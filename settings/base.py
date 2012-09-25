@@ -27,28 +27,11 @@ MINIFY_BUNDLES = {
 
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
-    # Example code. Can (and should) be removed for actual projects.
-    #'examples',
-    'django.contrib.sessions',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.admin',
-    'django_nose',
-    #'piston',
-    #'south',
-    'systems',
-    'mdns',
-    'mdns.migrate',
-    'user_systems',
-    'build',
-    'dhcp',
-    'truth',
     'api',
     'api_v2',
-    'reports',
-    'mozdns',
     'base',
     'base.mozdns',
+    'build',
     'core',
     'core.site',
     'core.vlan',
@@ -61,6 +44,10 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'core.search',
     'core.lib',
     'core.bulk_change',
+    'dhcp',
+    'mozdns',
+    'mdns',
+    'mdns.migrate',
     'mozdns',
     'mozdns.address_record',
     'mozdns.cname',
@@ -76,9 +63,24 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'mozdns.view',
     'mozdns.mozbind',
     'mozdns.master_form',
+    'reports',
+    'systems',
+    'truth',
+    'user_systems',
+
+    # Third party apps
     'debug_toolbar',
+    'djcelery',
+    'django_extensions',
+    'django_nose',
     'tastypie',
     'tastytools',
+
+    # Django contrib apps
+    'django.contrib.sessions',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.admin',
 ]
 
 

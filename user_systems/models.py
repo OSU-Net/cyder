@@ -2,7 +2,7 @@ from django.db import models
 from systems.models import OperatingSystem, ServerModel
 from datetime import datetime, timedelta, date
 from django.db.models.query import QuerySet
-from settings.local import USER_SYSTEM_ALLOWED_DELETE, FROM_EMAIL_ADDRESS, UNAUTHORIZED_EMAIL_ADDRESS, BUG_URL
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 
@@ -29,7 +29,7 @@ class UserOperatingSystem(models.Model):
     name = models.CharField(max_length=128, blank=False)
     def __unicode__(self):
         return self.name
-    
+
 class UnmanagedSystemType(models.Model):
     name = models.CharField(max_length=128, blank=False)
     def __unicode__(self):
@@ -56,7 +56,7 @@ class UnmanagedSystem(models.Model):
     objects = QuerySetManager()
 
     search_fields = (
-            'serial', 
+            'serial',
             'asset_tag',
             'owner__name',
             'server_model__vendor',
@@ -78,7 +78,7 @@ class UnmanagedSystem(models.Model):
             server_model = self.server_model
         except ServerModel.DoesNotExist:
             server_model = ""
-        return "%s - %s - %s" % (server_model, self.asset_tag, self.serial) 
+        return "%s - %s - %s" % (server_model, self.asset_tag, self.serial)
 
     class QuerySet(QuerySet):
         def get_all_loaners(self):
@@ -92,7 +92,7 @@ class UnmanagedSystem(models.Model):
         bug_id = ''
         if self.bug_number:
             bug_id = self.bug_number
-        return "%s%s" % (BUG_URL, bug_id)
+        return "%s%s" % (settings.BUG_URL, bug_id)
 
     @models.permalink
     def get_absolute_url(self):
@@ -155,7 +155,7 @@ class UserLicense(models.Model):
     #user_operating_system = models.IntegerField(choices=OS_CHOICES, blank=True, null=True)
     user_operating_system = models.ForeignKey('UserOperatingSystem', blank=True, null=True)
     search_fields = (
-            'username', 
+            'username',
             'version',
             'license_type',
             'license_key',

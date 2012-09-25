@@ -23,22 +23,6 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-INSTALLED_APPS = (                                                       
-    'django.contrib.sessions',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.admin',
-    'piston',
-    #'south',
-    'systems',
-    'user_systems',
-    'build',
-    'dhcp',
-    'truth',
-    'api',
-    'api_v2',
-    'reports',
-)
 
 DATABASES = {
     'default': {
@@ -89,13 +73,13 @@ BUG_URL = ''
 #mysite.monitor.start(interval=1.0)
 # Specify your custom test runner to use
 #TEST_RUNNER='test_runner_with_coverage'
- 
+
  # List of modules to enable for code coverage
 #COVERAGE_MODULES = ['api.views']
 #TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
 USER_SYSTEM_ALLOWED_DELETE = ('')
 from jinja2 import FileSystemLoader, Environment
-TEMPLATE_DIRS = (                                          
+TEMPLATE_DIRS = (
     os.path.join(_base, 'templates'),
     site_root + '/templates'
 )

@@ -4,6 +4,7 @@ import operator
 from django.template import RequestContext
 from django.forms.extras.widgets import SelectDateWidget
 from django.db import connection
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.utils import simplejson as json
@@ -16,13 +17,14 @@ from systems import models as system_models
 from datetime import datetime, timedelta
 from libs import ldap_lib
 import settings
-from settings.local import USER_SYSTEM_ALLOWED_DELETE, FROM_EMAIL_ADDRESS, UNAUTHORIZED_EMAIL_ADDRESS
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from libs.jinja import render_to_response as render_to_response
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from MozInvAuthorization.UnmanagedSystemACL import UnmanagedSystemACL
+
+settings.USER_SYSTEM_ALLOWED_DELETE, settings.FROM_EMAIL_ADDRESS, settings.UNAUTHORIZED_EMAIL_ADDRESS
 
 def license_version_search(request):
     query = request.GET.get('query')
@@ -334,13 +336,13 @@ def license_show(request, object_id):
 def license_index(request):
     from settings import BUG_URL as BUG_URL
     system_list = models.UserLicense.objects.select_related('owner').all()
-    paginator = Paginator(system_list, 25)                                                                        
-                    
+    paginator = Paginator(system_list, 25)
+
     if 'page' in request.GET:
         page = request.GET.get('page')
-    else:   
+    else:
         page = 1
-        
+
     try:
         systems = paginator.page(page)
     except PageNotAnInteger:
@@ -357,13 +359,13 @@ def license_index(request):
 def user_system_index(request):
     from settings import BUG_URL as BUG_URL
     system_list = models.UnmanagedSystem.objects.select_related('owner', 'server_model', 'operating_system').order_by('owner__name')
-    paginator = Paginator(system_list, 25)                                                                        
-                    
+    paginator = Paginator(system_list, 25)
+
     if 'page' in request.GET:
         page = request.GET.get('page')
-    else:   
+    else:
         page = 1
-        
+
     try:
         systems = paginator.page(page)
     except PageNotAnInteger:
@@ -377,7 +379,7 @@ def user_system_index(request):
             'user_system_list': systems,
             'BUG_URL': BUG_URL
             },RequestContext(request) )
-        
+
 
 def license_delete(request, object_id):
     license = get_object_or_404(models.UserLicense, pk=object_id)
@@ -398,10 +400,10 @@ def unmanaged_system_delete(request, object_id):
             acl = UnmanagedSystemACL(request)
             acl.check_delete()
             user_system.delete()
-            send_mail('System Deleted', '%s Deleted by %s' % (user_system, request.user.username), FROM_EMAIL_ADDRESS, UNAUTHORIZED_EMAIL_ADDRESS, fail_silently=False)
+            send_mail('System Deleted', '%s Deleted by %s' % (user_system, request.user.username), settings.FROM_EMAIL_ADDRESS, settings.UNAUTHORIZED_EMAIL_ADDRESS, fail_silently=False)
             return HttpResponseRedirect( reverse('user-system-list') )
         except PermissionDenied, e:
-            send_mail('Unauthorized System Delete Attempt', 'Unauthorized Attempt to Delete %s by %s' % (user_system, request.user.username), FROM_EMAIL_ADDRESS, UNAUTHORIZED_EMAIL_ADDRESS, fail_silently=False)
+            send_mail('Unauthorized System Delete Attempt', 'Unauthorized Attempt to Delete %s by %s' % (user_system, request.user.username), settings.FROM_EMAIL_ADDRESS, settings.UNAUTHORIZED_EMAIL_ADDRESS, fail_silently=False)
             return render_to_response('user_systems/unauthorized_delete.html', {
                     'content': 'You do not have permission to delete this system',
                 },
@@ -411,20 +413,20 @@ def unmanaged_system_delete(request, object_id):
                 'owner': user_system,
             },
             RequestContext(request))
-                    
+
 
 def show_by_model(request, object_id):
     system_list = models.UnmanagedSystem.objects.filter(server_model=models.ServerModel.objects.get(id=object_id))
     if 'show_all' in request.GET:
-        paginator = Paginator(system_list, system_list.count())                                                                        
+        paginator = Paginator(system_list, system_list.count())
     else:
-        paginator = Paginator(system_list, 25)                                                                        
-                    
+        paginator = Paginator(system_list, 25)
+
     if 'page' in request.GET:
         page = request.GET.get('page')
-    else:   
+    else:
         page = 1
-        
+
     try:
         systems = paginator.page(page)
     except PageNotAnInteger:
