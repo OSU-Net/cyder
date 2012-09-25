@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.utils import simplejson as json
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.mail import send_mail
+from django.shortcuts import render_to_response
 
 import forms
 import models
@@ -19,12 +20,10 @@ from libs import ldap_lib
 import settings
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
-from libs.jinja import render_to_response as render_to_response
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from MozInvAuthorization.UnmanagedSystemACL import UnmanagedSystemACL
 
-settings.USER_SYSTEM_ALLOWED_DELETE, settings.FROM_EMAIL_ADDRESS, settings.UNAUTHORIZED_EMAIL_ADDRESS
 
 def license_version_search(request):
     query = request.GET.get('query')
@@ -170,7 +169,6 @@ def license_quicksearch_ajax(request):
 @csrf_exempt
 def user_system_quicksearch_ajax(request):
     """Returns systems sort table"""
-    from settings import BUG_URL as BUG_URL
     search = request.POST['quicksearch']
     print request.POST
     filters = [Q(**{"%s__icontains" % t: search})
@@ -181,7 +179,7 @@ def user_system_quicksearch_ajax(request):
 
     return render_to_response('user_systems/quicksearch.html', {
             'systems': systems,
-            'BUG_URL': BUG_URL,
+            'BUG_URL': settings.BUG_URL,
            },
            RequestContext(request))
 
@@ -334,7 +332,6 @@ def license_show(request, object_id):
             'license': license,
             },RequestContext(request) )
 def license_index(request):
-    from settings import BUG_URL as BUG_URL
     system_list = models.UserLicense.objects.select_related('owner').all()
     paginator = Paginator(system_list, 25)
 
@@ -354,10 +351,9 @@ def license_index(request):
 
     return render_to_response('user_systems/userlicense_list.html', {
             'license_list': systems,
-            'BUG_URL': BUG_URL
+            'BUG_URL': settings.BUG_URL
             },RequestContext(request) )
 def user_system_index(request):
-    from settings import BUG_URL as BUG_URL
     system_list = models.UnmanagedSystem.objects.select_related('owner', 'server_model', 'operating_system').order_by('owner__name')
     paginator = Paginator(system_list, 25)
 
@@ -377,7 +373,7 @@ def user_system_index(request):
 
     return render_to_response('user_systems/unmanagedsystem_list.html', {
             'user_system_list': systems,
-            'BUG_URL': BUG_URL
+            'BUG_URL': settings.BUG_URL
             },RequestContext(request) )
 
 

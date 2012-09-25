@@ -11,9 +11,9 @@ try:
 except:
     from django.utils import simplejson as json
 from django.test.client import Client
-from settings import API_ACCESS
+from django.conf import settings
 class DHCPHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()
@@ -41,7 +41,7 @@ class DHCPHandler(BaseHandler):
             return d.get_hosts()
 
 class SystemHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()
@@ -143,7 +143,7 @@ class SystemHandler(BaseHandler):
                 resp.write("System Updated")
             return resp
 class TruthHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     def create(self, request, key_value_id=None):
         n = KeyValue()
         if 'truth_id' in request.POST:
@@ -211,7 +211,7 @@ class TruthHandler(BaseHandler):
             resp = rc.NOT_FOUND
         return resp
 class KeyValueHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     def create(self, request, key_value_id=None):
         if 'system_id' in request.POST:
             n = KeyValue()
@@ -589,7 +589,7 @@ class KeyValueHandler(BaseHandler):
         return resp
 
 class NetworkAdapterHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = NetworkAdapter
     def create(self, request, network_adapter_id=None):
         n = NetworkAdapter()

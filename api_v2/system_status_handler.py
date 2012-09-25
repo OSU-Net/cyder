@@ -6,11 +6,11 @@ try:
 except:
     from django.utils import simplejson as json
 from django.test.client import Client
-from settings import API_ACCESS
+from django.conf import settings
 
 
 class SystemStatusHandler(BaseHandler):
-    #allowed_methods = API_ACCESS
+    #allowed_methods = settings.API_ACCESS
     allowed_methods = ('GET')
     #exclude = ('name','id', ('location', ('name', 'id') ) )
     exclude=()

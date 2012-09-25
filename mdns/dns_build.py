@@ -10,10 +10,10 @@ from mdns.build_nics import *
 from mdns.utils import *
 import ipaddr
 from systems.models import ScheduledTask
-from settings import MOZ_SITE_PATH
-from settings import REV_SITE_PATH
-from settings import ZONE_PATH
-from settings import RUN_SVN_STATS
+from django.conf import settings
+from django.conf import settings
+from django.conf import settings
+from django.conf import settings
 from core.network.models import Network
 from core.interface.static_intr.models import StaticInterface
 
@@ -48,7 +48,7 @@ def ip_to_site(ip_str, base_site_path):
 
     :param ip_str: The ip to use.
     :type ip_str: str
-    :param base_site_path: The dir containing all other sites (usually MOZ_SITE_PATH)
+    :param base_site_path: The dir containing all other sites (usually settingsMOZ_SITE_PATH)
     :type base_site_path: str
     :returns key_value: The kv representing the site the ip belongs in.
     :type key_value: truth.models.KeyValue
@@ -184,21 +184,21 @@ def do_dns_build():
     #   ('<site-name>', '<network>', '<file_path_to_site_dir>')
 
 
-    #sites_to_build = set(get_all_sites(MOZ_SITE_PATH))
+    #sites_to_build = set(get_all_sites(settingsMOZ_SITE_PATH))
     #sites_to_build = set()
 
     #changed_ui = set(get_ui_sites_changed(all_sites))
     #sites_to_build = sites_to_build.union(changed_ui)
 
     #changed_forward = set(get_forward_svn_sites_changed(all_sites,
-    #    MOZ_SITE_PATH))
+    #    settingsMOZ_SITE_PATH))
     #sites_to_build = sites_to_build.union(changed_forward)
 
     #changed_reverse = set(get_reverse_svn_sites_changed(all_sites,
-    #    REV_SITE_PATH))
+    #    settings.REV_SITE_PATH))
     #sites_to_build = sites_to_build.union(changed_reverse)
-    svn_zones = collect_svn_zones(MOZ_SITE_PATH, ZONE_PATH)
-    rev_svn_zones = collect_rev_svn_zones(REV_SITE_PATH, ZONE_PATH)
+    svn_zones = collect_svn_zones(settingsMOZ_SITE_PATH, settingsZONE_PATH)
+    rev_svn_zones = collect_rev_svn_zones(settings.REV_SITE_PATH, settingsZONE_PATH)
 
 
     populate_forward_dns(svn_zones)
@@ -219,11 +219,11 @@ def do_zone_build(ztype, view, root_domain, zone_path):
     view_obj, _ = View.objects.get_or_create(name=view)
     if ztype == 'forward':
         svn_zones = {root_domain.replace('mozilla.com', ''):((collect_svn_zone(root_domain, zone_path,
-            ZONE_PATH)), '')}
+            settingsZONE_PATH)), '')}
         populate_forward_dns(svn_zones, view=view_obj)
     elif ztype == 'reverse':
         rev_svn_zones = {root_domain:('', ((collect_rev_svn_zone(root_domain, zone_path,
-            ZONE_PATH)), ''))}
+            settingsZONE_PATH)), ''))}
         populate_reverse_dns(rev_svn_zones, view=view_obj)
     else:
         print "Slob"
@@ -257,13 +257,13 @@ def zone_build_from_config(job=None):
             try:
                 if ztype == 'f':
                     print view
-                    svn_zone = collect_svn_zone(root_domain, zone_path, ZONE_PATH)
+                    svn_zone = collect_svn_zone(root_domain, zone_path, settingsZONE_PATH)
                     populate_forward_dns(svn_zone, root_domain,
                             views=views)
                     del svn_zone
                 if ztype == 'r':
                     rev_svn_zones = {root_domain:('', ((collect_rev_svn_zone(root_domain, zone_path,
-                        ZONE_PATH)), ''))}
+                        settingsZONE_PATH)), ''))}
                     populate_reverse_dns(rev_svn_zones, views=views)
             except dns.zone.NoSOA, e:
                 print "----------------------"
@@ -289,7 +289,7 @@ def zone_build_from_config(job=None):
                 view_obj, _ = View.objects.get_or_create(name=view)
                 views = [view_obj]
             if ztype == 'f':
-                svn_zone = collect_svn_zone(root_domain, zone_path, ZONE_PATH)
+                svn_zone = collect_svn_zone(root_domain, zone_path, settingsZONE_PATH)
                 populate_forward_dns(svn_zone, root_domain, views=views)
                 del svn_zone
         return
@@ -311,7 +311,7 @@ def zone_build_from_config(job=None):
                 view_obj, _ = View.objects.get_or_create(name=view)
                 views = [view_obj]
             if ztype == 'f':
-                svn_zone = collect_svn_zone(root_domain, zone_path, ZONE_PATH)
+                svn_zone = collect_svn_zone(root_domain, zone_path, settingsZONE_PATH)
                 populate_forward_dns(svn_zone, root_domain, views=views)
                 del svn_zone
         return
@@ -334,7 +334,7 @@ def zone_build_from_config(job=None):
                     view_obj, _ = View.objects.get_or_create(name=view)
                     views = [view_obj]
                 if ztype == 'f':
-                    svn_zone = collect_svn_zone(root_domain, zone_path, ZONE_PATH)
+                    svn_zone = collect_svn_zone(root_domain, zone_path, settingsZONE_PATH)
                     populate_forward_dns(svn_zone, root_domain,
                             views=views)
                     del svn_zone
@@ -360,7 +360,7 @@ def zone_build_from_config(job=None):
                 view_obj, _ = View.objects.get_or_create(name=view)
                 views = [view_obj]
             if ztype == 'f':
-                svn_zone = collect_svn_zone(root_domain, zone_path, ZONE_PATH)
+                svn_zone = collect_svn_zone(root_domain, zone_path, settingsZONE_PATH)
                 populate_forward_dns(svn_zone, root_domain, views=views)
                 del svn_zone
         return
@@ -383,7 +383,7 @@ def zone_build_from_config(job=None):
                 views = [view_obj]
             if ztype == 'r':
                 rev_svn_zones = {root_domain:('', ((collect_rev_svn_zone(root_domain, zone_path,
-                    ZONE_PATH)), ''))}
+                    settingsZONE_PATH)), ''))}
                 populate_reverse_dns(rev_svn_zones, views=views)
 
 

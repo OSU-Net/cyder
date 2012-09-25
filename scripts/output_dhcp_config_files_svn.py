@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardi
 import manage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 
-from settings import DHCP_CONFIG_OUTPUT_DIRECTORY
+from django.conf import settings
 from dhcp.models import DHCPFile
 always_push_svn = True
 from libs.DHCPHelper import DHCPHelper
@@ -21,7 +21,7 @@ def main():
     dh = DHCPHelper()
     dhcp_scopes = []
     dhcp_scopes = dh.get_scopes_to_generate()
-    output_dir = DHCP_CONFIG_OUTPUT_DIRECTORY
+    output_dir = settingsDHCP_CONFIG_OUTPUT_DIRECTORY
     for scope in dhcp_scopes:
         dhcp_scope = scope.task
         try:

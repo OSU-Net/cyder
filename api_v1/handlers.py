@@ -11,10 +11,10 @@ try:
 except:
     from django.utils import simplejson as json
 from django.test.client import Client
-from settings import API_ACCESS
+from django.conf import settings
 
 class SystemHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()
@@ -117,7 +117,7 @@ class SystemHandler(BaseHandler):
             return resp
 
 class NetworkAdapterHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = NetworkAdapter
     def create(self, request, network_adapter_id=None):
         n = NetworkAdapter()

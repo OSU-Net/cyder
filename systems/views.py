@@ -17,7 +17,6 @@ from jingo import render
 from jinja2.filters import contextfilter
 
 import models
-from libs.jinja import render_to_response as render_to_response
 from Rack import Rack
 from mozilla_inventory.middleware.restrict_to_remote import allow_anyone,sysadmin_only, LdapGroupRequired
 from core.interface.static_intr.models import StaticInterface
@@ -258,8 +257,8 @@ def system_auto_complete_ajax(request):
 @allow_anyone
 def list_all_systems_ajax(request):
 #iSortCol_0 = which column is sorted
-#sSortDir_0 = which direction   
-    
+#sSortDir_0 = which direction
+
     cols = ['hostname','serial','asset_tag','server_model','system_rack', 'oob_ip', 'system_status']
     sort_col = cols[0]
     if 'iSortCol_0' in request.GET:
@@ -317,7 +316,7 @@ def list_all_systems_ajax(request):
             systems = models.System.with_related.filter(search_q).order_by('hostname').distinct('hostname')[iDisplayStart:end_display]
             the_data = build_json(request, systems, sEcho, total_count, iDisplayLength, sort_col, sort_dir)
         except:
-            the_data = '{"sEcho": %s, "iTotalRecords":0, "iTotalDisplayRecords":0, "aaData":[]}' % (sEcho) 
+            the_data = '{"sEcho": %s, "iTotalRecords":0, "iTotalDisplayRecords":0, "aaData":[]}' % (sEcho)
     return HttpResponse(the_data)
 
 def build_json(request, systems, sEcho, total_records, display_count, sort_col, sort_dir):
@@ -386,8 +385,8 @@ def build_json(request, systems, sEcho, total_records, display_count, sort_col, 
         the_data += ']}'
     #except:
         pass
-    
-    return the_data 
+
+    return the_data
 
 
 #@ldap_group_required('build')
@@ -461,7 +460,7 @@ def save_key_value(request, id):
         print e
         pass
 
-        
+
     acl = KeyValueACL(request)
     if post_key == 'shouldfailvalidation':
         resp['success'] = False
@@ -492,13 +491,13 @@ def save_key_value(request, id):
                 existing_dhcp_scope = models.KeyValue.objects.filter(system=kv.system).filter(key='nic.%s.dhcp_scope.0' % matches.group(1))[0].value
                 if existing_dhcp_scope is not None:
                     models.ScheduledTask(task=existing_dhcp_scope, type='dhcp').save()
-            except Exception, e: 
+            except Exception, e:
                 pass
             try:
                 existing_reverse_dns_zone = models.KeyValue.objects.filter(system=kv.system).filter(key='nic.%s.reverse_dns_zone.0' % matches.group(1))[0].value
                 if existing_reverse_dns_zone is not None:
                     models.ScheduledTask(task=existing_reverse_dns_zone, type='reverse_dns_zone').save()
-            except Exception, e: 
+            except Exception, e:
                 pass
         try:
             kv.key = request.POST.get('key').strip()
@@ -698,7 +697,7 @@ def system_view(request, template, data, instance=None):
 
     data['form'] = form
 
-    return render_to_response(template, 
+    return render_to_response(template,
                 data,
                 request
             )
@@ -743,7 +742,7 @@ def system_csv(request):
             writer.writerow([s.hostname, s.serial, s.asset_tag, s.server_model, s.allocation, s.system_rack, s.switch_ports, s.oob_ip])
         except:
             writer.writerow([s.hostname, s.serial, s.asset_tag, s.server_model, '', s.system_rack, s.switch_ports, s.oob_ip])
-        
+
 
     return response
 
@@ -772,7 +771,7 @@ def get_expanded_key_value_store(request, system_id):
     return HttpResponse(return_obj)
 
 
-    
+
 def new_rack_system_ajax(request, rack_id):
     from forms import RackSystemForm
     rack = get_object_or_404(models.SystemRack, pk=rack_id)

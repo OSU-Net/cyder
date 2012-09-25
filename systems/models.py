@@ -16,8 +16,8 @@ from django.db import IntegrityError
 
 from dhcp.models import DHCP
 import mdns
-from settings import MOZ_SITE_PATH
-from settings import BUG_URL
+from django.conf import settings
+from django.conf import settings
 
 
 import datetime
@@ -190,7 +190,7 @@ class KeyValue(models.Model):
         # to construct an interface and find the ip in the interface.
             intr = build_nic(self.system.keyvalue_set.all())
             for ip in intr.ips:
-                kv = mdns.dns_build.ip_to_site(ip, MOZ_SITE_PATH)
+                kv = mdns.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
                 if kv:
                     try:
                         ScheduledTask(type='dns', task=kv.key).save()
@@ -628,7 +628,7 @@ class System(DirtyFieldsMixin, models.Model):
             for pattern in patterns:
                 m = re.search(pattern, self.notes)
                 if m:
-                    self.notes = re.sub(pattern, '<a href="%s%s">Bug %s</a>' % (BUG_URL, m.group(1), m.group(1)), self.notes)
+                    self.notes = re.sub(pattern, '<a href="%s%s">Bug %s</a>' % (settings.BUG_URL, m.group(1), m.group(1)), self.notes)
             return self.notes
         else:
             return ''

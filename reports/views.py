@@ -24,7 +24,6 @@ from django.template.defaulttags import URLNode
 from django.conf import settings
 from jinja2.filters import contextfilter
 from django.utils import translation
-from libs.jinja import jinja_render_to_response
 @allow_anyone
 def report_home(request):
     data = {}
@@ -87,10 +86,10 @@ def report_home(request):
                         'Location',
                         ]
                 writer.writerow(columns)
-                for system in systems: 
+                for system in systems:
                     writer.writerow([
                     system.hostname,
-                    system.asset_tag, 
+                    system.asset_tag,
                     system.purchase_date,
                     system.server_model,
                     system.serial,
@@ -110,7 +109,7 @@ def report_home(request):
         data['form'] = form
         template = 'reports/index.html'
 
-    return jinja_render_to_response(template, {
+    return render_to_response(template, {
             'systems': systems,
             'form': form
            })

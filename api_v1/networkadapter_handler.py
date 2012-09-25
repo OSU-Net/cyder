@@ -11,11 +11,11 @@ try:
 except:
     from django.utils import simplejson as json
 from django.test.client import Client
-from settings import API_ACCESS
+from django.conf import settings
 
 
 class NetworkAdapterHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = NetworkAdapter
     def create(self, request, network_adapter_id=None):
         n = NetworkAdapter()

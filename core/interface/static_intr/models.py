@@ -14,7 +14,7 @@ from mozdns.view.models import View
 from mozdns.domain.models import Domain
 from mozdns.cname.models import CNAME
 from mozdns.ip.models import Ip
-from settings import CORE_BASE_URL
+from django.conf import settings
 
 import re
 import pdb

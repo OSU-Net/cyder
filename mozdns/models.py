@@ -9,7 +9,7 @@ from mozdns.view.models import View
 from mozdns.mixins import ObjectUrlMixin
 from mozdns.validation import validate_first_label, validate_name
 from mozdns.validation import validate_ttl, is_rfc1918, is_rfc4193
-from settings import MOZDNS_BASE_URL
+from django.conf import settings
 
 import pdb
 

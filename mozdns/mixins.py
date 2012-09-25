@@ -1,4 +1,4 @@
-from settings import MOZDNS_BASE_URL
+from django.conf import settings
 from gettext import gettext as _
 
 
@@ -16,7 +16,7 @@ class ObjectUrlMixin(object):
         """
         Return the absolute url of an object.
         """
-        return MOZDNS_BASE_URL + "/{0}/{1}/".format(
+        return settings.MOZDNS_BASE_URL + "/{0}/{1}/".format(
             self._meta.db_table, self.pk
         )
 
@@ -27,19 +27,19 @@ class ObjectUrlMixin(object):
         """
         Return the edit url of an object.
         """
-        return MOZDNS_BASE_URL + "/{0}/{1}/update/".format(
+        return settings.MOZDNS_BASE_URL + "/{0}/{1}/update/".format(
             self._meta.db_table, self.pk
         )
 
     def get_fancy_edit_url(self):
-        return MOZDNS_BASE_URL + _("/record/"
+        return settings.MOZDNS_BASE_URL + _("/record/"
             "?record_type={0}&record_pk={1}").format(self.rdtype, self.pk)
 
     def get_delete_url(self):
         """
         Return the delete url of an object.
         """
-        return MOZDNS_BASE_URL + "/{0}/{1}/delete/".format(
+        return settings.MOZDNS_BASE_URL + "/{0}/{1}/delete/".format(
             self._meta.db_table, self.pk
         )
 
@@ -47,4 +47,4 @@ class ObjectUrlMixin(object):
         """
         Return the create url of the type of object.
         """
-        return MOZDNS_BASE_URL + "/{0}/create/".format(self._meta.db_table)
+        return settings.MOZDNS_BASE_URL + "/{0}/create/".format(self._meta.db_table)

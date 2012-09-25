@@ -7,9 +7,9 @@ from dns import zone
 import pprint
 import hashlib
 import ipaddr
-from settings import MOZ_SITE_PATH
-from settings import REV_SITE_PATH
-from settings import ZONE_PATH
+from django.conf import settings
+from django.conf import settings
+from django.conf import settings
 from mdns.utils import *
 import truth
 from truth.models import Truth

@@ -25,13 +25,13 @@ import pdb
 import os
 import time
 
-from settings import BUILD_PATH
+from django.conf import settings
 DEFAULT_TTL = 999
 
 # DEBUG OPTIONS
 DEBUG = True
 DEBUG_BUILD_STRING = ''  # A string to store build output in.
-CHROOT_ZONE_PATH = "/etc/invzones/"
+settings.ZONE_PATH = "/etc/invzones/"
 
 
 def choose_zone_path(soa, root_domain):
@@ -57,7 +57,7 @@ def choose_zone_path(soa, root_domain):
 
     .. note::
 
-        In all cases the zone_path is prepended with the ``BUILD_PATH`` varable
+        In all cases the zone_path is prepended with the ``settings.BUILD_PATH`` varable
         found in ``settings/local.py``
 
     """
@@ -205,34 +205,34 @@ def build_zone(ztype, soa, root_domain):
         data = "; The views public and private do not exist\n"
         private_data = ""
 
-    if not os.access(BUILD_PATH + zone_path, os.R_OK):
-        os.makedirs(BUILD_PATH + zone_path)
+    if not os.access(settings.BUILD_PATH + zone_path, os.R_OK):
+        os.makedirs(settings.BUILD_PATH + zone_path)
     if private_data:
-        open(BUILD_PATH + private_file_path, "w+").write(soa_data + private_data)
+        open(settings.BUILD_PATH + private_file_path, "w+").write(soa_data + private_data)
         DEBUG_STRING += ";{0} {1} View Data {0}\n".format("=" * 30, "Private")
         DEBUG_STRING += soa_data
         DEBUG_STRING += private_data
 
         master_private_zones = render_zone_stmt(root_domain.name, "master",
-                CHROOT_ZONE_PATH + private_file_path)
+                CHROOT_settingsZONE_PATH + private_file_path)
 
         slave_private_zones = render_zone_stmt(root_domain.name, "private",
-                CHROOT_ZONE_PATH + private_file_path)
+                CHROOT_settingsZONE_PATH + private_file_path)
     else:
         master_private_zones = ""
         slave_private_zones = ""
         DEBUG_STRING += "; NO PRIVATE ZONE DATA\n"
 
     if public_data:
-        open(BUILD_PATH + public_file_path, "w+").write(soa_data + public_data)
+        open(settings.BUILD_PATH + public_file_path, "w+").write(soa_data + public_data)
         DEBUG_STRING += ";{0} {1} View Data {0}\n".format("=" * 30, "Public")
         DEBUG_STRING += soa_data
         DEBUG_STRING += public_data
 
         master_public_zones = render_zone_stmt(root_domain.name, "master",
-                CHROOT_ZONE_PATH + public_file_path)
+                CHROOT_settingsZONE_PATH + public_file_path)
         slave_public_zones = render_zone_stmt(root_domain.name, "public",
-                CHROOT_ZONE_PATH + public_file_path)
+                CHROOT_settingsZONE_PATH + public_file_path)
     else:
         master_public_zones = ""
         slave_public_zones = ""
@@ -271,7 +271,7 @@ def build_dns():
         slave_public_zones += tmp_s_pub_zs
         slave_private_zones += tmp_s_pri_zs
 
-    config_path = BUILD_PATH + "config/"
+    config_path = settings.BUILD_PATH + "config/"
     if not os.access(config_path, os.R_OK):
         os.makedirs(config_path)
 

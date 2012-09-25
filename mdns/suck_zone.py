@@ -8,10 +8,10 @@ from mdns.build_nics import *
 from mdns.utils import *
 import ipaddr
 from systems.models import ScheduledTask
-from settings import MOZ_SITE_PATH
-from settings import REV_SITE_PATH
-from settings import ZONE_PATH
-from settings import RUN_SVN_STATS
+from django.conf import settings
+from django.conf import settings
+from django.conf import settings
+from django.conf import settings
 from core.network.models import Network
 from core.interface.static_intr.models import StaticInterface
 

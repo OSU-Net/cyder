@@ -2,7 +2,7 @@ from truth.models import Truth
 import systems
 from systems.models import System
 from mdns.build_nics import *
-from settings import FIX_M_C_M_C
+from django.conf import settings
 from mdns.utils import *
 
 import ipaddr
@@ -49,7 +49,7 @@ def generate_hostname(nic, site_name):
             "Use the 'dns_auto_hostname' key to override."
             .format(hostname, nic.system.pk), WARNING)
 
-        if FIX_M_C_M_C:
+        if settings.FIX_M_C_M_C:
             log("Attemping to fix...", DEBUG)
             kv = systems.models.KeyValue(key =
                     "nic.{0}.dns_auto_hostname.{1}".format(nic.primary,

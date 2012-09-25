@@ -12,11 +12,11 @@ except:
     from django.utils import simplejson as json
 from django.test.client import Client
 from django.db.models import Q
-from settings import API_ACCESS
+from django.conf import settings
 from mozilla_inventory.middleware.restrict_by_api_token import AuthenticatedAPI
 
 class SystemHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()

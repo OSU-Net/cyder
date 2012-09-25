@@ -19754,7 +19754,7 @@ dirpath = '/home/uberj/dns_data/'
 
 [ERROR] No SOA found for /home/uberj/dns_data/zones/in-addr/10.14/10.14
 domain = '14.10.IN-ADDR.ARPA'
-REV_SITE_PATH = '/home/uberj/dns_data/zones/in-addr'
+settings.REV_SITE_PATH = '/home/uberj/dns_data/zones/in-addr'
 full_network_path = '/home/uberj/dns_data/zones/in-addr/10.14/10.14'
 
 [ ('19.104.14.10.IN-ADDR.ARPA.', 'sync36.db.scl2.svc.mozilla.com.'),

@@ -92,7 +92,7 @@ class UnmanagedSystem(models.Model):
         bug_id = ''
         if self.bug_number:
             bug_id = self.bug_number
-        return "%s%s" % (settings.BUG_URL, bug_id)
+        return "%s%s" % (settingsBUG_URL, bug_id)
 
     @models.permalink
     def get_absolute_url(self):

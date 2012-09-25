@@ -25,10 +25,9 @@ from django.template.defaulttags import URLNode
 from django.conf import settings
 from jinja2.filters import contextfilter
 from django.utils import translation
-from libs.jinja import jinja_render_to_response
 
 def showall(request):
-    dhcp_scopes = models.DHCP.objects.all()	
+    dhcp_scopes = models.DHCP.objects.all()
     import pdb; pdb.set_trace()
     client = Client()
     resp = client.get('/en-US/api/keyvalue/?key=is_dhcp_scope', follow=True)
@@ -37,7 +36,7 @@ def showall(request):
     for key in obj.iterkeys():
         dhcp_scopes.append(key.split(":")[1])
 
-    return jinja_render_to_response('dhcp/index.html', {
+    return render_to_response('dhcp/index.html', {
             'dhcp_scopes': dhcp_scopes,
            })
 
@@ -52,7 +51,7 @@ def new(request):
                 truth_exists = True
             except:
                 pass
-            if truth_exists is False: 
+            if truth_exists is False:
                 t = Truth(name=form.cleaned_data['scope_name'], description=form.cleaned_data['scope_description'])
                 t.save()
                 k = TruthKeyValue(truth=t,key='is_dhcp_scope',value='True')
@@ -63,7 +62,7 @@ def new(request):
     else:
         form = forms.AddDHCPScopeForm()
 
-    return jinja_render_to_response('dhcp/new.html', {
+    return render_to_response('dhcp/new.html', {
             "form": form ,
             "error_message":error_message
            })
@@ -85,7 +84,7 @@ def override_file(request, dhcp_scope):
 
         form = forms.DHCPScopeOverrideForm(initial={'dhcp_scope':dhcp_scope, 'override_text':do.override_text})
 
-    return jinja_render_to_response('dhcp/override.html', {
+    return render_to_response('dhcp/override.html', {
             "form": form,
             'dhcp_scope':dhcp_scope
            },
@@ -98,14 +97,14 @@ def showfile(request, dhcp_scope):
         d = models.DHCPFile.objects.get(dhcp_scope=dhcp_scope)
         content = d.file_text
     except Exception, e:
-        content = """This file has not been stored in inventory yet. 
-        To get it stored. Make an innocous change to a hosts key/value entry. 
-        An example would be to change the nic name from nic0 to nic1 then back to nic0 again and click save. 
+        content = """This file has not been stored in inventory yet.
+        To get it stored. Make an innocous change to a hosts key/value entry.
+        An example would be to change the nic name from nic0 to nic1 then back to nic0 again and click save.
         Once the file gets regenerated, it will be stored here"""
     output = content.replace("\n","<br />")
     return render_to_response('dhcp/showfile.html', {
 
-        "output": output 
+        "output": output
         },
         RequestContext(request))
 def create(request):
@@ -119,7 +118,7 @@ def create(request):
         form = forms.AddDHCPScopeForm()
 
     return render_to_response('dhcp/new.html', {
-            "form": form 
+            "form": form
            },
            RequestContext(request))
 def edit(request, dhcp_scope):
@@ -214,7 +213,7 @@ def edit(request, dhcp_scope):
     else:
         form = forms.EditDHCPScopeForm(initial=initial)
 
-    return jinja_render_to_response('dhcp/edit.html', {
+    return render_to_response('dhcp/edit.html', {
             "form": form,
             'dhcp_scope': dhcp_scope
            })
@@ -224,5 +223,5 @@ def delete(request, dhcp_scope):
         TruthKeyValue.objects.filter(truth=scope).delete()
         scope.delete()
         return redirect('/dhcp/show/')
-    except:    
+    except:
         return redirect('/dhcp/show/')

@@ -16,7 +16,7 @@ from mozdns.ip.models import ipv6_to_longs
 from mozdns.view.models import View
 from mozdns.utils import ensure_domain
 
-from settings import ZONE_PATH
+from django.conf import settings
 
 from mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
 
@@ -70,7 +70,7 @@ def migrate_zone(root_domain_name, name_reversed, zone_path, ztype, view, relati
                         ) + ".in-addr.arpa"
             else:
                 root_domain_name = '.'.join(root_domain_name.split('.')) + ".in-addr.arpa"
-        svn_zone = collect_svn_zone(root_domain_name, zone_path, ZONE_PATH)
+        svn_zone = collect_svn_zone(root_domain_name, zone_path, settingsZONE_PATH)
     except dns.zone.NoSOA, e:
         print "----------------------"
         print "ERROR: NoSOA()"

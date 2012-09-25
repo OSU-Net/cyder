@@ -1,6 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from MozInvAuthorization.BaseKeyValueACL import BaseKeyValueACL
-from settings import *
+from django.conf import settings
 import systems.models as SystemModels
 class KeyValueACL(BaseKeyValueACL):
     def __init__(self, request):
@@ -11,7 +11,7 @@ class KeyValueACL(BaseKeyValueACL):
         if not self.user or self.user == '':
             raise PermissionDenied('You do not have permission to access this key scope')
         self.check_for_permission(self.user, allowed)
-    
+
     def check_ip_not_exist_other_system(self, system, ip_address):
         keys = SystemModels.KeyValue.objects.filter(value=ip_address).exclude(system=system)
         if keys:

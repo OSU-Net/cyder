@@ -15,7 +15,7 @@ from django.contrib.sites.models import Site
 import user_systems.models as model
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from settings import SCRIPT_URL, DESKTOP_EMAIL_ADDRESS, FROM_EMAIL_ADDRESS
+from django.conf import settings, settings.DESKTOP_EMAIL_ADDRESS, settingsFROM_EMAIL_ADDRESS
 
 
 
@@ -25,11 +25,11 @@ def main():
     loaners_due = model.UnmanagedSystem.objects.select_related().get_loaners_due()
     for loaner in loaners_due:
         text_message += "%s borrowed by %s is due %s\n" %(loaner, loaner.owner.name, loaner.loaner_return_date)
-        html_message += "<tr><td><a href='%s/user_systems/show/%i/'>%s</a></td><td>%s</td><td>%s</td></tr>" %(SCRIPT_URL, loaner.id, loaner, loaner.owner.name, loaner.loaner_return_date)
+        html_message += "<tr><td><a href='%s/user_systems/show/%i/'>%s</a></td><td>%s</td><td>%s</td></tr>" %(settings.SCRIPT_URL, loaner.id, loaner, loaner.owner.name, loaner.loaner_return_date)
 
     
-    sender = FROM_EMAIL_ADDRESS
-    receivers = [DESKTOP_EMAIL_ADDRESS]
+    sender = settingsFROM_EMAIL_ADDRESS
+    receivers = [settings.DESKTOP_EMAIL_ADDRESS]
 
     if len(loaners_due) > 0:
         try:

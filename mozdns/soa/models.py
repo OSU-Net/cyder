@@ -6,7 +6,7 @@ from django.db import models
 from mozdns.validation import validate_name
 from mozdns.mixins import ObjectUrlMixin
 
-from settings import MOZDNS_BASE_URL
+from django.conf import settings
 from core.keyvalue.models import KeyValue
 from core.keyvalue.utils import AuxAttr
 import os
@@ -88,7 +88,7 @@ class SOA(models.Model, ObjectUrlMixin):
                 )
 
     def get_debug_build_url(self):
-        return MOZDNS_BASE_URL + "/bind/build_debug/{0}/".format(self.pk)
+        return settings.MOZDNS_BASE_URL + "/bind/build_debug/{0}/".format(self.pk)
 
     def delete(self, *args, **kwargs):
         super(SOA, self).delete(*args, **kwargs)

@@ -7,12 +7,12 @@ except:
     from django.utils import simplejson as json
 from mozilla_inventory.middleware.restrict_by_api_token import AuthenticatedAPI
 
-from settings import API_ACCESS
+from django.conf import settings
 
 from django.contrib.auth.models import User
 
 class OncallHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
 
     def read(self, request, oncall_type, display_type=None):
         oncall = ''

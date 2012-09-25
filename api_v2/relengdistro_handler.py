@@ -11,11 +11,11 @@ try:
 except:
     from django.utils import simplejson as json
 from django.test.client import Client
-from settings import API_ACCESS
+from django.conf import settings
 
 
 class RelengDistroHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     model = RelengDistro
     fields = ('id','distro_name')
     def create(self, request, releng_distro_id=None):

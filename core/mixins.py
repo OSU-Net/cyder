@@ -1,4 +1,4 @@
-from settings import CORE_BASE_URL
+from django.conf import settings
 
 
 class ObjectUrlMixin(object):
@@ -15,7 +15,7 @@ class ObjectUrlMixin(object):
         """
         Return the absolute url of an object.
         """
-        return CORE_BASE_URL + "/{0}/{1}/".format(
+        return settings.CORE_BASE_URL + "/{0}/{1}/".format(
             self._meta.db_table, self.pk
         )
 
@@ -26,7 +26,7 @@ class ObjectUrlMixin(object):
         """
         Return the edit url of an object.
         """
-        return CORE_BASE_URL + "/{0}/{1}/update/".format(
+        return settings.CORE_BASE_URL + "/{0}/{1}/update/".format(
             self._meta.db_table, self.pk
         )
 
@@ -34,7 +34,7 @@ class ObjectUrlMixin(object):
         """
         Return the delete url of an object.
         """
-        return CORE_BASE_URL + "/{0}/{1}/delete/".format(
+        return settings.CORE_BASE_URL + "/{0}/{1}/delete/".format(
             self._meta.db_table, self.pk
         )
 
@@ -42,4 +42,4 @@ class ObjectUrlMixin(object):
         """
         Return the create url of the type of object.
         """
-        return CORE_BASE_URL + "/{0}/create/".format(self._meta.db_table)
+        return settings.CORE_BASE_URL + "/{0}/create/".format(self._meta.db_table)

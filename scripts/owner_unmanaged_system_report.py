@@ -14,13 +14,13 @@ import smtplib
 import user_systems.models as model
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from settings import SCRIPT_URL, FROM_EMAIL_ADDRESS
+from django.conf import settings, settingsFROM_EMAIL_ADDRESS
 
 
 
 def main():
     owners = model.Owner.objects.filter(email__gt='')
-    sender = FROM_EMAIL_ADDRESS
+    sender = settingsFROM_EMAIL_ADDRESS
     for owner in owners:
         owner_systems = owner.unmanagedsystem_set
         print owner_systems.count()
@@ -31,7 +31,7 @@ def main():
             for system in owner_systems.all():
                 print "%s %s" % (owner_email, system)
                 text_message += "%s\n" %(system)
-                html_message += "<tr><td><a href='%s/user_systems/show/%i/'>%s</a></td><td>%s</td></tr>" %(SCRIPT_URL, system.id, system, owner)
+                html_message += "<tr><td><a href='%s/user_systems/show/%i/'>%s</a></td><td>%s</td></tr>" %(settings.SCRIPT_URL, system.id, system, owner)
             ## Send email here
             receivers = [owner.email]
             html = '<html><head></head><body><table><tr><th>Loaner</th><th>Owner</th></tr>%s</table></body></html>' % (html_message)

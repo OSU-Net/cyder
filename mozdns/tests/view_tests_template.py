@@ -6,7 +6,7 @@ from django.test.client import Client
 
 from mozdns.domain.models import Domain
 from mozdns.nameserver.models import Nameserver
-from settings import MOZDNS_BASE_URL
+from django.conf import settings
 
 
 class GenericViewTests(object):
@@ -57,7 +57,7 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/$', DomainListView.as_view()),
         """
         def test_base_mozdns_app(self):
-            resp = self.client.get(MOZDNS_BASE_URL+"/%s/" % (self.url_slug),
+            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/" % (self.url_slug),
                     follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_base_mozdns_app
@@ -67,14 +67,14 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/create/$', DomainCreateView.as_view()),
         """
         def test_get_create(self):
-            resp = self.client.get(MOZDNS_BASE_URL+"/%s/create/" %
+            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/create/" %
                     (self.url_slug), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_create
 
     def build_post_create(self):
         def test_post_create(self):
-            resp = self.client.post(MOZDNS_BASE_URL+"/%s/create/" %
+            resp = self.client.post(settings.MOZDNS_BASE_URL+"/%s/create/" %
                     (self.url_slug), self.post_data(), follow=True)
             self.assertTrue(resp.status_code in (302, 200))
         return test_post_create
@@ -84,14 +84,14 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<domain>[\w-]+)/create$', DomainCreateView.as_view()),
         """
         def test_get_create_in_domain(self):
-            resp = self.client.get(MOZDNS_BASE_URL+"/%s/%s/create/" %
+            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/create/" %
                     (self.url_slug, self.domain.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_create_in_domain
 
     def build_post_create_in_domain(self):
         def test_post_create_in_domain(self):
-            resp = self.client.post(MOZDNS_BASE_URL+"/%s/%s/create/" %
+            resp = self.client.post(settings.MOZDNS_BASE_URL+"/%s/%s/create/" %
                     (self.url_slug, self.domain.pk), self.post_data(),
                     follow=True)
             self.assertTrue(resp.status_code in (302, 200))
@@ -102,7 +102,7 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<pk>[\w-]+)/update$', DomainUpdateView.as_view()),
         """
         def test_get_object_update(self):
-            resp = self.client.get(MOZDNS_BASE_URL+"/%s/%s/update/" %
+            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/update/" %
                     (self.url_slug, self.test_obj.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_object_update
@@ -110,7 +110,7 @@ class GenericViewTests(object):
 
     def build_post_object_update(self):
         def test_post_object_update(self):
-            resp = self.client.post(MOZDNS_BASE_URL+"/%s/%s/update/" %
+            resp = self.client.post(settings.MOZDNS_BASE_URL+"/%s/%s/update/" %
                     (self.url_slug,self.test_obj.pk), self.post_data(),
                         follow=True)
             self.assertTrue(resp.status_code in (302, 200))
@@ -122,7 +122,7 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<pk>[\w-]+)/$', DomainDetailView.as_view()),
         """
         def test_get_object_details(self):
-            resp = self.client.get(MOZDNS_BASE_URL+"/%s/%s/" % (self.url_slug,
+            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/" % (self.url_slug,
                 self.test_obj.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_object_details
@@ -132,7 +132,7 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<pk>[\w-]+)/delete$', DomainDeleteView.as_view())
         """
         def test_get_object_delete(self):
-            resp = self.client.get(MOZDNS_BASE_URL+"/%s/%s/delete/" %
+            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/delete/" %
                     (self.url_slug, self.test_obj.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
             pass

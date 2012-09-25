@@ -14,10 +14,10 @@ from django.test.client import Client
 
 from MozInvAuthorization.KeyValueACL import KeyValueACL 
 
-from settings import API_ACCESS
+from django.conf import settings
 
 class KeyValueHandler(BaseHandler):
-    allowed_methods = API_ACCESS
+    allowed_methods = settings.API_ACCESS
     def create(self, request, key_value_id=None):
         if 'system_id' in request.POST:
             post_key = request.POST.get('key')
