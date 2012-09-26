@@ -17,7 +17,6 @@ tmp/*
 *.mo
 src/
 .vagrant
-build/
 */*.*_auto__.*
 migrations/*
 private.json

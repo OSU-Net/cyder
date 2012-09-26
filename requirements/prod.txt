@@ -1,3 +1,6 @@
+django-tastypie
 ipaddr
+mimeparse
 python-ldap
+
 -r ../vendor/src/funfactory/funfactory/requirements/prod.txt

@@ -1,0 +1,156 @@
+# This is your project's main settings file that can be committed to your
+# repo. If you need to override a setting locally, use settings_local.py
+
+from funfactory.settings_base import *
+from cyder.settings.dns import *
+
+
+# Bundles is a dictionary of two dictionaries, css and js, which list css files
+# and js files that can be bundled together by the minify app.
+MINIFY_BUNDLES = {
+    'css': {
+        'example_css': (
+            'css/examples/main.css',
+        ),
+        'example_mobile_css': (
+            'css/examples/mobile.css',
+        ),
+    },
+    'js': {
+        'example_js': (
+            'js/examples/libs/jquery-1.4.4.min.js',
+            'js/examples/libs/jquery.cookie.js',
+            'js/examples/init.js',
+        ),
+    }
+}
+
+MEDIA_ROOT = path('media')
+MEDIA_URL = '/media/'
+
+INSTALLED_APPS = list(INSTALLED_APPS) + [
+    'api',
+    'api_v2',
+    'base',
+    'base.mozdns',
+    'build',
+    'core',
+    'core.site',
+    'core.vlan',
+    'core.network',
+    'core.range',
+    'core.build',
+    'core.lib',
+    'core.interface',
+    'core.interface.static_intr',
+    'core.search',
+    'core.lib',
+    'core.bulk_change',
+    'dhcp',
+    'mozdns',
+    'mdns',
+    'mdns.migrate',
+    'mozdns',
+    'mozdns.address_record',
+    'mozdns.cname',
+    'mozdns.domain',
+    'mozdns.ip',
+    'mozdns.mx',
+    'mozdns.nameserver',
+    'mozdns.ptr',
+    'mozdns.soa',
+    'mozdns.sshfp',
+    'mozdns.srv',
+    'mozdns.txt',
+    'mozdns.view',
+    'mozdns.mozbind',
+    'mozdns.master_form',
+    'reports',
+    'systems',
+    'truth',
+    'user_systems',
+
+    # Third party apps
+    'djcelery',
+    'django_extensions',
+    'django_nose',
+    'tastypie',
+    'tastytools',
+
+    # Django contrib apps
+    'django.contrib.sessions',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.admin',
+]
+
+
+# Because Jinja2 is the default template loader, add any non-Jinja templated
+# apps here:
+JINGO_EXCLUDE_APPS = [
+    'build',
+    'admin',
+    'user_systems',
+    'debug_toolbar',
+    'tastytools',
+]
+
+DJANGO_TEMPLATE_APPS = [
+    'admin',
+    'build',
+    'user_systems',
+    ]
+# Tells the extract script what files to look for L10n in and what function
+# handles the extraction. The Tower library expects this.
+
+# # Use this if you have localizable HTML files:
+# DOMAIN_METHODS['lhtml'] = [
+#    ('**/templates/**.lhtml',
+#        'tower.management.commands.extract.extract_tower_template'),
+# ]
+
+# # Use this if you have localizable HTML files:
+# DOMAIN_METHODS['javascript'] = [
+#    # Make sure that this won't pull in strings from external libraries you
+#    # may use.
+#    ('media/js/**.js', 'javascript'),
+# ]
+
+LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
+AUTH_PROFILE_MODULE = 'systems.UserProfile'
+AUTHENTICATION_BACKENDS = (
+        'middleware.restrict_by_api_token.RestrictByToken',
+        'django.contrib.auth.backends.RemoteUserBackend',
+)
+AUTH_PROFILE_MODULE = "systems.UserProfile"
+PISTON_IGNORE_DUPE_MODELS = True
+
+ROOT_URLCONF = 'mozilla_inventory.urls'
+#TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+
+#########################################################
+#                   MOZ DNS                             #
+#########################################################
+
+MOZDNS_BASE_URL = "/mozdns"
+CORE_BASE_URL = "/core"
+JINJA_CONFIG = {'autoescape': False}
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)
+
+INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
+
+def custom_show_toolbar(request):
+    return True # Always show toolbar, for example purposes only.
+
+
+#############################################################
+#                       MOZ DNS                             #
+#############################################################
+MOZDNS_BASE_URL = "/mozdns"
+CORE_BASE_URL = "/core"
+ROOT_URLCONF = 'inventory.urls'
+BUILD_PATH = 'builds'
