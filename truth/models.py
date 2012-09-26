@@ -5,6 +5,7 @@ import pdb
 
 # Create your models here.
 
+
 class Truth(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=128)
@@ -15,10 +16,12 @@ class Truth(models.Model):
     class Meta:
         db_table = u'truth'
 
+
 class ApiManager(models.Manager):
-	def get_query_set(self):
-		results = super(ApiManager, self).get_query_set()
-		return results
+    def get_query_set(self):
+        results = super(ApiManager, self).get_query_set()
+        return results
+
 
 class KeyValue(models.Model):
     truth = models.ForeignKey('Truth')
@@ -39,5 +42,5 @@ class KeyValue(models.Model):
                 ScheduledTask(type='dns', task=self.key).save()
             except IntegrityError, e:
                 print ("Key {0} and Value {1} already existsed in "
-                    "table".format(self.key, self.value))
+                       "table".format(self.key, self.value))
         super(KeyValue, self).save(*args, **kwargs)

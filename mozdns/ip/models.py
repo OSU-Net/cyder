@@ -58,7 +58,7 @@ class Ip(models.Model):
     """
     IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
     ip_str = models.CharField(max_length=39, editable=True, verbose_name='IP',
-                help_text="IP Address in IPv4 or IPv6 Format")
+                              help_text="IP Address in IPv4 or IPv6 Format")
     # ip_upper/lower are calculated from ip_str on ip_clean.
     # TODO rename ip_* to ipaddr_*
     ip_upper = models.BigIntegerField(null=True, blank=True)
@@ -76,7 +76,7 @@ class Ip(models.Model):
     # the definition for 'domain'.
     # reverse_domain = models.ForeignKey(Domain, null=True, blank=True)
     ip_type = models.CharField(max_length=1, choices=IP_TYPE_CHOICES,
-                    editable=True, help_text='IPv4 or IPv6 Address type')
+                               editable=True, help_text='IPv4 or IPv6 Address type')
 
     class Meta:
         abstract = True
@@ -98,12 +98,13 @@ class Ip(models.Model):
                 raise ValidationError("Invalid Ip address {0}".
                                       format(self.ip_str))
             if update_reverse_domain:
-                self.reverse_domain = name_to_domain(ip_to_domain_name(self.ip_str,
-                    ip_type='4'))
+                self.reverse_domain = name_to_domain(
+                    ip_to_domain_name(self.ip_str,
+                                      ip_type='4'))
                 if (self.reverse_domain is None or self.reverse_domain.name in
                         ('arpa', 'in-addr.arpa', 'ipv6.arpa')):
                     raise ValidationError("No reverse Domain found for {0} "
-                            .format(self.ip_str))
+                                          .format(self.ip_str))
             self.ip_upper = 0
             self.ip_lower = int(ip)
         else:
@@ -121,7 +122,7 @@ class Ip(models.Model):
                 if (self.reverse_domain is None or self.reverse_domain.name in
                         ('arpa', 'in-addr.arpa', 'ipv6.arpa')):
                     raise ValidationError("No reverse Domain found for {0} "
-                            .format(self.ip_str))
+                                          .format(self.ip_str))
             self.ip_upper, self.ip_lower = ipv6_to_longs(int(ip))
 
     def __int__(self):

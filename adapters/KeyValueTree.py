@@ -8,8 +8,10 @@ from systems.models import System, KeyValue
 from truth.models import Truth, KeyValue as TruthKeyValue
 import re
 from MacroExpansion import MacroExpansion
+
+
 class KeyValueTree:
-    def __init__(self,search_string):
+    def __init__(self, search_string):
         self.ret = []
         self.final = {}
         self.is_system = False
@@ -42,19 +44,19 @@ class KeyValueTree:
                 return None
         tmp_list = []
         #Let's start at our child node, first getting out own keys, these will not get overwritten by those of our parents
-        for row in base: 
-            matches = re.match("\$\{(.*)\}", row.value) 
-            if not re.search("parent", row.key): 
-                if matches is not None: 
-                    m = MacroExpansion(matches.group(1)) 
-                    row.value = m.output() 
+        for row in base:
+            matches = re.match("\$\{(.*)\}", row.value)
+            if not re.search("parent", row.key):
+                if matches is not None:
+                    m = MacroExpansion(matches.group(1))
+                    row.value = m.output()
         ##Now we've got our base keys, lets get those of our parents
         for row in base:
 
             matches = re.match("(parent.*)", row.key)
             if matches is not None:
-                parent_type = row.value.replace("${","").split(':')[0]
-                parent_name = row.value.replace("}","").split(':')[1]
+                parent_type = row.value.replace("${", "").split(':')[0]
+                parent_name = row.value.replace("}", "").split(':')[1]
                 tmp = self.get_parents(parent_type, parent_name, root=True)
                 #Ok now i've got my own parents
                 for host in tmp:
@@ -76,40 +78,44 @@ class KeyValueTree:
             obj = None
             if parent_type == 'host':
                 obj = System.objects.get(hostname=parent_name)
-                base = KeyValue.expanded_objects.filter(system=obj).exclude(key__contains='parent')
-                base_parents = KeyValue.expanded_objects.filter(system=obj,key__contains='parent')
+                base = KeyValue.expanded_objects.filter(
+                    system=obj).exclude(key__contains='parent')
+                base_parents = KeyValue.expanded_objects.filter(
+                    system=obj, key__contains='parent')
                 parent_compare = obj.hostname
             elif parent_type == 'truth':
                 obj = Truth.objects.get(name=parent_name)
-                base = TruthKeyValue.expanded_objects.filter(truth=obj).exclude(key__contains='parent')
-                base_parents = TruthKeyValue.expanded_objects.filter(truth=obj,key__contains='parent')
+                base = TruthKeyValue.expanded_objects.filter(
+                    truth=obj).exclude(key__contains='parent')
+                base_parents = TruthKeyValue.expanded_objects.filter(
+                    truth=obj, key__contains='parent')
                 parent_compare = obj.name
-
 
             if base is not None and obj is not None:
                 for host in base:
                     if host.value is not None and host.key is not None:
-                        matches = re.match("\$\{(.*)\}", host.value) 
-                        if not re.search("parent", host.key): 
-                            if matches is not None: 
+                        matches = re.match("\$\{(.*)\}", host.value)
+                        if not re.search("parent", host.key):
+                            if matches is not None:
                                 m = MacroExpansion(matches.group(1))
                                 host.value = m.output()
                     if host.key is not None and host.value is not None:
                         if self.search_string != parent_compare:
-                            host.key = "%s:%s:%s" % (parent_type, parent_name, host.key)
-                        tmp = {'key':host.key, 'value':host.value}
+                            host.key = "%s:%s:%s" % (
+                                parent_type, parent_name, host.key)
+                        tmp = {'key': host.key, 'value': host.value}
                         self.ret.append(tmp)
                 for row in base_parents:
-                    parent_type = row.value.replace("${","").split(':')[0]
-                    parent_name = row.value.replace("}","").split(':')[1]
-                    self.ret.append(self.get_parents(parent_type, parent_name, root=False))
-
+                    parent_type = row.value.replace("${", "").split(':')[0]
+                    parent_name = row.value.replace("}", "").split(':')[1]
+                    self.ret.append(self.get_parents(
+                        parent_type, parent_name, root=False))
 
                 """for host in base:
                     if host.value is not None and host.key is not None:
-                        matches = re.match("\$\{(.*)\}", host.value) 
-                        if not re.search("parent", host.key): 
-                            if matches is not None: 
+                        matches = re.match("\$\{(.*)\}", host.value)
+                        if not re.search("parent", host.key):
+                            if matches is not None:
                                 m = MacroExpansion(matches.group(1))
                                 host.value = m.output()
                     if host.key is not None and host.value is not None:
@@ -119,12 +125,13 @@ class KeyValueTree:
                         tmp = {'key':host.key, 'value':host.value}
                         self.ret.append(tmp)
 
-                base_parents = TruthKeyValue.expanded_objects.filter(truth=truth,key__contains='parent')
+                base_parents = TruthKeyValue.expanded_objects.filter(
+                    truth=truth,key__contains='parent')
                 for row in base_parents:
                     parent_type = row.value.replace("${","").split(':')[0]
                     parent_name = row.value.replace("}","").split(':')[1]
                     self.ret.append(self.get_parents(parent_type, parent_name, root=False))"""
 
-            return self.ret        
+            return self.ret
         else:
             return None

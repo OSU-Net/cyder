@@ -17,6 +17,7 @@ from core.keyvalue.utils import get_aa, get_docstrings, get_attrs
 from core.keyvalue.utils import update_attrs, dict_to_kv
 import simplejson as json
 
+
 class SOAView(object):
     model = SOA
     form_class = SOAForm
@@ -38,7 +39,7 @@ class SOADetailView(SOAView, MozdnsDetailView):
             return soa
 
         dom_objects = soa.domain_set.all().order_by('master_domain'
-                ).select_related()
+                                                    ).select_related()
         dom_headers, dom_matrix, dom_urls = tablefy(dom_objects)
 
         context = dict({
@@ -53,6 +54,7 @@ class SOADetailView(SOAView, MozdnsDetailView):
 class SOACreateView(SOAView, MozdnsCreateView):
     """ """
 
+
 def delete_soa_attr(request, attr_pk):
     """
     An view destined to be called by ajax to remove an attr.
@@ -60,6 +62,7 @@ def delete_soa_attr(request, attr_pk):
     attr = get_object_or_404(SOAKeyValue, pk=attr_pk)
     attr.delete()
     return HttpResponse("Attribute Removed.")
+
 
 def update_soa(request, soa_pk):
     soa = get_object_or_404(SOA, pk=soa_pk)

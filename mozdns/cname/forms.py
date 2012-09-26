@@ -11,6 +11,7 @@ class CNAMEForm(ModelForm):
         widgets = {'views': forms.CheckboxSelectMultiple}
         # https://code.djangoproject.com/ticket/9321
 
+
 class CNAMEFQDNForm(ModelForm):
     class Meta:
         model = CNAME

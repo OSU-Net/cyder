@@ -107,4 +107,4 @@ def create_ns_delegated(request, domain):
     # Everything else get's the blank form
     form = NSDelegated()
     return render_to_response("nameserver/ns_delegated.html",
-            {'form': form, 'request': request})
+                              {'form': form, 'request': request})

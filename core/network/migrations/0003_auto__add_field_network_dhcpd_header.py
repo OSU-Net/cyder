@@ -10,14 +10,13 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Network.dhcpd_header'
         db.add_column('network', 'dhcpd_header',
-                      self.gf('django.db.models.fields.TextField')(null=True, blank=True),
+                      self.gf('django.db.models.fields.TextField')(
+                          null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'Network.dhcpd_header'
         db.delete_column('network', 'dhcpd_header')
-
 
     models = {
         'network.network': {

@@ -24,7 +24,8 @@ PR_AND = 1
 PR_OR = 2
 PR_TERM = -1
 
-def build_filter(filter_, fields, filter_type = "icontains"):
+
+def build_filter(filter_, fields, filter_type="icontains"):
     # rtucker++
     final_filter = Q()
     if filter_ and filter_[0] == '/':
@@ -32,9 +33,10 @@ def build_filter(filter_, fields, filter_type = "icontains"):
         filter_type = "regex"
     for t in fields:
         final_filter = final_filter | Q(**{"{0}__{1}".format(t,
-            filter_type): filter_})
+                                                             filter_type): filter_})
 
     return final_filter
+
 
 def build_text_qsets(f):
     q_sets = []
@@ -51,6 +53,7 @@ def build_text_qsets(f):
     q_sets.append(build_filter(f, TXT.search_fields))
     return q_sets
 
+
 class Token(object):
     def __init__(self, type_, value, precedence, col):
         self.value = value
@@ -58,9 +61,9 @@ class Token(object):
         self.precedence = precedence
         self.col = col
         self.types = [
-                ('directive', re.compile("^(.*):(.*)$")) # type, vlan, etc
-                ('text', re.compile("^(.*)$")), # Default to term
-            ]
+            ('directive', re.compile("^(.*):(.*)$"))  # type, vlan, etc
+            ('text', re.compile("^(.*)$")),  # Default to term
+        ]
 
     def __str__(self):
         return "{0} {1}".format(self.type_, self.value)
@@ -97,7 +100,7 @@ class Tokenizer(object):
 
     def peek(self):
         try:
-            token = self.tokens[self.idx+1]
+            token = self.tokens[self.idx + 1]
             return token
         except IndexError:
             return None
@@ -105,12 +108,14 @@ class Tokenizer(object):
     # List of types
     # Operators And precedence rules
     patterns = [
-        ('uop', re.compile("^(!)$"), PR_UOP), # NOT Unary Operator
+        ('uop', re.compile("^(!)$"), PR_UOP),  # NOT Unary Operator
         ('lparen', re.compile("^(\()$"), PR_LPAREN),  # Left paren
-        ('rparen', re.compile("^(\))$"), PR_RPAREN), # Right paren
-        ('bop', re.compile("(and)$", re.IGNORECASE), PR_AND), # AND Binary Operator
-        ('bop', re.compile("(or)$", re.IGNORECASE), PR_OR), # OR Binary Operator
-        ('term', re.compile("^(.*)$"), PR_TERM) # Everything else is a term
+        ('rparen', re.compile("^(\))$"), PR_RPAREN),  # Right paren
+        ('bop', re.compile(
+            "(and)$", re.IGNORECASE), PR_AND),  # AND Binary Operator
+        ('bop', re.compile("(or)$", re.IGNORECASE), PR_OR),
+        # OR Binary Operator
+        ('term', re.compile("^(.*)$"), PR_TERM)  # Everything else is a term
     ]
 
     def n(self):
@@ -124,7 +129,7 @@ class Tokenizer(object):
                 if type_ == 'uop' or type_ == 'bop':
                     opr = match.groups(1)[0]
                     return Token(type_, opr.upper(), precedence, col)
-                if type_ in ('lparen','rparen'):
+                if type_ in ('lparen', 'rparen'):
                     paren = match.groups(1)[0]
                     return Token(type_, paren, precedence, col)
                 if type_ == 'term':
@@ -148,14 +153,14 @@ class Tokenizer(object):
             i = 0
             while i < (len(tokens) - 1):
                 cur = tokens[i]
-                nxt = tokens[i+1]
+                nxt = tokens[i + 1]
                 if not nxt:
                     new_tokens.append(cur)
                     break
 
                 if ((cur.type_ == 'Term' and nxt.type_ == 'Term')
                     or (cur.type_ == 'Term' and nxt.type_ == 'Lparen')
-                    or (cur.type_ == 'Rparen' and nxt.type_ == 'Term')):
+                        or (cur.type_ == 'Rparen' and nxt.type_ == 'Term')):
                     new_tokens.append(cur)
                     new_tokens.append(Token('Bop', 'AND', PR_AND, None))
                     i += 1
@@ -171,32 +176,28 @@ class Tokenizer(object):
                     if token.type_ == 'Lparen':
                         for i in xrange(token.precedence):
                             new_tokens.append(Token('Lparen', '(',
-                                token.precedence, None))
+                                                    token.precedence, None))
                         new_tokens.append(token)
                         continue
                     elif token.type_ == 'Rparen':
                         for i in xrange(token.precedence):
                             new_tokens.append(Token('Rparen', ')',
-                                token.precedence, None))
+                                                    token.precedence, None))
                         new_tokens.append(token)
                     else:
                         for i in xrange(token.precedence):
                             new_tokens.append(Token('Rparen', ')',
-                                token.precedence, None))
+                                                    token.precedence, None))
                         new_tokens.append(token)
                         for i in xrange(token.precedence):
                             new_tokens.append(Token('Lparen', '(',
-                                token.precedence, None))
+                                                    token.precedence, None))
                 else:
                     new_tokens.append(token)
             return new_tokens
 
-
-
         self.tokens = add_ands(self.tokens)
         self.tokens = add_parens(self.tokens)
-
-
 
 
 def print_tokens(ss):

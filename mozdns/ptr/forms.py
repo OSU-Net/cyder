@@ -7,5 +7,5 @@ class PTRForm(ModelForm):
     class Meta:
         model = PTR
         exclude = ('ip', 'data_domain', 'reverse_domain', 'ip_upper',
-                'ip_lower')
+                   'ip_lower')
         widgets = {'views': forms.CheckboxSelectMultiple}

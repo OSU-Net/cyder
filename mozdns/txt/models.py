@@ -16,10 +16,11 @@ class TXT(MozdnsRecord):
 
     def details(self):
         return (
-                ("FQDN", self.fqdn),
-                ("Record Type", "TXT"),
-                ("Text", self.txt_data)
-               )
+            ("FQDN", self.fqdn),
+            ("Record Type", "TXT"),
+            ("Text", self.txt_data)
+        )
+
     @classmethod
     def get_api_fields(cls):
         data = super(TXT, cls).get_api_fields() + ['txt_data']

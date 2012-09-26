@@ -28,7 +28,7 @@ class Lexer(object):
     def peekn(self, n):
         if self.pos + n > self.length - 1:
             return None
-        return self.line[self.pos+n]
+        return self.line[self.pos + n]
 
     def lex(self):
         self._lex_ws()
@@ -81,7 +81,6 @@ class Lexer(object):
                 token = token + c
         return token
 
-
     def _lex_ws(self):
         while True:
             # Read in name
@@ -94,6 +93,7 @@ class Lexer(object):
                 self.unpop()
                 break
         return
+
 
 def lex_stmt(ss):
     print ss
@@ -163,4 +163,3 @@ if __name__ == "__main__":
     ss = '"fooo"'
     ss = "() ()(bar ()(foo))baz"
     print lex_stmt(ss)
-

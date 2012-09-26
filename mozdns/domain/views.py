@@ -52,10 +52,10 @@ def build_tree(root, domains):
         ordered += build_tree(child, domains)
     return ordered
 
+
 def get_all_domains(request):
     domains = [domain.name for domain in Domain.objects.all()]
     return HttpResponse(json.dumps(domains))
-
 
 
 class DomainView(object):
@@ -105,7 +105,7 @@ class DomainDetailView(DomainView, DetailView):
         else:
             cname_views = True
         cname_headers, cname_matrix, cname_urls = tablefy(cname_objects,
-                cname_views)
+                                                          cname_views)
 
         # TODO, include Static Registrations
         ptr_objects = domain.ptr_set.all().order_by('ip_str')
@@ -114,7 +114,7 @@ class DomainDetailView(DomainView, DetailView):
         # TODO, include Static Registrations
         all_static_intr = StaticInterface.objects.all()
         intr_objects = domain.staticinterface_set.all().order_by(
-                'name').order_by('ip_str')
+            'name').order_by('ip_str')
         intr_headers, intr_matrix, intr_urls = tablefy(intr_objects)
 
         address_objects = domain.addressrecord_set.all().order_by('label')
@@ -184,7 +184,7 @@ class DomainCreateView(DomainView, CreateView):
             return render(request, "mozdns/mozdns_form.html", {
                 'form': domain_form,
                 'form_title': 'Create Domain'
-        })
+            })
 
         try:
             if domain.master_domain and domain.master_domain.soa:
@@ -192,7 +192,7 @@ class DomainCreateView(DomainView, CreateView):
                 domain.save()
         except ValidationError, e:
             return render(request, "mozdns/mozdns_form.html", {'form':
-                domain_form, 'form_title': 'Create Domain'})
+                                                               domain_form, 'form_title': 'Create Domain'})
         # Success. Redirect.
         messages.success(request, "{0} was successfully created.".
                          format(domain.name))
@@ -201,7 +201,7 @@ class DomainCreateView(DomainView, CreateView):
     def get(self, request, *args, **kwargs):
         domain_form = DomainForm()
         return render(request, "mozdns/mozdns_form.html", {'form': domain_form,
-            'form_title': 'Create Domain'})
+                                                           'form_title': 'Create Domain'})
 
 
 class DomainUpdateView(DomainView, UpdateView):
@@ -239,7 +239,7 @@ class DomainUpdateView(DomainView, UpdateView):
             domain_form = DomainUpdateForm(instance=domain)
             messages.error(request, str(e))
             return render(request, "domain/domain_update.html", {"form":
-                domain_form})
+                                                                 domain_form})
 
         messages.success(request, '{0} was successfully updated.'.
                          format(domain.name))

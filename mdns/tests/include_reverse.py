@@ -188,7 +188,7 @@ $ORIGIN private.tor1.mozilla.com.
 
 10.240.2.10 IN  PTR       infosec1
 
-    
+
    10.242.75.1  IN  PTR   fw1
 
 10.242.75.5 IN  PTR   admin1
@@ -227,7 +227,7 @@ $ORIGIN private.tor1.mozilla.com.
 
 10.240.2.10 IN  PTR       infosec1
 
-    
+
    10.242.75.1  IN  PTR   fw1
 
 10.242.75.5 IN  PTR   admin1
@@ -263,7 +263,7 @@ $ORIGIN private.tor1.mozilla.com.
 
 10.240.2.10 IN  PTR       infosec1
 
-    
+
    10.242.75.1  IN  PTR   fw1
 
 10.242.75.5 IN  PTR   admin1
@@ -302,7 +302,7 @@ $ORIGIN private.tor1.mozilla.com.
 
 10.240.2.10 IN  PTR       infosec1
 
-    
+
    10.242.75.1  IN  PTR   fw1
 
 10.242.75.5 IN  PTR   admin1
@@ -344,25 +344,40 @@ ex_txt8 = """
 $INCLUDE foo/bar/inventory ; This include preserves $ORIGIN
 """
 
+
 class EnsureRevIncludeTests(TestCase):
 
     def test_1(self):
-        self._do_test(txt1, ex_txt1, _ensure_include, include_file='foo/bar/inventory')
-    def test_2(self):
-        self._do_test(txt2, ex_txt2, _ensure_include, include_file='foo/bar/inventory')
-    def test_3(self):
-        self._do_test(txt3, ex_txt3, _ensure_include, include_file='foo/bar/inventory')
-    def test_4(self):
-        self._do_test(txt4, ex_txt4, _ensure_include, include_file='foo/bar/inventory')
-    def test_5(self):
-        self._do_test(txt5, ex_txt5, _ensure_include, include_file='foo/bar/inventory')
-    def test_6(self):
-        self._do_test(txt6, ex_txt6, _ensure_include, include_file='foo/bar/inventory')
-    def test_7(self):
-        self._do_test(txt7, ex_txt7, _ensure_include, include_file='foo/bar/inventory')
-    def test_8(self):
-        self._do_test(txt8, ex_txt8, _ensure_include, include_file='foo/bar/inventory')
+        self._do_test(
+            txt1, ex_txt1, _ensure_include, include_file='foo/bar/inventory')
 
+    def test_2(self):
+        self._do_test(
+            txt2, ex_txt2, _ensure_include, include_file='foo/bar/inventory')
+
+    def test_3(self):
+        self._do_test(
+            txt3, ex_txt3, _ensure_include, include_file='foo/bar/inventory')
+
+    def test_4(self):
+        self._do_test(
+            txt4, ex_txt4, _ensure_include, include_file='foo/bar/inventory')
+
+    def test_5(self):
+        self._do_test(
+            txt5, ex_txt5, _ensure_include, include_file='foo/bar/inventory')
+
+    def test_6(self):
+        self._do_test(
+            txt6, ex_txt6, _ensure_include, include_file='foo/bar/inventory')
+
+    def test_7(self):
+        self._do_test(
+            txt7, ex_txt7, _ensure_include, include_file='foo/bar/inventory')
+
+    def test_8(self):
+        self._do_test(
+            txt8, ex_txt8, _ensure_include, include_file='foo/bar/inventory')
 
     def _do_test(self, text, expect, fun, include_file):
         ios = StringIO(text)

@@ -33,20 +33,20 @@ class Nameserver(models.Model, ObjectUrlMixin):
     """
     id = models.AutoField(primary_key=True)
     domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
-                "record is for.")
+                               "record is for.")
     server = models.CharField(max_length=255, validators=[validate_name],
-                help_text="The name of the server this records points to.")
+                              help_text="The name of the server this records points to.")
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
-            validators=[validate_ttl])
+                                      validators=[validate_ttl])
     # "If the name server does lie within the domain it should have a
     # corresponding A record."
     addr_glue = models.ForeignKey(AddressRecord, null=True, blank=True,
-            related_name="nameserver_set")
+                                  related_name="nameserver_set")
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
-            related_name="intrnameserver_set")
+                                  related_name="intrnameserver_set")
     views = models.ManyToManyField(View, blank=True)
     comment = models.CharField(max_length=1000, null=True, blank=True,
-                help_text="Comments about this record.")
+                               help_text="Comments about this record.")
 
     search_fields = ("server",)
 
@@ -108,8 +108,8 @@ class Nameserver(models.Model, ObjectUrlMixin):
             self.intr_glue = None
         else:
             raise ValueError("Cannot assing {0}: Nameserver.glue must be of "
-                    "either type AddressRecord or type "
-                    "StaticInterface.".format(glue))
+                             "either type AddressRecord or type "
+                             "StaticInterface.".format(glue))
 
     def del_glue(self):
         if self.addr_glue:
@@ -135,15 +135,15 @@ class Nameserver(models.Model, ObjectUrlMixin):
             # AddressRecords take higher priority over interface records.
             glue_label = self.server.split('.')[0]  # foo.com -> foo
             if (self.glue and self.glue.label == glue_label and
-                self.glue.domain == self.domain):
+                    self.glue.domain == self.domain):
                 # Our glue record is valid. Don't go looking for a new one.
                 pass
             else:
                 # Ok, our glue record wasn't valid, let's find a new one.
                 addr_glue = AddressRecord.objects.filter(label=glue_label,
-                        domain=self.domain)
+                                                         domain=self.domain)
                 intr_glue = StaticInterface.objects.filter(label=glue_label,
-                        domain=self.domain)
+                                                           domain=self.domain)
                 if not (addr_glue or intr_glue):
                     raise ValidationError(
                         "This NS needs a glue record. Create a glue "

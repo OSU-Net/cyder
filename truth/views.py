@@ -19,22 +19,27 @@ from django.utils import translation
 import re
 # Source: http://nedbatchelder.com/blog/200712/human_sorting.html
 # Author: Ned Batchelder
+
+
 def tryint(s):
     try:
         return int(s)
     except:
         return s
 
+
 def alphanum_key(s):
     """ Turn a string into a list of string and number chunks.
         "z23a" -> ["z", 23, "a"]
     """
-    return [ tryint(c) for c in re.split('([0-9]+)', s) ]
+    return [tryint(c) for c in re.split('([0-9]+)', s)]
+
 
 def sort_nicely(l):
     """ Sort the given list in the way that humans expect.
     """
     l.sort(key=alphanum_key)
+
 
 def create(request):
     if request.POST:
@@ -46,14 +51,16 @@ def create(request):
         f = forms.TruthForm()
 
     return render_to_response('truth/key_value_store_create.html', {
-            'form': f
-           })
+        'form': f
+    })
+
 
 def delete(request, id):
     t = models.Truth.objects.get(id=id)
     models.KeyValue.objects.filter(truth=t).delete()
     t.delete()
     return HttpResponseRedirect('/truth/')
+
 
 def edit(request, id):
     truth = models.Truth.objects.get(id=id)
@@ -64,30 +71,37 @@ def edit(request, id):
     else:
         f = forms.TruthForm(instance=truth)
     return render_to_response('truth/edit.html', {
-            'kv': truth,
-            'form': f
-           })
+        'kv': truth,
+        'form': f
+    })
+
+
 def index(request):
 
     return render_to_response('truth/index.html', {
-            'systems': models.Truth.objects.all(),
-            'read_only': getattr(request, 'read_only', False),
-           })
+        'systems': models.Truth.objects.all(),
+        'read_only': getattr(request, 'read_only', False),
+    })
+
 
 def get_key_value_store(request, id):
     truth = models.Truth.objects.get(id=id)
     key_value_store = models.KeyValue.objects.filter(truth=truth)
     return render_to_response('truth/key_value_store.html', {
-            'key_value_store': key_value_store,
-           })
+        'key_value_store': key_value_store,
+    })
+
+
 def delete_key_value(request, id, kv_id):
     kv = models.KeyValue.objects.get(id=id)
     kv.delete()
     truth = models.Truth.objects.get(id=kv_id)
     key_value_store = models.KeyValue.objects.filter(truth=truth)
     return render_to_response('truth/key_value_store.html', {
-            'key_value_store': key_value_store,
-           })
+        'key_value_store': key_value_store,
+    })
+
+
 def save_key_value(request, id):
     kv = models.KeyValue.objects.get(id=id)
     if kv is not None:
@@ -97,20 +111,22 @@ def save_key_value(request, id):
         kv.save()
     return HttpResponseRedirect('/truth/get_key_value_store/' + truth_id + '/')
 
+
 def create_key_value(request, id):
     truth = models.Truth.objects.get(id=id)
     kv = models.KeyValue(truth=truth)
-    kv.save();
+    kv.save()
     key_value_store = models.KeyValue.objects.filter(truth=truth)
     return render_to_response('truth/key_value_store.html', {
-            'key_value_store': key_value_store,
-           })
+        'key_value_store': key_value_store,
+    })
+
 
 def list_all_keys_ajax(request):
 #iSortCol_0 = which column is sorted
 #sSortDir_0 = which direction
 
-    cols = ['name','description']
+    cols = ['name', 'description']
     sort_col = cols[0]
     if 'iSortCol_0' in request.GET:
         sort_col = cols[int(request.GET['iSortCol_0'])]
@@ -118,7 +134,6 @@ def list_all_keys_ajax(request):
     sort_dir = 'asc'
     if 'sSortDir_0' in request.GET:
         sort_dir = request.GET['sSortDir_0']
-
 
     if 'sEcho' in request.GET:
         sEcho = request.GET['sEcho']
@@ -144,7 +159,8 @@ def list_all_keys_ajax(request):
         end_display = int(iDisplayStart) + int(iDisplayLength)
         system_count = models.Truth.objects.all().count()
         systems = models.Truth.objects.all()[iDisplayStart:end_display]
-        the_data = build_json(request, systems, sEcho, system_count, iDisplayLength, sort_col, sort_dir)
+        the_data = build_json(request, systems, sEcho, system_count,
+                              iDisplayLength, sort_col, sort_dir)
 
     if search_term is not None and len(search_term) > 0:
 
@@ -152,15 +168,19 @@ def list_all_keys_ajax(request):
         search_q |= Q(description__contains=search_term)
         total_count = models.Truth.objects.filter(search_q).count()
         end_display = int(iDisplayStart) + int(iDisplayLength)
-        systems = models.Truth.objects.filter(search_q).order_by('name')[iDisplayStart:end_display]
-        the_data = build_json(request, systems, sEcho, total_count, iDisplayLength, sort_col, sort_dir)
+        systems = models.Truth.objects.filter(
+            search_q).order_by('name')[iDisplayStart:end_display]
+        the_data = build_json(request, systems, sEcho, total_count,
+                              iDisplayLength, sort_col, sort_dir)
     return HttpResponse(the_data)
+
 
 def build_json(request, systems, sEcho, total_records, display_count, sort_col, sort_dir):
     system_list = []
     for system in systems:
 
-        system_list.append({'name': system.name.strip(), 'description': system.description, 'id':system.id})
+        system_list.append({'name': system.name.strip(
+        ), 'description': system.description, 'id': system.id})
 
     the_data = '{"sEcho": %s, "iTotalRecords":0, "iTotalDisplayRecords":0, "aaData":[]}' % (sEcho)
 
@@ -170,12 +190,12 @@ def build_json(request, systems, sEcho, total_records, display_count, sort_col, 
         if sort_dir == 'desc':
             system_list.reverse()
 
-
-        the_data = '{"sEcho": %s, "iTotalRecords":%i, "iTotalDisplayRecords":%i, "aaData":[' % (sEcho,  total_records, total_records)
+        the_data = '{"sEcho": %s, "iTotalRecords":%i, "iTotalDisplayRecords":%i, "aaData":[' % (sEcho, total_records, total_records)
         counter = 0
         for system in system_list:
             if counter < display_count:
-                the_data += '["%s","%s","%s"],' % (system['name'],system['description'],system['id'])
+                the_data += '["%s","%s","%s"],' % (
+                    system['name'], system['description'], system['id'])
                 counter += 1
             else:
                 counter = display_count

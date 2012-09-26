@@ -17,27 +17,30 @@ import random
 import ipaddr
 import pdb
 
+
 class LibTestsFreeIP(TestCase):
     def setUp(self):
         self.system = System()
         Domain.objects.get_or_create(name="com")
         d1, _ = Domain.objects.get_or_create(name="mozilla.com")
-        soa, _ = SOA.objects.get_or_create(primary="fo.bar", contact="foo.bar.com",
-                comment="foo bar")
+        soa, _ = SOA.objects.get_or_create(
+            primary="fo.bar", contact="foo.bar.com",
+            comment="foo bar")
         self.s = soa
         d1.soa = soa
         d1.save()
 
         v, _ = Vlan.objects.get_or_create(name="private", number=3)
         s, _ = Site.objects.get_or_create(name="phx1")
-        s1, _ = Site.objects.get_or_create(name="corp", parent = s)
+        s1, _ = Site.objects.get_or_create(name="corp", parent=s)
         d, _ = Domain.objects.get_or_create(name="phx1.mozilla.com")
         d.soa = soa
         d.save()
         d1, _ = Domain.objects.get_or_create(name="corp.phx1.mozilla.com")
         d1.soa = soa
         d1.save()
-        d2, _ = Domain.objects.get_or_create(name="private.corp.phx1.mozilla.com")
+        d2, _ = Domain.objects.get_or_create(
+            name="private.corp.phx1.mozilla.com")
         d2.soa = soa
         d2.save()
 
@@ -53,7 +56,7 @@ class LibTestsFreeIP(TestCase):
         n.save()
 
         r = Range(start_str="15.0.0.0", end_str="15.0.0.10",
-                network=n)
+                  network=n)
         r.clean()
         r.save()
 
@@ -63,8 +66,8 @@ class LibTestsFreeIP(TestCase):
         count = calc_free_ips_str("15.0.0.200", "15.0.0.204")
         self.assertEqual(count, 4)
         intr, errors = create_ipv4_intr_from_range("foo",
-                "private.corp.phx1.mozilla.com", self.system,
-                "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+                                                   "private.corp.phx1.mozilla.com", self.system,
+                                                   "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -73,8 +76,8 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 3)
 
         intr, errors = create_ipv4_intr_from_range("foo",
-                "private.corp.phx1.mozilla.com", self.system,
-                "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+                                                   "private.corp.phx1.mozilla.com", self.system,
+                                                   "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -83,8 +86,8 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 2)
 
         intr, errors = create_ipv4_intr_from_range("foo",
-                "private.corp.phx1.mozilla.com", self.system,
-                "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+                                                   "private.corp.phx1.mozilla.com", self.system,
+                                                   "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -93,8 +96,8 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 1)
 
         intr, errors = create_ipv4_intr_from_range("foo",
-                "private.corp.phx1.mozilla.com", self.system,
-                "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+                                                   "private.corp.phx1.mozilla.com", self.system,
+                                                   "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -102,10 +105,9 @@ class LibTestsFreeIP(TestCase):
         count = calc_free_ips_str("15.0.0.200", "15.0.0.204")
         self.assertEqual(count, 0)
 
-
     def test2_free_ip_count(self):
         return
         # Time is tight, not going to do this test yet.
         # Add an Ipv6 address and make sure the rangecount function sees it.
         count = calc_free_ips_str("2620:101:8001::", "2620:101:8001::",
-                ip_type='6')
+                                  ip_type='6')

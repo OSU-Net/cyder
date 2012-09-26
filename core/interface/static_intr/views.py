@@ -38,7 +38,7 @@ def do_combine_a_ptr_to_interface(
     if mac_address == '00:00:00:00:00:00' or mac_address is None:
         next_adapter = system.get_next_key_value_adapter()
     if (addr.ip_str != ptr.ip_str or addr.fqdn != ptr.name or
-        addr.ip_type != ptr.ip_type):
+            addr.ip_type != ptr.ip_type):
         raise ValidationError("This A and PTR have different data.")
 
     intr = StaticInterface(
@@ -56,7 +56,8 @@ def do_combine_a_ptr_to_interface(
     if interface:
         from api_v3.system_api import SystemResource
         intr.update_attrs()
-        adapter_type, primary, alias = SystemResource.extract_nic_attrs(interface)
+        adapter_type, primary, alias = SystemResource.extract_nic_attrs(
+            interface)
         intr.attrs.primary = primary
         intr.attrs.alias = alias
         intr.attrs.interface_type = adapter_type
@@ -92,18 +93,18 @@ def combine_a_ptr_to_interface(request, addr_pk, ptr_pk):
             system = System.objects.get(hostname=system_hostname)
         except:
             try:
-                system_hostname = re.sub('mozilla\.[com|net|org]','',
-                        system_hostname)
+                system_hostname = re.sub('mozilla\.[com|net|org]', '',
+                                         system_hostname)
                 system = System.objects.get(hostname=system_hostname)
             except:
                 system = None
         if system:
             try:
                 intr, addr_deleted, ptr_deleted = do_combine_a_ptr_to_interface(
-                        addr, ptr, system, mac_address="00:00:00:00:00:00")
+                    addr, ptr, system, mac_address="00:00:00:00:00:00")
             except ValidationError, e:
                 return HttpResponse(json.dumps({'success': False, 'error':
-                    e.messages[0]}))
+                                                e.messages[0]}))
             ret_dict = {}
             ret_dict['success'] = True
             ret_dict['hostname'] = system.hostname
@@ -111,7 +112,7 @@ def combine_a_ptr_to_interface(request, addr_pk, ptr_pk):
             return HttpResponse(json.dumps(ret_dict))
         else:
             return HttpResponse(json.dumps({'success': False, 'error':
-                'Unable to find system'}))
+                                            'Unable to find system'}))
 
     if request.method == "POST":
         form = CombineForm(request.POST)
@@ -119,7 +120,7 @@ def combine_a_ptr_to_interface(request, addr_pk, ptr_pk):
             system = form.cleaned_data['system']
             try:
                 intr, addr_deleted, ptr_deleted = do_combine_a_ptr_to_interface(
-                        addr, ptr, system)
+                    addr, ptr, system)
                 return redirect(intr)
             except ValidationError, e:
                 form.errors['__all__'] = ErrorList(e.messages)
@@ -163,7 +164,7 @@ def create_no_system_static_interface(request):
             network = calc_parent_str(ip_str, ip_type)
             if network and network.vlan and network.site:
                 expected_name = "{0}.{1}.mozilla.com".format(network.vlan.name,
-                    network.site.get_site_path())
+                                                             network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist, e:
@@ -171,7 +172,7 @@ def create_no_system_static_interface(request):
 
             if domain:
                 initial['initial'] = {'ip_str': ip_str, 'domain': domain,
-                        'ip_type': ip_type}
+                                      'ip_type': ip_type}
             else:
                 initial['initial'] = {'ip_str': ip_str, 'ip_type': ip_type}
 
@@ -338,29 +339,29 @@ def quick_create(request, system_pk):
                         networks.append(network)
                 if not networks:
                     raise ValidationError("No appropriate networks found. "
-                        "Consider adding this interface manually.")
+                                          "Consider adding this interface manually.")
 
                 ip = mrange.get_next_ip()
-                if ip == None:
+                if ip is None:
                     raise ValidationError("No appropriate IP found "
-                        "in {0} Vlan {1} Range {2} - {3}. Consider adding "
-                        "this interface manually.".format(site.name, vlan.name,
-                        mrange.start_str, mrange.end_str))
+                                          "in {0} Vlan {1} Range {2} - {3}. Consider adding "
+                                          "this interface manually.".format(site.name, vlan.name,
+                                                                            mrange.start_str, mrange.end_str))
 
                 expected_name = "{0}.{1}.mozilla.com".format(vlan.name,
-                                    site.get_site_path())
+                                                             site.get_site_path())
                 print "Expected name {0}".format(expected_name)
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist, e:
                     raise ValidationError("The domain '{0}' doesn't seem to "
-                        "exist. Consider creating this interface "
-                        "manually.".format(expected_name))
+                                          "exist. Consider creating this interface "
+                                          "manually.".format(expected_name))
 
                 intr = StaticInterface(label=label, domain=domain,
-                        ip_str=str(ip),
-                    #ip_type=ip_type, mac=mac, system=system)
-                    ip_type=ip_type, system=system)
+                                       ip_str=str(ip),
+                                       #ip_type=ip_type, mac=mac, system=system)
+                                       ip_type=ip_type, system=system)
                 intr.full_clean()
                 intr.save()
             except ValidationError, e:
@@ -368,7 +369,7 @@ def quick_create(request, system_pk):
                 return render(request, 'static_intr/static_intr_form.html', {
                     'form': interface_form,
                     'form_title': "Quick Interface Create for System "
-                        "{0}".format(system)
+                    "{0}".format(system)
                 })
         else:
             return render(request, 'static_intr/static_intr_form.html', {

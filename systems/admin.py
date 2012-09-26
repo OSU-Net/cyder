@@ -7,7 +7,8 @@ from systems.models import UserProfile
 
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
-     
+
+
 class InvUserAdmin(UserAdmin):
     filter_horizontal = UserAdmin.filter_horizontal + ('groups',)
     inlines = [UserProfileInline]

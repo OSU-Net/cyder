@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, RelengDistro, SystemRack,SystemStatus,NetworkAdapter,KeyValue
+from systems.models import System, RelengDistro, SystemRack, SystemStatus, NetworkAdapter, KeyValue
 from truth.models import Truth, KeyValue as TruthKeyValue
 from dhcp.DHCP import DHCP as DHCPInterface
 from dhcp.models import DHCP
@@ -17,7 +17,8 @@ from django.conf import settings
 class RelengDistroHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
     model = RelengDistro
-    fields = ('id','distro_name')
+    fields = ('id', 'distro_name')
+
     def create(self, request, releng_distro_id=None):
         rd = RelengDistro()
         rd.save()
@@ -27,7 +28,7 @@ class RelengDistroHandler(BaseHandler):
 
     def read(self, request, releng_distro_id=None):
         base = RelengDistro.objects
-        
+
         if releng_distro_id:
             return base.get(pk=releng_distro_id)
         else:
@@ -35,7 +36,7 @@ class RelengDistroHandler(BaseHandler):
 
     def update(self, request, releng_distro_id=None):
         model = RelengDistro
-    	if request.method == 'PUT':
+        if request.method == 'PUT':
             try:
                 rd = model.objects.get(pk=releng_distro_id)
                 rd.distro_name = request.POST['releng_distro_name']

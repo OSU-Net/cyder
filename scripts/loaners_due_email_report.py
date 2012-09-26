@@ -6,8 +6,10 @@ except:
     from django.utils import simplejson as json
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 import manage
 import smtplib
@@ -18,16 +20,16 @@ from email.mime.text import MIMEText
 from django.conf import settings, settings.DESKTOP_EMAIL_ADDRESS, settingsFROM_EMAIL_ADDRESS
 
 
-
 def main():
     text_message = ""
     html_message = ""
-    loaners_due = model.UnmanagedSystem.objects.select_related().get_loaners_due()
+    loaners_due = model.UnmanagedSystem.objects.select_related(
+    ).get_loaners_due()
     for loaner in loaners_due:
-        text_message += "%s borrowed by %s is due %s\n" %(loaner, loaner.owner.name, loaner.loaner_return_date)
-        html_message += "<tr><td><a href='%s/user_systems/show/%i/'>%s</a></td><td>%s</td><td>%s</td></tr>" %(settings.SCRIPT_URL, loaner.id, loaner, loaner.owner.name, loaner.loaner_return_date)
+        text_message += "%s borrowed by %s is due %s\n" % (
+            loaner, loaner.owner.name, loaner.loaner_return_date)
+        html_message += "<tr><td><a href='%s/user_systems/show/%i/'>%s</a></td><td>%s</td><td>%s</td></tr>" % (settings.SCRIPT_URL, loaner.id, loaner, loaner.owner.name, loaner.loaner_return_date)
 
-    
     sender = settingsFROM_EMAIL_ADDRESS
     receivers = [settings.DESKTOP_EMAIL_ADDRESS]
 
@@ -44,9 +46,6 @@ def main():
             smtpObj.sendmail(sender, receivers, msg.as_string())
         except SMTPException:
             print "Error: unable to send email"
-    
-
-
 
 
 if __name__ == '__main__':

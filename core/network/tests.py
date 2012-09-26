@@ -10,20 +10,20 @@ import random
 import ipaddr
 import pdb
 
+
 class NetworkTests(TestCase):
 
     def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None):
-        s = Network(network_str=network+"/"+prefixlen,ip_type=ip_type)
+        s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
         s.clean()
         s.save()
         self.assertTrue(s)
         return s
 
-
     def test1_create_ipv6(self):
         network = "f::"
         prefixlen = "24"
-        kwargs = {'network':network , 'prefixlen':prefixlen, 'ip_type':'6'}
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '6'}
         s = self.do_basic_add(**kwargs)
         str(s)
         s.__repr__()
@@ -32,7 +32,7 @@ class NetworkTests(TestCase):
     def test2_create_ipv6(self):
         network = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
         prefixlen = "24"
-        kwargs = {'network':network , 'prefixlen':prefixlen, 'ip_type':'6'}
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '6'}
         s = self.do_basic_add(**kwargs)
         str(s)
         s.__repr__()
@@ -44,7 +44,7 @@ class NetworkTests(TestCase):
     def test_bad_resize(self):
         network = "129.0.0.0"
         prefixlen = "24"
-        kwargs = {'network':network , 'prefixlen':prefixlen, 'ip_type':'4'}
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
         s = self.do_basic_add(**kwargs)
         self.assertTrue(s)
 
@@ -64,14 +64,13 @@ class NetworkTests(TestCase):
         self.assertEqual(r.network, s)
         self.assertTrue(len(s.range_set.all()) == 1)
 
-
         s.network_str = "129.0.0.0/25"
         self.assertRaises(ValidationError, s.clean)
 
     def test_bad_delete(self):
         network = "129.0.0.0"
         prefixlen = "24"
-        kwargs = {'network':network , 'prefixlen':prefixlen, 'ip_type':'4'}
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
         s = self.do_basic_add(**kwargs)
         s_pk = s.pk
         self.assertTrue(s)
@@ -92,7 +91,6 @@ class NetworkTests(TestCase):
 
         self.assertEqual(r.network, s)
         self.assertTrue(len(s.range_set.all()) == 1)
-
 
         self.assertRaises(ValidationError, s.delete)
         self.assertTrue(Network.objects.get(pk=s_pk))

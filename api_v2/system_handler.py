@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack,SystemStatus,NetworkAdapter,KeyValue,ServerModel,Allocation,OperatingSystem
+from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue, ServerModel, Allocation, OperatingSystem
 from truth.models import Truth, KeyValue as TruthKeyValue
 from dhcp.DHCP import DHCP as DHCPInterface
 from dhcp.models import DHCP
@@ -15,11 +15,13 @@ from django.db.models import Q
 from django.conf import settings
 from mozilla_inventory.middleware.restrict_by_api_token import AuthenticatedAPI
 
+
 class SystemHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()
+
     @AuthenticatedAPI
     def read(self, request, system_id=None):
         model = System
@@ -66,19 +68,22 @@ class SystemHandler(BaseHandler):
                 search_q &= Q(switch_ports=request.GET['switch_ports'])
             if 'location' in request.GET:
                 has_criteria = True
-                search_q &= Q(system_rack__location__name=request.GET['location'])
+                search_q &= Q(
+                    system_rack__location__name=request.GET['location'])
             if 'allocation' in request.GET:
                 has_criteria = True
                 search_q &= Q(allocation__name=request.GET['allocation'])
             if 'system_rack_id' in request.GET:
                 has_criteria = True
                 try:
-                    sr = SystemRack.objects.get(id=request.GET['system_rack_id'])
+                    sr = SystemRack.objects.get(
+                        id=request.GET['system_rack_id'])
                     search_q &= Q(system_rack=sr)
                 except:
                     pass
             if has_criteria:
-                systems = System.with_related.filter(search_q).order_by('hostname')
+                systems = System.with_related.filter(
+                    search_q).order_by('hostname')
             if systems is not None and len(systems) > 0:
                 return systems
             else:
@@ -107,17 +112,19 @@ class SystemHandler(BaseHandler):
         else:
             #return base.filter(id_gt=400) # Or base.filter(...)
             return base.all()
+
     def create(self, request, system_id=None):
         s = System()
-        s.hostname = system_id 
+        s.hostname = system_id
         try:
             s.save()
             resp = rc.CREATED
-            resp.write('json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
+            resp.write(
+                'json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
         except:
             resp = rc.BAD_REQUEST
             resp.write('Unable to Create Host')
-            
+
         return resp
 
     def delete(self, request, system_id=None):
@@ -140,9 +147,10 @@ class SystemHandler(BaseHandler):
             resp.write("Unable to find system")
 
         return resp
+
     def update(self, request, system_id=None):
         model = System
-    	if request.method == 'PUT' or request.method == 'POST':
+        if request.method == 'PUT' or request.method == 'POST':
             try:
                 try:
                     s = System.objects.get(id=system_id)
@@ -157,29 +165,32 @@ class SystemHandler(BaseHandler):
                         s.allocation = None
                     else:
                         try:
-                            sa = Allocation.objects.get(id=request.POST['allocation'])
+                            sa = Allocation.objects.get(
+                                id=request.POST['allocation'])
                             s.allocation = sa
                         except Exception, e:
                             pass
                             resp = rc.NOT_FOUND
-                            resp.write("Server Not Found %s" % e) 
+                            resp.write("Server Not Found %s" % e)
                 if 'server_model' in request.POST:
                     if request.POST['server_model'] == '':
                         s.server_model = None
                     else:
                         try:
-                            sm = ServerModel.objects.get(id=request.POST['server_model'])
+                            sm = ServerModel.objects.get(
+                                id=request.POST['server_model'])
                             s.server_model = sm
                         except:
                             pass
                             #resp = rc.NOT_FOUND
-                            #resp.write("Server Not Found") 
+                            #resp.write("Server Not Found")
                 if 'operating_system' in request.POST:
                     if request.POST['operating_system'] == '':
                         s.operating_system = None
                     else:
                         try:
-                            sos = OperatingSystem.objects.get(id=request.POST['operating_system'])
+                            sos = OperatingSystem.objects.get(
+                                id=request.POST['operating_system'])
                             s.operating_system = sos
                         except Exception, e:
                             resp = rc.NOT_FOUND
@@ -192,13 +203,15 @@ class SystemHandler(BaseHandler):
                     else:
                         ss = None
                         try:
-                            ss = SystemStatus.objects.get(status=request.POST['system_status'])
+                            ss = SystemStatus.objects.get(
+                                status=request.POST['system_status'])
                             s.system_status = ss
                         except:
                             pass
                         if ss is None:
                             try:
-                                ss = SystemStatus.objects.get(id=request.POST['system_status'])
+                                ss = SystemStatus.objects.get(
+                                    id=request.POST['system_status'])
                                 s.system_status = ss
                             except:
                                 pass
@@ -208,20 +221,24 @@ class SystemHandler(BaseHandler):
                         s.system_rack = None
                     else:
                         try:
-                            sr = SystemRack.objects.get(id=request.POST['system_rack'])
+                            sr = SystemRack.objects.get(
+                                id=request.POST['system_rack'])
                             s.system_rack = sr
                         except:
                             sr = None
                         try:
-                            sr_post = request.POST.get('system_rack').replace(" ","")
+                            sr_post = request.POST.get(
+                                'system_rack').replace(" ", "")
                             sr_location = sr_post.split("-")[0]
-                            sr_rack = "%s-%s" % (sr_post.split("-")[1], sr_post.split("-")[2])
-                            sr = SystemRack.objects.get(name=sr_rack, location__name=sr_location)
+                            sr_rack = "%s-%s" % (
+                                sr_post.split("-")[1], sr_post.split("-")[2])
+                            sr = SystemRack.objects.get(
+                                name=sr_rack, location__name=sr_location)
                             s.system_rack = sr
                         except:
                             sr = None
                         #resp = rc.NOT_FOUND
-                        #resp.write("System Rack Not Found") 
+                        #resp.write("System Rack Not Found")
                 if 'location' in request.POST:
                     s.location = request.POST['location']
                 if 'asset_tag' in request.POST:
@@ -247,14 +264,16 @@ class SystemHandler(BaseHandler):
                     s.notes = request.POST['notes']
 
                 if 'notes_append' in request.POST:
-                    s.notes = "%s\n%s" % (s.notes, request.POST['notes_append'])
+                    s.notes = "%s\n%s" % (
+                        s.notes, request.POST['notes_append'])
 
                 if 'oob_switch_port' in request.POST:
                     s.oob_switch_port = request.POST['oob_switch_port']
 
                 s.save()
                 resp = rc.ALL_OK
-                resp.write('json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
+                resp.write(
+                    'json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
             except Exception, e:
                 resp = rc.NOT_FOUND
                 resp.write("System Updated")

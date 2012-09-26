@@ -8,6 +8,7 @@ ERROR = 2
 DEBUG = 3
 BUILD = 4
 
+
 def log(msg, level=0):
     """
     0 - Info
@@ -37,6 +38,7 @@ def log(msg, level=0):
         print "[BUILD] {0}".format(msg),
         return
 
+
 def print_system(system):
     return "{0} ({1}systems/edit/{2}/)".format(system, INV_URL, system.pk)
 
@@ -46,6 +48,8 @@ def print_system(system):
 >>> ip_to_domain_name('10.20.30.40', lowercase=True)
 '40.30.20.10.in-addr.arpa'
 """
+
+
 def _ip_to_domain_name(ip, lowercase=False):
     """Convert an ip to dns zone form. The ip is assumed to be in valid dotted
     decimal format."""
@@ -57,10 +61,12 @@ def _ip_to_domain_name(ip, lowercase=False):
     name = '.'.join(list(reversed(octets))) + name
     return name
 
+
 def dns2ip_form(dnsip):
     dnsip = dnsip.upper()
     dnsip = dnsip.replace('.IN-ADDR.ARPA.', '')
     return '.'.join(list(reversed(dnsip.split('.'))))
+
 
 def ensure_include(file_, file_type, include_file):
     """This function is magical. It will make sure that the 'include_file' has
@@ -84,6 +90,7 @@ def ensure_include(file_, file_type, include_file):
         raise Exception
     finally:
         fd.close()
+
 
 def _ensure_include(text, file_type, include_file):
     """Read in a zone file and ensure that the string::
@@ -111,7 +118,7 @@ def _ensure_include(text, file_type, include_file):
 
     if file_type == 'forward':
         matches = [re.compile("^\s*\S*\s*IN\s*A\s*.*"),
-            re.compile("^\s*\S*\s*IN\s*AAAA\s*.*")]  # Match A and AAAA
+                   re.compile("^\s*\S*\s*IN\s*AAAA\s*.*")]  # Match A and AAAA
     else:
         # Must be 'reverse'
         matches = [re.compile("^\s*\S*\s*IN\s*PTR\s*.*")]  # Match PTR
@@ -125,15 +132,17 @@ def _ensure_include(text, file_type, include_file):
         for regex in matches:
             if regex.match(line):
                 log("Inventory include not found. Adding $INCLUDE "
-                        "{0}".format(include_file), INFO)
+                    "{0}".format(include_file), INFO)
                 return_text += "\n"
-                return_text += "$INCLUDE {0} ; {1}\n".format(include_file, comment)
+                return_text += "$INCLUDE {0} ; {1}\n".format(
+                    include_file, comment)
                 return_text += "\n"
                 done = True
 
         return_text += raw_line
 
     return return_text
+
 
 def _has_include(text, include_file=None):
     """Sanity check."""
@@ -147,7 +156,8 @@ def _has_include(text, include_file=None):
             include_str = file_include.groups(0)[0]
             include_str = include_str.strip("'").strip('"')
             if include_str == include_file:
-                log("Found existing include str: {0}".format(include_str), DEBUG)
+                log("Found existing include str: {0}".format(
+                    include_str), DEBUG)
                 return True
 
     return False
@@ -173,6 +183,7 @@ def increment_soa(file_):
         raise Exception
     finally:
         fd.close()
+
 
 def _str_increment_soa(text):
     """Read in a zone file and incriment the SOA. Return the zone file with the
@@ -226,7 +237,7 @@ def _str_increment_soa(text):
         rr = _lex_word(ll)
         if rr.upper() != 'SOA':
             new_text += raw_line
-            continue # It's not an soa, keep going.
+            continue  # It's not an soa, keep going.
 
         isSOA = True
         _lex_ws(ll)
@@ -255,8 +266,8 @@ def _str_increment_soa(text):
         new_text += raw_line.replace(serial, str(int(serial) + 1))
         done = True
 
-
     return new_text
+
 
 def _lex_word(ll):
     word = ''
@@ -274,6 +285,7 @@ def _lex_word(ll):
         else:
             word = word + c
     return word
+
 
 def _lex_ws(ll):
     while True:

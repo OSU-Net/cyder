@@ -27,6 +27,7 @@ import pdb
 
 API_VERSION = '1'
 
+
 class KVAPITests(object):
     object_list_url = "/mozdns/api/v{0}_dns/{1}/"
     object_url = "/mozdns/api/v{0}_dns/{1}/{2}/"
@@ -66,7 +67,7 @@ class KVAPITests(object):
         resp, post_data = self.generic_create(self.post_data())
         _, _, (_, new_object_url) = resp.items()
         update_resp, patch_data = self.generic_update(new_object_url,
-                self.post_data())
+                                                      self.post_data())
 
         # Now make sure the data used to patch is sticking to the model.
         patch_resp = self.api_client.get(new_object_url, format='json')
@@ -79,7 +80,7 @@ class KVAPITests(object):
         obj_count = self.test_type.objects.count()
         resp, post_data = self.generic_create(self.post_data())
         _, _, (_, new_object_url) = resp.items()
-        self.assertEqual(self.test_type.objects.count(), obj_count+1)
+        self.assertEqual(self.test_type.objects.count(), obj_count + 1)
         resp = self.api_client.delete(new_object_url, format='json')
         self.assertHttpAccepted(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -87,18 +88,17 @@ class KVAPITests(object):
     def generic_update(self, patch_url, patch_data):
         obj_count = self.test_type.objects.count()
         resp = self.api_client.patch(patch_url, format='json',
-                    data=patch_data)
+                                     data=patch_data)
         self.assertHttpAccepted(resp)
         # Verify a no new object has been added.
         self.assertEqual(self.test_type.objects.count(), obj_count)
         return resp, patch_data
 
-
     def generic_create(self, post_data):
         # Check how many are there first.
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
@@ -109,7 +109,7 @@ class KVAPITests(object):
         post_data = self.bad_post_data()
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -121,7 +121,7 @@ class KVAPITests(object):
         _, _, (_, new_object_url) = resp.items()
 
         resp = self.api_client.patch(new_object_url, format='json',
-                data=self.bad_post_data())
+                                     data=self.bad_post_data())
         self.assertHttpBadRequest(resp)
 
         new_resp = self.api_client.get(new_object_url, format='json')

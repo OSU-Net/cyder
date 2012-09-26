@@ -10,14 +10,20 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'Network'
         db.create_table('network', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('id', self.gf(
+                'django.db.models.fields.AutoField')(primary_key=True)),
             ('vlan', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['vlan.Vlan'], null=True, on_delete=models.SET_NULL, blank=True)),
             ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['site.Site'], null=True, on_delete=models.SET_NULL, blank=True)),
-            ('ip_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('ip_upper', self.gf('django.db.models.fields.BigIntegerField')(blank=True)),
-            ('ip_lower', self.gf('django.db.models.fields.BigIntegerField')(blank=True)),
-            ('network_str', self.gf('django.db.models.fields.CharField')(max_length=39)),
-            ('prefixlen', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('ip_type', self.gf(
+                'django.db.models.fields.CharField')(max_length=1)),
+            ('ip_upper', self.gf(
+                'django.db.models.fields.BigIntegerField')(blank=True)),
+            ('ip_lower', self.gf(
+                'django.db.models.fields.BigIntegerField')(blank=True)),
+            ('network_str', self.gf(
+                'django.db.models.fields.CharField')(max_length=39)),
+            ('prefixlen', self.gf(
+                'django.db.models.fields.PositiveIntegerField')()),
         ))
         db.send_create_signal('network', ['Network'])
 
@@ -26,19 +32,25 @@ class Migration(SchemaMigration):
 
         # Adding model 'NetworkKeyValue'
         db.create_table('network_key_value', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('key', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('is_option', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('is_statement', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('has_validator', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('network', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['network.Network'])),
+            ('id', self.gf(
+                'django.db.models.fields.AutoField')(primary_key=True)),
+            ('key', self.gf(
+                'django.db.models.fields.CharField')(max_length=255)),
+            ('value', self.gf(
+                'django.db.models.fields.CharField')(max_length=255)),
+            ('is_option', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
+            ('is_statement', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
+            ('has_validator', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
+            ('network', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['network.Network'])),
         ))
         db.send_create_signal('network', ['NetworkKeyValue'])
 
         # Adding unique constraint on 'NetworkKeyValue', fields ['key', 'value']
         db.create_unique('network_key_value', ['key', 'value'])
-
 
     def backwards(self, orm):
         # Removing unique constraint on 'NetworkKeyValue', fields ['key', 'value']
@@ -52,7 +64,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'NetworkKeyValue'
         db.delete_table('network_key_value')
-
 
     models = {
         'network.network': {

@@ -8,6 +8,7 @@ from models import Truth, KeyValue
 from django.test import TestCase
 from django.test.client import Client
 
+
 class TruthTest(TestCase):
     fixtures = ['testdata.json']
 
@@ -26,7 +27,7 @@ class TruthTest(TestCase):
 
         resp = self.client.get('/truth/create/', follow=True)
         self.assertEqual(200, resp.status_code)
-        resp = self.client.post('/en-US/truth/create/', {'name':self.key_name, 'description':self.key_description}, follow=True)
+        resp = self.client.post('/en-US/truth/create/', {'name': self.key_name, 'description': self.key_description}, follow=True)
         self.assertEqual(200, resp.status_code)
         kv = Truth.objects.get(name=self.key_name)
         self.assertEqual(kv.name, self.key_name)
@@ -34,7 +35,7 @@ class TruthTest(TestCase):
 
     def test_update(self):
         update_url = '/en-US/truth/edit/1/'
-        resp = self.client.post(update_url, {'name':self.new_key_name, 'description':self.new_key_description}, follow=True)
+        resp = self.client.post(update_url, {'name': self.new_key_name, 'description': self.new_key_description}, follow=True)
         self.assertEqual(200, resp.status_code)
         kv = Truth.objects.get(id=1)
         self.assertEqual(kv.name, self.new_key_name)
@@ -43,7 +44,7 @@ class TruthTest(TestCase):
     def test_delete(self):
         resp = self.client.post('/en-US/truth/delete/1/', follow=True)
         self.assertEqual(200, resp.status_code)
-        resp = self.client.get('/truth/create/1/', {'name':self.key_name, 'description':self.key_description}, follow=True)
+        resp = self.client.get('/truth/create/1/', {'name': self.key_name, 'description': self.key_description}, follow=True)
         self.assertEqual(404, resp.status_code)
         try:
             kv = Truth.objects.get(id=1)

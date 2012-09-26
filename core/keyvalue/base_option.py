@@ -27,7 +27,7 @@ class CommonOption(KeyValue):
         See allow.
         """
         choices = ["unknown-clients", "bootp", "booting", "duplicates",
-                "declines", "client-updates", "dynamic bootp clients"]
+                   "declines", "client-updates", "dynamic bootp clients"]
         self.is_statement = True
         self.is_option = False
         self.has_validator = True
@@ -38,7 +38,7 @@ class CommonOption(KeyValue):
                 continue
             else:
                 raise ValidationError("Invalid option ({0}) parameter "
-                    "({1})'".format(self.key, self.value))
+                                      "({1})'".format(self.key, self.value))
 
     def _aa_allow(self):
         """
@@ -71,7 +71,7 @@ class CommonOption(KeyValue):
         """
 
         choices = ["unknown-clients", "bootp", "booting", "duplicates",
-                "declines", "client-updates", "dynamic bootp clients"]
+                   "declines", "client-updates", "dynamic bootp clients"]
         self.is_statement = True
         self.is_option = False
         self.has_validator = True
@@ -82,7 +82,7 @@ class CommonOption(KeyValue):
                 continue
             else:
                 raise ValidationError("Invalid option ({0}) parameter "
-                    "({1})'".format(self.key, self.value))
+                                      "({1})'".format(self.key, self.value))
 
     def _routers(self, ip_type):
         """
@@ -160,11 +160,11 @@ class CommonOption(KeyValue):
             name = name.strip(' ')
             if not name:
                 raise ValidationError("Each name needs to be a non empty "
-                    "domain name surrounded by \"\"")
+                                      "domain name surrounded by \"\"")
 
             if name[0] != '"' and name[len(name) - 1] != '"':
                 raise ValidationError("Each name needs to be a non empty "
-                    "domain name surrounded by \"\"")
+                                      "domain name surrounded by \"\"")
             validate_name(name.strip('"'))
 
     def _ip_list(self, ip_type):
@@ -183,7 +183,7 @@ class CommonOption(KeyValue):
                     raise NotImplemented
             except ipaddr.AddressValueError, e:
                 raise ValidationError("Invalid option ({0}) parameter "
-                    "({1})'".format(self.key, router))
+                                      "({1})'".format(self.key, router))
 
     def _single_ip(self, ip_type):
         ip = self._get_value()
@@ -194,4 +194,4 @@ class CommonOption(KeyValue):
                 raise NotImplemented
         except ipaddr.AddressValueError, e:
             raise ValidationError("Invalid option ({0}) parameter "
-                "({1})'".format(self.key, ip))
+                                  "({1})'".format(self.key, ip))

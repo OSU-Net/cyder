@@ -19,15 +19,16 @@ from core.site.models import Site
 
 import pdb
 
+
 class FullNameTests(TestCase):
 
     def test_basic_add_remove1(self):
-        c = Domain(name = 'com')
+        c = Domain(name='com')
         c.save()
         self.assertFalse(c.purgeable)
-        f_c = Domain(name = 'foo.com')
+        f_c = Domain(name='foo.com')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                comment="foo.zfoo.comom")
+                                         comment="foo.zfoo.comom")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -38,10 +39,12 @@ class FullNameTests(TestCase):
         self.assertTrue(the_domain.purgeable)
         self.assertEqual(the_domain.master_domain.name, "y.z.foo.com")
         self.assertTrue(the_domain.master_domain.purgeable)
-        self.assertEqual(the_domain.master_domain.master_domain.name, "z.foo.com")
+        self.assertEqual(
+            the_domain.master_domain.master_domain.name, "z.foo.com")
         self.assertTrue(the_domain.master_domain.master_domain.purgeable)
         self.assertEqual(the_domain.master_domain.master_domain.master_domain.name, "foo.com")
-        self.assertFalse(the_domain.master_domain.master_domain.master_domain.purgeable)
+        self.assertFalse(
+            the_domain.master_domain.master_domain.master_domain.purgeable)
 
         # Now call prune tree one the_domain
         self.assertTrue(prune_tree(the_domain))
@@ -60,12 +63,12 @@ class FullNameTests(TestCase):
     def test_basic_add_remove2(self):
         # MAke sure that if a domain is set to not purgeable the prune stops at
         # that domain.
-        c = Domain(name = 'edu')
+        c = Domain(name='edu')
         c.save()
         self.assertFalse(c.purgeable)
-        f_c = Domain(name = 'foo.edu')
+        f_c = Domain(name='foo.edu')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-            comment="foo.edu")
+                                         comment="foo.edu")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -76,10 +79,12 @@ class FullNameTests(TestCase):
         self.assertTrue(the_domain.purgeable)
         self.assertEqual(the_domain.master_domain.name, "y.z.foo.edu")
         self.assertTrue(the_domain.master_domain.purgeable)
-        self.assertEqual(the_domain.master_domain.master_domain.name, "z.foo.edu")
+        self.assertEqual(
+            the_domain.master_domain.master_domain.name, "z.foo.edu")
         self.assertTrue(the_domain.master_domain.master_domain.purgeable)
         self.assertEqual(the_domain.master_domain.master_domain.master_domain.name, "foo.edu")
-        self.assertFalse(the_domain.master_domain.master_domain.master_domain.purgeable)
+        self.assertFalse(
+            the_domain.master_domain.master_domain.master_domain.purgeable)
 
         # See if purgeable stops prune
         the_domain.purgeable = False
@@ -114,12 +119,12 @@ class FullNameTests(TestCase):
     def test_basic_add_remove3(self):
         # MAke sure that if a domain is set to not purgeable the prune stops at
         # that domain when a record exists in a domain
-        c = Domain(name = 'foo')
+        c = Domain(name='foo')
         c.save()
         self.assertFalse(c.purgeable)
-        f_c = Domain(name = 'foo.foo')
+        f_c = Domain(name='foo.foo')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                comment="foo.foo")
+                                         comment="foo.foo")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -143,12 +148,12 @@ class FullNameTests(TestCase):
     def test_basic_add_remove4(self):
         # Move a record down the tree testing prune's ability to not delete
         # stuff.
-        c = Domain(name = 'goo')
+        c = Domain(name='goo')
         c.save()
         self.assertFalse(c.purgeable)
-        f_c = Domain(name = 'foo.goo')
+        f_c = Domain(name='foo.goo')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                comment="foo.goo")
+                                         comment="foo.goo")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -192,12 +197,12 @@ class FullNameTests(TestCase):
 
     def test_basic_add_remove5(self):
         # Make sure all record types block
-        c = Domain(name = 'foo22')
+        c = Domain(name='foo22')
         c.save()
         self.assertFalse(c.purgeable)
-        f_c = Domain(name = 'foo.foo22')
+        f_c = Domain(name='foo.foo22')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                comment="foo.foo22")
+                                         comment="foo.foo22")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -211,7 +216,7 @@ class FullNameTests(TestCase):
 
         label, the_domain = ensure_label_domain(fqdn)
         addr = AddressRecord(label=label, domain=the_domain,
-                ip_type='4', ip_str="10.2.3.4")
+                             ip_type='4', ip_str="10.2.3.4")
         addr.save()
         self.assertFalse(prune_tree(the_domain))
         addr.delete()
@@ -229,20 +234,21 @@ class FullNameTests(TestCase):
         ns.delete()
 
         label, the_domain = ensure_label_domain(fqdn)
-        srv = SRV(label='_'+label, domain=the_domain, target="foo", priority=4,
-                weight=4, port=34)
+        srv = SRV(
+            label='_' + label, domain=the_domain, target="foo", priority=4,
+            weight=4, port=34)
         srv.save()
         self.assertFalse(prune_tree(the_domain))
         srv.delete()
 
     def test_basic_add_remove6(self):
         # Make sure CNAME record block
-        c = Domain(name = 'foo1')
+        c = Domain(name='foo1')
         c.save()
         self.assertFalse(c.purgeable)
-        f_c = Domain(name = 'foo.foo1')
+        f_c = Domain(name='foo.foo1')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                comment="foo.foo1")
+                                         comment="foo.foo1")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)

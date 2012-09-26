@@ -27,10 +27,12 @@ class GenericViewTests(object):
         # Make a generic test "object". This object is called self.test_obj and is used to test datail and
         # update views
         server = "random"
-        self.test_obj, create = Nameserver.objects.get_or_create(server=server, domain= self.domain)
+        self.test_obj, create = Nameserver.objects.get_or_create(
+            server=server, domain= self.domain)
         while not create:
             server = "a"+server
-            self.test_obj, create = Nameserver.objects.get_or_create(server=server, domain= self.domain)
+            self.test_obj, create = Nameserver.objects.get_or_create(
+                server=server, domain= self.domain)
 
     This function is used to generate valid data to test views that require POST data.
 
@@ -40,25 +42,26 @@ class GenericViewTests(object):
     """
     def build_all_tests(self):
         return (
-                self.build_get_object_delete(),\
-                self.build_get_object_details(),\
-                self.build_post_object_update(),\
-                self.build_get_object_update(),\
-                self.build_post_create_in_domain(),\
-                self.build_get_create_in_domain(),\
-                self.build_post_create(),\
-                self.build_base_mozdns_app(),\
-                self.build_get_create(),\
-                lambda junk: True \
-                )
+            self.build_get_object_delete(),
+            self.build_get_object_details(),
+            self.build_post_object_update(),
+            self.build_get_object_update(),
+            self.build_post_create_in_domain(),
+            self.build_get_create_in_domain(),
+            self.build_post_create(),
+            self.build_base_mozdns_app(),
+            self.build_get_create(),
+            lambda junk: True
+        )
 
     def build_base_mozdns_app(self):
         """
         ex: url(r'^/mozdns/domain/$', DomainListView.as_view()),
         """
         def test_base_mozdns_app(self):
-            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/" % (self.url_slug),
-                    follow=True)
+            resp = self.client.get(
+                settings.MOZDNS_BASE_URL + "/%s/" % (self.url_slug),
+                follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_base_mozdns_app
 
@@ -67,15 +70,15 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/create/$', DomainCreateView.as_view()),
         """
         def test_get_create(self):
-            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/create/" %
-                    (self.url_slug), follow=True)
+            resp = self.client.get(settings.MOZDNS_BASE_URL + "/%s/create/" %
+                                   (self.url_slug), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_create
 
     def build_post_create(self):
         def test_post_create(self):
-            resp = self.client.post(settings.MOZDNS_BASE_URL+"/%s/create/" %
-                    (self.url_slug), self.post_data(), follow=True)
+            resp = self.client.post(settings.MOZDNS_BASE_URL + "/%s/create/" %
+                                    (self.url_slug), self.post_data(), follow=True)
             self.assertTrue(resp.status_code in (302, 200))
         return test_post_create
 
@@ -84,16 +87,17 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<domain>[\w-]+)/create$', DomainCreateView.as_view()),
         """
         def test_get_create_in_domain(self):
-            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/create/" %
-                    (self.url_slug, self.domain.pk), follow=True)
+            resp = self.client.get(settings.MOZDNS_BASE_URL + "/%s/%s/create/" %
+                                   (self.url_slug, self.domain.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_create_in_domain
 
     def build_post_create_in_domain(self):
         def test_post_create_in_domain(self):
-            resp = self.client.post(settings.MOZDNS_BASE_URL+"/%s/%s/create/" %
-                    (self.url_slug, self.domain.pk), self.post_data(),
-                    follow=True)
+            resp = self.client.post(settings.MOZDNS_BASE_URL + "/%s/%s/create/" %
+                                    (self.url_slug,
+                                     self.domain.pk), self.post_data(),
+                                    follow=True)
             self.assertTrue(resp.status_code in (302, 200))
         return test_post_create_in_domain
 
@@ -102,17 +106,17 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<pk>[\w-]+)/update$', DomainUpdateView.as_view()),
         """
         def test_get_object_update(self):
-            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/update/" %
-                    (self.url_slug, self.test_obj.pk), follow=True)
+            resp = self.client.get(settings.MOZDNS_BASE_URL + "/%s/%s/update/" %
+                                   (self.url_slug, self.test_obj.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_object_update
 
-
     def build_post_object_update(self):
         def test_post_object_update(self):
-            resp = self.client.post(settings.MOZDNS_BASE_URL+"/%s/%s/update/" %
-                    (self.url_slug,self.test_obj.pk), self.post_data(),
-                        follow=True)
+            resp = self.client.post(settings.MOZDNS_BASE_URL + "/%s/%s/update/" %
+                                    (self.url_slug,
+                                     self.test_obj.pk), self.post_data(),
+                                    follow=True)
             self.assertTrue(resp.status_code in (302, 200))
             pass
         return test_post_object_update
@@ -122,8 +126,9 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<pk>[\w-]+)/$', DomainDetailView.as_view()),
         """
         def test_get_object_details(self):
-            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/" % (self.url_slug,
-                self.test_obj.pk), follow=True)
+            resp = self.client.get(
+                settings.MOZDNS_BASE_URL + "/%s/%s/" % (self.url_slug,
+                                                        self.test_obj.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_object_details
 
@@ -132,20 +137,22 @@ class GenericViewTests(object):
         ex: url(r'^/mozdns/domain/(?P<pk>[\w-]+)/delete$', DomainDeleteView.as_view())
         """
         def test_get_object_delete(self):
-            resp = self.client.get(settings.MOZDNS_BASE_URL+"/%s/%s/delete/" %
-                    (self.url_slug, self.test_obj.pk), follow=True)
+            resp = self.client.get(settings.MOZDNS_BASE_URL + "/%s/%s/delete/" %
+                                   (self.url_slug, self.test_obj.pk), follow=True)
             self.assertEqual(resp.status_code, 200)
             pass
         return test_get_object_delete
+
 
 def random_label():
     """
     Utility function to generate a random *valid* label.
     """
     label = ''
-    for i in range(random.randint(5,30)):
-        label += string.letters[random.randint(0,len(string.letters)-1)]
+    for i in range(random.randint(5, 30)):
+        label += string.letters[random.randint(0, len(string.letters) - 1)]
     return label
+
 
 def random_byte():
     """

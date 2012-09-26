@@ -8,6 +8,8 @@ import pprint
 pp = pprint.PrettyPrinter(indent=2)
 
 nic_nums = re.compile("^nic\.(\d+)\..*\.(\d+)$")
+
+
 class Interface(object):
     mac = None
     hostname = None
@@ -17,7 +19,7 @@ class Interface(object):
 
     def __init__(self, system, sub_nic):
         self.system = system
-        self._nic = sub_nic # Just in case we need it for something
+        self._nic = sub_nic  # Just in case we need it for something
         tmp = nic_nums.match(sub_nic[0].key)
         if tmp:
             self.primary = tmp.group(1)
@@ -60,7 +62,7 @@ class Interface(object):
 
     def __str__(self):
         return "nic.{0}.{1} IP: {2} Hostname: {3}".format(self.primary,
-                self.alias, self.ips, self.hostname)
+                                                          self.alias, self.ips, self.hostname)
 
     def __repr__(self):
         return "<Interface: {0}>".format(self)
@@ -73,6 +75,7 @@ is_dns_auto_hostname_key = re.compile("^nic\.\d+\.dns_auto_hostname\.\d+$")
 is_dns_has_conflict_key = re.compile("^nic\.\d+\.dns_has_conflict\.\d+$")
 is_some_key = re.compile("^nic\.\d+\.(.*)\.\d+$")
 
+
 def build_nic(sub_nic):
     intr = Interface(sub_nic[0].system, sub_nic)
     for nic_data in sub_nic:
@@ -80,8 +83,8 @@ def build_nic(sub_nic):
             if intr.mac is not None:
                 log("!" * 20, WARNING)
                 log("nic with more than one mac in system "
-                        "{0} (https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
-                        .format(intr.system, intr.system.pk), WARNING)
+                    "{0} (https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
+                    .format(intr.system, intr.system.pk), WARNING)
                 log(pp.pformat(sub_nic), WARNING)
             intr.mac = nic_data.value
             intr.keys.append('mac')
@@ -90,8 +93,8 @@ def build_nic(sub_nic):
             if intr.hostname is not None:
                 log("!" * 20, WARNING)
                 log("nic with more than one hostname in system "
-                        "{0} (https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
-                        .format(intr.system, intr.system.pk), WARNING)
+                    "{0} (https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
+                    .format(intr.system, intr.system.pk), WARNING)
                 log(pp.pformat(sub_nic), WARNING)
             intr.hostname = nic_data.value
             intr.keys.append('hostname')
@@ -117,7 +120,7 @@ def build_nic(sub_nic):
         if tmp:
             if hasattr(intr, tmp.group(1)):
                 setattr(intr, tmp.group(1), [nic_data.value,
-                    getattr(intr, tmp.group(1))])
+                                             getattr(intr, tmp.group(1))])
                 intr.keys.append(tmp.group(s))
 
             else:
@@ -129,6 +132,7 @@ def build_nic(sub_nic):
         intr.hostname = intr.system.hostname
 
     return intr
+
 
 def get_nic_objs():
     """
@@ -153,6 +157,7 @@ def get_nic_objs():
                     continue
                 interfaces.append(interface)
     return interfaces
+
 
 def build_nics_from_system(system):
     """
@@ -187,6 +192,7 @@ def build_nics_from_system(system):
                 continue
             interfaces.append(interface)
     return interfaces
+
 
 def get_dns_data():
     dns_data, nic_objs = _get_dns_data()
@@ -239,7 +245,7 @@ def _build_primary_nics(all_nics):
         if not isinstance(nic.key, basestring):
             log("=" * 15, DEBUG)
             log("System {0} and NIC {1} not in valid format.  Value is not "
-                    "type basestring Skipping.".format(nic.system, nic), DEBUG)
+                "type basestring Skipping.".format(nic.system, nic), DEBUG)
             log(print_system(nic.system), DEBUG)
             continue
         possible_primary_nic = get_nic_primary_number.match(nic.key)

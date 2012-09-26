@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack,SystemStatus,NetworkAdapter,KeyValue
+from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue
 from truth.models import Truth, KeyValue as TruthKeyValue
 from dhcp.DHCP import DHCP as DHCPInterface
 from dhcp.models import DHCP
@@ -13,8 +13,10 @@ except:
 from django.test.client import Client
 from django.conf import settings
 
+
 class TruthHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
+
     def create(self, request, key_value_id=None):
         n = KeyValue()
         if 'truth_id' in request.POST:
@@ -34,7 +36,7 @@ class TruthHandler(BaseHandler):
         return resp
 
     def update(self, request, key_value_id=None):
-        n = KeyValue.objects.get(id=key_value_id,key=request.POST['key'])
+        n = KeyValue.objects.get(id=key_value_id, key=request.POST['key'])
         if 'system_id' in request.POST:
             system = System.objects.get(id=request.POST['system_id'])
             n.system = system
@@ -48,6 +50,7 @@ class TruthHandler(BaseHandler):
             resp = rc.NOT_FOUND
             resp.write('Unable to Create Key/Value Pair')
         return resp
+
     def read(self, request, key_value_id=None):
         base = Truth.expanded_objects
         if 'key' in request.GET:
@@ -72,6 +75,7 @@ class TruthHandler(BaseHandler):
                 m = MacroExpansion(matches.group(1))
                 row.value = m.output()
         return base
+
     def delete(self, request, key_value_id=None):
         try:
             n = KeyValue.objects.get(id=key_value_id)

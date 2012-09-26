@@ -13,6 +13,7 @@ from django.conf import settings
 
 import pdb
 
+
 @receiver(m2m_changed)
 def views_handler(sender, **kwargs):
     """ This function catches any changes to a manymany relationship and just nukes
@@ -37,6 +38,7 @@ def views_handler(sender, **kwargs):
             instance.views.remove(View.objects.get(name="public"))
         elif instance.ip_type == '6' and is_rfc4193(instance.ip_str):
             instance.views.remove(View.objects.get(name="public"))
+
 
 class MozdnsRecord(models.Model, ObjectUrlMixin):
     """
@@ -73,21 +75,21 @@ class MozdnsRecord(models.Model, ObjectUrlMixin):
     """
 
     domain = models.ForeignKey(Domain, null=False, help_text="FQDN of the "
-                "domain after the short hostname. "
-                "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
+                               "domain after the short hostname. "
+                               "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
     # "The length of any one label is limited to between 1 and 63 octets."
     # RFC218
     label = models.CharField(max_length=63, blank=True, null=True,
-                validators=[validate_first_label],
-                help_text="Short name of the fqdn")
+                             validators=[validate_first_label],
+                             help_text="Short name of the fqdn")
     fqdn = models.CharField(max_length=255, blank=True, null=True,
-                validators=[validate_name], db_index=True)
+                            validators=[validate_name], db_index=True)
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
-            validators=[validate_ttl],
-            help_text="Time to Live of this record")
+                                      validators=[validate_ttl],
+                                      help_text="Time to Live of this record")
     views = models.ManyToManyField(View, blank=True)
     comment = models.CharField(max_length=1000, blank=True, null=True,
-                help_text="Comments about this record.")
+                               help_text="Comments about this record.")
     # fqdn = label + domain.name <--- see set_fqdn
 
     class Meta:
@@ -173,11 +175,12 @@ def check_for_cname(record):
     CNAME = mozdns.cname.models.CNAME
     if hasattr(record, 'label'):
         if CNAME.objects.filter(domain=record.domain,
-                label=record.label).exists():
+                                label=record.label).exists():
             raise ValidationError("A CNAME with this name already exists.")
     else:
         if CNAME.objects.filter(label='', domain=record.domain).exists():
             raise ValidationError("A CNAME with this name already exists.")
+
 
 def check_for_delegation(record):
     """If an object's domain is delegated it should not be able to

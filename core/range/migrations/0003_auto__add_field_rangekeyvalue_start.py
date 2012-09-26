@@ -10,14 +10,13 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'RangeKeyValue.start'
         db.add_column('range_key_value', 'start',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(null=True),
+                      self.gf('django.db.models.fields.PositiveIntegerField')(
+                          null=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'RangeKeyValue.start'
         db.delete_column('range_key_value', 'start')
-
 
     models = {
         'network.network': {

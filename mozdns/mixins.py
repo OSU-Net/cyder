@@ -33,7 +33,7 @@ class ObjectUrlMixin(object):
 
     def get_fancy_edit_url(self):
         return settings.MOZDNS_BASE_URL + _("/record/"
-            "?record_type={0}&record_pk={1}").format(self.rdtype, self.pk)
+                                            "?record_type={0}&record_pk={1}").format(self.rdtype, self.pk)
 
     def get_delete_url(self):
         """

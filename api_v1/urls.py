@@ -20,18 +20,29 @@ system_rack_handler = Resource(SystemRackHandler)
 system_status_handler = Resource(SystemStatusHandler)
 
 urlpatterns = patterns('',
-    url(r'^dhcp/(?P<dhcp_scope>[^/]+)/(?P<dhcp_action>[^/]+)', cached_resource(dhcp_handler)),
-    url(r'^dhcp/', cached_resource(dhcp_handler)),
-    url(r'^reverse_dns/(?P<reverse_dns_zone>[^/]+)/(?P<reverse_dns_action>[^/]+)', cached_resource(reverse_dns_handler)),
-    url(r'^reverse_dns/', cached_resource(reverse_dns_handler)),
-    url(r'^system/(?P<system_id>[^/]+)/', cached_resource(systems_handler)),
-    url(r'^systems/', cached_resource(systems_handler)),
-    url(r'^systemrack/(?P<system_rack_id>[^/]+)/', cached_resource(system_rack_handler)),
-    url(r'^systemrack/', cached_resource(system_rack_handler)),
-    url(r'^systemstatus/(?P<system_status_id>[^/]+)/', cached_resource(system_status_handler)),
-    url(r'^systemstatus/', cached_resource(system_status_handler)),
-    url(r'^keyvalue/(?P<key_value_id>[^/]+)/', cached_resource(keyvalue_handler)),
-    url(r'^keyvalue/', cached_resource(keyvalue_handler)),
-    url(r'^networkadapter/(?P<network_adapter_id>[^/]+)/', cached_resource(network_adapter_handler)),
-    url(r'^networkadapter/', cached_resource(network_adapter_handler)),
-      )
+                       url(
+                           r'^dhcp/(?P<dhcp_scope>[^/]+)/(?P<dhcp_action>[^/]+)',
+                       cached_resource(dhcp_handler)),
+                       url(r'^dhcp/', cached_resource(dhcp_handler)),
+                       url(r'^reverse_dns/(?P<reverse_dns_zone>[^/]+)/(?P<reverse_dns_action>[^/]+)', cached_resource(reverse_dns_handler)),
+                       url(r'^reverse_dns/',
+                           cached_resource(reverse_dns_handler)),
+                       url(r'^system/(?P<system_id>[^/]+)/',
+                           cached_resource(systems_handler)),
+                       url(r'^systems/', cached_resource(systems_handler)),
+                       url(r'^systemrack/(?P<system_rack_id>[^/]+)/', cached_resource(
+                           system_rack_handler)),
+                       url(r'^systemrack/',
+                           cached_resource(system_rack_handler)),
+                       url(r'^systemstatus/(?P<system_status_id>[^/]+)/', cached_resource(
+                           system_status_handler)),
+                       url(r'^systemstatus/',
+                           cached_resource(system_status_handler)),
+                       url(r'^keyvalue/(?P<key_value_id>[^/]+)/', cached_resource(
+                           keyvalue_handler)),
+                       url(r'^keyvalue/', cached_resource(keyvalue_handler)),
+                       url(r'^networkadapter/(?P<network_adapter_id>[^/]+)/',
+                           cached_resource(network_adapter_handler)),
+                       url(r'^networkadapter/',
+                           cached_resource(network_adapter_handler)),
+                       )

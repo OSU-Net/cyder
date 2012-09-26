@@ -23,11 +23,11 @@ class NameserverForm(ModelForm):
             # If it doesn't have glue, it doesn't need it.
             return
         addr_glue = AddressRecord.objects.filter(
-                label=self.instance.glue.label,
-                domain=self.instance.glue.domain)
+            label=self.instance.glue.label,
+            domain=self.instance.glue.domain)
         intr_glue = StaticInterface.objects.filter(
-                label=self.instance.glue.label,
-                domain=self.instance.glue.domain)
+            label=self.instance.glue.label,
+            domain=self.instance.glue.domain)
 
         glue_choices = []
         for glue in addr_glue:
@@ -41,7 +41,7 @@ class NameserverForm(ModelForm):
             initial = "intr_{0}".format(self.instance.glue.pk)
 
         self.fields['glue'] = forms.ChoiceField(choices=glue_choices,
-                initial=initial)
+                                                initial=initial)
 
 
 class NSDelegated(forms.Form):

@@ -3,9 +3,11 @@ from django.db.models import Q
 import ipaddr
 import pdb
 
+
 def get_interfaces_range(start, stop):
     intrs = StaticInterface.objects.filter(ip_upper=0, ip_lower__gte=start,
-            ip_lower__lte=end)
+                                           ip_lower__lte=end)
+
 
 class IPFilterSet(object):
     ipfs = set()
@@ -77,14 +79,14 @@ class IPFilterSet(object):
             # r2 |---------|
             # rx    |------|
             return IPFilter(None, ip_type, r1.start_upper, r1.start_lower,
-                    r2.end_upper, r2.end_lower)
+                            r2.end_upper, r2.end_lower)
         if r1.start < r2.start and r1.end < r2.end:
             # Low                   High
             # r1 |---------|
             # r2    |---------|
             # rx    |------|
             return IPFilter(None, ip_type, r2.start_upper, r2.start_lower,
-                    r1.end_upper, r1.end_lower)
+                            r1.end_upper, r1.end_lower)
 
 
 class IPFilter(object):
@@ -110,7 +112,7 @@ class IPFilter(object):
 
     def compile_Q(self):
         q_filter = Q(ip_upper=start_upper, ip_lower__gte=start_lower,
-                ip_lower__lte=end_lower)
+                     ip_lower__lte=end_lower)
         return q_filter
 
 
@@ -121,8 +123,10 @@ def two_to_four(start, end):
     end_lower = end & (1 << 64) - 1
     return start_upper, start_lower, end_upper, end_lower
 
+
 def two_to_one(upper, lower):
     return long(upper << 64) + long(lower)
+
 
 def four_to_two(start_upper, start_lower, end_upper, end_lower):
     start = start_upper << 64 + start_lower

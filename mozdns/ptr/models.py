@@ -21,12 +21,12 @@ class PTR(Ip, ObjectUrlMixin):
     """
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, validators=[validate_name],
-                help_text="The name that this record points to.")
+                            help_text="The name that this record points to.")
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
-            validators=[validate_ttl])
+                                      validators=[validate_ttl])
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True)
     data_domain = models.ForeignKey(Domain, null=True, blank=True,
-            related_name='ptrs', on_delete=models.SET_NULL)
+                                    related_name='ptrs', on_delete=models.SET_NULL)
     views = models.ManyToManyField(View, blank=True)
     comment = models.CharField(max_length=1000, null=True, blank=True)
 
@@ -38,10 +38,10 @@ class PTR(Ip, ObjectUrlMixin):
 
     def details(self):
         return (
-                    ('Ip', str(self.ip_str)),
-                    ('Record Type', 'PTR'),
-                    ('Name', self.name),
-               )
+            ('Ip', str(self.ip_str)),
+            ('Record Type', 'PTR'),
+            ('Name', self.name),
+        )
 
     class Meta:
         db_table = 'ptr'
@@ -85,9 +85,9 @@ class PTR(Ip, ObjectUrlMixin):
         # We need to check if there is an interface using our ip and name
         # because that interface will generate a ptr record.
         if (StaticInterface.objects.filter(fqdn=self.name,
-            ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()):
+                                           ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()):
             raise ValidationError("An Interface has already used this IP and "
-                "Name.")
+                                  "Name.")
 
     def __str__(self):
         return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.name)
@@ -99,5 +99,3 @@ class PTR(Ip, ObjectUrlMixin):
         """Return the cononical name of this ptr that can be placed in a
         reverse zone file."""
         return ip_to_dns_form(self.ip_str, ip_type=self.ip_type)
-
-

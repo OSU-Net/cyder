@@ -29,14 +29,16 @@ import socket
 class QuerySetManager(models.Manager):
     def get_query_set(self):
         return self.model.QuerySet(self.model)
+
     def __getattr__(self, attr, *args):
         return getattr(self.get_query_set(), attr, *args)
+
 
 class DirtyFieldsMixin(object):
     def __init__(self, *args, **kwargs):
         super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
         post_save.connect(self._reset_state, sender=self.__class__,
-                            dispatch_uid='%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__)
+                          dispatch_uid='%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__)
         self._reset_state()
 
     def _reset_state(self, *args, **kwargs):
@@ -49,9 +51,11 @@ class DirtyFieldsMixin(object):
         new_state = self._as_dict()
         return dict([(key, value) for key, value in self._original_state.iteritems() if value != new_state[key]])
 
+
 class BuildManager(models.Manager):
     def get_query_set(self):
         return super(BuildManager, self).get_query_set().filter(allocation__name='release')
+
 
 class SystemWithRelatedManager(models.Manager):
     def get_query_set(self):
@@ -73,19 +77,25 @@ class Allocation(models.Model):
         db_table = u'allocations'
         ordering = ['name']
 
+
 class ScheduledTask(models.Model):
     task = models.CharField(max_length=255, blank=False, unique=True)
     type = models.CharField(max_length=255, blank=False)
     objects = QuerySetManager()
+
     class QuerySet(QuerySet):
         def delete_all_reverse_dns(self):
             self.filter(type='reverse_dns_zone').delete()
+
         def delete_all_dhcp(self):
             self.filter(type='dhcp').delete()
+
         def get_all_dhcp(self):
             return self.filter(type='dhcp')
+
         def get_all_reverse_dns(self):
             return self.filter(type='reverse_dns_zone')
+
         def get_next_task(self, type=None):
             if type is not None:
                 try:
@@ -94,6 +104,7 @@ class ScheduledTask(models.Model):
                     return None
             else:
                 return None
+
         def get_last_task(self, type=None):
             if type is not None:
                 try:
@@ -102,9 +113,11 @@ class ScheduledTask(models.Model):
                     return None
             else:
                 return None
+
     class Meta:
         db_table = u'scheduled_tasks'
         ordering = ['task']
+
 
 class Contract(models.Model):
     contract_number = models.CharField(max_length=255, blank=True)
@@ -119,6 +132,7 @@ class Contract(models.Model):
     class Meta:
         db_table = u'contracts'
 
+
 class Location(models.Model):
     name = models.CharField(unique=True, max_length=255, blank=True)
     address = models.TextField(blank=True, null=True)
@@ -130,10 +144,13 @@ class Location(models.Model):
     class Meta:
         db_table = u'locations'
         ordering = ['name']
+
+
 class ApiManager(models.Manager):
     def get_query_set(self):
         results = super(ApiManager, self).get_query_set()
         return results
+
 
 class KeyValue(models.Model):
     system = models.ForeignKey('System')
@@ -150,6 +167,7 @@ class KeyValue(models.Model):
 
     def __repr__(self):
         return self.key if self.key else ''
+
     def save(self, *args, **kwargs):
         dirty = False
         schedule_dns = False
@@ -169,13 +187,12 @@ class KeyValue(models.Model):
             # need to schedule dns to be built.
             nic_type = is_nic.groups(0)
             dns_related_types = ('hostname', 'ipv4_address', 'dns_auto_build',
-                    'dns_auto_hostname', 'dns_has_conflict')
+                                 'dns_auto_hostname', 'dns_has_conflict')
             # dns_has_conflict is probably not needed.
             if nic_type and nic_type[0] in dns_related_types:
                 schedule_dns = True
             else:
                 schedule_dns = False
-
 
         if re.match('^nic\.\d+\.mac_address\.\d+$', self.key):
             self.value = validate_mac(self.value)
@@ -198,12 +215,13 @@ class KeyValue(models.Model):
                         # The task already existed.
                         pass
 
-
     class Meta:
         db_table = u'key_value'
 
 # Eventually, should this go in the KV class? Depends on whether other code
 # calls this.
+
+
 def validate_mac(mac):
     """
     Validates a mac address. If the mac is in the form XX-XX-XX-XX-XX-XX this
@@ -214,11 +232,12 @@ def validate_mac(mac):
     :returns: The valid mac address.
     :raises: ValidationError
     """
-    mac = mac.replace('-',':')
+    mac = mac.replace('-', ':')
     if not re.match('^([0-9a-fA-F]{2}(:|$)){6}$', mac):
         raise ValidationError("Please enter a valid Mac Address in the form "
-                                "XX:XX:XX:XX:XX:XX")
+                              "XX:XX:XX:XX:XX:XX")
     return mac
+
 
 class NetworkAdapter(models.Model):
     system_id = models.IntegerField()
@@ -234,7 +253,7 @@ class NetworkAdapter(models.Model):
     switch_id = models.IntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.full_clean() # Calls field.clean() on all fields.
+        self.full_clean()  # Calls field.clean() on all fields.
         super(NetworkAdapter, self).save(*args, **kwargs)
 
     def get_system_host_name(self):
@@ -244,14 +263,18 @@ class NetworkAdapter(models.Model):
                 return system.hostname
         else:
             return ''
+
     class Meta:
         db_table = u'network_adapters'
+
 
 class Mac(models.Model):
     system = models.ForeignKey('System')
     mac = models.CharField(unique=True, max_length=17)
+
     class Meta:
         db_table = u'macs'
+
 
 class OperatingSystem(models.Model):
     name = models.CharField(max_length=255, blank=True)
@@ -263,6 +286,7 @@ class OperatingSystem(models.Model):
     class Meta:
         db_table = u'operating_systems'
         ordering = ['name', 'version']
+
 
 class ServerModel(models.Model):
     vendor = models.CharField(max_length=255, blank=True)
@@ -276,6 +300,7 @@ class ServerModel(models.Model):
     class Meta:
         db_table = u'server_models'
         ordering = ['vendor', 'model']
+
 
 class SystemRack(models.Model):
     name = models.CharField(max_length=255, blank=True)
@@ -305,10 +330,12 @@ class SystemType(models.Model):
     class Meta:
         db_table = u'system_types'
 
+
 class SystemStatus(models.Model):
     status = models.CharField(max_length=255, blank=True)
     color = models.CharField(max_length=255, blank=True)
     color_code = models.CharField(max_length=255, blank=True)
+
     def __unicode__(self):
         return self.status
 
@@ -317,16 +344,16 @@ class SystemStatus(models.Model):
         ordering = ['status']
 
 
-
 class System(DirtyFieldsMixin, models.Model):
 
     YES_NO_CHOICES = (
-    (0, 'No'),
-    (1, 'Yes'),
+        (0, 'No'),
+        (1, 'Yes'),
     )
     hostname = models.CharField(unique=True, max_length=255)
     serial = models.CharField(max_length=255, blank=True, null=True)
-    operating_system = models.ForeignKey('OperatingSystem', blank=True, null=True)
+    operating_system = models.ForeignKey(
+        'OperatingSystem', blank=True, null=True)
     server_model = models.ForeignKey('ServerModel', blank=True, null=True)
     created_on = models.DateTimeField(null=True, blank=True)
     updated_on = models.DateTimeField(null=True, blank=True)
@@ -336,7 +363,8 @@ class System(DirtyFieldsMixin, models.Model):
     licenses = models.TextField(blank=True, null=True)
     allocation = models.ForeignKey('Allocation', blank=True, null=True)
     system_rack = models.ForeignKey('SystemRack', blank=True, null=True)
-    rack_order = models.DecimalField(null=True, blank=True, max_digits=6, decimal_places=2)
+    rack_order = models.DecimalField(
+        null=True, blank=True, max_digits=6, decimal_places=2)
     switch_ports = models.CharField(max_length=255, blank=True, null=True)
     patch_panel_port = models.CharField(max_length=255, blank=True, null=True)
     oob_switch_port = models.CharField(max_length=255, blank=True, null=True)
@@ -345,17 +373,23 @@ class System(DirtyFieldsMixin, models.Model):
     system_status = models.ForeignKey('SystemStatus', blank=True, null=True)
     change_password = models.DateTimeField(null=True, blank=True)
     ram = models.CharField(max_length=255, blank=True, null=True)
-    is_dhcp_server = models.IntegerField(choices=YES_NO_CHOICES, blank=True, null=True)
-    is_dns_server = models.IntegerField(choices=YES_NO_CHOICES, blank=True, null=True)
-    is_puppet_server = models.IntegerField(choices=YES_NO_CHOICES, blank=True, null=True)
-    is_nagios_server = models.IntegerField(choices=YES_NO_CHOICES, blank=True, null=True)
-    is_switch = models.IntegerField(choices=YES_NO_CHOICES, blank=True, null=True)
+    is_dhcp_server = models.IntegerField(
+        choices=YES_NO_CHOICES, blank=True, null=True)
+    is_dns_server = models.IntegerField(
+        choices=YES_NO_CHOICES, blank=True, null=True)
+    is_puppet_server = models.IntegerField(
+        choices=YES_NO_CHOICES, blank=True, null=True)
+    is_nagios_server = models.IntegerField(
+        choices=YES_NO_CHOICES, blank=True, null=True)
+    is_switch = models.IntegerField(
+        choices=YES_NO_CHOICES, blank=True, null=True)
     #network_adapter = models.ForeignKey('NetworkAdapter', blank=True, null=True)
 
     @property
     def primary_ip(self):
         try:
-            first_ip = self.keyvalue_set.filter(key__contains='ipv4_address').order_by('key')[0].value
+            first_ip = self.keyvalue_set.filter(
+                key__contains='ipv4_address').order_by('key')[0].value
             return first_ip
         except:
             return None
@@ -377,7 +411,6 @@ class System(DirtyFieldsMixin, models.Model):
                     intr.mac = mac_address
                 intr.save()
         return True
-                
 
         """
             method to update a netwrok adapter
@@ -397,14 +430,14 @@ class System(DirtyFieldsMixin, models.Model):
             :type adapter_name: str
             :return: True on deletion, exception raid if not exists
         """
-        adapter_type, primary, alias = SystemResource.extract_nic_attrs(adapter_name)
+        adapter_type, primary, alias = SystemResource.extract_nic_attrs(
+            adapter_name)
         #self.staticinterface_set.get(type = adapter_type, primary = primary, alias = alias).delete()
         for i in self.staticinterface_set.all():
             i.update_attrs()
             if i.attrs.interface_type == adapter_type and i.attrs.primary == primary and i.attrs.alias == alias:
                 i.delete()
         return True
-
 
     def get_adapters(self):
         """
@@ -463,10 +496,12 @@ class System(DirtyFieldsMixin, models.Model):
         ret['num'] = None
         ret['dhcp_scope'] = None
         ret['name'] = 'nic0'
-        key_value = self.keyvalue_set.filter(key__startswith='nic', key__icontains='mac_address')[0]
+        key_value = self.keyvalue_set.filter(
+            key__startswith='nic', key__icontains='mac_address')[0]
         m = re.search('nic\.(\d+)\.mac_address\.0', key_value.key)
         ret['num'] = int(m.group(1))
-        key_value_set = self.keyvalue_set.filter(key__startswith='nic.%s' % ret['num'])
+        key_value_set = self.keyvalue_set.filter(
+            key__startswith='nic.%s' % ret['num'])
         if len(key_value_set) > 0:
             for kv in key_value_set:
                 m = re.search('nic\.\d+\.(.*)\.0', kv.key)
@@ -477,7 +512,6 @@ class System(DirtyFieldsMixin, models.Model):
             return False
         #System.keyvalue_set.filter(name__startswith='nic' % key_id).delete()
 
-
     def delete_key_value_adapter_by_index(self, index):
         """
             Delete a set of key_value items by index
@@ -486,6 +520,7 @@ class System(DirtyFieldsMixin, models.Model):
         """
         self.keyvalue_set.filter(key__startswith='nic.%i' % index).delete()
         return True
+
     @property
     def primary_reverse(self):
         try:
@@ -495,15 +530,15 @@ class System(DirtyFieldsMixin, models.Model):
 
     def get_updated_fqdn(self):
         allowed_domains = [
-                'mozilla.com',
-                'scl3.mozilla.com',
-                'phx.mozilla.com',
-                'phx1.mozilla.com',
-                'mozilla.net',
-                'mozilla.org',
-                'build.mtv1.mozilla.com',
-                'build.mozilla.org',
-                ]
+            'mozilla.com',
+            'scl3.mozilla.com',
+            'phx.mozilla.com',
+            'phx1.mozilla.com',
+            'mozilla.net',
+            'mozilla.org',
+            'build.mtv1.mozilla.com',
+            'build.mozilla.org',
+        ]
         reverse_fqdn = self.primary_reverse
         if self.primary_ip and reverse_fqdn:
             current_hostname = str(self.hostname)
@@ -517,7 +552,8 @@ class System(DirtyFieldsMixin, models.Model):
                 updated = False
                 if not updated:
                     try:
-                        fqdn = socket.gethostbyaddr('%s.%s' % (self.hostname, domain))
+                        fqdn = socket.gethostbyaddr(
+                            '%s.%s' % (self.hostname, domain))
                         if fqdn:
                             self.update_host_for_migration(fqdn[0])
                             updated = True
@@ -530,14 +566,14 @@ class System(DirtyFieldsMixin, models.Model):
 
     def update_host_for_migration(self, new_hostname):
         if new_hostname.startswith(self.hostname):
-            kv = KeyValue(system=self, key='system.hostname.alias.0', value=self.hostname)
+            kv = KeyValue(system=self,
+                          key='system.hostname.alias.0', value=self.hostname)
             kv.save()
             try:
                 self.hostname = new_hostname
                 self.save()
             except Exception, e:
                 print "ERROR - %s" % (e)
-
 
     objects = models.Manager()
     build_objects = BuildManager()
@@ -550,7 +586,7 @@ class System(DirtyFieldsMixin, models.Model):
             if changes:
                 system = System.objects.get(id=self.id)
                 save_string = ''
-                for k,v in changes.items():
+                for k, v in changes.items():
                     if k == 'system_status_id':
                         k = 'System Status'
                         ss = SystemStatus.objects.get(id=v)
@@ -563,12 +599,12 @@ class System(DirtyFieldsMixin, models.Model):
                         k = 'Server Model'
                         ss = ServerModel.objects.get(id=v)
                         v = ss
-                    save_string += '%s: %s\n\n' % (k,v)
+                    save_string += '%s: %s\n\n' % (k, v)
                 try:
                     remote_user = request.META['REMOTE_USER']
                 except Exception, e:
                     remote_user = 'changed_user'
-                tmp = SystemChangeLog(system=system,changed_by = remote_user,changed_text = save_string, changed_date = datetime.datetime.now())
+                tmp = SystemChangeLog(system=system, changed_by=remote_user, changed_text=save_string, changed_date=datetime.datetime.now())
                 tmp.save()
         except Exception, e:
             print e
@@ -582,6 +618,7 @@ class System(DirtyFieldsMixin, models.Model):
 
     def __unicode__(self):
         return self.hostname
+
     def get_switches(self):
         return System.objects.filter(is_switch=1)
 
@@ -602,15 +639,17 @@ class System(DirtyFieldsMixin, models.Model):
 
     def get_nic_names(self):
         adapter_names = []
-        pairs = KeyValue.objects.filter(system=self,key__startswith='nic', key__contains='adapter_name')
+        pairs = KeyValue.objects.filter(
+            system=self, key__startswith='nic', key__contains='adapter_name')
         for row in pairs:
             m = re.match('^nic\.\d+\.adapter_name\.\d+', row.key)
             if m:
                 adapter_names.append(str(row.value))
         return adapter_names
+
     def get_adapter_numbers(self):
         nic_numbers = []
-        pairs = KeyValue.objects.filter(system=self,key__startswith='nic')
+        pairs = KeyValue.objects.filter(system=self, key__startswith='nic')
         for row in pairs:
             m = re.match('^nic\.(\d+)\.', row.key)
             if m:
@@ -624,7 +663,7 @@ class System(DirtyFieldsMixin, models.Model):
         if self.notes:
             patterns = [
                 '[bB]ug#?\D#?(\d+)',
-                    ]
+            ]
             for pattern in patterns:
                 m = re.search(pattern, self.notes)
                 if m:
@@ -632,6 +671,7 @@ class System(DirtyFieldsMixin, models.Model):
             return self.notes
         else:
             return ''
+
     def get_next_adapter_number(self):
         nic_numbers = self.get_adapter_numbers()
         if len(nic_numbers) > 0:
@@ -650,11 +690,13 @@ class System(DirtyFieldsMixin, models.Model):
     class Meta:
         db_table = u'systems'
 
+
 class SystemChangeLog(models.Model):
     changed_by = models.CharField(max_length=255)
     changed_date = models.DateTimeField()
     changed_text = models.TextField()
     system = models.ForeignKey(System)
+
     class Meta:
         db_table = u'systems_change_log'
 #class UserProfile(models.Model):
@@ -662,10 +704,12 @@ class SystemChangeLog(models.Model):
 #    user = models.ForeignKey(User, unique=True)
 #    class Meta:
 ##        db_table = u'user_profiles'
+
+
 class UserProfile(models.Model):
     PAGER_CHOICES = (
-            ('epager', 'epager'),
-            ('sms', 'sms'),
+        ('epager', 'epager'),
+        ('sms', 'sms'),
     )
     user = models.ForeignKey(User, unique=True)
     is_desktop_oncall = models.BooleanField()
@@ -676,26 +720,30 @@ class UserProfile(models.Model):
     current_services_oncall = models.BooleanField()
     irc_nick = models.CharField(max_length=128, null=True, blank=True)
     api_key = models.CharField(max_length=255, null=True, blank=True)
-    pager_type = models.CharField(choices=PAGER_CHOICES, max_length=255, null=True, blank=True)
+    pager_type = models.CharField(
+        choices=PAGER_CHOICES, max_length=255, null=True, blank=True)
     pager_number = models.CharField(max_length=255, null=True, blank=True)
     epager_address = models.CharField(max_length=255, null=True, blank=True)
     objects = QuerySetManager()
+
     class QuerySet(QuerySet):
         def get_all_desktop_oncall(self):
             self.filter(is_desktop_oncall=1)
+
         def get_current_desktop_oncall(self):
             self.filter(current_desktop_oncall=1).select_related()
 
         def get_all_services_oncall(self):
             self.filter(is_services_oncall=1)
+
         def get_current_services_oncall(self):
             self.filter(current_services_oncall=1).select_related()
 
         def get_all_sysadmin_oncall(self):
             self.filter(is_sysadmin_oncall=1)
+
         def get_current_sysadmin_oncall(self):
             self.filter(current_sysadmin_oncall=1).select_related()
 
     class Meta:
         db_table = u'user_profiles'
-

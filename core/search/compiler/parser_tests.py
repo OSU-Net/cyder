@@ -2,15 +2,17 @@ import unittest
 from parser import Parser
 from utils import *
 
+
 class TestParser(unittest.TestCase):
     def compare(self, ss, expected_stack_str):
         p = Parser(ss)
         root_node = p.parse()
         stack = make_stack(root_node)
-        actual =  ' '.join([token.value for token in stack])
+        actual = ' '.join([token.value for token in stack])
         self.assertEqual(actual, expected_stack_str, msg="Actual: {0} != "
-                "Excpected:{1} Parsing: {2}".format(actual, expected_stack_str,
-                    ss))
+                         "Excpected:{1} Parsing: {2}".format(actual, expected_stack_str,
+                                                             ss))
+
     def test1(self):
         ss = "(a AND (b OR (c d)))"
         exp = 'a b c d AND OR AND'

@@ -24,17 +24,19 @@ from django.template.defaulttags import URLNode
 from django.conf import settings
 from jinja2.filters import contextfilter
 from django.utils import translation
+
+
 @allow_anyone
 def report_home(request):
     data = {}
     systems = None
     initial = {
-            'system_type': ['SYSTEM'],
-            'location': ['-1'],
-            'system_status': ['-1'],
+        'system_type': ['SYSTEM'],
+        'location': ['-1'],
+        'system_status': ['-1'],
 
 
-            }
+    }
     if request.method == 'POST':
         form = ReportForm(request.POST)
         if form.is_valid():
@@ -50,17 +52,18 @@ def report_home(request):
                     if '-1' not in request.POST.getlist('location'):
                         for location in request.POST.getlist('location'):
                             search_q |= Q(system_rack__location__id=location)
-                        total_count = System.with_related.filter(search_q).count()
+                        total_count = System.with_related.filter(
+                            search_q).count()
                         systems = systems.filter(search_q)
 
                 if allocation != '':
                     systems = systems.filter(Q(allocation=allocation))
 
                 if server_models != '':
-                    systems = systems.filter(Q(server_model__model__icontains=server_models)|Q(server_model__vendor__icontains=server_models))
+                    systems = systems.filter(Q(server_model__model__icontains=server_models) | Q(server_model__vendor__icontains=server_models))
 
                 if operating_system != '':
-                    systems = systems.filter(Q(operating_system__name__icontains=operating_system)|Q(operating_system__version__icontains=operating_system))
+                    systems = systems.filter(Q(operating_system__name__icontains=operating_system) | Q(operating_system__version__icontains=operating_system))
 
                 if '-1' not in system_status:
                     the_query = Q()
@@ -76,27 +79,27 @@ def report_home(request):
                 response['Content-Disposition'] = 'attachment; inventory_report.csv'
                 writer = csv.writer(response)
                 columns = [
-                        'Hostname',
-                        'Asset Tag',
-                        'Purchase Date',
-                        'Server Model',
-                        'Serial',
-                        'Purchase Price',
-                        'Operating System',
-                        'Location',
-                        ]
+                    'Hostname',
+                    'Asset Tag',
+                    'Purchase Date',
+                    'Server Model',
+                    'Serial',
+                    'Purchase Price',
+                    'Operating System',
+                    'Location',
+                ]
                 writer.writerow(columns)
                 for system in systems:
                     writer.writerow([
-                    system.hostname,
-                    system.asset_tag,
-                    system.purchase_date,
-                    system.server_model,
-                    system.serial,
-                    system.purchase_price,
-                    system.operating_system if system.operating_system else '',
-                    system.system_rack.location if system.system_rack else '',
-                    ])
+                                    system.hostname,
+                                    system.asset_tag,
+                                    system.purchase_date,
+                                    system.server_model,
+                                    system.serial,
+                                    system.purchase_price,
+                                    system.operating_system if system.operating_system else '',
+                                    system.system_rack.location if system.system_rack else '',
+                                    ])
                 return response
             if 'SCREEN' == request.POST['output']:
                 template = 'reports/index.html'
@@ -110,6 +113,6 @@ def report_home(request):
         template = 'reports/index.html'
 
     return render_to_response(template, {
-            'systems': systems,
-            'form': form
-           })
+        'systems': systems,
+        'form': form
+    })

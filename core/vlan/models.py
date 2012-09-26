@@ -17,9 +17,9 @@ class Vlan(models.Model, ObjectUrlMixin):
 
     def details(self):
         return (
-                ("Name", self.name),
-                ("Number", self.number),
-                )
+            ("Name", self.name),
+            ("Number", self.number),
+        )
 
     class Meta:
         db_table = "vlan"
@@ -39,7 +39,7 @@ class Vlan(models.Model, ObjectUrlMixin):
         for network in self.network_set.all():
             if network.site:
                 expected_name = "{0}.{1}.mozilla.com".format(self.name,
-                    network.site.get_site_path())
+                                                             network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist, e:

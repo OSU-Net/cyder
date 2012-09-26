@@ -3,11 +3,13 @@ from systems.models import System
 
 # Create your models here.
 
+
 class BuildPurpose(models.Model):
     name = models.CharField(max_length=255)
 
     def __unicode__(self):
         return self.name
+
 
 class BuildAttribute(models.Model):
 
@@ -16,8 +18,10 @@ class BuildAttribute(models.Model):
         ('Tier 2', 'Tier 2'),
         ('Tier 3', 'Tier 3'),
     )
-    support_tier = models.CharField(max_length=255, blank=True, choices=TIER_CHOICES)
-    purposes = models.ManyToManyField('BuildPurpose', db_table='build_attributes_purposes', blank=True)
+    support_tier = models.CharField(
+        max_length=255, blank=True, choices=TIER_CHOICES)
+    purposes = models.ManyToManyField(
+        'BuildPurpose', db_table='build_attributes_purposes', blank=True)
     system = models.OneToOneField(System)
     tboxtree_url = models.CharField(max_length=255, blank=True)
     cvsbranch = models.CharField(max_length=255, blank=True)
@@ -27,5 +31,6 @@ class BuildAttribute(models.Model):
     support_doc = models.CharField(max_length=255, blank=True)
     pool_name = models.CharField(max_length=255, blank=True)
     product_series = models.CharField(max_length=255, blank=True)
+
     class Meta:
         db_table = u'build_attributes'

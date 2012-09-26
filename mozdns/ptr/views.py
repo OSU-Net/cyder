@@ -39,7 +39,7 @@ class PTRCreateView(PTRView, MozdnsCreateView):
             network = calc_parent_str(ip_str, ip_type)
             if network and network.vlan and network.site:
                 expected_name = "{0}.{1}.mozilla.com".format(network.vlan.name,
-                    network.site.get_site_path())
+                                                             network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist, e:
@@ -47,7 +47,7 @@ class PTRCreateView(PTRView, MozdnsCreateView):
 
             if domain:
                 initial['initial'] = {'ip_str': ip_str,
-                        'name': "." + domain.name, 'ip_type': ip_type}
+                                      'name': "." + domain.name, 'ip_type': ip_type}
             else:
                 initial['initial'] = {'ip_str': ip_str, 'ip_type': ip_type}
 

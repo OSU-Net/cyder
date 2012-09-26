@@ -10,13 +10,20 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'Range'
         db.create_table('range', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('start', self.gf('django.db.models.fields.PositiveIntegerField')(null=True)),
-            ('start_str', self.gf('django.db.models.fields.CharField')(max_length=39)),
-            ('end', self.gf('django.db.models.fields.PositiveIntegerField')(null=True)),
-            ('end_str', self.gf('django.db.models.fields.CharField')(max_length=39)),
-            ('dhcpd_header', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('network', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['network.Network'])),
+            ('id', self.gf(
+                'django.db.models.fields.AutoField')(primary_key=True)),
+            ('start', self.gf(
+                'django.db.models.fields.PositiveIntegerField')(null=True)),
+            ('start_str', self.gf(
+                'django.db.models.fields.CharField')(max_length=39)),
+            ('end', self.gf(
+                'django.db.models.fields.PositiveIntegerField')(null=True)),
+            ('end_str', self.gf(
+                'django.db.models.fields.CharField')(max_length=39)),
+            ('dhcpd_header', self.gf(
+                'django.db.models.fields.TextField')(null=True, blank=True)),
+            ('network', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['network.Network'])),
         ))
         db.send_create_signal('range', ['Range'])
 
@@ -25,19 +32,25 @@ class Migration(SchemaMigration):
 
         # Adding model 'RangeKeyValue'
         db.create_table('range_key_value', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('key', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('is_option', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('is_statement', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('has_validator', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('range', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['range.Range'])),
+            ('id', self.gf(
+                'django.db.models.fields.AutoField')(primary_key=True)),
+            ('key', self.gf(
+                'django.db.models.fields.CharField')(max_length=255)),
+            ('value', self.gf(
+                'django.db.models.fields.CharField')(max_length=255)),
+            ('is_option', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
+            ('is_statement', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
+            ('has_validator', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
+            ('range', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['range.Range'])),
         ))
         db.send_create_signal('range', ['RangeKeyValue'])
 
         # Adding unique constraint on 'RangeKeyValue', fields ['key', 'value']
         db.create_unique('range_key_value', ['key', 'value'])
-
 
     def backwards(self, orm):
         # Removing unique constraint on 'RangeKeyValue', fields ['key', 'value']
@@ -51,7 +64,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'RangeKeyValue'
         db.delete_table('range_key_value')
-
 
     models = {
         'network.network': {

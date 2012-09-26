@@ -10,14 +10,13 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'StaticInterface.dhcp_enabled'
         db.add_column('static_interface', 'dhcp_enabled',
-                      self.gf('django.db.models.fields.BooleanField')(default=True),
+                      self.gf('django.db.models.fields.BooleanField')(
+                          default=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'StaticInterface.dhcp_enabled'
         db.delete_column('static_interface', 'dhcp_enabled')
-
 
     models = {
         'domain.domain': {

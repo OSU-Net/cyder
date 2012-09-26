@@ -13,19 +13,19 @@ class Migration(SchemaMigration):
 
         # Adding field 'Network.dhcpd_raw_include'
         db.add_column('network', 'dhcpd_raw_include',
-                      self.gf('django.db.models.fields.TextField')(null=True, blank=True),
+                      self.gf('django.db.models.fields.TextField')(
+                          null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Adding field 'Network.dhcpd_header'
         db.add_column('network', 'dhcpd_header',
-                      self.gf('django.db.models.fields.TextField')(null=True, blank=True),
+                      self.gf('django.db.models.fields.TextField')(
+                          null=True, blank=True),
                       keep_default=False)
 
         # Deleting field 'Network.dhcpd_raw_include'
         db.delete_column('network', 'dhcpd_raw_include')
-
 
     models = {
         'network.network': {

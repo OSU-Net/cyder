@@ -304,7 +304,7 @@ class SystemAdapterTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         obj = json.loads(resp.content)
         self.assertEqual(obj[0]['display'], 'No Site - No Vlan - (66.66.66.0/24) '
-                '66.66.66.1 to 66.66.66.254')
+                         '66.66.66.1 to 66.66.66.254')
 
     def test5_system_adapter_next_available_ip(self):
         range_id = Range.objects.get(start_str='10.99.99.1').id
@@ -434,7 +434,7 @@ class SystemAdapterTest(TestCase):
         private = View.objects.get(name='private')
         public = View.objects.get(name='public')
         self.assertEqual(private.staticinterface_set.all()[0].fqdn,
-            u'fake-hostname.mozilla.com')
+                         u'fake-hostname.mozilla.com')
         self.assertEqual(
             private.staticinterface_set.all()[0].mac, u'00:00:00:00:00:00')
         self.assertEqual(
@@ -443,7 +443,8 @@ class SystemAdapterTest(TestCase):
             private.staticinterface_set.all()[0].dns_enabled, True)
         self.assertEqual(
             private.staticinterface_set.all()[0].dhcp_enabled, True)
-        self.assertEqual(private.staticinterface_set.all()[0].dns_enabled, True)
+        self.assertEqual(
+            private.staticinterface_set.all()[0].dns_enabled, True)
 
     def test10_test_ajax_dhcp_enabled_priv_enabled_pub_disabled(self):
         post_dict = {

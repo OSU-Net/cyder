@@ -9,6 +9,7 @@ from mozdns.search_utils import smart_fqdn_exists
 
 import pdb
 
+
 class CNAME(MozdnsRecord):
     """CNAMES can't point to an any other records. Said another way,
     CNAMES can't be at the samle level as any other record. This means
@@ -23,19 +24,19 @@ class CNAME(MozdnsRecord):
     # TODO cite an RFC for that ^ (it's around somewhere)
     id = models.AutoField(primary_key=True)
     target = models.CharField(max_length=100, validators=[validate_name],
-            help_text="CNAME Target")
+                              help_text="CNAME Target")
     target_domain = models.ForeignKey(Domain, null=True,
-                        related_name='target_domains', blank=True,
-                        on_delete=models.SET_NULL)
+                                      related_name='target_domains', blank=True,
+                                      on_delete=models.SET_NULL)
 
     search_fields = ('fqdn', 'target')
 
     def details(self):
         return  (
-                    ('FQDN', self.fqdn),
-                    ('Record Type', 'CNAME'),
-                    ('Target', self.target),
-               )
+            ('FQDN', self.fqdn),
+            ('Record Type', 'CNAME'),
+            ('Target', self.target),
+        )
 
     class Meta:
         db_table = 'cname'
@@ -75,7 +76,7 @@ class CNAME(MozdnsRecord):
         try:
             self.domain
         except ObjectDoesNotExist:
-            return # Validation will fail eventually
+            return  # Validation will fail eventually
         root_domain = find_root_domain(self.domain.soa)
         if root_domain is None:
             return
@@ -121,4 +122,4 @@ class CNAME(MozdnsRecord):
         MX = mozdns.mx.models.MX
         if MX.objects.filter(server=self.fqdn):
             raise ValidationError("RFC 2181 says you shouldn't point MX "
-                                    "records at CNAMEs")
+                                  "records at CNAMEs")

@@ -1,17 +1,20 @@
 import re
+
+
 class DHCPHash(object):
     dhcp_object_list = []
     hashed_list = []
     list_string = ""
     unformatted_string = ""
     known_options = [
-            'hardware ethernet',
-            'fixed-address',
-            'option host-name',
-            'option domain-name',
-            'option domain-name-servers',
-            'filename',
-            ]
+        'hardware ethernet',
+        'fixed-address',
+        'option host-name',
+        'option domain-name',
+        'option domain-name-servers',
+        'filename',
+    ]
+
     def __init__(self, list_string):
         self.list_string = list_string
         unformatted_string = self.remove_formatting(self.list_string)
@@ -21,13 +24,12 @@ class DHCPHash(object):
     def get_hash(self):
         return self.hashed_list
 
-
     def remove_formatting(self, input_string):
         output_string = input_string
-        output_string = output_string.replace('\n','')
-        output_string = output_string.replace('\t','')
-        output_string = output_string.replace('    ','')
-        output_string = output_string.replace('}','}\n')
+        output_string = output_string.replace('\n', '')
+        output_string = output_string.replace('\t', '')
+        output_string = output_string.replace('    ', '')
+        output_string = output_string.replace('}', '}\n')
         return output_string
 
     def split_lines(self, input_string):
@@ -47,19 +49,19 @@ class DHCPHash(object):
                 else:
                     tmp['host'] = host
 
-
                 for the_key in m.group(2).split(';'):
                     for known in self.known_options:
                         if known in the_key:
-                            tmp[known] = the_key.replace(known, '').strip().strip('"').strip("'")
+                            tmp[known] = the_key.replace(
+                                known, '').strip().strip('"').strip("'")
             hash_list.append(tmp)
         return hash_list
 
 
 class DHCPHashCompare(object):
 
-    hash1_count = 0    
-    hash2_count = 0    
+    hash1_count = 0
+    hash2_count = 0
     hash1_hosts = []
     hash2_hosts = []
     hash1_diff = []
@@ -83,7 +85,6 @@ class DHCPHashCompare(object):
         if not identical:
             self.hash1_diff = lists[0]
             self.hash2_diff = lists[1]
-
 
     def _get_hosts(self, hash):
         tmp = []
@@ -110,23 +111,28 @@ class DHCPHashCompare(object):
             if row not in list2:
                 identical = False
                 if row['host'] not in [r['host'] for r in list2]:
-                    self.hash1_diff.append({'host': row['host'].replace('.mozilla.com',''), 'data': row})
+                    self.hash1_diff.append({'host': row['host'].replace(
+                        '.mozilla.com', ''), 'data': row})
         for row in list2:
             if row not in list1:
                 identical = False
                 if row['host'] not in [r['host'] for r in self.hash2_diff]:
-                    self.hash2_diff.append({'host': row['host'].replace('.mozilla.com',''), 'data': row})
+                    self.hash2_diff.append({'host': row['host'].replace(
+                        '.mozilla.com', ''), 'data': row})
         if identical:
             return identical, [[], []]
         else:
             return identical, [self.hash1_diff, self.hash2_diff]
+
     def analyze(self):
-        msg = "Hosts in %s but not in %s\n" % (self.hash1_name, self.hash2_name)
+        msg = "Hosts in %s but not in %s\n" % (
+            self.hash1_name, self.hash2_name)
         for h in self.hash1_diff:
             if h['host'] not in [h2['host'] for h2 in self.hash2_diff]:
                 msg += "%s\n" % h['host']
 
-        msg += "Hosts in %s but not in %s\n" % (self.hash2_name, self.hash1_name)
+        msg += "Hosts in %s but not in %s\n" % (
+            self.hash2_name, self.hash1_name)
         for h in self.hash2_diff:
             if h['host'] not in [h2['host'] for h2 in self.hash1_diff]:
                 msg += "%s\n" % h['host']
@@ -137,10 +143,12 @@ class DHCPHashCompare(object):
 
         for row in self.hash1_diff:
             try:
-                second_hashes = [h2['data'] for h2 in self.hash2_diff if h2['data']['host'] == row['host']]
+                second_hashes = [h2['data'] for h2 in self.hash2_diff if h2[
+                    'data']['host'] == row['host']]
                 ret = self.dict_diff(row['data'], second_hash)
                 for key in ret.iterkeys():
-                    msg += '%s key "%s" is %s from %s' % (row['host'], key, ret[key][0], self.hash1_name)
+                    msg += '%s key "%s" is %s from %s' % (
+                        row['host'], key, ret[key][0], self.hash1_name)
                     msg += ' --- %s from %s\n' % (ret[key][1], self.hash2_name)
             except IndexError:
                 ## Host isn't present in both lists
@@ -149,6 +157,7 @@ class DHCPHashCompare(object):
         ## If by some miracle i do figure this out
         ## Uncomment the following return msg and uncomment the previous
     ## {{{ http://code.activestate.com/recipes/576644/ (r1)
+
     def dict_diff(self, first, second):
         KEYNOTFOUND = '<KEYNOTFOUND>'       # KeyNotFound for dictDiff
         """ Return a dict of keys that differ with another config object.  If a value is
@@ -160,18 +169,16 @@ class DHCPHashCompare(object):
         diff = {}
         # Check all keys in first dict
         for key in first.keys():
-            if (not second.has_key(key)):
+            if (key not in second):
                 diff[key] = (first[key], KEYNOTFOUND)
             elif (first[key] != second[key]):
                 diff[key] = (first[key], second[key])
         # Check all keys in second dict to find missing
         for key in second.keys():
-            if (not first.has_key(key)):
+            if (key not in first):
                 diff[key] = (KEYNOTFOUND, second[key])
         return diff
     ## end of http://code.activestate.com/recipes/576644/ }}}
-
-
 
 
 def compare_lists(list1, list2):
@@ -180,8 +187,8 @@ def compare_lists(list1, list2):
     First list returned is items that are missing
     Second list returned is items that are missin
     """
-    missingFromList2 = [] 
-    missingFromList1 = [] 
+    missingFromList2 = []
+    missingFromList1 = []
     for row in list1:
         if row not in list2:
             print "%s not found" % row

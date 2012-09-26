@@ -12,6 +12,7 @@ from mozdns.ip.utils import ip_to_domain_name, nibbilize
 
 import pdb
 
+
 class DeleteStaticInterTests(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
@@ -20,15 +21,15 @@ class DeleteStaticInterTests(TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name = name, delegated=delegated)
+        d = Domain(name=name, delegated=delegated)
         d.clean()
         self.assertTrue(d.is_reverse)
         return d
 
     def setUp(self):
-        self.arpa = self.create_domain( name = 'arpa')
+        self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
-        self.i_arpa = self.create_domain( name = 'in-addr.arpa')
+        self.i_arpa = self.create_domain(name='in-addr.arpa')
         self.i_arpa.save()
 
         self.c = Domain(name="ccc")
@@ -44,7 +45,7 @@ class DeleteStaticInterTests(TestCase):
 
     def do_add(self, mac, label, domain, ip_str, system, ip_type='4'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                ip_type=ip_type, system=system)
+                            ip_type=ip_type, system=system)
         r.clean()
         r.save()
         return r
@@ -53,7 +54,8 @@ class DeleteStaticInterTests(TestCase):
         ip_str = r.ip_str
         fqdn = r.fqdn
         r.delete()
-        self.assertFalse(AddressRecord.objects.filter(ip_str=ip_str, fqdn=fqdn))
+        self.assertFalse(
+            AddressRecord.objects.filter(ip_str=ip_str, fqdn=fqdn))
 
     def test1_delete_basic(self):
         # Does deleting a system delete it's interfaces?
@@ -64,7 +66,7 @@ class DeleteStaticInterTests(TestCase):
         system = System(hostname="foo")
         system.save()
         kwargs = {'mac': mac, 'label': label, 'domain': domain, 'ip_str': ip_str,
-                'system': system}
+                  'system': system}
         i = self.do_add(**kwargs)
         intr_pk = i.pk
         self.assertTrue(StaticInterface.objects.filter(**kwargs))

@@ -8,8 +8,9 @@ class AddressRecordForm(ModelForm):
         model = AddressRecord
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
         fields = ('label', 'domain', 'ip_type', 'ip_str', 'views', 'ttl',
-                'comment')
+                  'comment')
         widgets = {'views': forms.CheckboxSelectMultiple}
+
 
 class AddressRecordFQDNForm(AddressRecordForm):
     class Meta:

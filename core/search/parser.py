@@ -11,11 +11,13 @@ import pdb
 <word>  -> letters and stuff
 """
 
+
 def parse_statement(ll, args):
     term = parse_term(ll)
     if term:
         args.append(term)
         parse_statement(ll, args)
+
 
 def parse(ss):
     l = Lexer(ss)
@@ -92,6 +94,7 @@ def parse_term(ll):
     ex_args = expand_args(args)
     return (un, op, ex_args)
 
+
 def expand_args(args):
     """
     Apply any macro expansion on args.
@@ -101,6 +104,7 @@ def expand_args(args):
     """
     args = expand_range(args)
     return args
+
 
 def expand_range(args):
     regex = re.compile("((\d+)\.\.(\d+))")
@@ -117,10 +121,11 @@ def expand_range(args):
         stop = int(r.groups()[2])
         if start > stop:
             return args
-        for i in xrange(start, stop+1):
+        for i in xrange(start, stop + 1):
             new_args.append(new_arg.format(i))
 
     return new_args
+
 
 def parse_list(ll, extra=None):
     args = []
@@ -154,6 +159,7 @@ def parse_list(ll, extra=None):
         list_str += c
     return list_str.split(',')
 
+
 def _is_list_end(ll):
     i = 0
     while True:
@@ -183,6 +189,7 @@ def _lex_word(ll):
         else:
             word = word + c
     return word
+
 
 def _peek_word(ll):
     word = ''
@@ -216,6 +223,7 @@ def _lex_ws(ll):
             break
     return
 
+
 class Lexer(object):
     def __init__(self, line):
         self.line = line
@@ -242,7 +250,7 @@ class Lexer(object):
     def peekn(self, n):
         if self.pos + n > self.length - 1:
             return None
-        return self.line[self.pos+n]
+        return self.line[self.pos + n]
 
     def lex(self):
         _lex_ws(self)

@@ -37,6 +37,7 @@ import simplejson as json
 from jinja2 import Environment, PackageLoader
 env = Environment(loader=PackageLoader('core.bulk_change', 'templates'))
 
+
 def bulk_change_ajax(request):
     search = request.GET.get("search", None)
     if not search:
@@ -50,21 +51,23 @@ def bulk_change_ajax(request):
     addrs, cnames, domains, intrs, mxs, nss, ptrs, srvs, txts, misc = x
     template = env.get_template('bulk_change/bulk_change_form_content.html')
     return HttpResponse(template.render(
-                                    **{
-                                        "search": search,
-                                        "addrs": addrs,
-                                        "cnames": cnames,
-                                        "intrs": intrs,
-                                        "mxs": mxs,
-                                        "nss": nss,
-                                        "ptrs": ptrs,
-                                        "srvs": srvs,
-                                        "txts": txts
-                                    }
-                        ))
+        **{
+        "search": search,
+        "addrs": addrs,
+        "cnames": cnames,
+        "intrs": intrs,
+        "mxs": mxs,
+        "nss": nss,
+        "ptrs": ptrs,
+        "srvs": srvs,
+        "txts": txts
+        }
+    ))
+
+
 def bulk_change(request):
     """Search page"""
-    search = request.GET.get('search','')
+    search = request.GET.get('search', '')
     return render(request, "bulk_change/bulk_change.html", {
         "search": search
     })

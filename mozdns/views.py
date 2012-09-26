@@ -7,6 +7,7 @@ import simplejson as json
 
 import pdb
 
+
 class MozdnsListView(BaseListView):
     """ """
     template_name = 'mozdns/mozdns_list.html'
@@ -40,12 +41,12 @@ class MozdnsCreateView(BaseCreateView):
         """This removes the unhelpful "Hold down the...." help texts for the
         specified fields for a form."""
         remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
-            'to select more than one.')
+                                 'to select more than one.')
         for field in form.fields:
             if field in form.base_fields:
                 if form.base_fields[field].help_text:
                     new_text = form.base_fields[field].help_text.replace(
-                            remove_message, '')
+                        remove_message, '')
                     new_text = new_text.strip()
                     form.base_fields[field].help_text = new_text
         return form
@@ -59,12 +60,12 @@ class MozdnsUpdateView(BaseUpdateView):
         """This removes the unhelpful "Hold down the...." help texts for the
         specified fields for a form."""
         remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
-            'to select more than one.')
+                                 'to select more than one.')
         for field in form.fields:
             if field in form.base_fields:
                 if form.base_fields[field].help_text:
                     new_text = form.base_fields[field].help_text.replace(
-                            remove_message, '')
+                        remove_message, '')
                     new_text = new_text.strip()
                     form.base_fields[field].help_text = new_text
         return form

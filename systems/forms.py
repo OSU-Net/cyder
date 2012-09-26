@@ -16,49 +16,56 @@ class OncallForm(forms.Form):
     desktop_support_choices = [(m, m.get_profile().irc_nick) for m in User.objects.select_related().filter(userprofile__is_desktop_oncall=1)]
     sysadmin_support_choices = [(m, m.get_profile().irc_nick) for m in User.objects.select_related().filter(userprofile__is_sysadmin_oncall=1)]
     services_support_choices = [(m, m.get_profile().irc_nick) for m in User.objects.select_related().filter(userprofile__is_services_oncall=1)]
-                    
+
     desktop_support = forms.ChoiceField(label='Desktop Oncall',
-        choices= desktop_support_choices)
+                                        choices=desktop_support_choices)
     sysadmin_support = forms.ChoiceField(label='Sysadmin Oncall',
-        choices= sysadmin_support_choices)
+                                         choices=sysadmin_support_choices)
     services_support = forms.ChoiceField(label='Services Oncall',
-        choices= services_support_choices)
+                                         choices=services_support_choices)
+
     class meta:
         model = User
+
 
 class SystemRackForm(forms.ModelForm):
     class Meta:
         model = models.SystemRack
 
+
 class ServerModelForm(forms.ModelForm):
     class Meta:
         model = models.ServerModel
+
 
 class LocationForm(forms.ModelForm):
     class Meta:
         model = models.Location
 
+
 class AllocationForm(forms.ModelForm):
     class Meta:
         model = models.Allocation
+
+
 class RackFilterForm(forms.Form):
 
     location = forms.ChoiceField(
         required=False,
         choices=[('0', 'All')] + [(m.id, m)
-                    for m in models.Location.objects.all()])
+                                  for m in models.Location.objects.all()])
     status = forms.ChoiceField(
         required=False,
         choices=[('', 'All')] + [(m.id, m)
-                    for m in models.SystemStatus.objects.all()])
+                                 for m in models.SystemStatus.objects.all()])
     rack = forms.ChoiceField(
         required=False,
-        choices=[('', 'All')] + [(m.id, m.location.name + ' ' +  m.name)
-                    for m in models.SystemRack.objects.all().order_by('location','name')])
+        choices=[('', 'All')] + [(m.id, m.location.name + ' ' + m.name)
+                                 for m in models.SystemRack.objects.all().order_by('location', 'name')])
     allocation = forms.ChoiceField(
         required=False,
         choices=[('', 'All')] + [(m.id, m)
-                    for m in models.Allocation.objects.all()])
+                                 for m in models.Allocation.objects.all()])
 
 
 def return_data_if_true(f):
@@ -78,10 +85,11 @@ class SystemForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'size': '3'}))
     purchase_date = forms.DateField(
-            required=False,
-            widget=SelectDateWidget(years=range(1999,datetime.today().year + 2)), 
-            initial=datetime.now()
-            )
+        required=False,
+        widget=SelectDateWidget(
+            years=range(1999, datetime.today().year + 2)),
+        initial=datetime.now()
+    )
     change_password = forms.DateField(
         required=False,
         widget=SelectDateWidget)
@@ -144,20 +152,19 @@ class SystemForm(forms.ModelForm):
 
     @return_data_if_true
     def clean_system_status(self):
-	name_status = self.data.get('js_status_name')
-	color_status = self.data.get('js_status_color')
-	code_color_status = self.data.get('js_status_code')
-	if name_status is not None and code_color_status is not None and color_status is not None:
-		status_model, c= models.SystemStatus.objects.get_or_create(
-			status=name_status,
-		        color = color_status,	
-			color_code= code_color_status,
-					
-		)
-		return status_model
-	
-	return None
+        name_status = self.data.get('js_status_name')
+        color_status = self.data.get('js_status_color')
+        code_color_status = self.data.get('js_status_code')
+        if name_status is not None and code_color_status is not None and color_status is not None:
+            status_model, c = models.SystemStatus.objects.get_or_create(
+                status=name_status,
+                color=color_status,
+                color_code=code_color_status,
 
+            )
+            return status_model
+
+        return None
 
     class Meta:
         model = models.System

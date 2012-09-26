@@ -67,6 +67,7 @@ def get_klasses(record_type):
 
     return Klass, FormKlass, FQDNFormKlass
 
+
 def mozdns_record_search_ajax(request):
     """This function will return a list of records matching the 'query' of type
     'record_type'. It's used for ajaxy stuff."""
@@ -76,7 +77,7 @@ def mozdns_record_search_ajax(request):
         raise Http404
     Klass, _, _ = get_klasses(record_type)
     mega_filter = [Q(**{"{0}__icontains".format(field): query}) for field in
-            Klass.search_fields]
+                   Klass.search_fields]
     mega_filter = reduce(operator.or_, mega_filter)
     records = Klass.objects.filter(mega_filter)[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]

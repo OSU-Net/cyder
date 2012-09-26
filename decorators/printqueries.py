@@ -1,13 +1,16 @@
-""" 
+"""
     Print SQL Decorator found at http://pushingkarma.com/notebookdjango-decorator-print-sql-queries/
     Usage:
     @print_queries('metric')
     Where 'metric' is a search filter in the query itself
 """
-import os, time
+import os
+import time
 
-COLORS = {'blue':34, 'cyan':36, 'green':32, 'grey':30, 'magenta':35, 'red':31, 'white':37, 'yellow':33}
+COLORS = {'blue': 34, 'cyan': 36, 'green': 32, 'grey': 30, 'magenta': 35,
+          'red': 31, 'white': 37, 'yellow': 33}
 RESET = '\033[0m'
+
 
 def print_queries(filter=None):
     """ Print all queries executed in this funnction. """
@@ -33,11 +36,14 @@ def print_queries(filter=None):
             print colored("------", 'blue')
             print colored('Total Time:  %ss' % runtime, 'yellow')
             print colored('Proc Time:   %ss' % proctime, 'yellow')
-            print colored('Query Time:  %ss (longest: %ss)' % (sqltime, longest), 'yellow')
-            print colored('Num Queries: %s (%s hidden)\n' % (numqueries, numhidden), 'yellow')
+            print colored('Query Time:  %ss (longest: %ss)' % (
+                sqltime, longest), 'yellow')
+            print colored('Num Queries: %s (%s hidden)\n' % (
+                numqueries, numhidden), 'yellow')
             return result
         return wrapper2
     return wrapper1
+
 
 def colored(text, color=None):
     """ Colorize text {red, green, yellow, blue, magenta, cyan, white}. """

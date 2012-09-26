@@ -11,7 +11,7 @@ RELATIVE_PATH = "/home/juber/sysadmins/dnsconfig/"
 
 def resolve(name, ns, rdclass="all"):
     proc = subprocess.Popen(["dig", "@{0}".format(ns), name, rdclass,
-        "+short"], stdout=subprocess.PIPE)
+                             "+short"], stdout=subprocess.PIPE)
     x = proc.communicate()[0]
     x = x.split('\n')
     x = '\n'.join(sorted(x))
@@ -53,7 +53,7 @@ def check_rdtype(zone, nss, rdtype):
 
             for ns, result in itertools.izip(nss, results):
                 print "{0} returned:\n-->\n{1}\n<--".format(ns,
-                        result.strip('\n'))
+                                                            result.strip('\n'))
 
 
 def diff_nameservers(nss, zone_name, zone_file):
@@ -81,8 +81,8 @@ if __name__ == "__main__":
         ns2 = thing['ns2']
         nss.append(ns2)
 
-        print "="*60
+        print "=" * 60
         print("==== Checking {0} against {1} with for the zone {2} with file "
-            "{3}".format(ns1, ns2, zone_name, zone_file))
-        print "="*60
+              "{3}".format(ns1, ns2, zone_name, zone_file))
+        print "=" * 60
         diff_nameservers(nss, zone_name, zone_file)

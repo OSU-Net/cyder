@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack,SystemStatus,NetworkAdapter,KeyValue
+from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue
 from truth.models import Truth, KeyValue as TruthKeyValue
 from dhcp.DHCP import DHCP as DHCPInterface
 from dhcp.models import DHCP
@@ -17,6 +17,7 @@ from django.conf import settings
 class NetworkAdapterHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
     model = NetworkAdapter
+
     def create(self, request, network_adapter_id=None):
         n = NetworkAdapter()
         if 'system_id' in request.POST:
@@ -36,7 +37,8 @@ class NetworkAdapterHandler(BaseHandler):
 
         if 'dhcp_scope' in request.POST:
             try:
-                n.dhcp_scope = DHCP.objects.get(scope_name=request.POST['dhcp_scope'])
+                n.dhcp_scope = DHCP.objects.get(
+                    scope_name=request.POST['dhcp_scope'])
             except:
                 pass
         try:
@@ -46,19 +48,19 @@ class NetworkAdapterHandler(BaseHandler):
         except:
             resp = rc.NOT_FOUND
             resp.write('Unable to Create Host')
-            
+
         return resp
 
     def read(self, request, network_adapter_id=None):
         base = NetworkAdapter.objects
-        
+
         if network_adapter_id:
             return base.get(id=network_adapter_id)
         else:
             return base.all()
 
     def update(self, request, network_adapter_id=None):
-    	if request.method == 'PUT':
+        if request.method == 'PUT':
             try:
                 n = NetworkAdapter.objects.get(pk=network_adapter_id)
                 if 'system_id' in request.POST:
@@ -83,7 +85,8 @@ class NetworkAdapterHandler(BaseHandler):
                     n.option_host_name = ''
                 if 'dhcp_scope' in request.POST:
                     try:
-                        n.dhcp_scope = DHCP.objects.get(scope_name=request.POST['dhcp_scope'])
+                        n.dhcp_scope = DHCP.objects.get(
+                            scope_name=request.POST['dhcp_scope'])
                     except:
                         pass
                 n.save()
@@ -92,7 +95,7 @@ class NetworkAdapterHandler(BaseHandler):
             except:
                 resp = rc.NOT_FOUND
         else:
-                resp = rc.NOT_FOUND
+            resp = rc.NOT_FOUND
         return resp
 
     def delete(self, request, network_adapter_id=None):

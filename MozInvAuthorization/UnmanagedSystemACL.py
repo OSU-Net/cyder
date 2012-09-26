@@ -1,6 +1,8 @@
 from django.core.exceptions import PermissionDenied
 from MozInvAuthorization.BaseACL import BaseACL
 from django.conf import settings
+
+
 class UnmanagedSystemACL(BaseACL):
     def __init__(self, request):
         self.request = request
@@ -9,7 +11,7 @@ class UnmanagedSystemACL(BaseACL):
         else:
             self.user = self.request.META['REMOTE_USER']
 
-    def check_delete(self, allowed = None):
+    def check_delete(self, allowed=None):
         if allowed:
             allowed = allowed
         else:

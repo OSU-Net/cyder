@@ -14,6 +14,7 @@ from utils import *
 <word>  -> letters and stuff
 """
 
+
 class Node(object):
     def __init__(self, token, indent=0):
         self.token = token
@@ -47,8 +48,6 @@ class Node(object):
             if self.token.value:
                 print self.token.value,
 
-
-
     def inline_print(self):
         if not (self.l_child or self.r_child):
             print self.token.value,
@@ -62,7 +61,7 @@ class Node(object):
             print ')',
 
     def tree_print(self):
-        print '\t'*self.indent + self.token
+        print '\t' * self.indent + self.token
 
     def __str__(self):
         return str(self.token)
@@ -70,16 +69,18 @@ class Node(object):
     def __repr__(self):
         return str(self)
 
+
 def do_parse(ss):
     print ss
     p = Parser(ss)
     root_node = p.parse()
     root_node.inline_print()
 
+
 class Parser(object):
     def __init__(self, stmt):
         # We always wrap with ()'s
-        self.tnz = Tokenizer('('+stmt+')')
+        self.tnz = Tokenizer('(' + stmt + ')')
 
     def pop(self):
         return self.tnz.pop()
@@ -94,9 +95,9 @@ class Parser(object):
         indent = deepcopy(indent)
         indent += 1
         if istype(self.top(), 'Lparen'):
-            self.pop() # Open paren
+            self.pop()  # Open paren
             n = self.parse(indent)
-            cp = self.pop() # Close paren
+            cp = self.pop()  # Close paren
             if istype(self.top(), 'Bop'):
                 bopr = Node(self.pop(), indent)
                 bopr.l_child = n

@@ -13,8 +13,9 @@ class SystemStatusHandler(BaseHandler):
     #allowed_methods = settings.API_ACCESS
     allowed_methods = ('GET')
     #exclude = ('name','id', ('location', ('name', 'id') ) )
-    exclude=()
+    exclude = ()
     model = SystemStatus
+
     def create(self, request, network_adapter_id=None):
         n = NetworkAdapter()
         if 'system_id' in request.POST:
@@ -34,7 +35,8 @@ class SystemStatusHandler(BaseHandler):
 
         if 'dhcp_scope' in request.POST:
             try:
-                n.dhcp_scope = DHCP.objects.get(scope_name=request.POST['dhcp_scope'])
+                n.dhcp_scope = DHCP.objects.get(
+                    scope_name=request.POST['dhcp_scope'])
             except:
                 pass
         try:
@@ -44,12 +46,12 @@ class SystemStatusHandler(BaseHandler):
         except:
             resp = rc.NOT_FOUND
             resp.write('Unable to Create Host')
-            
+
         return resp
 
     def read(self, request, system_status_id=None):
         base = SystemStatus.objects
-        
+
         if system_status_id:
             try:
                 return base.order_by('id').get(id=system_status_id)
@@ -61,7 +63,7 @@ class SystemStatusHandler(BaseHandler):
             return base.order_by('id').all()
 
     def update(self, request, network_adapter_id=None):
-    	if request.method == 'PUT':
+        if request.method == 'PUT':
             try:
                 n = NetworkAdapter.objects.get(pk=network_adapter_id)
                 if 'system_id' in request.POST:
@@ -86,7 +88,8 @@ class SystemStatusHandler(BaseHandler):
                     n.option_host_name = ''
                 if 'dhcp_scope' in request.POST:
                     try:
-                        n.dhcp_scope = DHCP.objects.get(scope_name=request.POST['dhcp_scope'])
+                        n.dhcp_scope = DHCP.objects.get(
+                            scope_name=request.POST['dhcp_scope'])
                     except:
                         pass
                 n.save()
@@ -95,7 +98,7 @@ class SystemStatusHandler(BaseHandler):
             except:
                 resp = rc.NOT_FOUND
         else:
-                resp = rc.NOT_FOUND
+            resp = rc.NOT_FOUND
         return resp
 
     def delete(self, request, network_adapter_id=None):

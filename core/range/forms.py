@@ -15,4 +15,4 @@ class RangeForm(forms.ModelForm):
         super(RangeForm, self).__init__(*args, **kwargs)
         self.fields['dhcpd_raw_include'].label = "DHCP Config Extras"
         self.fields['dhcpd_raw_include'].widget.attrs.update({'cols': '80',
-            'style': 'display: none;width: 680px'})
+                                                              'style': 'display: none;width: 680px'})

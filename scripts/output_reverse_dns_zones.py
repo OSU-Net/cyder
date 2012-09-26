@@ -6,26 +6,31 @@ try:
     import json
 except:
     from django.utils import simplejson as json
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 
 from django.test.client import Client
 
+
 def main():
     client = Client()
     reverse_dns_zones = []
-    reverse_dns_zones = json.loads(client.get('/api/v2/reverse_dns/1/get_reverse_dns_zones/').content)
-    output_dir = "/etc/dnsconfig-autodeploy";
+    reverse_dns_zones = json.loads(
+        client.get('/api/v2/reverse_dns/1/get_reverse_dns_zones/').content)
+    output_dir = "/etc/dnsconfig-autodeploy"
     for dns_zone in reverse_dns_zones:
         dir = dns_zone.split("-")[0]
         output_file = '-'.join(dns_zone.split("-")[1:])
-        final_destination_file = "%s/%s/%s" % (output_dir,dir, output_file)
-        output_text = client.get('/api/v2/reverse_dns/%s/view_hosts/' % dns_zone).content
+        final_destination_file = "%s/%s/%s" % (output_dir, dir, output_file)
+        output_text = client.get(
+            '/api/v2/reverse_dns/%s/view_hosts/' % dns_zone).content
         output_text = output_text[1:-1]
         #f = open(final_destination_file,"w")
-        output_text =  output_text.replace("\\n","\n")
-        output_text =  output_text.replace('\\"','"')
+        output_text = output_text.replace("\\n", "\n")
+        output_text = output_text.replace('\\"', '"')
         #print output_text
         #f.write(output_text)
         #f.close()

@@ -49,7 +49,6 @@ class CommonDNSResource(ModelResource):
         # We dont' want this method being used
         raise NotImplemented
 
-
     def dehydrate(self, bundle):
         # Every DNS Resource should have a domain
         bundle.data['views'] = [view.name for view in bundle.obj.views.all()]
@@ -74,13 +73,14 @@ class CommonDNSResource(ModelResource):
                 bundle.data['domain'] = domain
             except ObjectDoesNotExist, e:
                 errors = {}
-                errors['domain'] = "Couldn't find domain {0}".format(domain_name)
+                errors[
+                    'domain'] = "Couldn't find domain {0}".format(domain_name)
                 bundle.errors['error_messages'] = json.dumps(errors)
         elif ('fqdn' in bundle.data and not ('domain' in bundle.data or 'label'
-                in bundle.data)):
+                                             in bundle.data)):
             try:
                 label_domain = ensure_label_domain(bundle.data['fqdn'])
-                bundle.data['label'] , bundle.data['domain'] = label_domain
+                bundle.data['label'], bundle.data['domain'] = label_domain
             except ValidationError, e:
                 errors = {}
                 errors['fqdn'] = e.messages
@@ -113,7 +113,7 @@ class CommonDNSResource(ModelResource):
         if bundle.errors:
             self.error_response(bundle.errors, request)
         if ('label' in bundle.data and 'domain' in bundle.data and 'fqdn' in
-            bundle.data):
+                bundle.data):
             # See top comment. fqdn takes precidence.
             del bundle.data['label']
             del bundle.data['domain']
@@ -121,7 +121,8 @@ class CommonDNSResource(ModelResource):
 
         if bundle.errors:
             self.error_response(bundle.errors, request)
-        self.apply_commit(obj, bundle.data)  # bundle should only have valid data.
+        self.apply_commit(
+            obj, bundle.data)  # bundle should only have valid data.
                                              # If it doesn't errors will be thrown
 
         return self.save_commit(request, bundle, views, kv)
@@ -130,7 +131,7 @@ class CommonDNSResource(ModelResource):
         views = []
         # We have to remove views from data because those need to be added
         # later in a seperate step
-        for view_name in bundle.data.pop('views',[]):
+        for view_name in bundle.data.pop('views', []):
             try:
                 views.append(View.objects.get(name=view_name))
             except ObjectDoesNotExist, e:
@@ -175,8 +176,6 @@ class CommonDNSResource(ModelResource):
         bundle = self.full_hydrate(bundle)
         if bundle.errors:
             self.error_response(bundle.errors, request)
-
-
 
         # Create the Object
         try:
@@ -231,6 +230,7 @@ class CommonDNSResource(ModelResource):
 allowed_methods = ['get', 'post', 'patch', 'delete']
 v1_dns_api = Api(api_name="v1_dns")
 
+
 class CNAMEResource(CommonDNSResource, ModelResource):
     class Meta:
         always_return_data = True
@@ -240,6 +240,7 @@ class CNAMEResource(CommonDNSResource, ModelResource):
         allowed_methods = allowed_methods
 
 v1_dns_api.register(CNAMEResource())
+
 
 class TXTResource(CommonDNSResource, ModelResource):
     class Meta:
@@ -251,6 +252,7 @@ class TXTResource(CommonDNSResource, ModelResource):
 
 v1_dns_api.register(TXTResource())
 
+
 class SRVResource(CommonDNSResource, ModelResource):
     class Meta:
         always_return_data = True
@@ -260,6 +262,7 @@ class SRVResource(CommonDNSResource, ModelResource):
         allowed_methods = allowed_methods
 
 v1_dns_api.register(SRVResource())
+
 
 class MXResource(CommonDNSResource, ModelResource):
     class Meta:
@@ -271,6 +274,7 @@ class MXResource(CommonDNSResource, ModelResource):
 
 v1_dns_api.register(MXResource())
 
+
 class SSHFPResource(CommonDNSResource, ModelResource):
     class Meta:
         always_return_data = True
@@ -280,6 +284,7 @@ class SSHFPResource(CommonDNSResource, ModelResource):
         allowed_methods = allowed_methods
 
 v1_dns_api.register(SSHFPResource())
+
 
 class AddressRecordResource(CommonDNSResource, ModelResource):
 
@@ -291,6 +296,7 @@ class AddressRecordResource(CommonDNSResource, ModelResource):
         allowed_methods = allowed_methods
 
 v1_dns_api.register(AddressRecordResource())
+
 
 class NameserverResource(CommonDNSResource):
     def hydrate(self, bundle):
@@ -308,6 +314,7 @@ class NameserverResource(CommonDNSResource):
                 error = "Couldn't find domain {0}".format(domain_name)
                 bundle.errors['domain'] = error
         return bundle
+
     class Meta:
         always_return_data = True
         queryset = Nameserver.objects.all()
@@ -317,9 +324,12 @@ class NameserverResource(CommonDNSResource):
 
 v1_dns_api.register(NameserverResource())
 
+
 class PTRResource(CommonDNSResource, ModelResource):
-    views = fields.ListField(null=True, blank=True)  # User passes list of view names, in hydrate we
+    views = fields.ListField(null=True, blank=True)
+                             # User passes list of view names, in hydrate we
                                                     # make these the actual views
+
     def hydrate(self, bundle):
         # Nothing to do here.
         return bundle
@@ -333,13 +343,14 @@ class PTRResource(CommonDNSResource, ModelResource):
 
 v1_dns_api.register(PTRResource())
 
+
 class StaticInterfaceResource(CommonDNSResource, ModelResource):
     system = fields.ToOneField(SystemResource, 'system', null=False, full=True)
 
     def hydrate(self, bundle):
         if 'system_hostname' in bundle.data and 'system' in bundle.data:
             bundle.errors = _("Please only specify a system via the 'system' "
-                "xor the 'system_hostname' parameter")
+                              "xor the 'system_hostname' parameter")
         if 'system_hostname' in bundle.data:
             system_hostname = bundle.data.get('system_hostname')
             try:
@@ -347,7 +358,7 @@ class StaticInterfaceResource(CommonDNSResource, ModelResource):
                 bundle.data['system'] = system
             except ObjectDoesNotExist, e:
                 bundle.errors['system'] = _("Couldn't find system with "
-                    "hostname {0}".format(system_hostname))
+                                            "hostname {0}".format(system_hostname))
         super(StaticInterfaceResource, self).hydrate(bundle)
         return bundle
 
@@ -366,19 +377,19 @@ class StaticInterfaceResource(CommonDNSResource, ModelResource):
             # It's key and value. Nothing else is allowed in the bundle.
             if set('key', 'value') != set(bundle.data):
                 error = _("key and value must be the only keys in your request "
-                    "when you are updating KV pairs.")
+                          "when you are updating KV pairs.")
                 bundle.errors['keyvalue'] = error
                 return []
             else:
                 kv.append((bundle.data['key'], bundle.data['value']))
         elif 'key' in bundle.data and 'value' not in bundle.data:
             error = _("When specifying a key you must also specify a value for "
-                    "that key")
+                      "that key")
             bundle.errors['keyvalue'] = error
             return []
         elif 'value' in bundle.data and 'key' not in bundle.data:
             error = _("When specifying a value you must also specify a key for "
-                    "that value")
+                      "that value")
             bundle.errors['keyvalue'] = error
             return []
         elif 'iname' in bundle.data:
@@ -386,7 +397,7 @@ class StaticInterfaceResource(CommonDNSResource, ModelResource):
             del bundle.data['iname']
             if not iname:
                 error = _("Could not parse iname {0} into interface_type and "
-                    "primary (or possible not an alias).".format(bundle.data['iname']))
+                          "primary (or possible not an alias).".format(bundle.data['iname']))
                 bundle.errors['iname'] = error
                 return []
             kv.append(('interface_type', iname.group(1)))
@@ -397,11 +408,11 @@ class StaticInterfaceResource(CommonDNSResource, ModelResource):
                 kv.append(('alias', '0'))
         return kv
 
-
     class Meta:
         always_return_data = True
         queryset = StaticInterface.objects.all()
-        fields = StaticInterface.get_api_fields() + ['domain', 'views', 'system']
+        fields = StaticInterface.get_api_fields(
+        ) + ['domain', 'views', 'system']
         authorization = Authorization()
         allowed_methods = allowed_methods
         resource_name = 'staticinterface'

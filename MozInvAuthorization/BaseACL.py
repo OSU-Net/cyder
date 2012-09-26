@@ -1,4 +1,6 @@
 from django.core.exceptions import PermissionDenied
+
+
 class BaseACL(object):
     request = None
     user = None
@@ -10,15 +12,16 @@ class BaseACL(object):
         else:
             self.user = request.META['REMOTE_USER']
 
-    def check_create(self, allowed = None):
+    def check_create(self, allowed=None):
         pass
 
-    def check_read(self, allowed = None):
+    def check_read(self, allowed=None):
         pass
 
-    def check_update(self, allowed = None):
+    def check_update(self, allowed=None):
         pass
-    def check_delete(self, allowed = None):
+
+    def check_delete(self, allowed=None):
         pass
 
     """
@@ -27,4 +30,5 @@ class BaseACL(object):
     """
     def check_for_permission(self, user, acl_list):
         if user is None or user == '' or user not in acl_list:
-            raise PermissionDenied('You do not have permission to delete this license.')
+            raise PermissionDenied(
+                'You do not have permission to delete this license.')

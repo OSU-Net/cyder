@@ -23,6 +23,7 @@ end_upper, end_lower - int with 64bits of info
 proto - Either '4' or '6'
 """
 
+
 def sif(ipfset, site):
     if not site:
         return [], None
@@ -63,8 +64,8 @@ def nif(ipfset, network, root=True):
     if root:
         try:
             n = Network.objects.get(ip_upper=network.ip_upper,
-                    ip_lower=network.ip_lower, ip_type=network.ip_type,
-                    prefixlen=network.prefixlen)
+                                    ip_lower=network.ip_lower, ip_type=network.ip_type,
+                                    prefixlen=network.prefixlen)
             misc.add(n)
         except ObjectDoesNotExist, e:
             pass
@@ -92,18 +93,19 @@ def ipf(ipfset, start, end, ip_type, root=True):
     ip_type = ip_type
     try:
         range_ = Range.objects.get(start_upper=start_upper,
-                    start_lower=start_lower, end_upper=end_upper,
-                    end_lower=end_lower, ip_type=ip_type)
+                                   start_lower=start_lower, end_upper=end_upper,
+                                   end_lower=end_lower, ip_type=ip_type)
     except ObjectDoesNotExist, e:
         range_ = None
     ipf = IPFilter(range_, ip_type, start_upper, start_lower, end_upper,
-            end_lower)
+                   end_lower)
     ipfset.add(ipf)
     return ipfset
+
 
 def run_test():
     ipfset = IPFilterSet()
     print sif(ipfset, Site.objects.get(name='scl3'))
     print vif(ipfset, Vlan.objects.get(name='private'))
-    print '-'*8
+    print '-' * 8
     ipfset.pprint()

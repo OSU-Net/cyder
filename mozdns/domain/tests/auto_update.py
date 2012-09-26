@@ -19,15 +19,16 @@ from core.site.models import Site
 
 import pdb
 
+
 class UpdateRecordDeleteDomainTests(TestCase):
 
     def generic_check(self, obj, do_label=True, label_prefix=""):
         # Make sure all record types block
-        c, _ = Domain.objects.get_or_create(name = 'foo22')
+        c, _ = Domain.objects.get_or_create(name='foo22')
         self.assertFalse(c.purgeable)
-        f_c, _ = Domain.objects.get_or_create(name = 'foo.foo22')
+        f_c, _ = Domain.objects.get_or_create(name='foo.foo22')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                comment="foo.foo22")
+                                         comment="foo.foo22")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -71,7 +72,7 @@ class UpdateRecordDeleteDomainTests(TestCase):
 
     def test_srv_update(self):
         srv = SRV(target="foo", priority=4,
-                weight=4, port=34)
+                  weight=4, port=34)
         self.generic_check(srv, label_prefix="_")
 
     def test_cname_update(self):

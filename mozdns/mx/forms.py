@@ -9,6 +9,7 @@ class MXForm(ModelForm):
         exclude = ('fqdn',)
         widgets = {'views': forms.CheckboxSelectMultiple}
 
+
 class FQDNMXForm(MXForm):
     class Meta:
         model = MX

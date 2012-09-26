@@ -13,19 +13,19 @@ class Migration(SchemaMigration):
 
         # Adding field 'Range.dhcpd_raw_input'
         db.add_column('range', 'dhcpd_raw_input',
-                      self.gf('django.db.models.fields.TextField')(null=True, blank=True),
+                      self.gf('django.db.models.fields.TextField')(
+                          null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Adding field 'Range.dhcp_raw_input'
         db.add_column('range', 'dhcp_raw_input',
-                      self.gf('django.db.models.fields.TextField')(null=True, blank=True),
+                      self.gf('django.db.models.fields.TextField')(
+                          null=True, blank=True),
                       keep_default=False)
 
         # Deleting field 'Range.dhcpd_raw_input'
         db.delete_column('range', 'dhcpd_raw_input')
-
 
     models = {
         'network.network': {

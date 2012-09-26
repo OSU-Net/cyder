@@ -30,15 +30,15 @@ class MasterFormTests(TestCase):
     def craft_ip_str(self):
         data = {
             'ip_str': "10.{0}.{1}.{2}".format(random_byte(), random_byte(),
-                random_byte(), random_byte())
+                                              random_byte(), random_byte())
         }
         return data
 
     def craft_label_domain(self):
         data = {
-                'label': random_label(),
-                'domain': self.d.name
-                }
+            'label': random_label(),
+            'domain': self.d.name
+        }
         return data
 
     def craft_number_dict(self, field):
@@ -51,13 +51,13 @@ class MasterFormTests(TestCase):
 
     def craft_ttl_and_comment(self):
         data = {
-                'ttl': random_byte(),
-                'comment': random_label()
-                }
+            'ttl': random_byte(),
+            'comment': random_label()
+        }
         return data
 
     def test_A(self):
-        data = {'rtype':'A'}
+        data = {'rtype': 'A'}
         data.update(self.craft_label_domain())
         data.update(self.craft_ip_str())
         data.update(self.craft_ttl_and_comment())
@@ -67,7 +67,7 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
@@ -75,11 +75,11 @@ class MasterFormTests(TestCase):
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
 
     def test_TXT(self):
-        data = {'rtype':'A'}
+        data = {'rtype': 'A'}
         data.update(self.craft_label_domain())
         data.update(self.craft_ip_str())
         data.update(self.craft_ttl_and_comment())
@@ -89,7 +89,7 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
@@ -97,11 +97,11 @@ class MasterFormTests(TestCase):
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
 
     def test_CNAME(self):
-        data = {'rtype':'CNAME'}
+        data = {'rtype': 'CNAME'}
         data.update(self.craft_label_domain())
         data.update({'target': random_label()})
         data.update(self.craft_ttl_and_comment())
@@ -111,7 +111,7 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
@@ -119,11 +119,11 @@ class MasterFormTests(TestCase):
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
 
     def test_PTR(self):
-        data = {'rtype':'PTR'}
+        data = {'rtype': 'PTR'}
         data.update({'name': random_label()})
         data.update(self.craft_ip_str())
         data.update(self.craft_ttl_and_comment())
@@ -133,7 +133,7 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
@@ -141,11 +141,11 @@ class MasterFormTests(TestCase):
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
 
     def test_MX(self):
-        data = {'rtype':'MX'}
+        data = {'rtype': 'MX'}
         data.update(self.craft_label_domain())
         data.update(self.craft_ttl_and_comment())
         data.update(self.craft_number_dict('priority'))
@@ -156,7 +156,7 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
@@ -164,14 +164,14 @@ class MasterFormTests(TestCase):
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
 
     def test_SRV(self):
-        data = {'rtype':'SRV'}
+        data = {'rtype': 'SRV'}
         data.update({'target': random_label()})
         data.update(self.craft_label_domain())
-        data['label'] = "_"+random_label()
+        data['label'] = "_" + random_label()
         data.update(self.craft_ttl_and_comment())
         data.update(self.craft_number_dict('priority'))
         data.update(self.craft_number_dict('weight'))
@@ -183,20 +183,20 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
         data.update(self.craft_label_domain())
-        data['label'] = "_"+random_label()
+        data['label'] = "_" + random_label()
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
 
     def test_NS(self):
-        data = {'rtype':'NS'}
+        data = {'rtype': 'NS'}
         data['domain'] = self.d.name
         data.update(self.craft_ttl_and_comment())
         data.update(self.craft_name_dict('server'))
@@ -206,7 +206,7 @@ class MasterFormTests(TestCase):
         self.assertTrue(response.status_code, 200)
         content = json.loads(response.content)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         # Now do an update
         orig_obj_pk = content['obj_pk']
         data['pk'] = orig_obj_pk
@@ -214,9 +214,8 @@ class MasterFormTests(TestCase):
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.validate_return_object(content['obj_class'],
-                content['obj_pk'], data)
+                                    content['obj_pk'], data)
         self.assertEqual(orig_obj_pk, content['obj_pk'])
-
 
     def test_no_rtype(self):
         data = {}
@@ -241,6 +240,7 @@ class MasterFormTests(TestCase):
                 self.assertEqual(getattr(obj, k).name, v)
             else:
                 self.assertEqual(getattr(obj, k), v)
+
 
 class FakeRequest(object):
     def __init__(self, data):

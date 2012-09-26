@@ -14,11 +14,14 @@ try:
 except:
     from django.utils import simplejson as json
 
-from test_utils import setup_test_environment,TestCase
+from test_utils import setup_test_environment, TestCase
 setup_test_environment()
 from libs.Rack import Rack
+
+
 class RackTest(TestCase):
     fixtures = ['testdata.json']
+
     def setUp(self):
         self.client = Client()
 

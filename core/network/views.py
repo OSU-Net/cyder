@@ -138,4 +138,4 @@ def network_detail(request, network_pk):
         'eldars': eldars,
         'sub_networks': sub_networks,
         'attrs': attrs,
-        })
+    })

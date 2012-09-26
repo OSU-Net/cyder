@@ -46,6 +46,7 @@ DO_DEBUG = False
 
 pp = pprint.PrettyPrinter(indent=2)
 
+
 def migrate_networks():
     all = truth.models.Truth.objects.all()
     print all
@@ -66,7 +67,7 @@ def migrate_networks():
     is_pool_allow_bootp = re.compile("dhcp.pool.allow_bootp.\d")
     for scope in scopes:
         if str(scope).endswith("fake"):
-            print "Skipping "+str(scope)
+            print "Skipping " + str(scope)
             continue
         vlan_number = vlan_number_re.search(str(scope)).groups(1)[0]
         network_start = None
@@ -103,7 +104,7 @@ def migrate_networks():
 
         vlan = Vlan.objects.filter(number=vlan_number)
         try:
-            net = ipaddr.IPv4Network(network_start+'/'+netmask)
+            net = ipaddr.IPv4Network(network_start + '/' + netmask)
         except ipaddr.AddressValueError, e:
             if str(scope) == "phx1-vlan75":
                 net = ipaddr.IPv4Network("10.8.75.0/24")
@@ -111,25 +112,27 @@ def migrate_networks():
                 pdb.set_trace()
                 continue
         network = Network.objects.filter(ip_lower=int(net.network),
-                ip_upper = 0, prefixlen = net.prefixlen)
+                                         ip_upper=0, prefixlen=net.prefixlen)
 
-        print "="*20 + " " +str(scope)
-        print "Expected Vlan: "+str(vlan)
+        print "=" * 20 + " " + str(scope)
+        print "Expected Vlan: " + str(vlan)
         print vlan_number
         if not network:
-            print "Creating new Network: "+str(net)
-            network, _ = Network.objects.get_or_create(network_str = str(net), ip_type='4')
+            print "Creating new Network: " + str(net)
+            network, _ = Network.objects.get_or_create(
+                network_str=str(net), ip_type='4')
             parent = calc_parent(network)
             if parent:
                 network.site = parent.site
         else:
             network = network[0]
-            print "Existing Network: "+str(network)
+            print "Existing Network: " + str(network)
 
         if vlan:
             network.vlan = vlan[0]
         else:
-            v, _ = Vlan.objects.get_or_create(name="I need a name.", number=vlan_number)
+            v, _ = Vlan.objects.get_or_create(
+                name="I need a name.", number=vlan_number)
             network.vlan = v
         network.save()
 
@@ -153,7 +156,8 @@ def migrate_networks():
                 else:
                     real_ntp_servers.append(server)
             if real_ntp_servers:
-                kv = NetworkKeyValue(key="ntp-servers", value=", ".join(real_ntp_servers),
+                kv = NetworkKeyValue(
+                    key="ntp-servers", value=", ".join(real_ntp_servers),
                         network=network)
                 try:
                     kv.clean()
@@ -164,7 +168,7 @@ def migrate_networks():
         if domain_name:
             pdb.set_trace()
             kv = NetworkKeyValue(key="domain-name", value=domain_name,
-                    network=network)
+                                 network=network)
             try:
                 kv.clean()
                 kv.save()
@@ -172,7 +176,8 @@ def migrate_networks():
                 # Duplicate error
                 pass
         if dns_servers:
-            kv = NetworkKeyValue(key="ntp-servers", value=", ".join(dns_servers),
+            kv = NetworkKeyValue(
+                key="ntp-servers", value=", ".join(dns_servers),
                     network=network)
             try:
                 kv.clean()
@@ -198,7 +203,7 @@ def migrate_networks():
                 pass
         elif allow_booting and allow_bootp:
             kv = NetworkKeyValue(key="allow", value="booting, bootp",
-                    network=network)
+                                 network=network)
             try:
                 kv.clean()
                 kv.save()

@@ -27,7 +27,8 @@ from MozInvAuthorization.UnmanagedSystemACL import UnmanagedSystemACL
 
 def license_version_search(request):
     query = request.GET.get('query')
-    tmp = [str(m['version']) for m in models.UserLicense.objects.filter(version__icontains=query).values('version').distinct()]
+    tmp = [str(m['version']) for m in models.UserLicense.objects.filter(
+        version__icontains=query).values('version').distinct()]
     versions = list(set(tmp))
     ret_dict = {}
     ret_dict['query'] = query
@@ -35,28 +36,34 @@ def license_version_search(request):
     ret_dict['data'] = versions
     return HttpResponse(json.dumps(ret_dict))
 
+
 def license_type_search(request):
     query = request.GET.get('query')
-    types = [m['license_type'] for m in models.UserLicense.objects.filter(license_type__icontains=query).values('license_type').distinct()]
+    types = [m['license_type'] for m in models.UserLicense.objects.filter(
+        license_type__icontains=query).values('license_type').distinct()]
     ret_dict = {}
     ret_dict['query'] = query
     ret_dict['suggestions'] = types
     ret_dict['data'] = types
     return HttpResponse(json.dumps(ret_dict))
+
+
 @csrf_exempt
 def owners_quicksearch_ajax(request):
     """Returns systems sort table"""
     search = request.POST['quicksearch']
     filters = [Q(**{"%s__icontains" % t: search})
-                    for t in models.Owner.search_fields]
+               for t in models.Owner.search_fields]
 
     owners = models.Owner.objects.filter(
-                reduce(operator.or_, filters))
+        reduce(operator.or_, filters))
 
     return render_to_response('user_systems/owners_quicksearch.html', {
-            'owners': owners,
-           },
-           RequestContext(request))
+        'owners': owners,
+    },
+        RequestContext(request))
+
+
 @csrf_exempt
 def license_edit(request, object_id):
     license = get_object_or_404(models.UserLicense, pk=object_id)
@@ -69,24 +76,29 @@ def license_edit(request, object_id):
         form = forms.UserLicenseForm(instance=license)
 
     return render_to_response('user_systems/userlicense_form.html', {
-            'form': form,
-           },
-           RequestContext(request))
+        'form': form,
+    },
+        RequestContext(request))
+
+
 def owner_list(request):
     owners = models.Owner.objects.select_related('user_location').all()
     upgradeable_users = models.Owner.objects.filter(unmanagedsystem__date_purchased__lt=datetime.now() - timedelta(days=730)).distinct().count()
     return render_to_response('user_systems/owner_list.html', {
-            'owner_list': owners,
-            'upgradeable_users':upgradeable_users,
-           },
-           RequestContext(request))
+        'owner_list': owners,
+        'upgradeable_users': upgradeable_users,
+    },
+        RequestContext(request))
+
+
 def owner_show(request, object_id):
     owner = get_object_or_404(models.Owner, pk=object_id)
 
     return render_to_response('user_systems/owner_detail.html', {
-            'owner': owner,
-           },
-           RequestContext(request))
+        'owner': owner,
+    },
+        RequestContext(request))
+
 
 def owner_delete(request, object_id):
     owner = get_object_or_404(models.Owner, pk=object_id)
@@ -95,9 +107,11 @@ def owner_delete(request, object_id):
         return HttpResponseRedirect('/user_systems/owners/')
     else:
         return render_to_response('user_systems/owner_confirm_delete.html', {
-                'owner': owner,
-            },
+            'owner': owner,
+        },
             RequestContext(request))
+
+
 @csrf_exempt
 def owner_edit(request, object_id):
     owner = get_object_or_404(models.Owner, pk=object_id)
@@ -111,9 +125,11 @@ def owner_edit(request, object_id):
         form = forms.OwnerForm(instance=owner)
 
     return render_to_response('user_systems/owner_form.html', {
-            'form': form,
-           },
-           RequestContext(request))
+        'form': form,
+    },
+        RequestContext(request))
+
+
 def owner_create(request):
     initial = {}
     if request.method == 'POST':
@@ -125,9 +141,11 @@ def owner_create(request):
         form = forms.OwnerForm(initial=initial)
 
     return render_to_response('user_systems/owner_form.html', {
-            'form': form,
-           },
-           RequestContext(request))
+        'form': form,
+    },
+        RequestContext(request))
+
+
 def license_new(request):
     initial = {}
     if request.method == 'POST':
@@ -139,9 +157,11 @@ def license_new(request):
         form = forms.UserLicenseForm(initial=initial)
 
     return render_to_response('user_systems/userlicense_form.html', {
-            'form': form,
-           },
-           RequestContext(request))
+        'form': form,
+    },
+        RequestContext(request))
+
+
 @csrf_exempt
 def license_quicksearch_ajax(request):
     """Returns systems sort table"""
@@ -155,33 +175,36 @@ def license_quicksearch_ajax(request):
         search = request.GET.get('quicksearch', None)
     if search:
         filters = [Q(**{"%s__icontains" % t: search})
-                        for t in models.UserLicense.search_fields]
+                   for t in models.UserLicense.search_fields]
 
         licenses = models.UserLicense.objects.filter(
-                    reduce(operator.or_, filters))
+            reduce(operator.or_, filters))
     else:
         licenses = None
 
     return render_to_response('user_systems/license_quicksearch.html', {
-            'licenses': licenses,
-           },
-           RequestContext(request))
+        'licenses': licenses,
+    },
+        RequestContext(request))
+
+
 @csrf_exempt
 def user_system_quicksearch_ajax(request):
     """Returns systems sort table"""
     search = request.POST['quicksearch']
     print request.POST
     filters = [Q(**{"%s__icontains" % t: search})
-                    for t in models.UnmanagedSystem.search_fields]
+               for t in models.UnmanagedSystem.search_fields]
 
     systems = models.UnmanagedSystem.objects.filter(
-                reduce(operator.or_, filters))
+        reduce(operator.or_, filters))
 
     return render_to_response('user_systems/quicksearch.html', {
-            'systems': systems,
-            'BUG_URL': settings.BUG_URL,
-           },
-           RequestContext(request))
+        'systems': systems,
+        'BUG_URL': settings.BUG_URL,
+    },
+        RequestContext(request))
+
 
 @csrf_exempt
 def user_system_view(request, template, data, instance=None):
@@ -195,16 +218,16 @@ def user_system_view(request, template, data, instance=None):
 
         try:
             os, c = models.OperatingSystem.objects.get_or_create(
-                    name=request.POST['js_os_name'],
-                    version=request.POST['js_os_version'])
+                name=request.POST['js_os_name'],
+                version=request.POST['js_os_version'])
             post_data['operating_system'] = os.id
         except KeyError:
             pass
 
         try:
             server_model, c = models.ServerModel.objects.get_or_create(
-                            vendor=request.POST['js_server_model_vendor'],
-                            model=request.POST['js_server_model_model'])
+                vendor=request.POST['js_server_model_vendor'],
+                model=request.POST['js_server_model_model'])
             post_data['server_model'] = server_model.id
         except KeyError:
             pass
@@ -314,6 +337,8 @@ def user_system_view(request, template, data, instance=None):
     #data['owner_json'].append("Stock")
 
     return render_to_response(template, data, RequestContext(request))
+
+
 def get_changed_by(request):
     try:
         remote_user = request.META['REMOTE_USER']
@@ -325,12 +350,15 @@ def get_changed_by(request):
 #def license_new(request):
 #	return render_to_response('user_systems/userlicense_new.html')
 
+
 def license_show(request, object_id):
     license = get_object_or_404(models.UserLicense, pk=object_id)
 
     return render_to_response('user_systems/userlicense_detail.html', {
-            'license': license,
-            },RequestContext(request) )
+        'license': license,
+    }, RequestContext(request))
+
+
 def license_index(request):
     system_list = models.UserLicense.objects.select_related('owner').all()
     paginator = Paginator(system_list, 25)
@@ -350,11 +378,14 @@ def license_index(request):
         systems = paginator.page(paginator.num_pages)
 
     return render_to_response('user_systems/userlicense_list.html', {
-            'license_list': systems,
-            'BUG_URL': settings.BUG_URL
-            },RequestContext(request) )
+        'license_list': systems,
+        'BUG_URL': settings.BUG_URL
+    }, RequestContext(request))
+
+
 def user_system_index(request):
-    system_list = models.UnmanagedSystem.objects.select_related('owner', 'server_model', 'operating_system').order_by('owner__name')
+    system_list = models.UnmanagedSystem.objects.select_related(
+        'owner', 'server_model', 'operating_system').order_by('owner__name')
     paginator = Paginator(system_list, 25)
 
     if 'page' in request.GET:
@@ -372,21 +403,22 @@ def user_system_index(request):
         systems = paginator.page(paginator.num_pages)
 
     return render_to_response('user_systems/unmanagedsystem_list.html', {
-            'user_system_list': systems,
-            'BUG_URL': settings.BUG_URL
-            },RequestContext(request) )
+        'user_system_list': systems,
+        'BUG_URL': settings.BUG_URL
+    }, RequestContext(request))
 
 
 def license_delete(request, object_id):
     license = get_object_or_404(models.UserLicense, pk=object_id)
     try:
         license.delete()
-        return HttpResponseRedirect( reverse('license-list') )
+        return HttpResponseRedirect(reverse('license-list'))
     except PermissionDenied, e:
         return render_to_response('user_systems/unauthorized_delete.html', {
-                'content': 'You do not have permission to delete this license',
-            },
+            'content': 'You do not have permission to delete this license',
+        },
             RequestContext(request))
+
 
 def unmanaged_system_delete(request, object_id):
     #Dummy comment
@@ -397,22 +429,23 @@ def unmanaged_system_delete(request, object_id):
             acl.check_delete()
             user_system.delete()
             send_mail('System Deleted', '%s Deleted by %s' % (user_system, request.user.username), settings.FROM_EMAIL_ADDRESS, settings.UNAUTHORIZED_EMAIL_ADDRESS, fail_silently=False)
-            return HttpResponseRedirect( reverse('user-system-list') )
+            return HttpResponseRedirect(reverse('user-system-list'))
         except PermissionDenied, e:
             send_mail('Unauthorized System Delete Attempt', 'Unauthorized Attempt to Delete %s by %s' % (user_system, request.user.username), settings.FROM_EMAIL_ADDRESS, settings.UNAUTHORIZED_EMAIL_ADDRESS, fail_silently=False)
             return render_to_response('user_systems/unauthorized_delete.html', {
-                    'content': 'You do not have permission to delete this system',
-                },
+                'content': 'You do not have permission to delete this system',
+            },
                 RequestContext(request))
     else:
         return render_to_response('user_systems/unmanagedsystem_confirm_delete.html', {
-                'owner': user_system,
-            },
+            'owner': user_system,
+        },
             RequestContext(request))
 
 
 def show_by_model(request, object_id):
-    system_list = models.UnmanagedSystem.objects.filter(server_model=models.ServerModel.objects.get(id=object_id))
+    system_list = models.UnmanagedSystem.objects.filter(
+        server_model=models.ServerModel.objects.get(id=object_id))
     if 'show_all' in request.GET:
         paginator = Paginator(system_list, system_list.count())
     else:
@@ -432,10 +465,11 @@ def show_by_model(request, object_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         systems = paginator.page(paginator.num_pages)
     return render_to_response('user_systems/unmanagedsystem_list.html', {
-            'user_system_list': systems,
-            'show_all': True,
-           },
-           RequestContext(request))
+        'user_system_list': systems,
+        'show_all': True,
+    },
+        RequestContext(request))
+
 
 def user_system_show(request, object_id):
     system = get_object_or_404(models.UnmanagedSystem, id=object_id)
@@ -445,10 +479,12 @@ def user_system_show(request, object_id):
 
     #system = get_object_or_404(models.UnmanagedSystem
     return render_to_response('user_systems/unmanagedsystem_detail.html', {
-            'user_system': system,
-            'settings': settings,
-           },
-           RequestContext(request))
+        'user_system': system,
+        'settings': settings,
+    },
+        RequestContext(request))
+
+
 def user_system_show_by_asset_tag(request, id):
     system = get_object_or_404(models.UnmanagedSystem, asset_tag=id)
     #system = models.UnmanagedSystem.objects.select_related(
@@ -457,9 +493,9 @@ def user_system_show_by_asset_tag(request, id):
 
     #system = get_object_or_404(models.UnmanagedSystem
     return render_to_response('user_systems/unmanagedsystem_detail.html', {
-            'user_system': system,
-           },
-           RequestContext(request))
+        'user_system': system,
+    },
+        RequestContext(request))
 
 
 def user_system_new(request):
@@ -490,7 +526,6 @@ def user_system_csv(request):
     except:
         pass
 
-
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=user_systems.csv'
 
@@ -504,7 +539,7 @@ def user_system_csv(request):
         except AttributeError:
             location = ''
         writer.writerow([s.owner, location, s.serial, s.asset_tag,
-                s.operating_system, s.server_model, s.date_purchased, s.cost])
+                         s.operating_system, s.server_model, s.date_purchased, s.cost])
 
     return response
 

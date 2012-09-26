@@ -15,22 +15,22 @@ Options:
 import os
 import sys
 from textwrap import dedent
-from optparse import  OptionParser
+from optparse import OptionParser
 from hashlib import md5
 
 # Constants
 PROJECT = 0
-VENDOR  = 1
+VENDOR = 1
 
 ENV_BRANCH = {
     # 'environment': [PROJECT_BRANCH, VENDOR_BRANCH],
-    'dev':   ['base',   'master'],
+    'dev': ['base', 'master'],
     'stage': ['master', 'master'],
-    'prod':  ['prod',   'master'],
+    'prod': ['prod', 'master'],
 }
 
-# The URL of the SVN repository with the localization files (*.po). If you set 
-# it to a non-empty value, remember to `git rm --cached -r locale` in the root 
+# The URL of the SVN repository with the localization files (*.po). If you set
+# it to a non-empty value, remember to `git rm --cached -r locale` in the root
 # of the project.  Example:
 # LOCALE_REPO_URL = 'https://svn.mozilla.org/projects/l10n-misc/trunk/playdoh/locale'
 LOCALE_REPO_URL = ''
@@ -56,8 +56,8 @@ def update_site(env, debug):
 
     commands = [
         (CHDIR, here),
-        (EXEC,  GIT_PULL % project_branch),
-        (EXEC,  GIT_SUBMODULE),
+        (EXEC, GIT_PULL % project_branch),
+        (EXEC, GIT_SUBMODULE),
     ]
 
     # Checkout the locale repo into locale/ if the URL is known
@@ -84,8 +84,8 @@ def update_site(env, debug):
 
     commands += [
         (CHDIR, os.path.join(here, 'vendor')),
-        (EXEC,  GIT_PULL % vendor_branch),
-        (EXEC,  GIT_SUBMODULE),
+        (EXEC, GIT_PULL % vendor_branch),
+        (EXEC, GIT_SUBMODULE),
         (CHDIR, os.path.join(here)),
         (EXEC, 'python2.6 vendor/src/schematic/schematic migrations/'),
         (EXEC, 'python2.6 manage.py compress_assets'),

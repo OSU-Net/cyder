@@ -21,10 +21,12 @@ import pdb
 import sys
 import traceback
 
+
 class CommonDNSResource(Resource):
     domain = fields.CharField()  # User passes string, in hydrate we find a
                                  # domain
-    views = fields.ListField(null=True, blank=True)  # User passes list of view names, in hydrate we
+    views = fields.ListField(null=True, blank=True)
+                             # User passes list of view names, in hydrate we
                                 # make these the actual views
 
     def dehydrate(self, bundle):
@@ -40,7 +42,7 @@ class CommonDNSResource(Resource):
                 view = View.objects.get(name=view_name)
             except ObjectDoesNotExist, e:
                 raise HydrationError("Couldn't find the view "
-                        "{0}".format(view_name))
+                                     "{0}".format(view_name))
         return bundle
 
     def hydrate(self, bundle):
@@ -50,7 +52,7 @@ class CommonDNSResource(Resource):
             domain = Domain.objects.get(name=domain_name)
         except ObjectDoesNotExist, e:
             raise HydrationError("Couldn't find domain "
-                    "{0}".format(domain_name))
+                                 "{0}".format(domain_name))
         bundle.data['domain'] = domain
         return bundle
 
@@ -62,7 +64,8 @@ class CommonDNSResource(Resource):
 
         if bundle.errors:
             self.error_response(bundle.errors, request)
-        self.apply_commit(obj, bundle.data)  # bundle should only have valid data.
+        self.apply_commit(
+            obj, bundle.data)  # bundle should only have valid data.
                                                    # If it doesn't errors will be thrown
         self.apply_custom_hydrate(obj, bundle, action='update')
         return self.save_commit(request, obj, bundle, views)
@@ -71,12 +74,12 @@ class CommonDNSResource(Resource):
         views = []
         # We have to remove views from data because those need to be added
         # later in a seperate step
-        for view_name in bundle.data.pop('views',[]):
+        for view_name in bundle.data.pop('views', []):
             try:
                 views.append(View.objects.get(name=view_name))
             except ObjectDoesNotExist, e:
                 raise HydrationError("Couldn't find the view "
-                        "{0}".format(view_name))
+                                     "{0}".format(view_name))
         return views
 
     def apply_commit(self, obj, commit_data):

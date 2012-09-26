@@ -18,6 +18,7 @@ pp = pprint.PrettyPrinter(indent=2)
 
 SITE_IGNORE = []
 
+
 def get_site_dirs(base_dir):
     if os.access(base_dir, os.R_OK):
         site_dirs = os.listdir(base_dir)
@@ -25,6 +26,7 @@ def get_site_dirs(base_dir):
         log("Can't access svn_site_path", ERROR)
         site_dirs = None
     return site_dirs
+
 
 def process_site(site, site_dir):
     log("=== Processing site: {0}".format(site), DEBUG)
@@ -39,6 +41,7 @@ def process_site(site, site_dir):
             continue
         log(file_, DEBUG)
 
+
 def is_valid_site_dir(site, site_dir):
     has_private, has_SOA = False, False
 
@@ -51,10 +54,12 @@ def is_valid_site_dir(site, site_dir):
         return True
     else:
         if not has_private:
-            log("{0} is missing the 'private' data file.".format(site), WARNING)
+            log("{0} is missing the 'private' data file.".format(
+                site), WARNING)
         if not has_SOA:
             log("{0} is missing the 'SOA' file.".format(site), WARNING)
         return False
+
 
 def get_zone_data(domain, filepath, dirpath, rtype=None):
     log("domain = '{0}'\nfilepath = '{1}'\ndirpath = '{2}'\n".format(domain,
@@ -70,6 +75,7 @@ def get_zone_data(domain, filepath, dirpath, rtype=None):
 
     os.chdir(cwd)
     return (rzone, data)
+
 
 def collect_svn_zone(root_domain, zone_path, relative_zone_path):
     cwd = os.getcwd()
@@ -97,7 +103,7 @@ def collect_svn_zones(svn_site_path, relative_zone_path):
         if site in SITE_IGNORE:
             continue
 
-        if svn_site_path[len(svn_site_path)-1] == '/':
+        if svn_site_path[len(svn_site_path) - 1] == '/':
             svn_site_path = svn_site_path[:-1]
 
         full_site_path = "{0}/{1}".format(svn_site_path, site)
@@ -112,12 +118,13 @@ def collect_svn_zones(svn_site_path, relative_zone_path):
         if is_valid_site_dir(site, site_dir):
             domain = "{0}.mozilla.com".format(site)
             site_zone_data = get_zone_data(domain,
-                    "{0}/private".format(full_site_path), relative_zone_path, 'A')
+                                           "{0}/private".format(full_site_path), relative_zone_path, 'A')
             sites[site] = site_zone_data
         else:
             log("[Invalid] site dir for site {0}".format(site_dir), WARNING)
             continue
     return sites
+
 
 def collect_rev_svn_zone(rev_domain, rev_zone_path, relative_zone_path):
     rev_root_domain = "{0}.IN-ADDR.ARPA".format('.'.join(
@@ -127,6 +134,7 @@ def collect_rev_svn_zone(rev_domain, rev_zone_path, relative_zone_path):
     rzone = zone.from_file(rev_zone_path, rev_root_domain, relativize=False)
     os.chdir(cwd)
     return rzone
+
 
 def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
     """
@@ -147,7 +155,7 @@ def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
         if site in SITE_IGNORE:
             continue
 
-        if svn_rev_site_path[len(svn_rev_site_path)-1] == '/':
+        if svn_rev_site_path[len(svn_rev_site_path) - 1] == '/':
             svn_rev_site_path = svn_rev_site_path[:-1]
 
         almost_full_site_path = "{0}/{1}".format(svn_rev_site_path, site)
@@ -175,8 +183,8 @@ def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
             for octet in reversed(octets):
                 if not octet.isdigit():
                     print ("Could not parse reverse domain name ",
-                            "from file {0}/{1}/{2}.".format(svn_rev_site_path,
-                            site, network), ERROR)
+                           "from file {0}/{1}/{2}.".format(svn_rev_site_path,
+                                                           site, network), ERROR)
                     fail = True
                 rev_domain.append(octet)
 
@@ -186,38 +194,42 @@ def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
 
             rev_domain = "{0}.IN-ADDR.ARPA".format('.'.join(rev_domain))
             full_network_path = "{0}/{1}/{2}".format(svn_rev_site_path, site,
-                                                    network)
+                                                     network)
 
             mode = os.stat(full_network_path).st_mode
             if stat.S_ISREG(mode) == 0:
                 log("{0} is missing it's 'SOA' file".format(site),
-                        ERROR)
+                    ERROR)
             try:
-                if full_network_path.replace('in-addr','').find('-') != -1:
+                if full_network_path.replace('in-addr', '').find('-') != -1:
                     continue
                 site_zone_data = get_zone_data(rev_domain,
-                        full_network_path, relative_zone_path, 'PTR')
+                                               full_network_path, relative_zone_path, 'PTR')
             except dns.zone.NoSOA:
                 log("No SOA found for {0}".format(full_network_path),
-                        ERROR)
+                    ERROR)
                 log("domain = '{0}'\nsvn_rev_site_path = '{1}'\n"
-                        "full_network_path = '{2}'\n".format(rev_domain,
-                        svn_rev_site_path, full_network_path), ERROR)
+                    "full_network_path = '{2}'\n".format(rev_domain,
+                                                         svn_rev_site_path, full_network_path), ERROR)
 
             sites[network] = (full_network_path, site_zone_data)
 
     return sites
 
+
 def get_hash_store():
     hash_store, created = Truth.objects.get_or_create(name="dns_site_hash",
-            description="Truth store for storing hashes of DNS data files in "
-            "SVN. Don't edit these entries")
+                                                      description="Truth store for storing hashes of DNS data files in "
+                                                      "SVN. Don't edit these entries")
     if created:
         log("Created dns_site_hash")
     return hash_store
 
 # This regex is wrong. it matches 256.256.256.256.
-is_network_file = re.compile("^([0-9][0-9]?[0-9]?)\.([0-9][0-9]?[0-9]?)\.([0-9][0-9]?[0-9]?)$")
+is_network_file = re.compile(
+    "^([0-9][0-9]?[0-9]?)\.([0-9][0-9]?[0-9]?)\.([0-9][0-9]?[0-9]?)$")
+
+
 def get_reverse_svn_sites_changed(sites, site_path):
     """This function looks at every file in the in-addr/ directory in SVN and
     compares it to the full list of sites that *could* be built. If the network
@@ -245,19 +257,21 @@ def get_reverse_svn_sites_changed(sites, site_path):
     for network, file_ in files_to_check:
         digest = hash_file(file_)
         kv_prev_digest = truth.models.KeyValue.objects.filter(truth=hash_store,
-                key=file_)
+                                                              key=file_)
 
         if kv_prev_digest and kv_prev_digest[0].value == digest:
             log("No changes in {0}".format(file_), INFO)
             continue
         elif kv_prev_digest and kv_prev_digest[0].value != digest:
             kv_prev_digest = kv_prev_digest[0]
-            log("Changes in network {0}, file {1}".format(network, file_), INFO)
+            log("Changes in network {0}, file {1}".format(
+                network, file_), INFO)
             # Fall through
         elif not kv_prev_digest:
-            log("New file for network {0}, file {1}".format(network, file_), INFO)
+            log("New file for network {0}, file {1}".format(
+                network, file_), INFO)
             kv_prev_digest = truth.models.KeyValue(truth=hash_store,
-                    key=file_, value=digest)
+                                                   key=file_, value=digest)
 
         # Even if the file isn't going to cause a site to be built, track
         # it's hash.
@@ -274,7 +288,8 @@ def get_reverse_svn_sites_changed(sites, site_path):
             # TODO Ask people about this.
             # If the class C network the file represents overlaps with a
             # network in a site, rebuild that site.
-            network_file_str = network + ".0/24"  # Make sure it's a full class C
+            network_file_str = network + \
+                ".0/24"  # Make sure it's a full class C
             network_file = ipaddr.IPv4Network(network_file_str)
             site_network = ipaddr.IPv4Network(site_network_str)
 
@@ -284,8 +299,8 @@ def get_reverse_svn_sites_changed(sites, site_path):
                 kv_prev_digest.save()
                 continue
 
-
     return sites_to_build
+
 
 def hash_file(file_):
     fd = open(file_, 'r')
@@ -294,6 +309,7 @@ def hash_file(file_):
     digest = hash_.hexdigest()
     fd.close()
     return digest
+
 
 def get_forward_svn_sites_changed(sites, site_path):
     """This function should return a list of sites that have been changed in
@@ -333,7 +349,7 @@ def get_forward_svn_sites_changed(sites, site_path):
         digest = hash_file(file_)
 
         kv_prev_digest = truth.models.KeyValue.objects.filter(truth=hash_store,
-                key=file_)
+                                                              key=file_)
         if kv_prev_digest and kv_prev_digest[0].value == digest:
             log("No changes in {0}".format(file_), INFO)
             continue
@@ -348,11 +364,10 @@ def get_forward_svn_sites_changed(sites, site_path):
         log("New file for site {0}, file {1}".format(site, file_), INFO)
         # We didn't find anything.
         kv = truth.models.KeyValue(truth=hash_store,
-                key=file_, value=digest)
+                                   key=file_, value=digest)
         kv.save()
         files_flaged_to_build.add(file_)
         sites_to_build.append(site_meta)
-
 
     # We didn't find a site
     return sites_to_build

@@ -1,7 +1,10 @@
 #!/usr/bin/python
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
+import sys
+import os
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
 import manage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 import manage
@@ -27,6 +30,8 @@ from core.interface.static_intr.views import do_combine_a_ptr_to_interface
 from django.test import Client
 from systems.models import System
 #(addr, ptr, system, mac_address):
+
+
 def main():
     for mrange in Range.objects.all():
         #if not str(mrange.network.site) == 'Phx1':
@@ -49,7 +54,7 @@ def main():
 
         range_data = []
         for i in range((start_upper << 64) + start_lower, (end_upper << 64) +
-                end_lower - 1):
+                       end_lower - 1):
             taken = False
             adr_taken = None
             ip_str = str(ipaddr.IPv4Address(i))
@@ -95,7 +100,8 @@ def main():
                     intr_hostname = bl[2].name.replace(".mozilla.com", "")
                     system_hostname = intr_hostname
                 #system = System.objects.get(hostname=intr_hostname)
-                system = KeyValue.objects.filter(key__icontains='ipv4_address', value=bl[1])[0].system
+                system = KeyValue.objects.filter(
+                    key__icontains='ipv4_address', value=bl[1])[0].system
                 addr = AddressRecord.objects.get(pk=bl[3].pk)
                 ptr = PTR.objects.get(pk=bl[2].pk)
                 try:
@@ -123,7 +129,8 @@ def main():
                             dhcp_filename = None
 
                         if 'dhcp_domain_name_servers' in adapter:
-                            dhcp_domain_name_servers = adapter['dhcp_domain_name_servers']
+                            dhcp_domain_name_servers = adapter[
+                                'dhcp_domain_name_servers']
                         else:
                             dhcp_domain_name_servers = None
 
@@ -142,8 +149,9 @@ def main():
                             intr.save()
                         else:
                             from api_v3.system_api import SystemResource
-                            intr = StaticInterface(label=addr.label, mac=mac_address, domain=addr.domain,
-                                    ip_str=addr.ip_str, ip_type=addr.ip_type, system=system)
+                            intr = StaticInterface(
+                                label=addr.label, mac=mac_address, domain=addr.domain,
+                                ip_str=addr.ip_str, ip_type=addr.ip_type, system=system)
                             intr.full_clean()
                             intr.dns_enabled = False
                             intr.dhcp_enabled = True
@@ -172,11 +180,11 @@ def main():
                 if str(e) == "'AddressRecord' object has no attribute 'name'":
                     #import pdb; pdb.set_trace()
                     try:
-                        print "FAIL ===== %s - %s - %s" % (addr.ip_str, system_hostname, e)
+                        print "FAIL ===== %s - %s - %s" % (
+                            addr.ip_str, system_hostname, e)
                     except:
                         print "FAIL =====  %s - %s" % (system_hostname, e)
             except Exception, e:
                 print "FAIL ===== %s - %s" % (system_hostname, e)
 if __name__ == '__main__':
     main()
-

@@ -12,7 +12,7 @@ class DHCPHelper(object):
         return ScheduledTask.objects.get_all_dhcp()
 
     def systems_by_scope(self, scope):
-        keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope',value=scope).filter(key__startswith='nic.')
+        keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope', value=scope).filter(key__startswith='nic.')
         #Iterate through the list and get all of the key/value pairs
         tmp_list = []
         for row in keyvalue_pairs:
@@ -34,7 +34,8 @@ class DHCPHelper(object):
     def adapters_by_system_and_scope(self, system, scope):
         dhcp_scope = scope
         system = System.objects.get(hostname=system)
-        keyvalue_pairs = KeyValue.objects.filter(key__startswith='nic.').filter(system=system).order_by('key')
+        keyvalue_pairs = KeyValue.objects.filter(
+            key__startswith='nic.').filter(system=system).order_by('key')
         #Iterate through the list and get all of the key/value pairs
         tmp_dict = {}
         adapter_ids = []
@@ -42,7 +43,7 @@ class DHCPHelper(object):
         for kv in keyvalue_pairs:
             tmp_dict[kv.key] = kv.value
         for k in tmp_dict.iterkeys():
-            matches = re.match('nic\.(\d+).*',k)
+            matches = re.match('nic\.(\d+).*', k)
             if matches.group is not None:
                 dhcp_scope_match = 'nic.%s.dhcp_scope.0' % matches.group(1)
                 ip_address_match = 'nic.%s.ipv4_address.0' % matches.group(1)
@@ -72,6 +73,7 @@ class DHCPHelper(object):
             if 'nic.%s.dhcp_domain_name.0' % a in tmp_dict:
                 dhcp_domain_name = tmp_dict['nic.%s.dhcp_domain_name.0' % a]
             if 'nic.%s.dhcp_domain_name_servers.0' % a in tmp_dict:
-                dhcp_domain_name_servers = tmp_dict['nic.%s.dhcp_domain_name_servers.0' % a]
-            final_list.append({'system_hostname':system.hostname, 'ipv4_address':ipv4_address,  'adapter_name':adapter_name, 'mac_address':mac_address, 'option_hostname': dhcp_hostname, 'dhcp_hostname':dhcp_hostname, 'dhcp_filename':dhcp_filename, 'dhcp_domain_name':dhcp_domain_name, 'dhcp_domain_name_servers':dhcp_domain_name_servers})
+                dhcp_domain_name_servers = tmp_dict[
+                    'nic.%s.dhcp_domain_name_servers.0' % a]
+            final_list.append({'system_hostname': system.hostname, 'ipv4_address': ipv4_address, 'adapter_name': adapter_name, 'mac_address': mac_address, 'option_hostname': dhcp_hostname, 'dhcp_hostname': dhcp_hostname, 'dhcp_filename': dhcp_filename, 'dhcp_domain_name': dhcp_domain_name, 'dhcp_domain_name_servers': dhcp_domain_name_servers})
         return final_list

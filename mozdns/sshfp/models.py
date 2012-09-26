@@ -5,12 +5,15 @@ from mozdns.models import MozdnsRecord
 
 
 def validate_algorithm(number):
-    if number not in (1,2):
-        raise ValidationError("Algorithm number must be with 1 (RSA) or 2 (DSA)")
+    if number not in (1, 2):
+        raise ValidationError(
+            "Algorithm number must be with 1 (RSA) or 2 (DSA)")
+
 
 def validate_fingerprint(number):
     if number not in (1,):
         raise ValidationError("Fingerprint type must be 1 (SHA-1)")
+
 
 class SSHFP(MozdnsRecord):
     """
@@ -21,27 +24,27 @@ class SSHFP(MozdnsRecord):
     id = models.AutoField(primary_key=True)
     key = models.TextField()
     algorithm_number = models.PositiveIntegerField(null=False, blank=False,
-            validators=[validate_algorithm], help_text="Algorithm number must "
-            "be with 1 (RSA) or 2 (DSA)")
+                                                   validators=[validate_algorithm], help_text="Algorithm number must "
+                                                   "be with 1 (RSA) or 2 (DSA)")
     fingerprint_type = models.PositiveIntegerField(null=False, blank=False,
-            validators=[validate_fingerprint], help_text="Fingerprint type "
-            "must be 1 (SHA-1)")
+                                                   validators=[validate_fingerprint], help_text="Fingerprint type "
+                                                   "must be 1 (SHA-1)")
 
     search_fields = ("fqdn", "key")
 
     def details(self):
         return (
-                ("FQDN", self.fqdn),
-                ("Record Type", "SSHFP"),
-                ("Algorithm", self.algorithm_number),
-                ("Finger Print Type", self.fingerprint_type),
-                ("Key", self.key),
-               )
+            ("FQDN", self.fqdn),
+            ("Record Type", "SSHFP"),
+            ("Algorithm", self.algorithm_number),
+            ("Finger Print Type", self.fingerprint_type),
+            ("Key", self.key),
+        )
 
     @classmethod
     def get_api_fields(cls):
         return super(SSHFP, cls).get_api_fields() + ['fingerprint_type',
-                'algorithm_number', 'key']
+                                                     'algorithm_number', 'key']
 
     def save(self, *args, **kwargs):
         super(SSHFP, self).save(*args, **kwargs)

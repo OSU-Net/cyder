@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack,SystemStatus,NetworkAdapter,KeyValue
+from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue
 from truth.models import Truth, KeyValue as TruthKeyValue
 from dhcp.DHCP import DHCP as DHCPInterface
 from dhcp.models import DHCP
@@ -13,8 +13,10 @@ except:
 from django.test.client import Client
 from django.conf import settings
 
+
 class KeyValueHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
+
     def create(self, request, key_value_id=None):
         if 'system_id' in request.POST:
             n = KeyValue()
@@ -51,6 +53,7 @@ class KeyValueHandler(BaseHandler):
         else:
             resp = rc.NOT_FOUND
             resp.write('system_id or truth_name required')
+
     def build_validation_array(self):
         input_regex_array = []
         output_regex_array = []
@@ -74,7 +77,7 @@ class KeyValueHandler(BaseHandler):
         input_regex_array.append(re.compile('^dhcp\.scope\.start$'))
         output_regex_array.append(re.compile(ipv4_regex))
         error_message_array.append('Requires IP Address')
-        
+
         input_regex_array.append(re.compile('^dhcp\.scope\.end$'))
         output_regex_array.append(re.compile(ipv4_regex))
         error_message_array.append('Requires IP Address')
@@ -99,20 +102,23 @@ class KeyValueHandler(BaseHandler):
         output_regex_array.append(re.compile(ipv4_regex))
         error_message_array.append('Requires IP Address')
 
-        input_regex_array.append(re.compile('^dhcp\.option\.subnet_mask\.\d+$'))
+        input_regex_array.append(
+            re.compile('^dhcp\.option\.subnet_mask\.\d+$'))
         output_regex_array.append(re.compile(ipv4_regex))
         error_message_array.append('Requires IP Address')
 
-        input_regex_array.append(re.compile('^dhcp\.pool\.allow_booting\.\d+$'))
+        input_regex_array.append(
+            re.compile('^dhcp\.pool\.allow_booting\.\d+$'))
         output_regex_array.append(re.compile(true_false_regex))
         error_message_array.append('Requires True|False')
-        
+
         input_regex_array.append(re.compile('^dhcp\.pool\.allow_bootp\.\d+$'))
         output_regex_array.append(re.compile(true_false_regex))
         error_message_array.append('Requires True|False')
 
         input_regex_array.append(re.compile('^nic\.\d+\.mac_address\.\d+$'))
-        output_regex_array.append(re.compile('^([0-9a-f]{2}([:-]|$)){6}$', re.I))
+        output_regex_array.append(
+            re.compile('^([0-9a-f]{2}([:-]|$)){6}$', re.I))
         error_message_array.append('Requires Mac Address XX:XX:XX:XX:XX:XX')
 
         return input_regex_array, output_regex_array, error_message_array
@@ -122,13 +128,12 @@ class KeyValueHandler(BaseHandler):
         return_regex = None
         return_bool = True
 
-
         input_regex_array, output_regex_array, error_message_array = self.build_validation_array()
         ## Here we loop through all of the possible input validation array. If they key matches one, then we need to validate the value for the key/value pair
         for i in range(0, len(input_regex_array)):
             if input_regex_array[i].match(key):
                 return_regex = output_regex_array[i]
-                error_message = error_message_array[i];
+                error_message = error_message_array[i]
                 continue
 
         ## Check if we should validate the value portion of the key/value pair. No use validating it if the key doesn't require it
@@ -138,21 +143,22 @@ class KeyValueHandler(BaseHandler):
             else:
                 error_message = None
 
-
         return return_bool, error_message
-
 
     def update(self, request, key_value_id=None):
         ###TODO This whole method is not functioning correctly. Just for version 2. Not getting the system_id or truth_id from the poster firefox plugin
         if 'system_id' in request.POST:
             n = None
-            key_validated, validation_error_string = self.validate(request.POST['key'], request.POST['value']) 
+            key_validated, validation_error_string = self.validate(
+                request.POST['key'], request.POST['value'])
             if key_validated is False:
                 resp = rc.FORBIDDEN
-                resp.write('Validation Failed for %s %s' % (request.POST['key'], validation_error_string) )
+                resp.write('Validation Failed for %s %s' %
+                           (request.POST['key'], validation_error_string))
                 return resp
             try:
-                n = KeyValue.objects.get(id=key_value_id,key=request.POST['key'])
+                n = KeyValue.objects.get(
+                    id=key_value_id, key=request.POST['key'])
                 system = System.objects.get(id=request.POST['system_id'])
             except:
                 resp = rc.NOT_FOUND
@@ -174,7 +180,8 @@ class KeyValueHandler(BaseHandler):
         elif 'truth_id' in request.POST:
             try:
                 truth = Truth.objects.get(name=key_value_id)
-                na = TruthKeyValue.objects.get(truth=truth,key=request.POST['key'])
+                na = TruthKeyValue.objects.get(
+                    truth=truth, key=request.POST['key'])
                 if 'value' in request.POST:
                     n.value = request.POST['value']
             except:
@@ -215,7 +222,8 @@ class KeyValueHandler(BaseHandler):
             tmp_list = []
             if key_type == 'dhcp_scopes':
                 #Get keystores from truth that have dhcp.is_scope = True
-                base = TruthKeyValue.objects.filter(key='dhcp.is_scope',value='True')
+                base = TruthKeyValue.objects.filter(
+                    key='dhcp.is_scope', value='True')
                 #Iterate through the list and get all of the key/value pairs
                 for row in base:
                     keyvalue = TruthKeyValue.objects.filter(truth=row.truth)
@@ -228,7 +236,7 @@ class KeyValueHandler(BaseHandler):
             if key_type == 'system_by_reverse_dns_zone':
 
                 #Get keystores from truth that have dhcp.is_scope = True
-                keyvalue_pairs = KeyValue.objects.filter(key__contains='reverse_dns_zone',value=request.GET['zone']).filter(key__startswith='nic.')
+                keyvalue_pairs = KeyValue.objects.filter(key__contains='reverse_dns_zone', value=request.GET['zone']).filter(key__startswith='nic.')
                 #Iterate through the list and get all of the key/value pairs
                 tmp_list = []
                 for row in keyvalue_pairs:
@@ -249,7 +257,7 @@ class KeyValueHandler(BaseHandler):
                 return tmp_list
             if key_type == 'system_by_scope':
                 #Get keystores from truth that have dhcp.is_scope = True
-                keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope',value=request.GET['scope']).filter(key__startswith='nic.')
+                keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope', value=request.GET['scope']).filter(key__startswith='nic.')
                 #Iterate through the list and get all of the key/value pairs
                 tmp_list = []
                 for row in keyvalue_pairs:
@@ -279,7 +287,7 @@ class KeyValueHandler(BaseHandler):
                 for kv in keyvalue_pairs:
                     tmp_dict[kv.key] = kv.value
                 for k in tmp_dict.iterkeys():
-                    matches = re.match('nic\.(\d+).*',k)
+                    matches = re.match('nic\.(\d+).*', k)
                     if matches.group is not None:
                         if matches.group(1) not in adapter_ids:
                             adapter_ids.append(matches.group(1))
@@ -302,13 +310,13 @@ class KeyValueHandler(BaseHandler):
                         dhcp_filename = tmp_dict['nic.%s.dhcp_filename.0' % a]
                     try:
                         final_list.append({
-                            'system_hostname':system.hostname,
-                            'ipv4_address':ipv4_address,
-                            'adapter_name':adapter_name,
-                            'mac_address':mac_address,
-                            'dhcp_hostname':dhcp_hostname,
-                            'dhcp_filename':dhcp_filename}
-                            )
+                            'system_hostname': system.hostname,
+                            'ipv4_address': ipv4_address,
+                            'adapter_name': adapter_name,
+                            'mac_address': mac_address,
+                            'dhcp_hostname': dhcp_hostname,
+                            'dhcp_filename': dhcp_filename}
+                        )
                     except:
                         pass
                 #tmp_list.append(tmp_dict)
@@ -325,7 +333,7 @@ class KeyValueHandler(BaseHandler):
                 for kv in keyvalue_pairs:
                     tmp_dict[kv.key] = kv.value
                 for k in tmp_dict.iterkeys():
-                    matches = re.match('nic\.(\d+).*',k)
+                    matches = re.match('nic\.(\d+).*', k)
                     if matches.group is not None:
                         dhcp_scope_match = 'nic.%s.reverse_dns_zone.0' % matches.group(1)
                         if matches.group(1) not in adapter_ids and dhcp_scope_match in tmp_dict and tmp_dict[dhcp_scope_match] == zone:
@@ -350,8 +358,10 @@ class KeyValueHandler(BaseHandler):
                     if 'nic.%s.dhcp_filename.0' % a in tmp_dict:
                         dhcp_filename = tmp_dict['nic.%s.dhcp_filename.0' % a]
                     if 'nic.%s.dhcp_domain_name.0' % a in tmp_dict:
-                        dhcp_domain_name = tmp_dict['nic.%s.dhcp_domain_name.0' % a]
-                    final_list.append({'system_hostname':system.hostname, 'ipv4_address':ipv4_address})
+                        dhcp_domain_name = tmp_dict[
+                            'nic.%s.dhcp_domain_name.0' % a]
+                    final_list.append({'system_hostname': system.hostname,
+                                      'ipv4_address': ipv4_address})
                 #tmp_list.append(tmp_dict)
                 return final_list
             if key_type == 'adapters_by_system_and_scope':
@@ -366,7 +376,7 @@ class KeyValueHandler(BaseHandler):
                 for kv in keyvalue_pairs:
                     tmp_dict[kv.key] = kv.value
                 for k in tmp_dict.iterkeys():
-                    matches = re.match('nic\.(\d+).*',k)
+                    matches = re.match('nic\.(\d+).*', k)
                     if matches.group is not None:
                         dhcp_scope_match = 'nic.%s.dhcp_scope.0' % matches.group(1)
                         if matches.group(1) not in adapter_ids and dhcp_scope_match in tmp_dict and tmp_dict[dhcp_scope_match] == dhcp_scope:
@@ -389,12 +399,14 @@ class KeyValueHandler(BaseHandler):
                     if 'nic.%s.dhcp_hostname.0' % a in tmp_dict and 'nic.%s.option_hostname.0' % a not in tmp_dict:
                         dhcp_hostname = tmp_dict['nic.%s.dhcp_hostname.0' % a]
                     if  'nic.%s.option_hostname.0' % a not in tmp_dict:
-                        dhcp_hostname = tmp_dict['nic.%s.option_hostname.0' % a]
+                        dhcp_hostname = tmp_dict[
+                            'nic.%s.option_hostname.0' % a]
                     if 'nic.%s.dhcp_filename.0' % a in tmp_dict:
                         dhcp_filename = tmp_dict['nic.%s.dhcp_filename.0' % a]
                     if 'nic.%s.dhcp_domain_name.0' % a in tmp_dict:
-                        dhcp_domain_name = tmp_dict['nic.%s.dhcp_domain_name.0' % a]
-                    final_list.append({'system_hostname':system.hostname, 'ipv4_address':ipv4_address,  'adapter_name':adapter_name, 'mac_address':mac_address, 'dhcp_hostname':dhcp_hostname, 'dhcp_filename':dhcp_filename, 'dhcp_domain_name':dhcp_domain_name})
+                        dhcp_domain_name = tmp_dict[
+                            'nic.%s.dhcp_domain_name.0' % a]
+                    final_list.append({'system_hostname': system.hostname, 'ipv4_address': ipv4_address, 'adapter_name': adapter_name, 'mac_address': mac_address, 'dhcp_hostname': dhcp_hostname, 'dhcp_filename': dhcp_filename, 'dhcp_domain_name': dhcp_domain_name})
                 #tmp_list.append(tmp_dict)
                 return final_list
         elif 'key' in request.GET and request.GET['key'] > '':
@@ -460,7 +472,8 @@ class KeyValueHandler(BaseHandler):
             try:
                 system_hostname = request.GET['system_hostname']
                 system = System.objects.get(hostname=system_hostname)
-                KeyValue.objects.filter(key__startswith='nic', system=system).delete()
+                KeyValue.objects.filter(
+                    key__startswith='nic', system=system).delete()
                 resp = rc.ALL_OK
                 resp.write('json = {"id":"0"}')
             except:
@@ -503,7 +516,7 @@ class KeyValueHandler(BaseHandler):
                 except:
                     resp = rc.NOT_FOUND
                 return resp
-        
+
         resp = rc.ALL_OK
         resp.write('json = {"id":"1"}')
         return resp

@@ -1,6 +1,7 @@
 # Jingo helpers (Jinja2 custom filters)
 from jingo import register
 
+
 @register.filter
 def humanized_class_name(obj, *args, **kwargs):
     """

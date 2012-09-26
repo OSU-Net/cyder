@@ -18,32 +18,32 @@ import pdb
 class Network(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     vlan = models.ForeignKey(Vlan, null=True,
-            blank=True, on_delete=models.SET_NULL)
+                             blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
-            blank=True, on_delete=models.SET_NULL)
+                             blank=True, on_delete=models.SET_NULL)
 
     # NETWORK/NETMASK FIELDS
     IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
     ip_type = models.CharField(max_length=1, choices=IP_TYPE_CHOICES,
-                editable=True, validators=[validate_ip_type])
+                               editable=True, validators=[validate_ip_type])
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
     network_str = models.CharField(max_length=49, editable=True,
-                    help_text="The network address of this network.")
+                                   help_text="The network address of this network.")
     prefixlen = models.PositiveIntegerField(null=False,
-                    help_text="The number of binary 1's in the netmask.")
+                                            help_text="The number of binary 1's in the netmask.")
 
     dhcpd_raw_include = models.TextField(null=True, blank=True, help_text="The"
-            " config options in this box will be included *as is* in the "
-            "dhcpd.conf file for this subnet.")
+                                         " config options in this box will be included *as is* in the "
+                                         "dhcpd.conf file for this subnet.")
 
     network = None
 
     def details(self):
         return (
-                ('Network', self.network_str),
-                )
+            ('Network', self.network_str),
+        )
 
     class Meta:
         db_table = 'network'
@@ -70,7 +70,7 @@ class Network(models.Model, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
             raise ValidationError("Cannot delete this network because it has "
-                "child ranges")
+                                  "child ranges")
         super(Network, self).delete(*args, **kwargs)
 
     def clean(self):
@@ -87,7 +87,7 @@ class Network(models.Model, ObjectUrlMixin):
             if range_.start_upper < self.ip_upper:
                 fail = True
             elif (range_.start_upper > self.ip_upper and range_.start_lower <
-                self.ip_lower):
+                  self.ip_lower):
                 fail = True
             elif (range_.start_upper == self.ip_upper and range_.start_lower
                     < self.ip_lower):
@@ -103,7 +103,7 @@ class Network(models.Model, ObjectUrlMixin):
             if range_.end_upper > brdcst_upper:
                 fail = True
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
-                brdcst_lower):
+                  brdcst_lower):
                 fail = True
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
@@ -111,13 +111,14 @@ class Network(models.Model, ObjectUrlMixin):
 
             if fail:
                 raise ValidationError("Resizing this subnet to the requested "
-                        "network prefix would orphan existing ranges.")
+                                      "network prefix would orphan existing ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
         self.update_network()
-        ip_info = two_to_four(int(self.network.network), int(self.network.broadcast))
+        ip_info = two_to_four(
+            int(self.network.network), int(self.network.broadcast))
         self.ipf = IPFilter(self, self.ip_type, *ip_info)
 
     def update_network(self):
@@ -134,10 +135,10 @@ class Network(models.Model, ObjectUrlMixin):
                 self.network = ipaddr.IPv6Network(self.network_str)
             else:
                 raise ValidationError("Could not determine IP type of network"
-                        " %s" % (self.network_str))
+                                      " %s" % (self.network_str))
         except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
             raise ValidationError("Invalid network for ip type of "
-                    "'{0}'.".format(self, self.ip_type))
+                                  "'{0}'.".format(self, self.ip_type))
         # Update fields
         self.ip_upper = int(self.network) >> 64
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off

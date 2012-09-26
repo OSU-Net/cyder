@@ -78,14 +78,14 @@ class SOA(models.Model, ObjectUrlMixin):
 
     def details(self):
         return  (
-                    ('Primary', self.primary),
-                    ('Contact', self.contact),
-                    ('Serial', self.serial),
-                    ('Expire', self.expire),
-                    ('Retry', self.retry),
-                    ('Refresh', self.refresh),
-                    ('Comment', self.comment),
-                )
+            ('Primary', self.primary),
+            ('Contact', self.contact),
+            ('Serial', self.serial),
+            ('Expire', self.expire),
+            ('Retry', self.retry),
+            ('Refresh', self.refresh),
+            ('Comment', self.comment),
+        )
 
     def get_debug_build_url(self):
         return settings.MOZDNS_BASE_URL + "/bind/build_debug/{0}/".format(self.pk)
@@ -100,7 +100,7 @@ class SOA(models.Model, ObjectUrlMixin):
         if self.pk:
             db_self = SOA.objects.get(pk=self.pk)
             fields = ['primary', 'contact', 'serial', 'expire', 'retry',
-                    'refresh', 'comment']
+                      'refresh', 'comment']
             for field in fields:
                 if getattr(db_self, field) != getattr(self, field):
                     self.dirty = True
@@ -112,6 +112,7 @@ class SOA(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<'{0}'>".format(str(self))
 
+
 class SOAKeyValue(KeyValue):
     soa = models.ForeignKey(SOA, null=False)
 
@@ -120,7 +121,7 @@ class SOAKeyValue(KeyValue):
         zone?"""
         if not os.access(self.value, os.R_OK):
             raise ValidationError("Couldn't find {0} on the system running "
-                    "this code. Please create this path.".format(self.value))
+                                  "this code. Please create this path.".format(self.value))
 
     def _aa_disabled(self):
         """Disabled - The Value of this Key determines whether or not an SOA will
@@ -136,5 +137,5 @@ class SOAKeyValue(KeyValue):
             self.value = "False"
         else:
             raise ValidationError("Disabled should be set to either {0} OR "
-                        "{1}".format(", ".join(true_values),
-                        ", ".join(false_values)))
+                                  "{1}".format(", ".join(true_values),
+                                               ", ".join(false_values)))

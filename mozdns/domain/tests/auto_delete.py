@@ -21,15 +21,16 @@ from core.site.models import Site
 
 import pdb
 
+
 class AutoDeleteTests(TestCase):
 
     def setUp(self):
         s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                comment="foo")
-        self.c = Domain(name = 'poo')
+                                         comment="foo")
+        self.c = Domain(name='poo')
         self.c.save()
         self.assertFalse(self.c.purgeable)
-        self.f_c = Domain(name = 'foo.poo')
+        self.f_c = Domain(name='foo.poo')
         self.f_c.soa = s
         self.f_c.save()
 
@@ -62,7 +63,7 @@ class AutoDeleteTests(TestCase):
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
         addr = AddressRecord(label=label, domain=the_domain,
-                ip_type='4', ip_str="10.2.3.4")
+                             ip_type='4', ip_str="10.2.3.4")
         addr.save()
         self.assertFalse(prune_tree(the_domain))
         addr.delete()
@@ -116,8 +117,9 @@ class AutoDeleteTests(TestCase):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
-        srv = SRV(label='_'+label, domain=the_domain, target="foo", priority=4,
-                weight=4, port=34)
+        srv = SRV(
+            label='_' + label, domain=the_domain, target="foo", priority=4,
+            weight=4, port=34)
         srv.save()
         self.assertFalse(prune_tree(the_domain))
         srv.delete()
@@ -129,12 +131,12 @@ class AutoDeleteTests(TestCase):
 
     def test_cleanup_cname(self):
         # Make sure CNAME record block
-        c = Domain(name = 'foo1')
+        c = Domain(name='foo1')
         c.save()
         self.assertFalse(c.purgeable)
         s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                comment="dddfoo")
-        f_c = Domain(name = 'foo.foo1')
+                                         comment="dddfoo")
+        f_c = Domain(name='foo.foo1')
         f_c.soa = s
         f_c.save()
 
@@ -172,8 +174,8 @@ class AutoDeleteTests(TestCase):
         label, the_domain = ensure_label_domain(fqdn)
         system = System()
         addr = StaticInterface(label=label, domain=the_domain,
-                ip_type='4', ip_str="10.2.3.4", mac="00:11:22:33:44:55",
-                system=system)
+                               ip_type='4', ip_str="10.2.3.4", mac="00:11:22:33:44:55",
+                               system=system)
         addr.save()
         self.assertFalse(prune_tree(the_domain))
         addr.delete()

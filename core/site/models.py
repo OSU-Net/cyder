@@ -12,8 +12,8 @@ class Site(models.Model, ObjectUrlMixin):
 
     def details(self):
         return (
-                ('Name', self.get_full_name()),
-                )
+            ('Name', self.get_full_name()),
+        )
 
     def get_full_name(self):
         full_name = self.name

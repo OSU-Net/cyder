@@ -28,7 +28,7 @@ def sif(site):
     # Return list to make consistent with vif
     parent_net.update_network()
     return [ipf(int(parent_net.network.network),
-        int(parent_net.network.broadcast), root=False)], misc
+                int(parent_net.network.broadcast), root=False)], misc
 
 
 def vif(vlan, root=True):
@@ -55,8 +55,8 @@ def nif(network, root=True):
     if root:
         try:
             n = Network.objects.get(ip_upper=network.ip_upper,
-                    ip_lower=network.ip_lower, ip_type=network.ip_type,
-                    prefixlen=network.prefixlen)
+                                    ip_lower=network.ip_lower, ip_type=network.ip_type,
+                                    prefixlen=network.prefixlen)
             misc.add(n)
         except ObjectDoesNotExist, e:
             pass
@@ -67,7 +67,7 @@ def nif(network, root=True):
     # Return list to make consistent with vif
     network.update_network()
     return [ipf(int(network.network.network), int(network.network.broadcast),
-        root=False)], misc
+                root=False)], misc
 
 
 def ipf(start, end, root=True):
@@ -82,10 +82,11 @@ def ipf(start, end, root=True):
 
     #query = Q(ip_upper__lte=start_upper, ip_upper__gte=end_upper)
     query = Q(ip_upper=start_upper, ip_lower__gte=start_lower,
-            ip_lower__lte=end_lower)
+              ip_lower__lte=end_lower)
     return query
 
-def build_filter(f, fields, filter_type = "icontains"):
+
+def build_filter(f, fields, filter_type="icontains"):
     # rtucker++
     final_filter = Q()
     filters = []
@@ -95,7 +96,7 @@ def build_filter(f, fields, filter_type = "icontains"):
             filter_ = filter_[1:]
         for t in fields:
             final_filter = final_filter | Q(**{"{0}__{1}".format(t,
-                filter_type): filter_})
+                                                                 filter_type): filter_})
 
     return final_filter
 
@@ -190,7 +191,8 @@ def compile_search(args):
         try:
             # Guess which network type they are searching by looking for ':'
             if network_str.find(':') > -1:
-                network = ipaddr.IPv6Address(network_str=network_str, ip_type='6')
+                network = ipaddr.IPv6Address(
+                    network_str=network_str, ip_type='6')
                 network.update_network()
             else:
                 network = Network(network_str=network_str, ip_type='4')
@@ -227,7 +229,8 @@ def compile_search(args):
             mega_filter = tuple(range_queries)
             if 'A' in type_fs:
                 AddressRecord = mozdns.address_record.models.AddressRecord
-                addrs = AddressRecord.objects.filter(*mega_filter).order_by('ip_upper').order_by('ip_lower')
+                addrs = AddressRecord.objects.filter(
+                    *mega_filter).order_by('ip_upper').order_by('ip_lower')
             else:
                 addrs = None
             cnames = None
@@ -312,7 +315,8 @@ def compile_search(args):
             # We need to AND all of these Q set's together.
             mega_filter = tuple(range_queries)
             AddressRecord = mozdns.address_record.models.AddressRecord
-            addrs = AddressRecord.objects.filter(*mega_filter).order_by('ip_upper').order_by('ip_lower')
+            addrs = AddressRecord.objects.filter(
+                *mega_filter).order_by('ip_upper').order_by('ip_lower')
             cnames = None
             domains = None
             StaticInterface = core.interface.static_intr.models.StaticInterface
@@ -450,6 +454,5 @@ def compile_search(args):
         if txts:
             txt_filter = build_filter(ef, TXT.search_fields)
             txts = txts.exclude(txt_filter)
-
 
     return addrs, cnames, domains, intrs, mxs, nss, ptrs, srvs, txts, misc

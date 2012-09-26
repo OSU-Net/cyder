@@ -57,10 +57,10 @@ def search_ip(request):
                         network = ipaddr.IPv6Network(search_ip)
                 except ipaddr.AddressValueError, e:
                     form._errors['__all__'] = ErrorList(["Bad IPv{0} Address "
-                            "{1}".format(ip_type, search_ip)])
+                                                         "{1}".format(ip_type, search_ip)])
                     return render(request, 'core/core_form.html', {
                         'form': form
-                        })
+                    })
                 try:
                     network = Network.objects.get(network_str=search_ip)
                     search_ip = network
@@ -68,13 +68,13 @@ def search_ip(request):
                 except ObjectDoesNotExist:
                     found_exact = False
                     network = Network(ip_type, network_str=search_ip,
-                            ip_type=ip_type)
+                                      ip_type=ip_type)
                 parent = calc_parent(network)
                 eldars, sub_networks = calc_networks(network)
                 if ip_type == '6':
                     sip_upper, sip_lower == ipv6_to_longs(network.network.ip)
                     eip_upper, eip_lower == ipv6_to_longs(
-                            network.network.broadcast)
+                        network.network.broadcast)
                 else:
                     sip_upper, sip_lower = 0, int(network.network.ip)
                     eip_upper, eip_lower = 0, int(network.network.broadcast)
@@ -119,14 +119,14 @@ def search_ip(request):
                 'parent': parent,
                 'eldars': eldars,
                 'sub_networks': sub_networks,
-                })
+            })
         except ValidationError, e:
             form._errors['__all__'] = ErrorList(e.messages)
             return render(request, 'core/core_form.html', {
                 'form': form
-                })
+            })
     else:
         form = IpSearchForm()
         return render(request, 'core/core_form.html', {
             'form': form
-            })
+        })

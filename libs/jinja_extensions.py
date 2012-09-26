@@ -3,6 +3,7 @@ from jinja2.ext import Extension
 from django.utils.safestring import mark_safe
 import traceback
 
+
 class CsrfExtension(Extension):
     # a set of names that trigger the extension.
     tags = set(['csrf_token'])
@@ -13,7 +14,7 @@ class CsrfExtension(Extension):
     def parse(self, parser):
         try:
             token = parser.stream.next()
-            return nodes.Output([self.call_method('_render', [nodes.Name('csrf_token','load')])]).set_lineno(token.lineno)
+            return nodes.Output([self.call_method('_render', [nodes.Name('csrf_token', 'load')])]).set_lineno(token.lineno)
 
         except:
             traceback.print_exc()
@@ -34,4 +35,4 @@ class CsrfExtension(Extension):
                 warnings.warn("A {% csrf_token %} was used in a template, but the context did not provide the value.  This is usually caused by not using RequestContext.")
             return u''
 
-csrf_token=CsrfExtension
+csrf_token = CsrfExtension

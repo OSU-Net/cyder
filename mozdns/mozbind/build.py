@@ -70,7 +70,7 @@ def choose_zone_path(soa, root_domain):
             zone_path = "reverse/in-addr.arpa/"
         else:
             raise Exception("WTF type of reverse domain is this "
-                    "{0}?!?".format(root_domain))
+                            "{0}?!?".format(root_domain))
     else:
         try:
             zone_path = soa.attrs.dir_path
@@ -83,52 +83,55 @@ def choose_zone_path(soa, root_domain):
 
 def render_forward_zone(view, mega_filter):
     data = render_zone(
-            default_ttl=DEFAULT_TTL,
+        default_ttl=DEFAULT_TTL,
 
-            nameserver_set=Nameserver.objects.filter(mega_filter
-                ).filter(views__name=view.name).order_by('server'),
+        nameserver_set=Nameserver.objects.filter(mega_filter
+                                                 ).filter(
+                                                     views__name=view.name).order_by('server'),
 
-            mx_set=MX.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('server'),
+        mx_set=MX.objects.filter(mega_filter).filter(views__name=view.name
+                                                     ).order_by('server'),
 
-            addressrecord_set=AddressRecord.objects.filter(mega_filter).filter(
-                views__name=view.name).order_by('ip_type', 'label', 'ip_upper',
-                    'ip_lower'),
+        addressrecord_set=AddressRecord.objects.filter(mega_filter).filter(
+            views__name=view.name).order_by('ip_type', 'label', 'ip_upper',
+                                            'ip_lower'),
 
-            interface_set=StaticInterface.objects.filter(mega_filter,
-                dns_enabled=True).filter(views__name=view.name).order_by(
-                    'ip_type', 'label', 'ip_upper', 'ip_lower'),
+        interface_set=StaticInterface.objects.filter(mega_filter,
+                                                     dns_enabled=True).filter(views__name=view.name).order_by(
+                                                         'ip_type', 'label', 'ip_upper', 'ip_lower'),
 
-            cname_set=CNAME.objects.filter(mega_filter).filter(
-                views__name=view.name).order_by('label'),
+        cname_set=CNAME.objects.filter(mega_filter).filter(
+            views__name=view.name).order_by('label'),
 
-            srv_set=SRV.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('label'),
+        srv_set=SRV.objects.filter(mega_filter).filter(views__name=view.name
+                                                       ).order_by('label'),
 
-            txt_set=TXT.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('label'),
+        txt_set=TXT.objects.filter(mega_filter).filter(views__name=view.name
+                                                       ).order_by('label'),
 
-            sshfp_set=SSHFP.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('label'),
-        )
+        sshfp_set=SSHFP.objects.filter(mega_filter).filter(views__name=view.name
+                                                           ).order_by('label'),
+    )
     return data
 
 
 def render_reverse_zone(view, forward_mega_filter, reverse_mega_filter):
     data = render_reverse_domain(
-            default_ttl=DEFAULT_TTL,
+        default_ttl=DEFAULT_TTL,
 
-            nameserver_set=Nameserver.objects.filter(forward_mega_filter
-                ).filter(views__name=view.name).order_by('server'),
+        nameserver_set=Nameserver.objects.filter(forward_mega_filter
+                                                 ).filter(
+                                                     views__name=view.name).order_by('server'),
 
-            interface_set=StaticInterface.objects.filter(reverse_mega_filter,
-                dns_enabled=True).filter(views__name=view.name).order_by(
-                    'ip_type', 'label', 'ip_upper', 'ip_lower'),
+        interface_set=StaticInterface.objects.filter(reverse_mega_filter,
+                                                     dns_enabled=True).filter(views__name=view.name).order_by(
+                                                         'ip_type', 'label', 'ip_upper', 'ip_lower'),
 
-            ptr_set=PTR.objects.filter(reverse_mega_filter).filter(views__name=view.name
-                ).order_by('ip_upper').order_by( 'ip_lower'),
+        ptr_set=PTR.objects.filter(reverse_mega_filter).filter(views__name=view.name
+                                                               ).order_by(
+                                                                   'ip_upper').order_by('ip_lower'),
 
-        )
+    )
     return data
 
 
@@ -152,12 +155,12 @@ def build_moz_zone(soa, domain_type, NOWRITE=True, request=None):
     time_end = time.time()
     time_total = time_end - time_start
     stats = {
-            'soa_id': soa.pk,
-            'time_start': time_start,
-            'time_end': time_end,
-            'time_total': time_total,
-            'user': user
-            }
+        'soa_id': soa.pk,
+        'time_start': time_start,
+        'time_end': time_end,
+        'time_total': time_total,
+        'user': user
+    }
     return stats
 
 
@@ -177,7 +180,8 @@ def build_zone(ztype, soa, root_domain):
         forward_mega_filter = forward_mega_filter | Q(domain=domain)
     reverse_mega_filter = Q(reverse_domain=root_domain)
     for reverse_domain in domains:
-        reverse_mega_filter = reverse_mega_filter | Q(reverse_domain=reverse_domain)
+        reverse_mega_filter = reverse_mega_filter | Q(
+            reverse_domain=reverse_domain)
 
     soa_data = render_soa_only(soa=soa, root_domain=root_domain)
     try:
@@ -187,7 +191,7 @@ def build_zone(ztype, soa, root_domain):
             public_file_path = zone_path + "public"
         else:
             public_data = render_reverse_zone(public, forward_mega_filter,
-                    reverse_mega_filter)
+                                              reverse_mega_filter)
             public_file_path = zone_path + root_domain.name + ".public"
     except ObjectDoesNotExist, e:
         data = "; The views public and private do not exist\n"
@@ -199,7 +203,7 @@ def build_zone(ztype, soa, root_domain):
             private_file_path = zone_path + "private"
         else:
             private_data = render_reverse_zone(private, forward_mega_filter,
-                    reverse_mega_filter)
+                                               reverse_mega_filter)
             private_file_path = zone_path + root_domain.name + ".private"
     except ObjectDoesNotExist, e:
         data = "; The views public and private do not exist\n"
@@ -208,31 +212,33 @@ def build_zone(ztype, soa, root_domain):
     if not os.access(settings.BUILD_PATH + zone_path, os.R_OK):
         os.makedirs(settings.BUILD_PATH + zone_path)
     if private_data:
-        open(settings.BUILD_PATH + private_file_path, "w+").write(soa_data + private_data)
+        open(settings.BUILD_PATH + private_file_path, "w+").write(
+            soa_data + private_data)
         DEBUG_STRING += ";{0} {1} View Data {0}\n".format("=" * 30, "Private")
         DEBUG_STRING += soa_data
         DEBUG_STRING += private_data
 
         master_private_zones = render_zone_stmt(root_domain.name, "master",
-                CHROOT_settingsZONE_PATH + private_file_path)
+                                                CHROOT_settingsZONE_PATH + private_file_path)
 
         slave_private_zones = render_zone_stmt(root_domain.name, "private",
-                CHROOT_settingsZONE_PATH + private_file_path)
+                                               CHROOT_settingsZONE_PATH + private_file_path)
     else:
         master_private_zones = ""
         slave_private_zones = ""
         DEBUG_STRING += "; NO PRIVATE ZONE DATA\n"
 
     if public_data:
-        open(settings.BUILD_PATH + public_file_path, "w+").write(soa_data + public_data)
+        open(settings.BUILD_PATH + public_file_path, "w+").write(
+            soa_data + public_data)
         DEBUG_STRING += ";{0} {1} View Data {0}\n".format("=" * 30, "Public")
         DEBUG_STRING += soa_data
         DEBUG_STRING += public_data
 
         master_public_zones = render_zone_stmt(root_domain.name, "master",
-                CHROOT_settingsZONE_PATH + public_file_path)
+                                               CHROOT_settingsZONE_PATH + public_file_path)
         slave_public_zones = render_zone_stmt(root_domain.name, "public",
-                CHROOT_settingsZONE_PATH + public_file_path)
+                                              CHROOT_settingsZONE_PATH + public_file_path)
     else:
         master_public_zones = ""
         slave_public_zones = ""
@@ -246,6 +252,7 @@ def build_zone(ztype, soa, root_domain):
             (master_private_zones, slave_private_zones),
             DEBUG_STRING)
 
+
 def build_dns():
     master_public_zones = ""
     master_private_zones = ""
@@ -257,12 +264,12 @@ def build_dns():
         root_domain = find_root_domain(soa)
         if not root_domain:
             print ("Couldn't find root domain. No zone statement was printed "
-                "for {0}".format(soa))
+                   "for {0}".format(soa))
             continue
         if root_domain.is_reverse:
-            masters, slaves, _ =  build_zone("reverse", soa, root_domain)
+            masters, slaves, _ = build_zone("reverse", soa, root_domain)
         else:
-            masters, slaves, _ =  build_zone("forward", soa, root_domain)
+            masters, slaves, _ = build_zone("forward", soa, root_domain)
         tmp_m_pub_zs, tmp_m_pri_zs = masters
         master_public_zones += tmp_m_pub_zs
         master_private_zones += tmp_m_pri_zs

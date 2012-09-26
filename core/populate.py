@@ -10,47 +10,47 @@ import ipaddr
 sites = []
 
 site_name = "scl1"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 sites.append(s)
 
 site_name = "scl2"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 sites.append(s)
 
 site_name = "scl3"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 scl3 = s
 sites.append(s)
 
 site_name = "ams1"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 sites.append(s)
 
 site_name = "phx1"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 phx1 = s
 sites.append(s)
 
 site_name = "sjc1"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 sites.append(s)
 
 site_name = "releng"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 s.parent = scl3
 s.save()
 sites.append(s)
 
 site_name = "mtv1"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 sites.append(s)
 
 site_name = "pek1"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 sites.append(s)
 
 site_name = "corp"
-s,_ = Site.objects.get_or_create(name=site_name)
+s, _ = Site.objects.get_or_create(name=site_name)
 s.parent = phx1
 s.save()
 sites.append(s)
@@ -175,12 +175,13 @@ site_networks.append(n)
 
 def create_network_vlan(v_num, v_name, n_str, site_octs, router_label=None):
     print "##### {0} {1} ##### {2} #####".format(v_num, v_name, n_str,
-        site_octs)
+                                                 site_octs)
 
-    v, _ = Vlan.objects.get_or_create(number = v_num, name=v_name)
+    v, _ = Vlan.objects.get_or_create(number=v_num, name=v_name)
 
     for so in site_octs:
-        n, _ = Network.objects.get_or_create(network_str=n_str.format(so), ip_type='4')
+        n, _ = Network.objects.get_or_create(
+            network_str=n_str.format(so), ip_type='4')
         n.vlan = v
         parent = calc_parent(n)
         if parent:
@@ -191,10 +192,10 @@ def create_network_vlan(v_num, v_name, n_str, site_octs, router_label=None):
             n.save()
         ip = ipaddr.IPv4Network(n_str.format(so))
         if int(n_str[-2:]) >= 22:
-            r, _ = Range.objects.get_or_create(start_str =
-                    str(ipaddr.IPv4Address(int(ip.network) + 10)), end_str =
-                    str(ipaddr.IPv4Address(int(ip.broadcast)
-                    - 2)), network = n)
+            r, _ = Range.objects.get_or_create(start_str=
+                                               str(ipaddr.IPv4Address(int(ip.network) + 10)), end_str=
+                                               str(ipaddr.IPv4Address(int(ip.broadcast)
+                                                                      - 2)), network=n)
 
 
 ##### 17 console ##### 10.DC.17.0/24 #####
@@ -271,7 +272,7 @@ n_str = "10.{0}.70.0/24"
 site_octs = [pek1_oct, phx1_oct, corp_phx1_oct]
 create_network_vlan(v_num, v_name, n_str, site_octs)
 
-net = Network.objects.get(network_str = n_str.format(corp_phx1_oct))
+net = Network.objects.get(network_str=n_str.format(corp_phx1_oct))
 phx1 = Site.objects.get(name="phx1")
 correct_site = Site.objects.get(name="corp", parent=phx1)
 net.site = correct_site

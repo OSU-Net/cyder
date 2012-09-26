@@ -13,8 +13,9 @@ from django.test import TestCase
 from django.test.client import Client
 from system.models import KeyValue, System
 
+
 def InterFaceTests(TestCase):
     def setUp(self):
         self.s = System()
-    def test_get_kv(self):
 
+    def test_get_kv(self):

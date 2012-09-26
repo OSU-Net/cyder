@@ -5,7 +5,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import  redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils import translation
@@ -18,7 +18,7 @@ from jinja2.filters import contextfilter
 
 import models
 from Rack import Rack
-from mozilla_inventory.middleware.restrict_to_remote import allow_anyone,sysadmin_only, LdapGroupRequired
+from mozilla_inventory.middleware.restrict_to_remote import allow_anyone, sysadmin_only, LdapGroupRequired
 from core.interface.static_intr.models import StaticInterface
 from core.range.models import Range
 from mozdns.utils import ensure_label_domain, prune_tree
@@ -42,26 +42,30 @@ def tryint(s):
     except:
         return s
 
+
 def alphanum_key(s):
     """ Turn a string into a list of string and number chunks.
         "z23a" -> ["z", 23, "a"]
     """
-    return [ tryint(c) for c in re.split('([0-9]+)', s) ]
+    return [tryint(c) for c in re.split('([0-9]+)', s)]
+
 
 def sort_nicely(l):
     """ Sort the given list in the way that humans expect.
     """
     l.sort(key=alphanum_key)
 
-def parse_title_num(title):
-   val = 0
-   try:
-      val = int(title.rsplit('#')[-1])
-   except ValueError:
-      pass
-   return val
 
-def check_dupe_nic(request,system_id, adapter_number):
+def parse_title_num(title):
+    val = 0
+    try:
+        val = int(title.rsplit('#')[-1])
+    except ValueError:
+        pass
+    return val
+
+
+def check_dupe_nic(request, system_id, adapter_number):
     try:
         system = models.System.objects.get(id=system_id)
         found = system.check_for_adapter(adapter_number)
@@ -69,7 +73,8 @@ def check_dupe_nic(request,system_id, adapter_number):
         pass
     return HttpResponse(found)
 
-def check_dupe_nic_name(requessdft,system_id,adapter_name):
+
+def check_dupe_nic_name(requessdft, system_id, adapter_name):
     try:
         system = models.System.objects.get(id=system_id)
         found = system.check_for_adapter_name(adapter_name)
@@ -77,20 +82,22 @@ def check_dupe_nic_name(requessdft,system_id,adapter_name):
         pass
     return HttpResponse(found)
 
+
 @allow_anyone
 def system_rack_elevation(request, rack_id):
     r = Rack(rack_id)
-    data  = {
-            'rack_ru': r.ru,
-            'ethernet_patch_panels_24': r.ethernet_patch_panel_24,
-            'ethernet_patch_panels_48': r.ethernet_patch_panel_48,
-            'systems': r.systems,
+    data = {
+        'rack_ru': r.ru,
+        'ethernet_patch_panels_24': r.ethernet_patch_panel_24,
+        'ethernet_patch_panels_48': r.ethernet_patch_panel_48,
+        'systems': r.systems,
     }
     data = json.dumps(data)
     return render_to_response('systems/rack_elevation.html', {
-        'data':data,
-        },
+        'data': data,
+    },
         RequestContext(request))
+
 
 def get_all_ranges_ajax(request):
     system_pk = request.GET.get('system_pk', '0')
@@ -139,11 +146,13 @@ def get_next_available_ip_by_range(request, range_id):
     ret['ip_address'] = display_ip
     return HttpResponse(json.dumps(ret))
 
+
 def get_next_intr_name(request, system_pk):
     system = get_object_or_404(models.System, pk=system_pk)
     interface_type, primary, alias = system.get_next_adapter()
     return HttpResponse(json.dumps({'success': True,
-        'intr_name': "{0}{1}.{2}".format(interface_type, primary, alias)}))
+                                    'intr_name': "{0}{1}.{2}".format(interface_type, primary, alias)}))
+
 
 @csrf_exempt
 def create_adapter(request, system_id):
@@ -182,8 +191,8 @@ def create_adapter(request, system_id):
 
     if not intr_name:
         return HttpResponse(json.dumps({'success': False, 'error_message':
-            "Please specify a interface name or select to have the name "
-            "automatically generated."}))
+                                        "Please specify a interface name or select to have the name "
+                                        "automatically generated."}))
 
     # Figure out label and domain
     fqdn = request.POST.get('fqdn', '')
@@ -193,8 +202,8 @@ def create_adapter(request, system_id):
         # make sure to call prune_tree on this domain.
     except ValidationError, e:
         return HttpResponse(json.dumps({'success': False,
-            'error_message': "Error creating label and domain: "
-            "{0}".format(" ".join(e.messages))}))
+                                        'error_message': "Error creating label and domain: "
+                                        "{0}".format(" ".join(e.messages))}))
 
     # Determine the keys to store later when nameing the interface.
     try:
@@ -203,19 +212,19 @@ def create_adapter(request, system_id):
     except ValidationError, e:
         prune_tree(domain)
         return HttpResponse(json.dumps({'success': False, 'error_message':
-            " ".join(e.messages)}))
+                                        " ".join(e.messages)}))
 
     # Create the Interface
     s = StaticInterface(label=label, mac=mac_address, domain=domain,
-        ip_str=ip_address, ip_type='4', system=system,
-        dhcp_enabled=enable_dhcp, dns_enabled=enable_dns)
+                        ip_str=ip_address, ip_type='4', system=system,
+                        dhcp_enabled=enable_dhcp, dns_enabled=enable_dns)
     try:
         s.clean()
         s.save()
     except ValidationError, e:
         prune_tree(domain)
         return HttpResponse(json.dumps({'success': False, 'error_message':
-            "Failed to create an interface: {0}".format(" ".join(e.messages))}))
+                                        "Failed to create an interface: {0}".format(" ".join(e.messages))}))
 
     # Configure views
     if enable_dns:
@@ -227,7 +236,6 @@ def create_adapter(request, system_id):
             s.views.add(private)
         s.save()
 
-
     # Add key value pairs
     s.update_attrs()
     try:
@@ -236,8 +244,8 @@ def create_adapter(request, system_id):
         s.attrs.alias = alias
     except AttributeError, e:
         return HttpResponse(json.dumps({'success': True, 'error_message':
-            "The Interface was created but there were other errors: ".join(
-                e.messages)}))
+                                        "The Interface was created but there were other errors: ".join(
+                                        e.messages)}))
 
     return HttpResponse(json.dumps({'success': True}))
 
@@ -254,12 +262,14 @@ def system_auto_complete_ajax(request):
     ret_dict['data'] = id_list
     return HttpResponse(json.dumps(ret_dict))
 
+
 @allow_anyone
 def list_all_systems_ajax(request):
 #iSortCol_0 = which column is sorted
 #sSortDir_0 = which direction
 
-    cols = ['hostname','serial','asset_tag','server_model','system_rack', 'oob_ip', 'system_status']
+    cols = ['hostname', 'serial', 'asset_tag', 'server_model',
+            'system_rack', 'oob_ip', 'system_status']
     sort_col = cols[0]
     if 'iSortCol_0' in request.GET:
         sort_col = cols[int(request.GET['iSortCol_0'])]
@@ -267,7 +277,6 @@ def list_all_systems_ajax(request):
     sort_dir = 'asc'
     if 'sSortDir_0' in request.GET:
         sort_dir = request.GET['sSortDir_0']
-
 
     if 'sEcho' in request.GET:
         sEcho = request.GET['sEcho']
@@ -291,7 +300,8 @@ def list_all_systems_ajax(request):
         end_display = int(iDisplayStart) + int(iDisplayLength)
         system_count = models.System.objects.all().count()
         systems = models.System.objects.all()[iDisplayStart:end_display]
-        the_data = build_json(request, systems, sEcho, system_count, iDisplayLength, sort_col, sort_dir)
+        the_data = build_json(request, systems, sEcho, system_count,
+                              iDisplayLength, sort_col, sort_dir)
 
     if search_term is not None and len(search_term) > 0:
         if search_term.startswith('/') and len(search_term) > 1:
@@ -308,16 +318,20 @@ def list_all_systems_ajax(request):
         search_q |= Q(oob_ip__icontains=search_term)
         search_q |= Q(keyvalue__value__icontains=search_term)
         try:
-            total_count = models.System.with_related.filter(search_q).distinct('hostname').count()
+            total_count = models.System.with_related.filter(
+                search_q).distinct('hostname').count()
         except:
             total_count = 0
         end_display = int(iDisplayStart) + int(iDisplayLength)
         try:
-            systems = models.System.with_related.filter(search_q).order_by('hostname').distinct('hostname')[iDisplayStart:end_display]
-            the_data = build_json(request, systems, sEcho, total_count, iDisplayLength, sort_col, sort_dir)
+            systems = models.System.with_related.filter(search_q).order_by(
+                'hostname').distinct('hostname')[iDisplayStart:end_display]
+            the_data = build_json(request, systems, sEcho, total_count,
+                                  iDisplayLength, sort_col, sort_dir)
         except:
             the_data = '{"sEcho": %s, "iTotalRecords":0, "iTotalDisplayRecords":0, "aaData":[]}' % (sEcho)
     return HttpResponse(the_data)
+
 
 def build_json(request, systems, sEcho, total_records, display_count, sort_col, sort_dir):
     system_list = []
@@ -332,7 +346,8 @@ def build_json(request, systems, sEcho, total_records, display_count, sort_col, 
         else:
             server_model = ''
         if system.system_rack is not None:
-            system_rack = "%s - %s" % (str(system.system_rack), system.rack_order)
+            system_rack = "%s - %s" % (
+                str(system.system_rack), system.rack_order)
             system_rack_id = str(system.system_rack.id)
         else:
             system_rack = ''
@@ -358,8 +373,9 @@ def build_json(request, systems, sEcho, total_records, display_count, sort_col, 
         else:
             system_id = system.id
 
-        system_list.append({'hostname': system.hostname.strip(), 'oob_ip': oob_ip, 'serial': serial, 'asset_tag': asset_tag, 'server_model': server_model,
-        'system_rack':system_rack, 'system_status':system_status, 'id':system_id, 'system_rack_id': system_rack_id})
+        system_list.append(
+            {'hostname': system.hostname.strip(), 'oob_ip': oob_ip, 'serial': serial, 'asset_tag': asset_tag, 'server_model': server_model,
+             'system_rack': system_rack, 'system_status': system_status, 'id': system_id, 'system_rack_id': system_rack_id})
 
     the_data = '{"sEcho": %s, "iTotalRecords":0, "iTotalDisplayRecords":0, "aaData":[]}' % (sEcho)
 
@@ -370,14 +386,13 @@ def build_json(request, systems, sEcho, total_records, display_count, sort_col, 
             #system_list = system_list.reverse()
             system_list.reverse()
 
-
         #the_data = '{"sEcho": %s, "iTotalRecords":%i, "iTotalDisplayRecords":%s, "aaData":[' % (sEcho,  total_records, display_count)
-        the_data = '{"sEcho": %s, "iTotalRecords":%i, "iTotalDisplayRecords":%i, "aaData":[' % (sEcho,  total_records, total_records)
+        the_data = '{"sEcho": %s, "iTotalRecords":%i, "iTotalDisplayRecords":%i, "aaData":[' % (sEcho, total_records, total_records)
         #sort_nicely(system_list)
         counter = 0
         for system in system_list:
             if counter < display_count:
-                the_data += '["%i,%s","%s","%s","%s","%s,%s", "%s", "%s", "%i"],' % (system['id'],system['hostname'], system['serial'],system['asset_tag'],system['server_model'],system['system_rack_id'], system['system_rack'], system['oob_ip'], system['system_status'], system['id'])
+                the_data += '["%i,%s","%s","%s","%s","%s,%s", "%s", "%s", "%i"],' % (system['id'], system['hostname'], system['serial'], system['asset_tag'], system['server_model'], system['system_rack_id'], system['system_rack'], system['oob_ip'], system['system_status'], system['id'])
                 counter += 1
             else:
                 counter = display_count
@@ -395,9 +410,10 @@ def build_json(request, systems, sEcho, total_records, display_count, sort_col, 
 def home(request):
     """Index page"""
     return render_to_response('systems/index.html', {
-            'read_only': getattr(request, 'read_only', False),
-            #'is_build': getattr(request.user.groups.all(), 'build', False),
-           })
+        'read_only': getattr(request, 'read_only', False),
+        #'is_build': getattr(request.user.groups.all(), 'build', False),
+    })
+
 
 @allow_anyone
 def system_quicksearch_ajax(request):
@@ -410,25 +426,28 @@ def system_quicksearch_ajax(request):
     systems = models.System.with_related.filter(search_q).order_by('hostname')
     if 'is_test' not in request.POST:
         return render_to_response('systems/quicksearch.html', {
-                'systems': systems,
-                'read_only': getattr(request, 'read_only', False),
-            },
+            'systems': systems,
+            'read_only': getattr(request, 'read_only', False),
+        },
             RequestContext(request))
     else:
         from django.core import serializers
         systems_data = serializers.serialize("json", systems)
         return HttpResponse(systems_data)
 
+
 def get_key_value_store(request, id):
     system = models.System.objects.get(id=id)
     key_value_store = models.KeyValue.objects.filter(system=system)
     return render_to_response('systems/key_value_store.html', {
-            'key_value_store': key_value_store,
-           },
-           RequestContext(request))
+        'key_value_store': key_value_store,
+    },
+        RequestContext(request))
+
+
 def delete_key_value(request, id, system_id):
     kv = models.KeyValue.objects.get(id=id)
-    matches = re.search('^nic\.(\d+)', str(kv.key) )
+    matches = re.search('^nic\.(\d+)', str(kv.key))
     if matches:
         try:
             existing_dhcp_scope = models.KeyValue.objects.filter(system=kv.system).filter(key='nic.%s.dhcp_scope.0' % matches.group(1))[0].value
@@ -439,14 +458,16 @@ def delete_key_value(request, id, system_id):
     system = models.System.objects.get(id=system_id)
     key_value_store = models.KeyValue.objects.filter(system=system)
     return render_to_response('systems/key_value_store.html', {
-            'key_value_store': key_value_store,
-           },
-           RequestContext(request))
+        'key_value_store': key_value_store,
+    },
+        RequestContext(request))
+
+
 @csrf_exempt
 def save_key_value(request, id):
     system_id = None
     validated = True
-    resp = {'success': True, 'errorMessage' : ''}
+    resp = {'success': True, 'errorMessage': ''}
     post_key = request.POST.get('key').strip()
     post_value = request.POST.get('value').strip()
     """
@@ -460,7 +481,6 @@ def save_key_value(request, id):
         print e
         pass
 
-
     acl = KeyValueACL(request)
     if post_key == 'shouldfailvalidation':
         resp['success'] = False
@@ -469,7 +489,7 @@ def save_key_value(request, id):
     kv = models.KeyValue.objects.get(id=id)
     if kv is not None and validated:
         ##Here we eant to check if the existing key is a network adapter. If so we want to find out if it has a dhcp scope. If so then we want to add it to ScheduledTasks so that the dhcp file gets regenerated
-        matches = re.search('^nic\.(\d+)', str(kv.key).strip() )
+        matches = re.search('^nic\.(\d+)', str(kv.key).strip())
         """
             Check to see if we have a network adapter
             If so we need to flag the dhcp zone file to be regenerated
@@ -480,7 +500,7 @@ def save_key_value(request, id):
                 run KeyValueACL.check_ip_not_exist_other_system
             """
             #import pdb; pdb.set_trace()
-            if re.search('^nic\.(\d+)\.ipv4_address', str(post_key).strip() ):
+            if re.search('^nic\.(\d+)\.ipv4_address', str(post_key).strip()):
                 try:
                     acl.check_ip_not_exist_other_system(system, post_value)
                 except Exception, e:
@@ -490,13 +510,15 @@ def save_key_value(request, id):
             try:
                 existing_dhcp_scope = models.KeyValue.objects.filter(system=kv.system).filter(key='nic.%s.dhcp_scope.0' % matches.group(1))[0].value
                 if existing_dhcp_scope is not None:
-                    models.ScheduledTask(task=existing_dhcp_scope, type='dhcp').save()
+                    models.ScheduledTask(
+                        task=existing_dhcp_scope, type='dhcp').save()
             except Exception, e:
                 pass
             try:
                 existing_reverse_dns_zone = models.KeyValue.objects.filter(system=kv.system).filter(key='nic.%s.reverse_dns_zone.0' % matches.group(1))[0].value
                 if existing_reverse_dns_zone is not None:
-                    models.ScheduledTask(task=existing_reverse_dns_zone, type='reverse_dns_zone').save()
+                    models.ScheduledTask(task=existing_reverse_dns_zone,
+                                         type='reverse_dns_zone').save()
             except Exception, e:
                 pass
         try:
@@ -524,22 +546,24 @@ def save_key_value(request, id):
                     pass
                 if new_dhcp_scope is not None:
                     try:
-                        models.ScheduledTask(task=new_dhcp_scope, type='dhcp').save()
+                        models.ScheduledTask(
+                            task=new_dhcp_scope, type='dhcp').save()
                     except Exception, e:
                         print e
                         ##This is due to the key already existing in the db
                         pass
                 if new_reverse_dns_zone is not None:
                     try:
-                        models.ScheduledTask(task=new_reverse_dns_zone, type='reverse_dns_zone').save()
-                    except Exception ,e:
+                        models.ScheduledTask(task=new_reverse_dns_zone,
+                                             type='reverse_dns_zone').save()
+                    except Exception, e:
                         print e
                         ##This is due to the key already existing in the db
                         pass
 
-
-    return HttpResponse(json.dumps(resp));
+    return HttpResponse(json.dumps(resp))
     #return HttpResponseRedirect('/en-US/systems/get_key_value_store/' + system_id + '/')
+
 
 @csrf_exempt
 def create_key_value(request, id):
@@ -551,10 +575,10 @@ def create_key_value(request, id):
         key = request.POST['key'].strip()
     if 'value' in request.POST:
         value = request.POST['value'].strip()
-    kv = models.KeyValue(system=system,key=key,value=value)
+    kv = models.KeyValue(system=system, key=key, value=value)
     print "Key is %s: Value is %s." % (key, value)
-    kv.save();
-    matches = re.search('^nic\.(\d+)', str(kv.key) )
+    kv.save()
+    matches = re.search('^nic\.(\d+)', str(kv.key))
     if matches:
         try:
             existing_dhcp_scope = models.KeyValue.objects.filter(system=kv.system).filter(key='nic.%s.dhcp_scope.0' % matches.group(1))[0].value
@@ -563,29 +587,34 @@ def create_key_value(request, id):
             pass
     key_value_store = models.KeyValue.objects.filter(system=system)
     return render_to_response('systems/key_value_store.html', {
-            'key_value_store': key_value_store,
-           },
-           RequestContext(request))
+        'key_value_store': key_value_store,
+    },
+        RequestContext(request))
+
+
 def get_network_adapters(request, id):
     adapters = models.NetworkAdapter.objects.filter(system_id=id)
     return render_to_response('systems/network_adapters.html', {
-            'adapters': adapters,
-            'switches': models.System.objects.filter(is_switch=1),
-            'dhcp_scopes': models.DHCP.objects.all()
-            #'read_only': getattr(request, 'read_only', False),
-           },
-           RequestContext(request))
+        'adapters': adapters,
+        'switches': models.System.objects.filter(is_switch=1),
+        'dhcp_scopes': models.DHCP.objects.all()
+        #'read_only': getattr(request, 'read_only', False),
+    },
+        RequestContext(request))
+
+
 def delete_network_adapter(request, id, system_id):
     adapter = models.NetworkAdapter.objects.get(id=id)
     adapter.delete()
     adapters = models.NetworkAdapter.objects.filter(system_id=system_id)
     return render_to_response('systems/network_adapters.html', {
-            'adapters': adapters,
-            'dhcp_scopes': models.DHCP.objects.all(),
-            'switches': models.System.objects.filter(is_switch=1)
-            #'read_only': getattr(request, 'read_only', False),
-           },
-           RequestContext(request))
+        'adapters': adapters,
+        'dhcp_scopes': models.DHCP.objects.all(),
+        'switches': models.System.objects.filter(is_switch=1)
+        #'read_only': getattr(request, 'read_only', False),
+    },
+        RequestContext(request))
+
 
 def create_network_adapter(request, id):
 
@@ -593,20 +622,22 @@ def create_network_adapter(request, id):
     nic.save()
     adapters = models.NetworkAdapter.objects.filter(system_id=id)
     return render_to_response('systems/network_adapters.html', {
-            'adapters': adapters,
-            'dhcp_scopes': models.DHCP.objects.all(),
-            'switches': models.System.objects.filter(is_switch=1)
-            #'read_only': getattr(request, 'read_only', False),
-           },
-           RequestContext(request))
+        'adapters': adapters,
+        'dhcp_scopes': models.DHCP.objects.all(),
+        'switches': models.System.objects.filter(is_switch=1)
+        #'read_only': getattr(request, 'read_only', False),
+    },
+        RequestContext(request))
+
 
 def save_network_adapter(request, id):
     import re
     nic = models.NetworkAdapter.objects.get(id=id)
     if nic is not None:
         mac = request.POST['mac_address']
-        mac = mac.replace(':','').replace(' ','').replace('.','')
-        tmp = mac[0:2] + ':' + mac[2:4] + ':' + mac[4:6] + ':' + mac[6:8] + ':' + mac[8:10] + ':' + mac[10:12]
+        mac = mac.replace(':', '').replace(' ', '').replace('.', '')
+        tmp = mac[0:2] + ':' + mac[2:4] + ':' + mac[4:6] + ':' + \
+            mac[6:8] + ':' + mac[8:10] + ':' + mac[10:12]
         mac = tmp
         nic.dhcp_scope_id = request.POST['dhcp_scope_id']
         nic.mac_address = mac
@@ -624,9 +655,6 @@ def save_network_adapter(request, id):
     return HttpResponseRedirect('/systems/get_network_adapters/' + id)
 
 
-
-
-
 @allow_anyone
 def system_show(request, id):
     system = get_object_or_404(models.System, pk=id)
@@ -636,7 +664,7 @@ def system_show(request, id):
     is_release = False
     try:
         client = Client()
-        adapters = json.loads(client.get('/api/v2/keyvalue/3/', {'key_type':'adapters_by_system','system':system.hostname}, follow=True).content)
+        adapters = json.loads(client.get('/api/v2/keyvalue/3/', {'key_type': 'adapters_by_system', 'system': system.hostname}, follow=True).content)
     except:
         adapters = []
     if system.allocation is 'release':
@@ -652,17 +680,18 @@ def system_show(request, id):
     else:
         key_values = system.keyvalue_set.exclude(key__istartswith='nic.')
 
-    intrs = StaticInterface.objects.filter(system = system)
+    intrs = StaticInterface.objects.filter(system=system)
 
     return render_to_response('systems/system_show.html', {
-            'system': system,
-            'interfaces': intrs,
-            'adapters': adapters,
-            'key_values': key_values,
-            'is_release': is_release,
-            'read_only': getattr(request, 'read_only', False),
-           },
-           RequestContext(request))
+        'system': system,
+        'interfaces': intrs,
+        'adapters': adapters,
+        'key_values': key_values,
+        'is_release': is_release,
+        'read_only': getattr(request, 'read_only', False),
+    },
+        RequestContext(request))
+
 
 @allow_anyone
 def system_show_by_asset_tag(request, id):
@@ -678,11 +707,12 @@ def system_show_by_asset_tag(request, id):
         system.warranty_link = "http://www11.itrc.hp.com/service/ewarranty/warrantyResults.do?productNumber=%s&serialNumber1=%s&country=US" % (system.server_model.part_number, system.serial)
 
     return render_to_response('systems/system_show.html', {
-            'system': system,
-            'is_release': True,
-            'read_only': getattr(request, 'read_only', False),
-           },
-           RequestContext(request))
+        'system': system,
+        'is_release': True,
+        'read_only': getattr(request, 'read_only', False),
+    },
+        RequestContext(request))
+
 
 def system_view(request, template, data, instance=None):
     from forms import SystemForm
@@ -698,12 +728,15 @@ def system_view(request, template, data, instance=None):
     data['form'] = form
 
     return render_to_response(template,
-                data,
-                request
-            )
+                              data,
+                              request
+                              )
+
+
 @csrf_exempt
 def system_new(request):
     return system_view(request, 'systems/system_new.html', {})
+
 
 @csrf_exempt
 def system_edit(request, id):
@@ -717,10 +750,10 @@ def system_edit(request, id):
         pass
 
     return system_view(request, 'systems/system_edit.html', {
-            'system': system,
-            'dhcp_scopes':dhcp_scopes,
-            'revision_history':models.SystemChangeLog.objects.filter(system=system).order_by('-id')
-            }, system)
+        'system': system,
+        'dhcp_scopes': dhcp_scopes,
+        'revision_history': models.SystemChangeLog.objects.filter(system=system).order_by('-id')
+    }, system)
 
 
 def system_delete(request, id):
@@ -736,15 +769,17 @@ def system_csv(request):
     response['Content-Disposition'] = 'attachment; filename=systems.csv'
 
     writer = csv.writer(response)
-    writer.writerow(['Host Name', 'Serial', 'Asset Tag', 'Model', 'Allocation', 'Rack', 'Switch Ports', 'OOB IP'])
+    writer.writerow(['Host Name', 'Serial', 'Asset Tag', 'Model',
+                    'Allocation', 'Rack', 'Switch Ports', 'OOB IP'])
     for s in systems:
         try:
             writer.writerow([s.hostname, s.serial, s.asset_tag, s.server_model, s.allocation, s.system_rack, s.switch_ports, s.oob_ip])
         except:
-            writer.writerow([s.hostname, s.serial, s.asset_tag, s.server_model, '', s.system_rack, s.switch_ports, s.oob_ip])
-
+            writer.writerow([s.hostname, s.serial, s.asset_tag, s.server_model,
+                            '', s.system_rack, s.switch_ports, s.oob_ip])
 
     return response
+
 
 def system_releng_csv(request):
     systems = models.System.objects.filter(allocation=2).order_by('hostname')
@@ -753,23 +788,25 @@ def system_releng_csv(request):
     response['Content-Disposition'] = 'attachment; filename=systems.csv'
 
     writer = csv.writer(response)
-    writer.writerow(['id','hostname', 'switch_ports', 'oob_ip', 'system_rack', 'asset_tag', 'operating_system', 'rack_order'])
+    writer.writerow(['id', 'hostname', 'switch_ports', 'oob_ip', 'system_rack',
+                    'asset_tag', 'operating_system', 'rack_order'])
     for s in systems:
         writer.writerow([s.id, s.hostname, s.switch_ports, s.oob_ip, s.system_rack, s.asset_tag, s.operating_system, s.rack_order])
 
     return response
+
 
 def get_expanded_key_value_store(request, system_id):
     try:
         from django.test.client import Client
         client = Client()
         system = models.System.objects.get(id=system_id)
-        resp = client.get('/api/keyvalue/?keystore=%s' % (system.hostname), follow=True)
-        return_obj = resp.content.replace("\n","<br />")
+        resp = client.get(
+            '/api/keyvalue/?keystore=%s' % (system.hostname), follow=True)
+        return_obj = resp.content.replace("\n", "<br />")
     except:
         return_obj = 'This failed'
     return HttpResponse(return_obj)
-
 
 
 def new_rack_system_ajax(request, rack_id):
@@ -797,22 +834,28 @@ def new_rack_system_ajax(request, rack_id):
     data['form'] = rack_form
     data['rack'] = rack
 
-    resp_data['payload'] = render_to_string(template, data, RequestContext(request))
+    resp_data['payload'] = render_to_string(template, data,
+                                            RequestContext(request))
 
     return HttpResponse(json.dumps(resp_data), mimetype="application/json")
+
 
 @allow_anyone
 def racks_by_location(request, location=0):
     ret_list = []
     if int(location) > 0:
         location = models.Location.objects.get(id=location)
-        racks = models.SystemRack.objects.select_related('location').filter(location=location).order_by('name')
+        racks = models.SystemRack.objects.select_related(
+            'location').filter(location=location).order_by('name')
     else:
-        racks = models.SystemRack.objects.select_related('location').order_by('location', 'name')
+        racks = models.SystemRack.objects.select_related(
+            'location').order_by('location', 'name')
 
     for r in racks:
-        ret_list.append({'name':'%s %s' % (r.location.name, r.name), 'id':r.id})
+        ret_list.append(
+            {'name': '%s %s' % (r.location.name, r.name), 'id': r.id})
     return HttpResponse(json.dumps(ret_list))
+
 
 @allow_anyone
 def racks(request):
@@ -827,7 +870,7 @@ def racks(request):
         has_query = True
         if len(location_id) > 0 and int(location_id) > 0:
             loc = models.Location.objects.get(id=location_id)
-            filter_form.fields['rack'].choices = [('','ALL')] + [(m.id, m.location.name + ' ' +  m.name) for m in models.SystemRack.objects.filter(location=loc).order_by('name')]
+            filter_form.fields['rack'].choices = [('', 'ALL')] + [(m.id, m.location.name + ' ' + m.name) for m in models.SystemRack.objects.filter(location=loc).order_by('name')]
     else:
         has_query = False
     if filter_form.is_valid():
@@ -839,7 +882,8 @@ def racks(request):
             racks = racks.filter(location=filter_form.cleaned_data['location'])
             has_query = True
         if filter_form.cleaned_data['allocation']:
-            system_query &= Q(allocation=filter_form.cleaned_data['allocation'])
+            system_query &= Q(
+                allocation=filter_form.cleaned_data['allocation'])
             has_query = True
         if filter_form.cleaned_data['status']:
             system_query &= Q(system_status=filter_form.cleaned_data['status'])
@@ -848,7 +892,8 @@ def racks(request):
     if not has_query:
         racks = []
     else:
-        decommissioned = models.SystemStatus.objects.get(status='decommissioned')
+        decommissioned = models.SystemStatus.objects.get(
+            status='decommissioned')
         racks = [(k, list(k.system_set.select_related(
             'server_model',
             'allocation',
@@ -856,11 +901,12 @@ def racks(request):
         ).filter(system_query).exclude(system_status=decommissioned).order_by('rack_order'))) for k in racks]
 
     return render_to_response('systems/racks.html', {
-            'racks': racks,
-            'filter_form': filter_form,
-            'read_only': getattr(request, 'read_only', False),
-           },
-           RequestContext(request))
+        'racks': racks,
+        'filter_form': filter_form,
+        'read_only': getattr(request, 'read_only', False),
+    },
+        RequestContext(request))
+
 
 def getoncall(request, type):
     from django.contrib.auth.models import User
@@ -881,29 +927,34 @@ def getoncall(request, type):
         except:
             return_irc_nick = ''
     return HttpResponse(return_irc_nick)
+
+
 def oncall(request):
     from forms import OncallForm
     from django.contrib.auth.models import User
     #current_desktop_oncall = models.UserProfile.objects.get_current_desktop_oncall
     #import pdb; pdb.set_trace()
     try:
-        current_desktop_oncall = User.objects.select_related().filter(userprofile__current_desktop_oncall=1)[0].username
+        current_desktop_oncall = User.objects.select_related(
+        ).filter(userprofile__current_desktop_oncall=1)[0].username
     except IndexError:
         current_desktop_oncall = ''
     try:
-        current_sysadmin_oncall = User.objects.select_related().filter(userprofile__current_sysadmin_oncall=1)[0].username
+        current_sysadmin_oncall = User.objects.select_related(
+        ).filter(userprofile__current_sysadmin_oncall=1)[0].username
     except IndexError:
         current_sysadmin_oncall = ''
     try:
-        current_services_oncall = User.objects.select_related().filter(userprofile__current_services_oncall=1)[0].username
+        current_services_oncall = User.objects.select_related(
+        ).filter(userprofile__current_services_oncall=1)[0].username
     except IndexError:
         current_services_oncall = ''
 
     initial = {
-        'desktop_support':current_desktop_oncall,
-        'sysadmin_support':current_sysadmin_oncall,
-        'services_support':current_services_oncall,
-            }
+        'desktop_support': current_desktop_oncall,
+        'sysadmin_support': current_sysadmin_oncall,
+        'services_support': current_services_oncall,
+    }
     if request.method == 'POST':
         form = OncallForm(request.POST, initial=initial)
         if form.is_valid():
@@ -918,14 +969,16 @@ def oncall(request):
                 set_oncall('sysadmin', current_sysadmin_oncall)
                 set_oncall('services', current_services_oncall)
     else:
-        form = OncallForm(initial = initial)
-    return render(request, 'systems/generic_form.html', {'current_services_oncall':current_services_oncall, 'current_desktop_oncall':current_desktop_oncall,'current_sysadmin_oncall':current_sysadmin_oncall, 'form':form})
+        form = OncallForm(initial=initial)
+    return render(request, 'systems/generic_form.html', {'current_services_oncall': current_services_oncall, 'current_desktop_oncall': current_desktop_oncall, 'current_sysadmin_oncall': current_sysadmin_oncall, 'form': form})
+
 
 def clear_oncall():
     from django.db import connection, transaction
     cursor = connection.cursor()
     cursor.execute("UPDATE `user_profiles` set `current_desktop_oncall` = 0, `current_sysadmin_oncall` = 0, `current_services_oncall` = 0")
     transaction.commit_unless_managed()
+
 
 def clear_oncall_orm():
     from django.contrib.auth.models import User
@@ -942,17 +995,19 @@ def clear_oncall_orm():
             continue
 
     return True
+
+
 def set_oncall(type, username):
     from django.contrib.auth.models import User
     try:
         new_oncall = User.objects.get(username=username)
-        if type=='desktop':
+        if type == 'desktop':
             new_oncall.get_profile().current_desktop_oncall = 1
-        elif type=='sysadmin':
+        elif type == 'sysadmin':
             new_oncall.get_profile().current_sysadmin_oncall = 1
-        elif type=='services':
+        elif type == 'services':
             new_oncall.get_profile().current_services_oncall = 1
-        elif type=='all':
+        elif type == 'all':
             new_oncall.get_profile().current_sysadmin_oncall = 1
             new_oncall.get_profile().current_desktop_oncall = 1
             new_oncall.get_profile().current_services_oncall = 1
@@ -960,6 +1015,8 @@ def set_oncall(type, username):
         new_oncall.save()
     except Exception, e:
         print e
+
+
 def rack_delete(request, object_id):
     from models import SystemRack
     rack = get_object_or_404(SystemRack, pk=object_id)
@@ -968,8 +1025,8 @@ def rack_delete(request, object_id):
         return HttpResponseRedirect('/systems/racks/')
     else:
         return render_to_response('systems/rack_confirm_delete.html', {
-                'rack': rack,
-            },
+            'rack': rack,
+        },
             RequestContext(request))
 
 

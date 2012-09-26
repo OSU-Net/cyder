@@ -14,9 +14,9 @@ from mozdns.domain.models import Domain
 
 class SSHFPTests(TestCase):
     def setUp(self):
-        self.o = Domain(name = "org")
+        self.o = Domain(name="org")
         self.o.save()
-        self.o_e = Domain(name = "mozilla.org")
+        self.o_e = Domain(name="mozilla.org")
         self.o_e.save()
 
     def do_generic_add(self, data):
@@ -42,7 +42,7 @@ class SSHFPTests(TestCase):
         data = "asdf"
         s_type = 1
         a_type = 1
-        data = { 'label':label, 'key':data ,'domain':self.o_e ,
+        data = {'label': label, 'key': data, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
         sshfp1 = self.do_generic_add(data)
 
@@ -50,7 +50,7 @@ class SSHFPTests(TestCase):
         data = "asdfasfd"
         s_type = 1
         a_type = 1
-        data = { 'label':label, 'key':data ,'domain':self.o_e ,
+        data = {'label': label, 'key': data, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
         sshfp1 = self.do_generic_add(data)
 
@@ -58,7 +58,7 @@ class SSHFPTests(TestCase):
         data = "aasdf"
         s_type = 1
         a_type = 1
-        data = { 'label':label, 'key':data ,'domain':self.o_e ,
+        data = {'label': label, 'key': data, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
         sshfp1 = self.do_generic_add(data)
 
@@ -66,7 +66,6 @@ class SSHFPTests(TestCase):
         data = "dd"
         s_type = 1
         a_type = 1
-        data = { 'label':label, 'key':data ,'domain':self.o ,
+        data = {'label': label, 'key': data, 'domain': self.o,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
         sshfp1 = self.do_generic_add(data)
-

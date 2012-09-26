@@ -16,4 +16,3 @@ class FQDNSRVForm(ModelForm):
         model = SRV
         exclude = ('label', 'domain')
         widgets = {'views': forms.CheckboxSelectMultiple}
-

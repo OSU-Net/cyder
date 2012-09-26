@@ -12,4 +12,4 @@ class DomainUpdateForm(ModelForm):
 class DomainForm(ModelForm):
     class Meta:
         model = Domain
-        exclude = ('master_domain','is_reverse', 'dirty')
+        exclude = ('master_domain', 'is_reverse', 'dirty')

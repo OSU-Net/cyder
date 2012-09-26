@@ -35,7 +35,7 @@ def network_wizard(request):
                 ip_type = form.data.get('ip_type')
                 if ip_type not in ('4', '6'):
                     raise ValidationError("IP type must be either IPv4 or "
-                            "IPv6.")
+                                          "IPv6.")
                 network_str = form.data.get('network', '')
                 try:
                     if ip_type == '4':
@@ -53,9 +53,9 @@ def network_wizard(request):
                 else:
                     ip_upper, ip_lower = ipv6_to_longs(network.network)
                 if (Network.objects.filter(ip_upper=ip_upper,
-                        ip_lower=ip_lower).exists()):
+                                           ip_lower=ip_lower).exists()):
                     raise ValidationError("This network has already been "
-                            "allocated.")
+                                          "allocated.")
             except ValidationError, e:
                 form = NetworkForm_network(request.POST)
                 if form._errors is None:
@@ -67,7 +67,7 @@ def network_wizard(request):
                 })
 
             request.session['net_wiz_vars'] = {'ip_type': ip_type,
-                    'network_str': str(network)}
+                                               'network_str': str(network)}
             parent = calc_parent_str(network_str, ip_type=ip_type)
 
             # Now build the form with the correct site.
@@ -97,7 +97,7 @@ def network_wizard(request):
                         nvars['site_pk'] = site.pk
                     except ObjectDoesNotExist, e:
                         raise ValidationError("That site does not exist. Try"
-                                " again.")
+                                              " again.")
             except ValidationError, e:
                 form = NetworkForm_site(request.POST)
                 if form._errors is None:
@@ -123,27 +123,27 @@ def network_wizard(request):
                 nvars = request.session['net_wiz_vars']
                 if 'create_choice' not in form.data:
                     raise ValidationError("Select whether you are using an "
-                            "exiting Vlan or if you are going to make a "
-                            "new one.")
+                                          "exiting Vlan or if you are going to make a "
+                                          "new one.")
                 create_choice = form.data['create_choice']
                 if create_choice == 'new':
                     if 'name' not in form.data:
                         raise ValidationError("When creating a new Vlan, "
-                                "please provide a vlan name")
+                                              "please provide a vlan name")
                     if 'number' not in form.data:
                         raise ValidationError("When creating a new Vlan, "
-                                "please provide a vlan number")
+                                              "please provide a vlan number")
                     vlan_name = form.data['name']
                     vlan_number = form.data['number']
                     if not (vlan_name and vlan_number):
                         raise ValidationError("When creating a new Vlan, "
-                                "please provide a string for the name and "
-                                "an integer for the number.")
+                                              "please provide a string for the name and "
+                                              "an integer for the number.")
                     vlan = Vlan.objects.filter(name=vlan_name,
-                                    number=vlan_number).exists()
+                                               number=vlan_number).exists()
                     if vlan:
                         raise ValidationError("The Vlan {0} {1} already "
-                            "exists.".format(vlan_name, vlan_number))
+                                              "exists.".format(vlan_name, vlan_number))
                     else:
                         nvars['vlan_action'] = "new"
                         nvars['vlan_name'] = vlan_name
@@ -153,12 +153,12 @@ def network_wizard(request):
                     vlan = form.data.get('vlan', '')
                     if not vlan:
                         raise ValidationError("You selected to use an existing"
-                                "vlan. Pleasechoose a vlan.")
+                                              "vlan. Pleasechoose a vlan.")
                     try:
                         vlan = Vlan.objects.get(pk=vlan)
                     except ObjectDoesNotExist, e:
                         raise ValidationError("That Vlan does not exist. Try "
-                                "again.")
+                                              "again.")
                     nvars['vlan_pk'] = vlan.pk
                     nvars['vlan_action'] = "existing"
                 else:
@@ -253,7 +253,7 @@ def create_objects(nvars):
         vlan_number = nvars.get('vlan_pk', '')
         if not vlan_number:
             raise ValidationError("You selected to use an existing vlan. "
-                "Pleasechoose a vlan.")
+                                  "Pleasechoose a vlan.")
         vlan = Vlan.objects.get(pk=vlan_number)
     else:
         vlan = None

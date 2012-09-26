@@ -27,6 +27,7 @@ import pdb
 
 API_VERSION = '1'
 
+
 def build_sample_domain():
     domain_name = ''
     for i in range(2):
@@ -37,6 +38,7 @@ def build_sample_domain():
     domain.soa = soa
     domain.save()
     return domain
+
 
 class MozdnsAPITests(object):
     object_list_url = "/mozdns/api/v{0}_dns/{1}/"
@@ -82,7 +84,7 @@ class MozdnsAPITests(object):
         resp, post_data = self.generic_create(self.post_data())
         _, (_, new_object_url) = resp.items()
         update_resp, patch_data = self.generic_update(new_object_url,
-                self.post_data())
+                                                      self.post_data())
 
         # Now make sure the data used to patch is sticking to the model.
         patch_resp = self.api_client.get(new_object_url, format='json')
@@ -94,7 +96,7 @@ class MozdnsAPITests(object):
         obj_count = self.test_type.objects.count()
         resp, post_data = self.generic_create(self.post_data())
         _, (_, new_object_url) = resp.items()
-        self.assertEqual(self.test_type.objects.count(), obj_count+1)
+        self.assertEqual(self.test_type.objects.count(), obj_count + 1)
         resp = self.api_client.delete(new_object_url, format='json')
         self.assertHttpAccepted(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -115,7 +117,7 @@ class MozdnsAPITests(object):
     def generic_update(self, patch_url, patch_data):
         obj_count = self.test_type.objects.count()
         resp = self.api_client.patch(patch_url, format='json',
-                    data=patch_data)
+                                     data=patch_data)
         self.assertHttpAccepted(resp)
         # Verify a no new object has been added.
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -125,7 +127,7 @@ class MozdnsAPITests(object):
         # Check how many are there first.
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
@@ -138,7 +140,8 @@ class MozdnsAPITests(object):
         change_post_data = {}
         change_post_data['comment'] = "==DIFFERENT=="
         post_data['comment'] = "==DIFFERENT=="
-        resp, patch_data = self.generic_update(new_object_url, change_post_data)
+        resp, patch_data = self.generic_update(
+            new_object_url, change_post_data)
         new_resp = self.api_client.get(new_object_url, format='json')
         updated_obj_data = json.loads(new_resp.content)
         self.compare_data(post_data, updated_obj_data)
@@ -148,7 +151,7 @@ class MozdnsAPITests(object):
         post_data['views'] = ['public']
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
@@ -200,7 +203,7 @@ class MangleTests(ResourceTestCase):
         post_data.pop('label')
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -210,7 +213,7 @@ class MangleTests(ResourceTestCase):
         post_data['label'] = post_data['label'] + '.'
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -220,7 +223,7 @@ class MangleTests(ResourceTestCase):
         post_data['domain'] = ''
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -231,7 +234,7 @@ class MangleTests(ResourceTestCase):
         post_data['fqdn'] = post_data['label'] + '.' + post_data['domain']
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -241,14 +244,14 @@ class MangleTests(ResourceTestCase):
         post_data = self.post_data()
         Domain.objects.get_or_create(name="asdf")
         Domain.objects.get_or_create(name="foo.asdf")
-        domain , _= Domain.objects.get_or_create(name="bar.foo.asdf")
+        domain, _ = Domain.objects.get_or_create(name="bar.foo.asdf")
         fqdn = post_data['label'] + '.' + domain.name
         post_data.pop('label')
         post_data.pop('domain')
         post_data['fqdn'] = 'secondbar.x.y.' + fqdn
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -258,19 +261,20 @@ class MangleTests(ResourceTestCase):
         post_data['views'] = ['foobar']
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                        str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
 
     def post_data(self):
         return {
-            'comment':random_label(),
+            'comment': random_label(),
             'ttl': random_byte(),
             'label': 'b' + random_label(),
-            'domain':self.domain.name,
-            'target':random_label()
+            'domain': self.domain.name,
+            'target': random_label()
         }
+
 
 class DomainLeakTests(ResourceTestCase):
     test_type = CNAME
@@ -285,7 +289,7 @@ class DomainLeakTests(ResourceTestCase):
         # Check how many are there first.
         domain_count = Domain.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
-                str(self.test_type.__name__).lower())
+                                                 str(self.test_type.__name__).lower())
         post_data = self.post_data()
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
@@ -301,15 +305,16 @@ class DomainLeakTests(ResourceTestCase):
             'fqdn': 'c' + random_label() + '.' + random_label() + '.' + self.domain.name,
         }
 
+
 class CNAMEAPITests(MozdnsAPITests, ResourceTestCase):
     test_type = CNAME
 
     def post_data(self):
         return {
-            'comment':random_label(),
+            'comment': random_label(),
             'ttl': random_byte(),
             'label': 'd' + random_label(),
-            'domain':self.domain.name,
+            'domain': self.domain.name,
             'target': random_label()
         }
 
@@ -321,54 +326,61 @@ class MXAPITests(MozdnsAPITests, ResourceTestCase):
         return {
             'comment': random_label(),
             'ttl': random_byte(),
-            'label':  'e' + random_label(),
-            'domain':self.domain.name,
+            'label': 'e' + random_label(),
+            'domain': self.domain.name,
             'server': random_label(),
-            'priority':123,
-            'ttl':213
+            'priority': 123,
+            'ttl': 213
         }
+
 
 class SRVAPITests(MozdnsAPITests, ResourceTestCase):
     test_type = SRV
+
     def post_data(self):
         return {
             'comment': random_label(),
             'ttl': random_byte(),
-            'label':"_"+random_label(),
-            'domain':self.domain.name,
+            'label': "_" + random_label(),
+            'domain': self.domain.name,
             'target': random_label(),
-            'priority':2 ,
-            'weight':2222 ,
+            'priority': 2,
+            'weight': 2222,
             'port': 222
         }
 
 
 class TXTAPITests(MozdnsAPITests, ResourceTestCase):
     test_type = TXT
+
     def post_data(self):
         return {
             'comment': random_label(),
             'ttl': random_byte(),
             'label': 'f' + random_label(),
-            'domain':self.domain.name,
+            'domain': self.domain.name,
             'txt_data': random_label()
         }
 
+
 class NameserverAPITests(MozdnsAPITests, ResourceTestCase):
     test_type = Nameserver
+
     def test_fqdn_create(self):
         pass
+
     def post_data(self):
         return {
             'server': 'g' + random_label(),
             'comment': random_label(),
             'ttl': random_byte(),
-            'domain':self.domain.name,
+            'domain': self.domain.name,
         }
 
 
 class SSHFPAPITests(MozdnsAPITests, ResourceTestCase):
     test_type = SSHFP
+
     def post_data(self):
         return {
             'comment': random_label(),
@@ -380,8 +392,10 @@ class SSHFPAPITests(MozdnsAPITests, ResourceTestCase):
             'key': random_label()
         }
 
+
 class AdderessRecordV4APITests(MozdnsAPITests, ResourceTestCase):
     test_type = AddressRecord
+
     def setUp(self):
         super(AdderessRecordV4APITests, self).setUp()
 
@@ -395,8 +409,10 @@ class AdderessRecordV4APITests(MozdnsAPITests, ResourceTestCase):
             'ip_type': '4'
         }
 
+
 class AdderessRecordV6APITests(MozdnsAPITests, ResourceTestCase):
     test_type = AddressRecord
+
     def setUp(self):
         #Domain.objects.get_or_create(name='arap')
         #Domain.objects.get_or_create(name='ipv6.arap')
@@ -410,12 +426,14 @@ class AdderessRecordV6APITests(MozdnsAPITests, ResourceTestCase):
             'label': 'j' + random_label(),
             'domain': self.domain.name,
             'ip_str': "1000:{0}:{1}:{2}::".format(random_byte(), random_byte(),
-                random_byte()),
+                                                  random_byte()),
             'ip_type': '6'
         }
 
+
 class PTRV6APITests(MozdnsAPITests, ResourceTestCase):
     test_type = PTR
+
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='ipv6.arpa')
@@ -430,13 +448,17 @@ class PTRV6APITests(MozdnsAPITests, ResourceTestCase):
             'comment': 'k' + random_label(),
             'ttl': random_byte(),
             'ip_str': "1000:{0}:{1}:{2}:{3}:{4}::".format(random_byte(), random_byte(),
-                random_byte(),random_byte(),random_byte()),
+                                                          random_byte(
+                                                          ), random_byte(
+                                                          ), random_byte()),
             'ip_type': '6',
             'name': random_label()
         }
 
+
 class PTRV4APITests(MozdnsAPITests, ResourceTestCase):
     test_type = PTR
+
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')
@@ -455,8 +477,10 @@ class PTRV4APITests(MozdnsAPITests, ResourceTestCase):
             'name': random_label()
         }
 
+
 class StaticIntrV4APITests(MozdnsAPITests, ResourceTestCase):
     test_type = StaticInterface
+
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')
@@ -468,9 +492,10 @@ class StaticIntrV4APITests(MozdnsAPITests, ResourceTestCase):
     def compare_data(self, old_data, new_obj_data):
         for key in old_data.keys():
             if key == 'system_hostname':
-                self.assertEqual(old_data[key], new_obj_data['system']['hostname'])
+                self.assertEqual(
+                    old_data[key], new_obj_data['system']['hostname'])
                 continue
-            if key in ('iname', 'system') :
+            if key in ('iname', 'system'):
                 continue  # StaticInterface needs this done. Too lazy to factor
                           # a comparison function out
             self.assertEqual(old_data[key], new_obj_data[key])
@@ -501,8 +526,10 @@ class StaticIntrV4APITests(MozdnsAPITests, ResourceTestCase):
             'ip_type': '4'
         }
 
+
 class StaticIntrV6APITests(MozdnsAPITests, ResourceTestCase):
     test_type = StaticInterface
+
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='ipv6.arpa')
@@ -530,6 +557,6 @@ class StaticIntrV6APITests(MozdnsAPITests, ResourceTestCase):
             'system': '/tasty/v3/system/{0}/'.format(self.s.pk),
             'domain': self.domain.name,
             'ip_str': "2000:a{0}:a{1}:a{2}::".format(random_byte(), random_byte(),
-                random_byte()),
+                                                     random_byte()),
             'ip_type': '6'
         }

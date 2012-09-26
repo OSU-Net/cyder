@@ -5,6 +5,7 @@ import pdb
 
 class Command(BaseCommand):
     args = ''
+
     def handle(self, *args, **options):
         if len(args) != 1:
             return

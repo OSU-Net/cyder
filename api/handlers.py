@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack,SystemStatus,NetworkAdapter,KeyValue,ScheduledTask
+from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue, ScheduledTask
 from truth.models import Truth, KeyValue as TruthKeyValue
 from dhcp.DHCP import DHCP as DHCPInterface
 from dhcp.models import DHCP
@@ -12,11 +12,14 @@ except:
     from django.utils import simplejson as json
 from django.test.client import Client
 from django.conf import settings
+
+
 class DHCPHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()
+
     def read(self, request, dhcp_scope=None, dhcp_action=None):
         if dhcp_scope and dhcp_action == 'get_scopes':
             tasks = []
@@ -34,17 +37,20 @@ class DHCPHandler(BaseHandler):
                 if 'hostname' in host:
                     the_url = '/api/keyvalue/?key_type=adapters_by_system_and_scope&dhcp_scope=%s&system=%s' % (dhcp_scope, host['hostname'])
                     try:
-                        adapter_list.append(json.loads(client.get(the_url, follow=True).content))
+                        adapter_list.append(json.loads(
+                            client.get(the_url, follow=True).content))
                     except:
                         pass
             d = DHCPInterface(scope_options, adapter_list)
             return d.get_hosts()
+
 
 class SystemHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
     model = System
     #fields = ('id', 'asset_tag', 'oob_ip', 'hostname', 'operating_system', ('system_status',('status', 'id')))
     exclude = ()
+
     def read(self, request, system_id=None):
         model = System
         base = model.objects
@@ -67,17 +73,19 @@ class SystemHandler(BaseHandler):
         else:
             #return base.filter(id_gt=400) # Or base.filter(...)
             return base.all()
+
     def create(self, request, system_id=None):
         s = System()
-        s.hostname = system_id 
+        s.hostname = system_id
         try:
             s.save()
             resp = rc.CREATED
-            resp.write('json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
+            resp.write(
+                'json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
         except:
             resp = rc.BAD_REQUEST
             resp.write('Unable to Create Host')
-            
+
         return resp
 
     def delete(self, request, system_id=None):
@@ -93,9 +101,10 @@ class SystemHandler(BaseHandler):
             resp.write("Unable to find system")
 
         return resp
+
     def update(self, request, system_id=None):
         model = System
-    	if request.method == 'PUT':
+        if request.method == 'PUT':
             try:
                 try:
                     s = System.objects.get(id=system_id)
@@ -107,19 +116,21 @@ class SystemHandler(BaseHandler):
                     pass
                 if 'system_status' in request.POST:
                     try:
-                        ss = SystemStatus.objects.get(id=request.POST['system_status'])
+                        ss = SystemStatus.objects.get(
+                            id=request.POST['system_status'])
                         s.system_status = ss
                     except:
                         resp = rc.NOT_FOUND
-                        resp.write("System Status Not Found") 
+                        resp.write("System Status Not Found")
                 if 'system_rack' in request.POST:
                     try:
-                        sr = SystemRack.objects.get(id=request.POST['system_rack'])
+                        sr = SystemRack.objects.get(
+                            id=request.POST['system_rack'])
                         s.system_rack = sr
                     except:
                         pass
                         #resp = rc.NOT_FOUND
-                        #resp.write("System Rack Not Found") 
+                        #resp.write("System Rack Not Found")
                 if 'location' in request.POST:
                     s.location = request.POST['location']
                 if 'asset_tag' in request.POST:
@@ -137,13 +148,17 @@ class SystemHandler(BaseHandler):
                     s.notes = request.POST['notes']
                 s.save()
                 resp = rc.ALL_OK
-                resp.write('json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
+                resp.write(
+                    'json = {"id":%i, "hostname":"%s"}' % (s.id, s.hostname))
             except:
                 resp = rc.NOT_FOUND
                 resp.write("System Updated")
             return resp
+
+
 class TruthHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
+
     def create(self, request, key_value_id=None):
         n = KeyValue()
         if 'truth_id' in request.POST:
@@ -163,7 +178,7 @@ class TruthHandler(BaseHandler):
         return resp
 
     def update(self, request, key_value_id=None):
-        n = KeyValue.objects.get(id=key_value_id,key=request.POST['key'])
+        n = KeyValue.objects.get(id=key_value_id, key=request.POST['key'])
         if 'system_id' in request.POST:
             system = System.objects.get(id=request.POST['system_id'])
             n.system = system
@@ -177,6 +192,7 @@ class TruthHandler(BaseHandler):
             resp = rc.NOT_FOUND
             resp.write('Unable to Create Key/Value Pair')
         return resp
+
     def read(self, request, key_value_id=None):
         base = Truth.expanded_objects
         if 'key' in request.GET:
@@ -201,6 +217,7 @@ class TruthHandler(BaseHandler):
                 m = MacroExpansion(matches.group(1))
                 row.value = m.output()
         return base
+
     def delete(self, request, key_value_id=None):
         try:
             n = KeyValue.objects.get(id=key_value_id)
@@ -210,8 +227,11 @@ class TruthHandler(BaseHandler):
         except:
             resp = rc.NOT_FOUND
         return resp
+
+
 class KeyValueHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
+
     def create(self, request, key_value_id=None):
         if 'system_id' in request.POST:
             n = KeyValue()
@@ -248,7 +268,7 @@ class KeyValueHandler(BaseHandler):
 
     def update(self, request, key_value_id=None):
         if 'system_id' in request.POST:
-            n = KeyValue.objects.get(id=key_value_id,key=request.POST['key'])
+            n = KeyValue.objects.get(id=key_value_id, key=request.POST['key'])
             system = System.objects.get(id=request.POST['system_id'])
             n.system = system
             if 'value' in request.POST:
@@ -264,7 +284,8 @@ class KeyValueHandler(BaseHandler):
         else:
             try:
                 truth = Truth.objects.get(name=key_value_id)
-                n = TruthKeyValue.objects.get(truth=truth,key=request.POST['key'])
+                n = TruthKeyValue.objects.get(
+                    truth=truth, key=request.POST['key'])
                 if 'value' in request.POST:
                     n.value = request.POST['value']
             except:
@@ -301,7 +322,8 @@ class KeyValueHandler(BaseHandler):
             tmp_list = []
             if key_type == 'dhcp_scopes':
                 #Get keystores from truth that have dhcp.is_scope = True
-                base = TruthKeyValue.objects.filter(key='dhcp.is_scope',value='True')
+                base = TruthKeyValue.objects.filter(
+                    key='dhcp.is_scope', value='True')
                 #Iterate through the list and get all of the key/value pairs
                 for row in base:
                     keyvalue = TruthKeyValue.objects.filter(truth=row.truth)
@@ -313,7 +335,7 @@ class KeyValueHandler(BaseHandler):
 
             if key_type == 'system_by_scope':
                 #Get keystores from truth that have dhcp.is_scope = True
-                keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope',value=request.GET['scope']).filter(key__startswith='nic.')
+                keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope', value=request.GET['scope']).filter(key__startswith='nic.')
                 #Iterate through the list and get all of the key/value pairs
                 tmp_list = []
                 for row in keyvalue_pairs:
@@ -343,7 +365,7 @@ class KeyValueHandler(BaseHandler):
                 for kv in keyvalue_pairs:
                     tmp_dict[kv.key] = kv.value
                 for k in tmp_dict.iterkeys():
-                    matches = re.match('nic\.(\d+).*',k)
+                    matches = re.match('nic\.(\d+).*', k)
                     if matches.group is not None:
                         if matches.group(1) not in adapter_ids:
                             adapter_ids.append(matches.group(1))
@@ -367,13 +389,13 @@ class KeyValueHandler(BaseHandler):
                         dhcp_filename = tmp_dict['nic.%s.dhcp_filename.0' % a]
                     try:
                         final_list.append({
-                            'system_hostname':system.hostname,
-                            'ipv4_address':ipv4_address,
-                            'adapter_name':adapter_name,
-                            'mac_address':mac_address,
-                            'dhcp_hostname':dhcp_hostname,
-                            'dhcp_filename':dhcp_filename}
-                            )
+                            'system_hostname': system.hostname,
+                            'ipv4_address': ipv4_address,
+                            'adapter_name': adapter_name,
+                            'mac_address': mac_address,
+                            'dhcp_hostname': dhcp_hostname,
+                            'dhcp_filename': dhcp_filename}
+                        )
                     except:
                         pass
                 #tmp_list.append(tmp_dict)
@@ -390,7 +412,7 @@ class KeyValueHandler(BaseHandler):
                 for kv in keyvalue_pairs:
                     tmp_dict[kv.key] = kv.value
                 for k in tmp_dict.iterkeys():
-                    matches = re.match('nic\.(\d+).*',k)
+                    matches = re.match('nic\.(\d+).*', k)
                     if matches.group is not None:
                         #if matches.group(1) not in adapter_ids and tmp_dict['nic.%s.dhcp_scope.0' % matches.group(1)] is not None and tmp_dict['nic.%s.dhcp_scope.0' % matches.group(1)] == dhcp_scope:
                         dhcp_scope_match = 'nic.%s.dhcp_scope.0' % matches.group(1)
@@ -413,12 +435,14 @@ class KeyValueHandler(BaseHandler):
                     if 'nic.%s.dhcp_hostname.0' % a in tmp_dict:
                         dhcp_hostname = tmp_dict['nic.%s.dhcp_hostname.0' % a]
                     if 'nic.%s.option_hostname.0' % a in tmp_dict:
-                        dhcp_hostname = tmp_dict['nic.%s.option_hostname.0' % a]
+                        dhcp_hostname = tmp_dict[
+                            'nic.%s.option_hostname.0' % a]
                     if 'nic.%s.dhcp_filename.0' % a in tmp_dict:
                         dhcp_filename = tmp_dict['nic.%s.dhcp_filename.0' % a]
                     if 'nic.%s.dhcp_domain_name.0' % a in tmp_dict:
-                        dhcp_domain_name = tmp_dict['nic.%s.dhcp_domain_name.0' % a]
-                    final_list.append({'system_hostname':system.hostname, 'ipv4_address':ipv4_address,  'adapter_name':adapter_name, 'mac_address':mac_address, 'dhcp_hostname':dhcp_hostname, 'dhcp_filename':dhcp_filename, 'dhcp_domain_name':dhcp_domain_name})
+                        dhcp_domain_name = tmp_dict[
+                            'nic.%s.dhcp_domain_name.0' % a]
+                    final_list.append({'system_hostname': system.hostname, 'ipv4_address': ipv4_address, 'adapter_name': adapter_name, 'mac_address': mac_address, 'dhcp_hostname': dhcp_hostname, 'dhcp_filename': dhcp_filename, 'dhcp_domain_name': dhcp_domain_name})
                 #tmp_list.append(tmp_dict)
                 return final_list
         elif 'key' in request.GET and request.GET['key'] > '':
@@ -540,7 +564,8 @@ class KeyValueHandler(BaseHandler):
             try:
                 system_hostname = request.GET['system_hostname']
                 system = System.objects.get(hostname=system_hostname)
-                KeyValue.objects.filter(key__startswith='nic', system=system).delete()
+                KeyValue.objects.filter(
+                    key__startswith='nic', system=system).delete()
                 resp = rc.ALL_OK
                 resp.write('json = {"id":"0"}')
             except:
@@ -583,14 +608,16 @@ class KeyValueHandler(BaseHandler):
                 except:
                     resp = rc.NOT_FOUND
                 return resp
-        
+
         resp = rc.ALL_OK
         resp.write('json = {"id":"1"}')
         return resp
 
+
 class NetworkAdapterHandler(BaseHandler):
     allowed_methods = settings.API_ACCESS
     model = NetworkAdapter
+
     def create(self, request, network_adapter_id=None):
         n = NetworkAdapter()
         if 'system_id' in request.POST:
@@ -610,7 +637,8 @@ class NetworkAdapterHandler(BaseHandler):
 
         if 'dhcp_scope' in request.POST:
             try:
-                n.dhcp_scope = DHCP.objects.get(scope_name=request.POST['dhcp_scope'])
+                n.dhcp_scope = DHCP.objects.get(
+                    scope_name=request.POST['dhcp_scope'])
             except:
                 pass
         try:
@@ -620,19 +648,19 @@ class NetworkAdapterHandler(BaseHandler):
         except:
             resp = rc.NOT_FOUND
             resp.write('Unable to Create Host')
-            
+
         return resp
 
     def read(self, request, network_adapter_id=None):
         base = NetworkAdapter.objects
-        
+
         if network_adapter_id:
             return base.get(id=network_adapter_id)
         else:
             return base.all()
 
     def update(self, request, network_adapter_id=None):
-    	if request.method == 'PUT':
+        if request.method == 'PUT':
             try:
                 n = NetworkAdapter.objects.get(pk=network_adapter_id)
                 if 'system_id' in request.POST:
@@ -657,7 +685,8 @@ class NetworkAdapterHandler(BaseHandler):
                     n.option_host_name = ''
                 if 'dhcp_scope' in request.POST:
                     try:
-                        n.dhcp_scope = DHCP.objects.get(scope_name=request.POST['dhcp_scope'])
+                        n.dhcp_scope = DHCP.objects.get(
+                            scope_name=request.POST['dhcp_scope'])
                     except:
                         pass
                 n.save()
@@ -666,7 +695,7 @@ class NetworkAdapterHandler(BaseHandler):
             except:
                 resp = rc.NOT_FOUND
         else:
-                resp = rc.NOT_FOUND
+            resp = rc.NOT_FOUND
         return resp
 
     def delete(self, request, network_adapter_id=None):
@@ -679,6 +708,7 @@ class NetworkAdapterHandler(BaseHandler):
         except:
             resp = rc.NOT_FOUND
         return resp
+
 
 def fr(record):
     if not args:
