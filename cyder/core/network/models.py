@@ -2,14 +2,14 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
-from mozdns.validation import validate_ip_type
-from mozdns.ip.models import ipv6_to_longs
-from core.utils import IPFilter, two_to_four
-from core.vlan.models import Vlan
-from core.site.models import Site
-from core.mixins import ObjectUrlMixin
-from core.keyvalue.models import KeyValue
-from core.keyvalue.base_option import CommonOption
+from cyder.mozdns.validation import validate_ip_type
+from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.core.utils import IPFilter, two_to_four
+from cyder.core.vlan.models import Vlan
+from cyder.core.site.models import Site
+from cyder.core.mixins import ObjectUrlMixin
+from cyder.core.keyvalue.models import KeyValue
+from cyder.core.keyvalue.base_option import CommonOption
 
 import ipaddr
 import pdb

@@ -1,4 +1,4 @@
-from systems.models import ScheduledTask, KeyValue, System
+from cyder.systems.models import ScheduledTask, KeyValue, System
 import re
 
 

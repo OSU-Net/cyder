@@ -11,9 +11,9 @@ from django.template.loader import render_to_string
 from django.utils import simplejson as json
 import _mysql_exceptions
 
-from systems.models import System, Location
-from user_systems.models import UnmanagedSystem
-from mozilla_inventory.middleware.restrict_to_remote import allow_anyone
+from cyder.systems.models import System, Location
+from cyder.user_systems.models import UnmanagedSystem
+from cyder.middleware.restrict_to_remote import allow_anyone
 
 import re
 from django.test.client import Client

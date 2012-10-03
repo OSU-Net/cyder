@@ -6,13 +6,13 @@ from django.forms.util import ErrorList, ErrorDict
 from django.contrib import messages
 
 
-from mozdns.nameserver.forms import NameserverForm
-from mozdns.nameserver.forms import NSDelegated
-from mozdns.nameserver.models import Nameserver
-from mozdns.views import *
+from cyder.mozdns.nameserver.forms import NameserverForm
+from cyder.mozdns.nameserver.forms import NSDelegated
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.views import *
 
-from mozdns.address_record.models import AddressRecord
-from mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.domain.models import Domain
 
 import pdb
 

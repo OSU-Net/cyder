@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-urlpatterns = patterns('build',
+urlpatterns = patterns('cyder.build',
                        url(r'^$', 'views.build_list', name='build-list'),
                        url(r'^quicksearch/$', 'views.quicksearch_ajax',
                            name='build-quicksearch'),

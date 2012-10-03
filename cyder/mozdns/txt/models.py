@@ -1,6 +1,6 @@
 from django.db import models
 
-from mozdns.models import MozdnsRecord
+from cyder.mozdns.models import MozdnsRecord
 import pdb
 
 

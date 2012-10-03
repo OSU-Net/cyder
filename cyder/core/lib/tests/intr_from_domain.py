@@ -1,16 +1,16 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from core.vlan.models import Vlan
-from core.site.models import Site
-from core.range.models import Range
-from core.network.models import Network
-from core.interface.static_intr.models import StaticInterface
-from core.lib.utils import *
+from cyder.core.vlan.models import Vlan
+from cyder.core.site.models import Site
+from cyder.core.range.models import Range
+from cyder.core.network.models import Network
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.core.lib.utils import *
 
-from mozdns.domain.models import Domain
+from cyder.mozdns.domain.models import Domain
 
-from systems.models import System
+from cyder.systems.models import System
 
 import random
 import ipaddr

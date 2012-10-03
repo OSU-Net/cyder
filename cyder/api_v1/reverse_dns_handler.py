@@ -1,6 +1,6 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue, ScheduledTask
-from truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue, ScheduledTask
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
 from MacroExpansion import MacroExpansion
 from KeyValueTree import KeyValueTree
 import re

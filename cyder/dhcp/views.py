@@ -14,10 +14,10 @@ import _mysql_exceptions
 
 import models
 import forms
-from truth.models import KeyValue as TruthKeyValue, Truth
-from systems.models import NetworkAdapter
+from cyder.truth.models import KeyValue as TruthKeyValue, Truth
+from cyder.systems.models import NetworkAdapter
 #import adapters.dhcp
-from mozilla_inventory.middleware.restrict_to_remote import allow_anyone
+from cyder.middleware.restrict_to_remote import allow_anyone
 
 from DHCP import DHCP
 from django.test.client import Client

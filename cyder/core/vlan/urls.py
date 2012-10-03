@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from core.vlan.views import *
+from cyder.core.vlan.views import *
 
 urlpatterns = patterns('',
                        url(r'^$', VlanListView.as_view()),

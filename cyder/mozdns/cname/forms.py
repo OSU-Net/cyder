@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from mozdns.cname.models import CNAME
+from cyder.mozdns.cname.models import CNAME
 
 
 class CNAMEForm(ModelForm):

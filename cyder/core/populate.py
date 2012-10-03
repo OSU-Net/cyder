@@ -1,8 +1,8 @@
-from core.site.models import Site
-from core.vlan.models import Vlan
-from core.network.models import Network
-from core.network.utils import calc_parent
-from core.range.models import Range
+from cyder.core.site.models import Site
+from cyder.core.vlan.models import Vlan
+from cyder.core.network.models import Network
+from cyder.core.network.utils import calc_parent
+from cyder.core.range.models import Range
 import pdb
 import ipaddr
 

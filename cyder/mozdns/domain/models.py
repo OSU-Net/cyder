@@ -2,16 +2,16 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import mozdns
-from mozdns.soa.models import SOA
-from mozdns.mixins import ObjectUrlMixin
-from mozdns.validation import validate_domain_name, _name_type_check
-from mozdns.validation import do_zone_validation
-from mozdns.search_utils import smart_fqdn_exists
-from mozdns.ip.utils import ip_to_domain_name, nibbilize
-from mozdns.validation import validate_reverse_name
-from mozdns.domain.utils import name_to_domain
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.validation import validate_domain_name, _name_type_check
+from cyder.mozdns.validation import do_zone_validation
+from cyder.mozdns.search_utils import smart_fqdn_exists
+from cyder.mozdns.ip.utils import ip_to_domain_name, nibbilize
+from cyder.mozdns.validation import validate_reverse_name
+from cyder.mozdns.domain.utils import name_to_domain
 
-from core.site.models import Site
+from cyder.core.site.models import Site
 
 import pdb
 

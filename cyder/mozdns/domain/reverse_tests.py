@@ -8,14 +8,14 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.ptr.models import PTR
-from mozdns.tests.view_tests import random_label
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.tests.view_tests import random_label
 
-from mozdns.ip.models import ipv6_to_longs, Ip
-from mozdns.ip.utils import ip_to_domain_name, nibbilize
+from cyder.mozdns.ip.models import ipv6_to_longs, Ip
+from cyder.mozdns.ip.utils import ip_to_domain_name, nibbilize
 
-from mozdns.domain.models import Domain, boot_strap_ipv6_reverse_domain
-from mozdns.soa.models import SOA
+from cyder.mozdns.domain.models import Domain, boot_strap_ipv6_reverse_domain
+from cyder.mozdns.soa.models import SOA
 
 import ipaddr
 import pdb

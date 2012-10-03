@@ -10,9 +10,9 @@ from django.core.exceptions import ValidationError
 
 
 import ipaddr
-from mozdns.ip.models import ipv6_to_longs, Ip
-from mozdns.domain.models import boot_strap_ipv6_reverse_domain, Domain
-from mozdns.ip.utils import ip_to_domain_name
+from cyder.mozdns.ip.models import ipv6_to_longs, Ip
+from cyder.mozdns.domain.models import boot_strap_ipv6_reverse_domain, Domain
+from cyder.mozdns.ip.utils import ip_to_domain_name
 
 import pdb
 

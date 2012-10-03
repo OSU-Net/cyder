@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
-from mozdns.master_form.views import *
-from mozdns.api.v1.api import v1_dns_api
+from cyder.mozdns.master_form.views import *
+from cyder.mozdns.api.v1.api import v1_dns_api
 
 
 urlpatterns = patterns('',

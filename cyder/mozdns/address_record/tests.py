@@ -4,13 +4,13 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
 
-from mozdns.address_record.models import AddressRecord
-from mozdns.domain.models import Domain
-from mozdns.ip.models import ipv6_to_longs
-from mozdns.nameserver.models import Nameserver
-from mozdns.domain.models import boot_strap_ipv6_reverse_domain
-from mozdns.ip.utils import ip_to_domain_name
-from mozdns.cname.models import CNAME
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.domain.models import boot_strap_ipv6_reverse_domain
+from cyder.mozdns.ip.utils import ip_to_domain_name
+from cyder.mozdns.cname.models import CNAME
 
 import pdb
 

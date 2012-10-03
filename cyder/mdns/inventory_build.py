@@ -1,9 +1,9 @@
-from truth.models import Truth
+from cyder.truth.models import Truth
 import systems
-from systems.models import System
-from mdns.build_nics import *
+from cyder.systems.models import System
+from cyder.mdns.build_nics import *
 from django.conf import settings
-from mdns.utils import *
+from cyder.mdns.utils import *
 
 import ipaddr
 

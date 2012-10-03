@@ -3,18 +3,18 @@ from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
 from django.forms.util import ErrorDict, ErrorList
 
-from core.site.models import Site
-from core.vlan.models import Vlan
-from core.network.models import Network
-from core.site.models import Site
-from core.range.models import find_free_ip
-from core.interface.static_intr.models import StaticInterface
+from cyder.core.site.models import Site
+from cyder.core.vlan.models import Vlan
+from cyder.core.network.models import Network
+from cyder.core.site.models import Site
+from cyder.core.range.models import find_free_ip
+from cyder.core.interface.static_intr.models import StaticInterface
 
-from mozdns.utils import ensure_domain
-from mozdns.ip.utils import i64_to_i128, i128_to_i64
-from mozdns.domain.models import Domain
-from mozdns.address_record.models import AddressRecord
-from mozdns.ptr.models import PTR
+from cyder.mozdns.utils import ensure_domain
+from cyder.mozdns.ip.utils import i64_to_i128, i128_to_i64
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.ptr.models import PTR
 
 
 import pdb

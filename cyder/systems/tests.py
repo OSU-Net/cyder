@@ -16,19 +16,19 @@ import manage
 from django.test import TestCase
 from django.test.client import Client
 from models import KeyValue, System
-from core.range.models import Range
-from mozdns.domain.models import Domain
-from mozdns.soa.models import SOA
-from core.network.models import Network
-from mozdns.view.models import View
-from core.vlan.models import Vlan
-from core.site.models import Site
+from cyder.core.range.models import Range
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.soa.models import SOA
+from cyder.core.network.models import Network
+from cyder.mozdns.view.models import View
+from cyder.core.vlan.models import Vlan
+from cyder.core.site.models import Site
 try:
     import json
 except:
     from django.utils import simplejson as json
 
-from inventory.systems import models
+from cyder.systems import models
 from test_utils import setup_test_environment, TestCase
 import pdb
 setup_test_environment()

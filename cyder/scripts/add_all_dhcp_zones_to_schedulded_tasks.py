@@ -14,7 +14,7 @@ import manage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 
 from django.test.client import Client
-from systems.models import ScheduledTask
+from cyder.systems.models import ScheduledTask
 always_push_svn = True
 
 

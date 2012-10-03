@@ -8,19 +8,19 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.soa.models import SOA
-from mozdns.domain.models import Domain
-from mozdns.nameserver.models import Nameserver
-from mozdns.mx.models import MX
-from mozdns.srv.models import SRV
-from mozdns.txt.models import TXT
-from mozdns.cname.models import CNAME
-from mozdns.address_record.models import AddressRecord
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.address_record.models import AddressRecord
 
-from core.interface.static_intr.models import StaticInterface
-from mozdns.ip.utils import ip_to_domain_name
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.ip.utils import ip_to_domain_name
 
-from systems.models import System
+from cyder.systems.models import System
 
 import pdb
 

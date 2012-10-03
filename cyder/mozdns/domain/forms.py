@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from mozdns.domain.models import Domain
+from cyder.mozdns.domain.models import Domain
 
 
 class DomainUpdateForm(ModelForm):

@@ -1,5 +1,5 @@
-from mozdns.domain.models import Domain
-from core.interface.static_intr.views import find_available_ip_from_ipv4_range
+from cyder.mozdns.domain.models import Domain
+from cyder.core.interface.static_intr.views import find_available_ip_from_ipv4_range
 
 
 def get_available_ip_by_domain(domain):

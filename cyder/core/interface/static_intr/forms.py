@@ -2,15 +2,15 @@ from django import forms
 from django.forms import models
 from django.core.exceptions import ValidationError
 
-from core.interface.static_intr.models import StaticInterface
-from mozdns.domain.models import Domain
-from mozdns.view.models import View
-from core.range.models import Range
-from mozdns.validation import validate_label
-from core.vlan.models import Vlan
-from core.site.models import Site
-from systems.models import System
-from core.validation import validate_mac
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.view.models import View
+from cyder.core.range.models import Range
+from cyder.mozdns.validation import validate_label
+from cyder.core.vlan.models import Vlan
+from cyder.core.site.models import Site
+from cyder.systems.models import System
+from cyder.core.validation import validate_mac
 
 import ipaddr
 import pdb

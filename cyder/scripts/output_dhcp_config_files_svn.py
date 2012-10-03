@@ -14,11 +14,11 @@ import manage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 
 from django.conf import settings
-from dhcp.models import DHCPFile
+from cyder.dhcp.models import DHCPFile
 always_push_svn = True
 from libs.DHCPHelper import DHCPHelper
-from dhcp.DHCP import DHCP as DHCPInterface
-from systems.models import ScheduledTask
+from cyder.dhcp.DHCP import DHCP as DHCPInterface
+from cyder.systems.models import ScheduledTask
 
 
 def main():

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from mdns.dns_build import zone_build_from_config
+from cyder.mdns.dns_build import zone_build_from_config
 import pdb
 
 

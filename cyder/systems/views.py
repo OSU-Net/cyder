@@ -18,12 +18,12 @@ from jinja2.filters import contextfilter
 
 import models
 from Rack import Rack
-from mozilla_inventory.middleware.restrict_to_remote import allow_anyone, sysadmin_only, LdapGroupRequired
-from core.interface.static_intr.models import StaticInterface
-from core.range.models import Range
-from mozdns.utils import ensure_label_domain, prune_tree
+from cyder.middleware.restrict_to_remote import allow_anyone, sysadmin_only, LdapGroupRequired
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.core.range.models import Range
+from cyder.mozdns.utils import ensure_label_domain, prune_tree
 
-from MozInvAuthorization.KeyValueACL import KeyValueACL
+from cyder.MozInvAuthorization.KeyValueACL import KeyValueACL
 
 import pdb
 import csv
@@ -159,9 +159,9 @@ def create_adapter(request, system_id):
     if not request.POST.get('is_ajax', False):
         return HttpResponse("Ajax only homie.")
 
-    from api_v3.system_api import SystemResource
-    from mozdns.domain.models import Domain
-    from mozdns.view.models import View
+    from cyder.api_v3.system_api import SystemResource
+    from cyder.mozdns.domain.models import Domain
+    from cyder.mozdns.view.models import View
     system = get_object_or_404(models.System, id=system_id)
     ip_address = request.POST.get('ip_address', '')
     mac_address = request.POST.get('mac_address', '')

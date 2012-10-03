@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from mozdns.ptr.models import PTR
+from cyder.mozdns.ptr.models import PTR
 
 
 class PTRForm(ModelForm):

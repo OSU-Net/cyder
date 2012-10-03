@@ -1,16 +1,16 @@
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-from mozdns.domain.models import Domain
-from mozdns.address_record.models import AddressRecord
-from mozdns.validation import validate_label, validate_name
-from mozdns.mixins import ObjectUrlMixin
-from mozdns.view.models import View
-from mozdns.validation import validate_ttl
-from mozdns.models import check_for_cname
-from mozdns.soa.utils import update_soa
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.validation import validate_label, validate_name
+from cyder.mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.view.models import View
+from cyder.mozdns.validation import validate_ttl
+from cyder.mozdns.models import check_for_cname
+from cyder.mozdns.soa.utils import update_soa
 
-from core.interface.static_intr.models import StaticInterface
+from cyder.core.interface.static_intr.models import StaticInterface
 
 import pdb
 
@@ -67,7 +67,7 @@ class Nameserver(models.Model, ObjectUrlMixin):
         return tuple(details)
 
     def delete(self, *args, **kwargs):
-        from mozdns.utils import prune_tree
+        from cyder.mozdns.utils import prune_tree
         objs_domain = self.domain
         super(Nameserver, self).delete(*args, **kwargs)
         prune_tree(objs_domain)
@@ -85,7 +85,7 @@ class Nameserver(models.Model, ObjectUrlMixin):
             db_domain = None
         super(Nameserver, self).save(*args, **kwargs)
         if db_domain:
-            from mozdns.utils import prune_tree
+            from cyder.mozdns.utils import prune_tree
             prune_tree(db_domain)
 
     def get_glue(self):

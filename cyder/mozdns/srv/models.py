@@ -1,17 +1,17 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 import mozdns
-from mozdns.domain.models import Domain
-from mozdns.models import MozdnsRecord
-from mozdns.validation import validate_name
-from mozdns.mixins import ObjectUrlMixin
-from mozdns.view.models import View
-from mozdns.soa.utils import update_soa
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.models import MozdnsRecord
+from cyder.mozdns.validation import validate_name
+from cyder.mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.view.models import View
+from cyder.mozdns.soa.utils import update_soa
 
-from mozdns.validation import validate_srv_label, validate_srv_port
-from mozdns.validation import validate_srv_priority, validate_srv_weight
-from mozdns.validation import validate_srv_name, validate_ttl
-from mozdns.validation import validate_srv_target
+from cyder.mozdns.validation import validate_srv_label, validate_srv_port
+from cyder.mozdns.validation import validate_srv_priority, validate_srv_weight
+from cyder.mozdns.validation import validate_srv_name, validate_ttl
+from cyder.mozdns.validation import validate_srv_target
 
 import pdb
 
@@ -77,7 +77,7 @@ class SRV(models.Model, ObjectUrlMixin):
                 'comment']
 
     def delete(self, *args, **kwargs):
-        from mozdns.utils import prune_tree
+        from cyder.mozdns.utils import prune_tree
         objs_domain = self.domain
         super(SRV, self).delete(*args, **kwargs)
         prune_tree(objs_domain)
@@ -95,7 +95,7 @@ class SRV(models.Model, ObjectUrlMixin):
             db_domain = None
         super(SRV, self).save(*args, **kwargs)
         if db_domain:
-            from mozdns.utils import prune_tree
+            from cyder.mozdns.utils import prune_tree
             prune_tree(db_domain)
 
     def clean(self):

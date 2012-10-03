@@ -8,8 +8,8 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.sshfp.models import SSHFP
-from mozdns.domain.models import Domain
+from cyder.mozdns.sshfp.models import SSHFP
+from cyder.mozdns.domain.models import Domain
 
 
 class SSHFPTests(TestCase):

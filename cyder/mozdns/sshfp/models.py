@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from mozdns.models import MozdnsRecord
+from cyder.mozdns.models import MozdnsRecord
 
 
 def validate_algorithm(number):

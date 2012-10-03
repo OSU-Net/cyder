@@ -4,8 +4,8 @@ import string
 from django.test import TestCase
 from django.test.client import Client
 
-from mozdns.domain.models import Domain
-from mozdns.nameserver.models import Nameserver
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.nameserver.models import Nameserver
 from django.conf import settings
 
 

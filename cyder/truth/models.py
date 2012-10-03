@@ -1,5 +1,5 @@
 from django.db import models
-from systems.models import ScheduledTask
+from cyder.systems.models import ScheduledTask
 from django.db import IntegrityError
 import pdb
 

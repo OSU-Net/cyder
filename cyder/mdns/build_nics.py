@@ -1,8 +1,8 @@
 import re
 import pdb
 import systems.models
-from systems.models import System
-from mdns.utils import *
+from cyder.systems.models import System
+from cyder.mdns.utils import *
 
 import pprint
 pp = pprint.PrettyPrinter(indent=2)

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from mozdns.mx.models import MX
+from cyder.mozdns.mx.models import MX
 
 
 class MXForm(ModelForm):

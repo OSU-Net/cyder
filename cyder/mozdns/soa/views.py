@@ -3,18 +3,18 @@ from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
 
-from mozdns.domain.models import Domain
-from mozdns.soa.forms import SOAForm
-from mozdns.soa.models import SOA, SOAKeyValue
-from mozdns.utils import tablefy
-from mozdns.views import MozdnsCreateView
-from mozdns.views import MozdnsDeleteView
-from mozdns.views import MozdnsDetailView
-from mozdns.views import MozdnsListView
-from mozdns.views import MozdnsUpdateView
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.soa.forms import SOAForm
+from cyder.mozdns.soa.models import SOA, SOAKeyValue
+from cyder.mozdns.utils import tablefy
+from cyder.mozdns.views import MozdnsCreateView
+from cyder.mozdns.views import MozdnsDeleteView
+from cyder.mozdns.views import MozdnsDetailView
+from cyder.mozdns.views import MozdnsListView
+from cyder.mozdns.views import MozdnsUpdateView
 
-from core.keyvalue.utils import get_aa, get_docstrings, get_attrs
-from core.keyvalue.utils import update_attrs, dict_to_kv
+from cyder.core.keyvalue.utils import get_aa, get_docstrings, get_attrs
+from cyder.core.keyvalue.utils import update_attrs, dict_to_kv
 import simplejson as json
 
 

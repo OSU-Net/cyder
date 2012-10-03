@@ -8,27 +8,27 @@ sys.path.append(os.path.abspath(
 import manage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 import manage
-from core.range.models import Range, RangeKeyValue
-from core.interface.static_intr.models import StaticInterface
-from mozdns.address_record.models import AddressRecord
+from cyder.core.range.models import Range, RangeKeyValue
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.address_record.models import AddressRecord
 from django.db.models import Q
-from core.range.forms import RangeForm
-from mozdns.view.models import View
-from core.range.models import Range, RangeKeyValue
-from core.interface.static_intr.models import StaticInterface
-from mozdns.address_record.models import AddressRecord
-from mozdns.ptr.models import PTR
-from mozdns.ip.models import ipv6_to_longs
-from core.views import CoreDeleteView, CoreDetailView
-from core.views import CoreCreateView, CoreUpdateView, CoreListView
-from core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
-from core.keyvalue.utils import get_docstrings, dict_to_kv
+from cyder.core.range.forms import RangeForm
+from cyder.mozdns.view.models import View
+from cyder.core.range.models import Range, RangeKeyValue
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.core.views import CoreDeleteView, CoreDetailView
+from cyder.core.views import CoreCreateView, CoreUpdateView, CoreListView
+from cyder.core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
+from cyder.core.keyvalue.utils import get_docstrings, dict_to_kv
 import ipaddr
 import simplejson as json
-from systems.models import System, KeyValue
-from core.interface.static_intr.views import do_combine_a_ptr_to_interface
+from cyder.systems.models import System, KeyValue
+from cyder.core.interface.static_intr.views import do_combine_a_ptr_to_interface
 from django.test import Client
-from systems.models import System
+from cyder.systems.models import System
 #(addr, ptr, system, mac_address):
 
 
@@ -148,7 +148,7 @@ def main():
                             intr.views.add(private)
                             intr.save()
                         else:
-                            from api_v3.system_api import SystemResource
+                            from cyder.api_v3.system_api import SystemResource
                             intr = StaticInterface(
                                 label=addr.label, mac=mac_address, domain=addr.domain,
                                 ip_str=addr.ip_str, ip_type=addr.ip_type, system=system)

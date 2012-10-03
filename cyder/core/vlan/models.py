@@ -1,11 +1,11 @@
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from core.site.models import Site
-from core.mixins import ObjectUrlMixin
-from mozdns.domain.models import Domain
+from cyder.core.site.models import Site
+from cyder.core.mixins import ObjectUrlMixin
+from cyder.mozdns.domain.models import Domain
 
-from core.keyvalue.models import KeyValue
+from cyder.core.keyvalue.models import KeyValue
 
 import pdb
 

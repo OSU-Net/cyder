@@ -1,13 +1,13 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
-from api_v2.system_handler import SystemHandler
-from api_v2.networkadapter_handler import NetworkAdapterHandler
-from api_v2.keyvalue_handler import KeyValueHandler
-from api_v2.truth_handler import TruthHandler
-from api_v2.dhcp_handler import DHCPHandler
-from api_v2.reverse_dns_handler import ReverseDNSHandler
-from api_v2.system_rack_handler import SystemRackHandler
-from api_v2.system_status_handler import SystemStatusHandler
+from cyder.api_v2.system_handler import SystemHandler
+from cyder.api_v2.networkadapter_handler import NetworkAdapterHandler
+from cyder.api_v2.keyvalue_handler import KeyValueHandler
+from cyder.api_v2.truth_handler import TruthHandler
+from cyder.api_v2.dhcp_handler import DHCPHandler
+from cyder.api_v2.reverse_dns_handler import ReverseDNSHandler
+from cyder.api_v2.system_rack_handler import SystemRackHandler
+from cyder.api_v2.system_status_handler import SystemStatusHandler
 from django.views.decorators.cache import cache_control
 cached_resource = cache_control(public=True, maxage=600, s_maxage=600)
 

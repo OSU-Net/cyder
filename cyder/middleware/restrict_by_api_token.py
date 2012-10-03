@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseForbidden
 import base64
 from django.contrib.auth.models import User
-from systems.models import UserProfile
+from cyder.systems.models import UserProfile
 
 
 class RestrictByToken:

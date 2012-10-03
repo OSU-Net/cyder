@@ -4,19 +4,19 @@ import pdb
 
 from django.test import TestCase
 
-from mozdns.domain.models import Domain
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.txt.models import TXT
-from mozdns.ptr.models import PTR
-from mozdns.mx.models import MX
-from mozdns.cname.models import CNAME
-from mozdns.address_record.models import AddressRecord
-from mozdns.nameserver.models import Nameserver
-from core.interface.static_intr.models import StaticInterface
-from mozdns.mozbind.build import *
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.mozbind.build import *
 
-from systems.models import System
+from cyder.systems.models import System
 import pdb
 
 

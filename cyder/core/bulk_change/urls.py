@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
-from core.bulk_change.views import *
+from cyder.core.bulk_change.views import *
 
 urlpatterns = patterns('',
                        url(r'^bulk_change_ajax',

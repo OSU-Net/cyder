@@ -2,15 +2,15 @@
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.sshfp.models import SSHFP
-from mozdns.txt.models import TXT
-from mozdns.srv.models import SRV
-from mozdns.address_record.models import AddressRecord
-from mozdns.cname.models import CNAME
-from mozdns.view.models import View
-from core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.sshfp.models import SSHFP
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.view.models import View
+from cyder.core.interface.static_intr.models import StaticInterface
 
 from copy import deepcopy
 import pdb

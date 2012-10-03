@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from mozdns.domain.views import *
+from cyder.mozdns.domain.views import *
 from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = patterns('',

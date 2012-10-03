@@ -1,14 +1,14 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from mozdns.view.models import View
-from mozdns.domain.models import Domain, _name_to_domain
-from mozdns.ip.models import Ip
-from mozdns.ip.utils import ip_to_dns_form
-from mozdns.validation import validate_name, validate_ttl
-from mozdns.validation import validate_views
-from mozdns.mixins import ObjectUrlMixin
-from core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.view.models import View
+from cyder.mozdns.domain.models import Domain, _name_to_domain
+from cyder.mozdns.ip.models import Ip
+from cyder.mozdns.ip.utils import ip_to_dns_form
+from cyder.mozdns.validation import validate_name, validate_ttl
+from cyder.mozdns.validation import validate_views
+from cyder.mozdns.mixins import ObjectUrlMixin
+from cyder.core.interface.static_intr.models import StaticInterface
 
 import pdb
 

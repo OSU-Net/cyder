@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from mozdns.address_record.models import AddressRecord
+from cyder.mozdns.address_record.models import AddressRecord
 
 
 class AddressRecordForm(ModelForm):

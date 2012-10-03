@@ -1,11 +1,11 @@
 from django.core.exceptions import ObjectDoesNotExist
 
-from mozdns.address_record.forms import AddressRecordForm
-from mozdns.address_record.models import AddressRecord
-from mozdns.domain.models import Domain
-from mozdns.views import MozdnsDeleteView, MozdnsDetailView
-from mozdns.views import MozdnsCreateView, MozdnsUpdateView, MozdnsListView
-from core.network.utils import calc_parent_str
+from cyder.mozdns.address_record.forms import AddressRecordForm
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.views import MozdnsDeleteView, MozdnsDetailView
+from cyder.mozdns.views import MozdnsCreateView, MozdnsUpdateView, MozdnsListView
+from cyder.core.network.utils import calc_parent_str
 
 import pdb
 

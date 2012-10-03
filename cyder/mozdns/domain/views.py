@@ -12,20 +12,20 @@ from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import CreateView
 
-from core.interface.static_intr.models import StaticInterface
-from mozdns.address_record.models import AddressRecord
-from mozdns.cname.models import CNAME
-from mozdns.utils import tablefy
-from mozdns.views import MozdnsCreateView, MozdnsDeleteView, MozdnsListView
-from mozdns.domain.models import Domain
-from mozdns.domain.forms import DomainForm, DomainUpdateForm
-from mozdns.mx.models import MX
-from mozdns.nameserver.models import Nameserver
-from mozdns.ptr.models import PTR
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.txt.models import TXT
-from mozdns.view.models import View
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.utils import tablefy
+from cyder.mozdns.views import MozdnsCreateView, MozdnsDeleteView, MozdnsListView
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.domain.forms import DomainForm, DomainUpdateForm
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.view.models import View
 
 import pdb
 import simplejson as json

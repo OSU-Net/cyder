@@ -2,14 +2,14 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.test.client import Client
 
-from mozdns.domain.models import Domain
-from mozdns.address_record.models import AddressRecord
-from mozdns.nameserver.models import Nameserver
-from mozdns.ip.models import ipv6_to_longs, Ip
-from mozdns.ip.utils import ip_to_domain_name
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.ip.models import ipv6_to_longs, Ip
+from cyder.mozdns.ip.utils import ip_to_domain_name
 
-from core.interface.static_intr.models import StaticInterface
-from systems.models import System
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.systems.models import System
 
 import pdb
 

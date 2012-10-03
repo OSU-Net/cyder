@@ -2,10 +2,10 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import mozdns
-from mozdns.domain.models import Domain, _name_to_domain
-from mozdns.models import MozdnsRecord
-from mozdns.validation import validate_name, find_root_domain
-from mozdns.search_utils import smart_fqdn_exists
+from cyder.mozdns.domain.models import Domain, _name_to_domain
+from cyder.mozdns.models import MozdnsRecord
+from cyder.mozdns.validation import validate_name, find_root_domain
+from cyder.mozdns.search_utils import smart_fqdn_exists
 
 import pdb
 

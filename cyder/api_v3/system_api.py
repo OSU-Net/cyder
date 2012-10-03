@@ -11,12 +11,12 @@ from tastypie.serializers import Serializer
 from django.core.serializers import json as djson
 from tastytools.test.resources import ResourceTestData
 from tastypie.authorization import Authorization
-from core.interface.static_intr.models import StaticInterface
-from core.interface.static_intr.models import StaticIntrKeyValue
-from core.range.models import Range
-from mozdns.view.models import View
-from mozdns.domain.models import Domain
-from core.lib.utils import create_ipv4_intr_from_domain
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.core.interface.static_intr.models import StaticIntrKeyValue
+from cyder.core.range.models import Range
+from cyder.mozdns.view.models import View
+from cyder.mozdns.domain.models import Domain
+from cyder.core.lib.utils import create_ipv4_intr_from_domain
 import json
 import re
 
@@ -166,7 +166,7 @@ class SystemResource(CustomAPIResource):
             ip_str = patch_dict.pop('ip_address', None)
             interface = patch_dict.pop('interface', None)
             domain = patch_dict.pop('domain', 'mozilla.com')
-            from core.lib.utils import create_ipv4_intr_from_range
+            from cyder.core.lib.utils import create_ipv4_intr_from_range
             mac = patch_dict['mac']
             if interface:
                 interface_type, primary, alias = SystemResource.extract_nic_attrs(interface)

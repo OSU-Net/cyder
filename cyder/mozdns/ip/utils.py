@@ -1,6 +1,6 @@
 import ipaddr
 from django.core.exceptions import ValidationError
-from mozdns.validation import validate_ip_type
+from cyder.mozdns.validation import validate_ip_type
 
 
 def ip_to_dns_form(ip, ip_type='4', uppercase=False):

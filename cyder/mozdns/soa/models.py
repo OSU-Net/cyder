@@ -3,12 +3,12 @@ from django.core.exceptions import ValidationError
 
 from django.db import models
 
-from mozdns.validation import validate_name
-from mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.validation import validate_name
+from cyder.mozdns.mixins import ObjectUrlMixin
 
 from django.conf import settings
-from core.keyvalue.models import KeyValue
-from core.keyvalue.utils import AuxAttr
+from cyder.core.keyvalue.models import KeyValue
+from cyder.core.keyvalue.utils import AuxAttr
 import os
 
 

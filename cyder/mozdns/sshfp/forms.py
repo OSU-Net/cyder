@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from mozdns.sshfp.models import SSHFP
+from cyder.mozdns.sshfp.models import SSHFP
 
 
 class SSHFPForm(ModelForm):

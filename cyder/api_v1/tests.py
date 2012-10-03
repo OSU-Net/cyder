@@ -6,7 +6,7 @@ except:
     from django.utils import simplejson as json
 from MacroExpansion import MacroExpansion
 from KeyValueTree import KeyValueTree
-from truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
 
 
 class TestMacroExpansion(TestCase):

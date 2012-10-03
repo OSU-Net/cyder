@@ -1,5 +1,5 @@
 from django.db import models
-from systems.models import OperatingSystem, ServerModel
+from cyder.systems.models import OperatingSystem, ServerModel
 from datetime import datetime, timedelta, date
 from django.db.models.query import QuerySet
 from django.conf import settings

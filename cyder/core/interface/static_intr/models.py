@@ -1,19 +1,19 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from systems.models import System
+from cyder.systems.models import System
 
 import mozdns
-from core.keyvalue.models import KeyValue
-from core.keyvalue.utils import AuxAttr
-from core.mixins import ObjectUrlMixin
-from core.validation import validate_mac
-from mozdns.address_record.models import BaseAddressRecord
-from mozdns.models import MozdnsRecord
-from mozdns.view.models import View
-from mozdns.domain.models import Domain
-from mozdns.cname.models import CNAME
-from mozdns.ip.models import Ip
+from cyder.core.keyvalue.models import KeyValue
+from cyder.core.keyvalue.utils import AuxAttr
+from cyder.core.mixins import ObjectUrlMixin
+from cyder.core.validation import validate_mac
+from cyder.mozdns.address_record.models import BaseAddressRecord
+from cyder.mozdns.models import MozdnsRecord
+from cyder.mozdns.view.models import View
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.ip.models import Ip
 from django.conf import settings
 
 import re
@@ -148,10 +148,10 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         if not self.system:
             raise ValidationError("An interface means nothing without it's "
                                   "system.")
-        from mozdns.ptr.models import PTR
+        from cyder.mozdns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError("A PTR already uses this Name and IP")
-        from mozdns.address_record.models import AddressRecord
+        from cyder.mozdns.address_record.models import AddressRecord
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
             raise ValidationError("An A record already uses this Name and IP")

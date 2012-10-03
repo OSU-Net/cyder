@@ -1,5 +1,5 @@
-from mozdns.mozbind.generators.bind_domain_generator import render_ns
-from mozdns.ip.utils import ip_to_dns_form
+from cyder.mozdns.mozbind.generators.bind_domain_generator import render_ns
+from cyder.mozdns.ip.utils import ip_to_dns_form
 
 from string import Template
 import pdb

@@ -1,5 +1,5 @@
 from django.db import models
-from systems.models import System
+from cyder.systems.models import System
 
 # Create your models here.
 

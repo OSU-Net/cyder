@@ -1,5 +1,5 @@
-from core.network.models import Network
-from core.interface.static_intr.models import StaticInterface
+from cyder.core.network.models import Network
+from cyder.core.interface.static_intr.models import StaticInterface
 
 import pdb
 
@@ -29,7 +29,7 @@ def build_subnet(network, raw=False):
     ranges = network.range_set.all()
 
     # Let's assume all options need a ';' appended.
-    build_str = "# DHCP Generated from inventory."
+    build_str = "# DHCP Generated from cyder."
     build_str += "\nsubnet {0} netmask {1} {{\n".format(network,
                                                         network.network.netmask)
     build_str += "\n"

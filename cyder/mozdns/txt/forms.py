@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from mozdns.txt.models import TXT
+from cyder.mozdns.txt.models import TXT
 
 
 class TXTForm(ModelForm):

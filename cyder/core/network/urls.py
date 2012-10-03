@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 
-from core.network.views import *
-from core.network.network_wizard import *
+from cyder.core.network.views import *
+from cyder.core.network.network_wizard import *
 
 
 urlpatterns = patterns('',

@@ -1,5 +1,5 @@
 from haystack import indexes
-from mozdns.domain.models import Domain
+from cyder.mozdns.domain.models import Domain
 
 
 class DomainIndex(indexes.SearchIndex, indexes.Indexable):

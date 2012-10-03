@@ -1,9 +1,9 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from mozdns.domain.models import Domain, name_to_domain
-from mozdns.validation import validate_ip_type
-from mozdns.ip.utils import ip_to_domain_name, nibbilize
+from cyder.mozdns.domain.models import Domain, name_to_domain
+from cyder.mozdns.validation import validate_ip_type
+from cyder.mozdns.ip.utils import ip_to_domain_name, nibbilize
 
 import ipaddr
 

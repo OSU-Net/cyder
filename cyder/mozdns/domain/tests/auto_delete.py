@@ -1,23 +1,23 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.test import TestCase
 
-from systems.models import System
-from mozdns.address_record.models import AddressRecord
-from core.interface.static_intr.models import StaticInterface
-from mozdns.cname.models import CNAME
-from mozdns.ptr.models import PTR
-from mozdns.txt.models import TXT
-from mozdns.mx.models import MX
-from mozdns.srv.models import SRV
-from mozdns.domain.models import Domain
-from mozdns.domain.models import ValidationError, _name_to_domain
-from mozdns.ip.models import ipv6_to_longs, Ip
-from mozdns.nameserver.models import Nameserver
-from mozdns.domain.models import Domain
-from mozdns.utils import ensure_label_domain, prune_tree
-from mozdns.soa.models import SOA
+from cyder.systems.models import System
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.domain.models import ValidationError, _name_to_domain
+from cyder.mozdns.ip.models import ipv6_to_longs, Ip
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.utils import ensure_label_domain, prune_tree
+from cyder.mozdns.soa.models import SOA
 
-from core.site.models import Site
+from cyder.core.site.models import Site
 
 import pdb
 

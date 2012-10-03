@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 
-from core.interface.static_intr.views import *
+from cyder.core.interface.static_intr.views import *
 from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = patterns('',

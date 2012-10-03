@@ -8,8 +8,8 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.srv.models import SRV
-from mozdns.domain.models import Domain
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.domain.models import Domain
 
 
 class SRVTests(TestCase):

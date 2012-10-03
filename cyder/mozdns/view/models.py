@@ -1,6 +1,6 @@
 from django.db import models
 
-from mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.mixins import ObjectUrlMixin
 
 
 class View(models.Model, ObjectUrlMixin):

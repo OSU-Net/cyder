@@ -1,5 +1,5 @@
 from haystack import indexes
-from mozdns.ptr.models import PTR
+from cyder.mozdns.ptr.models import PTR
 
 
 class PTRIndex(indexes.SearchIndex, indexes.Indexable):

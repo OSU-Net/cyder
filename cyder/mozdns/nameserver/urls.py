@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
-from mozdns.nameserver.views import *
+from cyder.mozdns.nameserver.views import *
 
 urlpatterns = patterns('',
                        url(r'^$', NSListView.as_view()),

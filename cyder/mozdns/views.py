@@ -1,7 +1,7 @@
-from mozdns.domain.models import Domain
-from mozdns.utils import slim_form
-from base.mozdns.views import BaseListView, BaseDetailView, BaseCreateView
-from base.mozdns.views import BaseUpdateView, BaseDeleteView
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.utils import slim_form
+from cyder.base.mozdns.views import BaseListView, BaseDetailView, BaseCreateView
+from cyder.base.mozdns.views import BaseUpdateView, BaseDeleteView
 
 import simplejson as json
 

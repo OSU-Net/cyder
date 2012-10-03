@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 from django.db import models
-from systems.models import UserProfile
+from cyder.systems.models import UserProfile
 
 
 class UserProfileInline(admin.StackedInline):

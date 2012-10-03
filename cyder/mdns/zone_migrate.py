@@ -1,24 +1,24 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from mozdns.address_record.models import AddressRecord
-from mozdns.cname.models import CNAME
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.nameserver.models import Nameserver
-from mozdns.ptr.models import PTR
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.tests.view_tests import random_label
-from mozdns.txt.models import TXT
-from mozdns.domain.utils import *
-from mozdns.ip.utils import ip_to_domain_name
-from mozdns.ip.models import ipv6_to_longs
-from mozdns.view.models import View
-from mozdns.utils import ensure_domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.tests.view_tests import random_label
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.domain.utils import *
+from cyder.mozdns.ip.utils import ip_to_domain_name
+from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.mozdns.view.models import View
+from cyder.mozdns.utils import ensure_domain
 
 from django.conf import settings
 
-from mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
+from cyder.mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
 
 import dns
 import dns.zone
@@ -28,19 +28,19 @@ from copy import deepcopy
 
 def buildzone3(job):
     if job == "external":
-        from mdns.migrate.zone_configs.external import external
+        from cyder.mdns.migrate.zone_configs.external import external
         configs = external
     if job == "private_reverse":
-        from mdns.migrate.zone_configs.private_reverse import private_reverse
+        from cyder.mdns.migrate.zone_configs.private_reverse import private_reverse
         configs = private_reverse
     if job == "net":
-        from mdns.migrate.zone_configs.mozilla_net import mozilla_net
+        from cyder.mdns.migrate.zone_configs.mozilla_net import mozilla_net
         configs = mozilla_net
     if job == "org":
-        from mdns.migrate.zone_configs.mozilla_org import mozilla_org
+        from cyder.mdns.migrate.zone_configs.mozilla_org import mozilla_org
         configs = mozilla_org
     if job == "com":
-        from mdns.migrate.zone_configs.mozilla_com_dc_zone_config import mozilla_com_dcs
+        from cyder.mdns.migrate.zone_configs.mozilla_com_dc_zone_config import mozilla_com_dcs
         configs = mozilla_com_dcs
     build_from_config(configs)
 

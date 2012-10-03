@@ -1,1 +1,1 @@
-from mozdns.api.tests.basic import *
+from cyder.mozdns.api.tests.basic import *

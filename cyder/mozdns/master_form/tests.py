@@ -2,18 +2,18 @@ from django.test import TestCase
 from django.test.client import Client
 from django.http import Http404
 
-from mozdns.tests.view_tests_template import random_label
-from mozdns.tests.view_tests_template import random_byte
-from mozdns.domain.models import Domain
-from mozdns.address_record.models import AddressRecord
-from mozdns.ptr.models import PTR
-from mozdns.txt.models import TXT
-from mozdns.cname.models import CNAME
-from mozdns.mx.models import MX
-from mozdns.srv.models import SRV
-from mozdns.nameserver.models import Nameserver
-from mozdns.master_form.views import commit_record
-from mozdns.view.models import View
+from cyder.mozdns.tests.view_tests_template import random_label
+from cyder.mozdns.tests.view_tests_template import random_byte
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.master_form.views import commit_record
+from cyder.mozdns.view.models import View
 
 import simplejson as json
 import pdb

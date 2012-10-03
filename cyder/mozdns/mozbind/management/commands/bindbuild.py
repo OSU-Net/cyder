@@ -1,4 +1,4 @@
-from mozdns.mozbind.build import *
+from cyder.mozdns.mozbind.build import *
 from django.core.management.base import BaseCommand, CommandError
 
 

@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from mozdns.ip.models import Ip
+from cyder.mozdns.ip.models import Ip
 
 
 class IpForm(ModelForm):

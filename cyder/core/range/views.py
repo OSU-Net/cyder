@@ -4,16 +4,16 @@ from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from core.range.forms import RangeForm
-from core.range.models import Range, RangeKeyValue
-from core.interface.static_intr.models import StaticInterface
-from mozdns.address_record.models import AddressRecord
-from mozdns.ptr.models import PTR
-from mozdns.ip.models import ipv6_to_longs
-from core.views import CoreDeleteView, CoreDetailView
-from core.views import CoreCreateView, CoreUpdateView, CoreListView
-from core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
-from core.keyvalue.utils import get_docstrings, dict_to_kv
+from cyder.core.range.forms import RangeForm
+from cyder.core.range.models import Range, RangeKeyValue
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.core.views import CoreDeleteView, CoreDetailView
+from cyder.core.views import CoreCreateView, CoreUpdateView, CoreListView
+from cyder.core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
+from cyder.core.keyvalue.utils import get_docstrings, dict_to_kv
 from django.forms.util import ErrorList, ErrorDict
 
 import ipaddr

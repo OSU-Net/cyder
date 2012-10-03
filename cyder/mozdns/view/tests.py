@@ -8,12 +8,12 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.view.models import View
-from mozdns.domain.models import Domain
-from mozdns.ptr.models import PTR
-from mozdns.address_record.models import AddressRecord
-from systems.models import System
-from core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.view.models import View
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.systems.models import System
+from cyder.core.interface.static_intr.models import StaticInterface
 import pdb
 
 

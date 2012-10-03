@@ -1,14 +1,14 @@
 from django.test import TestCase
 from django.test.client import Client
 
-from mozdns.cname.models import CNAME
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.tests.view_tests_template import GenericViewTests, random_label
-from mozdns.txt.models import TXT
-from mozdns.sshfp.models import SSHFP
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.tests.view_tests_template import GenericViewTests, random_label
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.sshfp.models import SSHFP
 
 
 """Hack hack hack, hack it up!"""

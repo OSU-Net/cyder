@@ -14,7 +14,7 @@ from django.shortcuts import render_to_response
 
 import forms
 import models
-from systems import models as system_models
+from cyder.systems import models as system_models
 from datetime import datetime, timedelta
 from libs import ldap_lib
 import settings
@@ -22,7 +22,7 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from MozInvAuthorization.UnmanagedSystemACL import UnmanagedSystemACL
+from cyder.MozInvAuthorization.UnmanagedSystemACL import UnmanagedSystemACL
 
 
 def license_version_search(request):

@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
 import json
-from dhcp.DHCPHash import DHCPHash, compare_lists, DHCPHashCompare
+from cyder.dhcp.DHCPHash import DHCPHash, compare_lists, DHCPHashCompare
 
 
 class DHCPMigrateTest(TestCase):

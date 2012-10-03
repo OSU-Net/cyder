@@ -1,10 +1,10 @@
-from mozdns.views import MozdnsDeleteView
-from mozdns.views import MozdnsDetailView
-from mozdns.views import MozdnsCreateView
-from mozdns.views import MozdnsUpdateView
-from mozdns.views import MozdnsListView
-from mozdns.cname.models import CNAME
-from mozdns.cname.forms import CNAMEForm
+from cyder.mozdns.views import MozdnsDeleteView
+from cyder.mozdns.views import MozdnsDetailView
+from cyder.mozdns.views import MozdnsCreateView
+from cyder.mozdns.views import MozdnsUpdateView
+from cyder.mozdns.views import MozdnsListView
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.cname.forms import CNAMEForm
 
 
 class CNAMEView(object):

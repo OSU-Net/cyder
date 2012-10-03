@@ -1,8 +1,8 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue, ServerModel, Allocation, OperatingSystem
-from truth.models import Truth, KeyValue as TruthKeyValue
-from dhcp.DHCP import DHCP as DHCPInterface
-from dhcp.models import DHCP
+from cyder.systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue, ServerModel, Allocation, OperatingSystem
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.dhcp.DHCP import DHCP as DHCPInterface
+from cyder.dhcp.models import DHCP
 from MacroExpansion import MacroExpansion
 from KeyValueTree import KeyValueTree
 import re
@@ -13,7 +13,7 @@ except:
 from django.test.client import Client
 from django.db.models import Q
 from django.conf import settings
-from mozilla_inventory.middleware.restrict_by_api_token import AuthenticatedAPI
+from cyder.middleware.restrict_by_api_token import AuthenticatedAPI
 
 
 class SystemHandler(BaseHandler):

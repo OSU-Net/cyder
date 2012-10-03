@@ -3,9 +3,9 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
-from mozdns.address_record.models import AddressRecord
-from mozdns.ptr.models import PTR
-from mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.domain.models import Domain
 
 import simplejson as json
 import pdb

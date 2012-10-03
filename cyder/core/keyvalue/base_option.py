@@ -1,8 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from mozdns.validation import validate_name
-from core.keyvalue.models import KeyValue
+from cyder.mozdns.validation import validate_name
+from cyder.core.keyvalue.models import KeyValue
 
 import pdb
 import ipaddr

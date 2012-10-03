@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.test.client import Client
 
-from mozdns.soa.models import SOA
-from mozdns.tests.view_tests import random_label
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.tests.view_tests import random_label
 from django.conf import settings
 
 

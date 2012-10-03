@@ -1,11 +1,11 @@
 from piston.handler import BaseHandler, rc
-from systems.models import UserProfile
+from cyder.systems.models import UserProfile
 import re
 try:
     import json
 except:
     from django.utils import simplejson as json
-from mozilla_inventory.middleware.restrict_by_api_token import AuthenticatedAPI
+from cyder.middleware.restrict_by_api_token import AuthenticatedAPI
 
 from django.conf import settings
 

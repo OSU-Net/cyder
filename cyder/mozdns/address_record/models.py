@@ -3,16 +3,16 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import mozdns
 import core as core
-from mozdns.cname.models import CNAME
-from mozdns.view.models import View
-from mozdns.ip.models import Ip
-from mozdns.models import set_fqdn, check_for_cname, check_for_delegation
-from mozdns.models import check_TLD_condition
-from mozdns.validation import validate_first_label, validate_name
-from mozdns.validation import validate_ttl, validate_views
-from mozdns.domain.models import Domain
-from mozdns.mixins import ObjectUrlMixin
-from mozdns.soa.utils import update_soa
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.view.models import View
+from cyder.mozdns.ip.models import Ip
+from cyder.mozdns.models import set_fqdn, check_for_cname, check_for_delegation
+from cyder.mozdns.models import check_TLD_condition
+from cyder.mozdns.validation import validate_first_label, validate_name
+from cyder.mozdns.validation import validate_ttl, validate_views
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.soa.utils import update_soa
 
 import pdb
 
@@ -80,7 +80,7 @@ class BaseAddressRecord(Ip):
             db_domain = None
         super(BaseAddressRecord, self).save(*args, **kwargs)
         if db_domain:
-            from mozdns.utils import prune_tree
+            from cyder.mozdns.utils import prune_tree
             prune_tree(db_domain)
 
     def clean(self, *args, **kwargs):
@@ -100,7 +100,7 @@ class BaseAddressRecord(Ip):
         self.clean_ip(update_reverse_domain=urd)
 
         if not kwargs.pop("ignore_interface", False):
-            from core.interface.static_intr.models import StaticInterface
+            from cyder.core.interface.static_intr.models import StaticInterface
             if StaticInterface.objects.filter(fqdn=self.fqdn,
                                               ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists():
                 raise ValidationError("A Static Interface has already "
@@ -120,7 +120,7 @@ class BaseAddressRecord(Ip):
                                       "Change the CNAME before deleting this record.".
                                       format(self.record_type()))
 
-        from mozdns.utils import prune_tree
+        from cyder.mozdns.utils import prune_tree
         objs_domain = self.domain
         super(BaseAddressRecord, self).delete(*args, **kwargs)
         prune_tree(objs_domain)

@@ -11,8 +11,8 @@ import os
 import manage
 from django.test import TestCase
 from django.test.client import Client
-from systems.models import KeyValue, System
-from mdns.utils import _str_increment_soa
+from cyder.systems.models import KeyValue, System
+from cyder.mdns.utils import _str_increment_soa
 
 ex_tx1 = """
 $TTL 3600

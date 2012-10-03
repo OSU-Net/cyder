@@ -10,9 +10,9 @@ import ipaddr
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
-from mdns.utils import *
+from cyder.mdns.utils import *
 import truth
-from truth.models import Truth
+from cyder.truth.models import Truth
 pp = pprint.PrettyPrinter(indent=2)
 
 

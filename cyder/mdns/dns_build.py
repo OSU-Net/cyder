@@ -1,36 +1,36 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from truth.models import Truth
+from cyder.truth.models import Truth
 
-from mdns.inventory_build import inventory_build_sites
-from mdns.svn_build import collect_svn_zones, collect_rev_svn_zones
-from mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
-from mdns.svn_build import get_forward_svn_sites_changed
-from mdns.svn_build import get_reverse_svn_sites_changed
-from mdns.build_nics import *
-from mdns.utils import *
+from cyder.mdns.inventory_build import inventory_build_sites
+from cyder.mdns.svn_build import collect_svn_zones, collect_rev_svn_zones
+from cyder.mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
+from cyder.mdns.svn_build import get_forward_svn_sites_changed
+from cyder.mdns.svn_build import get_reverse_svn_sites_changed
+from cyder.mdns.build_nics import *
+from cyder.mdns.utils import *
 import ipaddr
-from systems.models import ScheduledTask
+from cyder.systems.models import ScheduledTask
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
-from core.network.models import Network
-from core.interface.static_intr.models import StaticInterface
+from cyder.core.network.models import Network
+from cyder.core.interface.static_intr.models import StaticInterface
 
-from mozdns.address_record.models import AddressRecord
-from mozdns.cname.models import CNAME
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.nameserver.models import Nameserver
-from mozdns.ptr.models import PTR
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.tests.view_tests import random_label
-from mozdns.txt.models import TXT
-from mozdns.domain.utils import *
-from mozdns.ip.utils import ip_to_domain_name
-from mozdns.ip.models import ipv6_to_longs
-from mozdns.view.models import View
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.tests.view_tests import random_label
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.domain.utils import *
+from cyder.mozdns.ip.utils import ip_to_domain_name
+from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.mozdns.view.models import View
 
 import os.path
 import pprint
@@ -246,7 +246,7 @@ def zone_build_from_config(job=None):
         return
     import dns
     if job == "external":
-        from mdns.migrate.zone_configs.external import external
+        from cyder.mdns.migrate.zone_configs.external import external
         for config in external:
             zone_path = config['path']
             root_domain = config['zone_name']
@@ -283,7 +283,7 @@ def zone_build_from_config(job=None):
         return
 
     if job == "zones":
-        from mdns.migrate.zone_configs.zones import zones
+        from cyder.mdns.migrate.zone_configs.zones import zones
         for config in zones:
             zone_path = config['path']
             root_domain = config['zone_name']
@@ -306,7 +306,7 @@ def zone_build_from_config(job=None):
         return
 
     if job == "net":
-        from mdns.migrate.zone_configs.mozilla_net import mozilla_net
+        from cyder.mdns.migrate.zone_configs.mozilla_net import mozilla_net
         for config in mozilla_net:
             zone_path = config['path']
             root_domain = config['zone_name']
@@ -330,7 +330,7 @@ def zone_build_from_config(job=None):
 
     try:
         if job == "mozilla_org":
-            from mdns.migrate.zone_configs.mozilla_org import mozilla_org
+            from cyder.mdns.migrate.zone_configs.mozilla_org import mozilla_org
             for config in mozilla_org:
                 zone_path = config['path']
                 root_domain = config['zone_name']
@@ -357,7 +357,7 @@ def zone_build_from_config(job=None):
         pass
 
     if job == "dc":
-        from mdns.migrate.zone_configs.mozilla_com_dc_zone_config import mozilla_com_dcs
+        from cyder.mdns.migrate.zone_configs.mozilla_com_dc_zone_config import mozilla_com_dcs
         for config in mozilla_com_dcs:
             zone_path = config['path']
             root_domain = config['zone_name']
@@ -380,7 +380,7 @@ def zone_build_from_config(job=None):
         return
 
     if job == "private_reverse":
-        from mdns.migrate.zone_configs.private_reverse import private_reverse
+        from cyder.mdns.migrate.zone_configs.private_reverse import private_reverse
         for config in private_reverse:
             zone_path = config['path']
             root_domain = config['zone_name']

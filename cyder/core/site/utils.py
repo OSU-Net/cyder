@@ -1,4 +1,4 @@
-from core.network.models import Network
+from cyder.core.network.models import Network
 import pdb
 
 

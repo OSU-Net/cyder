@@ -1,39 +1,39 @@
-from truth.models import Truth
+from cyder.truth.models import Truth
 from django.db import IntegrityError
 
-from mdns.inventory_build import inventory_build_sites
-from mdns.svn_build import collect_svn_zones, collect_rev_svn_zones
-from mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
-from mdns.svn_build import get_forward_svn_sites_changed
-from mdns.svn_build import get_reverse_svn_sites_changed
-from mdns.build_nics import *
-from mdns.utils import *
+from cyder.mdns.inventory_build import inventory_build_sites
+from cyder.mdns.svn_build import collect_svn_zones, collect_rev_svn_zones
+from cyder.mdns.svn_build import collect_svn_zone, collect_rev_svn_zone
+from cyder.mdns.svn_build import get_forward_svn_sites_changed
+from cyder.mdns.svn_build import get_reverse_svn_sites_changed
+from cyder.mdns.build_nics import *
+from cyder.mdns.utils import *
 import ipaddr
-from systems.models import ScheduledTask
+from cyder.systems.models import ScheduledTask
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
-from core.network.models import Network, NetworkKeyValue
-from core.network.utils import calc_parent
-from core.vlan.models import Vlan
-from core.interface.static_intr.models import StaticInterface
+from cyder.core.network.models import Network, NetworkKeyValue
+from cyder.core.network.utils import calc_parent
+from cyder.core.vlan.models import Vlan
+from cyder.core.interface.static_intr.models import StaticInterface
 
 import truth
 
-from mozdns.address_record.models import AddressRecord
-from mozdns.cname.models import CNAME
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.nameserver.models import Nameserver
-from mozdns.ptr.models import PTR
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.tests.view_tests import random_label
-from mozdns.txt.models import TXT
-from mozdns.domain.utils import *
-from mozdns.ip.utils import ip_to_domain_name
-from mozdns.view.models import View
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.tests.view_tests import random_label
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.domain.utils import *
+from cyder.mozdns.ip.utils import ip_to_domain_name
+from cyder.mozdns.view.models import View
 
 import os.path
 import pprint

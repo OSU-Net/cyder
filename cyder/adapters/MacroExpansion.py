@@ -1,5 +1,5 @@
-from systems.models import System, KeyValue
-from truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.systems.models import System, KeyValue
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
 
 
 class MacroExpansion:

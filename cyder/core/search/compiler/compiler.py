@@ -2,16 +2,16 @@ from django.db.models import Q
 
 import mozdns
 import core
-from mozdns.address_record.models import AddressRecord
-from mozdns.cname.models import CNAME
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.nameserver.models import Nameserver
-from mozdns.ptr.models import PTR
-from mozdns.srv.models import SRV
-from mozdns.sshfp.models import SSHFP
-from core.interface.static_intr.models import StaticInterface
-from mozdns.txt.models import TXT
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.sshfp.models import SSHFP
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.txt.models import TXT
 
 from parser import Parser
 from utils import *

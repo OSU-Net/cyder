@@ -1,6 +1,6 @@
 from haystack import indexes
-from mozdns.address_record.models import AddressRecord
-from mozdns.mozdns_index import MozdnsIndex
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.mozdns_index import MozdnsIndex
 
 
 class AddressRecordIndex(MozdnsIndex, indexes.Indexable):

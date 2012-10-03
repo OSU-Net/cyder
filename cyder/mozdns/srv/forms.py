@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 
-from mozdns.srv.models import SRV
+from cyder.mozdns.srv.models import SRV
 
 
 class SRVForm(ModelForm):

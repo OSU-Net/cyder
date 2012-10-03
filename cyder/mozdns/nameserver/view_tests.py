@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.test.client import Client
 
-from mozdns.domain.models import Domain
-from mozdns.nameserver.models import Nameserver
-from mozdns.tests.view_tests import GenericViewTests, random_label
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.tests.view_tests import GenericViewTests, random_label
 from django.conf import settings
 
 

@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from mozdns.soa.models import SOA
+from cyder.mozdns.soa.models import SOA
 
 
 class SOAForm(ModelForm):

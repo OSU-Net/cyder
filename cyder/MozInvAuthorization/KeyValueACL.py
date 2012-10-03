@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from MozInvAuthorization.BaseKeyValueACL import BaseKeyValueACL
+from cyder.MozInvAuthorization.BaseKeyValueACL import BaseKeyValueACL
 from django.conf import settings
 import systems.models as SystemModels
 

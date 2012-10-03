@@ -4,22 +4,22 @@ from django.utils.encoding import smart_str
 
 from tastypie.test import ResourceTestCase
 
-from systems.models import System
-from core.interface.static_intr.models import StaticInterface
-from mozdns.utils import ensure_label_domain, prune_tree
-from mozdns.tests.view_tests_template import GenericViewTests, random_label
-from mozdns.tests.view_tests_template import random_byte
-from mozdns.cname.models import CNAME
-from mozdns.address_record.models import AddressRecord
-from mozdns.domain.models import Domain
-from mozdns.mx.models import MX
-from mozdns.ptr.models import PTR
-from mozdns.nameserver.models import Nameserver
-from mozdns.soa.models import SOA
-from mozdns.srv.models import SRV
-from mozdns.txt.models import TXT
-from mozdns.sshfp.models import SSHFP
-from mozdns.view.models import View
+from cyder.systems.models import System
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.utils import ensure_label_domain, prune_tree
+from cyder.mozdns.tests.view_tests_template import GenericViewTests, random_label
+from cyder.mozdns.tests.view_tests_template import random_byte
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.soa.models import SOA
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.sshfp.models import SSHFP
+from cyder.mozdns.view.models import View
 
 import simplejson as json
 from urlparse import urlparse, urlsplit

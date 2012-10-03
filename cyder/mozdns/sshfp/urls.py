@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
-from mozdns.sshfp.views import *
+from cyder.mozdns.sshfp.views import *
 
 urlpatterns = patterns('',
                        url(r'^$', SSHFPListView.as_view()),

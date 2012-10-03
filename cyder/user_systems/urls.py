@@ -26,7 +26,7 @@ owner_upgrade_info_dict = {
 }
 
 
-urlpatterns = patterns('user_systems',
+urlpatterns = patterns('cyder.user_systems',
                        url(
                            r'^quicksearch/$', 'views.user_system_quicksearch_ajax',
                        name='user-system-quicksearch'),

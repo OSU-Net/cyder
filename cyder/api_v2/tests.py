@@ -7,8 +7,8 @@ except:
     from django.utils import simplejson as json
 from MacroExpansion import MacroExpansion
 from KeyValueTree import KeyValueTree
-from truth.models import Truth, KeyValue as TruthKeyValue
-from systems.models import ScheduledTask, System, KeyValue
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.systems.models import ScheduledTask, System, KeyValue
 
 
 class TestMacroExpansion(TestCase):

@@ -1,15 +1,15 @@
 from system_api import SystemResource, CustomAPIResource, OperatingSystemData
-from systems.models import System
+from cyder.systems.models import System
 from tastypie.test import ResourceTestCase
 from django.core.exceptions import ValidationError
 import json
 from django.http import HttpRequest
-from mozdns.view.models import View
-from core.vlan.models import Vlan
-from core.site.models import Site
-from mozdns.domain.models import Domain
-from core.network.models import Network
-from core.range.models import Range
+from cyder.mozdns.view.models import View
+from cyder.core.vlan.models import Vlan
+from cyder.core.site.models import Site
+from cyder.mozdns.domain.models import Domain
+from cyder.core.network.models import Network
+from cyder.core.range.models import Range
 
 
 class Tasty1SystemTest(ResourceTestCase):

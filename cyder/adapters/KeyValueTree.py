@@ -3,8 +3,8 @@
 from django.core.management import setup_environ
 import settings
 
-from systems.models import System, KeyValue
-from truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.systems.models import System, KeyValue
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
 import re
 from MacroExpansion import MacroExpansion
 

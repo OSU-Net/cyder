@@ -1,10 +1,10 @@
-from mozdns.mx.models import MX
-from mozdns.mx.forms import MXForm
-from mozdns.views import MozdnsDeleteView
-from mozdns.views import MozdnsDetailView
-from mozdns.views import MozdnsCreateView
-from mozdns.views import MozdnsListView
-from mozdns.views import MozdnsUpdateView
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.mx.forms import MXForm
+from cyder.mozdns.views import MozdnsDeleteView
+from cyder.mozdns.views import MozdnsDetailView
+from cyder.mozdns.views import MozdnsCreateView
+from cyder.mozdns.views import MozdnsListView
+from cyder.mozdns.views import MozdnsUpdateView
 
 
 class MXView(object):

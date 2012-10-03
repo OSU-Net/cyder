@@ -4,7 +4,7 @@ from models import ServerModel, Location, Allocation, SystemRack, KeyValue
 
 from misc.generic_views import create_object, update_object, delete_object, gen_mod_dict, gen_info_dict, gen_del_dict
 
-urlpatterns = patterns('systems',
+urlpatterns = patterns('cyder.systems',
                        (r'^quicksearch/$', 'views.system_quicksearch_ajax'),
                        (r'^list_all_systems_ajax/$',
                         'views.list_all_systems_ajax'),

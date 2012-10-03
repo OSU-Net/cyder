@@ -1,11 +1,11 @@
 # Create your views here.
-from mozdns.views import MozdnsDeleteView
-from mozdns.views import MozdnsCreateView
-from mozdns.views import MozdnsDetailView
-from mozdns.views import MozdnsUpdateView
-from mozdns.views import MozdnsListView
-from mozdns.view.models import View
-from mozdns.view.forms import ViewForm
+from cyder.mozdns.views import MozdnsDeleteView
+from cyder.mozdns.views import MozdnsCreateView
+from cyder.mozdns.views import MozdnsDetailView
+from cyder.mozdns.views import MozdnsUpdateView
+from cyder.mozdns.views import MozdnsListView
+from cyder.mozdns.view.models import View
+from cyder.mozdns.view.forms import ViewForm
 
 
 class ViewView(object):

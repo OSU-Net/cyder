@@ -1,10 +1,10 @@
-from mozdns.views import MozdnsDeleteView
-from mozdns.views import MozdnsCreateView
-from mozdns.views import MozdnsDetailView
-from mozdns.views import MozdnsUpdateView
-from mozdns.views import MozdnsListView
-from mozdns.srv.models import SRV
-from mozdns.srv.forms import SRVForm
+from cyder.mozdns.views import MozdnsDeleteView
+from cyder.mozdns.views import MozdnsCreateView
+from cyder.mozdns.views import MozdnsDetailView
+from cyder.mozdns.views import MozdnsUpdateView
+from cyder.mozdns.views import MozdnsListView
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.srv.forms import SRVForm
 
 
 class SRVView(object):

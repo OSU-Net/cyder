@@ -1,7 +1,7 @@
 from django import forms
 
-from core.site.models import Site
-from core.vlan.models import Vlan
+from cyder.core.site.models import Site
+from cyder.core.vlan.models import Vlan
 
 
 class VlanForm(forms.ModelForm):

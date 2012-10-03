@@ -5,23 +5,23 @@ from django.contrib import messages
 from django.forms.util import ErrorList
 from django.http import HttpResponse
 
-from systems.models import System
+from cyder.systems.models import System
 
-from core.interface.static_intr.models import StaticInterface
-from core.interface.static_intr.models import StaticIntrKeyValue
-from core.interface.static_intr.forms import StaticInterfaceForm
-from core.interface.static_intr.forms import FullStaticInterfaceForm
-from core.interface.static_intr.forms import StaticInterfaceQuickForm
-from core.interface.static_intr.forms import CombineForm
-from core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
-from core.keyvalue.utils import get_docstrings, dict_to_kv
-from core.views import CoreDeleteView, CoreCreateView
-from core.range.models import Range
-from core.network.utils import calc_parent_str
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.core.interface.static_intr.models import StaticIntrKeyValue
+from cyder.core.interface.static_intr.forms import StaticInterfaceForm
+from cyder.core.interface.static_intr.forms import FullStaticInterfaceForm
+from cyder.core.interface.static_intr.forms import StaticInterfaceQuickForm
+from cyder.core.interface.static_intr.forms import CombineForm
+from cyder.core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
+from cyder.core.keyvalue.utils import get_docstrings, dict_to_kv
+from cyder.core.views import CoreDeleteView, CoreCreateView
+from cyder.core.range.models import Range
+from cyder.core.network.utils import calc_parent_str
 
-from mozdns.domain.models import Domain
-from mozdns.address_record.models import AddressRecord
-from mozdns.ptr.models import PTR
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.ptr.models import PTR
 
 import pdb
 import re
@@ -54,7 +54,7 @@ def do_combine_a_ptr_to_interface(
     intr.full_clean()
     intr.save()
     if interface:
-        from api_v3.system_api import SystemResource
+        from cyder.api_v3.system_api import SystemResource
         intr.update_attrs()
         adapter_type, primary, alias = SystemResource.extract_nic_attrs(
             interface)

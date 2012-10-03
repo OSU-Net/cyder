@@ -8,8 +8,8 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.txt.models import TXT
-from mozdns.domain.models import Domain
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.domain.models import Domain
 
 
 class TXTTests(TestCase):

@@ -3,16 +3,16 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.shortcuts import render
 
-from mozdns.views import MozdnsCreateView
-from mozdns.views import MozdnsDeleteView
-from mozdns.views import MozdnsDetailView
-from mozdns.views import MozdnsListView
-from mozdns.views import MozdnsUpdateView
-from mozdns.ip.forms import IpForm
-from mozdns.ptr.forms import PTRForm
-from mozdns.ptr.models import PTR
-from mozdns.domain.models import Domain
-from core.network.utils import calc_parent_str
+from cyder.mozdns.views import MozdnsCreateView
+from cyder.mozdns.views import MozdnsDeleteView
+from cyder.mozdns.views import MozdnsDetailView
+from cyder.mozdns.views import MozdnsListView
+from cyder.mozdns.views import MozdnsUpdateView
+from cyder.mozdns.ip.forms import IpForm
+from cyder.mozdns.ptr.forms import PTRForm
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.domain.models import Domain
+from cyder.core.network.utils import calc_parent_str
 
 
 class PTRView(object):

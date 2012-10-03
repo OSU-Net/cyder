@@ -4,13 +4,13 @@ from tastypie import fields, utils
 from tastypie.exceptions import HydrationError
 from tastypie.resources import Resource, DeclarativeMetaclass
 from tastypie.resources import ModelResource
-from mozdns.domain.models import Domain
-from mozdns.txt.models import TXT
-from mozdns.txt.forms import TXTForm
-from mozdns.cname.models import CNAME
-from mozdns.cname.forms import CNAMEForm
-from mozdns.domain.forms import DomainForm
-from mozdns.view.models import View
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.txt.forms import TXTForm
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.cname.forms import CNAMEForm
+from cyder.mozdns.domain.forms import DomainForm
+from cyder.mozdns.view.models import View
 from tastypie.validation import FormValidation
 
 from tastypie.authorization import Authorization

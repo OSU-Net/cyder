@@ -1,9 +1,9 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.domain.models import Domain
-from core.network.models import Network
-from core.range.models import Range
+from cyder.mozdns.domain.models import Domain
+from cyder.core.network.models import Network
+from cyder.core.range.models import Range
 
 import ipaddr
 import pdb

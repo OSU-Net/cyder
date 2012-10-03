@@ -6,23 +6,23 @@ from tastypie.exceptions import HydrationError
 from tastypie.resources import Resource, DeclarativeMetaclass
 from tastypie.resources import ModelResource
 
-from systems.models import System
-from api_v3.system_api import SystemResource
-from core.interface.static_intr.models import StaticInterface
-from mozdns.utils import ensure_label_domain, prune_tree
-from mozdns.domain.models import Domain
-from mozdns.address_record.models import AddressRecord
-from mozdns.txt.models import TXT
-from mozdns.ptr.models import PTR
-from mozdns.srv.models import SRV
-from mozdns.mx.models import MX
-from mozdns.nameserver.models import Nameserver
-from mozdns.sshfp.models import SSHFP
-from mozdns.txt.forms import TXTForm
-from mozdns.cname.models import CNAME
-from mozdns.cname.forms import CNAMEForm
-from mozdns.domain.forms import DomainForm
-from mozdns.view.models import View
+from cyder.systems.models import System
+from cyder.api_v3.system_api import SystemResource
+from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.utils import ensure_label_domain, prune_tree
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.ptr.models import PTR
+from cyder.mozdns.srv.models import SRV
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.sshfp.models import SSHFP
+from cyder.mozdns.txt.forms import TXTForm
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.cname.forms import CNAMEForm
+from cyder.mozdns.domain.forms import DomainForm
+from cyder.mozdns.view.models import View
 from tastypie.validation import FormValidation
 
 from tastypie.authorization import Authorization

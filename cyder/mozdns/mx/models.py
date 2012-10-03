@@ -1,12 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from mozdns.models import MozdnsRecord
-from mozdns.cname.models import CNAME
+from cyder.mozdns.models import MozdnsRecord
+from cyder.mozdns.cname.models import CNAME
 
-from mozdns.validation import validate_mx_priority
-from mozdns.validation import validate_ttl
-from mozdns.validation import validate_name
+from cyder.mozdns.validation import validate_mx_priority
+from cyder.mozdns.validation import validate_ttl
+from cyder.mozdns.validation import validate_name
 
 
 class MX(MozdnsRecord):

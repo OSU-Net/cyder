@@ -1,3 +1,3 @@
-from mdns.tests.include_forward import *
-from mdns.tests.include_reverse import *
-from mdns.tests.soa import *
+from cyder.mdns.tests.include_forward import *
+from cyder.mdns.tests.include_reverse import *
+from cyder.mdns.tests.soa import *

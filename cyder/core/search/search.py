@@ -1,13 +1,13 @@
 from django.db.models import Q
-from core.network.utils import calc_parent
+from cyder.core.network.utils import calc_parent
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 import mozdns
 import core
 import operator
-from core.network.models import Network
-from core.site.models import Site
-from core.vlan.models import Vlan
+from cyder.core.network.models import Network
+from cyder.core.site.models import Site
+from cyder.core.vlan.models import Vlan
 
 import pdb
 import ipaddr

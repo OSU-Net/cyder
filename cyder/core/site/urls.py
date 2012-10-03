@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from core.site.views import *
+from cyder.core.site.views import *
 
 urlpatterns = patterns('',
                        url(r'^$', SiteListView.as_view()),

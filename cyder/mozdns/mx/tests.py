@@ -8,9 +8,9 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.mx.models import MX
-from mozdns.cname.models import CNAME
-from mozdns.domain.models import Domain
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.cname.models import CNAME
+from cyder.mozdns.domain.models import Domain
 
 import pdb
 

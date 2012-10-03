@@ -8,8 +8,8 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from mozdns.soa.models import *
-from mozdns.domain.models import Domain
+from cyder.mozdns.soa.models import *
+from cyder.mozdns.domain.models import Domain
 
 
 class SOATests(TestCase):

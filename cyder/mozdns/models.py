@@ -4,11 +4,11 @@ from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
 
 import mozdns
-from mozdns.domain.models import Domain, _check_TLD_condition
-from mozdns.view.models import View
-from mozdns.mixins import ObjectUrlMixin
-from mozdns.validation import validate_first_label, validate_name
-from mozdns.validation import validate_ttl, is_rfc1918, is_rfc4193
+from cyder.mozdns.domain.models import Domain, _check_TLD_condition
+from cyder.mozdns.view.models import View
+from cyder.mozdns.mixins import ObjectUrlMixin
+from cyder.mozdns.validation import validate_first_label, validate_name
+from cyder.mozdns.validation import validate_ttl, is_rfc1918, is_rfc4193
 from django.conf import settings
 
 import pdb
@@ -111,7 +111,7 @@ class MozdnsRecord(models.Model, ObjectUrlMixin):
         check_TLD_condition(self)
 
     def delete(self, *args, **kwargs):
-        from mozdns.utils import prune_tree
+        from cyder.mozdns.utils import prune_tree
         objs_domain = self.domain
         super(MozdnsRecord, self).delete(*args, **kwargs)
         prune_tree(objs_domain)
@@ -135,7 +135,7 @@ class MozdnsRecord(models.Model, ObjectUrlMixin):
                 self.domain.soa.dirty = True
                 self.domain.soa.save()
         if db_domain:
-            from mozdns.utils import prune_tree
+            from cyder.mozdns.utils import prune_tree
             prune_tree(db_domain)
 
     def set_fqdn(self):

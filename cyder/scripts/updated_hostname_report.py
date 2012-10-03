@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
 import manage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
-from systems import models
+from cyder.systems import models
 
 
 def main():

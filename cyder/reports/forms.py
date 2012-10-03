@@ -7,7 +7,7 @@ except ImportError:
 
 import models
 from django.forms.widgets import RadioSelect, CheckboxSelectMultiple
-from systems.models import Location, Allocation, SystemStatus, OperatingSystem
+from cyder.systems.models import Location, Allocation, SystemStatus, OperatingSystem
 
 
 class MultiSelectFormField(forms.MultipleChoiceField):

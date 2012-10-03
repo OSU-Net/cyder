@@ -1,9 +1,9 @@
 from django import forms
 from django.forms import ModelForm
 
-from mozdns.nameserver.models import Nameserver
-from mozdns.address_record.models import AddressRecord
-from core.interface.static_intr.models import StaticInterface
+from cyder.mozdns.nameserver.models import Nameserver
+from cyder.mozdns.address_record.models import AddressRecord
+from cyder.core.interface.static_intr.models import StaticInterface
 import itertools
 
 import pdb

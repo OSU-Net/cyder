@@ -1,8 +1,8 @@
 from piston.handler import BaseHandler, rc
-from systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue
-from truth.models import Truth, KeyValue as TruthKeyValue
-from dhcp.DHCP import DHCP as DHCPInterface
-from dhcp.models import DHCP
+from cyder.systems.models import System, SystemRack, SystemStatus, NetworkAdapter, KeyValue
+from cyder.truth.models import Truth, KeyValue as TruthKeyValue
+from cyder.dhcp.DHCP import DHCP as DHCPInterface
+from cyder.dhcp.models import DHCP
 from MacroExpansion import MacroExpansion
 from KeyValueTree import KeyValueTree
 import re
@@ -12,7 +12,7 @@ except:
     from django.utils import simplejson as json
 from django.test.client import Client
 
-from MozInvAuthorization.KeyValueACL import KeyValueACL
+from cyder.MozInvAuthorization.KeyValueACL import KeyValueACL
 
 from django.conf import settings
 
@@ -264,7 +264,7 @@ class KeyValueHandler(BaseHandler):
             key_type = request.GET['key_type']
             tmp_list = []
             if key_type == 'dhcp_scopes':
-                #Get keystores from truth that have dhcp.is_scope = True
+                #Get keystores from cyder.truth that have dhcp.is_scope = True
                 base = TruthKeyValue.objects.filter(
                     key='dhcp.is_scope', value='True')
                 #Iterate through the list and get all of the key/value pairs
@@ -278,7 +278,7 @@ class KeyValueHandler(BaseHandler):
 
             if key_type == 'system_by_reverse_dns_zone':
 
-                #Get keystores from truth that have dhcp.is_scope = True
+                #Get keystores from cyder.truth that have dhcp.is_scope = True
                 keyvalue_pairs = KeyValue.objects.filter(key__contains='reverse_dns_zone', value=request.GET['zone']).filter(key__startswith='nic.')
                 #Iterate through the list and get all of the key/value pairs
                 tmp_list = []
@@ -299,7 +299,7 @@ class KeyValueHandler(BaseHandler):
                     #tmp_list = list(set(tmp_list))
                 return tmp_list
             if key_type == 'system_by_scope':
-                #Get keystores from truth that have dhcp.is_scope = True
+                #Get keystores from cyder.truth that have dhcp.is_scope = True
                 keyvalue_pairs = KeyValue.objects.filter(key__contains='dhcp_scope', value=request.GET['scope']).filter(key__startswith='nic.')
                 #Iterate through the list and get all of the key/value pairs
                 tmp_list = []
@@ -320,7 +320,7 @@ class KeyValueHandler(BaseHandler):
                     #tmp_list = list(set(tmp_list))
                 return tmp_list
             if key_type == 'adapters_by_system':
-                #Get keystores from truth that have dhcp.is_scope = True
+                #Get keystores from cyder.truth that have dhcp.is_scope = True
                 system = None
                 try:
                     system = System.objects.get(hostname=request.GET['system'])
@@ -392,7 +392,7 @@ class KeyValueHandler(BaseHandler):
                 #tmp_list.append(tmp_dict)
                 return final_list
             if key_type == 'adapters_by_system_and_zone':
-                #Get keystores from truth that have dhcp.is_scope = True
+                #Get keystores from cyder.truth that have dhcp.is_scope = True
                 zone = request.GET['zone']
                 system = System.objects.get(hostname=request.GET['system'])
                 keyvalue_pairs = KeyValue.objects.filter(key__startswith='nic.').filter(system=system).order_by('key')
@@ -451,7 +451,7 @@ class KeyValueHandler(BaseHandler):
 
                 return resp
             if key_type == 'adapters_by_system_and_scope':
-                #Get keystores from truth that have dhcp.is_scope = True
+                #Get keystores from cyder.truth that have dhcp.is_scope = True
                 dhcp_scope = request.GET['dhcp_scope']
                 system = System.objects.get(hostname=request.GET['system'])
                 keyvalue_pairs = KeyValue.objects.filter(key__startswith='nic.').filter(system=system).order_by('key')
@@ -559,7 +559,7 @@ class KeyValueHandler(BaseHandler):
 
     def delete(self, request, key_value_id=None):
         if 'key_type' in request.GET and request.GET['key_type'] == 'delete_all_network_adapters':
-            #Get keystores from truth that have dhcp.is_scope = True
+            #Get keystores from cyder.truth that have dhcp.is_scope = True
             try:
                 system_hostname = request.GET['system_hostname']
                 system = System.objects.get(hostname=system_hostname)
@@ -573,7 +573,7 @@ class KeyValueHandler(BaseHandler):
 
             return resp
         if 'key_type' in request.GET and request.GET['key_type'] == 'delete_network_adapter':
-            #Get keystores from truth that have dhcp.is_scope = True
+            #Get keystores from cyder.truth that have dhcp.is_scope = True
             try:
                 adapter_number = request.GET['adapter_number']
                 system_hostname = request.GET['system_hostname']

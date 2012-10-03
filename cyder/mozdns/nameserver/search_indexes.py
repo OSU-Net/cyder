@@ -1,5 +1,5 @@
 from haystack import indexes
-from mozdns.nameserver.models import Nameserver
+from cyder.mozdns.nameserver.models import Nameserver
 
 
 class NameserverIndex(indexes.SearchIndex, indexes.Indexable):

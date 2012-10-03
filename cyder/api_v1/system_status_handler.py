@@ -1,5 +1,5 @@
 from piston.handler import BaseHandler, rc
-from systems.models import SystemStatus
+from cyder.systems.models import SystemStatus
 import re
 try:
     import json

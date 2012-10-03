@@ -1,9 +1,9 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
-from api.handlers import SystemHandler
-from api.handlers import NetworkAdapterHandler
-from api.handlers import KeyValueHandler
-from api.handlers import DHCPHandler
+from cyder.api.handlers import SystemHandler
+from cyder.api.handlers import NetworkAdapterHandler
+from cyder.api.handlers import KeyValueHandler
+from cyder.api.handlers import DHCPHandler
 
 systems_handler = Resource(SystemHandler)
 network_adapter_handler = Resource(NetworkAdapterHandler)

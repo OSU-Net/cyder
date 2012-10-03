@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from mdns.zone_migrate import buildzone3
+from cyder.mdns.zone_migrate import buildzone3
 import pdb
 
 

@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from MozInvAuthorization.BaseACL import BaseACL
+from cyder.MozInvAuthorization.BaseACL import BaseACL
 from django.conf import settings
 
 

@@ -3,7 +3,7 @@ from django.views.generic.list_detail import object_detail, object_list
 
 from misc.generic_views import create_object, update_object, delete_object, gen_mod_dict, gen_info_dict, gen_del_dict
 
-urlpatterns = patterns('truth',
+urlpatterns = patterns('cyder.truth',
                        url(r'^$', 'views.index', name='truth-list'),
                        url(
                            r'^list_all_keys_ajax[/]$', 'views.list_all_keys_ajax',

@@ -1,8 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from core.mixins import ObjectUrlMixin
-from core.keyvalue.models import KeyValue
+from cyder.core.mixins import ObjectUrlMixin
+from cyder.core.keyvalue.models import KeyValue
 
 
 class Site(models.Model, ObjectUrlMixin):

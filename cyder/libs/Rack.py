@@ -2,8 +2,8 @@
 
 
 from KeyValueTree import KeyValueTree
-from truth.models import KeyValue as TruthKeyValue, Truth
-from systems.models import KeyValue as KeyValue
+from cyder.truth.models import KeyValue as TruthKeyValue, Truth
+from cyder.systems.models import KeyValue as KeyValue
 from django.test.client import Client
 import json
 

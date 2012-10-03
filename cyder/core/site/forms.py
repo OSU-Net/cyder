@@ -1,7 +1,7 @@
 from django import forms
 
-from core.site.models import Site
-from core.network.models import Network
+from cyder.core.site.models import Site
+from cyder.core.network.models import Network
 
 
 class SiteForm(forms.ModelForm):

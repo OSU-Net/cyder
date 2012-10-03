@@ -14,7 +14,7 @@ from django.db.models.query import QuerySet
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 
-from dhcp.models import DHCP
+from cyder.dhcp.models import DHCP
 import mdns
 from django.conf import settings
 from django.conf import settings
@@ -171,8 +171,8 @@ class KeyValue(models.Model):
     def save(self, *args, **kwargs):
         dirty = False
         schedule_dns = False
-        from mdns.build_nics import build_nic
-        from mdns.dns_build import ip_to_site
+        from cyder.mdns.build_nics import build_nic
+        from cyder.mdns.dns_build import ip_to_site
 
         is_nic = re.match('^nic\.\d+\.(.*)\.\d+$', self.key)
         if self.pk:
@@ -395,7 +395,7 @@ class System(DirtyFieldsMixin, models.Model):
             return None
 
     def update_adapter(self, **kwargs):
-        from api_v3.system_api import SystemResource
+        from cyder.api_v3.system_api import SystemResource
         interface = kwargs.pop('interface', None)
         ip_address = kwargs.pop('ip_address', None)
         mac_address = kwargs.pop('mac_address', None)
@@ -420,7 +420,7 @@ class System(DirtyFieldsMixin, models.Model):
             :return: True on deletion, exception on failure
         """
     def delete_adapter(self, adapter_name):
-        from api_v3.system_api import SystemResource
+        from cyder.api_v3.system_api import SystemResource
         """
             method to get the next adapter
             we'll want to always return an adapter with a 0 alias

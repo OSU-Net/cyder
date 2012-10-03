@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
-from core.range.views import *
+from cyder.core.range.views import *
 
 urlpatterns = patterns('',
                        url(r'^$', csrf_exempt(RangeListView.as_view())),

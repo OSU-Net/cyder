@@ -1,5 +1,5 @@
-from core.build.subnet import build_subnet
-from core.network.models import Network
+from cyder.core.build.subnet import build_subnet
+from cyder.core.network.models import Network
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse
 

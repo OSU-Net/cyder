@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from core.network.models import Network
-from core.range.models import Range
-from mozdns.domain.models import Domain
-from mozdns.ip.models import ipv6_to_longs
+from cyder.core.network.models import Network
+from cyder.core.range.models import Range
+from cyder.mozdns.domain.models import Domain
+from cyder.mozdns.ip.models import ipv6_to_longs
 
 import random
 import ipaddr

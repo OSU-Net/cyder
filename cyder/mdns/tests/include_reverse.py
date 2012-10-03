@@ -11,9 +11,9 @@ import os
 import manage
 from django.test import TestCase
 from django.test.client import Client
-from systems.models import KeyValue, System
+from cyder.systems.models import KeyValue, System
 from StringIO import StringIO
-from mdns.utils import _ensure_include
+from cyder.mdns.utils import _ensure_include
 import pdb
 
 txt1 = """

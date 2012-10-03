@@ -6,19 +6,19 @@ from django.contrib import messages
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 
-from core.network.models import Network, NetworkKeyValue
-from core.network.forms import *
-from core.network.utils import calc_networks, calc_parent_str
-from core.vlan.models import Vlan
-from core.site.models import Site
-from core.site.forms import SiteForm
-from core.keyvalue.utils import get_attrs, update_attrs, get_dhcp_aa
-from core.keyvalue.utils import get_dhcp_docstrings, dict_to_kv
-from core.range.forms import RangeForm
+from cyder.core.network.models import Network, NetworkKeyValue
+from cyder.core.network.forms import *
+from cyder.core.network.utils import calc_networks, calc_parent_str
+from cyder.core.vlan.models import Vlan
+from cyder.core.site.models import Site
+from cyder.core.site.forms import SiteForm
+from cyder.core.keyvalue.utils import get_attrs, update_attrs, get_dhcp_aa
+from cyder.core.keyvalue.utils import get_dhcp_docstrings, dict_to_kv
+from cyder.core.range.forms import RangeForm
 
-from core.views import CoreDeleteView, CoreListView
-from core.views import CoreCreateView
-from mozdns.ip.models import ipv6_to_longs
+from cyder.core.views import CoreDeleteView, CoreListView
+from cyder.core.views import CoreCreateView
+from cyder.mozdns.ip.models import ipv6_to_longs
 from django.forms.formsets import formset_factory
 
 import re

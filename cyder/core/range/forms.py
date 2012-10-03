@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models.query import EmptyQuerySet
 
-from core.range.models import Range
+from cyder.core.range.models import Range
 
 import pdb
 

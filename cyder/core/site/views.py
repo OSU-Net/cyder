@@ -5,16 +5,16 @@ from django.contrib import messages
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 
-from core.site.models import Site, SiteKeyValue
-from core.site.forms import SiteForm
-from core.site.utils import get_vlans
+from cyder.core.site.models import Site, SiteKeyValue
+from cyder.core.site.forms import SiteForm
+from cyder.core.site.utils import get_vlans
 
-from core.vlan.models import Vlan
-from core.network.models import Network
-from core.keyvalue.utils import get_attrs, update_attrs
+from cyder.core.vlan.models import Vlan
+from cyder.core.network.models import Network
+from cyder.core.keyvalue.utils import get_attrs, update_attrs
 
-from core.views import CoreDeleteView, CoreListView
-from core.views import CoreCreateView, CoreUpdateView
+from cyder.core.views import CoreDeleteView, CoreListView
+from cyder.core.views import CoreCreateView, CoreUpdateView
 
 import re
 import pdb

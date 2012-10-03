@@ -1,6 +1,6 @@
 from haystack import indexes
-from mozdns.mx.models import MX
-from mozdns.mozdns_index import MozdnsIndex
+from cyder.mozdns.mx.models import MX
+from cyder.mozdns.mozdns_index import MozdnsIndex
 
 
 class MXIndex(MozdnsIndex, indexes.Indexable):

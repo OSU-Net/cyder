@@ -125,7 +125,7 @@ AUTHENTICATION_BACKENDS = (
 AUTH_PROFILE_MODULE = "systems.UserProfile"
 PISTON_IGNORE_DUPE_MODELS = True
 
-ROOT_URLCONF = 'mozilla_inventory.urls'
+ROOT_URLCONF = 'cyder.urls'
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 
@@ -152,5 +152,5 @@ def custom_show_toolbar(request):
 #############################################################
 MOZDNS_BASE_URL = "/mozdns"
 CORE_BASE_URL = "/core"
-ROOT_URLCONF = 'inventory.urls'
+ROOT_URLCONF = 'cyder.urls'
 BUILD_PATH = 'builds'

@@ -1,6 +1,6 @@
 from haystack import indexes
-from mozdns.txt.models import TXT
-from mozdns.mozdns_index import MozdnsIndex
+from cyder.mozdns.txt.models import TXT
+from cyder.mozdns.mozdns_index import MozdnsIndex
 
 
 class TXTIndex(MozdnsIndex, indexes.Indexable):
