@@ -14,7 +14,6 @@ from cyder.mozdns.cname.models import CNAME
 from cyder.mozdns.address_record.models import AddressRecord
 from cyder.mozdns.nameserver.models import Nameserver
 from cyder.core.interface.static_intr.models import StaticInterface
-from cyder.mozdns.mozbind.build import *
 
 from cyder.systems.models import System
 import pdb
