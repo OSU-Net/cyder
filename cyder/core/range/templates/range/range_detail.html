@@ -1,11 +1,10 @@
 {% extends "core/core_base.html" %}
 
-
 {% block core_content %}
 
     <span class='dns-title'>Range: Start {{ range.start_str }} End: {{ range.end_str}}</span>
 
-
+    <!-- TODO fix all the urls in this view -->
     {% block action_bar %}
         {% if range.get_edit_url %}
             <a class="btn btn-primary" href="{{ range.get_edit_url() }}">Edit</a>
@@ -29,7 +28,7 @@
     {% else %}
     .
     {% endif %}
-    <span>See <a href="/core/build/{{range.network.pk}}/">DHCP Build Output</a>.</span>
+    <span>See <a href="{{ url('build-network', range.network.pk) }}">DHCP Build Output</a>.</span>
     {% if attrs %}
     <table class="table">
         <thead>
