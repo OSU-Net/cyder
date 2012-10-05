@@ -33,9 +33,9 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'inventory_mozilla',
+        'NAME': 'chili',
         'USER': 'root',
-        'PASSWORD': 'B0G3Y',
+        'PASSWORD': 'yoursql',
         'HOST': 'localhost',
         'PORT': '',
         'OPTIONS': {

@@ -1,10 +1,10 @@
 {% extends "jinja_base.html" %}
 {% block subtitle %} - racks{% endblock %}
 {% block content %}
-<script type="text/javascript" src="/static/js/jQuery.rightclick.js"></script>
-<script type="text/javascript" src="/static/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery.autocomplete-min.js"></script>
-<link rel="stylesheet" href="/static/css/smoothness/jquery-ui-1.8.11.custom.css" type="text/css" />
+<script type="text/javascript" src="/media/js/lib/jQuery.rightclick.js"></script>
+<script type="text/javascript" src="/media/js/lib/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="/media/js/lib/jquery.autocomplete-min.js"></script>
+<link rel="stylesheet" href="/media/css/lib/smoothness/jquery-ui-1.8.11.custom.css" type="text/css" />
 <style type='text/css'>
     #blah-rack_elevation {
         width: 400px;
@@ -93,7 +93,7 @@ $(document).ready(function() {
         $("#server_model").html(server_model);
         $("#operating_system").html(operating_system);
         var d = $( "#dialog" ).dialog({
-                title: system_name, 
+                title: system_name,
                 autoShow: false,
                 buttons: {
                     "Show": function() {
@@ -108,7 +108,7 @@ $(document).ready(function() {
                         $( this ).dialog( "close" );
                     }
                 }
-                
+
                 });
         d.show();
 
@@ -121,7 +121,7 @@ $(document).ready(function() {
         } else if(!is_rack_hardware(system_index) && system_index > 0){
             $("#ru_number").html(system_index);
             var d = $( "#add-dialog" ).dialog({
-                    title: system_name, 
+                    title: system_name,
                     autoShow: false,
                     buttons: {
                         "Save": function() {
@@ -132,12 +132,12 @@ $(document).ready(function() {
                             $( this ).dialog( "close" );
                         }
                     }
-                    
+
                     });
             d.show();
 
         }
-        
+
         /*system_index = get_ru(e);
         left_click_rack(system_index);*/
     });
@@ -148,12 +148,12 @@ $(document).ready(function() {
     function draw_rack_border(ctx){
         ctx.beginPath();
         ctx.fillStyle   = '#000000';
-        ctx.fillRect(0,0,rack_width, rack_height);  
+        ctx.fillRect(0,0,rack_width, rack_height);
     }
     function clear_rack_center(ctx){
         ctx.beginPath();
         ctx.fillStyle   = '#FFFFFF';
-        ctx.fillRect(edge, edge, usable_width, usable_height);  
+        ctx.fillRect(edge, edge, usable_width, usable_height);
 
     }
 function draw() {
@@ -201,7 +201,7 @@ function draw() {
             });
             if(slot > 0){
                 system_ru = ru;
-                draw_image_at_ru(ctx, '/static/images/' + image, counter, edge, edge+mult, usable_width, usable_height, system_ru, system_name);
+                draw_image_at_ru(ctx, '/media/img/' + image, counter, edge, edge+mult, usable_width, usable_height, system_ru, system_name);
                 for(ii=1;ii<=system_ru;ii++){
                     system_list.push(system_id);
                 }
@@ -219,8 +219,8 @@ function draw() {
                 ctx.fillStyle = '';
                 ctx.strokeStyle = "grey";
                 ctx.lineWidth = 1;
-                ctx.moveTo(edge, edge + mult);  
-                ctx.lineTo(usable_width + edge, edge + mult);  
+                ctx.moveTo(edge, edge + mult);
+                ctx.lineTo(usable_width + edge, edge + mult);
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.fillStyle = "blue";
@@ -242,8 +242,8 @@ function draw() {
         // Calculate the top portion of the system. Each is based on an RU being 18 pixels high, counting backwards from the bottom up
         y = y - (item_height * ru);
         text_y = y + ((18 * ru) / 2) + 3;
-        var img = new Image();   // Create new img element  
-        img.onload = function(){  
+        var img = new Image();   // Create new img element
+        img.onload = function(){
             // Set the background to the image of the server
             ctx.drawImage(img, x, y, width, 18  * ru);
             if(system_name.length > 0){
@@ -251,7 +251,7 @@ function draw() {
                 ctx.fillStyle   = 'white';
                 var new_text_y = y + ((18 * ru) / 2) + 3;
                 //Because system names are of variable length. Create a small box then increment it based on the length of the system name.
-                ctx.fillRect(edge + edge + 2, new_text_y - 12, usable_width -340 + (system_name.length * 5),16);  
+                ctx.fillRect(edge + edge + 2, new_text_y - 12, usable_width -340 + (system_name.length * 5),16);
                 ctx.fill();
                 // We want to mark on the left side of the rack the RU that the system starts at
                 ctx.fillStyle = "red";
@@ -265,7 +265,7 @@ function draw() {
                 ctx.fillText(system_name, edge + edge + 6, new_text_y +0);
                 ctx.stroke();
             }
-        };  
+        };
         img.src =  img_path;
     }
 
