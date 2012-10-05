@@ -4,5 +4,5 @@ from cyder.mozdns.zone_creation.views import zone_creation
 
 
 urlpatterns = patterns('',
-                       url(r'^$', zone_creation),
-                       )
+    url(r'^$', zone_creation),
+)
