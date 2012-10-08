@@ -24,8 +24,60 @@ import re
 import pdb
 import ipaddr
 
-
 def network_wizard(request):
+    if request.method == 'POST':
+        form = NetworkForm_network(request.POST)
+        if form.is_valid():
+            if network.site is None:
+                parent = calc_parent
+                if parent:
+                    network.site = parent.site
+            date = form.cleaned_data
+            form = NetworkForm_site()
+            return render(request, 'network/wizard_form.html', {
+                'form': form,
+                'data': data,
+            })
+        else:
+            return render(request, 'network/wizard_form.html', {
+                'form': form,
+            })
+    else:
+        form = NetworkForm_network()
+        return render(request, 'network/wizard_form.html', {
+            'form': form,
+        })
+
+def site_wizard(request):
+    if request.method == 'POST':
+        form = NetworkForm_site(request.POST)
+        if form.is_valid():
+            data = request.POST.get('data')
+            data = dict(data.items() + form.cleaned_data.items())
+            form = NetworkForm_vlan()
+            return render(request, 'network/wizard_form.html', {
+                'form': form,
+                'data': data,
+            })
+        else:
+            return render(request, 'network/wizard_form.html', {
+                'form': form,
+            })
+    else:
+        form = NetworkForm_site()
+        return render(request, 'network/wizard_form.html', {
+            'form': form,
+        })
+
+
+def vlan_wizard(request):
+    if request.method == 'POST':
+        form = NetworkForm_vlan(request.POST)
+        if form.is_valid():
+            data = request.POST.get('data')
+            data = dict(data.items() + form.cleaned_data.items())
+
+def network_wizard1(request):
     if request.method == 'POST':
         action = request.POST.get('action', '')
         if action == "network":
