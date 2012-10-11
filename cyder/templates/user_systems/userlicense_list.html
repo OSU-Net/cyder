@@ -38,9 +38,9 @@
                 <td>&nbsp;</td>
             {% endif %}
 	
-            <td><a href="{{ 'license-show'|url(license.id) }}">Show</a></td>
-            <td><a href="{{ 'license-edit'|url(license.id) }}">Edit</a></td>
-            <td><a href="{{ 'license-delete'|url(license.id) }}">Delete</a></td>
+            <td><a href="{{ url('license-detail', license.id) }}">Show</a></td>
+            <td><a href="{{ url('license-update', license.id) }}">Edit</a></td>
+            <td><a href="{{ url('license-delete', license.id) }}">Delete</a></td>
         </tr>
         {% endfor %}
     </tbody>
@@ -65,7 +65,7 @@
 <script>
 	$().ready(function(){
         add_tablesorter($('.listtable')[0]);
-        add_quicksearch($("#quicksearch"), $("#search_hits"), "/en-US{{ 'license-quicksearch'|url() }}");
+        add_quicksearch($("#quicksearch"), $("#search_hits"), "/en-US{{ url('license-quicksearch') }}");
 	});
 </script>
 {% endblock %}

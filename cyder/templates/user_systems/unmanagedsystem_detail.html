@@ -18,7 +18,7 @@
 <dt>Owner:</dt>
 <dd>
 {% if user_system.owner %}
-<a href="{{ 'owner-show'|url(user_system.owner.id) }}">{{ user_system.owner }}</a>
+<a href="{{ url('owner-detail', user_system.owner.id) }}">{{ user_system.owner }}</a>
 {% endif %}
 </dd>
 <div style="clear:both;"></div>
@@ -70,6 +70,6 @@
 </div>
 
 <div style="clear:both;"></div>
-<a href="/user_systems/edit/{{user_system.id }}">Edit</a>
-<a href="/user_systems/">Back</a>
+<a href="{{ url('user-system-update', user_system.id) }}">Edit</a>
+<a href="{{ url('user-system-list') }}">Back</a>
 {% endblock %}

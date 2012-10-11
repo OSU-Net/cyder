@@ -195,7 +195,7 @@
 
 <div style="clear:both;"></div>
 {% if not read_only %}
-<a href="{{ "systems.views.system_edit"|url(system.id) }}">Edit</a>
+<a href="{{ url('systems.views.system_edit', system.id) }}">Edit</a>
 {% endif %}
 <a href="{{ "systems.views.home"|url() }}">Back</a>
 <script type='text/javascript'>

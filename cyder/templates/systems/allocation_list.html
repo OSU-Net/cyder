@@ -1,7 +1,7 @@
 {% extends "jinja_generic_listtable.html" %}
 {% block list_name %}Locations{% endblock %}
 
-{% block create_new_url %}{{ "allocation-new"|url() }}{% endblock %}
+{% block create_new_url %}{{ url('allocation-create') }}{% endblock %}
 {% block table_head %}
         <tr>
             <th>Name</th> 
@@ -12,8 +12,8 @@
         {% for o in object_list %}
         <tr>
             <td>{{ o.name }}</td>
-            <td><a href="{{ "allocation-show"|url(o.id) }}">Show</a></td>
-            <td><a href="{{ "allocation-edit"|url(o.id) }}">Edit</a></td>
+            <td><a href="{{ url('allocation-detail', o.id) }}">Show</a></td>
+            <td><a href="{{ url('allocation-update', o.id) }}">Edit</a></td>
         </tr>
         {% endfor %}
 {% endblock %}
