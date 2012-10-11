@@ -29,7 +29,7 @@ is_attr = re.compile("^attr_\d+$")
 
 
 class VlanDeleteView(VlanView, CoreDeleteView):
-    """ """
+    success_url = "/core/vlan/"
 
 
 class VlanListView(VlanView, CoreListView):

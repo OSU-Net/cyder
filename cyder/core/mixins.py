@@ -40,4 +40,3 @@ class ObjectUrlMixin(object):
             return reverse(self._meta.db_table + '-create', args=[self.pk])
         except:
             return reverse(self._meta.db_table + '-create')
-
