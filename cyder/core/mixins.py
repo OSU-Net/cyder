@@ -1,5 +1,5 @@
 from django.conf import settings
-
+from django.core.urlresolvers import reverse
 
 class ObjectUrlMixin(object):
     """
@@ -15,9 +15,7 @@ class ObjectUrlMixin(object):
         """
         Return the absolute url of an object.
         """
-        return settings.CORE_BASE_URL + "/{0}/{1}/".format(
-            self._meta.db_table, self.pk
-        )
+        return reverse(self._meta.db_table + '-detail', args=[self.pk])
 
     def absolute_url(self):
         return self.get_absolute_url()
@@ -26,20 +24,19 @@ class ObjectUrlMixin(object):
         """
         Return the edit url of an object.
         """
-        return settings.CORE_BASE_URL + "/{0}/{1}/update/".format(
-            self._meta.db_table, self.pk
-        )
+        return reverse(self._meta.db_table + '-update', args=[self.pk])
 
     def get_delete_url(self):
         """
         Return the delete url of an object.
         """
-        return settings.CORE_BASE_URL + "/{0}/{1}/delete/".format(
-            self._meta.db_table, self.pk
-        )
+        return reverse(self._meta.db_table + '-delete', args=[self.pk])
 
     def get_create_url(self):
         """
         Return the create url of the type of object.
         """
-        return settings.CORE_BASE_URL + "/{0}/create/".format(self._meta.db_table)
+        try:
+            return reverse(self._meta.db_table + '-create', args=[self.pk])
+        except:
+            return reverse(self._meta.db_table + '-create')

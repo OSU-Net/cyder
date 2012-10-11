@@ -37,7 +37,7 @@ is_attr = re.compile("^attr_\d+$")
 
 
 class NetworkDeleteView(NetworkView, CoreDeleteView):
-    """ """
+    success_url = "/core/network/"
 
 
 class NetworkListView(NetworkView, CoreListView):
@@ -57,20 +57,19 @@ def delete_network_attr(request, attr_pk):
 def create_network(request):
     if request.method == 'POST':
         form = NetworkForm(request.POST)
-        try:
-            if form.is_valid():
-                network = form.instance
-                if network.site is None:
-                    parent = calc_parent(network)
-                    if parent:
-                        network.site = parent.site
-                network.save()
+        network = form.instance
+        if form.is_valid():
+            if network.site is None:
+                parent = calc_parent(network)
+                if parent:
+                    network.site = parent.site
+            network.save()
             return redirect(network)
-        except ValidationError, e:
+        else:
             return render(request, 'core/core_form.html', {
-                'object': network,
                 'form': form,
-            })
+        })
+
     else:
         form = NetworkForm()
         return render(request, 'core/core_form.html', {

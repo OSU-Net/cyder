@@ -28,7 +28,7 @@ class RangeView(object):
 
 
 class RangeDeleteView(RangeView, CoreDeleteView):
-    """ """
+    success_url = "/core/range/"
 
 
 class RangeDetailView(RangeView, CoreDetailView):
