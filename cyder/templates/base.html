@@ -4,19 +4,9 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>{% block title %}Inventory{% block subtitle %}{% endblock %}{% endblock %}</title>
-    <script src="/media/js/lib/jquery-1.6.1.min.js" type="text/javascript"></script>
-    <script src="/media/js/lib/tablesorter.js" type="text/javascript"></script>
-    <script src="/media/js/application.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="/media/css/lib/blueprint/screen.css" type="text/css" media="screen, projection" />
-    <link rel="stylesheet" href="/media/css/lib/blueprint/print.css" type="text/css" media="print" />
-    <script src="/media/js/lib/jquery.tools.min.js"></script>
-    <!--[if lt IE 8]>
-      <link rel="stylesheet" href="/media/css/lib/blueprint/ie.css" type="text/css" media="screen, projection">
-    <![endif]-->
-    <link href="/media/css/screen.css" media="screen" rel="stylesheet" type="text/css" />
+    {{ css('cyder_css') }}
     <link rel="shortcut icon" href="/media/img/favicon.ico">
     <link rel="icon" href="/media/img/favicon.ico">
-
     {% block head %}{% endblock %}
 
 </head>
@@ -31,7 +21,6 @@
     <div id="hd">
         <div id="toptabs">
             <ul id="app-buttons">
-<!-- @TODO Implement Reverses -->
                 <li><a href="/">Systems</a></li>
                 <li><a href="{{ url("system_rack-list") }}">Racks</a></li>
                 {% if not read_only %}
@@ -51,6 +40,7 @@
         {% block site_tabs %} {% endblock %}
     </div>
     <div id="bd">
+        {{ js('cyder_js') }}
         {% block content %}{% endblock %}
     </div>
     <div id="ft">

@@ -91,8 +91,8 @@
                             <b>Free</b>
                         </td>
                         <td>
-                            Create <a href="/mozdns/address_record/create/?ip_str={{ object[1]}}&ip_type=4">A</a> 
-                                    <a href="/mozdns/ptr/create/?ip_str={{ object[1]}}&ip_type=4">PTR</a> 
+                            Create <a href="/mozdns/address_record/create/?ip_str={{ object[1]}}&ip_type=4">A</a>
+                                    <a href="/mozdns/ptr/create/?ip_str={{ object[1]}}&ip_type=4">PTR</a>
                                     <a href="/core/interface/create/?ip_str={{ object[1]}}&ip_type=4">Interface</a>
                         </td>
                         {% endif %}
@@ -107,7 +107,7 @@
     <script type='text/javascript'>
         function update_link(obj, system_id, hostname){
             link_text = '<a href="/systems/show/' + system_id + '/">' + hostname + '</a>';
-            obj.closest('td').prev('td').html('System ' + link_text);   
+            obj.closest('td').prev('td').html('System ' + link_text);
             obj.closest('td').html(' ');
         }
         $(document).ready(function() {
@@ -158,9 +158,6 @@
             });
 });
 </script>
-<script type="text/javascript" src="/media/js/lib/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="/media/js/lib/jquery.autocomplete-min.js"></script>
-<link rel="stylesheet" href="/media/css/lib/smoothness/jquery-ui-1.8.11.custom.css" type="text/css" />
 <style type='text/css'>
     .autocomplete-w1 { border-right: 1 px solid #F0F0F0; position:absolute; top:0px; width: 150px; left:0px; margin:6px 0 0 6px; /* IE6 fix: */ _background:none; _margin:1px 0 0 0; }
     .autocomplete { background:#FFF; cursor:default; text-align:left; max-height:350px; background-color: #FEFEFE; width: 150px; margin:-6px 6px 6px -6px;}

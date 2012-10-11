@@ -1,12 +1,8 @@
-{% extends "jinja_base.html" %}
+{% extends "base.html" %}
 {% block subtitle %} - {{ system.hostname }} - edit{% endblock %}
 {% block head %}
-<script type='text/javascript' src='/media/js/lib/jquery.validate.min.js'></script>
-<!-- standalone page styling (can be removed) -->
-<link rel="stylesheet" type="text/css" href="/media/css/standalone.css"/>	
 
 
-	
 	<!-- tab styling -->
 <style type="text/css">
    .error {
@@ -16,7 +12,7 @@
         background-color: #ffc;
         border: 1px solid #c00;
         z-index: 500;
-    } 
+    }
     input[type=text].error {
         font: normal 11px Lucida Grande;
         background-color: #FFFFFF;
@@ -28,7 +24,7 @@
     }
 .panes div {
 	min-height: 200px;
-	display:none;		
+	display:none;
 	padding:15px 10px;
 	border:1px solid #999;
 	border-top:0;
@@ -41,54 +37,54 @@
 
 }
 /* root element for tabs  */
-ul.css-tabs {  
-	margin:0 !important; 
+ul.css-tabs {
+	margin:0 !important;
 	padding:0;
 	height:30px;
-	border-bottom:1px solid #666;	 	
+	border-bottom:1px solid #666;
 }
 
 /* single tab */
-ul.css-tabs li {  
-	float:left;	 
-	padding:0; 
-	margin:0;  
-	list-style-type:none;	
+ul.css-tabs li {
+	float:left;
+	padding:0;
+	margin:0;
+	list-style-type:none;
 }
 
 /* link inside the tab. uses a background image */
-ul.css-tabs a { 
+ul.css-tabs a {
 	float:left;
 	font-size:13px;
 	display:block;
-	padding:5px 30px;	
+	padding:5px 30px;
 	text-decoration:none;
-	border:1px solid #666;	
+	border:1px solid #666;
 	border-bottom:0px;
 	height:18px;
 	background-color:#efefef;
 	color:#777;
 	margin-right:2px;
 	position:relative;
-	top:1px;	
+	top:1px;
 	outline:0;
-	-moz-border-radius:4px 4px 0 0;	
+	-moz-border-radius:4px 4px 0 0;
 }
 
 ul.css-tabs a:hover {
 	background-color:#F7F7F7;
 	color:#333;
 }
-	
+
 /* selected tab */
 ul.css-tabs a.current {
 	background-color:#ddd;
-	border-bottom:1px solid #ddd;	
-	color:#000;	
+	border-bottom:1px solid #ddd;
+	color:#000;
 	cursor:default;
 }
 
-	
+
 /* tab pane */
 .css-panes div {
 	display:none;
@@ -96,28 +92,28 @@ ul.css-tabs a.current {
 	border-width:0 1px 1px 1px;
 	min-height:150px;
 	padding:15px 20px;
-	background-color:#ddd;	
+	background-color:#ddd;
 }
 
 /* CSS Declarations for overlay */
 .simple_overlay {
-    
+
     /* must be initially hidden */
     display:none;
-    
+
     /* place overlay on top of other elements */
     z-index:10000;
-    
+
     /* styling */
     background-color:#333;
-    
-    width:675px;    
+
+    width:675px;
     min-height:200px;
     border:1px solid #666;
-    
+
     /* CSS3 styling for latest browsers */
     -moz-box-shadow:0 0 90px 5px #000;
-    -webkit-box-shadow: 0 0 90px #000;  
+    -webkit-box-shadow: 0 0 90px #000;
 }
 
 /* close button positioned on upper right corner */
@@ -138,7 +134,7 @@ ul.css-tabs a.current {
     color:#fff;
     width:150px;
 }
-    
+
 .details h3 {
     color:#aba;
     font-size:15px;
@@ -147,7 +143,6 @@ ul.css-tabs a.current {
 
 
 </style>
-<link rel="stylesheet" type="text/css" href="/media/css/tabs.css" />
 <script type="text/javascript">
         var system_id = getURISegment(5);
     $.validator.addMethod("checkForDupeNicName", function(value, element, param){
@@ -166,7 +161,7 @@ ul.css-tabs a.current {
         //here we check the response
         if(ajaxFunc.responseText == 'True'){
             return false;
-        } else { 
+        } else {
             return true;
         }
         },
@@ -189,11 +184,11 @@ ul.css-tabs a.current {
         //here we check the response
         if(ajaxFunc.responseText == 'True'){
             return false;
-        } else { 
+        } else {
             return true;
         }
         },
-            "Adapter number is already taken" 
+            "Adapter number is already taken"
         );
 
         $.validator.addMethod(
@@ -268,42 +263,42 @@ ul.css-tabs a.current {
                             },
                             submitHandler: function(data){
                                     $.post("/en-US/systems/create_key_value/" + system_id + '/',
-                                        { 
-                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.ipv4_address.0', 
-                                        value: $('#quick_add_ip_address').val() 
+                                        {
+                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.ipv4_address.0',
+                                        value: $('#quick_add_ip_address').val()
                                         }
                                     );
                                     $.post("/en-US/systems/create_key_value/" + system_id + '/',
-                                        { 
-                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.hostname.0', 
-                                        value: $('#quick_add_host_name').val() 
+                                        {
+                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.hostname.0',
+                                        value: $('#quick_add_host_name').val()
                                         }
                                     );
                                     $.post("/en-US/systems/create_key_value/" + system_id + '/',
-                                        { 
-                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.mac_address.0', 
-                                        value: $('#quick_add_mac_address').val() 
+                                        {
+                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.mac_address.0',
+                                        value: $('#quick_add_mac_address').val()
                                         }
                                     );
                                     if($("#quick_add_dhcp_scope").val()){
                                         $.post("/en-US/systems/create_key_value/" + system_id + '/',
-                                            { 
-                                            key: 'nic.' + $('#quick_add_adapter_number').val() + '.dhcp_scope.0', 
-                                            value: $('#quick_add_dhcp_scope').val() 
+                                            {
+                                            key: 'nic.' + $('#quick_add_adapter_number').val() + '.dhcp_scope.0',
+                                            value: $('#quick_add_dhcp_scope').val()
                                             }
                                         );
                                     }
                                     $.post("/en-US/systems/create_key_value/" + system_id + '/',
-                                        { 
-                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.name.0', 
-                                        value: $('#quick_add_adapter_name').val() 
+                                        {
+                                        key: 'nic.' + $('#quick_add_adapter_number').val() + '.name.0',
+                                        value: $('#quick_add_adapter_name').val()
                                         }
                                     );
                                     if($('#quick_add_option_host_name').val().length > 0){
                                         $.post("/en-US/systems/create_key_value/" + system_id + '/',
-                                            { 
-                                            key: 'nic.' + $('#quick_add_adapter_number').val() + '.option_hostname.0', 
-                                            value: $('#quick_add_option_host_name').val() 
+                                            {
+                                            key: 'nic.' + $('#quick_add_adapter_number').val() + '.option_hostname.0',
+                                            value: $('#quick_add_option_host_name').val()
                                             }
                                         );
                                     }

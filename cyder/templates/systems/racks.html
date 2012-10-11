@@ -1,4 +1,4 @@
-{% extends "jinja_base.html" %}
+{% extends "base.html" %}
 {% block subtitle %} - racks{% endblock %}
 {% block content %}
 <h2>Listing Racks</h2>
@@ -35,7 +35,7 @@ Allocation: {{ filter_form.allocation }}
 </table>
 <br />
 {% endfor %}
-<script type="text/javascript" src="/media/js/application.js"></script>
+
 <script type="text/javascript">
     $(document).ready(function() {
         $('.new-system').new_system_from_rack();

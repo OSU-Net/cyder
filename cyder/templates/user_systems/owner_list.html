@@ -1,4 +1,4 @@
-{% extends "jinja_base.html" %}
+{% extends "base.html" %}
 {% block content %}
 <script>
     function showUpgradeable($,t) {
@@ -14,7 +14,7 @@
         return false;
     }
 </script>
-    <script src="/media/js/lib/tablesorter.js"></script>
+
 <div style="margin-top: 1em; float:right;">
     <form action="/en-US/owners/quicksearch/" onSubmit="return false;">
         <strong>Quick Search:</strong> <input id="quicksearch" type="text" name="quicksearch" /><input type='submit' name='submit' value='Go' />

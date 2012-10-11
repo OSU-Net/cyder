@@ -1,7 +1,7 @@
-{% extends "jinja_base.html" %}
+{% extends "base.html" %}
 {% block subtitle %} - {{ system.hostname }} - show{% endblock %}
 {% block content %}
-<script type="text/javascript" src="/media/js/master_form_utils.js"></script>
+
 <!-- ^ Contains the make smart name function -->
 
 <div>
@@ -495,8 +495,4 @@
         <tr><td>Private DNS:</td><td><input type='checkbox' name='add_adapter_private' id='add_adapter_private' style='width: 159px;' value='1' checked=""></td></tr>
     </table>
 </div>
-{% endblock %}
-{% block head %}
-    <script type="text/javascript" src="/media/js/lib/jquery-ui-1.8.11.custom.min.js"></script>
-    <link rel="stylesheet" href="/media/css/lib/smoothness/jquery-ui-1.8.11.custom.css" type="text/css" />
 {% endblock %}

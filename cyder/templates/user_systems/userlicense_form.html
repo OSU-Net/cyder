@@ -1,10 +1,5 @@
-{% extends "jinja_base.html" %}
+{% extends "base.html" %}
 {% block head %}
-    <script type="text/javascript" src="/media/js/lib/jquery-ui-1.8.11.custom.min.js"></script>
-    <script type="text/javascript" src="/media/js/lib/jquery.autocomplete-min.js"></script>
-
-    <link href="/media/css/lib/jquery.autocomplete.css" media="screen" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="/media/css/lib/smoothness/jquery-ui-1.8.11.custom.css" type="text/css" />
     <script type="text/javascript">
     $(document).ready(function() {
         $("#id_license_type").autocomplete({
@@ -37,9 +32,9 @@
     {{ form.errors }}
     <form method="post" action="" class = "editform">
         {% include "user_systems/userlicense_form_snippet.html" %}
-    <br \> 
+    <br \>
     <input type="submit" name="submit" value="Save" />
     </form>
-    
+
     {% include "user_systems/userlicense_form_snippet.js" %}
 {% endblock %}

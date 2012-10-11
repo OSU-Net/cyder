@@ -4,29 +4,53 @@
 from funfactory.settings_base import *
 from cyder.settings.dns import *
 
+ROOT_URLCONF = 'cyder.urls'
+MEDIA_ROOT = path('media')
+MEDIA_URL = '/media/'
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
 # and js files that can be bundled together by the minify app.
 MINIFY_BUNDLES = {
     'css': {
-        'example_css': (
-            'css/examples/main.css',
-        ),
-        'example_mobile_css': (
-            'css/examples/mobile.css',
+        'cyder_css': (
+            'css/lib/blueprint/ie.css',
+            'css/lib/blueprint/print.css',
+            'css/lib/blueprint/screen.css',
+            'css/lib/blueprint/plugins/buttons/screen.css',
+            'css/lib/blueprint/plugins/fancy-type/screen.css',
+            'css/lib/blueprint/plugins/link-icons/screen.css',
+            'css/lib/blueprint/plugins/rtl/screen.css',
+            'css/lib/jquery.autocomplete.css',
+            'css/lib/smoothness/jquery-ui-1.8.11.custom.css',
+            'css/lib/ui-lightness/jquery-ui-1.8.11.custom.css',
+
+            'css/screen.css',
+            'css/standalone.css',
+            'css/tabs.css',
         ),
     },
     'js': {
-        'example_js': (
-            'js/examples/libs/jquery-1.4.4.min.js',
-            'js/examples/libs/jquery.cookie.js',
-            'js/examples/init.js',
+        'cyder_js': (
+            'js/lib/jquery-1.6.1.min.js',
+            'js/lib/attribute_adder.js',
+            'js/lib/jquery-ui-1.8.11.custom.min.js',
+            'js/lib/jquery.autocomplete.min.js',
+            'js/lib/jquery.history.js',
+            'js/lib/jQuery.rightclick.js',
+            'js/lib/jquery.tools.min.js',
+            'js/lib/jquery.validate.min.js',
+            'js/lib/jquery.dataTables.js',
+            'js/lib/jquery.tabletools.min.js',
+            'js/lib/tablesorter.js',
+
+            'js/application.js',
+            'js/dhcp_raw_include.js',
+            'js/key_value_validators.js',
+            'js/master_form.js',
+            'js/master_form_utils.js',
         ),
     }
 }
-
-MEDIA_ROOT = path('media')
-MEDIA_URL = '/media/'
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'api',
@@ -74,6 +98,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'djcelery',
     'django_extensions',
     'django_nose',
+    'jingo_minify',
     'tastypie',
     'tastytools',
 
@@ -99,7 +124,8 @@ DJANGO_TEMPLATE_APPS = [
     'admin',
     'build',
     'user_systems',
-    ]
+]
+
 # Tells the extract script what files to look for L10n in and what function
 # handles the extraction. The Tower library expects this.
 
@@ -125,9 +151,7 @@ AUTHENTICATION_BACKENDS = (
 AUTH_PROFILE_MODULE = "systems.UserProfile"
 PISTON_IGNORE_DUPE_MODELS = True
 
-ROOT_URLCONF = 'cyder.urls'
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 
 #########################################################
 #                   MOZ DNS                             #
@@ -152,5 +176,4 @@ def custom_show_toolbar(request):
 #############################################################
 MOZDNS_BASE_URL = "/mozdns"
 CORE_BASE_URL = "/core"
-ROOT_URLCONF = 'cyder.urls'
 BUILD_PATH = 'builds'
