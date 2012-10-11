@@ -62,12 +62,12 @@ class NetworkForm_network(forms.Form):
 
     def clean(self):
         cleaned_data = super(NetworkForm_network, self).clean()
-        network_str = cleaned_data.get('network_str', '')
+        network_str = cleaned_data.get('network', '')
         try:
             ip_type = cleaned_data.get('ip_type')
             if ip_type not in ('4', '6'):
                 raise ValidationError("IP type must be either IPv4 or IPv6.")
-            if ip_type == '4':
+            elif ip_type == '4':
                 network = ipaddr.IPv4Network(network_str)
                 ip_upper, ip_lower = 0, int(network.network)
             elif ip_type == '6':

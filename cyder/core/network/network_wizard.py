@@ -19,10 +19,36 @@ from cyder.core.views import CoreDeleteView, CoreListView
 from cyder.core.views import CoreCreateView
 from cyder.mozdns.ip.models import ipv6_to_longs
 from django.forms.formsets import formset_factory
-
+from django.http import HttpResponse
+import json
 import re
 import pdb
 import ipaddr
+
+def test_wizard(request):
+    net_form = NetworkForm_network()
+    site_form = NetworkForm_site()
+    vlan_form = NetworkForm_vlan()
+    if request.method == 'POST':
+        confirmed = dict([(key, str(val)) for key, val in request.POST.items()])
+        print confirmed
+        action = confirmed['action']
+        if action == "#network_form":
+            form = NetworkForm_network(confirmed)
+            if form.is_valid():
+                return HttpResponse(json.dumps({'action':'#site_form'}), mimetype="application/json")
+            return HttpResponse(json.dumps({'action':'#network_form', 'form':form.as_p() }), mimetype="application/json")
+    net_form = NetworkForm_network()
+    site_form = NetworkForm_site()
+    vlan_form = NetworkForm_vlan()
+    return render(request, 'network/wizard.html', {
+        'net_form' : net_form,
+        'site_form' : site_form,
+        'vlan_form' : vlan_form,
+        'action' : '#network_form'
+    })
+
+
 
 def network_wizard(request):
     if request.method == 'POST':
@@ -68,7 +94,6 @@ def site_wizard(request):
         return render(request, 'network/wizard_form.html', {
             'form': form,
         })
-
 
 def vlan_wizard(request):
     if request.method == 'POST':
