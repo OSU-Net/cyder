@@ -1,31 +1,20 @@
 server {
-    root /home/username/Code/chili/;
-    server_name z.com;
-    gzip            off;
+   server_name chili;
+   gzip off;
+   listen 8000 default;
 
-    location = /favicon.ico  {
-        rewrite "/favicon.ico" /img/favicon.ico;
-    }
-    location /media/ {
-        alias /media/ ;
-    }
-    location /tmp/ {
-        alias /tmp/ ;
-    }
+   location = /favicon.ico  {
+       rewrite "/favicon.ico" /img/favicon.ico;
+   }
+   location /media/  {
+       root /nfs/milo/u1/username/Code/chili;
+   }
+   location /tmp/  {
+       root /nfs/milo/u1/username/Code/chili;
+   }
 
-    proxy_set_header Host $host;
-    location / {
-      proxy_read_timeout 180;
-      fastcgi_read_timeout 180;
-      proxy_intercept_errors off;
-      if (-f $request_filename) {
-          add_header X-Static hit;
-          access_log   off;
-      }
-
-      if (!-f $request_filename) {
-          proxy_pass http://127.0.0.1:80;
-          add_header X-Static miss;
-      }
-    }
+   proxy_set_header Host $host;
+   location / {
+       proxy_pass http://127.0.0.1:8080/;
+   }
 }
