@@ -9,7 +9,7 @@ urlpatterns = patterns('cyder.dhcp',
        'views.showfile', name='dhcp-show-file'),
    url(r'^override/(.*)[/]$', 'views.override_file',
        name='dhcp-show-override'),
-   url(r'^new/$', 'views.new'),
+   url(r'^new/$', 'views.new', name='dhcp-new'),
    # TODO this shit is fucked up.  views.create is a bullshit view
    # figure this out later
    url(r'^edit/(.*)[/]$', 'views.edit', name='dhcp-update'),

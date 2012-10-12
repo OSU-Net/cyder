@@ -54,11 +54,9 @@ urlpatterns = patterns('cyder.user_systems',
    url(r'^fillincsv/$',
        'views.fillin_csv', name="user-system-fillin-csv"),
 
-   url(r'^owners/new/$',
-       'views.owner_create', name="owner-create"),
-   url(
-       r'^owners/edit/(?P<object_id>\d+)/$', 'views.owner_edit',
-   name="owner-update"),
+   url(r'^owners/new/$', 'views.owner_create', name="owner-create"),
+   url(r'^owners/edit/(?P<object_id>\d+)/$', 'views.owner_edit',
+        name="owner-update"),
    url(r'^owners/$',
        'views.owner_list', name="owner-list"),
    url(

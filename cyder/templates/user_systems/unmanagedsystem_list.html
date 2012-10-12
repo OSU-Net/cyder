@@ -64,7 +64,7 @@
 <script type="text/javascript">
 	$().ready(function(){
         add_tablesorter($('.listtable')[0]);
-        add_quicksearch($("#quicksearch"), $("#search_hits"), "/en-US{{ 'user-system-quicksearch'|url() }}");
+        add_quicksearch($("#quicksearch"), $("#search_hits"), "/en-US{{ url('user-system-quicksearch') }}");
 	});
 </script>
 {% endblock %}
