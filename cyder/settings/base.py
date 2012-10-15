@@ -30,6 +30,7 @@ MINIFY_BUNDLES = {
 
             'css/base.scss',
             'css/navtabs.scss',
+            'css/globals.scss',
         ),
     },
     'js': {
