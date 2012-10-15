@@ -69,7 +69,7 @@ th.ui-state-default {
 </style>
 {% endblock %}
 <h2>Listing systems</h2>
-{% if not read_only %}<a href="{{ 'truth.views.create'|url() }}">Create New</a>{% endif %}
+{% if not read_only %}<a href="{{ url('truth-create') }}">Create New</a>{% endif %}
 
 <br />
 <div id="search_hits"></div>

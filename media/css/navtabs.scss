@@ -1,0 +1,96 @@
+/* Root element for tabs. */
+ul.tabs {
+    list-style: none;
+    margin: 0 !important;
+    padding: 0;
+    border-bottom: 1px solid #666;
+    height: 30px;
+    li {
+      /* Single tab. */
+      float: left;
+      text-indent: 0;
+      padding: 0;
+      margin: 0 !important;
+      list-style-image: none !important;
+    }
+    a {
+      /* Link inside the tab. uses a background image. */
+      background: url(../images/blue.png) no-repeat -420px 0;
+      font-size: 11px;
+      display: block;
+      height: 30px;
+      line-height: 30px;
+      width: 134px;
+      text-align: center;
+      text-decoration: none;
+      color: #333;
+      padding: 0px;
+      margin: 0px;
+      position: relative;
+      top: 1px;
+      &:active {
+        outline: none;
+      }
+      &:hover {
+        /* When mouse enters the tab move the background image. */
+        background-position: -420px -31px;
+        color: #fff;
+      }
+      &.current {
+        background-position: -420px -62px;
+        cursor: default !important;
+        color: #000 !important;
+        &:hover {
+          background-position: -420px -62px;
+          cursor: default !important;
+          color: #000 !important;
+        }
+      }
+    }
+    li.current a {
+      background-position: -420px -62px;
+      cursor: default !important;
+      color: #000 !important;
+    }
+    a {
+      /* Different widths for tabs: use a class name: s, l, xl. */
+      &.s {
+        /* Width 1. */
+        background-position: -553px 0;
+        width: 81px;
+        &:hover {
+          background-position: -553px -31px;
+        }
+        &.current {
+          background-position: -553px -62px;
+        }
+      }
+      &.l {
+        /* Width 2. */
+        background-position: -247px 0px;
+        width: 174px;
+        &:hover {
+          background-position: -247px -31px;
+        }
+        &.current {
+          background-position: -247px -62px;
+        }
+      }
+      &.xl {
+        /* Width 3. */
+        background-position: 0 0px;
+        width: 248px;
+        &:hover {
+          background-position: 0 -31px;
+        }
+        &.current {
+          background-position: 0 -62px;
+        }
+      }
+    }
+}
+
+.panes .pane {
+    /* Initially, all panes are hidden. */
+    display: none;
+}

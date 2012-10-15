@@ -7,6 +7,6 @@
 </dl>
 
 <div style="clear:both;"></div>
-<a href="{{ "allocation-edit"|url(object.id) }}">Edit</a>
-<a href="{{ "allocation-list"|url() }}">Back</a>
+<a href="{{ url('allocation-update', object.id) }}">Edit</a>
+<a href="{{ url('allocation-list') }}">Back</a>
 {% endblock %}

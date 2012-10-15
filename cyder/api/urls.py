@@ -13,18 +13,18 @@ from django.views.decorators.cache import cache_control
 cached_resource = cache_control(public=True, maxage=600, s_maxage=600)
 
 urlpatterns = patterns('',
-                       url(
-                           r'^dhcp/(?P<dhcp_scope>[^/]+)/(?P<dhcp_action>[^/]+)',
-                       cached_resource(dhcp_handler)),
-                       url(r'^dhcp/', cached_resource(dhcp_handler)),
-                       url(r'^system/(?P<system_id>[^/]+)/',
-                           cached_resource(systems_handler)),
-                       url(r'^systems/', cached_resource(systems_handler)),
-                       url(r'^keyvalue/(?P<key_value_id>[^/]+)/', cached_resource(
-                           keyvalue_handler)),
-                       url(r'^keyvalue/', cached_resource(keyvalue_handler)),
-                       url(r'^networkadapter/(?P<network_adapter_id>[^/]+)/',
-                           cached_resource(network_adapter_handler)),
-                       url(r'^networkadapter/',
-                           cached_resource(network_adapter_handler)),
-                       )
+   url(
+       r'^dhcp/(?P<dhcp_scope>[^/]+)/(?P<dhcp_action>[^/]+)',
+   cached_resource(dhcp_handler)),
+   url(r'^dhcp/', cached_resource(dhcp_handler)),
+   url(r'^system/(?P<system_id>[^/]+)/',
+       cached_resource(systems_handler)),
+   url(r'^systems/', cached_resource(systems_handler)),
+   url(r'^keyvalue/(?P<key_value_id>[^/]+)/', cached_resource(
+       keyvalue_handler)),
+   url(r'^keyvalue/', cached_resource(keyvalue_handler)),
+   url(r'^networkadapter/(?P<network_adapter_id>[^/]+)/',
+       cached_resource(network_adapter_handler)),
+   url(r'^networkadapter/',
+       cached_resource(network_adapter_handler)),
+)

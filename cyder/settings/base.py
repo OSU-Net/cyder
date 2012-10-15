@@ -8,6 +8,10 @@ ROOT_URLCONF = 'cyder.urls'
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
+SASS_PREPROCESS = True
+SASS_BIN = '/usr/bin/sass'
+JINGO_MINIFY_USE_STATIC = False
+
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
 # and js files that can be bundled together by the minify app.
 MINIFY_BUNDLES = {
@@ -24,9 +28,8 @@ MINIFY_BUNDLES = {
             'css/lib/smoothness/jquery-ui-1.8.11.custom.css',
             'css/lib/ui-lightness/jquery-ui-1.8.11.custom.css',
 
-            'css/screen.css',
-            'css/standalone.css',
-            'css/tabs.css',
+            'css/base.scss',
+            'css/navtabs.scss',
         ),
     },
     'js': {
@@ -113,17 +116,13 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
 # Because Jinja2 is the default template loader, add any non-Jinja templated
 # apps here:
 JINGO_EXCLUDE_APPS = [
-    'build',
     'admin',
-    'user_systems',
     'debug_toolbar',
     'tastytools',
 ]
 
 DJANGO_TEMPLATE_APPS = [
     'admin',
-    'build',
-    'user_systems',
 ]
 
 # Tells the extract script what files to look for L10n in and what function
@@ -148,8 +147,6 @@ AUTHENTICATION_BACKENDS = (
         'middleware.restrict_by_api_token.RestrictByToken',
         'django.contrib.auth.backends.RemoteUserBackend',
 )
-AUTH_PROFILE_MODULE = "systems.UserProfile"
-PISTON_IGNORE_DUPE_MODELS = True
 
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

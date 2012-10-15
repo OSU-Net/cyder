@@ -729,7 +729,6 @@ def system_view(request, template, data, instance=None):
 
     return render_to_response(template,
                               data,
-                              request
                               )
 
 

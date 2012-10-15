@@ -1,7 +1,7 @@
 {% extends "generic_listtable.html" %}
 {% block list_name %}Server Models{% endblock %}
 
-{% block create_new_url %}{{ 'server_model-new'|url() }}{% endblock %}
+{% block create_new_url %}{{ url('server_model-create') }}{% endblock %}
 {% block table_head %}
         <tr>
             <th>Vendor</th> 
@@ -14,10 +14,10 @@
         {% for o in object_list %}
         <tr>
             <td>{{ o.vendor }}</td>
-            <td>{% if o.id %}<a href="{{ "user-system-list-by-model"|url(o.id) }}">{{ o.model }}</a>{% else %} {{ o.model }}{% endif %}</td>
+            <td>{% if o.id %}<a href="{{ url('user-system-list-by-model',o.id) }}">{{ o.model }}</a>{% else %} {{ o.model }}{% endif %}</td>
             <td>{{ o.description }}</td>
-            <td><a href="{{ "server_model-show"|url(o.id) }}">Show</a></td>
-            <td><a href="{{ "server_model-edit"|url(o.id) }}">Edit</a></td>
+            <td><a href="{{ url('server_model-details', o.id) }}">Show</a></td>
+            <td><a href="{{ url('server_model-update', o.id) }}">Edit</a></td>
         </tr>
         {% endfor %}
 {% endblock %}

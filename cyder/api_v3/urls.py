@@ -15,7 +15,7 @@ v3_api.register(SystemRackResource())
 v3_api.register(SystemStatusResource())
 v3_api.register_testdata(OperatingSystemData)
 urlpatterns = patterns('',
-                       (r'', include(v3_api.urls)),
-                       (r'^tastytools/', include('tastytools.urls'), {'api_name':
-                                                                      v3_api.api_name}),
-                       )
+    (r'', include(v3_api.urls)),
+    (r'^tastytools/', include('tastytools.urls'), {'api_name':
+        v3_api.api_name}),
+)
