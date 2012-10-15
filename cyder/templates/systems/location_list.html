@@ -1,7 +1,7 @@
 {% extends "jinja_generic_listtable.html" %}
 {% block list_name %}Locations{% endblock %}
 
-{% block create_new_url %}{{ "location-new"|url() }}{% endblock %}
+{% block create_new_url %}{{ url('location-create') }}{% endblock %}
 {% block table_head %}
         <tr>
             <th>Name</th> 
@@ -14,8 +14,8 @@
         <tr>
             <td>{{ o.name }}</td>
             <td>{{ o.address }}</td>
-            <td><a href="{{ "location-show"|url(o.id) }}">Show</a></td>
-            <td><a href="{{ "location-edit"|url(o.id) }}">Edit</a></td>
+            <td><a href="{{ url('location-detail', o.id) }}">Show</a></td>
+            <td><a href="{{ url('location-update', o.id) }}">Edit</a></td>
         </tr>
         {% endfor %}
 {% endblock %}

@@ -2,7 +2,7 @@
 <tr>
     <td>
         <input type="checkbox" name="system_id" value="{{ system.pk }}" />
-        <a href="{% url build-show system.id %}">{{ system }}</a>
+        <a href="{{ url('build-detail', system.id) }}">{{ system }}</a>
     </td>
     <td>{{ system.system_rack.location }}</td>
 {% with system.buildattribute as ba %}
@@ -14,8 +14,8 @@
 <td>{{ ba.closes_tree }}</td>
 <td>{{ ba.purposes.all|join:"," }}</td>
 <td>{{ ba.support_doc|urlize }}</td>
-<td><a href="{% url build-show system.id %}">Show</a></td>
-<td><a href="{% url build-edit system.id %}">Edit</a></td>
+<td><a href="{{ url('build-detail', system.id) }}">Show</a></td>
+<td><a href="{{ url('build-update', system.id) }}">Edit</a></td>
 {% endwith %}
 
 </tr>

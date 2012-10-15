@@ -6,7 +6,7 @@
                 <td>&nbsp;</td>
             {% endif %}
             <td>{{ system.asset_tag }}</td>
-            <td>{% if system.server_model %}<a href="{{ 'user-system-list-by-model'|url(system.server_model.id) }}">{{ system.server_model }}</a>{% endif %}</td>
+            <td>{% if system.server_model %}<a href="{{ url('user-system-list-by-model', system.server_model.id) }}">{{ system.server_model }}</a>{% endif %}</td>
             <td>{{ system.serial }}</td>
             <td>{{ system.notes }}</td>
             <td>
@@ -16,8 +16,8 @@
                 &nbsp;
             {% endif %}
             </td>
-            <td><a href="{{ 'user-system-show'|url(system.id) }}">Show</a></td>
-            <td><a href="{{ 'user-system-edit'|url(system.id) }}">Edit</a></td>
-            <td><a href="{{ 'user-system-delete'|url(system.id) }}">Delete</a></td>
+            <td><a href="{{ url('user-system-detail', system.id) }}">Show</a></td>
+            <td><a href="{{ url('user-system-update', system.id) }}">Edit</a></td>
+            <td><a href="{{ url('user-system-delete', system.id) }}">Delete</a></td>
         </tr>
         {% endfor %}
