@@ -8,6 +8,6 @@ urlpatterns = patterns('cyder.build',
    url(r'^edit/(\d+)/$',
        'views.build_edit', name='build-update'),
    url(r'^bulk/$',
-       'views.build_bulk', name='build-bulk-uptdate'),
+       'views.build_bulk', name='build-bulk-edit'),
    url(r'^csv/$', 'views.build_csv', name='build-csv'),
 )

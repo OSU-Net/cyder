@@ -10,20 +10,20 @@
 
 <br />
 <div id="search_hits"></div>
-<form action="{% url build-bulk-edit %}" method="get">
+<form action="{{ url('build-bulk-edit') }}" method="get">
 <table class="listtable tablesorter">
 	<thead>
         <tr>
-            <th>Host Name</th> 
+            <th>Host Name</th>
             <th>Location</th>
-            <th>Support Tier</th> 
-            <th>Repo. Branch</th> 
-            <th>CPU Throttled</th> 
-            <th>Product Branch</th> 
-            <th>Product Series</th> 
-            <th>Closes Tree</th> 
-            <th>Purposes</th> 
-            <th>Support URL</th> 
+            <th>Support Tier</th>
+            <th>Repo. Branch</th>
+            <th>CPU Throttled</th>
+            <th>Product Branch</th>
+            <th>Product Series</th>
+            <th>Closes Tree</th>
+            <th>Purposes</th>
+            <th>Support URL</th>
             <th colspan="2">Actions</th>
         </tr>
 	</thead>
@@ -50,11 +50,11 @@
 </form>
 
 <br />
-<a href="{% url build-csv %}">Create CSV</a>
+<a href="{{ url('build-csv') }}">Create CSV</a>
 <script>
 	$().ready(function(){
         add_tablesorter($('.listtable')[0]);
-        add_quicksearch($("#quicksearch"), $("#search_hits"), "/en-US{% url build-quicksearch %}");
+        add_quicksearch($("#quicksearch"), $("#search_hits"), "/en-US{{ url('build-quicksearch') }}");
 	});
 </script>
 {% endblock %}
