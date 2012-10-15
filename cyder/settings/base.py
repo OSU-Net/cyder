@@ -8,6 +8,11 @@ ROOT_URLCONF = 'cyder.urls'
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
+SASS_PREPROCESS = True
+SASS_BIN = '/usr/bin/sass'
+
+JINGO_MINIFY_USE_STATIC = False
+
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
 # and js files that can be bundled together by the minify app.
 MINIFY_BUNDLES = {
@@ -144,8 +149,6 @@ AUTHENTICATION_BACKENDS = (
         'middleware.restrict_by_api_token.RestrictByToken',
         'django.contrib.auth.backends.RemoteUserBackend',
 )
-AUTH_PROFILE_MODULE = "systems.UserProfile"
-PISTON_IGNORE_DUPE_MODELS = True
 
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
