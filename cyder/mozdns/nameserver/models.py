@@ -122,7 +122,6 @@ class Nameserver(models.Model, ObjectUrlMixin):
     glue = property(get_glue, set_glue, del_glue, "The Glue property.")
 
     def clean(self):
-        self.check_NS_TLD_condition()
         check_for_cname(self)
 
         if not self._needs_glue():
@@ -155,14 +154,6 @@ class Nameserver(models.Model, ObjectUrlMixin):
                         self.glue = addr_glue[0]
                     else:
                         self.glue = intr_glue[0]
-
-    def check_NS_TLD_condition(ns):
-        domain = Domain.objects.filter(name=ns.server)
-        if not domain:
-            return
-        else:
-            raise ValidationError("You cannot create a NS record that is the"
-                                  "name of a domain.")
 
     def __repr__(self):
         return "<Forward '{0}'>".format(str(self))
