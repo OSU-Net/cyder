@@ -10,7 +10,6 @@ MEDIA_URL = '/media/'
 
 SASS_PREPROCESS = True
 SASS_BIN = '/usr/bin/sass'
-
 JINGO_MINIFY_USE_STATIC = False
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
@@ -29,9 +28,8 @@ MINIFY_BUNDLES = {
             'css/lib/smoothness/jquery-ui-1.8.11.custom.css',
             'css/lib/ui-lightness/jquery-ui-1.8.11.custom.css',
 
-            'css/screen.css',
-            'css/standalone.css',
-            'css/tabs.css',
+            'css/base.scss',
+            'css/navtabs.scss',
         ),
     },
     'js': {

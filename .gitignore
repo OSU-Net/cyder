@@ -27,3 +27,4 @@ tastytools/*.pyc
 mdns/migrate/zone_configs/
 local.py
 .sass-cache
+*.css
