@@ -14,7 +14,6 @@ from cyder.core.site.models import Site
 from cyder.core.site.forms import SiteForm
 from cyder.core.keyvalue.utils import get_attrs, update_attrs
 from cyder.core.range.forms import RangeForm
-
 from cyder.core.views import CoreDeleteView, CoreListView
 from cyder.core.views import CoreCreateView
 from cyder.mozdns.ip.models import ipv6_to_longs
@@ -37,7 +36,17 @@ def test_wizard(request):
             form = NetworkForm_network(confirmed)
             if form.is_valid():
                 return HttpResponse(json.dumps({'action':'#site_form'}), mimetype="application/json")
-            return HttpResponse(json.dumps({'action':'#network_form', 'form':form.as_p() }), mimetype="application/json")
+            return HttpResponse(json.dumps({'action': '#network_form', 'form':form.as_p() }), mimetype="application/json")
+        elif action == "#site_form":
+            form = NetworkForm_site(confirmed)
+            if form.is_valid():
+                return HttpResponse(json.dumps({'action':'#vlan_form'}), mimetype="application/json")
+            return HttpResponse(json.dumps({'action': '#site_form', 'form':form.as_p() }), mimetype="application/json")
+        elif action == "#vlan_form":
+            form = NetworkForm_vlan(confirmed)
+            if form.is_valid():
+                return HttpResponse(json.dumps({'action':'#poop_form'}), mimetype="application/json")
+            return HttpResponse(json.dumps({'action': '#vlan_form', 'form':form.as_p() }), mimetype="application/json")
     net_form = NetworkForm_network()
     site_form = NetworkForm_site()
     vlan_form = NetworkForm_vlan()
