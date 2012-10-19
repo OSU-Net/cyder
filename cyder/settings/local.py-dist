@@ -63,7 +63,7 @@ BUILD_TEAM = (
                 'you@domain.com',
               )
 
-SERVICES_URL = SITE_URL = STATIC_URL = 'http://localhost:8000'
+SERVICES_URL = SITE_URL = STATIC_URL = 'http://localhost:8000/'
 
 WIKI_USER = ''
 WIKI_PASSWORD = ''

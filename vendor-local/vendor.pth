@@ -1,6 +1,5 @@
 src/django-piston
 src/django-tastypie
 src/django-tastytools
-src/django-multidb-router
 src/mimeparse
 src/django-extensions

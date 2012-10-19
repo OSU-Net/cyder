@@ -1,7 +1,7 @@
 {% extends "jinja_base.html" %}
 {% block subtitle %} - {{ system.hostname }} - edit{% endblock %}
 {% block head %}
-<script type='text/javascript' src='/static/js/jquery.validate.min.js'></script>
+<script type='text/javascript' src='/media/js/lib/jquery.validate.min.js'></script>
 <!-- standalone page styling (can be removed) -->
 <link rel="stylesheet" type="text/css" href="/media/css/standalone.css"/>	
 
@@ -122,7 +122,7 @@ ul.css-tabs a.current {
 
 /* close button positioned on upper right corner */
 .simple_overlay .close {
-    background-image:url(/static/images/close.png);
+    background-image:url(/media/img/close.png);
     position:absolute;
     right:-15px;
     top:-15px;
@@ -349,7 +349,7 @@ ul.css-tabs a.current {
 {% block content %}
     <h2>Edit system - {{system}}</h2>
 <!--<div id='image-loading' style='position: fixed; top: 50%; left: 50%; z-index:5000; display: none;'>
-    <img src='/static/images/ajax-loader-large.gif'>
+    <img src='/media/img/ajax-loader-large.gif'>
 </div> -->
     {{form.errors}}
     <form class="editform" action="" method="post">
