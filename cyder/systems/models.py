@@ -1,29 +1,15 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#     * Rearrange models' order
-#     * Make sure each model has one field with primary_key=True
-# Feel free to rename the models, but don't rename db_table values or field names.
-#
-# Also note: You'll have to insert the output of 'django-admin.py sqlcustom [appname]'
-# into your database.
-
-from django.db import models
-from django.core.exceptions import ValidationError
-from django.db.models.signals import post_save
-from django.db.models.query import QuerySet
-from django.contrib.auth.models import User
-from django.db import IntegrityError
-
-from cyder.dhcp.models import DHCP
-import mdns
-from django.conf import settings
-from django.conf import settings
-
-
 import datetime
 import re
-import pdb
 import socket
+
+from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models, IntegrityError
+from django.db.models.query import QuerySet
+from django.db.models.signals import post_save
+
+import mdns
 
 
 class QuerySetManager(models.Manager):
@@ -239,35 +225,6 @@ def validate_mac(mac):
     return mac
 
 
-class NetworkAdapter(models.Model):
-    system_id = models.IntegerField()
-    mac_address = models.CharField(max_length=255)
-    ip_address = models.CharField(max_length=255)
-    adapter_name = models.CharField(max_length=255)
-    system_id = models.CharField(max_length=255)
-    switch_port = models.CharField(max_length=128)
-    filename = models.CharField(max_length=64)
-    option_host_name = models.CharField(max_length=64)
-    option_domain_name = models.CharField(max_length=128)
-    dhcp_scope = models.ForeignKey(DHCP, null=True, blank=True)
-    switch_id = models.IntegerField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        self.full_clean()  # Calls field.clean() on all fields.
-        super(NetworkAdapter, self).save(*args, **kwargs)
-
-    def get_system_host_name(self):
-        systems = System.objects.filter(id=self.system_id)
-        if systems:
-            for system in systems:
-                return system.hostname
-        else:
-            return ''
-
-    class Meta:
-        db_table = u'network_adapters'
-
-
 class Mac(models.Model):
     system = models.ForeignKey('System')
     mac = models.CharField(unique=True, max_length=17)
@@ -383,7 +340,6 @@ class System(DirtyFieldsMixin, models.Model):
         choices=YES_NO_CHOICES, blank=True, null=True)
     is_switch = models.IntegerField(
         choices=YES_NO_CHOICES, blank=True, null=True)
-    #network_adapter = models.ForeignKey('NetworkAdapter', blank=True, null=True)
 
     @property
     def primary_ip(self):
@@ -395,7 +351,7 @@ class System(DirtyFieldsMixin, models.Model):
             return None
 
     def update_adapter(self, **kwargs):
-        from cyder.api_v3.system_api import SystemResource
+        from .system_api import SystemResource
         interface = kwargs.pop('interface', None)
         ip_address = kwargs.pop('ip_address', None)
         mac_address = kwargs.pop('mac_address', None)
@@ -420,7 +376,7 @@ class System(DirtyFieldsMixin, models.Model):
             :return: True on deletion, exception on failure
         """
     def delete_adapter(self, adapter_name):
-        from cyder.api_v3.system_api import SystemResource
+        from .system_api import SystemResource
         """
             method to get the next adapter
             we'll want to always return an adapter with a 0 alias

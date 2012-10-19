@@ -7,7 +7,7 @@ from tastypie.resources import Resource, DeclarativeMetaclass
 from tastypie.resources import ModelResource
 
 from cyder.systems.models import System
-from cyder.api_v3.system_api import SystemResource
+from cyder.systems.system_api import SystemResource
 from cyder.core.interface.static_intr.models import StaticInterface
 from cyder.mozdns.utils import ensure_label_domain, prune_tree
 from cyder.mozdns.domain.models import Domain

@@ -54,7 +54,7 @@ def do_combine_a_ptr_to_interface(
     intr.full_clean()
     intr.save()
     if interface:
-        from cyder.api_v3.system_api import SystemResource
+        from cyder.systems.system_api import SystemResource
         intr.update_attrs()
         adapter_type, primary, alias = SystemResource.extract_nic_attrs(
             interface)

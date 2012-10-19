@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>{% block title %}Cyder{% block subtitle %}{% endblock %}{% endblock %}</title>
+    {{ css('cyder_css') }}
+    <link rel="shortcut icon" href="/media/img/favicon.ico">
+    <link rel="icon" href="/media/img/favicon.ico">
+    {% block head %}{% endblock %}
+
+</head>
+<body>
+
+<div id="header">
+    <div class="container">
+        <h1 id="inventory"><a href="/">Cyder</a></h1>
+    </div>
+</div>
+<div id="main" class="container">
+
+    <img style="position: fixed; right: -25px; top: 50px;" src="/media/img/cyder.gif">
+
+    <div id="hd">
+        <div id="toptabs">
+            <ul id="app-buttons">
+                <li><a href="{{ url("core-index") }}">DHCP</a></li>
+                <li><a href="{{ url("mozdns-index") }}">DNS</a></li>
+            </ul>
+        </div>
+        {% block site_tabs %} {% endblock %}
+    </div>
+    <div id="bd">
+        {{ js('cyder_js') }}
+        {% block content %}{% endblock %}
+    </div>
+    <div id="ft">
+    </div>
+</div>
+</body>
+</html>

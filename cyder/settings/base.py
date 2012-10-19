@@ -57,11 +57,8 @@ MINIFY_BUNDLES = {
 }
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
-    'api',
-    'api_v2',
     'base',
     'base.mozdns',
-    'build',
     'core',
     'core.site',
     'core.vlan',
@@ -74,7 +71,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'core.search',
     'core.lib',
     'core.bulk_change',
-    'dhcp',
     'mozdns',
     'mdns',
     'mdns.migrate',
@@ -93,10 +89,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'mozdns.view',
     'mozdns.mozbind',
     'mozdns.master_form',
-    'reports',
     'systems',
-    'truth',
-    'user_systems',
 
     # Third party apps
     'djcelery',
@@ -122,11 +115,7 @@ JINGO_EXCLUDE_APPS = [
     'tastytools',
 ]
 
-DJANGO_TEMPLATE_APPS = [
-    'admin',
-]
-
-# Tells the extract script what files to look for L10n in and what function
+DJANGO_TEMPLATE_APPS = [ 'admin', ] # Tells the extract script what files to look for L10n in and what function
 # handles the extraction. The Tower library expects this.
 
 # # Use this if you have localizable HTML files:
@@ -145,8 +134,7 @@ DJANGO_TEMPLATE_APPS = [
 LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
 AUTH_PROFILE_MODULE = 'systems.UserProfile'
 AUTHENTICATION_BACKENDS = (
-        'middleware.restrict_by_api_token.RestrictByToken',
-        'django.contrib.auth.backends.RemoteUserBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
 )
 
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -158,6 +146,7 @@ AUTHENTICATION_BACKENDS = (
 MOZDNS_BASE_URL = "/mozdns"
 CORE_BASE_URL = "/core"
 JINJA_CONFIG = {'autoescape': False}
+BUILD_PATH = 'builds'
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -167,11 +156,3 @@ INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
 
 def custom_show_toolbar(request):
     return True # Always show toolbar, for example purposes only.
-
-
-#############################################################
-#                       MOZ DNS                             #
-#############################################################
-MOZDNS_BASE_URL = "/mozdns"
-CORE_BASE_URL = "/core"
-BUILD_PATH = 'builds'
