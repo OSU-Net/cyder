@@ -10,7 +10,7 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.view.models import View
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from copy import deepcopy
 import pdb

@@ -17,7 +17,7 @@ urlpatterns = patterns('',
    url(r'^$', direct_to_template, {'template': 'base/index.html'}, name='system-home'),
    (r'^admin/', include(admin.site.urls)),
    (r'^cydns/', include('cyder.cydns.urls')),
-   (r'^core/', include('cyder.core.urls')),
+   (r'^cydhcp/', include('cyder.cydhcp.urls')),
    (r'^tasty/', include('cyder.systems.urls')),
 )
 

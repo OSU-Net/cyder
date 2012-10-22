@@ -15,7 +15,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
 
-from cyder.core.site.models import Site
+from cyder.cydhcp.site.models import Site
 
 import pdb
 

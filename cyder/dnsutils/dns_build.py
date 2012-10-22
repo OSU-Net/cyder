@@ -14,8 +14,8 @@ from django.conf import settings
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
-from cyder.core.network.models import Network
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME

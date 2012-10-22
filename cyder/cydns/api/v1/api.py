@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource
 
 from cyder.systems.models import System
 from cyder.systems.system_api import SystemResource
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord

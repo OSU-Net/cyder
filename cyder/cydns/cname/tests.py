@@ -17,7 +17,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.ip.utils import ip_to_domain_name
 
 from cyder.systems.models import System

@@ -14,7 +14,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
-from cyder.core.site.models import Site
+from cyder.cydhcp.site.models import Site
 
 import pdb
 

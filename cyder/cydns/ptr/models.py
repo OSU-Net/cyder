@@ -8,7 +8,7 @@ from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.validation import validate_name, validate_ttl
 from cyder.cydns.validation import validate_views
 from cyder.cydns.mixins import ObjectUrlMixin
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 import pdb
 

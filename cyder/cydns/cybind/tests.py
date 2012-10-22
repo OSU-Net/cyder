@@ -13,7 +13,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from cyder.systems.models import System
 import pdb

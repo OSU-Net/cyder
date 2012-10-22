@@ -59,18 +59,18 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
-    'core',
-    'core.site',
-    'core.vlan',
-    'core.network',
-    'core.range',
-    'core.build',
-    'core.lib',
-    'core.interface',
-    'core.interface.static_intr',
-    'core.search',
-    'core.lib',
-    'core.bulk_change',
+    'cydhcp',
+    'cydhcp.site',
+    'cydhcp.vlan',
+    'cydhcp.network',
+    'cydhcp.range',
+    'cydhcp.build',
+    'cydhcp.lib',
+    'cydhcp.interface',
+    'cydhcp.interface.static_intr',
+    'cydhcp.search',
+    'cydhcp.lib',
+    'cydhcp.bulk_change',
     'cydns',
     'dnsutils',
     'dnsutils.migrate',
@@ -149,7 +149,7 @@ AUTHENTICATION_BACKENDS = (
 #########################################################
 
 MOZDNS_BASE_URL = "/cydns"
-CORE_BASE_URL = "/core"
+CORE_BASE_URL = "/cydhcp"
 JINJA_CONFIG = {'autoescape': False}
 BUILD_PATH = 'builds'
 INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')

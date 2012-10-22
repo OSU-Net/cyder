@@ -11,7 +11,7 @@ from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain
 
-from cyder.core.site.models import Site
+from cyder.cydhcp.site.models import Site
 
 import pdb
 

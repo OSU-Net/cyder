@@ -3,7 +3,7 @@ from django.forms import ModelForm
 
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 import itertools
 
 import pdb

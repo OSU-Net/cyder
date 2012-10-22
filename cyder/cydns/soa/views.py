@@ -13,8 +13,8 @@ from cyder.cydns.views import CydnsDetailView
 from cyder.cydns.views import CydnsListView
 from cyder.cydns.views import CydnsUpdateView
 
-from cyder.core.keyvalue.utils import get_aa, get_docstrings, get_attrs
-from cyder.core.keyvalue.utils import update_attrs, dict_to_kv
+from cyder.cydhcp.keyvalue.utils import get_aa, get_docstrings, get_attrs
+from cyder.cydhcp.keyvalue.utils import update_attrs, dict_to_kv
 import simplejson as json
 
 

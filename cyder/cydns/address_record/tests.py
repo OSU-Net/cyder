@@ -401,7 +401,7 @@ class AddressRecordTests(TestCase):
         self.do_add_record(data)
 
     # Understore '_' tests
-    def test_add_address_underscore_in_name_domain(self):
+    def test_add_address_underscydhcp_in_name_domain(self):
         d = Domain(name="_mssucks.edu")
         d.save()
         data = {'label': '*', 'domain': d, 'ip': "128.193.0.10"}

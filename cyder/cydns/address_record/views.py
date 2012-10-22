@@ -5,7 +5,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.views import CydnsDeleteView, CydnsDetailView
 from cyder.cydns.views import CydnsCreateView, CydnsUpdateView, CydnsListView
-from cyder.core.network.utils import calc_parent_str
+from cyder.cydhcp.network.utils import calc_parent_str
 
 import pdb
 

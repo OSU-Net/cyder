@@ -10,7 +10,7 @@ from cyder.cydns.validation import validate_ttl
 from cyder.cydns.models import check_for_cname
 from cyder.cydns.soa.utils import update_soa
 
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 import pdb
 

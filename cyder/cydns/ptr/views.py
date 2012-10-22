@@ -12,7 +12,7 @@ from cyder.cydns.ip.forms import IpForm
 from cyder.cydns.ptr.forms import PTRForm
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.domain.models import Domain
-from cyder.core.network.utils import calc_parent_str
+from cyder.cydhcp.network.utils import calc_parent_str
 
 
 class PTRView(object):

@@ -1,0 +1,50 @@
+[
+  {
+    "model": "ctnr.ctnr",
+    "pk": 1,
+    "fields": {
+      "description": "Global Ctnr",
+      "name": "global"
+    }
+  },
+  {
+    "model": "ctnr.ctnr",
+    "pk": 2,
+    "fields": {
+      "description": "Default Ctnr",
+      "name": "default"
+    }
+  },
+
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "username": "development",
+        "first_name": "development",
+        "last_name": "development",
+        "is_superuser": true,
+        "email": "development@foo.bar.com",
+        "password": "sha512$7b4e73a165bdc505b97d$00196c794b7b99697d6f50e48ca732e2b51005b2bcbb098cd5bce110d7e7375e749848ebf597ecd9a0b75370ca3b46aa71805e3ad82421827790eb0d63464dc2"
+    }
+  },
+  {
+    "model": "cyuser.userprofile",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "default_ctnr": 1,
+      "phone_number": 1234567890 }
+  },
+
+  {
+    "model": "ctnr.ctnruser",
+    "pk": 1,
+    "fields": {
+        "user": 1,
+        "ctnr": 1,
+        "level": 2
+    }
+  }
+
+]

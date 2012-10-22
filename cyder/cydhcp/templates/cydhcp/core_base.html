@@ -1,0 +1,38 @@
+{% extends "base/base.html" %}
+
+
+{% block site_tabs %}
+        <div class="dns-menu">
+                <div class="logo"><a href="/"><i class="icon-glass"></i></a></div>
+
+                <!-- Core NAV -->
+                        <span class="nav-item">
+                            <a class="nav-link" href="/cydhcp/search/">Search</a>
+                        </span>
+                        <span class="nav-item">
+                            <a class="nav-link" href="/cydhcp/site/">Site</a>
+                        </span>
+                        <span class="nav-item">
+                            <a class="nav-link" href="/cydhcp/network/">Network</a>
+                        </span>
+                        <span class="nav-item">
+                            <a class="nav-link" href="/cydhcp/network/wizard_create/">Network Wizard</a>
+                        </span>
+                        <span class="nav-item">
+                            <a class="nav-link" href="/cydhcp/vlan/">Vlan</a>
+                        </span>
+                        <span class="nav-item">
+                            <a class="nav-link" href="/cydhcp/range/">Range</a>
+                        </span>
+        </div>
+{% endblock %}
+
+<div class='dns-title'>
+{% block title %} {% endblock %}
+</div>
+
+{% block content %}
+<div class='dns-content'>
+{% block cydhcp_content %} {% endblock %}
+</div>
+{% endblock %}

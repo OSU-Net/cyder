@@ -7,8 +7,8 @@ from cyder.cydns.validation import validate_name
 from cyder.cydns.mixins import ObjectUrlMixin
 
 from django.conf import settings
-from cyder.core.keyvalue.models import KeyValue
-from cyder.core.keyvalue.utils import AuxAttr
+from cyder.cydhcp.keyvalue.models import KeyValue
+from cyder.cydhcp.keyvalue.utils import AuxAttr
 import os
 
 

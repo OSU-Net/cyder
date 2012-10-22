@@ -12,7 +12,7 @@ from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import CreateView
 
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.utils import tablefy

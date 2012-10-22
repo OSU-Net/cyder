@@ -250,7 +250,7 @@ def validate_label(label, valid_chars=None):
         -- `RFC <http://tools.ietf.org/html/rfc1912>`__
 
         "[T]he following characters are recommended for use in a host
-        name: "A-Z", "a-z", "0-9", dash and underscore"
+        name: "A-Z", "a-z", "0-9", dash and underscydhcp"
 
         -- `RFC <http://tools.ietf.org/html/rfc1033>`__
 
@@ -261,7 +261,7 @@ def validate_label(label, valid_chars=None):
         # "Allowable characters in a label for a host name are only
         # ASCII letters, digits, and the `-' character." "[T]he
         # following characters are recommended for use in a host name:
-        # "A-Z", "a-z", "0-9", dash and underscore"
+        # "A-Z", "a-z", "0-9", dash and underscydhcp"
         valid_chars = string.ascii_letters + "0123456789" + "-" + "_"
 
     # Labels may not be all numbers, but may have a leading digit TODO

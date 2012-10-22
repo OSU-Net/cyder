@@ -8,7 +8,7 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.ip.utils import ip_to_domain_name
 
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.systems.models import System
 
 import pdb

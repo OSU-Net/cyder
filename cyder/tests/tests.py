@@ -3,4 +3,4 @@
     ./manage.py test -s tests.tests
 """
 from cyder.cydns.tests.all import *
-from cyder.core.tests.all import *
+from cyder.cydhcp.tests.all import *
