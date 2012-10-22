@@ -11,7 +11,7 @@ from cyder.cydhcp.lib.utils import *
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.models import SOA
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 
 import random
 import ipaddr

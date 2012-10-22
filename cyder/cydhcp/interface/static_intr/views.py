@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.forms.util import ErrorList
 from django.http import HttpResponse
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
@@ -54,7 +54,7 @@ def do_combine_a_ptr_to_interface(
     intr.full_clean()
     intr.save()
     if interface:
-        from cyder.systems.system_api import SystemResource
+        from cyder.core.systems.system_api import SystemResource
         intr.update_attrs()
         adapter_type, primary, alias = SystemResource.extract_nic_attrs(
             interface)

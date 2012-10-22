@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.ptr.models import PTR

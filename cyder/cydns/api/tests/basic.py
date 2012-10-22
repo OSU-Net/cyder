@@ -4,7 +4,7 @@ from django.utils.encoding import smart_str
 
 from tastypie.test import ResourceTestCase
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.tests.view_tests_template import GenericViewTests, random_label

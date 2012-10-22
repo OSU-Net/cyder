@@ -59,6 +59,7 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
+    'core.systems',
     'cydhcp',
     'cydhcp.site',
     'cydhcp.vlan',
@@ -89,7 +90,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydns.view',
     'cydns.cybind',
     'cydns.master_form',
-    'systems',
 
     # Third party apps
     'djcelery',
@@ -137,7 +137,7 @@ DJANGO_TEMPLATE_APPS = [ 'admin', ] # Tells the extract script what files to loo
 # ]
 
 LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
-AUTH_PROFILE_MODULE = 'systems.UserProfile'
+AUTH_PROFILE_MODULE = 'core.systems.UserProfile'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.RemoteUserBackend',
 )

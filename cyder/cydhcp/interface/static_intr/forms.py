@@ -9,7 +9,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydns.validation import validate_label
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 from cyder.cydhcp.validation import validate_mac
 
 import ipaddr

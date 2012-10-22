@@ -20,7 +20,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.ip.utils import ip_to_domain_name
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 
 import pdb
 

@@ -9,7 +9,7 @@ from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.ip.utils import ip_to_domain_name
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 
 import pdb
 

@@ -6,8 +6,8 @@ from tastypie.exceptions import HydrationError
 from tastypie.resources import Resource, DeclarativeMetaclass
 from tastypie.resources import ModelResource
 
-from cyder.systems.models import System
-from cyder.systems.system_api import SystemResource
+from cyder.core.systems.models import System
+from cyder.core.systems.system_api import SystemResource
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.domain.models import Domain

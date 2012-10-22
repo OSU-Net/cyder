@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 
 import cydns
 from cyder.cydhcp.keyvalue.models import KeyValue

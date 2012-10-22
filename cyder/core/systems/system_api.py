@@ -5,7 +5,7 @@ from tastypie.authentication import Authentication
 #from tastytools.resources import ModelResource
 from tastypie.resources import ModelResource
 from tastypie.resources import ALL, ALL_WITH_RELATIONS
-import systems.models as system_model
+import cyder.core.systems.models as system_model
 from django.conf.urls.defaults import url
 from tastypie.serializers import Serializer
 from django.core.serializers import json as djson

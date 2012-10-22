@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.test import TestCase
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.cname.models import CNAME
