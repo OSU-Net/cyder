@@ -1,5 +1,15 @@
 .. _core:
 
+OVERVIEW
+========
+
+
+
+VRF
+===
+
+
+
 IPAM
 ====
 A system that manages DNS and DHCP is useless without knowledge of the networks
@@ -8,10 +18,13 @@ the hosts using DNS and DHCP are located in. The core of inventory is it's
 
 Sites
 -----
-A :ref:`site` represents a datacenter or a business unit. Much like
-:ref:`domain`\s are organized into a hierarchy with 'master domains', a site
-can have a 'parent site'.
-
+A :ref:`site` is a construct for creating collections of networks assiocated with
+a physical location.  There are two types of sites, top level sites which represent
+a general geographic location like a campus and locations a place at that site.  
+Locations serve as aliases to top level parent sites so that we can effectively group
+smaller business units into a larger logical collection.  This construct allows us
+to partition up the campus by building and in turn those buildings can be further 
+divided up into departments if need be.
 
 .. figure:: images/mozcore_sites.png
 
@@ -21,8 +34,29 @@ instance of a site called Relenge that had a parent site of Scl2.
 
 Networks
 --------
-A :ref:`network` represents an IPv4/IPv6 network. Networks also related to eachother in a heirarchical way. Since networks are inherently contained within other networks, no explicit parent child relationship is stored in the database. Networks are homed in a site.
+A :ref:`network` represents an IPv4/IPv6 network. Networks also related to 
+eachother in a heirarchical way. Since networks are inherently contained within 
+other networks, no explicit parent child relationship is stored in the database. 
+Networks are homed in a site.  There are restrictions in terms of how sites and 
+networks can be associated.  A networks can be associated with multiple sites
+provided that those sites share a root parent site.  There are restrictions also
+in terms of the IP ranges of a network.  There are two distinct cases of valid 
+network allocations.
 
+Case 1:
+A network is created and associated with a site such that no other network in any site
+includes that range of addresses and if any existing networks are contained in that
+range they all share a parent site with the new network.
+
+Case 2:
+A network is created which is contained within an existing network and both of these
+networks share a parent site.
+
+These restrictions enforce the policy that new networks can't be created which span
+across other existing networks.  It also prevents us from splitting up address
+ranges and allowing blocks of addresses to be associated with different top level
+sites.  This means that any given range of addresses can be uniquely associated with
+a top level site.
 
 .. figure:: images/mozcore_networks.png
 
