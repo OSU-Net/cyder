@@ -39,9 +39,7 @@ is_attr = re.compile("^attr_\d+$")
 class NetworkDeleteView(NetworkView, CoreDeleteView):
     success_url = "/core/network/"
 
-
 class NetworkListView(NetworkView, CoreListView):
-    """ """
     template_name = 'network/network_list.html'
 
 
