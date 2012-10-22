@@ -59,7 +59,6 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
-    'base.mozdns',
     'core',
     'core.site',
     'core.vlan',
@@ -72,24 +71,24 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'core.search',
     'core.lib',
     'core.bulk_change',
-    'mozdns',
-    'mdns',
-    'mdns.migrate',
-    'mozdns',
-    'mozdns.address_record',
-    'mozdns.cname',
-    'mozdns.domain',
-    'mozdns.ip',
-    'mozdns.mx',
-    'mozdns.nameserver',
-    'mozdns.ptr',
-    'mozdns.soa',
-    'mozdns.sshfp',
-    'mozdns.srv',
-    'mozdns.txt',
-    'mozdns.view',
-    'mozdns.mozbind',
-    'mozdns.master_form',
+    'cydns',
+    'dnsutils',
+    'dnsutils.migrate',
+    'cydns',
+    'cydns.address_record',
+    'cydns.cname',
+    'cydns.domain',
+    'cydns.ip',
+    'cydns.mx',
+    'cydns.nameserver',
+    'cydns.ptr',
+    'cydns.soa',
+    'cydns.sshfp',
+    'cydns.srv',
+    'cydns.txt',
+    'cydns.view',
+    'cydns.cybind',
+    'cydns.master_form',
     'systems',
 
     # Third party apps
@@ -149,7 +148,7 @@ AUTHENTICATION_BACKENDS = (
 #                   MOZ DNS                             #
 #########################################################
 
-MOZDNS_BASE_URL = "/mozdns"
+MOZDNS_BASE_URL = "/cydns"
 CORE_BASE_URL = "/core"
 JINJA_CONFIG = {'autoescape': False}
 BUILD_PATH = 'builds'

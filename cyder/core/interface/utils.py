@@ -1,4 +1,4 @@
-from cyder.mozdns.domain.models import Domain
+from cyder.cydns.domain.models import Domain
 from cyder.core.interface.static_intr.views import find_available_ip_from_ipv4_range
 
 

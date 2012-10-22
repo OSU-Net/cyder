@@ -3,11 +3,11 @@ from django.core.exceptions import ValidationError
 
 from cyder.core.interface.static_intr.models import StaticInterface
 from cyder.systems.models import System
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.address_record.models import AddressRecord
-from cyder.mozdns.ptr.models import PTR
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.ptr.models import PTR
 
-from cyder.mozdns.ip.utils import ip_to_domain_name, nibbilize
+from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
 import pdb
 

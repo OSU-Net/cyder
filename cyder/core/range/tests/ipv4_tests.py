@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from cyder.mozdns.domain.models import Domain
+from cyder.cydns.domain.models import Domain
 from cyder.core.network.models import Network
 from cyder.core.range.models import Range
 from cyder.core.interface.static_intr.models import StaticInterface

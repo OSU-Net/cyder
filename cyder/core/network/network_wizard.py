@@ -17,7 +17,7 @@ from cyder.core.range.forms import RangeForm
 
 from cyder.core.views import CoreDeleteView, CoreListView
 from cyder.core.views import CoreCreateView
-from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.cydns.ip.models import ipv6_to_longs
 from django.forms.formsets import formset_factory
 
 import re

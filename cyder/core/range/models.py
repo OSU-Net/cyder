@@ -6,9 +6,9 @@ from cyder.core.utils import IPFilter
 from cyder.core.mixins import ObjectUrlMixin
 from cyder.core.keyvalue.base_option import CommonOption
 from cyder.core.interface.static_intr.models import StaticInterface
-from cyder.mozdns.ip.models import ipv6_to_longs
-from cyder.mozdns.address_record.models import AddressRecord
-from cyder.mozdns.ptr.models import PTR
+from cyder.cydns.ip.models import ipv6_to_longs
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.ptr.models import PTR
 
 import ipaddr
 

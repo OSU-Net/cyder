@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from cyder.core.site.models import Site
 from cyder.core.mixins import ObjectUrlMixin
-from cyder.mozdns.domain.models import Domain
+from cyder.cydns.domain.models import Domain
 
 from cyder.core.keyvalue.models import KeyValue
 

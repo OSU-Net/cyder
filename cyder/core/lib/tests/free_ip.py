@@ -8,8 +8,8 @@ from cyder.core.network.models import Network
 from cyder.core.interface.static_intr.models import StaticInterface
 from cyder.core.lib.utils import *
 
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.soa.models import SOA
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.soa.models import SOA
 
 from cyder.systems.models import System
 

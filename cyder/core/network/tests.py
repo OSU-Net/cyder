@@ -3,8 +3,8 @@ from django.core.exceptions import ValidationError
 
 from cyder.core.network.models import Network
 from cyder.core.range.models import Range
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.ip.models import ipv6_to_longs
 
 import random
 import ipaddr

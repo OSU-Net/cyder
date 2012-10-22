@@ -9,7 +9,7 @@ from django.db import models, IntegrityError
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 
-import mdns
+import dnsutils
 
 
 class QuerySetManager(models.Manager):
@@ -157,8 +157,8 @@ class KeyValue(models.Model):
     def save(self, *args, **kwargs):
         dirty = False
         schedule_dns = False
-        from cyder.mdns.build_nics import build_nic
-        from cyder.mdns.dns_build import ip_to_site
+        from cyder.dnsutils.build_nics import build_nic
+        from cyder.dnsutils.dns_build import ip_to_site
 
         is_nic = re.match('^nic\.\d+\.(.*)\.\d+$', self.key)
         if self.pk:
@@ -193,7 +193,7 @@ class KeyValue(models.Model):
         # to construct an interface and find the ip in the interface.
             intr = build_nic(self.system.keyvalue_set.all())
             for ip in intr.ips:
-                kv = mdns.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
+                kv = dnsutils.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
                 if kv:
                     try:
                         ScheduledTask(type='dns', task=kv.key).save()

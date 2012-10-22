@@ -16,7 +16,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
    url(r'^$', direct_to_template, {'template': 'base/index.html'}, name='system-home'),
    (r'^admin/', include(admin.site.urls)),
-   (r'^mozdns/', include('cyder.mozdns.urls')),
+   (r'^cydns/', include('cyder.cydns.urls')),
    (r'^core/', include('cyder.core.urls')),
    (r'^tasty/', include('cyder.systems.urls')),
 )

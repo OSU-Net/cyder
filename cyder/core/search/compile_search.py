@@ -2,7 +2,7 @@ from django.db.models import Q
 from cyder.core.network.utils import calc_parent
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-import mozdns
+import cydns
 import core
 import operator
 from cyder.core.network.models import Network

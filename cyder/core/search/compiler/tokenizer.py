@@ -1,17 +1,17 @@
 from django.db.models import Q
 
-import mozdns
+import cydns
 import core
-from cyder.mozdns.address_record.models import AddressRecord
-from cyder.mozdns.cname.models import CNAME
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.mx.models import MX
-from cyder.mozdns.nameserver.models import Nameserver
-from cyder.mozdns.ptr.models import PTR
-from cyder.mozdns.srv.models import SRV
-from cyder.mozdns.sshfp.models import SSHFP
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.mx.models import MX
+from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.srv.models import SRV
+from cyder.cydns.sshfp.models import SSHFP
 from cyder.core.interface.static_intr.models import StaticInterface
-from cyder.mozdns.txt.models import TXT
+from cyder.cydns.txt.models import TXT
 
 from lexer import Lexer
 import re

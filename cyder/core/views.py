@@ -1,5 +1,5 @@
-from cyder.base.mozdns.views import BaseListView, BaseDetailView, BaseCreateView
-from cyder.base.mozdns.views import BaseUpdateView, BaseDeleteView
+from cyder.base.views import BaseListView, BaseDetailView, BaseCreateView
+from cyder.base.views import BaseUpdateView, BaseDeleteView
 
 from django.forms.util import ErrorList, ErrorDict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -7,9 +7,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from cyder.core.forms import IpSearchForm
 from cyder.core.network.models import Network
 from cyder.core.network.utils import calc_networks, calc_parent
-from cyder.mozdns.address_record.models import AddressRecord
-from cyder.mozdns.ptr.models import PTR
-from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.ip.models import ipv6_to_longs
 
 from django.shortcuts import render
 

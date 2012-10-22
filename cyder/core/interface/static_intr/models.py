@@ -3,17 +3,17 @@ from django.core.exceptions import ValidationError
 
 from cyder.systems.models import System
 
-import mozdns
+import cydns
 from cyder.core.keyvalue.models import KeyValue
 from cyder.core.keyvalue.utils import AuxAttr
 from cyder.core.mixins import ObjectUrlMixin
 from cyder.core.validation import validate_mac
-from cyder.mozdns.address_record.models import BaseAddressRecord
-from cyder.mozdns.models import MozdnsRecord
-from cyder.mozdns.view.models import View
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.cname.models import CNAME
-from cyder.mozdns.ip.models import Ip
+from cyder.cydns.address_record.models import BaseAddressRecord
+from cyder.cydns.models import MozdnsRecord
+from cyder.cydns.view.models import View
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.ip.models import Ip
 from django.conf import settings
 
 import re
@@ -148,10 +148,10 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         if not self.system:
             raise ValidationError("An interface means nothing without it's "
                                   "system.")
-        from cyder.mozdns.ptr.models import PTR
+        from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError("A PTR already uses this Name and IP")
-        from cyder.mozdns.address_record.models import AddressRecord
+        from cyder.cydns.address_record.models import AddressRecord
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
             raise ValidationError("An A record already uses this Name and IP")
@@ -183,7 +183,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         if db_self.label == self.label and db_self.domain == self.domain:
             return
         # The label of the domain changed. Make sure it's not a glue record
-        Nameserver = mozdns.nameserver.models.Nameserver
+        Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
             raise ValidationError("This Interface represents a glue record "
                                   "for a Nameserver. Change the Nameserver to edit this "

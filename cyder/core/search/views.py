@@ -20,9 +20,9 @@ from cyder.core.views import CoreDeleteView, CoreCreateView
 from cyder.core.range.models import Range
 from cyder.core.network.utils import calc_parent_str
 
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.address_record.models import AddressRecord
-from cyder.mozdns.ptr.models import PTR
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.ptr.models import PTR
 
 import pdb
 from cyder.core.search.parser import parse

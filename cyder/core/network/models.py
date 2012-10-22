@@ -2,8 +2,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 
-from cyder.mozdns.validation import validate_ip_type
-from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.cydns.validation import validate_ip_type
+from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.core.utils import IPFilter, two_to_four
 from cyder.core.vlan.models import Vlan
 from cyder.core.site.models import Site

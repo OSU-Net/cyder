@@ -7,9 +7,9 @@ from django.http import HttpResponse
 from cyder.core.range.forms import RangeForm
 from cyder.core.range.models import Range, RangeKeyValue
 from cyder.core.interface.static_intr.models import StaticInterface
-from cyder.mozdns.address_record.models import AddressRecord
-from cyder.mozdns.ptr.models import PTR
-from cyder.mozdns.ip.models import ipv6_to_longs
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.core.views import CoreDeleteView, CoreDetailView
 from cyder.core.views import CoreCreateView, CoreUpdateView, CoreListView
 from cyder.core.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings

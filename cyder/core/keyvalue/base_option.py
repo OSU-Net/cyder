@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.mozdns.validation import validate_name
+from cyder.cydns.validation import validate_name
 from cyder.core.keyvalue.models import KeyValue
 
 import pdb

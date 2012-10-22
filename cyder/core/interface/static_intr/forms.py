@@ -3,10 +3,10 @@ from django.forms import models
 from django.core.exceptions import ValidationError
 
 from cyder.core.interface.static_intr.models import StaticInterface
-from cyder.mozdns.domain.models import Domain
-from cyder.mozdns.view.models import View
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.view.models import View
 from cyder.core.range.models import Range
-from cyder.mozdns.validation import validate_label
+from cyder.cydns.validation import validate_label
 from cyder.core.vlan.models import Vlan
 from cyder.core.site.models import Site
 from cyder.systems.models import System
