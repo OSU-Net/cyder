@@ -16,21 +16,15 @@ A system that manages DNS and DHCP is useless without knowledge of the networks
 the hosts using DNS and DHCP are located in. The core of inventory is it's
 :class:`Site`\s, :class:`Network`\s, and :class:`Range`\s.
 
-Sites
+Sites and Locations
 -----
-A :ref:`site` is a construct for creating collections of networks assiocated with
-a physical location.  There are two types of sites, top level sites which represent
-a general geographic location like a campus and locations a place at that site.  
-Locations serve as aliases to top level parent sites so that we can effectively group
-smaller business units into a larger logical collection.  This construct allows us
-to partition up the campus by building and in turn those buildings can be further 
-divided up into departments if need be.
+There are two types of sites, a top level site which represent a general geographic
+region like a campus and a location which is a place at a site.  Locations and sites
+allow us to partition up the campus by building and in turn those buildings can be 
+further divided up into departments if need be.
 
 .. figure:: images/mozcore_sites.png
 
-Here four sites are shown. Scl3 is the parent site of Releng and Phx1 is the
-Parent site of Svc. If Relenge were also in Scl2, there would be another
-instance of a site called Relenge that had a parent site of Scl2.
 
 Networks
 --------
@@ -53,10 +47,10 @@ A network is created which is contained within an existing network and both of t
 networks share a parent site.
 
 These restrictions enforce the policy that new networks can't be created which span
-across other existing networks.  It also prevents us from splitting up address
-ranges and allowing blocks of addresses to be associated with different top level
-sites.  This means that any given range of addresses can be uniquely associated with
-a top level site.
+across other existing networks.  This means that any given range of addresses can 
+be unambigulously associated with a top level site.  It also restricts users from
+creating networks which straddle the the boundary of an existing network created
+a network which is only partially contained within another network.
 
 .. figure:: images/mozcore_networks.png
 
