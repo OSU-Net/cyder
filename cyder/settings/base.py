@@ -5,6 +5,7 @@ from funfactory.settings_base import *
 from cyder.settings.dns import *
 
 ROOT_URLCONF = 'cyder.urls'
+APPEND_SLASH = True
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
@@ -106,6 +107,11 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'django.contrib.admin',
 ]
 
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated
 # apps here:
@@ -147,11 +153,6 @@ MOZDNS_BASE_URL = "/mozdns"
 CORE_BASE_URL = "/core"
 JINJA_CONFIG = {'autoescape': False}
 BUILD_PATH = 'builds'
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-)
-
 INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
 
 def custom_show_toolbar(request):

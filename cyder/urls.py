@@ -14,10 +14,11 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
-   url(r'^$', 'cyder.base.views.home', name='system-home'),
+   url(r'^$', direct_to_template, {'template': 'base/index.html'}, name='system-home'),
    (r'^admin/', include(admin.site.urls)),
    (r'^mozdns/', include('cyder.mozdns.urls')),
    (r'^core/', include('cyder.core.urls')),
+   (r'^tasty/', include('cyder.systems.urls')),
 )
 
 if settings.DEBUG:
