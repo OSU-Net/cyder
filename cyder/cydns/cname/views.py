@@ -1,8 +1,8 @@
-from cyder.cydns.views import MozdnsDeleteView
-from cyder.cydns.views import MozdnsDetailView
-from cyder.cydns.views import MozdnsCreateView
-from cyder.cydns.views import MozdnsUpdateView
-from cyder.cydns.views import MozdnsListView
+from cyder.cydns.views import CydnsDeleteView
+from cyder.cydns.views import CydnsDetailView
+from cyder.cydns.views import CydnsCreateView
+from cyder.cydns.views import CydnsUpdateView
+from cyder.cydns.views import CydnsListView
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.cname.forms import CNAMEForm
 
@@ -13,22 +13,22 @@ class CNAMEView(object):
     queryset = CNAME.objects.all().order_by('fqdn')
 
 
-class CNAMEDeleteView(CNAMEView, MozdnsDeleteView):
+class CNAMEDeleteView(CNAMEView, CydnsDeleteView):
     """ """
 
 
-class CNAMEDetailView(CNAMEView, MozdnsDetailView):
+class CNAMEDetailView(CNAMEView, CydnsDetailView):
     """ """
     template_name = "cname/cname_detail.html"
 
 
-class CNAMECreateView(CNAMEView, MozdnsCreateView):
+class CNAMECreateView(CNAMEView, CydnsCreateView):
     """ """
 
 
-class CNAMEUpdateView(CNAMEView, MozdnsUpdateView):
+class CNAMEUpdateView(CNAMEView, CydnsUpdateView):
     """ """
 
 
-class CNAMEListView(CNAMEView, MozdnsListView):
+class CNAMEListView(CNAMEView, CydnsListView):
     """ """

@@ -16,7 +16,7 @@ from cyder.core.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.utils import tablefy
-from cyder.cydns.views import MozdnsCreateView, MozdnsDeleteView, MozdnsListView
+from cyder.cydns.views import CydnsCreateView, CydnsDeleteView, CydnsListView
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.forms import DomainForm, DomainUpdateForm
 from cyder.cydns.mx.models import MX
@@ -64,16 +64,16 @@ class DomainView(object):
     form_class = DomainForm
 
 
-class DomainDeleteView(DomainView, MozdnsDeleteView):
+class DomainDeleteView(DomainView, CydnsDeleteView):
     """ """
 
 
-class DomainListView(DomainView, MozdnsListView):
+class DomainListView(DomainView, CydnsListView):
     queryset = Domain.objects.filter(is_reverse=False)
     template_name = "domain/domain_list.html"
 
 
-class ReverseDomainListView(DomainView, MozdnsListView):
+class ReverseDomainListView(DomainView, CydnsListView):
     queryset = Domain.objects.filter(is_reverse=True).order_by('name')
 
 

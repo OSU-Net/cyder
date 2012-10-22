@@ -3,11 +3,11 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.shortcuts import render
 
-from cyder.cydns.views import MozdnsCreateView
-from cyder.cydns.views import MozdnsDeleteView
-from cyder.cydns.views import MozdnsDetailView
-from cyder.cydns.views import MozdnsListView
-from cyder.cydns.views import MozdnsUpdateView
+from cyder.cydns.views import CydnsCreateView
+from cyder.cydns.views import CydnsDeleteView
+from cyder.cydns.views import CydnsDetailView
+from cyder.cydns.views import CydnsListView
+from cyder.cydns.views import CydnsUpdateView
 from cyder.cydns.ip.forms import IpForm
 from cyder.cydns.ptr.forms import PTRForm
 from cyder.cydns.ptr.models import PTR
@@ -21,16 +21,16 @@ class PTRView(object):
     queryset = PTR.objects.all()
 
 
-class PTRDeleteView(PTRView, MozdnsDeleteView):
+class PTRDeleteView(PTRView, CydnsDeleteView):
     """ """
 
 
-class PTRDetailView(PTRView, MozdnsDetailView):
+class PTRDetailView(PTRView, CydnsDetailView):
     """ """
     template_name = "ptr/ptr_detail.html"
 
 
-class PTRCreateView(PTRView, MozdnsCreateView):
+class PTRCreateView(PTRView, CydnsCreateView):
     def get_form(self, *args, **kwargs):
         initial = self.get_form_kwargs()
         if 'ip_type' in self.request.GET and 'ip_str' in self.request.GET:
@@ -54,9 +54,9 @@ class PTRCreateView(PTRView, MozdnsCreateView):
         return PTRForm(**initial)
 
 
-class PTRUpdateView(PTRView, MozdnsUpdateView):
+class PTRUpdateView(PTRView, CydnsUpdateView):
     """ """
 
 
-class PTRListView(PTRView, MozdnsListView):
+class PTRListView(PTRView, CydnsListView):
     """ """

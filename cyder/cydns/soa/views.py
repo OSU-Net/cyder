@@ -7,11 +7,11 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA, SOAKeyValue
 from cyder.cydns.utils import tablefy
-from cyder.cydns.views import MozdnsCreateView
-from cyder.cydns.views import MozdnsDeleteView
-from cyder.cydns.views import MozdnsDetailView
-from cyder.cydns.views import MozdnsListView
-from cyder.cydns.views import MozdnsUpdateView
+from cyder.cydns.views import CydnsCreateView
+from cyder.cydns.views import CydnsDeleteView
+from cyder.cydns.views import CydnsDetailView
+from cyder.cydns.views import CydnsListView
+from cyder.cydns.views import CydnsUpdateView
 
 from cyder.core.keyvalue.utils import get_aa, get_docstrings, get_attrs
 from cyder.core.keyvalue.utils import update_attrs, dict_to_kv
@@ -24,11 +24,11 @@ class SOAView(object):
     queryset = SOA.objects.all()
 
 
-class SOADeleteView(SOAView, MozdnsDeleteView):
+class SOADeleteView(SOAView, CydnsDeleteView):
     """ """
 
 
-class SOADetailView(SOAView, MozdnsDetailView):
+class SOADetailView(SOAView, CydnsDetailView):
     """ """
     template_name = 'soa/soa_detail.html'
 
@@ -51,7 +51,7 @@ class SOADetailView(SOAView, MozdnsDetailView):
         return context
 
 
-class SOACreateView(SOAView, MozdnsCreateView):
+class SOACreateView(SOAView, CydnsCreateView):
     """ """
 
 
@@ -112,5 +112,5 @@ def update_soa(request, soa_pk):
         })
 
 
-class SOAListView(SOAView, MozdnsListView):
+class SOAListView(SOAView, CydnsListView):
     """ """

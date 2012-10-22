@@ -32,7 +32,7 @@ def do_setUp(self, url_slug, test_class, test_data, use_domain=True):
         raise Exception
 
 
-class MozdnsViewTests(object):
+class CydnsViewTests(object):
     def setUp(self):
         self.client = Client()
         self.url_slug = url_slug
@@ -51,7 +51,7 @@ class MozdnsViewTests(object):
                 label=label, domain=self.domain)
 
 
-class CNAMEViewTests(MozdnsViewTests, TestCase):
+class CNAMEViewTests(CydnsViewTests, TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -71,7 +71,7 @@ for test in builder.build_all_tests():
     setattr(CNAMEViewTests, test.__name__ + "_cname", test)
 
 
-class MXViewTests(MozdnsViewTests, TestCase):
+class MXViewTests(CydnsViewTests, TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -95,7 +95,7 @@ for test in builder.build_all_tests():
     setattr(MXViewTests, test.__name__ + "_mx", test)
 
 
-class SRVViewTests(MozdnsViewTests, TestCase):
+class SRVViewTests(CydnsViewTests, TestCase):
     def setUp(self):
         test_data = {
             'label': "_" + random_label(),
@@ -121,7 +121,7 @@ for test in builder.build_all_tests():
     setattr(SRVViewTests, test.__name__ + "_srv", test)
 
 
-class TXTViewTests(MozdnsViewTests, TestCase):
+class TXTViewTests(CydnsViewTests, TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -141,7 +141,7 @@ for test in builder.build_all_tests():
     setattr(TXTViewTests, test.__name__ + "_txt", test)
 
 
-class SSHFPViewTests(MozdnsViewTests, TestCase):
+class SSHFPViewTests(CydnsViewTests, TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),

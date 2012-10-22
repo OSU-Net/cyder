@@ -7,22 +7,22 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.utils import slim_form
 
 
-class MozdnsListView(BaseListView):
+class CydnsListView(BaseListView):
     """ """
     template_name = 'cydns/cydns_list.html'
 
 
-class MozdnsDetailView(BaseDetailView):
+class CydnsDetailView(BaseDetailView):
     """ """
     template_name = 'cydns/cydns_detail.html'
 
 
-class MozdnsCreateView(BaseCreateView):
+class CydnsCreateView(BaseCreateView):
     """ """
     template_name = 'cydns/cydns_form.html'
 
     def get_form(self, form_class):
-        form = super(MozdnsCreateView, self).get_form(form_class)
+        form = super(CydnsCreateView, self).get_form(form_class)
         domain_pk = self.kwargs.get('domain', False)
 
         # The use of slim_form makes my eyes bleed and stomach churn.
@@ -51,11 +51,11 @@ class MozdnsCreateView(BaseCreateView):
         return form
 
 
-class MozdnsUpdateView(BaseUpdateView):
+class CydnsUpdateView(BaseUpdateView):
     template_name = 'cydns/cydns_form.html'
 
     def get_form(self, form_class):
-        form = super(MozdnsUpdateView, self).get_form(form_class)
+        form = super(CydnsUpdateView, self).get_form(form_class)
         """This removes the unhelpful "Hold down the...." help texts for the
         specified fields for a form."""
         remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
@@ -70,7 +70,7 @@ class MozdnsUpdateView(BaseUpdateView):
         return form
 
 
-class MozdnsDeleteView(BaseDeleteView):
+class CydnsDeleteView(BaseDeleteView):
     """ """
     template_name = 'cydns/cydns_confirm_delete.html'
     succcess_url = '/cydns/'

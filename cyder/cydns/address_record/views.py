@@ -3,8 +3,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from cyder.cydns.address_record.forms import AddressRecordForm
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.views import MozdnsDeleteView, MozdnsDetailView
-from cyder.cydns.views import MozdnsCreateView, MozdnsUpdateView, MozdnsListView
+from cyder.cydns.views import CydnsDeleteView, CydnsDetailView
+from cyder.cydns.views import CydnsCreateView, CydnsUpdateView, CydnsListView
 from cyder.core.network.utils import calc_parent_str
 
 import pdb
@@ -16,11 +16,11 @@ class AddressRecordView(object):
     queryset = AddressRecord.objects.all()
 
 
-class AddressRecordDeleteView(AddressRecordView, MozdnsDeleteView):
+class AddressRecordDeleteView(AddressRecordView, CydnsDeleteView):
     """ """
 
 
-class AddressRecordDetailView(AddressRecordView, MozdnsDetailView):
+class AddressRecordDetailView(AddressRecordView, CydnsDetailView):
     def get_context_data(self, **kwargs):
         context = super(AddressRecordDetailView, self).get_context_data(
             **kwargs)
@@ -35,7 +35,7 @@ class AddressRecordDetailView(AddressRecordView, MozdnsDetailView):
     template_name = 'address_record/addressrecord_detail.html'
 
 
-class AddressRecordCreateView(AddressRecordView, MozdnsCreateView):
+class AddressRecordCreateView(AddressRecordView, CydnsCreateView):
     """ """
     def get_form(self, *args, **kwargs):
         initial = self.get_form_kwargs()
@@ -60,9 +60,9 @@ class AddressRecordCreateView(AddressRecordView, MozdnsCreateView):
         return AddressRecordForm(**initial)
 
 
-class AddressRecordUpdateView(AddressRecordView, MozdnsUpdateView):
+class AddressRecordUpdateView(AddressRecordView, CydnsUpdateView):
     """ """
 
 
-class AddressRecordListView(AddressRecordView, MozdnsListView):
+class AddressRecordListView(AddressRecordView, CydnsListView):
     """ """

@@ -37,12 +37,12 @@ def build_sample_domain():
     return domain
 
 
-class MozdnsAPITests(object):
+class CydnsAPITests(object):
     object_list_url = "/cydns/api/v{0}_dns/{1}/"
     object_url = "/cydns/api/v{0}_dns/{1}/{2}/"
 
     def setUp(self):
-        super(MozdnsAPITests, self).setUp()
+        super(CydnsAPITests, self).setUp()
         self.domain = build_sample_domain()
         View(name='public').save()
         View(name='private').save()
@@ -292,7 +292,7 @@ class DomainLeakTests(ResourceTestCase):
         }
 
 
-class CNAMEAPITests(MozdnsAPITests, ResourceTestCase):
+class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
     test_type = CNAME
 
     def post_data(self):
@@ -305,7 +305,7 @@ class CNAMEAPITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class MXAPITests(MozdnsAPITests, ResourceTestCase):
+class MXAPITests(CydnsAPITests, ResourceTestCase):
     test_type = MX
 
     def post_data(self):
@@ -320,7 +320,7 @@ class MXAPITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class SRVAPITests(MozdnsAPITests, ResourceTestCase):
+class SRVAPITests(CydnsAPITests, ResourceTestCase):
     test_type = SRV
 
     def post_data(self):
@@ -336,7 +336,7 @@ class SRVAPITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class TXTAPITests(MozdnsAPITests, ResourceTestCase):
+class TXTAPITests(CydnsAPITests, ResourceTestCase):
     test_type = TXT
 
     def post_data(self):
@@ -349,7 +349,7 @@ class TXTAPITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class NameserverAPITests(MozdnsAPITests, ResourceTestCase):
+class NameserverAPITests(CydnsAPITests, ResourceTestCase):
     test_type = Nameserver
 
     def post_data(self):
@@ -361,7 +361,7 @@ class NameserverAPITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class SSHFPAPITests(MozdnsAPITests, ResourceTestCase):
+class SSHFPAPITests(CydnsAPITests, ResourceTestCase):
     test_type = SSHFP
 
     def post_data(self):
@@ -376,7 +376,7 @@ class SSHFPAPITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class AdderessRecordV4APITests(MozdnsAPITests, ResourceTestCase):
+class AdderessRecordV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
 
     def setUp(self):
@@ -396,7 +396,7 @@ class AdderessRecordV4APITests(MozdnsAPITests, ResourceTestCase):
         }
 
 
-class AdderessRecordV6APITests(MozdnsAPITests, ResourceTestCase):
+class AdderessRecordV6APITests(CydnsAPITests, ResourceTestCase):
     test_type = AddressRecord
 
     def setUp(self):

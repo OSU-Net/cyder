@@ -1,10 +1,10 @@
 from django.db import models
 
-from cyder.cydns.models import MozdnsRecord
+from cyder.cydns.models import CydnsRecord
 import pdb
 
 
-class TXT(MozdnsRecord):
+class TXT(CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """

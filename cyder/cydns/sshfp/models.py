@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.cydns.models import MozdnsRecord
+from cyder.cydns.models import CydnsRecord
 
 
 def validate_algorithm(number):
@@ -15,7 +15,7 @@ def validate_fingerprint(number):
         raise ValidationError("Fingerprint type must be 1 (SHA-1)")
 
 
-class SSHFP(MozdnsRecord):
+class SSHFP(CydnsRecord):
     """
     >>> SSHFP(label=label, domain=domain, key=key_data,
     ... algorithm_number=algo_num, fingerprint_type=fing_type)

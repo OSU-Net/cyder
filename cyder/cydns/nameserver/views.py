@@ -23,22 +23,22 @@ class NSView(object):
     queryset = Nameserver.objects.all()
 
 
-class NSDeleteView(NSView, MozdnsDeleteView):
+class NSDeleteView(NSView, CydnsDeleteView):
     """ """
 
 
-class NSDetailView(NSView, MozdnsDetailView):
+class NSDetailView(NSView, CydnsDetailView):
     template_name = "nameserver/nameserver_detail.html"
 
 
-class NSListView(NSView, MozdnsListView):
+class NSListView(NSView, CydnsListView):
     """ """
     template_name = "nameserver/nameserver_list.html"
     queryset = Nameserver.objects.all().select_related()
     # Wooo. Huge speed boost because of select_related
 
 
-class NSCreateView(NSView, MozdnsCreateView):
+class NSCreateView(NSView, CydnsCreateView):
     """ """
 
 
@@ -78,7 +78,7 @@ def update_ns(request, nameserver_pk):
     })
 
 
-class NSUpdateView(NSView, MozdnsUpdateView):
+class NSUpdateView(NSView, CydnsUpdateView):
     """ """
 
 

@@ -9,7 +9,7 @@ from cyder.core.keyvalue.utils import AuxAttr
 from cyder.core.mixins import ObjectUrlMixin
 from cyder.core.validation import validate_mac
 from cyder.cydns.address_record.models import BaseAddressRecord
-from cyder.cydns.models import MozdnsRecord
+from cyder.cydns.models import CydnsRecord
 from cyder.cydns.view.models import View
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.cname.models import CNAME

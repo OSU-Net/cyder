@@ -1,9 +1,9 @@
 # Create your views here.
-from cyder.cydns.views import MozdnsDeleteView
-from cyder.cydns.views import MozdnsCreateView
-from cyder.cydns.views import MozdnsDetailView
-from cyder.cydns.views import MozdnsUpdateView
-from cyder.cydns.views import MozdnsListView
+from cyder.cydns.views import CydnsDeleteView
+from cyder.cydns.views import CydnsCreateView
+from cyder.cydns.views import CydnsDetailView
+from cyder.cydns.views import CydnsUpdateView
+from cyder.cydns.views import CydnsListView
 from cyder.cydns.view.models import View
 from cyder.cydns.view.forms import ViewForm
 
@@ -14,22 +14,22 @@ class ViewView(object):
     queryset = View.objects.all()
 
 
-class ViewDeleteView(ViewView, MozdnsDeleteView):
+class ViewDeleteView(ViewView, CydnsDeleteView):
     """ """
 
 
-class ViewDetailView(ViewView, MozdnsDetailView):
+class ViewDetailView(ViewView, CydnsDetailView):
     """ """
     template_name = 'view/view_detail.html'
 
 
-class ViewCreateView(ViewView, MozdnsCreateView):
+class ViewCreateView(ViewView, CydnsCreateView):
     """ """
 
 
-class ViewUpdateView(ViewView, MozdnsUpdateView):
+class ViewUpdateView(ViewView, CydnsUpdateView):
     """ """
 
 
-class ViewListView(ViewView, MozdnsListView):
+class ViewListView(ViewView, CydnsListView):
     """ """

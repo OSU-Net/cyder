@@ -201,7 +201,7 @@ def find_root_domain(soa):
 #        Functions that validate labels and names                 #
 ###################################################################
 """
-MozAddressValueError
+CyAddressValueError
     This exception is thrown when an attempt is made to create/update a
     record with an invlaid IP.
 

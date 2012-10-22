@@ -40,7 +40,7 @@ def views_handler(sender, **kwargs):
             instance.views.remove(View.objects.get(name="public"))
 
 
-class MozdnsRecord(models.Model, ObjectUrlMixin):
+class CydnsRecord(models.Model, ObjectUrlMixin):
     """
     This class provides common functionality that many DNS record
     classes share.  This includes a foreign key to the ``domain`` table
@@ -53,8 +53,8 @@ class MozdnsRecord(models.Model, ObjectUrlMixin):
     validate will raise a ``ValidationError``.
 
     If you plan on using the ``unique_together`` constraint on a Model
-    that inherits from ``MozdnsRecord``, you must include ``domain`` and
-    ``label`` explicitly if you need them to.  ``MozdnsRecord`` will not
+    that inherits from ``CydnsRecord``, you must include ``domain`` and
+    ``label`` explicitly if you need them to.  ``CydnsRecord`` will not
     enforce uniqueness for you.
 
     All common records have a ``fqdn`` field. This field is updated
@@ -113,7 +113,7 @@ class MozdnsRecord(models.Model, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         from cyder.cydns.utils import prune_tree
         objs_domain = self.domain
-        super(MozdnsRecord, self).delete(*args, **kwargs)
+        super(CydnsRecord, self).delete(*args, **kwargs)
         prune_tree(objs_domain)
 
     def save(self, *args, **kwargs):
@@ -126,7 +126,7 @@ class MozdnsRecord(models.Model, ObjectUrlMixin):
         else:
             db_domain = None
         no_build = kwargs.pop("no_build", False)
-        super(MozdnsRecord, self).save(*args, **kwargs)
+        super(CydnsRecord, self).save(*args, **kwargs)
         if no_build:
             pass
         else:

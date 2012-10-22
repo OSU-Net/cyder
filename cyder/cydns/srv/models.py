@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import cydns
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.models import MozdnsRecord
+from cyder.cydns.models import CydnsRecord
 from cyder.cydns.validation import validate_name
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.view.models import View
@@ -16,7 +16,7 @@ from cyder.cydns.validation import validate_srv_target
 import pdb
 
 # Rhetorical Question: Why is SRV not a common record?  SRV records have
-# a '_' in their label. Most domain names do not allow this.  Mozdns
+# a '_' in their label. Most domain names do not allow this.  Cydns
 # record has a validator that would raise an exception when validating
 # it's label.  TODO, verify this.
 

@@ -3,14 +3,14 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cydns
 from cyder.cydns.domain.models import Domain, _name_to_domain
-from cyder.cydns.models import MozdnsRecord
+from cyder.cydns.models import CydnsRecord
 from cyder.cydns.validation import validate_name, find_root_domain
 from cyder.cydns.search_utils import smart_fqdn_exists
 
 import pdb
 
 
-class CNAME(MozdnsRecord):
+class CNAME(CydnsRecord):
     """CNAMES can't point to an any other records. Said another way,
     CNAMES can't be at the samle level as any other record. This means
     that when you are creating a CNAME every other record type must be
