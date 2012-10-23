@@ -1,23 +1,63 @@
 @import "globals.scss";
 
 body {
-    @include gradient(#eeeeee, $white);
+    background-color: $white;
 }
 
-div#header {
-    background-color: #222;
-    height: 50px;
-    h1 a {
-      text-decoration: none;
-      color: $white;
+a {
+    color: $white;
+    text-decoration: none;
+    &:hover {
+        color: $teal;
     }
 }
 
-#main {
-    background-color: #eeeeee;
-    border: 1px solid #999;
-    padding: 1em;
-    box-shadow: 0 0 1px $black;
+p {
+    color: $black;
+}
+
+ul {
+    list-style-type: none;
+}
+
+div#header {
+    background-color: $dark-gray;
+    height: 45px;
+    padding-top: 5px;
+    h1 {
+        display: inline;
+        a {
+            float: left;
+        }
+    }
+    #nav {
+        clear: left;
+        display: inline-block;
+        li {
+            border: solid $black 1px;
+            border-width: 0 2px 0 0;
+            display: inline;
+            margin-right: -5px;
+            padding: 25px 0 10px 0;
+            &:last-child {
+                border-width: 0 2px 0 2px;
+            }
+            a {
+                bottom: 3px;
+                font-size: 18px;
+                position: relative;
+                padding: 25px 30px 12px;
+                &:hover {
+                    background: $black;
+                }
+            }
+        }
+    }
+}
+
+.main {
+    padding-top: 13px;
+    #kid { @include img-box-shadow(); }
 }
 
 ul#app-buttons {
@@ -27,7 +67,7 @@ ul#app-buttons {
     outline: 0;
     overflow: hidden;
     display: inline-block;
-    border-bottom: 1px solid #778;
+    border-bottom: 1px solid $dark-gray;
     padding-top: 4px;
     display: block;
     li {
@@ -49,12 +89,10 @@ ul#app-buttons {
       padding: 3px 0.5em;
       margin-left: 3px;
       border-radius: 5px 5px 0 0;
-      border: 0px solid #778;
       border-bottom: none;
-      background-color: #608925;
-      background: -moz-linear-gradient(top, #608925, #98ba40);
+      background-color: $light-gray;
       text-decoration: none;
-      color: $white;
+      color: $dark-gray;
       font-weight: bold;
     }
 }
@@ -108,23 +146,6 @@ table {
         &:last-child, &.last, &:last-child, &.last {
           border-right-width: 0px;
         }
-      }
-    }
-    &.racktable {
-      border: 1px solid $black;
-      td {
-        border-right: 1px solid $black;
-        border-bottom: 1px solid $black;
-        &:last-child, &.last, &:last-child, &.last {
-          border-right-width: 0px;
-        }
-      }
-      th {
-        background-color: #c4c4c4;
-        text-align: center;
-      }
-      select {
-        max-width: 220px;
       }
     }
 }
@@ -214,10 +235,6 @@ dl.show {
       margin: 5px 10px 0 5px;
       width: 140px;
     }
-}
-
-ul {
-    list-style-type: none;
 }
 
 /* DNS Menu block */
@@ -343,7 +360,7 @@ a.nav-link {
     display: block;
     padding: .75em .75em .75em 1.5em;
     color: rgb(220, 220, 220);
-    background: rgb(0, 0, 0);
+    background: $black;
     border-style: solid none;
     border-width: 1px;
     border-color: rgb(46, 46, 46);
@@ -357,3 +374,14 @@ a.nav-link {
 span.helptext {
     display: none;
 }
+
+#footer {
+    background-color: $dark-blue;
+    color: $white;
+    padding-top: 13px;
+    text-align: center;
+    a {
+        color: $white;
+    }
+}
+

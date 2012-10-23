@@ -1,5 +1,26 @@
-$black: rgb(10, 10, 10);
-$white: rgb(240, 240, 240);
+$black: rgb(10, 10, 20);
+$dark-gray: rgb(50, 50, 60);
+$light-gray: rgb(200, 200, 210);
+$white: rgb(240, 240, 250);
+
+$dark-blue: #002163;
+$blue: #003399;
+$light-blue: #5C82CC;
+$teal: #008D83;
+$purple: #301E77;
+
+$red: #FF0700;
+$green: #00C90D;
+
+@mixin box-shadow($shadow) {
+    -moz-box-shadow: $shadow;
+    -webkit-box-shadow: $shadow;
+    box-shadow: $shadow;
+}
+
+@mixin img-box-shadow() {
+    @include box-shadow(2px 2px 4px #888888);
+}
 
 @mixin gradient($color1, $color2) {
     background-color: $color2;

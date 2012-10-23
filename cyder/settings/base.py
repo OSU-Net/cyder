@@ -19,15 +19,13 @@ MINIFY_BUNDLES = {
     'css': {
         'cyder_css': (
             'css/lib/blueprint/ie.css',
-            'css/lib/blueprint/print.css',
             'css/lib/blueprint/screen.css',
             'css/lib/blueprint/plugins/buttons/screen.css',
             'css/lib/blueprint/plugins/fancy-type/screen.css',
             'css/lib/blueprint/plugins/link-icons/screen.css',
             'css/lib/blueprint/plugins/rtl/screen.css',
             'css/lib/jquery.autocomplete.css',
-            'css/lib/smoothness/jquery-ui-1.8.11.custom.css',
-            'css/lib/ui-lightness/jquery-ui-1.8.11.custom.css',
+            'css/sticky_footer.css',
 
             'css/base.scss',
             'css/navtabs.scss',
