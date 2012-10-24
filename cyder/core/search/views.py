@@ -24,7 +24,6 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
-import pdb
 from cyder.core.search.parser import parse
 from cyder.core.search.search import compile_search
 
@@ -34,19 +33,16 @@ import operator
 import simplejson as json
 
 
-from jinja2 import Environment, PackageLoader
-env = Environment(loader=PackageLoader('cyder.core.search', 'templates'))
-
-
-def search_ajax(request):
+def search(request):
     search = request.GET.get("search", None)
+
     if not search:
         return HttpResponse("What do you want?!?")
     dos_terms = ["10", "com", "mozilla.com", "mozilla", "network:10/8",
                  "network:10.0.0.0/8"]
     if search in dos_terms:
         return HttpResponse("Denial of Service attack prevented. The search "
-                            "term '{0}' is to general".format(search))
+                            "term '{0}' is too general".format(search))
     query = parse(search)
     print "----------------------"
     print query
@@ -66,29 +62,20 @@ def search_ajax(request):
         'txt': txts.count() if txts else 0,
         }
     }
-    template = env.get_template('search/search_results.html')
-    return HttpResponse(template.render(
-        **{
-        "misc": misc,
-        "search": search,
-        "addrs": addrs,
-        "cnames": cnames,
-        "domains": domains,
-        "intrs": intrs,
-        "mxs": mxs,
-        "nss": nss,
-        "ptrs": ptrs,
-        "srvs": srvs,
-        "txts": txts,
-        "meta": meta,
-        "search": search
+
+    return render_to_response('search/search.html',
+        {
+          "misc": misc,
+          "search": search,
+          "addrs": addrs,
+          "cnames": cnames,
+          "domains": domains,
+          "intrs": intrs,
+          "mxs": mxs,
+          "nss": nss,
+          "ptrs": ptrs,
+          "srvs": srvs,
+          "txts": txts,
+          "meta": meta,
         }
-    ))
-
-
-def search(request):
-    """Search page"""
-    search = request.GET.get('search', '')
-    return render(request, "search/search.html", {
-        "search": search
-    })
+    )

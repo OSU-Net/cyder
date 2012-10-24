@@ -22,15 +22,15 @@
     <div id="subheader">
       <div class="container">
         <span id="ctnr">
-          <form action="/search" method="post">
+          <form action="/ctnr/" method="post">
             <select>
               <option value="0">Select Container...</option>
             </select>
           </form>
         </span>
         <span id="search">
-          <form action="/search" method="post">
-            <input value="Search..." type="text"></input>
+          <form action="/search/" method="get">
+            <input type="text" name="search" value="Search..."></input>
           </form>
         </span>
       </div>
@@ -41,6 +41,7 @@
 
       {% block site_tabs %} {% endblock %}
       {{ js('cyder_js') }}
+      <h1 id="title">{{ self.title() }}</h1>
       {% block content %}{% endblock %}
     </div>
 

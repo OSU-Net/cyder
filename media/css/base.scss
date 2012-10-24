@@ -5,7 +5,8 @@ body {
 }
 
 a {
-    color: $white;
+    color: $dark-gray;
+    font-weight: bold;
     text-decoration: none;
     &:hover {
         color: $teal;
@@ -20,6 +21,13 @@ ul {
     list-style-type: none;
 }
 
+input[type="text"], select {
+    background: $white;
+    border-radius: 2px;
+    color: $light-gray;
+    padding-left: 3px;
+}
+
 div#header {
     background-color: $dark-gray;
     height: 50px;
@@ -27,7 +35,12 @@ div#header {
     h1 {
         display: inline;
         a {
+            color: $white;
             float: left;
+            font-weight: normal;
+            &:hover {
+                color: $teal;
+            }
         }
     }
     #nav {
@@ -44,16 +57,20 @@ div#header {
             }
             a {
                 bottom: 3px;
+                color: $white;
                 font-size: 18px;
+                font-weight: normal;
                 position: relative;
                 padding: 30px 30px 18px;
                 &:hover {
                     background: $black;
+                    color: $teal;
                 }
             }
         }
     }
 }
+
 #subheader {
     background-color: $dark-blue;
     height: 30px;
@@ -63,9 +80,6 @@ div#header {
         position: relative;
         bottom: 4px;
         select {
-            background: $white;
-            border-radius: 2px;
-            color: $light-gray;
             padding-left: 2px;
         }
     }
@@ -75,13 +89,6 @@ div#header {
             display: inline;
             position: relative;
             bottom: 4px;
-            input {
-                background: $white;
-                border-radius: 2px;
-                color: $light-gray;
-                font-style: italic;
-                padding-left: 3px;
-            }
         }
     }
 }
