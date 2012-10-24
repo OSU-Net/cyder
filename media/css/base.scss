@@ -4,6 +4,10 @@ body {
     background-color: $white;
 }
 
+p, h1, h2, h3, h4 {
+    color: $black;
+}
+
 a {
     color: $dark-gray;
     font-weight: bold;
@@ -11,10 +15,6 @@ a {
     &:hover {
         color: $teal;
     }
-}
-
-p {
-    color: $black;
 }
 
 ul {
@@ -26,6 +26,10 @@ input[type="text"], select {
     border-radius: 2px;
     color: $light-gray;
     padding-left: 3px;
+}
+
+.helptext {
+    display: none;
 }
 
 div#header {
@@ -93,46 +97,35 @@ div#header {
     }
 }
 
-.main {
-    clear: both;
-    #kid { @include img-box-shadow(); }
+#sidebar {
+    float: left;
+    height: 100%;
+    margin-right: 26px;
+    width: 150px;
+    a.nav-link {
+        background: $black;
+        border: 1px solid $dark-gray;
+        color: $white;
+        display: block;
+        padding: 13px;
+        &:hover {
+          color: $teal;
+          background: $dark-gray;
+          text-decoration: none;
+        }
+        .nav-item {
+            display: block;
+            position: relative;
+            right: auto;
+        }
+    }
 }
 
-ul#app-buttons {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    outline: 0;
-    overflow: hidden;
-    display: inline-block;
-    border-bottom: 1px solid $dark-gray;
-    padding-top: 4px;
-    display: block;
-    li {
-      list-style-type: none;
-      margin-left: 0px;
-      $white-space: nowrap;
-      display: inline;
-      float: left;
-      padding-left: 2px;
-      padding-right: 2px;
-      &.first {
-        padding-left: 0px;
-      }
-      &.last {
-        padding-right: 0px;
-      }
-    }
-    a {
-      padding: 3px 0.5em;
-      margin-left: 3px;
-      border-radius: 5px 5px 0 0;
-      border-bottom: none;
-      background-color: $light-gray;
-      text-decoration: none;
-      color: $dark-gray;
-      font-weight: bold;
-    }
+.main {
+    clear: both;
+    height: 100%;
+    margin-top: 13px;
+    #kid { @include img-box-shadow(); }
 }
 
 table {
@@ -185,144 +178,6 @@ table {
           border-right-width: 0px;
         }
       }
-    }
-}
-
-.show {
-    padding: 3em;
-    margin: 3em;
-    background-color: #fefefe;
-    border-radius: 5px;
-    box-shadow: 0 0 3px $black;
-}
-
-dl.show {
-    font-size: 11px;
-    dt {
-      clear: left;
-      float: left;
-      width: 120px;
-      padding: 1px 0 3px;
-    }
-    dd {
-      float: left;
-      width: 340px;
-      padding-left: 10px;
-    }
-}
-
-.editform {
-    padding: 3em;
-    margin: 3em;
-    background-color: #fefefe;
-    border-radius: 5px;
-    box-shadow: 0 0 3px $black;
-}
-
-.formline {
-    clear: left;
-    margin-bottom: .75em;
-    label {
-      border-bottom: medium none;
-      float: left;
-      padding-right: 1em;
-      text-align: right;
-      width: 9em;
-      font-weight: bold;
-    }
-    textarea, input, select {
-      margin: 0;
-    }
-    .sub_form {
-      background-color: #f5f5f5;
-      border: 2px solid #ccc;
-      display: block;
-      padding: 10px 20px 10px 10px;
-      margin-bottom: 5px;
-      width: 400px;
-      float: left;
-      label {
-        width: 50px;
-        clear: left;
-        float: left;
-        text-align: left;
-      }
-    }
-}
-
-.releng_div_label {
-    padding: 0 15px 0 0;
-    margin: 0 15px 0 0;
-}
-
-.network_adapters_div {
-    margin: -15px 0 10px 120px;
-    min-height: 100px;
-    width: 850px;
-    border: 1px solid #AAA;
-}
-
-.releng_div {
-    margin: -15px 0 10px 120px;
-    height: 205px;
-    width: 360px;
-    border: 1px solid #AAA;
-    label {
-      float: left;
-      text-align: right;
-      margin: 5px 10px 0 5px;
-      width: 140px;
-    }
-}
-
-/* DNS Menu block */
-.dns-title {
-    display: block;
-    position: relative;
-    overflow: hidden;
-    /* will contain if #first is longer than #second */
-    font-size: 15pt;
-}
-.dns-content {
-    display: block;
-    position: relative;
-    float: left;
-    overflow: hidden;
-    /* will contain if #first is longer than #second */
-    margin-left: 1em;
-    margin-top: 1em;
-    width: 700px;
-}
-.dns-menu {
-    padding-top: .75em;
-    float: left;
-    /* add this */
-    width: 150px;
-    overflow: hidden;
-    /* if you don't want #second to wrap below #first */
-}
-.nav-item, .mozdns-item {
-    display: block;
-    position: relative;
-    right: auto;
-}
-
-/* DNS Main Page */
-a.mozdns-action {
-    display: block;
-    width: 200px;
-    padding: .75em .75em .75em 1.5em;
-    color: rgb(220, 220, 220);
-    background: rgb(40, 40, 40);
-    border-radius: 4px;
-    border-style: solid none;
-    border-width: 1px;
-    border-color: rgb(46, 46, 46);
-    &:hover {
-      color: rgb(220, 220, 220);
-      background: rgb(30, 30, 30);
-      border-color: rgb(10, 10, 10);
-      text-decoration: none;
     }
 }
 
@@ -393,26 +248,6 @@ a.mozdns-action {
     text-align: right;
 }
 
-/* Links */
-a.nav-link {
-    display: block;
-    padding: .75em .75em .75em 1.5em;
-    color: rgb(220, 220, 220);
-    background: $black;
-    border-style: solid none;
-    border-width: 1px;
-    border-color: rgb(46, 46, 46);
-    &:hover {
-      color: rgb(220, 220, 220);
-      background: rgb(30, 30, 30);
-      border-color: rgb(10, 10, 10);
-      text-decoration: none;
-    }
-}
-span.helptext {
-    display: none;
-}
-
 #footer {
     background-color: $dark-blue;
     color: $white;
@@ -420,6 +255,9 @@ span.helptext {
     text-align: center;
     a {
         color: $white;
+        &:hover {
+            color: $teal;
+        }
     }
 }
 

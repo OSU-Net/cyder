@@ -1,7 +1,7 @@
 {% extends "cydhcp/cydhcp_base.html" %}
 
 
-{% block cydhcp_content %}
+{% block content %}
     <form class="well form-horizontal" method="post" action="">
         {% for form in range_formset.forms %}
             {{ form }}
