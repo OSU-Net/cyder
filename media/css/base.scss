@@ -22,8 +22,8 @@ ul {
 
 div#header {
     background-color: $dark-gray;
-    height: 45px;
-    padding-top: 5px;
+    height: 50px;
+    padding-top: 10px;
     h1 {
         display: inline;
         a {
@@ -38,7 +38,7 @@ div#header {
             border-width: 0 2px 0 0;
             display: inline;
             margin-right: -5px;
-            padding: 25px 0 10px 0;
+            padding: 30px 0 16px 0;
             &:first-child {
                 border-width: 0 2px 0 2px;
             }
@@ -46,7 +46,7 @@ div#header {
                 bottom: 3px;
                 font-size: 18px;
                 position: relative;
-                padding: 25px 30px 12px;
+                padding: 30px 30px 18px;
                 &:hover {
                     background: $black;
                 }
@@ -54,9 +54,40 @@ div#header {
         }
     }
 }
+#subheader {
+    background-color: $dark-blue;
+    height: 30px;
+    padding-top: 5px;
+    #ctnr {
+        float: left;
+        position: relative;
+        bottom: 4px;
+        select {
+            background: $white;
+            border-radius: 2px;
+            color: $light-gray;
+            padding-left: 2px;
+        }
+    }
+    #search {
+        form {
+            float: right;
+            display: inline;
+            position: relative;
+            bottom: 4px;
+            input {
+                background: $white;
+                border-radius: 2px;
+                color: $light-gray;
+                font-style: italic;
+                padding-left: 3px;
+            }
+        }
+    }
+}
 
 .main {
-    padding-top: 13px;
+    clear: both;
     #kid { @include img-box-shadow(); }
 }
 
@@ -385,3 +416,21 @@ span.helptext {
     }
 }
 
+/* Clearfix */
+.c:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+.c {
+    display: inline-block;
+}
+html[xmlns] .c {
+    display: block;
+}
+* html .c {
+    height: 1%;
+}

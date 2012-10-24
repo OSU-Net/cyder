@@ -24,8 +24,8 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
-from cyder.cydhcp.search.parser import parse
-from cyder.cydhcp.search.search import compile_search
+from cyder.core.search.parser import parse
+from cyder.core.search.search import compile_search
 
 import pdb
 import re

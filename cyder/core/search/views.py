@@ -25,8 +25,8 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
 import pdb
-from cyder.cydhcp.search.parser import parse
-from cyder.cydhcp.search.search import compile_search
+from cyder.core.search.parser import parse
+from cyder.core.search.search import compile_search
 
 import re
 import ipaddr
@@ -35,7 +35,7 @@ import simplejson as json
 
 
 from jinja2 import Environment, PackageLoader
-env = Environment(loader=PackageLoader('cydhcp.search', 'templates'))
+env = Environment(loader=PackageLoader('cyder.core.search', 'templates'))
 
 
 def search_ajax(request):
@@ -66,7 +66,7 @@ def search_ajax(request):
         'txt': txts.count() if txts else 0,
         }
     }
-    template = env.get_template('search/cydhcp_search_results.html')
+    template = env.get_template('search/search_results.html')
     return HttpResponse(template.render(
         **{
         "misc": misc,
@@ -89,6 +89,6 @@ def search_ajax(request):
 def search(request):
     """Search page"""
     search = request.GET.get('search', '')
-    return render(request, "search/cydhcp_search.html", {
+    return render(request, "search/search.html", {
         "search": search
     })

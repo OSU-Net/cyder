@@ -14,7 +14,7 @@
             $('#results').html('<p>Please wait while we retrieve your results...<p>');
             var start = new Date().getTime();
 
-            $.get('/cydhcp/search/search_ajax?search='+escape(search),
+            $.get('/core.search/search_ajax?search='+escape(search),
             function update_results(data){
                 // First make the banner go away. Then push everthing to the left... just like google.
                 $('#banner_text').empty();
@@ -63,5 +63,5 @@
 </div>
 <div id="results">
 </div>
-{% include 'search/cydhcp_search_help.html' %}
+{% include 'search/search_help.html' %}
 {% endblock %}

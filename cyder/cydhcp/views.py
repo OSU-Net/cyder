@@ -14,7 +14,6 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from django.shortcuts import render
 
 import ipaddr
-import pdb
 
 
 class CoreListView(BaseListView):

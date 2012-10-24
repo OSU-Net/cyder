@@ -19,8 +19,25 @@
       </div>
     </div>
 
+    <div id="subheader">
+      <div class="container">
+        <span id="ctnr">
+          <form action="/search" method="post">
+            <select>
+              <option value="0">Select Container...</option>
+            </select>
+          </form>
+        </span>
+        <span id="search">
+          <form action="/search" method="post">
+            <input value="Search..." type="text"></input>
+          </form>
+        </span>
+      </div>
+    </div>
+
     <div class="main wrap container">
-      <img id="kid" style="position: fixed; right: -25px; top: 50px; opacity:.3;" src="/media/img/cyder.gif">
+      <img id="kid" style="position: fixed; right: -25px; top: 99.5px; opacity:.3;" src="/media/img/cyder.gif">
 
       {% block site_tabs %} {% endblock %}
       {{ js('cyder_js') }}

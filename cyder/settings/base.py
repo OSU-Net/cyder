@@ -52,6 +52,7 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
+    'core.search',
     'core.systems',
     'cydhcp',
     'cydhcp.site',
@@ -62,7 +63,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydhcp.lib',
     'cydhcp.interface',
     'cydhcp.interface.static_intr',
-    'cydhcp.search',
     'cydhcp.lib',
     'cydhcp.bulk_change',
     'cydns',
