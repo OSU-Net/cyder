@@ -52,12 +52,23 @@ div#header {
         display: inline;
         li {
             border: solid $black 1px;
-            border-width: 0 2px 0 0;
+            border-width: 0 1px 0 0;
             display: inline;
             margin-right: -5px;
-            padding: 30px 0 16px 0;
+            padding: 30px 0 16px 0px;
             &:first-child {
-                border-width: 0 2px 0 2px;
+                border-width: 0 1px 0 1px;
+            }
+            &:not(:first-child) {
+                padding-left: 2px;
+            }
+            &.selected {
+                border: none;
+                a {
+                    background: $light-gray;
+                    cursor: default;
+                    color: $dark-gray;
+                }
             }
             a {
                 bottom: 3px;
@@ -109,9 +120,18 @@ div#header {
         display: block;
         padding: 13px;
         &:hover {
-          color: $teal;
-          background: $dark-gray;
-          text-decoration: none;
+            color: $teal;
+            background: $dark-gray;
+            text-decoration: none;
+        }
+        &.selected {
+            background: $light-gray;
+            border: none;
+            color: $dark-gray;
+            &:hover {
+                cursor: default;
+                color: $dark-gray;
+            }
         }
         .nav-item {
             display: block;

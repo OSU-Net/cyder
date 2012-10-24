@@ -13,8 +13,8 @@
       <div class="container">
         <h1><a href="/">Cyder</a></h1>
         <ul id="nav">
-          <li><a href="{{ url("cydns-index") }}">DNS</a></li>
-          <li><a href="{{ url("cydhcp-index") }}">DHCP</a></li>
+          <li class="{{ 'selected' if request.path == url('cydns-index') }}"><a href="{{ url("cydns-index") }}">DNS</a></li>
+          <li class="{{ 'selected' if request.path == url('cydhcp-index') }}"><a href="{{ url("cydhcp-index") }}">DHCP</a></li>
         </ul>
       </div>
     </div>
