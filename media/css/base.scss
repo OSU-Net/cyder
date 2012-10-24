@@ -32,14 +32,14 @@ div#header {
     }
     #nav {
         clear: left;
-        display: inline-block;
+        display: inline;
         li {
             border: solid $black 1px;
             border-width: 0 2px 0 0;
             display: inline;
             margin-right: -5px;
             padding: 25px 0 10px 0;
-            &:last-child {
+            &:first-child {
                 border-width: 0 2px 0 2px;
             }
             a {

@@ -18,12 +18,7 @@ JINGO_MINIFY_USE_STATIC = False
 MINIFY_BUNDLES = {
     'css': {
         'cyder_css': (
-            'css/lib/blueprint/ie.css',
-            'css/lib/blueprint/screen.css',
-            'css/lib/blueprint/plugins/buttons/screen.css',
-            'css/lib/blueprint/plugins/fancy-type/screen.css',
-            'css/lib/blueprint/plugins/link-icons/screen.css',
-            'css/lib/blueprint/plugins/rtl/screen.css',
+            'css/lib/screen.css',
             'css/lib/jquery.autocomplete.css',
             'css/sticky_footer.css',
 
