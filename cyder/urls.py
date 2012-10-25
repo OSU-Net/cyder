@@ -12,7 +12,6 @@ patch()
 # from django.contrib import admin
 admin.autodiscover()
 
-
 urlpatterns = patterns('',
    url(r'^$', direct_to_template, {'template': 'base/index.html'}, name='system-home'),
    (r'^admin/', include(admin.site.urls)),
@@ -22,8 +21,8 @@ urlpatterns = patterns('',
    (r'^tasty/', include('cyder.core.systems.urls')),
    (r'^search/', include('cyder.core.search.urls')),
 
-   (r'^login/', include('cyder.core.cyuser.urls')),
-   (r'^logout/', include('cyder.core.cyuser.urls')),
+   url(r'^login/$', cyuser_views.login, name='login'),
+   url(r'^logout/$', cyuser_views.logout, name='logout'),
 )
 
 if settings.DEBUG:
