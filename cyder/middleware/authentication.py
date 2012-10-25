@@ -4,10 +4,10 @@ from django.shortcuts import redirect
 class AuthenticationMiddleware(object):
 
     def process_request(self, request):
-        if request.user.is_authenticated() or request.path in (u'/login', u'/logout'):
+        if request.user.is_authenticated() or request.path in (u'/login/', u'/logout/'):
             pass
         else:
-            return redirect('/login')
+            return redirect('/login/')
 
         if not 'ctnr' in request.session:
             # Set session ctnr on login to user's default ctnr.

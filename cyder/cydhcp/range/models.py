@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter
-from cyder.cydhcp.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.ip.models import ipv6_to_longs

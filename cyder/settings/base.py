@@ -52,6 +52,8 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
+    'core.ctnr',
+    'core.cyuser',
     'core.search',
     'core.systems',
     'cydhcp',

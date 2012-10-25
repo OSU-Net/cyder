@@ -21,6 +21,9 @@ urlpatterns = patterns('',
 
    (r'^tasty/', include('cyder.core.systems.urls')),
    (r'^search/', include('cyder.core.search.urls')),
+
+   (r'^login/', include('cyder.core.cyuser.urls')),
+   (r'^logout/', include('cyder.core.cyuser.urls')),
 )
 
 if settings.DEBUG:

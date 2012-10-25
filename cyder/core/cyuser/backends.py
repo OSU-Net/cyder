@@ -51,7 +51,7 @@ def has_perm(self, request, obj, action):
     user = request.user
     ctnr = request.session['ctnr']
 
-    # get user level
+    # Get user level.
     try:
         is_ctnr_admin = CtnrUser.objects.get(ctnr=ctnr, user=user).level == 2
         is_ctnr_user = CtnrUser.objects.get(ctnr=ctnr, user=user).level == 1
@@ -82,20 +82,20 @@ def has_perm(self, request, obj, action):
     else:
         user_level = 'pleb'
 
-    # dispatch to appropriate permissions handler
+    # Dispatch to appropriate permissions handler.
     obj_type = obj.__class__.__name__
     handling_function = {
-        # administrative
+        # Administrative.
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
 
         'SOA': has_soa_perm,
 
-        # top-level ctnr objects
+        # Top-level ctnr objects.
         'Domain': has_domain_perm,
         'ReverseDomain': has_reverse_domain_perm,
 
-        # domain records
+        # Domain records.
         'AddressRecord': has_domain_record_perm,
         'CNAME': has_domain_record_perm,
         'MX': has_domain_record_perm,
@@ -103,17 +103,17 @@ def has_perm(self, request, obj, action):
         'SRV': has_domain_record_perm,
         'Nameserver': has_domain_record_perm,
 
-        # reverse domain records
+        # Reverse domain records.
         'PTR': has_reverse_domain_record_perm,
         'ReverseNameserver': has_reverse_domain_record_perm,
 
-        # dhcp
+        # DHCP.
         'Subnet': has_subnet_perm,
         'Range': has_range_perm,
         'Group': has_group_perm,
         'Node': has_node_perm,
 
-        # options
+        # Options.
         'SubnetOption': has_dhcp_option_perm,
         'ClassOption': has_dhcp_option_perm,
         'PoolOption': has_dhcp_option_perm,

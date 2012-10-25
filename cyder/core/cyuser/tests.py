@@ -101,16 +101,16 @@ class PermissionsTest(TestCase):
         self.test_user = User.objects.get_or_create(username='test_user', password='test_user')[0]
         self.setup_request()
 
-        # superuser
+        # Superuser.
         self.superuser = User.objects.get(username='development')
 
-        # cyder admin
+        # Cyder admin.
         self.cyder_admin = User.objects.get_or_create(username='cyder_admin', password='cyder_admin')[0]
         self.ctnr_global = Ctnr.objects.get(id=1)
         self.ctnr_user_cyder_admin_global = CtnrUser(id=None, ctnr=self.ctnr_global, user=self.cyder_admin, level=2)
         self.ctnr_user_cyder_admin_global.save()
 
-        # admin
+        # Admin.
         self.ctnr_admin = Ctnr(id=None, name="admin")
         self.ctnr_admin.save()
         self.ctnr_user_admin = CtnrUser(id=None, ctnr=self.ctnr_admin, user=self.test_user, level=2)
@@ -118,19 +118,19 @@ class PermissionsTest(TestCase):
         self.ctnr_user_cyder_admin = CtnrUser(id=None, ctnr=self.ctnr_admin, user=self.cyder_admin, level=2)
         self.ctnr_user_cyder_admin.save()
 
-        # user
+        # User.
         self.ctnr_user = Ctnr(id=None, name="user")
         self.ctnr_user.save()
         self.ctnr_user_user = CtnrUser(id=None, ctnr=self.ctnr_user, user=self.test_user, level=1)
         self.ctnr_user_user.save()
 
-        # guest
+        # Guest.
         self.ctnr_guest = Ctnr(id=None, name="guest")
         self.ctnr_guest.save()
         self.ctnr_user_guest = CtnrUser(id=None, ctnr=self.ctnr_guest, user=self.test_user, level=0)
         self.ctnr_user_guest.save()
 
-        # pleb
+        # Pleb.
         self.pleb_user = User.objects.get_or_create(username='pleb_user', password='pleb_user')[0]
 
     def test_soa_perms(self):
@@ -174,7 +174,7 @@ class PermissionsTest(TestCase):
             'guest': ['view'],
         }
 
-        # initialize obj into ctnrs
+        # Initialize obj into ctnrs.
         obj = Domain(id=None, name='foo')
         obj.save()
         self.ctnr_admin.domains.add(obj)
@@ -197,7 +197,7 @@ class PermissionsTest(TestCase):
             'guest': ['view'],
         }
 
-        # initialize obj into ctnrs
+        # Initialize obj into ctnrs.
         obj = ReverseDomain(id=None, name='128')
         obj.save()
         self.ctnr_admin.reverse_domains.add(obj)
@@ -220,7 +220,7 @@ class PermissionsTest(TestCase):
             'guest': ['view'],
         }
 
-        # initialize objs into ctnrs
+        # Initialize objs into ctnrs.
         domain = Domain(id=None, name='foo')
         domain.save()
         self.ctnr_admin.domains.add(domain)
@@ -251,7 +251,7 @@ class PermissionsTest(TestCase):
             'guest': ['view'],
         }
 
-        # initialize objs into ctnrs
+        # Initialize objs into ctnrs.
         rdomain = ReverseDomain(id=None, name='128')
         rdomain.save()
         self.ctnr_admin.reverse_domains.add(rdomain)
@@ -286,30 +286,30 @@ class PermissionsTest(TestCase):
         """
         Utility function for checking permissions
         """
-        # superuser
+        # Superuser.
         self.request.user = self.superuser
         self.request.session['ctnr'] = self.ctnr_guest
         self.assert_perms(obj, perm_table, 'superuser')
 
-        # cyder admin
+        # Cyder admin.
         self.request.user = self.cyder_admin
         self.request.session['ctnr'] = self.ctnr_admin
         self.assert_perms(obj, perm_table, 'cyder_admin')
 
-        # admin
+        # Admin.
         self.request.user = self.test_user
         self.request.session['ctnr'] = self.ctnr_admin
         self.assert_perms(obj, perm_table, 'admin')
 
-        # user
+        # User.
         self.request.session['ctnr'] = self.ctnr_user
         self.assert_perms(obj, perm_table, 'user')
 
-        # guest
+        # Guest.
         self.request.session['ctnr'] = self.ctnr_guest
         self.assert_perms(obj, perm_table, 'guest')
 
-        # pleb
+        # Pleb.
         self.request.user = self.pleb_user
         self.assert_perms(obj, perm_table, 'pleb')
 
@@ -331,7 +331,7 @@ class PermissionsTest(TestCase):
             'delete': delete_perm,
         }
 
-        # superuser
+        # Superuser.
         actual_perms_list = [create_perm, view_perm, update_perm, delete_perm]
         if user_level == 'superuser':
             for perm in actual_perms_list:
@@ -340,7 +340,7 @@ class PermissionsTest(TestCase):
                 )
             return
 
-        # pleb
+        # Pleb.
         if not user_level in perm_table:
             for actual_perm in actual_perms_list:
                 self.assertTrue(not actual_perm,
@@ -349,20 +349,20 @@ class PermissionsTest(TestCase):
                 )
             return
 
-        # get what permissions should be from permissions table
+        # Get what permissions should be from permissions table.
         test_perm_list = perm_table[user_level]
 
-        # generically compare actual perms to what they should be (test_perm_list)
+        # Generically compare actual perms to what they should be (test_perm_list).
         for perm_type, actual_perm in actual_perms.iteritems():
 
-            # if should have perm
+            # If should have perm.
             if perm_type in test_perm_list:
                 self.assertTrue(actual_perm,
                     "%s should have %s perms to %s"
                         % (user_level, perm_type, obj.__class__.__name__)
                 )
 
-            # if should not have perm
+            # If should not have perm.
             elif 'all' not in test_perm_list:
                 self.assertTrue(not actual_perm,
                     "%s should not have %s perms to %s"

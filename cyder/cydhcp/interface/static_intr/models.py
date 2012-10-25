@@ -6,7 +6,7 @@ from cyder.core.systems.models import System
 import cydns
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydhcp.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.address_record.models import BaseAddressRecord
 from cyder.cydns.models import CydnsRecord

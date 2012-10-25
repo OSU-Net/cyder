@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
 
 from cyder.cydhcp.keyvalue.models import KeyValue

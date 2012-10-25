@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.validation import validate_label, validate_name
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_ttl
 from cyder.cydns.models import check_for_cname

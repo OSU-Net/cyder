@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from cyder.cydns.validation import validate_name
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 
 from django.conf import settings
 from cyder.cydhcp.keyvalue.models import KeyValue

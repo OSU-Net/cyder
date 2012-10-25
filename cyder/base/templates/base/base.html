@@ -17,8 +17,8 @@
           <li class="{{ 'selected' if request.path == url('cydhcp-index') }}"><a href="{{ url('cydhcp-index') }}">DHCP</a></li>
         </ul>
         <ul class="nav nav-right">
-          <li class="{{ 'selected' if request.path == False }}"><a href="{{ url('search') }}">Search</a></li>
-          <li class="{{ 'selected' if request.path == False }}"><a href="{{ url('cydns-index') }}">Logout</a></li>
+          <li class="{{ 'selected' if request.path == url('search') }}"><a href="{{ url('search') }}">Search</a></li>
+          <li><a href="{{ url('logout') }}">Logout</a></li>
         </ul>
       </div>
     </div>

@@ -4,7 +4,7 @@ import cydns
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.models import CydnsRecord
 from cyder.cydns.validation import validate_name
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.view.models import View
 from cyder.cydns.soa.utils import update_soa
 

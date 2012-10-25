@@ -7,7 +7,7 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydhcp.utils import IPFilter, two_to_four
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 

@@ -6,7 +6,7 @@ from django.db.models.signals import m2m_changed
 import cydns
 from cyder.cydns.domain.models import Domain, _check_TLD_condition
 from cyder.cydns.view.models import View
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, is_rfc1918, is_rfc4193
 from django.conf import settings
