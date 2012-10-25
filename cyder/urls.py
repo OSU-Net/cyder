@@ -7,6 +7,8 @@ from django.views import static
 from funfactory.monkeypatches import patch
 patch()
 
+from cyder.core.cyuser import views as cyuser_views
+
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
