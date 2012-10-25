@@ -47,9 +47,29 @@ div#header {
             }
         }
     }
-    #nav {
+    .nav {
         clear: left;
         display: inline;
+        &.nav-right {
+            bottom: 20px;
+            clear: none;
+            float: right;
+            /* Remove with blueprint */
+            margin-bottom: 0;
+            margin-right: 0;
+            position: relative;
+            li {
+                border-width: 0 1px 0 0;
+                display: inline-block;
+                padding-bottom: 13px;
+                &:first-child {
+                    border-width: 0 1px 0 1px;
+                }
+                a {
+                    padding-bottom: 19px;
+                }
+            }
+        }
         li {
             border: solid $black 1px;
             border-width: 0 1px 0 0;
@@ -100,10 +120,11 @@ div#header {
     }
     #search {
         form {
+            bottom: 18px;
+            clear: right;
             float: right;
             display: inline;
             position: relative;
-            bottom: 4px;
         }
     }
 }
