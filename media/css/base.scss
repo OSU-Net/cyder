@@ -52,8 +52,10 @@ div#header {
         }
     }
     .nav {
+        bottom: 18px;
         clear: left;
         display: inline;
+        position: relative;
         &.nav-right {
             bottom: 20px;
             clear: none;
@@ -61,13 +63,12 @@ div#header {
             /* Remove with blueprint */
             margin-bottom: 0;
             margin-right: 0;
-            position: relative;
             li {
                 border-width: 0 1px 0 0;
                 display: inline-block;
                 padding-bottom: 13px;
                 &:first-child {
-                    border-width: 0 1px 0 1px;
+                    border-width: 0 1px;
                 }
                 a.navlink {
                     padding-bottom: 19px;
@@ -95,6 +96,8 @@ div#header {
                 }
             }
             &.userinfo {
+                background: darken($dark-gray, 3%);
+                display: inline-block;
                 padding-top: 2px;
                 padding-bottom: 15px;
                 text-align: center;
@@ -105,7 +108,7 @@ div#header {
                 a {
                     color: $teal;
                     font-size: 13px;
-                    padding: 5px 15px;
+                    padding: 5px 10px;
                     &:hover {
                         color: $white;
                     }
