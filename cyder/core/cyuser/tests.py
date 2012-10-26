@@ -17,7 +17,6 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.reverse_domain.models import ReverseDomain
 from cyder.middleware.authentication import AuthenticationMiddleware
 from cyder.middleware.dev_authentication import DevAuthenticationMiddleware
 
@@ -184,29 +183,6 @@ class PermissionsTest(TestCase):
 
         self.check_perms_each_user(obj, perm_table)
 
-    def test_reverse_domain_perms(self):
-        """
-        Test reverse domain perms
-        """
-        self.setup_request()
-
-        perm_table = {
-            'cyder_admin': ['all'],
-            'admin': ['all'],
-            'user': ['all'],
-            'guest': ['view'],
-        }
-
-        # Initialize obj into ctnrs.
-        obj = ReverseDomain(id=None, name='128')
-        obj.save()
-        self.ctnr_admin.reverse_domains.add(obj)
-        self.ctnr_user.reverse_domains.add(obj)
-        self.ctnr_guest.reverse_domains.add(obj)
-        self.save_all_ctnrs()
-
-        self.check_perms_each_user(obj, perm_table)
-
     def test_domain_records_perms(self):
         """
         Test common domain record perms (cname, mx, txt, srv, ns)
@@ -236,33 +212,6 @@ class PermissionsTest(TestCase):
         domain_records.append(Nameserver(domain=domain))
 
         for obj in domain_records:
-            self.check_perms_each_user(obj, perm_table)
-
-    def test_rdomain_records_perms(self):
-        """
-        Test common reverse domain record perms (ptr, reverse_ns)
-        """
-        self.setup_request()
-
-        perm_table = {
-            'cyder_admin': ['all'],
-            'admin': ['all'],
-            'user': ['all'],
-            'guest': ['view'],
-        }
-
-        # Initialize objs into ctnrs.
-        rdomain = ReverseDomain(id=None, name='128')
-        rdomain.save()
-        self.ctnr_admin.reverse_domains.add(rdomain)
-        self.ctnr_user.reverse_domains.add(rdomain)
-        self.ctnr_guest.reverse_domains.add(rdomain)
-        self.save_all_ctnrs()
-        rdomain_records = []
-        rdomain_records.append(PTR(reverse_domain=rdomain))
-        rdomain_records.append(ReverseNameserver(reverse_domain=rdomain))
-
-        for obj in rdomain_records:
             self.check_perms_each_user(obj, perm_table)
 
     def setup_request(self):

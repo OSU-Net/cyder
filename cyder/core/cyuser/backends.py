@@ -93,7 +93,6 @@ def has_perm(self, request, obj, action):
 
         # Top-level ctnr objects.
         'Domain': has_domain_perm,
-        'ReverseDomain': has_reverse_domain_perm,
 
         # Domain records.
         'AddressRecord': has_domain_record_perm,
@@ -167,22 +166,6 @@ def has_domain_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_reverse_domain_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for reverse domains
-    Ctnrs have reverse domains
-    """
-    if not obj in ctnr.reverse_domains.all():
-        return False
-
-    return {
-        'cyder_admin': True,
-        'ctnr_admin': True,
-        'user': True,
-        'guest': action == 'view',
-    }.get(user_level, False)
-
-
 def has_domain_record_perm(user_level, obj, ctnr, action):
     """
     Permissions for domain records (or objects linked to a domain)
@@ -204,7 +187,7 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
     Permissions for reverse domain records (or objects linked to a reverse domain)
     Reverse domain records are assigned a reverse domain
     """
-    if obj.reverse_domain not in ctnr.reverse_domains.all():
+    if obj.reverse_domain not in ctnr.domains.all():
         return False
 
     return {

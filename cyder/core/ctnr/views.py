@@ -1,4 +1,4 @@
-import simplejson
+emport simplejson
 
 from django.contrib import messages
 from django import forms
@@ -35,10 +35,10 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         users = ctnr.users.all()
         user_headers, user_matrix, user_urls = tablefy_users(users)
 
-        domains = ctnr.domains.all()
+        domains = ctnr.domains.filter(is_reverse=False)
         domain_headers, domain_matrix, domain_urls = tablefy(domains)
 
-        rdomains = ctnr.reverse_domains.all()
+        rdomains = ctnr.domains.filter(is_reverse=True)
         rdomain_headers, rdomain_matrix, rdomain_urls = tablefy(rdomains)
 
         return dict({
