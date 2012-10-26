@@ -13,12 +13,19 @@
       <div class="container">
         <h1><a href="/">Cyder</a></h1>
         <ul class="nav">
-          <li class="{{ 'selected' if request.path == url('cydns-index') }}"><a href="{{ url('cydns-index') }}">DNS</a></li>
-          <li class="{{ 'selected' if request.path == url('cydhcp-index') }}"><a href="{{ url('cydhcp-index') }}">DHCP</a></li>
+          <li class="{{ 'selected' if request.path == url('cydns-index') }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
+          <li class="{{ 'selected' if request.path == url('cydhcp-index') }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
         </ul>
         <ul class="nav nav-right">
-          <li class="{{ 'selected' if request.path == url('search') }}"><a href="{{ url('search') }}">Search</a></li>
-          <li><a href="{{ url('logout') }}">Logout</a></li>
+          <li class="{{ 'selected' if request.path == url('search') }}"><a class="navlink" href="{{ url('search') }}">Search</a></li>
+          <li class="userinfo">
+            <span>
+              <a href="#">{{ request.user.username }}</a>
+              <p>on</p>
+              <a href="#">{{ request.session.ctnr.name }}</a>
+            </span>
+          </li>
+          <li><a class="navlink" href="{{ url('logout') }}">Logout</a></li>
         </ul>
       </div>
     </div>

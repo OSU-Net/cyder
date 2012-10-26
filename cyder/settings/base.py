@@ -23,7 +23,6 @@ MINIFY_BUNDLES = {
             'css/sticky_footer.css',
 
             'css/base.scss',
-            'css/navtabs.scss',
             'css/globals.scss',
         ),
     },
@@ -105,6 +104,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
+)
+
+AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.RemoteUserBackend',
 )
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated
@@ -115,8 +121,10 @@ JINGO_EXCLUDE_APPS = [
     'tastytools',
 ]
 
-DJANGO_TEMPLATE_APPS = [ 'admin', ] # Tells the extract script what files to look for L10n in and what function
+DJANGO_TEMPLATE_APPS = ['admin',] # Tells the extract script what files to look for L10n in and what function
 # handles the extraction. The Tower library expects this.
+
+LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
 
 # # Use this if you have localizable HTML files:
 # DOMAIN_METHODS['lhtml'] = [
@@ -131,23 +139,9 @@ DJANGO_TEMPLATE_APPS = [ 'admin', ] # Tells the extract script what files to loo
 #    ('media/js/**.js', 'javascript'),
 # ]
 
-LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
-AUTH_PROFILE_MODULE = 'core.systems.UserProfile'
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.RemoteUserBackend',
-)
-
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-#########################################################
-#                   MOZ DNS                             #
-#########################################################
 
 MOZDNS_BASE_URL = "/cydns"
 CORE_BASE_URL = "/cydhcp"
-JINJA_CONFIG = {'autoescape': False}
 BUILD_PATH = 'builds'
 INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
-
-def custom_show_toolbar(request):
-    return True # Always show toolbar, for example purposes only.

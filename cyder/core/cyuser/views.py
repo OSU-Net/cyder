@@ -9,14 +9,14 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
 
 
-def login(request):
+def cylogin(request):
     """
     Not implemented.
     """
     return redirect('/')
 
 
-def logout(request):
+def cylogout(request):
     """
     Not implemented.
     """

@@ -23,8 +23,8 @@ urlpatterns = patterns('',
    (r'^tasty/', include('cyder.core.systems.urls')),
    (r'^search/', include('cyder.core.search.urls')),
 
-   url(r'^login/$', cyuser_views.login, name='login'),
-   url(r'^logout/$', cyuser_views.logout, name='logout'),
+   url(r'^login/$', cyuser_views.cylogin, name='login'),
+   url(r'^logout/$', cyuser_views.cylogout, name='logout'),
 )
 
 if settings.DEBUG:

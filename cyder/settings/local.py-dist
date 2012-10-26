@@ -4,14 +4,14 @@ import os
 
 from .base import *
 
+
 _base = os.path.dirname(__file__)
 site_root = os.path.realpath(os.path.join(_base, '../'))
 sys.path.append(site_root)
-sys.path.append(site_root + '/adapters')
 sys.path.append(site_root + '/libs')
-sys.path.append(site_root + '/modules')
 sys.path.append(site_root + '/vendor')
 
+DEV = True
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -83,27 +83,13 @@ BUG_URL = ''
 #COVERAGE_MODULES = ['api.views']
 #TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
 USER_SYSTEM_ALLOWED_DELETE = ('')
+
 from jinja2 import FileSystemLoader, Environment
 TEMPLATE_DIRS = (
     os.path.join(_base, 'templates'),
     site_root + '/templates'
 )
-DEV = True
 
-env = Environment(loader=FileSystemLoader(TEMPLATE_DIRS))
-def jinja_url(view_name, *args, **kwargs):
-    from django.core.urlresolvers import reverse, NoReverseMatch
-    try:
-        return reverse(view_name, args=args, kwargs=kwargs)
-    except NoReverseMatch:
-        try:
-            project_name = SETTINGS_MODULE.split('.')[0]
-            return reverse(project_name + '.' + view_name,
-                           args=args, kwargs=kwargs)
-        except NoReverseMatch:
-            return ''
-
-env.filters['url'] = jinja_url
 import logging
 error = dict(level=logging.ERROR)
 info = dict(level=logging.INFO)
@@ -126,8 +112,10 @@ DESKTOP_EMAIL_ADDRESS = 'desktop@example.com'
 FROM_EMAIL_ADDRESS = 'inventory@example.com'
 DHCP_CONFIG_OUTPUT_DIRECTORY = '/data/dhcpconfig-autodeploy'
 UNAUTHORIZED_EMAIL_ADDRESS = ('manager@example.com')
-PISTON_IGNORE_DUPE_MODELS = True
 
+def custom_show_toolbar(request):
+    # Always show toolbar, for example purposes only.
+    return True
 DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.version.VersionDebugPanel',
     'debug_toolbar.panels.timer.TimerDebugPanel',

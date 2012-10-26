@@ -69,7 +69,7 @@ div#header {
                 &:first-child {
                     border-width: 0 1px 0 1px;
                 }
-                a {
+                a.navlink {
                     padding-bottom: 19px;
                 }
             }
@@ -88,13 +88,35 @@ div#header {
             }
             &.selected {
                 border: none;
-                a {
+                a.navlink {
                     background: $light-gray;
                     cursor: default;
                     color: $dark-gray;
                 }
             }
-            a {
+            &.userinfo {
+                padding-top: 2px;
+                padding-bottom: 15px;
+                text-align: center;
+                span {
+                    position: relative;
+                    top: 11px;
+                }
+                a {
+                    color: $teal;
+                    font-size: 13px;
+                    padding: 5px 15px;
+                    &:hover {
+                        color: $white;
+                    }
+                }
+                p {
+                    color: $white;
+                    line-height: 13px;
+                    margin-bottom: 0;
+                }
+            }
+            a.navlink {
                 bottom: 3px;
                 color: $white;
                 font-size: 18px;
@@ -104,6 +126,17 @@ div#header {
                 &:hover {
                     background: $black;
                     color: $teal;
+                }
+            }
+            div.logged-in {
+                color: $white;
+                font-size: 13px;
+                position: absolute;
+                a {
+                    color: $white;
+                    &:hover {
+                        color: $teal;
+                    }
                 }
             }
         }
