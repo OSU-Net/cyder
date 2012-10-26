@@ -4,6 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Cyder | {% block title %}Cyder{% endblock %}</title>
     <link rel="shortcut icon" href="/media/img/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Gravitas+One' rel='stylesheet' type='text/css'>
     {{ css('cyder_css') }}
     {% block head %}{% endblock %}
   </head>
@@ -33,9 +35,13 @@
     <div id="subheader">
       <div class="container">
         <span id="ctnr">
-          <form action="/ctnr/" method="post">
-            <select>
-              <option value="0">Select Container...</option>
+          <form action="{{ url('ctnr-change') }}" method="post">
+            <span>Container</span>
+            <select name="ctnr_name" class="submit-on-change">
+              <option value="{{ request.session.ctnr }}">{{ request.session.ctnr.name }}</option>
+              {% for ctnr in request.session.ctnrs %}
+                <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+              {% endfor %}
             </select>
           </form>
         </span>

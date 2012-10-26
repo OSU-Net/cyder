@@ -2,10 +2,15 @@
 
 body {
     background-color: $white;
+    font-family: 'Source Sans Pro', sans-serif;
 }
 
 p, h1, h2, h3, h4 {
     color: $black;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Source Sans Pro', sans-serif;
 }
 
 a {
@@ -42,10 +47,13 @@ div#header {
     padding-top: 10px;
     h1 {
         display: inline;
+        font-family: 'Gravitas One', cursive;
+        font-size: 30px;
         a {
             color: $white;
             float: left;
             font-weight: normal;
+            margin-top: 5px;
             &:hover {
                 color: $teal;
             }
@@ -55,6 +63,7 @@ div#header {
         bottom: 18px;
         clear: left;
         display: inline;
+        padding-left: 13px;
         position: relative;
         &.nav-right {
             bottom: 20px;
@@ -99,7 +108,7 @@ div#header {
                 background: darken($dark-gray, 3%);
                 display: inline-block;
                 padding-top: 2px;
-                padding-bottom: 15px;
+                padding-bottom: 14px;
                 text-align: center;
                 span {
                     position: relative;
@@ -125,7 +134,7 @@ div#header {
                 font-size: 18px;
                 font-weight: normal;
                 position: relative;
-                padding: 30px 30px 18px;
+                padding: 30px 30px 17px;
                 &:hover {
                     background: $black;
                     color: $teal;
@@ -154,6 +163,11 @@ div#header {
         float: left;
         position: relative;
         bottom: 4px;
+        span {
+            color: $white;
+            font-weight: bold;
+            margin-right: 5px;
+        }
         select {
             padding-left: 2px;
         }
@@ -206,6 +220,7 @@ div#header {
     background-color: $white;
     bottom: 19px;
     clear: both;
+    font-size: 13px;
     height: 100%;
     padding-top: 13px;
     position: relative;

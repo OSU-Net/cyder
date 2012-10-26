@@ -20,6 +20,7 @@ urlpatterns = patterns('',
    (r'^cydns/', include('cyder.cydns.urls')),
    (r'^cydhcp/', include('cyder.cydhcp.urls')),
 
+   (r'^ctnr/', include('cyder.core.ctnr.urls')),
    (r'^tasty/', include('cyder.core.systems.urls')),
    (r'^search/', include('cyder.core.search.urls')),
 

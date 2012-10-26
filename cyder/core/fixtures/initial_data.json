@@ -45,6 +45,16 @@
         "ctnr": 1,
         "level": 2
     }
+  },
+
+  {
+    "model": "ctnr.ctnruser",
+    "pk": 2,
+    "fields": {
+        "user": 1,
+        "ctnr": 2,
+        "level": 3
+    }
   }
 
 ]

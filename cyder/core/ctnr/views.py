@@ -1,4 +1,4 @@
-emport simplejson
+import simplejson
 
 from django.contrib import messages
 from django import forms
@@ -109,7 +109,7 @@ def change_ctnr(request, pk=None):
     """
     referer = request.META.get('HTTP_REFERER', '/')
 
-    # check if ctnr exists
+    # Check if ctnr exists.
     try:
         if request.method == 'POST':
             ctnr = Ctnr.objects.get(name=request.POST['ctnr_name'])
@@ -119,7 +119,7 @@ def change_ctnr(request, pk=None):
         messages.error(request, "Could not change container, does not exist")
         return redirect(referer)
 
-    # check if user has access to ctnr
+    # Check if user has access to ctnr.
     try:
         global_ctnr_user = CtnrUser.objects.get(user=request.user, ctnr=1)
     except CtnrUser.DoesNotExist:
@@ -130,10 +130,10 @@ def change_ctnr(request, pk=None):
         ctnr_user = None
 
     if ctnr_user or global_ctnr_user:
-        # set session ctnr and level
+        # Set session ctnr and level.
         request.session['ctnr'] = ctnr
 
-        # higher level overrides
+        # Higher level overrides.
         if ctnr_user:
             level = ctnr_user.level
         else:
