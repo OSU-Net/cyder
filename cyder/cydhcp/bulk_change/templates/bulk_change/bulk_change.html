@@ -1,11 +1,9 @@
 {% extends "cydhcp/cydhcp_base.html" %}
+
+{% block title %}Bulk Change{% endblock %}
+
 {% block content %}
 
-<style type="text/css">
-.center{
-    text-align: center;
-}
-</style>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
 
 <script type="text/javascript" >
@@ -65,7 +63,6 @@
     */
 </script>
 <div class="center">
-<h2>Bulk Change</h2>
     <input id="id_select" type="text" size="50" name="select" onChange='get_and_display_search()' value={{ search }}>
     <input value="Search" title="Search" type="button" id="btn_s" onclick='get_and_display_search()'>
     <br>

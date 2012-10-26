@@ -41,15 +41,17 @@
     </div>
 
     <div class="main wrap container">
-      <img id="kid" style="position: fixed; right: -25px; top: 99.5px; opacity:.3;" src="/media/img/cyder.gif">
+      <div class="main-inner">
+        <img id="kid" style="position: fixed; right: -25px; top: 95px; opacity:.3;" src="/media/img/cyder.gif">
 
-      {% if self.sidebar() %}<div id="sidebar">{% endif %}
-      {% block sidebar %}{% endblock %}
-      {% if self.sidebar() %}</div>{% endif %}
+        {% if self.sidebar() %}<div id="sidebar">{% endif %}
+        {% block sidebar %}{% endblock %}
+        {% if self.sidebar() %}</div>{% endif %}
 
-      <h1 id="title">{{ self.title() }}</h1>
-      {% block content %}{% endblock %}
-      {{ js('cyder_js') }}
+        <h1 id="title">{{ self.title() }}</h1>
+        {% block content %}{% endblock %}
+        {{ js('cyder_js') }}
+      </div>
     </div>
 
     <div id="footer">

@@ -1,7 +1,7 @@
 @import "globals.scss";
 
 body {
-    background-color: $white;
+    background-color: $light-gray;
 }
 
 p, h1, h2, h3, h4 {
@@ -26,6 +26,10 @@ input[type="text"], select {
     border-radius: 2px;
     color: $light-gray;
     padding-left: 3px;
+}
+
+.center {
+    text-align: center;
 }
 
 .helptext {
@@ -163,10 +167,17 @@ div#header {
 }
 
 .main {
+    @include box-shadow(0 0 2px $dark-gray);
+    background-color: $white;
+    bottom: 19px;
     clear: both;
     height: 100%;
-    margin-top: 13px;
+    padding-top: 13px;
+    position: relative;
     #kid { @include img-box-shadow(); }
+    .main-inner {
+        margin: 0 13px;
+    }
 }
 
 table {

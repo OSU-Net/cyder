@@ -8,6 +8,8 @@
     </ul>
 {% endif %}
 
+{% block title %}DNS{% endblock %}
+
 {% block content %}
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.js" type="text/javascript"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js" type="text/javascript"></script>
@@ -18,9 +20,6 @@
 
 <script>
 </script>
-
-
-    <h2>Create and Edit DNS records.</h2>
     <div id='build_status' class='build_notice'></div>
     <style>
         #commit_record {
