@@ -1,7 +1,7 @@
 @import "globals.scss";
 
 body {
-    background-color: $light-gray;
+    background-color: $white;
 }
 
 p, h1, h2, h3, h4 {
@@ -167,7 +167,6 @@ div#header {
 }
 
 .main {
-    @include box-shadow(0 0 2px $dark-gray);
     background-color: $white;
     bottom: 19px;
     clear: both;
@@ -175,9 +174,6 @@ div#header {
     padding-top: 13px;
     position: relative;
     #kid { @include img-box-shadow(); }
-    .main-inner {
-        margin: 0 7px;
-    }
 }
 
 table {
