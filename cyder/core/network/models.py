@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.core.utils import IPFilter, two_to_four
@@ -73,16 +72,31 @@ class Network(models.Model, ObjectUrlMixin):
                                   "child ranges")
         super(Network, self).delete(*args, **kwargs)
 
-    def clean(self):
+    def check_valid_site(self):
+        from cyder.core.network.utils import calc_networks, calc_parent
         self.update_network()
+        # If the network contains or is contained in another network make sure
+        # that they share a parent
+        fail = False
+        child_networks , parent_networks = calc_networks(self)
+        for parent_network in parent_networks:
+            if calc_parent(parent_network) != calc_parent(self):
+                fail = True
+        for child_network in child_networks:
+            if calc_parent(child_network) != calc_parent(self):
+                fail = True
+        return fail
+
+    def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
         # in the subnet?
+        self.update_network()
+        fail = False
         for range_ in self.range_set.all():
             """
                 I was writing checks to make sure that subnets wouldn't orphan
                 ranges. IPv6 needs support.
             """
-            fail = False
             # Check the start addresses.
             if range_.start_upper < self.ip_upper:
                 fail = True
@@ -108,10 +122,17 @@ class Network(models.Model, ObjectUrlMixin):
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
                 fail = True
+        return fail
 
-            if fail:
-                raise ValidationError("Resizing this subnet to the requested "
-                                      "network prefix would orphan existing ranges.")
+    def clean(self):
+        ranges_invalid = self.check_valid_range()
+        sites_invalid = self.check_valid_site()
+        if ranges_invalid:
+            raise ValidationError("Resizing this subnet to the requested "
+                                  "network prefix would orphan existing ranges.")
+        if sites_invalid:
+            raise ValidationError("This network has child or parent networks"
+                                  "which have different parent sites")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall

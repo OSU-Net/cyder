@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+
+from cyder.core.site.models import Site
 from cyder.core.network.models import Network
 from cyder.core.range.models import Range
 from cyder.cydns.domain.models import Domain
@@ -13,12 +15,37 @@ import pdb
 
 class NetworkTests(TestCase):
 
-    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None):
-        s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
+    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None, site=None):
+        if site:
+            parent = Site.objects.get(id = site)
+            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=parent)
+        else:
+            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
         s.clean()
         s.save()
         self.assertTrue(s)
         return s
+
+    def do_basic_add_site(self, name):
+        s = Site(name=name)
+        s.clean()
+        s.save()
+        self.assertTrue(s)
+        return s
+
+    def test_bad_site(self):
+        network = "111.111.111.0"
+        prefixlen1 = "24"
+        prefixlen2 = "28"
+        site1 = "Kerr"
+        site2 = "Newport"
+        s1 = self.do_basic_add_site({'name': site1})
+        s2 = self.do_basic_add_site({'name': site2})
+        kwargs = {'network': network, 'prefixlen': prefixlen1, 'ip_type': '4', 'site': s1.id}
+        n1 = self.do_basic_add(**kwargs)
+        kwargs = {'network_str': network + '/' + prefixlen2, 'ip_type': '4', 'site': s2}
+        n2 = Network(**kwargs)
+        self.assertRaises(ValidationError, n2.clean)
 
     def test1_create_ipv6(self):
         network = "f::"
