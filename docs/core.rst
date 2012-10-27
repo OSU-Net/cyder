@@ -18,7 +18,7 @@ the hosts using DNS and DHCP are located in. The core of inventory is it's
 
 Sites and Locations
 -----
-There are two types of sites, a top level site which represent a general geographic
+There are two types of sites, a top level site which represents a general geographic
 region like a campus and a location which is a place at a site.  Locations and sites
 allow us to partition up the campus by building and in turn those buildings can be 
 further divided up into departments if need be.
@@ -32,25 +32,10 @@ A :ref:`network` represents an IPv4/IPv6 network. Networks also related to
 eachother in a heirarchical way. Since networks are inherently contained within 
 other networks, no explicit parent child relationship is stored in the database. 
 Networks are homed in a site.  There are restrictions in terms of how sites and 
-networks can be associated.  A networks can be associated with multiple sites
-provided that those sites share a root parent site.  There are restrictions also
+networks can be associated.  A networks can be associated with multiple locations
+provided that those locations share a root parent site.  There are restrictions also
 in terms of the IP ranges of a network.  There are two distinct cases of valid 
 network allocations.
-
-Case 1:
-A network is created and associated with a site such that no other network in any site
-includes that range of addresses and if any existing networks are contained in that
-range they all share a parent site with the new network.
-
-Case 2:
-A network is created which is contained within an existing network and both of these
-networks share a parent site.
-
-These restrictions enforce the policy that new networks can't be created which span
-across other existing networks.  This means that any given range of addresses can 
-be unambigulously associated with a top level site.  It also restricts users from
-creating networks which straddle the the boundary of an existing network created
-a network which is only partially contained within another network.
 
 .. figure:: images/mozcore_networks.png
 
