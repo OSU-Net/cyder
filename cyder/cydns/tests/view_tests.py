@@ -11,10 +11,10 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 
 
-"""Hack hack hack, hack it up!"""
-
-
 def do_setUp(self, url_slug, test_class, test_data, use_domain=True):
+    """
+    Hack hack hack, hack it up!
+    """
     self.client = Client()
     self.url_slug = url_slug
     dname = random_label()

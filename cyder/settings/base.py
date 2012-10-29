@@ -51,6 +51,7 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
+    'core',
     'core.ctnr',
     'core.cyuser',
     'core.search',
@@ -107,9 +108,13 @@ MIDDLEWARE_CLASSES = (
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
 )
 
+SESSION_COOKIE_NAME = 'cyder'
+SESSION_COOKIE_SECURE = False
+
+
 AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.RemoteUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated
