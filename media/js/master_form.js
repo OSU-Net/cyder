@@ -391,7 +391,7 @@ function post(rec_type, commit_data, record_meta) {
 
     //commit_data = jQuery.extend(commit_data, get_views(rec_type));
     console.log(commit_data);
-    $.post('/mozdns/commit_record/', JSON.stringify(commit_data), function(data) {
+    $.post('/cydns/commit_record/', JSON.stringify(commit_data), function(data) {
         var data = jQuery.parseJSON(data)
         $('#error_list').empty();
         $('#dns_success').empty();
@@ -461,7 +461,7 @@ function get_record_meta_data(rec_type){
      *  - fill in 'pk' attribute
      *
      */
-    var base_api_url = "/mozdns/api/v1_dns/"
+    var base_api_url = "/cydns/api/v1_dns/"
     switch (rec_type) {
         case 'A':
                 return {

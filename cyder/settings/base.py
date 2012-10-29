@@ -19,6 +19,7 @@ MINIFY_BUNDLES = {
     'css': {
         'cyder_css': (
             'css/lib/screen.css',
+            'css/lib/jquery-ui-1.8.11.custom.css',
             'css/lib/jquery.autocomplete.css',
             'css/sticky_footer.css',
 
@@ -30,14 +31,14 @@ MINIFY_BUNDLES = {
         'cyder_js': (
             'js/lib/jquery-1.6.1.min.js',
             'js/lib/attribute_adder.js',
-            'js/lib/jquery-ui-1.8.11.custom.min.js',
-            'js/lib/jquery.autocomplete.min.js',
             'js/lib/jquery.history.js',
             'js/lib/jQuery.rightclick.js',
             'js/lib/jquery.tools.min.js',
             'js/lib/jquery.validate.min.js',
             'js/lib/jquery.dataTables.js',
             'js/lib/jquery.tabletools.min.js',
+            'js/lib/jquery.autocomplete.min.js',
+            'js/lib/jquery-ui-1.8.11.custom.min.js',
             'js/lib/tablesorter.js',
 
             'js/application.js',

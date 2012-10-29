@@ -26,7 +26,7 @@ $(document).ready(function (){
 });
 
 function make_smart_name_get_domains(element, append){
-    $.get('/mozdns/domain/get_all_domains/', function(domains) {
+    $.get('/cydns/domain/get_all_domains/', function(domains) {
         console.log(domains.sort);
         make_smart_name(element, $.parseJSON(domains), append);
     });
