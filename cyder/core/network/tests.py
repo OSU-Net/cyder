@@ -34,6 +34,10 @@ class NetworkTests(TestCase):
         return s
 
     def test_bad_site(self):
+        """
+        This test ensures that networks which contain each other
+        share a parent site
+        """
         network = "111.111.111.0"
         prefixlen1 = "24"
         prefixlen2 = "28"

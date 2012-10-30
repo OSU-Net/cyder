@@ -82,10 +82,15 @@ class Network(models.Model, ObjectUrlMixin):
         for parent_network in parent_networks:
             if calc_parent(parent_network) != calc_parent(self):
                 fail = True
+                break
         for child_network in child_networks:
             if calc_parent(child_network) != calc_parent(self):
                 fail = True
-        return fail
+                break
+        if fail:
+            raise ValidationError("This network has child or parent networks"
+                                  "which have different parent sites")
+        return
 
     def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
@@ -100,12 +105,15 @@ class Network(models.Model, ObjectUrlMixin):
             # Check the start addresses.
             if range_.start_upper < self.ip_upper:
                 fail = True
+                break
             elif (range_.start_upper > self.ip_upper and range_.start_lower <
                   self.ip_lower):
                 fail = True
+                break
             elif (range_.start_upper == self.ip_upper and range_.start_lower
                     < self.ip_lower):
                 fail = True
+                break
 
             if self.ip_type == '4':
                 brdcst_upper, brdcst_lower = 0, int(self.network.broadcast)
@@ -116,23 +124,23 @@ class Network(models.Model, ObjectUrlMixin):
             # Check the end addresses.
             if range_.end_upper > brdcst_upper:
                 fail = True
+                break
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
                   brdcst_lower):
                 fail = True
+                break
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
                 fail = True
-        return fail
-
-    def clean(self):
-        ranges_invalid = self.check_valid_range()
-        sites_invalid = self.check_valid_site()
-        if ranges_invalid:
+                break
+        if fail:
             raise ValidationError("Resizing this subnet to the requested "
                                   "network prefix would orphan existing ranges.")
-        if sites_invalid:
-            raise ValidationError("This network has child or parent networks"
-                                  "which have different parent sites")
+        return
+
+    def clean(self):
+        self.check_valid_range()
+        self.check_valid_site()
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
