@@ -45,6 +45,13 @@
             </select>
           </form>
         </span>
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
         <span id="search">
           <form action="{{ url('search') }}" method="get">
             <input type="text" name="search" value="Search..."></input>
@@ -54,7 +61,6 @@
     </div>
 
     <div class="main wrap container">
-      <div class="main-inner">
         <img id="kid" style="position: fixed; right: -25px; top: 95px; opacity:.3;" src="/media/img/cyder.gif">
 
         {% if self.sidebar() %}<div id="sidebar">{% endif %}
@@ -64,7 +70,6 @@
         <h1 id="title">{{ self.title() }}</h1>
         {% block content %}{% endblock %}
         {{ js('cyder_js') }}
-      </div>
     </div>
 
     <div id="footer">

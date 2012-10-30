@@ -8,7 +8,7 @@ urlpatterns = patterns('',
        AddressRecordListView.as_view()), name='address-record-list'),
     url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(AddressRecordCreateView.as_view()),
-       name='address-record-create-by-domain'),
+       name='address-record-create-in-domain'),
     url(r'create/', csrf_exempt(
        AddressRecordCreateView.as_view()), name='address-record-create'),
     url(r'(?P<pk>[\w-]+)/update/$',

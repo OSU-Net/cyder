@@ -146,7 +146,5 @@ LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
 
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-MOZDNS_BASE_URL = "/cydns"
-CORE_BASE_URL = "/cydhcp"
 BUILD_PATH = 'builds'
 INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')

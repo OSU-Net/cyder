@@ -6,7 +6,7 @@ from cyder.cydns.sshfp.views import *
 urlpatterns = patterns('',
    url(r'^$', SSHFPListView.as_view(), name='sshfp-list'),
    url(r'(?P<domain>[\w-]+)/create/$', csrf_exempt(
-       SSHFPCreateView.as_view()), name='sshfp-by-domain-create'),
+       SSHFPCreateView.as_view()), name='sshfp-create-in-domain'),
    url(r'create/$', csrf_exempt(
        SSHFPCreateView.as_view()), name='sshfp-create'),
    url(r'(?P<pk>[\w-]+)/update/$',

@@ -29,8 +29,10 @@ ul {
 input[type="text"], select {
     background: $white;
     border-radius: 2px;
-    color: $light-gray;
     padding-left: 3px;
+}
+input[type="text"] {
+    color: $light-gray;
 }
 
 .center {
@@ -165,6 +167,7 @@ div#header {
         bottom: 4px;
         span {
             color: $white;
+            font-size: 13px;
             font-weight: bold;
             margin-right: 5px;
         }

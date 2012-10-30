@@ -6,7 +6,7 @@ from cyder.cydns.cname.views import *
 urlpatterns = patterns('',
    url(r'^$', CNAMEListView.as_view(), name='cname-list'),
    url(r'(?P<domain>[\w-]+)/create/$',
-       csrf_exempt(CNAMECreateView.as_view()), name='cname-create'),
+       csrf_exempt(CNAMECreateView.as_view()), name='cname-create-in-domain'),
    url(r'create/$', csrf_exempt(CNAMECreateView.as_view()), name='cname-create'),
    url(r'(?P<pk>[\w-]+)/update/$',
        csrf_exempt(CNAMEUpdateView.as_view()), name='cname-update'),
