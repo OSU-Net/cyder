@@ -2,6 +2,10 @@
 
 {% block title %}DNS{% endblock %}
 
+{% block sidebar %}
+  {% include "cydns/includes/cydns_sidebar.html" %}
+{% endblock %}
+
 {% block content %}
     <form id='myform'>
   <label>FQDN:</label>
