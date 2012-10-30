@@ -1,27 +1,18 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+import cyder.base.tests
 from cyder.cydns.ip.utils import ip_to_domain_name
-
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
-
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.ip.utils import ip_to_domain_name
 
 import ipaddr
-import pdb
 
 
-class PTRTests(TestCase):
+class PTRTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()

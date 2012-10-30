@@ -1,12 +1,12 @@
-from django.test import TestCase
 from django.test.client import Client
 
+import cyder.base.tests
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.mx.models import MX
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.view_tests_template import GenericViewTests, random_label
+from cyder.cydns.tests.test_views_template import GenericViewTests, random_label
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 
@@ -51,7 +51,7 @@ class CydnsViewTests(object):
                 label=label, domain=self.domain)
 
 
-class CNAMEViewTests(CydnsViewTests, TestCase):
+class CNAMEViewTests(CydnsViewTests, cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -71,7 +71,7 @@ for test in builder.build_all_tests():
     setattr(CNAMEViewTests, test.__name__ + "_cname", test)
 
 
-class MXViewTests(CydnsViewTests, TestCase):
+class MXViewTests(CydnsViewTests, cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -95,7 +95,7 @@ for test in builder.build_all_tests():
     setattr(MXViewTests, test.__name__ + "_mx", test)
 
 
-class SRVViewTests(CydnsViewTests, TestCase):
+class SRVViewTests(CydnsViewTests, cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': "_" + random_label(),
@@ -121,7 +121,7 @@ for test in builder.build_all_tests():
     setattr(SRVViewTests, test.__name__ + "_srv", test)
 
 
-class TXTViewTests(CydnsViewTests, TestCase):
+class TXTViewTests(CydnsViewTests, cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -141,7 +141,7 @@ for test in builder.build_all_tests():
     setattr(TXTViewTests, test.__name__ + "_txt", test)
 
 
-class SSHFPViewTests(CydnsViewTests, TestCase):
+class SSHFPViewTests(CydnsViewTests, cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),

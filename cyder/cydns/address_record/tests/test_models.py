@@ -2,8 +2,8 @@ import ipaddr
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TestCase
 
+import cyder.base.tests
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -12,10 +12,8 @@ from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.cname.models import CNAME
 
-import pdb
 
-
-class AddressRecordTests(TestCase):
+class AddressRecordTests(cyder.base.tests.TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'

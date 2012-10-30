@@ -1,13 +1,6 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+import cyder.base.tests
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
@@ -22,10 +15,8 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 
 from cyder.core.systems.models import System
 
-import pdb
 
-
-class CNAMETests(TestCase):
+class CNAMETests(cyder.base.tests.TestCase):
 
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:

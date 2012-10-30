@@ -1,9 +1,7 @@
-import sys
 import os
-import pdb
+import sys
 
-from django.test import TestCase
-
+import cyder.base.tests
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
@@ -16,10 +14,9 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from cyder.core.systems.models import System
-import pdb
 
 
-class DirtySOATests(TestCase):
+class DirtySOATests(cyder.base.tests.TestCase):
     def setUp(self):
         Domain.objects.get_or_create(name="arpa")
         Domain.objects.get_or_create(name="in-addr.arpa")

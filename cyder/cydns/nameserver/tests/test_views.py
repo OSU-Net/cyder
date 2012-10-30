@@ -1,13 +1,13 @@
 from django.test import TestCase
 from django.test.client import Client
 
+import cyder.base.tests
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.tests.view_tests import GenericViewTests, random_label
-from django.conf import settings
+from cyder.cydns.tests.test_views import GenericViewTests, random_label
 
 
-class NSViewTests(TestCase):
+class NSViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         url_slug = "nameserver"
         dname = random_label()

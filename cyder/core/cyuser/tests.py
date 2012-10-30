@@ -22,7 +22,7 @@ from cyder.middleware.dev_authentication import DevAuthenticationMiddleware
 
 
 class AuthenticationTest(TestCase):
-    fixtures = ['initial_data.json']
+    fixtures = ['core/users']
 
     def setUp(self):
         self.setup_request()

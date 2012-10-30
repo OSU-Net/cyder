@@ -9,7 +9,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from cyder.cydns.ptr.models import PTR
-from cyder.cydns.tests.view_tests import random_label
+from cyder.cydns.tests.test_views import random_label
 
 from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize

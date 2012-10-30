@@ -2,8 +2,8 @@ from django.test import TestCase
 from django.test.client import Client
 from django.http import Http404
 
-from cyder.cydns.tests.view_tests_template import random_label
-from cyder.cydns.tests.view_tests_template import random_byte
+from cyder.cydns.tests.test_views_template import random_label
+from cyder.cydns.tests.test_views_template import random_byte
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
@@ -16,7 +16,6 @@ from cyder.cydns.master_form.views import commit_record
 from cyder.cydns.view.models import View
 
 import simplejson as json
-import pdb
 
 
 class MasterFormTests(TestCase):
