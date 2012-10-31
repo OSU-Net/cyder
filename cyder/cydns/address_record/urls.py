@@ -1,11 +1,12 @@
 from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
+from cyder.cydns.views import cydns_list_create_view
 from cyder.cydns.address_record.views import *
 
 urlpatterns = patterns('',
-    url(r'^$', csrf_exempt(
-       AddressRecordListView.as_view()), name='address-record-list'),
+    url(r'^$', cydns_list_create_view, name='address-record-list',
+        kwargs={'record_type': 'address_record'}),
     url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(AddressRecordCreateView.as_view()),
        name='address-record-create-in-domain'),

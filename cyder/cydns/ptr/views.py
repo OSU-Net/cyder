@@ -6,7 +6,7 @@ from django.shortcuts import render
 from cyder.cydns.views import CydnsCreateView
 from cyder.cydns.views import CydnsDeleteView
 from cyder.cydns.views import CydnsDetailView
-from cyder.cydns.views import CydnsListView
+from cyder.cydns.views import cydns_list_create_view
 from cyder.cydns.views import CydnsUpdateView
 from cyder.cydns.ip.forms import IpForm
 from cyder.cydns.ptr.forms import PTRForm
@@ -55,8 +55,4 @@ class PTRCreateView(PTRView, CydnsCreateView):
 
 
 class PTRUpdateView(PTRView, CydnsUpdateView):
-    """ """
-
-
-class PTRListView(PTRView, CydnsListView):
     """ """

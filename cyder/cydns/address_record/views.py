@@ -4,7 +4,7 @@ from cyder.cydns.address_record.forms import AddressRecordForm
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.views import CydnsDeleteView, CydnsDetailView
-from cyder.cydns.views import CydnsCreateView, CydnsUpdateView, CydnsListView
+from cyder.cydns.views import CydnsCreateView, CydnsUpdateView
 from cyder.cydhcp.network.utils import calc_parent_str
 
 import pdb
@@ -61,8 +61,4 @@ class AddressRecordCreateView(AddressRecordView, CydnsCreateView):
 
 
 class AddressRecordUpdateView(AddressRecordView, CydnsUpdateView):
-    """ """
-
-
-class AddressRecordListView(AddressRecordView, CydnsListView):
     """ """

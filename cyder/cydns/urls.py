@@ -1,11 +1,12 @@
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
-from cyder.cydns.master_form.views import cydns_record
+
 from cyder.cydns.api.v1.api import v1_dns_api
 
 
 urlpatterns = patterns('',
-   url(r'^$', cydns_record, name='cydns-index'),
+   url(r'^$', direct_to_template, {'template': 'cydns/cydns_index.html'},
+       name='cydns-index'),
    url(r'^record/', include('cyder.cydns.master_form.urls')),
    url(r'^address_record/', include ('cyder.cydns.address_record.urls')),
    url(r'^cname/', include('cyder.cydns.cname.urls')),
