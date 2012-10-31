@@ -68,16 +68,6 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
     qd = request.POST.copy()  # Make qd mutable.
     orig_qd = request.POST.copy()  # If errors, use qd to populate form.
 
-    record_type = qd.pop('record_type', '')
-    if record_type:
-        record_type = record_type[0]
-    else:
-        raise Http404
-
-    record_pk = qd.pop('record_pk', '')
-    if record_pk:
-        record_pk = record_pk[0]
-
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
     if 'fqdn' in qd:
         fqdn = qd.pop('fqdn')
@@ -85,9 +75,7 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
 
     object_ = None
     domain = None
-    if record_type == 'PTR':
-        pass
-    else:
+    if record_type is not 'PTR':
         try:
             # Call prune tree later if error, else domain leak.
             label, domain = ensure_label_domain(fqdn)
@@ -95,7 +83,7 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
             form = FQDNFormKlass(orig_qd)
             form._errors = ErrorDict()
             form._errors['__all__'] = ErrorList(e.messages)
-            return render(request, 'master_form/ajax_form.html', {
+            return render(request, 'cydns/cydns_list.html', {
                 'form': form,
                 'record_type': record_type,
                 'record_pk': record_pk,
@@ -110,46 +98,31 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
     else:
         form = FormKlass(qd)
 
+    # Validate form.
+    return_form = None
     if form.is_valid():
-        # Validate form.
         try:
             object_ = form.save()
         except ValidationError, e:
+            # Revert domain if not valid.
             prune_tree(domain)
-            error_form = FQDNFormKlass(orig_qd)
-            error_form._errors = ErrorDict()
-            error_form._errors['__all__'] = ErrorList(e.messages)
-            return render(request, 'master_form/ajax_form.html', {
-                'form': error_form,
-                'record_type': record_type,
-                'record_pk': record_pk,
-                'obj': object_
-            })
+            return_form = FQDNFormKlass(orig_qd)
+            return_form._errors = ErrorDict()
+            return_form._errors['__all__'] = ErrorList(e.messages)
 
-        fqdn_form = FQDNFormKlass(instance=object_)
-        if record_pk:
-            message = 'Record Updated!'
-        else:
-            message = 'Record Created!'
-        return render(request, 'master_form/ajax_form.html', {
-            'form': fqdn_form,
-            'record_type': record_type,
-            'record_pk': object_.pk,
-            'message': message,
-            'obj': object_
-        })
-
+        return_form = FQDNFormKlass(instance=object_)
     else:
-        # Revert if form not valid.
+        # Revert domain if not valid.
         prune_tree(domain)
-        error_form = FQDNFormKlass(orig_qd)
-        error_form._errors = form._errors
-        return render(request, 'master_form/ajax_form.html', {
-            'form': error_form,
-            'record_type': record_type,
-            'record_pk': record_pk,
-            'obj': object_
-        })
+        return_form = FQDNFormKlass(orig_qd)
+        return_form._errors = form._errors
+
+    return render(request, 'cydns/cydns_list.html', {
+        'form': return_form,
+        'record_type': record_type,
+        'record_pk': record_pk,
+        'obj': object_
+    })
 
 
 class CydnsDetailView(BaseDetailView):
@@ -217,31 +190,31 @@ class CydnsDeleteView(BaseDeleteView):
 
 
 def get_klasses(record_type):
-    if record_type == 'address_record':
+    if record_type == 'Address Record':
         Klass = AddressRecord
         FormKlass = AddressRecordForm
         FQDNFormKlass = AddressRecordFQDNForm
-    elif record_type == 'ptr':
+    elif record_type == 'PTR':
         Klass = PTR
         FormKlass = PTRForm
         FQDNFormKlass = PTRForm
-    elif record_type == 'srv':
+    elif record_type == 'SRV':
         Klass = SRV
         FormKlass = SRVForm
         FQDNFormKlass = FQDNSRVForm
-    elif record_type == 'cname':
+    elif record_type == 'CNAME':
         Klass = CNAME
         FormKlass = CNAMEForm
         FQDNFormKlass = CNAMEFQDNForm
-    elif record_type == 'txt':
+    elif record_type == 'TXT':
         Klass = TXT
         FormKlass = TXTForm
         FQDNFormKlass = FQDNTXTForm
-    elif record_type == 'mx':
+    elif record_type == 'MX':
         Klass = MX
         FormKlass = MXForm
         FQDNFormKlass = FQDNMXForm
-    elif record_type == 'soa':
+    elif record_type == 'SOA':
         Klass = SOA
         FormKlass = SOAForm
         FQDNFormKlass = SOAForm

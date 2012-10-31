@@ -7,7 +7,6 @@ from cyder.cydns.api.v1.api import v1_dns_api
 urlpatterns = patterns('',
    url(r'^$', direct_to_template, {'template': 'cydns/cydns_index.html'},
        name='cydns-index'),
-   url(r'^record/', include('cyder.cydns.master_form.urls')),
    url(r'^address_record/', include ('cyder.cydns.address_record.urls')),
    url(r'^cname/', include('cyder.cydns.cname.urls')),
    url(r'^domain/', include('cyder.cydns.domain.urls')),
@@ -21,4 +20,6 @@ urlpatterns = patterns('',
    url(r'^view/', include('cyder.cydns.view.urls')),
    url(r'^bind/', include('cyder.cydns.cybind.urls')),
    url(r'^api/', include(v1_dns_api.urls)),
+
+   # url(r'^record/', include('cyder.cydns.master_form.urls')),
 )

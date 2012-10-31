@@ -44,9 +44,11 @@ MINIFY_BUNDLES = {
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
-            'js/master_form.js',
-            'js/master_form_utils.js',
         ),
+        'cydns': {
+            'js/cydns/cydns_record_form.js',
+            'js/cydns/cydns_record_form_utils.js',
+        }
     }
 }
 
@@ -84,7 +86,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydns.txt',
     'cydns.view',
     'cydns.cybind',
-    'cydns.master_form',
 
     # Third party apps
     'djcelery',

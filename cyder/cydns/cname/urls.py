@@ -6,7 +6,7 @@ from cyder.cydns.views import cydns_list_create_view
 
 urlpatterns = patterns('',
    url(r'^$', cydns_list_create_view, name='cname-list',
-       kwargs={'record_type': 'cname'}),
+       kwargs={'record_type': 'CNAME'}),
    url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(CNAMECreateView.as_view()), name='cname-create-in-domain'),
    url(r'create/$', csrf_exempt(CNAMECreateView.as_view()), name='cname-create'),

@@ -6,7 +6,7 @@ from cyder.cydns.views import cydns_list_create_view
 
 urlpatterns = patterns('',
    url(r'^$', cydns_list_create_view, name='srv-list',
-       kwargs={'record_type': 'srv'}),
+       kwargs={'record_type': 'SRV'}),
    url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(SRVCreateView.as_view()), name='srv-create-in-domain'),
    url(r'create/$', csrf_exempt(SRVCreateView.as_view()), name='srv-create'),
