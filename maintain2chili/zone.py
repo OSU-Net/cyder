@@ -135,7 +135,6 @@ class Zone(object):
                 ha = "0" * 12
             system, _ = System.objects.get_or_create(hostname = name)
             if not StaticInterface.objects.filter(label = name,
-                                                  domain = domain,
                                                   mac = clean_mac(ha),
                                                   ip_str = long2ip(ip)).exists():
                 static = StaticInterface(label = name,
@@ -144,6 +143,8 @@ class Zone(object):
                                          system = system,
                                          ip_str = long2ip(ip),
                                          ip_type = '4')
+                pdb.set_trace()
+                static.update_attrs()
                 static.full_clean()
                 static.save()
 
@@ -210,42 +211,32 @@ def gen_other_static():
 
     cursor.execute("SELECT * FROM `host` where ip != 0")
     records = cursor.fetchall()
+    systems, statics = [], []
     for sysid, ip, dynamic_range, name, sysdomid, ha, systype, os, location, \
             serial, last_seen, other_id, workgroup, enabled, bandwidth_rate, \
             expire, ttl, last_update, zone, purchase_date, po_number, \
             warranty_date, owning_unit, user_id, department in records:
-        if ip == 0:
-            continue
         if len(ha) != 12:
             ha = "0" * 12
+
+        if not System.objects.filter(hostname = name).exists():
+            print "SYSTEM CREATE"
         system, _ = System.objects.get_or_create(hostname = name)
-        if not StaticInterface.objects.filter(label = name,
-                                                  mac = clean_mac(ha),
-                                                  ip_str = long2ip(ip)).exists():
-            sql = "select name from domain where id = %s" % sysdomid
-            cursor.execute(sql)
-            dname = cursor.fetchall()
-            if dname:
-                dname = dname[0][0]
-                print dname
-                #pdb.set_trace()
-                domain = Domain.objects.get(name = dname[0][0])
-                print domain
-            else:
-                print sysid, ip, name, sysdomid, ha
-                continue
-            if not StaticInterface.objects.filter(label = name,
-                                                        mac = clean_mac(ha),
-                                                        ip_str = long2ip(ip),
-                                                        domain = domain).exists():
+
+        if not StaticInterface.objects.filter(label = name, mac = clean_mac(ha), ip_str = long2ip(ip)).exists():
+            if not StaticInterface.objects.filter(label = "", mac = clean_mac(ha), ip_str = long2ip(ip)).exists():
+                print "STATIC CREATE", name, ha, ip
                 static = StaticInterface(label = name,
-                                         domain = domain,
                                          mac = clean_mac(ha),
                                          system = system,
                                          ip_str = long2ip(ip),
                                          ip_type = '4')
                 static.full_clean()
                 static.save()
+
+        continue
+
+    pdb.set_trace()
 
 
 def gen_other_PTR():
@@ -272,20 +263,25 @@ def gen_CNAME():
         cursor.execute("SELECT `name` FROM `domain` WHERE id = '%s'" % domain_id)
         dname = cursor.fetchone()
         if not dname:
+            print 1
             continue
         dname = dname[0]
 
-        if not Domain.objects.filter(name = name).exists():
+        if not Domain.objects.filter(name = dname).exists():
+            print 2, dname
             continue
 
         fqdn = ".".join([name, dname])
-        if domain.objects.filter(name = fqdn).exists():
+        if Domain.objects.filter(name = fqdn).exists():
             domain = Domain.objects.get(name = fqdn)
             name = ""
+        else:
+            domain = Domain.objects.get(name = dname)
 
         cn = CNAME(label = name, domain = domain, target = server)
         cn.full_clean()
         cn.save()
+        #print ".".join([cn.label, cn.domain.name]), server
 
 
 if __name__ == "__main__":
@@ -306,6 +302,7 @@ if __name__ == "__main__":
 
     if options.delete:
         if options.static:
+            System.objects.all().delete()
             StaticInterface.objects.all().delete()
 
         '''
@@ -320,6 +317,7 @@ if __name__ == "__main__":
             MX.objects.all().delete()
             Nameserver.objects.all().delete()
             PTR.objects.all().delete()
+            System.objects.all().delete()
             StaticInterface.objects.all().delete()
 
         if options.cname:
@@ -351,7 +349,7 @@ if __name__ == "__main__":
         records = cursor.fetchall()
         for domain_id, dname, _, _ in records:
             if dname == "edu":
-                continue
+                pass
             print "Creating %s zone." % dname
             Zone(domain_id = domain_id, dname = dname, root = True)
 
