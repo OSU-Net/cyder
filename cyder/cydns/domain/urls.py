@@ -2,7 +2,7 @@ from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
 from cyder.cydns.domain.views import *
-from cyder.cydns.views import cydns_list_create_view
+from cyder.cydns.views import cydns_list_create_record
 
 urlpatterns = patterns('',
    url(r'^$', DomainListView.as_view(), name='domain-list'),

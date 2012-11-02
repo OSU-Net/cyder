@@ -34,7 +34,7 @@ class CydnsListView(BaseListView):
     template_name = 'cydns/cydns_list.html'
 
 
-def cydns_list_create_view(request, record_type=None, record_pk=None):
+def cydns_list_create_record(request, record_type=None, record_pk=None):
     """
     Gets form for updating or creating a record type.
     """
@@ -57,7 +57,7 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
             object_ = None
             form = FQDNFormKlass()
 
-        return render(request, 'cydns/cydns_list.html', {
+        return render(request, 'cydns/cydns_list_record.html', {
             'domains': json.dumps([domain.name for domain in domains]),
             'form': form,
             'record_type': record_type,
@@ -83,7 +83,7 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
             form = FQDNFormKlass(orig_qd)
             form._errors = ErrorDict()
             form._errors['__all__'] = ErrorList(e.messages)
-            return render(request, 'cydns/cydns_list.html', {
+            return render(request, 'cydns/cydns_list_record.html', {
                 'form': form,
                 'record_type': record_type,
                 'record_pk': record_pk,
@@ -117,7 +117,7 @@ def cydns_list_create_view(request, record_type=None, record_pk=None):
         return_form = FQDNFormKlass(orig_qd)
         return_form._errors = form._errors
 
-    return render(request, 'cydns/cydns_list.html', {
+    return render(request, 'cydns/cydns_list_record.html', {
         'form': return_form,
         'record_type': record_type,
         'record_pk': record_pk,

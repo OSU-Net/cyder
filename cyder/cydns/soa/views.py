@@ -29,7 +29,6 @@ class SOADeleteView(SOAView, CydnsDeleteView):
 
 
 class SOADetailView(SOAView, CydnsDetailView):
-    """ """
     template_name = 'soa/soa_detail.html'
 
     def get_context_data(self, **kwargs):
@@ -113,4 +112,4 @@ def update_soa(request, soa_pk):
 
 
 class SOAListView(SOAView, CydnsListView):
-    """ """
+    template_name = 'soa/soa_list.html'

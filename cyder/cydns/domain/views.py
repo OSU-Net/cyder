@@ -75,6 +75,7 @@ class DomainListView(DomainView, CydnsListView):
 
 class ReverseDomainListView(DomainView, CydnsListView):
     queryset = Domain.objects.filter(is_reverse=True).order_by('name')
+    template_name = "domain/reverse_domain_list.html"
 
 
 class DomainDetailView(DomainView, DetailView):
