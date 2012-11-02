@@ -11,6 +11,7 @@ class CNAMEView(object):
     model = CNAME
     form_class = CNAMEForm
     queryset = CNAME.objects.all().order_by('fqdn')
+    extra_context = {'record_type': 'CNAME'}
 
 
 class CNAMEDeleteView(CNAMEView, CydnsDeleteView):
@@ -27,8 +28,4 @@ class CNAMECreateView(CNAMEView, CydnsCreateView):
 
 
 class CNAMEUpdateView(CNAMEView, CydnsUpdateView):
-    """ """
-
-
-class CNAMEListView(CNAMEView):
     """ """

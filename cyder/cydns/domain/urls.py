@@ -7,7 +7,7 @@ from cyder.cydns.views import cydns_list_create_record
 urlpatterns = patterns('',
    url(r'^$', DomainListView.as_view(), name='domain-list'),
    url(r'^reverse_domains/$',
-       ReverseDomainListView.as_view(), name='reverse-domain-list'),
+       ReverseDomainListView.as_view(), name='reverse_domain-list'),
    url(r'^get_all_domains/$', get_all_domains, name='get-all-domains'),
    url(r'create/$', csrf_exempt(
        DomainCreateView.as_view()), name='domain-create'),

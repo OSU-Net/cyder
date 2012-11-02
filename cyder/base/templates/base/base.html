@@ -69,6 +69,7 @@
         {% if self.sidebar() %}</div>{% endif %}
 
         <h1 id="title">{{ self.title() }}</h1>
+        {% block action_bar %}{% endblock %}
         {% block content %}{% endblock %}
     </div>
 

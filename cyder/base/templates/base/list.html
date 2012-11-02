@@ -12,15 +12,13 @@
   {% endif %}
 {% endblock %}
 
+{% block action_bar %}
+  {% if object_list %}
+    <a class="btn btn-primary" href="{{ object_list[0].get_create_url() }}">Create {{ object_list[0]|humanized_class_name }}</a>
+  {% endif %}
+{% endblock %}
+
 {% block content %}
-
-  {% block action_bar %}
-    {% if object_list %}
-      {# Getting the create url from the first object. If no first object, no create url. TODO #}
-      <a class="btn btn-primary" href="{{ object_list[0].get_create_url() }}">Create {{ object_list[0]|humanized_class_name }}</a>
-    {% endif %}
-  {% endblock %}
-
   {% block form %}{% endblock %}
 
   {% if page_obj %}

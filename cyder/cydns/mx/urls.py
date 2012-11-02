@@ -7,7 +7,7 @@ from cyder.cydns.views import cydns_list_create_record
 
 urlpatterns = patterns('',
    url(r'^$', cydns_list_create_record, name='mx-list',
-       kwargs={'record_type': 'MX'}),
+       kwargs={'record_type': 'mx'}),
    url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(MXCreateView.as_view()), name='mx-create-in-domain'),
    url(r'create/$', csrf_exempt(MXCreateView.as_view()), name='mx-create'),

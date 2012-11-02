@@ -1,11 +1,11 @@
 {% extends "base/list.html" %}
 
 {% block title %}
-    {{ record_type + 's' }}
+    {{ record_type|prettify_record_type + "s" }}
 {% endblock %}
 
 {% block header %}
-    {{ record_type + 's' }}
+    {{ record_type|prettify_record_type + "s" }}
 {% endblock %}
 
 {% block sidebar %}
@@ -14,25 +14,28 @@
 
 {% block form %}
 
-  <input type='button' id='launch-search' value='Edit an existing record' style='display:inline;'/>
-  <input type='button' id='launch-soa-search' value='View BIND file' style='display:inline;'/>
-  <input type='button' id='reset' value='Reset' style='display:inline;'/>
-  <div id="search-dialog" title="Search For Record" style='display: none;'>
-    <div>
-      <label for='record_search'>Search:
-        <input type='text' name='record_search' id='record_search' style='width: 400px;' value=''/>
-      </label>
+  <form method="POST">
+    <input type="button" id="launch-search" value="Edit an existing record" style="display:inline;"/>
+    <input type="button" id="launch-soa-search" value="View BIND file" style="display:inline;"/>
+    <div id="search-dialog" title="Search For Record" style="display: none;">
+      <div>
+        <label for="record_search">Search:
+          <input type="text" name="record_search" id="record_search" style="width: 400px;" value=""/>
+        </label>
+      </div>
     </div>
-  </div>
-  <div id="search-soa-dialog" title="Search a BIND file (will open in new tab)" style='display: none;'>
-    <div>
-      <label for='soa_search'>Search:
-        <input type='text' name='soa_search' id='soa_search' style='width: 400px;' value=''/>
-      </label>
+    <div id="search-soa-dialog" title="Search a BIND file (will open in new tab)" style="display: none;">
+      <div>
+        <label for="soa_search">Search:
+          <input type="text" name="soa_search" id="soa_search" style="width: 400px;" value=""/>
+        </label>
+      </div>
     </div>
-  </div>
 
-  {{ form }}
+    {{ form }}
 
-  {{ js('cydns') }}
+    <input type="submit" value="Submit"></input>
+  </form>
+
+  {{ js("cydns") }}
 {% endblock %}

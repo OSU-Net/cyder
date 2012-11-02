@@ -22,6 +22,11 @@ class SOAView(object):
     model = SOA
     form_class = SOAForm
     queryset = SOA.objects.all()
+    extra_context = {'record_type': 'soa'}
+
+
+class SOAListView(SOAView, CydnsListView):
+    """ """
 
 
 class SOADeleteView(SOAView, CydnsDeleteView):
@@ -110,6 +115,3 @@ def update_soa(request, soa_pk):
             'aa': json.dumps(aa)
         })
 
-
-class SOAListView(SOAView, CydnsListView):
-    template_name = 'soa/soa_list.html'

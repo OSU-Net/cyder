@@ -190,31 +190,31 @@ class CydnsDeleteView(BaseDeleteView):
 
 
 def get_klasses(record_type):
-    if record_type == 'Address Record':
+    if record_type == 'address_record':
         Klass = AddressRecord
         FormKlass = AddressRecordForm
         FQDNFormKlass = AddressRecordFQDNForm
-    elif record_type == 'PTR':
+    elif record_type == 'ptr':
         Klass = PTR
         FormKlass = PTRForm
         FQDNFormKlass = PTRForm
-    elif record_type == 'SRV':
+    elif record_type == 'srv':
         Klass = SRV
         FormKlass = SRVForm
         FQDNFormKlass = FQDNSRVForm
-    elif record_type == 'CNAME':
+    elif record_type == 'cname':
         Klass = CNAME
         FormKlass = CNAMEForm
         FQDNFormKlass = CNAMEFQDNForm
-    elif record_type == 'TXT':
+    elif record_type == 'txt':
         Klass = TXT
         FormKlass = TXTForm
         FQDNFormKlass = FQDNTXTForm
-    elif record_type == 'MX':
+    elif record_type == 'mx':
         Klass = MX
         FormKlass = MXForm
         FQDNFormKlass = FQDNMXForm
-    elif record_type == 'SOA':
+    elif record_type == 'soa':
         Klass = SOA
         FormKlass = SOAForm
         FQDNFormKlass = SOAForm
