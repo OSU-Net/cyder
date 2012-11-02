@@ -1,10 +1,12 @@
 from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
+from cyder.cydns.views import cydns_list_create_record
 from cyder.cydns.nameserver.views import *
 
 urlpatterns = patterns('',
-   url(r'^$', NSListView.as_view(), name='nameserver-list'),
+   url(r'^$', cydns_list_create_record, name='nameserver-list',
+       kwargs={'record_type': 'nameserver'}),
    url(r'(?P<domain>[\w-]+)/create_delegated/$',
        csrf_exempt(create_ns_delegated), name='nameserver-delegated-create'),
    url(r'(?P<domain>[\w-]+)/create/$',

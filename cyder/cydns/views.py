@@ -17,6 +17,8 @@ from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.mx.forms import FQDNMXForm, MXForm
 from cyder.cydns.mx.models import MX
+from cyder.cydns.nameserver.forms import NameserverForm
+from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.forms import PTRForm
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.forms import SOAForm
@@ -36,9 +38,10 @@ class CydnsListView(BaseListView):
 
 def cydns_list_create_record(request, record_type=None, record_pk=None):
     """
-    Gets form for updating or creating a record type.
+    List, create, update view all in one for a flatter heirarchy.
     """
     if request.method == 'GET':
+        # TODO: ACLs
         domains = Domain.objects.filter(is_reverse=False)
 
         # Get the record type's form.
@@ -46,7 +49,7 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
         if record_pk:
             # Get the object if updating.
             try:
-                # ACLs should be applied here.
+                # TODO: ACLs
                 object_ = Klass.objects.get(pk=record_pk)
                 form = FQDNFormKlass(instance=object_)
             except ObjectDoesNotExist:
@@ -218,6 +221,10 @@ def get_klasses(record_type):
         Klass = SOA
         FormKlass = SOAForm
         FQDNFormKlass = SOAForm
+    elif record_type == 'nameserver':
+        Klass = Nameserver
+        FormKlass = NameserverForm
+        FQDNFormKlass = NameserverForm
     else:
         Klass, FormKlass, FQDNFormKlass = None, None, None
 

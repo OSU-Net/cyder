@@ -2,8 +2,9 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cydns
-from cyder.cydns.soa.models import SOA
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydhcp.site.models import Site
+from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name, _name_type_check
 from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -11,13 +12,10 @@ from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain
 
-from cyder.cydhcp.site.models import Site
-
-import pdb
-
 
 class Domain(models.Model, ObjectUrlMixin):
-    """A Domain is used as a foreign key for most DNS records.
+    """
+    A Domain is used as a foreign key for most DNS records.
 
     A domain's SOA should be shared by only domains within it's zone.
 
@@ -71,7 +69,7 @@ class Domain(models.Model, ObjectUrlMixin):
             then doing a longest prefix match against all domains that have
             is_reverse set to True.
 
-    This last point is worth looking at furthur. When adding a new reverse
+    This last point is worth looking at further. When adding a new reverse
     domain, all records in the PTR table should be checked for a more
     appropriate domain. Also, when a domain is deleted, all PTR objects should
     be passed down to the parent domain.
