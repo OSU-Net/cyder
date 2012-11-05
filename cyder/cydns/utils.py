@@ -168,7 +168,9 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
 
 
 def ensure_label_domain(fqdn):
-    """Returns a label and domain object."""
+    """
+    Returns a label and domain object.
+    """
     if fqdn == '':
         raise ValidationError("FQDN cannot be the emptry string.")
     if Domain.objects.filter(name=fqdn).exists():

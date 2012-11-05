@@ -35,11 +35,6 @@ class DomainListView(DomainView, CydnsListView):
     queryset = Domain.objects.filter(is_reverse=False)
 
 
-class ReverseDomainListView(DomainView, CydnsListView):
-    extra_context = {'record_type': 'reverse_domain'}
-    queryset = Domain.objects.filter(is_reverse=True).order_by('name')
-
-
 class DomainDeleteView(DomainView, CydnsDeleteView):
     """ """
 
@@ -53,7 +48,7 @@ class DomainDetailView(DomainView, DetailView):
         if not domain:
             return context
 
-        # TODO this process can be generalized. It's not very high priority.
+        # TODO this process can be generalized. Not very high priority.
         mx_objects = domain.mx_set.all().order_by('label')
         mx_headers, mx_matrix, mx_urls = tablefy(mx_objects)
 
@@ -85,7 +80,8 @@ class DomainDetailView(DomainView, DetailView):
         intr_headers, intr_matrix, intr_urls = tablefy(intr_objects)
 
         address_objects = domain.addressrecord_set.all().order_by('label')
-        # This takes too long to load more than 50.
+
+        # Takes too long to load more than 50.
         if address_objects.count() > 50:
             adr_views = False
         else:
@@ -212,6 +208,11 @@ class DomainUpdateView(DomainView, UpdateView):
                          format(domain.name))
 
         return redirect(domain)
+
+
+class ReverseDomainListView(DomainView, CydnsListView):
+    extra_context = {'record_type': 'reverse_domain'}
+    queryset = Domain.objects.filter(is_reverse=True).order_by('name')
 
 
 def domain_sort(domains):

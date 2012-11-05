@@ -15,6 +15,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.forms import CNAMEForm, CNAMEFQDNForm
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.domain.forms import DomainForm
 from cyder.cydns.mx.forms import FQDNMXForm, MXForm
 from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.forms import NameserverForm
@@ -71,13 +72,15 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
     orig_qd = request.POST.copy()  # If errors, use qd to populate form.
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+
+    fqdn = False
     if 'fqdn' in qd:
         fqdn = qd.pop('fqdn')
         fqdn = fqdn[0]
 
     object_ = None
     domain = None
-    if record_type is not 'PTR':
+    if fqdn:
         try:
             # Call prune tree later if error, else domain leak.
             label, domain = ensure_label_domain(fqdn)
@@ -106,16 +109,17 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
         try:
             object_ = form.save()
         except ValidationError, e:
-            error = True
+            # Revert domain if not valid.
+            prune_tree(domain)
+            return_form = FQDNFormKlass(orig_qd)
+            return_form._errors = form._errors
+            return_form._errors['__all__'] = ErrorList(e.messages)
         return_form = FQDNFormKlass(instance=object_)
     else:
-        error = True
-    if error:
         # Revert domain if not valid.
         prune_tree(domain)
         return_form = FQDNFormKlass(orig_qd)
         return_form._errors = form._errors
-        return_form._errors['__all__'] = ErrorList(e.messages)
 
     return render(request, 'cydns/cydns_list_record.html', {
         'form': return_form,
@@ -198,6 +202,10 @@ def get_klasses(record_type):
         Klass = CNAME
         FormKlass = CNAMEForm
         FQDNFormKlass = CNAMEFQDNForm
+    elif record_type == 'domain':
+        Klass = Domain
+        FormKlass = DomainForm
+        FQDNFormKlass = DomainForm
     elif record_type == 'mx':
         Klass = MX
         FormKlass = MXForm
