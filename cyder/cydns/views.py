@@ -41,15 +41,12 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
     List, create, update view all in one for a flatter heirarchy.
     """
     if request.method == 'GET':
-        # TODO: ACLs
-        domains = Domain.objects.filter(is_reverse=False)
-
         # Get the record type's form.
         Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
         if record_pk:
-            # Get the object if updating.
             try:
                 # TODO: ACLs
+                # Get the object if updating.
                 object_ = Klass.objects.get(pk=record_pk)
                 form = FQDNFormKlass(instance=object_)
             except ObjectDoesNotExist:
@@ -61,7 +58,9 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
             form = FQDNFormKlass()
 
         return render(request, 'cydns/cydns_list_record.html', {
-            'domains': json.dumps([domain.name for domain in domains]),
+            # TODO: ACLs
+            'domains': json.dumps([domain.name for domain in
+                                   Domain.objects.filter(is_reverse=False)]),
             'form': form,
             'record_type': record_type,
             'record_pk': record_pk,
@@ -107,18 +106,16 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
         try:
             object_ = form.save()
         except ValidationError, e:
-            # Revert domain if not valid.
-            prune_tree(domain)
-            return_form = FQDNFormKlass(orig_qd)
-            return_form._errors = ErrorDict()
-            return_form._errors['__all__'] = ErrorList(e.messages)
-
+            error = True
         return_form = FQDNFormKlass(instance=object_)
     else:
+        error = True
+    if error:
         # Revert domain if not valid.
         prune_tree(domain)
         return_form = FQDNFormKlass(orig_qd)
         return_form._errors = form._errors
+        return_form._errors['__all__'] = ErrorList(e.messages)
 
     return render(request, 'cydns/cydns_list_record.html', {
         'form': return_form,
@@ -197,34 +194,34 @@ def get_klasses(record_type):
         Klass = AddressRecord
         FormKlass = AddressRecordForm
         FQDNFormKlass = AddressRecordFQDNForm
-    elif record_type == 'ptr':
-        Klass = PTR
-        FormKlass = PTRForm
-        FQDNFormKlass = PTRForm
-    elif record_type == 'srv':
-        Klass = SRV
-        FormKlass = SRVForm
-        FQDNFormKlass = FQDNSRVForm
     elif record_type == 'cname':
         Klass = CNAME
         FormKlass = CNAMEForm
         FQDNFormKlass = CNAMEFQDNForm
-    elif record_type == 'txt':
-        Klass = TXT
-        FormKlass = TXTForm
-        FQDNFormKlass = FQDNTXTForm
     elif record_type == 'mx':
         Klass = MX
         FormKlass = MXForm
         FQDNFormKlass = FQDNMXForm
-    elif record_type == 'soa':
-        Klass = SOA
-        FormKlass = SOAForm
-        FQDNFormKlass = SOAForm
     elif record_type == 'nameserver':
         Klass = Nameserver
         FormKlass = NameserverForm
         FQDNFormKlass = NameserverForm
+    elif record_type == 'ptr':
+        Klass = PTR
+        FormKlass = PTRForm
+        FQDNFormKlass = PTRForm
+    elif record_type == 'soa':
+        Klass = SOA
+        FormKlass = SOAForm
+        FQDNFormKlass = SOAForm
+    elif record_type == 'srv':
+        Klass = SRV
+        FormKlass = SRVForm
+        FQDNFormKlass = FQDNSRVForm
+    elif record_type == 'txt':
+        Klass = TXT
+        FormKlass = TXTForm
+        FQDNFormKlass = FQDNTXTForm
     else:
         Klass, FormKlass, FQDNFormKlass = None, None, None
 
