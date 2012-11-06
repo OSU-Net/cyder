@@ -13,7 +13,7 @@ class ObjectUrlMixin(object):
         """
         Return the absolute url of an object.
         """
-        return reverse(self._meta.db_table.replace('_', '-') + '-detail',
+        return reverse(self._meta.db_table.replace('-', '_') + '-detail',
                        args=[self.pk])
 
     def absolute_url(self):
@@ -23,14 +23,14 @@ class ObjectUrlMixin(object):
         """
         Return the edit url of an object.
         """
-        return reverse(self._meta.db_table.replace('_', '-') + '-update',
+        return reverse(self._meta.db_table.replace('-', '_') + '-update',
                        args=[self.pk])
 
     def get_delete_url(self):
         """
         Return the delete url of an object.
         """
-        return reverse(self._meta.db_table.replace('_', '-') + '-delete',
+        return reverse(self._meta.db_table.replace('-', '_') + '-delete',
                        args=[self.pk])
 
     def get_create_url(self):
@@ -38,7 +38,7 @@ class ObjectUrlMixin(object):
         Return the create url of the type of object.
         """
         try:
-            return reverse(self._meta.db_table.replace('_', '-') + '-create',
+            return reverse(self._meta.db_table.replace('-', '_') + '-create',
                            args=[self.pk])
         except:
-            return reverse(self._meta.db_table.replace('_', '-') + '-create')
+            return reverse(self._meta.db_table.replace('-', '_') + '-create')

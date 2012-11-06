@@ -28,6 +28,9 @@ def prettify_record_type(record_type, *args, **kwargs):
     words if underscore.
     e.g. 'cname' to 'CNAME' and 'address_record' to 'Address Record'
     """
+    if not record_type:
+        return
+
     prettified = ''
 
     if record_type == 'domain':

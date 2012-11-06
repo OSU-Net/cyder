@@ -26,8 +26,11 @@ class BaseListView(ListView):
         )
 
         # Extra_context takes precedence over original values in context.
-        if self.extra_context:
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
@@ -42,8 +45,11 @@ class BaseDetailView(DetailView):
         )
 
         # Extra_context takes precedence over original values in context.
-        if self.extra_context:
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
@@ -72,9 +78,12 @@ class BaseCreateView(CreateView):
             self.form_class.Meta.model.__name__
         )
 
-        # #xtra_context takes precedence over original values in context.
-        if self.extra_context:
+        # extra_context takes precedence over original values in context.
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
@@ -110,8 +119,11 @@ class BaseUpdateView(UpdateView):
         )
 
         # Extra_context takes precedence over original values in context.
-        if self.extra_context:
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
@@ -145,8 +157,11 @@ class BaseDeleteView(DeleteView):
         )
 
         # Extra_context takes precedence over original values in context.
-        if self.extra_context:
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
