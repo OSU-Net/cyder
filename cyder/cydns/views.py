@@ -52,9 +52,9 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
     # Get the record form.
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
     if record:
-        form = FQDNFormKlass(instance=record)
+        form = FormKlass(instance=record)
     else:
-        form = FQDNFormKlass()
+        form = FormKlass()
 
     if request.method == 'POST':
         qd = request.POST.copy()  # Make qd mutable.
@@ -62,9 +62,9 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
 
         # Create form to validate.
         if record:
-            form = FQDNFormKlass(qd, instance=record)
+            form = FormKlass(qd, instance=record)
         else:
-            form = FQDNFormKlass(qd)
+            form = FormKlass(qd)
 
         fqdn = False
         if 'fqdn' in qd:

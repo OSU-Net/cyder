@@ -163,7 +163,8 @@ def set_fqdn(record):
 
 
 def check_for_cname(record):
-    """"If a CNAME RR is preent at a node, no other data should be
+    """"
+    If a CNAME RR is present at a node, no other data should be
     present; this ensures that the data for a canonical name and its
     aliases cannot be different."
 
@@ -183,7 +184,8 @@ def check_for_cname(record):
 
 
 def check_for_delegation(record):
-    """If an object's domain is delegated it should not be able to
+    """
+    If an object's domain is delegated it should not be able to
     be changed.  Delegated domains cannot have objects created in
     them.
     """

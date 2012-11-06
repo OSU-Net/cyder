@@ -6,8 +6,6 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 import itertools
 
-import pdb
-
 
 class NameserverForm(ModelForm):
     class Meta:

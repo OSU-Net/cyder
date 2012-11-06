@@ -1,22 +1,7 @@
 {% extends "base/base.html" %}
 
 {% block sidebar %}
-  <!-- DHCP NAV -->
-  <span class="nav-item">
-    <a class="nav-link {{ 'selected' if request.path == url('site-list') }}" href="{{ url('site-list') }}">Site</a>
-  </span>
-  <span class="nav-item">
-    <a class="nav-link {{ 'selected' if request.path == url('network-list') }}" href="{{ url('network-list') }}">Network</a>
-  </span>
-  <span class="nav-item">
-    <a class="nav-link {{ 'selected' if request.path == url('network-wizard') }}" href="{{ url('network-wizard') }}">Network Wizard</a>
-  </span>
-  <span class="nav-item">
-    <a class="nav-link {{ 'selected' if request.path == url('vlan-list') }}" href="{{ url('vlan-list') }}">Vlan</a>
-  </span>
-  <span class="nav-item">
-    <a class="nav-link {{ 'selected' if request.path == url('range-list') }}" href="{{ url('range-list') }}">Range</a>
-  </span>
+  {% include "cydhcp/includes/cydhcp_sidebar.html" %}
 {% endblock %}
 
 {% block title %}DHCP{% endblock %}

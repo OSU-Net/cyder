@@ -23,11 +23,11 @@
               <a href="#">{{ request.session.ctnr.name }}</a>
             </span>
           </li>
-          <li class="{{ 'selected' if request.path == url('cydns-index') }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
-          <li class="{{ 'selected' if request.path == url('cydhcp-index') }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
+          <li class="{{ 'selected' if url('cydns-index') in request.path }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
+          <li class="{{ 'selected' if url('cydhcp-index') in request.path }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
         </ul>
         <ul class="nav nav-right">
-          <li class="{{ 'selected' if request.path == url('search') }}"><a class="navlink" href="{{ url('search') }}">Search</a></li>
+          <li class="{{ 'selected' if url('search') in request.path }}"><a class="navlink" href="{{ url('search') }}">Search</a></li>
           <li><a class="navlink" href="{{ url('logout') }}">Logout</a></li>
         </ul>
       </div>

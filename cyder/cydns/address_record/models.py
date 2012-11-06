@@ -14,8 +14,6 @@ from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.soa.utils import update_soa
 
-import pdb
-
 
 class BaseAddressRecord(Ip):
     """AddressRecord is the class that generates A and AAAA records
@@ -102,7 +100,8 @@ class BaseAddressRecord(Ip):
         if not kwargs.pop("ignore_interface", False):
             from cyder.cydhcp.interface.static_intr.models import StaticInterface
             if StaticInterface.objects.filter(fqdn=self.fqdn,
-                                              ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists():
+                                              ip_upper=self.ip_upper,
+                                              ip_lower=self.ip_lower).exists():
                 raise ValidationError("A Static Interface has already "
                                       "reserved this A record.")
 
