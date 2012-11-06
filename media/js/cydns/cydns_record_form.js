@@ -4,20 +4,18 @@ $(document).ready(function(){
     var searchUrl = cydns.attr('data-searchUrl');
     var updateUrl = cydns.attr('data-updateUrl');
 
-    // Bind smart names.
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     var inputs = $('input');
     inputs.length;
     for (var x = 0; x < inputs.length; x++) {
-        if(inputs[x].id === 'id_fqdn' || inputs[x].id === 'id_target' || inputs[x].id === 'id_server'){
+        if(inputs[x].id === 'id_fqdn' || inputs[x].id === 'id_target' || inputs[x].id === 'id_server') {
             make_smart_name_get_domains(inputs[x], true);
             $(inputs[x]).css('width', '400px');
         }
     }
 
-    // Bind record search box.
-    // Bind autocomplete to the search field for the specifc record type.
-    $('#record_search').autocomplete({
+    $('#record-searchbox').autocomplete({
+        // Bind autocomplete to the search field for the specifc record type.
         minLength: 2,
         source: searchUrl + '?record_type=' + recordType,
         select: function( event, ui ) {
@@ -26,8 +24,7 @@ $(document).ready(function(){
         }
     });
 
-    // Bind SOA search box.
-    $('#soa_search').autocomplete({
+    $('#soa-searchbox').autocomplete({
         minLength: 2,
         source: searchUrl + '?record_type=SOA',
         select: function( event, ui ) {
@@ -37,7 +34,7 @@ $(document).ready(function(){
     });
 
     // Set up search
-    $('#launch-search').click(function() {
+    $('#record-search').click(function() {
         $('#search-dialog').dialog({
             title: 'Search ' + recordType + ' records',
             autoShow: false,
@@ -49,24 +46,23 @@ $(document).ready(function(){
                     $.get(updateUrl, {'record_type': recordType,
                                       'record_pk': $('#search-dialog').attr('stage_pk')},
                           function(data) {
-                              // No bind_smart_names so autocomplete doesn't get in way.
                               $('#current_form_data').empty();
                               $('#current_form_data').append(data);
-                              $('#record_search').attr('value','');  // Clear the users selection.
+                              $('#record-search').attr('value', '');
                           });
                     $(this).dialog('close');
                 },
                 'Cancel': function() {
-                    $('#search-dialog').attr('stage_pk', ''), // we don't want this anymore.
+                    $('#search-dialog').attr('stage_pk', ''),
                     $(this).dialog('close');
                 }
             }
         }).show();
     });
 
-    $('#launch-soa-search').click(function() {
+    $('#record-search-soa').click(function() {
         $('#search-soa-dialog').dialog({
-            title: 'Search for a BIND file',  // Click the selected record
+            title: 'Search for a BIND file',
             autoShow: true,
             minWidth: 520,
             buttons: {
@@ -77,7 +73,7 @@ $(document).ready(function(){
                     $(this).dialog('close');
                 },
                 'Cancel': function() {
-                    $('#search-dialog').attr('stage_soa_pk', ''), // we don't want this anymore.
+                    $('#search-dialog').attr('stage_soa_pk', ''),
                     $(this).dialog('close');
                 }
             }

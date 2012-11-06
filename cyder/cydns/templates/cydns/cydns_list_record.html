@@ -12,6 +12,11 @@
   {% include "cydns/includes/cydns_sidebar.html" %}
 {% endblock %}
 
+{% block action_bar %}
+    <input type="button" id="record-search" value="Search {{ record_type|prettify_record_type + "s" }}">
+    <input type="button" id="record-search-soa" value="View BIND file">
+{% endblock %}
+
 {% block form %}
   <span id="cydns-record"
         data-recordType="{{ record_type }}"
@@ -20,19 +25,17 @@
   </span>
 
   <form method="POST">
-    <input type="button" id="launch-search" value="Edit an existing record" style="display:inline;"/>
-    <input type="button" id="launch-soa-search" value="View BIND file" style="display:inline;"/>
-    <div id="search-dialog" title="Search For Record" style="display: none;">
+    <div id="search-dialog" class="hidden">
       <div>
-        <label for="record_search">Search:
-          <input type="text" name="record_search" id="record_search" style="width: 400px;" value=""/>
+        <label for="search-record">
+          Search: <input type="text" id="record-searchbox" style="width: 400px;" value=""/>
         </label>
       </div>
     </div>
-    <div id="search-soa-dialog" title="Search a BIND file (will open in new tab)" style="display: none;">
+    <div id="search-soa-dialog" class="hidden">
       <div>
-        <label for="soa_search">Search:
-          <input type="text" name="soa_search" id="soa_search" style="width: 400px;" value=""/>
+        <label for="soa-search">
+          Search: <input type="text" id="soa-searchbox" style="width: 400px;" value=""/>
         </label>
       </div>
     </div>

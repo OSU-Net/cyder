@@ -4,11 +4,6 @@
     window.location.hash = '#record_type={{record_type}}&record_pk={{record_pk}}';
   });
 </script>
-<div id='form-message' class='form-message'>
-{% if message %}
-  {{message}} <div style='display: inline;' id='action-time'></div>
-{% endif %}
-</div>
 <style>
   div.soa_status_dirty {
     color: red;
@@ -68,4 +63,4 @@
 <input type="hidden" id="record_type" name="record_type" value="{{record_type}}"/>
 {{ form.as_p() }}
 <input type="hidden" id="record_pk" name="record_pk" value="{{record_pk}}"/>
-<input type="submit" value="Commit"/>
+<input type="submit" value="Submit"/>
