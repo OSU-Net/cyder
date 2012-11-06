@@ -21,10 +21,12 @@ Sites and Locations
 There are two types of sites, a top level site which represents a general geographic
 region like a campus and a location which is a place at a site.  Locations and sites
 allow us to partition up the campus by building and in turn those buildings can be 
-further divided up into departments if need be.
+further divided up into departments if need be.  If a site is deleted and it has networks
+pointed at it we first update those sites to point to the deleted site's parent and then
+we delete the given site.  Also if we update a what a site's parent is we must validate
+that the update will not violate the rules governing how networks are grouped.
 
 .. figure:: images/mozcore_sites.png
-
 
 Networks
 --------
