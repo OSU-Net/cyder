@@ -13,7 +13,11 @@
 {% endblock %}
 
 {% block form %}
-  <span id="record-type" data-recordType="{{ record_type }}"></span>
+  <span id="cydns-record"
+        data-recordType="{{ record_type }}"
+        data-searchUrl="{{ url('cydns-search-record') }}"
+        data-updateUrl="{{ url('cydns-update-record') }}">
+  </span>
 
   <form method="POST">
     <input type="button" id="launch-search" value="Edit an existing record" style="display:inline;"/>

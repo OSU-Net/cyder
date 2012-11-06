@@ -127,18 +127,38 @@ def cydns_update_record(request):
     try:
         # ACLs should be applied here.
         record = Klass.objects.get(pk=record_pk)
-        form = FQDNFormKlass(instance=object_)
+        form = FQDNFormKlass(instance=record)
     except ObjectDoesNotExist:
-        record = None
-        form = FQDNFormKlass()
-        record_pk = ''
+        raise Http404
 
-    return render(request, 'cydns/includes/update_record.html', {
+    return render(request, 'cydns/includes/cydns_update_record.html', {
         'form': form,
         'record_type': record_type,
         'record_pk': record_pk,
         'obj': record
     })
+
+
+def cydns_search_record(request):
+    """
+    Returns a list of records of 'record_type' matching 'term'.
+    """
+    record_type = request.GET.get('record_type', '')
+    query = request.GET.get('term', '')
+    if not (record_type and query):
+        raise Http404
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+
+    # Try to match query to records.
+    mega_filter = [Q(**{"{0}__icontains".format(field): query}) for field in
+                   Klass.search_fields]
+    mega_filter = reduce(operator.or_, mega_filter)
+
+    records = Klass.objects.filter(mega_filter)[:15]
+    records = [{'label': str(record), 'pk': record.pk} for record in records]
+
+    return HttpResponse(json.dumps(records))
 
 
 class CydnsListView(BaseListView):
@@ -251,25 +271,3 @@ def get_klasses(record_type):
         Klass, FormKlass, FQDNFormKlass = None, None, None
 
     return Klass, FormKlass, FQDNFormKlass
-
-
-def cydns_search_record(request):
-    """
-    Returns a list of records of 'record_type' matching 'term'.
-    """
-    record_type = request.GET.get('record_type', '')
-    query = request.GET.get('term', '')
-    if not (record_type and query):
-        raise Http404
-
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
-
-    # Try to match query to records.
-    mega_filter = [Q(**{"{0}__icontains".format(field): query}) for field in
-                   Klass.search_fields]
-    mega_filter = reduce(operator.or_, mega_filter)
-
-    records = Klass.objects.filter(mega_filter)[:15]
-    records = [{'label': str(record), 'pk': record.pk} for record in records]
-
-    return HttpResponse(json.dumps(records))

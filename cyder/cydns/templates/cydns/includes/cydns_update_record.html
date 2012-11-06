@@ -31,7 +31,7 @@
 </style>
 {% if obj %}
 <div class='object_meta'>
-  {% if obj.domain.soa %}
+  {% if obj.domain and obj.domain.soa %}
   <table>
     <tr>
       <td>
