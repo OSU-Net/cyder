@@ -100,9 +100,8 @@ div#header {
             }
             &.selected {
                 border: none;
-                a.navlink {
+                a.navlink, a.navlink:hover {
                     background: $light-gray;
-                    cursor: default;
                     color: $dark-gray;
                 }
             }
@@ -207,7 +206,6 @@ div#header {
             border: none;
             color: $dark-gray;
             &:hover {
-                cursor: default;
                 color: $dark-gray;
             }
         }
@@ -228,8 +226,13 @@ div#header {
     padding-top: 13px;
     position: relative;
     #kid { @include img-box-shadow(); }
+    .content {
+        clear: left;
+        display: inline;
+    }
 }
 
+/* Table */
 table {
     &.tablesorter {
       font-family: arial;

@@ -32,14 +32,9 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 from cyder.cydns.view.models import View
 
 
-class CydnsListView(BaseListView):
-    """ """
-    template_name = 'cydns/cydns_list.html'
-
-
 def cydns_list_create_record(request, record_type=None, record_pk=None):
     """
-    List, create, update view all in one for a flatter heirarchy.
+    List, create view in one for a flatter heirarchy.
     """
     domains = json.dumps([domain.name for domain in  # TODO: ACLs
                           Domain.objects.filter(is_reverse=False)]),
@@ -115,6 +110,40 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
         'obj': record,
         'object_list': Klass.objects.all()[0:20]
     })
+
+
+def cydns_update_record(request):
+    """
+    Update view called asynchronously from the list_create view
+    """
+    record_type = request.GET.get('record_type', '')
+    record_pk = request.GET.get('record_pk', '')
+    if not (record_type and record_pk):
+        raise Http404
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+
+    # Get the object if updating.
+    try:
+        # ACLs should be applied here.
+        record = Klass.objects.get(pk=record_pk)
+        form = FQDNFormKlass(instance=object_)
+    except ObjectDoesNotExist:
+        record = None
+        form = FQDNFormKlass()
+        record_pk = ''
+
+    return render(request, 'cydns/includes/update_record.html', {
+        'form': form,
+        'record_type': record_type,
+        'record_pk': record_pk,
+        'obj': record
+    })
+
+
+class CydnsListView(BaseListView):
+    """ """
+    template_name = 'cydns/cydns_list.html'
 
 
 class CydnsDetailView(BaseDetailView):
@@ -224,18 +253,18 @@ def get_klasses(record_type):
     return Klass, FormKlass, FQDNFormKlass
 
 
-def cydns_record_search_ajax(request):
+def cydns_search_record(request):
     """
-    Returns a list of records matching the 'query' of type 'record_type'.
+    Returns a list of records of 'record_type' matching 'term'.
     """
-    query = request.GET.get('term', '')
     record_type = request.GET.get('record_type', '')
-    if not (query and record_type):
+    query = request.GET.get('term', '')
+    if not (record_type and query):
         raise Http404
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
 
-    # Check if query matches any of the fields of the object.
+    # Try to match query to records.
     mega_filter = [Q(**{"{0}__icontains".format(field): query}) for field in
                    Klass.search_fields]
     mega_filter = reduce(operator.or_, mega_filter)
