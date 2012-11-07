@@ -34,7 +34,7 @@ from cyder.cydns.view.models import View
 
 def cydns_list_create_record(request, record_type=None, record_pk=None):
     """
-    List, create view in one for a flatter heirarchy.
+    List, create, update view in one for a flatter heirarchy.
     """
     domains = json.dumps([domain.name for domain in  # TODO: ACLs
                           Domain.objects.filter(is_reverse=False)]),
@@ -52,22 +52,20 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
         form = FQDNFormKlass()
 
     if request.method == 'POST':
-        qd = request.POST.copy()  # Make qd mutable.
-        orig_qd = request.POST.copy()  # If errors, use qd to populate form.
+        # May be mutating query dict for FQDN resolution and labels.
+        qd = request.POST.copy()
+        orig_qd = request.POST.copy()
 
-        # Create form to validate.
+        # Create initial FQDN form.
         if record:
             form = FQDNFormKlass(qd, instance=record)
         else:
             form = FQDNFormKlass(qd)
 
-        fqdn = False
-        if 'fqdn' in qd:
-            fqdn = qd.pop('fqdn')
-            fqdn = fqdn[0]
-
+        # Resolve fqdn to domain and attach to record object.
         domain = None
-        if fqdn:
+        if 'fqdn' in qd:
+            fqdn = qd.pop('fqdn')[0]
             try:
                 # Call prune tree later if error, else domain leak.
                 label, domain = ensure_label_domain(fqdn)
@@ -83,6 +81,14 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
                     'obj': record
                 })
             qd['label'], qd['domain'] = label, str(domain.pk)
+
+            # FQDN form to resolved domain form.
+            if record_pk:
+                # ACLs here. Move up so no new domain for unauthorized users.
+                object_ = get_object_or_404(Klass, pk=record_pk)
+                form = FormKlass(qd, instance=object_)
+            else:
+                form = FormKlass(qd)
 
         # Validate form.
         error = False
