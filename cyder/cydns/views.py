@@ -36,6 +36,10 @@ def cydns_list_create_record(request, record_type=None, pk=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
+    # Infer record_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
+    record_type = record_type or request.path.split('/')[2]
+
     domains = json.dumps([domain.name for domain in  # TODO: ACLs
                           Domain.objects.filter(is_reverse=False)]),
 
@@ -95,13 +99,13 @@ def cydns_list_create_record(request, record_type=None, pk=None):
                 record = form.save()
             except ValidationError as e:
                 error = True
-            return_form = FQDNFormKlass(instance=record)
+            form = FQDNFormKlass(instance=record)
         else:
             error = True
         if error:
             # Revert domain if not valid.
             prune_tree(domain)
-            return_form = FormKlass(orig_qd)
+            return_form = FQDNFormKlass(orig_qd)
             return_form._errors = form._errors
             form = return_form
 

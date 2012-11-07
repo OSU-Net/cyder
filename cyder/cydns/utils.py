@@ -13,7 +13,6 @@ from cyder.cydns.view.models import View
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from copy import deepcopy
-import pdb
 
 
 def tablefy(objects, views=True):
@@ -173,8 +172,10 @@ def ensure_label_domain(fqdn):
     """
     if fqdn == '':
         raise ValidationError("FQDN cannot be the emptry string.")
+
     if Domain.objects.filter(name=fqdn).exists():
         return '', Domain.objects.get(name=fqdn)
+
     fqdn_partition = fqdn.split('.')
     if len(fqdn_partition) == 1:
         raise ValidationError("Creating this record would force the creation "

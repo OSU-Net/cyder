@@ -69,14 +69,14 @@ class GenericViewTests(object):
         ex: url(r'^/cydns/domain/create/$', DomainCreateView.as_view()),
         """
         def test_get_create(self):
-            resp = self.client.get(reverse(self.url_slug + '-create'),
+            resp = self.client.get(reverse(self.url_slug + '-list'),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_create
 
     def build_post_create(self):
         def test_post_create(self):
-            resp = self.client.post(reverse(self.url_slug + '-create'),
+            resp = self.client.post(reverse(self.url_slug + '-list'),
                                     self.post_data(), follow=True)
             self.assertTrue(resp.status_code in (302, 200))
         return test_post_create
