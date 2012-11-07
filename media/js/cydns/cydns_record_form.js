@@ -3,14 +3,14 @@ $(document).ready(function(){
     var recordType = cydns.attr('data-recordType');
     var searchUrl = cydns.attr('data-searchUrl');
     var updateUrl = cydns.attr('data-updateUrl');
+    var domainsUrl = cydns.attr('data-domainsUrl');
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     var inputs = $('input');
     inputs.length;
     for (var x = 0; x < inputs.length; x++) {
         if(inputs[x].id === 'id_fqdn' || inputs[x].id === 'id_target' || inputs[x].id === 'id_server') {
-            make_smart_name_get_domains(inputs[x], true);
-            $(inputs[x]).css('width', '400px');
+            make_smart_name_get_domains(inputs[x].id, true, domainsUrl);
         }
     }
 
@@ -64,7 +64,7 @@ $(document).ready(function(){
     // Auto complete for search dialogs.
     $('#record-searchbox').autocomplete({
         // Bind autocomplete to the search field for the specifc record type.
-        minLength: 2,
+        minLength: 1,
         source: searchUrl + '?record_type=' + recordType,
         select: function( event, ui ) {
             // Save the selected pk so we can use it if the user decides to edit the record.
@@ -72,7 +72,7 @@ $(document).ready(function(){
         }
     });
     $('#soa-searchbox').autocomplete({
-        minLength: 2,
+        minLength: 1,
         source: searchUrl + '?record_type=SOA',
         select: function( event, ui ) {
             // Save the selected pk so we can use it if the user decides to edit the record.

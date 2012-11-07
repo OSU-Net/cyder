@@ -1,19 +1,22 @@
-function make_smart_name(rec_type, element_name, domains, append) {
-    element = $('# '+ element_name);
+function make_smart_name(element_name, domains, append) {
+    // Autocomplete domains.
+    element = $('#' + element_name);
+
     $(element).autocomplete({
         focus: function(event, ui) {
-            // Saved the matching part to ui.item.value.
-            var name = $('#' + element_name).val();
+            // Save matching part to ui.item.value.
+            var name = element.val();
+
             if (!append) {
-                $('#' + element_name).attr('value', ui.item.label);
+                element.attr('value', ui.item.label);
             } else if (ui.item.value !== '') {
                 var foo = name.substring(0, name.lastIndexOf(ui.item.value));
-                $('#' + element_name).attr('value', foo + ui.item.label);
+                element.attr('value', foo + ui.item.label);
             } else {
                 if (name.lastIndexOf('.') == name.length - 1) {
-                    $('#' + element_name).attr('value',  name + ui.item.label);
+                    element.attr('value',  name + ui.item.label);
                 } else {
-                    $('#' + element_name).attr('value',  name + '.' + ui.item.label);
+                    element.attr('value',  name + '.' + ui.item.label);
                 }
             }
             return false;
@@ -32,11 +35,11 @@ function make_smart_name(rec_type, element_name, domains, append) {
                 search_name = labels.join('.');
                 for (var domain in domains.sort(function(a,b) { return (a.length < b.length) ? 0 : 1; })) {
                     domain_name = domains[domain];
-                    if (domain_name.startsWith(search_name)) {
+                    if (domain_name.indexOf(search_name) == 0) {
                         suggested_domains.push({label: domain_name, value: search_name});
                     }
                 }
-                if (suggested_domains.length === 0){
+                if (suggested_domains.length === 0) {
                     labels.shift();
                 } else {
                     return callback(suggested_domains.slice(0, 20));
@@ -44,6 +47,13 @@ function make_smart_name(rec_type, element_name, domains, append) {
             }
             return callback([]);
         }
+    });
+}
+
+
+function make_smart_name_get_domains(element, append, domainsUrl){
+    $.get(domainsUrl, function(domains) {
+        make_smart_name(element, $.parseJSON(domains), append);
     });
 }
 
