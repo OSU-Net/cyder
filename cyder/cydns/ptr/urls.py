@@ -7,9 +7,9 @@ from cyder.cydns.views import cydns_list_create_record
 urlpatterns = patterns('',
    url(r'^$', cydns_list_create_record, name='ptr-list',
        kwargs={'record_type': 'ptr'}),
-   url(r'create/$', csrf_exempt(PTRCreateView.as_view()), name='ptr-create'),
+
    url(r'(?P<pk>[\w-]+)/update/$',
-       csrf_exempt(PTRUpdateView.as_view()), name='ptr-update'),
+       cydns_list_create_record, name='ptr-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(PTRDeleteView.as_view()), name='ptr-delete'),
    url(r'(?P<pk>[\w-]+)/$',

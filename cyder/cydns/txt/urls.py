@@ -5,13 +5,13 @@ from cyder.cydns.txt.views import *
 from cyder.cydns.views import cydns_list_create_record
 
 urlpatterns = patterns('',
-   url(r'^$', cydns_list_create_record, name='txt-list',
-       kwargs={'record_type': 'txt'}),
+   url(r'^$', cydns_list_create_record, name='txt-list'),
+
    url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(TXTCreateView.as_view()), name='txt-create-in-domain'),
-   url(r'create/$', csrf_exempt(TXTCreateView.as_view()), name='txt-create'),
+
    url(r'(?P<pk>[\w-]+)/update/$',
-       csrf_exempt(TXTUpdateView.as_view()), name='txt-update'),
+       cydns_list_create_record, name='txt-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(TXTDeleteView.as_view()), name='txt-delete'),
    url(r'(?P<pk>[\w-]+)/$',

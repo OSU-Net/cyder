@@ -32,7 +32,7 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 from cyder.cydns.view.models import View
 
 
-def cydns_list_create_record(request, record_type=None, record_pk=None):
+def cydns_list_create_record(request, record_type=None, pk=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
@@ -43,10 +43,9 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
 
     # Get the object if updating.
-    import pdb; pdb.set_trace()
     record = None
-    if record_pk:
-        record = get_object_or_404(Klass, pk=record_pk)  # TODO: ACLs
+    if pk:
+        record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
         form = FQDNFormKlass(instance=record)
     else:
         form = FQDNFormKlass()
@@ -77,13 +76,13 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
                     'domain': domains,
                     'form': fqdn_form,
                     'record_type': record_type,
-                    'record_pk': record_pk,
+                    'record_pk': pk,
                     'obj': record
                 })
             qd['label'], qd['domain'] = label, str(domain.pk)
 
             # FQDN form to resolved domain form.
-            if record_pk:
+            if pk:
                 # ACLs here.
                 form = FormKlass(qd, instance=record)
             else:
@@ -111,7 +110,7 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
         'domains': domains,
         'form': form,
         'record_type': record_type,
-        'record_pk': record_pk,
+        'record_pk': pk,
         'obj': record,
         'object_list': Klass.objects.all()[0:20]
     })
