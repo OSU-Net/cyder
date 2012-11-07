@@ -542,7 +542,7 @@ class ReverseDomainTests(TestCase):
             else:
                 self.assertEqual(rd[1].master_domain, rds[rd[0] - 1])
             self.assertTrue(rd[1].get_absolute_url())
-            self.assertTrue(rd[1].get_edit_url())
+            self.assertTrue(rd[1].get_update_url())
             self.assertTrue(rd[1].get_delete_url())
 
         try:

@@ -63,7 +63,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         cn.save()
         cn.save()
         self.assertTrue(cn.get_absolute_url())
-        self.assertTrue(cn.get_edit_url())
+        self.assertTrue(cn.get_update_url())
         self.assertTrue(cn.get_delete_url())
         self.assertTrue(cn.details())
 

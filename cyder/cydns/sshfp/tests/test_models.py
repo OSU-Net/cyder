@@ -18,7 +18,7 @@ class SSHFPTests(TestCase):
         sshfp.save()
         self.assertTrue(sshfp.details())
         self.assertTrue(sshfp.get_absolute_url())
-        self.assertTrue(sshfp.get_edit_url())
+        self.assertTrue(sshfp.get_update_url())
         self.assertTrue(sshfp.get_delete_url())
         rsshfp = SSHFP.objects.filter(**data)
         self.assertTrue(len(rsshfp) == 1)

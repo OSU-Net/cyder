@@ -46,7 +46,7 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
     classes share.  This includes a foreign key to the ``domain`` table
     and a ``label`` CharField.  This class also inherits from the
     ``ObjectUrlMixin`` class to provide the ``get_absolute_url``,
-    ``get_edit_url``, and ``get_delete_url`` functions.
+    ``get_update_url``, and ``get_delete_url`` functions.
 
     This class does validation on the ``label`` field. Call
     ``clean_all`` to trigger the validation functions. Failure to

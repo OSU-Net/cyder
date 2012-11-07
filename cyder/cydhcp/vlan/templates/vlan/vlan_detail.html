@@ -5,8 +5,8 @@
     <div class='dns-title'>{{ vlan }}</div>
 
     {% block action_bar %}
-        {% if vlan.get_edit_url %}
-            <a class="btn btn-primary" href="{{ vlan.get_edit_url() }}">Edit</a>
+        {% if vlan.get_update_url %}
+            <a class="btn btn-primary" href="{{ vlan.get_update_url() }}">Edit</a>
         {% endif %}
 
         {% block mid_action_bar %}

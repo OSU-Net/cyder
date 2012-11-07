@@ -6,8 +6,8 @@
 
     <!-- TODO fix all the urls in this view -->
     {% block action_bar %}
-        {% if range.get_edit_url %}
-            <a class="btn btn-primary" href="{{ range.get_edit_url() }}">Edit</a>
+        {% if range.get_update_url %}
+            <a class="btn btn-primary" href="{{ range.get_update_url() }}">Edit</a>
         {% endif %}
 
         {% block mid_action_bar %}

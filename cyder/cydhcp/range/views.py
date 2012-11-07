@@ -149,7 +149,7 @@ def update_range(request, range_pk):
                 kv = get_attrs(request.POST)
                 update_attrs(kv, attrs, RangeKeyValue, mrange, 'range')
                 mrange = form.save()
-                return redirect(mrange.get_edit_url())
+                return redirect(mrange.get_update_url())
         except ValidationError, e:
             if form._errors is None:
                 form._errors = ErrorDict()

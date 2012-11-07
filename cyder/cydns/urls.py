@@ -2,13 +2,14 @@ from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 
 from cyder.cydns.api.v1.api import v1_dns_api
-from cyder.cydns.views import cydns_search_record, cydns_update_record
+from cyder.cydns.views import cydns_search_record, cydns_get_record
 
 
 urlpatterns = patterns('',
    url(r'^$', direct_to_template, {'template': 'cydns/cydns_index.html'},
        name='cydns-index'),
-    url(r'^record/update/', cydns_update_record, name='cydns-update-record'),
+
+    url(r'^record/get/', cydns_get_record, name='cydns-get-record'),
     url(r'^record/search/', cydns_search_record, name='cydns-search-record'),
 
    url(r'^address_record/', include ('cyder.cydns.address_record.urls'),

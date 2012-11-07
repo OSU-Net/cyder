@@ -5,8 +5,8 @@
     <div class='dns-title'>{{ network }}</div>
 
     {% block action_bar %}
-        {% if network.get_edit_url %}
-            <a class="btn btn-primary" href="{{ network.get_edit_url() }}">Edit</a>
+        {% if network.get_update_url %}
+            <a class="btn btn-primary" href="{{ network.get_update_url() }}">Edit</a>
         {% endif %}
 
         {% block mid_action_bar %}

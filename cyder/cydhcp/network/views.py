@@ -99,7 +99,7 @@ def update_network(request, network_pk):
                 kv = get_attrs(request.POST)
                 update_attrs(kv, attrs, NetworkKeyValue, network, 'network')
                 network = form.save()
-                return redirect(network.get_edit_url())
+                return redirect(network.get_update_url())
         except ValidationError, e:
             if form._errors is None:
                 form._errors = ErrorDict()

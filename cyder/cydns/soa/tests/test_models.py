@@ -41,7 +41,7 @@ class SOATests(TestCase):
         soa = soa[0]
         self.assertTrue(soa.details())
         self.assertTrue(soa.get_absolute_url())
-        self.assertTrue(soa.get_edit_url())
+        self.assertTrue(soa.get_update_url())
         self.assertTrue(soa.get_delete_url())
 
         primary = "do.com"
@@ -56,7 +56,7 @@ class SOATests(TestCase):
         soa = soa[0]
         self.assertTrue(soa.details())
         self.assertTrue(soa.get_absolute_url())
-        self.assertTrue(soa.get_edit_url())
+        self.assertTrue(soa.get_update_url())
         self.assertTrue(soa.get_delete_url())
 
         primary = "ns1.derp.com"
@@ -67,7 +67,7 @@ class SOATests(TestCase):
             soa.serial and soa.expire and soa.retry and soa.refresh)
         self.assertTrue(soa.details())
         self.assertTrue(soa.get_absolute_url())
-        self.assertTrue(soa.get_edit_url())
+        self.assertTrue(soa.get_update_url())
         self.assertTrue(soa.get_delete_url())
 
     def test_add_remove(self):

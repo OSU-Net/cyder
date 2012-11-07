@@ -12,8 +12,8 @@
 
 
     {% block action_bar %}
-        {% if site.get_edit_url %}
-            <a class="btn btn-primary" href="{{ site.get_edit_url() }}">Edit</a>
+        {% if site.get_update_url %}
+            <a class="btn btn-primary" href="{{ site.get_update_url() }}">Edit</a>
         {% endif %}
 
         {% block mid_action_bar %}

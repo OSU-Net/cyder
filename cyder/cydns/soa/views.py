@@ -90,7 +90,7 @@ def update_soa(request, soa_pk):
                 kv = get_attrs(request.POST)
                 update_attrs(kv, attrs, SOAKeyValue, soa, 'soa')
                 soa = form.save()
-                return redirect(soa.get_edit_url())
+                return redirect(soa.get_update_url())
         except ValidationError, e:
             if form._errors is None:
                 form._errors = ErrorDict()

@@ -22,7 +22,7 @@
   <span id="cydns-record"
         data-recordType="{{ record_type }}"
         data-searchUrl="{{ url('cydns-search-record') }}"
-        data-updateUrl="{{ url('cydns-update-record') }}"
+        data-getUrl="{{ url('cydns-get-record') }}"
         data-domainsUrl="{{ url('get-all-domains') }}">
   </span>
 
@@ -43,11 +43,11 @@
 
   <div {% if not form.errors %}class="hidden"{% endif %} id="cydns-record-form">
     <form method="POST">
-          <h2 id="record-form-title"></h2>
-          <div class="inner-form">
-            {{ form.as_p() }}
-          </div>
-          <input type="submit" value="Submit"></input>
+      <h2 id="record-form-title"></h2>
+      <div class="inner-form">
+        {{ form.as_p() }}
+      </div>
+      <input type="submit" value="Submit"></input>
     </form>
   </div>
 

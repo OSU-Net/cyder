@@ -51,7 +51,7 @@ class PTRTests(cyder.base.tests.TestCase):
 
         self.assertTrue(ret.details())
         self.assertTrue(ret.get_absolute_url())
-        self.assertTrue(ret.get_edit_url())
+        self.assertTrue(ret.get_update_url())
         self.assertTrue(ret.get_delete_url())
 
         ip = Ip(ip_str=ip_str, ip_type=ip_type)

@@ -239,7 +239,7 @@
           <tbody>
           {% for addr in addrs %}
           <tr>
-            <td><a href="{{ addr.get_edit_url() }}">{{ addr.fqdn }}</a></td>
+            <td><a href="{{ addr.get_update_url() }}">{{ addr.fqdn }}</a></td>
             <td><b>{{ addr.record_type() }}</b></td>
             <td>{{ addr.ip_str }}</td>
           </tr>

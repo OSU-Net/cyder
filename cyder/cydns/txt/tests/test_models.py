@@ -25,7 +25,7 @@ class TXTTests(TestCase):
         txt.save()
         self.assertTrue(txt.details())
         self.assertTrue(txt.get_absolute_url())
-        self.assertTrue(txt.get_edit_url())
+        self.assertTrue(txt.get_update_url())
         self.assertTrue(txt.get_delete_url())
         rtxt = TXT.objects.filter(**data)
         self.assertTrue(len(rtxt) == 1)

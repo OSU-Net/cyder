@@ -22,7 +22,7 @@ class MXTests(cyder.base.tests.TestCase):
         mx.save()
         self.assertTrue(mx.details())
         self.assertTrue(mx.get_absolute_url())
-        self.assertTrue(mx.get_edit_url())
+        self.assertTrue(mx.get_update_url())
         self.assertTrue(mx.get_delete_url())
         rmx = MX.objects.filter(**data)
         self.assertTrue(len(rmx) == 1)

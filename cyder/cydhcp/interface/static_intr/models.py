@@ -116,7 +116,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         return super(StaticInterface, cls).get_api_fields() + ['mac',
                                                                'dhcp_enabled', 'dns_enabled']
 
-    def get_edit_url(self):
+    def get_update_url(self):
         return "/cydhcp/interface/{0}/update/".format(self.pk)
 
     def get_delete_url(self):

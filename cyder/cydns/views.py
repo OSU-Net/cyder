@@ -106,7 +106,6 @@ def cydns_list_create_record(request, record_type=None, pk=None):
             form = return_form
 
     return render(request, 'cydns/cydns_list_record.html', {
-        # TODO: ACLs
         'domains': domains,
         'form': form,
         'record_type': record_type,
@@ -116,12 +115,12 @@ def cydns_list_create_record(request, record_type=None, pk=None):
     })
 
 
-def cydns_update_record(request):
+def cydns_get_record(request):
     """
     Update view called asynchronously from the list_create view
     """
     record_type = request.GET.get('record_type', '')
-    record_pk = request.GET.get('record_pk', '')
+    record_pk = request.GET.get('pk', '')
     if not (record_type and record_pk):
         raise Http404
 
@@ -135,7 +134,8 @@ def cydns_update_record(request):
     except ObjectDoesNotExist:
         raise Http404
 
-    return HttpResponse(form.as_p())
+    return HttpResponse(json.dumps({'form': form.as_p(),
+                                    'updateUrl': record.get_update_url()}))
 
 
 def cydns_search_record(request):
@@ -230,43 +230,17 @@ class CydnsDeleteView(BaseDeleteView):
 
 
 def get_klasses(record_type):
-    if record_type == 'address_record':
-        Klass = AddressRecord
-        FormKlass = AddressRecordForm
-        FQDNFormKlass = AddressRecordFQDNForm
-    elif record_type == 'cname':
-        Klass = CNAME
-        FormKlass = CNAMEForm
-        FQDNFormKlass = CNAMEFQDNForm
-    elif record_type == 'domain':
-        Klass = Domain
-        FormKlass = DomainForm
-        FQDNFormKlass = DomainForm
-    elif record_type == 'mx':
-        Klass = MX
-        FormKlass = MXForm
-        FQDNFormKlass = FQDNMXForm
-    elif record_type == 'nameserver':
-        Klass = Nameserver
-        FormKlass = NameserverForm
-        FQDNFormKlass = NameserverForm
-    elif record_type == 'ptr':
-        Klass = PTR
-        FormKlass = PTRForm
-        FQDNFormKlass = PTRForm
-    elif record_type == 'soa':
-        Klass = SOA
-        FormKlass = SOAForm
-        FQDNFormKlass = SOAForm
-    elif record_type == 'srv':
-        Klass = SRV
-        FormKlass = SRVForm
-        FQDNFormKlass = FQDNSRVForm
-    elif record_type == 'txt':
-        Klass = TXT
-        FormKlass = TXTForm
-        FQDNFormKlass = FQDNTXTForm
-    else:
-        Klass, FormKlass, FQDNFormKlass = None, None, None
-
-    return Klass, FormKlass, FQDNFormKlass
+    """
+    Given record type string, grab its class and forms.
+    """
+    return {
+        'address_record': (AddressRecord, AddressRecordForm, AddressRecordFQDNForm),
+        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
+        'domain': (Domain, DomainForm, DomainForm),
+        'mx': (MX, MXForm, FQDNMXForm),
+        'nameserver': (Nameserver, NameserverForm, NameserverForm),
+        'ptr': (PTR, PTRForm, PTRForm),
+        'soa': (SOA, SOAForm, SOAForm),
+        'srv': (SRV, SRVForm, FQDNSRVForm),
+        'txt': (TXT, TXTForm, FQDNTXTForm),
+    }.get(record_type, (None, None, None))

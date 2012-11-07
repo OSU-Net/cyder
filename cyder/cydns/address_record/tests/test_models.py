@@ -349,7 +349,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         rec.save()
         self.assertTrue(rec.__repr__())
         self.assertTrue(rec.get_absolute_url())
-        self.assertTrue(rec.get_edit_url())
+        self.assertTrue(rec.get_update_url())
         self.assertTrue(rec.get_delete_url())
         self.assertTrue(rec.details())
 
@@ -367,7 +367,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         rec.save()
         self.assertTrue(rec.__repr__())
         self.assertTrue(rec.get_absolute_url())
-        self.assertTrue(rec.get_edit_url())
+        self.assertTrue(rec.get_update_url())
         self.assertTrue(rec.get_delete_url())
         self.assertTrue(rec.details())
 

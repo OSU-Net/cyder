@@ -257,7 +257,7 @@ def edit_static_interface(request, intr_pk):
             })
 
         messages.success(request, "Success! Interface Updated.")
-        return redirect(intr.get_edit_url())
+        return redirect(intr.get_update_url())
 
     else:
         interface_form = StaticInterfaceForm(instance=intr)

@@ -49,7 +49,7 @@ class StaticInterTests(TestCase):
         r.clean()
         r.save()
         r.details()
-        r.get_edit_url()
+        r.get_update_url()
         r.get_delete_url()
         r.get_absolute_url()
         repr(r)

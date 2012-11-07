@@ -16,8 +16,8 @@
     <div class='dns-title'>{{ object }}</div>
 
     {% block action_bar %}
-        {% if object.get_edit_url %}
-            <a class="btn btn-primary" href="{{ object.get_edit_url() }}">Edit</a>
+        {% if object.get_update_url %}
+            <a class="btn btn-primary" href="{{ object.get_update_url() }}">Edit</a>
         {% endif %}
 
         {% block mid_action_bar %}
