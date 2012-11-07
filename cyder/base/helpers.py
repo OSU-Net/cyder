@@ -51,3 +51,15 @@ def prettify_record_type(record_type, *args, **kwargs):
         return prettified
 
     return record_type.upper()
+
+
+@register.function
+def a_or_an(next_word):
+    """
+    Chooses 'a' or 'an' depending on first letter of next word.
+    Add in special cases if next word is 'hour' or something.
+    """
+    if next_word[0] in ['a', 'e', 'i', 'o', 'u']:
+        return 'an'
+    else:
+        return 'a'

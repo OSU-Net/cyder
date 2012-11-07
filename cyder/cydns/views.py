@@ -131,12 +131,7 @@ def cydns_update_record(request):
     except ObjectDoesNotExist:
         raise Http404
 
-    return render(request, 'cydns/includes/cydns_update_record.html', {
-        'form': form,
-        'record_type': record_type,
-        'record_pk': record_pk,
-        'obj': record
-    })
+    return HttpResponse(form.as_p())
 
 
 def cydns_search_record(request):

@@ -46,9 +46,10 @@ $(document).ready(function(){
                     $.get(updateUrl, {'record_type': recordType,
                                       'record_pk': $('#search-dialog').attr('stage_pk')},
                           function(data) {
-                              $('#current_form_data').empty();
-                              $('#current_form_data').append(data);
-                              $('#record-search').attr('value', '');
+                              $('#record-form-title').html('Update');
+                              $('.inner-form').empty().append(data);
+                              $('#cydns-record-form').show();
+                              $('#record-searchbox').attr('value', '');
                           });
                     $(this).dialog('close');
                 },
@@ -69,7 +70,7 @@ $(document).ready(function(){
                 'View ZONE file': function() {
                     // To edit. get pk (from when selected from the
                     // dropdown, and request object's form to replace current one.
-                    window.open('/cydns/bind/build_debug/'+$('#search-soa-dialog').attr('stage_soa_pk')+'/');
+                    window.open('/cydns/bind/build_debug/'+ $('#search-soa-dialog').attr('stage_soa_pk') + '/');
                     $(this).dialog('close');
                 },
                 'Cancel': function() {
@@ -78,5 +79,11 @@ $(document).ready(function(){
                 }
             }
         }).show();
+    });
+
+    $('#record-create').click(function() {
+        $('#record-form-title').html('Create');
+        clear_form_all($('#cydns-record-form form')[0]);
+        $('#cydns-record-form').show();
     });
 });
