@@ -39,14 +39,14 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
     domains = json.dumps([domain.name for domain in  # TODO: ACLs
                           Domain.objects.filter(is_reverse=False)]),
 
+    # Get the record form.
+    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+
     # Get the object if updating.
+    import pdb; pdb.set_trace()
     record = None
     if record_pk:
         record = get_object_or_404(Klass, pk=record_pk)  # TODO: ACLs
-
-    # Get the record form.
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
-    if record:
         form = FQDNFormKlass(instance=record)
     else:
         form = FQDNFormKlass()
@@ -84,9 +84,8 @@ def cydns_list_create_record(request, record_type=None, record_pk=None):
 
             # FQDN form to resolved domain form.
             if record_pk:
-                # ACLs here. Move up so no new domain for unauthorized users.
-                object_ = get_object_or_404(Klass, pk=record_pk)
-                form = FormKlass(qd, instance=object_)
+                # ACLs here.
+                form = FormKlass(qd, instance=record)
             else:
                 form = FormKlass(qd)
 

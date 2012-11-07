@@ -24,6 +24,4 @@ urlpatterns = patterns('',
    url(r'^view/', include('cyder.cydns.view.urls')),
    url(r'^bind/', include('cyder.cydns.cybind.urls')),
    url(r'^api/', include(v1_dns_api.urls)),
-
-   # url(r'^record/', include('cyder.cydns.master_form.urls')),
 )

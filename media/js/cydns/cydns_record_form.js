@@ -1,5 +1,6 @@
 $(document).ready(function(){
     var cydns = $('#cydns-record');
+    var form = $('#cydns-record-form form')[0];
     var recordType = cydns.attr('data-recordType');
     var searchUrl = cydns.attr('data-searchUrl');
     var updateUrl = cydns.attr('data-updateUrl');
@@ -24,12 +25,14 @@ $(document).ready(function(){
                 'Edit Record': function() {
                     // To edit. get pk (from when selected from the
                     // dropdown, and request object's form to replace current one.
+                    var pk = $(this).attr('stage_pk');
                     $.get(updateUrl, {'record_type': recordType,
-                                      'record_pk': $('#search-dialog').attr('stage_pk')},
+                                      'record_pk': pk},
                           function(data) {
                               $('#record-form-title').html('Update');
                               $('.inner-form').empty().append(data);
                               $('#cydns-record-form').show();
+                              form.action = pk + '/update/';
                               $('#record-searchbox').attr('value', '');
                           });
                     $(this).dialog('close');
@@ -83,7 +86,8 @@ $(document).ready(function(){
     // Show create form on clicking create button.
     $('#record-create').click(function() {
         $('#record-form-title').html('Create');
-        clear_form_all($('#cydns-record-form form')[0]);
+        clear_form_all(form);
+        form.action = '';
         $('#cydns-record-form').show();
     });
 });
