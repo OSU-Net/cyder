@@ -14,29 +14,10 @@ $(document).ready(function(){
         }
     }
 
-    $('#record-searchbox').autocomplete({
-        // Bind autocomplete to the search field for the specifc record type.
-        minLength: 2,
-        source: searchUrl + '?record_type=' + recordType,
-        select: function( event, ui ) {
-            // Save the selected pk so we can use it if the user decides to edit the record.
-            $('#search-dialog').attr('stage_pk', ui.item.pk);
-        }
-    });
-
-    $('#soa-searchbox').autocomplete({
-        minLength: 2,
-        source: searchUrl + '?record_type=SOA',
-        select: function( event, ui ) {
-            // Save the selected pk so we can use it if the user decides to edit the record.
-            $('#search-soa-dialog').attr('stage_soa_pk', ui.item.pk);
-        }
-    });
-
-    // Set up search
+    // Record-search dialogs to find records to update.
     $('#record-search').click(function() {
         $('#search-dialog').dialog({
-            title: 'Search ' + recordType + ' records',
+            title: 'Search for a ' + recordType + ' record to update.',
             autoShow: false,
             minWidth: 520,
             buttons: {
@@ -60,7 +41,6 @@ $(document).ready(function(){
             }
         }).show();
     });
-
     $('#record-search-soa').click(function() {
         $('#search-soa-dialog').dialog({
             title: 'Search for a BIND file',
@@ -81,6 +61,26 @@ $(document).ready(function(){
         }).show();
     });
 
+    // Auto complete for search dialogs.
+    $('#record-searchbox').autocomplete({
+        // Bind autocomplete to the search field for the specifc record type.
+        minLength: 2,
+        source: searchUrl + '?record_type=' + recordType,
+        select: function( event, ui ) {
+            // Save the selected pk so we can use it if the user decides to edit the record.
+            $('#search-dialog').attr('stage_pk', ui.item.pk);
+        }
+    });
+    $('#soa-searchbox').autocomplete({
+        minLength: 2,
+        source: searchUrl + '?record_type=SOA',
+        select: function( event, ui ) {
+            // Save the selected pk so we can use it if the user decides to edit the record.
+            $('#search-soa-dialog').attr('stage_soa_pk', ui.item.pk);
+        }
+    });
+
+    // Show create form on clicking create button.
     $('#record-create').click(function() {
         $('#record-form-title').html('Create');
         clear_form_all($('#cydns-record-form form')[0]);

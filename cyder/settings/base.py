@@ -18,7 +18,6 @@ JINGO_MINIFY_USE_STATIC = False
 MINIFY_BUNDLES = {
     'css': {
         'cyder_css': (
-            'css/lib/screen.css',
             'css/lib/jquery-ui-1.8.11.custom.css',
             'css/lib/jquery.autocomplete.css',
             'css/sticky_footer.css',
