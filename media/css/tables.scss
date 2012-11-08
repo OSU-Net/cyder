@@ -1,5 +1,38 @@
 @import "globals.scss";
 
+table.table {
+    padding: 13px 0;
+    margin-bottom: 13px;
+    width: 100%;
+    td, th {
+        padding: 5px 0;
+    }
+    thead {
+        background: $dark-blue;
+        color: $white;
+    }
+    tbody {
+        tr {
+            td {
+                a, p, span {
+                    position: relative;
+                    left: 13px;
+                }
+            }
+            &:hover {
+                background: darken($white, 10%);
+                cursor: pointer;
+            }
+            &:nth-child(even) {
+                background: $light-blue;
+                &:hover {
+                    background: darken($light-blue, 10%);
+                }
+            }
+        }
+    }
+}
+
 table {
     &.tablesorter {
       font-family: arial;

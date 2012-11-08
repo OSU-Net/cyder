@@ -8,11 +8,14 @@ form {
         margin-bottom: 26px;
         padding-bottom: 26px;
         #record-form-title {
-            margin-left: 13px;
+            left: 26px;
             padding-top: 13px;
+            position: relative;
         }
         p {
-            margin: 26px 0 26px 26px;
+            margin: 26px 0;
+            left: 39px;
+            position: relative;
             label {
                 color: $dark-gray;
             }
@@ -27,7 +30,7 @@ form {
             display: block;
         }
         input[type="checkbox"] {
-            left: 33%;
+            left: 100px;
             margin-top: 2px;
             position: absolute;
         }
@@ -38,7 +41,6 @@ form {
             bottom: 13px;
             float: right;
             position: relative;
-            right: 13px;
         }
     }
 }
