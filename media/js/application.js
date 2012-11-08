@@ -15,13 +15,13 @@ function add_tablesorter(table) {
     });
 }
 
-$(document).ready(function(){
+$(document).ready(function() {
     $('input, select').mouseover(function(){
         $(this).next('span.helptext').toggle();
-    });
-    $('input, select').mouseout(function(){
+    }).mouseout(function() {
         $(this).next('span.helptext').toggle();
     });
+
     $('.submit-on-change').change(function() {
         this.form.submit();
     });

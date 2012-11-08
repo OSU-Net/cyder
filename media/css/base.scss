@@ -42,6 +42,35 @@ input[type="text"] {
     color: $light-gray;
 }
 
+a.btn {
+    background: $light-gray;
+    border-radius: 5px;
+    bottom: 0;
+    color: $dark-gray;
+    font-weight: normal;
+    margin-right: 5px;
+    padding: 5px 10px;
+    position: relative;
+    text-decoration: none;
+    right: 0;
+    transition: .5s .1s;
+    &:hover {
+        @include box-shadow(2px 2px 3px $dark-gray);
+        background: lighten($light-gray, 5%);
+        bottom: 2px;
+        color: $dark-gray;
+        cursor: pointer;
+        right: 2px;
+    }
+    &:active {
+        @include box-shadow(none);
+        background: darken($light-gray, 10%);
+        bottom: 0;
+        right: 0;
+        transition: .03s 0s;
+    }
+}
+
 .center {
     text-align: center;
 }
@@ -237,6 +266,15 @@ div#header {
         clear: left;
         display: inline;
     }
+}
+
+#title {
+    display: inline;
+}
+
+#action-bar {
+    float: right;
+    margin-top: 5px;
 }
 
 /* Table */
