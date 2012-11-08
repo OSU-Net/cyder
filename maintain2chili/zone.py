@@ -1,10 +1,11 @@
 #! /usr/bin/python
 from optparse import OptionParser
+from ConfigParser import ConfigParser
 import pdb
 
 import chili_manage
 import fix_maintain, maintain_dump
-from utilities import get_cursor, long2ip, clean_mac
+from utilities import get_cursor, long2ip, ip2long, clean_mac, config
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
@@ -42,6 +43,8 @@ class Zone(object):
 
 
     def gen_soa(self):
+        """Generates an SOA record object if the SOA record exists.
+        """
         cursor.execute("SELECT * FROM soa WHERE domain = '%s';" % self.domain_id)
         records = cursor.fetchall()
 
@@ -60,6 +63,8 @@ class Zone(object):
 
 
     def gen_domain(self):
+        """Generates a Domain object for this Zone from a hostname
+        """
         if self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname:
             return None
 
@@ -67,9 +72,14 @@ class Zone(object):
 
 
     def gen_MX(self):
+        """Generates the MX Record objects related to this zone's domain.
+        """
         cursor.execute("SELECT * FROM zone_mx WHERE domain = '%s';" % self.domain_id)
         records = cursor.fetchall()
         for _, name, _, server, priority, ttl, _, _ in records:
+            """.. note::
+                Where multiple records with different ttls exist, only the first is kept.
+            """
             if MX.objects.filter(label = name,
                                  domain = self.domain,
                                  server = server,
@@ -87,6 +97,8 @@ class Zone(object):
 
 
     def gen_static(self):
+        """Generates the Static Interface objects related to this zone's domain.
+        """
         cursor.execute("SELECT * FROM host WHERE ip != 0 AND domain = '%s';" % self.domain_id)
         records = cursor.fetchall()
         for sysid, ip, dynamic_range, name, sysdomid, ha, systype, os, location, \
@@ -96,9 +108,11 @@ class Zone(object):
 
             if ip == 0:
                 continue
+
             if len(ha) != 12:
                 ha = "0" * 12
             # TODO: Make systems unique by hostname, ip, mac tuple
+            # TODO: Add key-value attributes to system objects.
             system, _ = System.objects.get_or_create(hostname = name)
             if not StaticInterface.objects.filter(label = name,
                                                   mac = clean_mac(ha),
@@ -115,6 +129,8 @@ class Zone(object):
 
 
     def gen_AR(self):
+        """Generates the Address Record and PTR objects related to this zone's domain.
+        """
         name = self.domain.name
         cursor.execute("SELECT * FROM pointer WHERE hostname LIKE '%%.%s';" % name)
         records = cursor.fetchall()
@@ -142,13 +158,21 @@ class Zone(object):
 
 
     def gen_NS(self):
+        """Generates the Nameserver objects related to this zone's domain.
+        """
         cursor.execute("SELECT * FROM nameserver WHERE domain='%s';" % self.domain_id)
         records = cursor.fetchall()
         for _, name, _, _ in records:
-            ns, _ = Nameserver.objects.get_or_create(domain = self.domain, server = name)
+            try:
+                ns, _ = Nameserver.objects.get_or_create(domain = self.domain, server = name)
+            except ValidationError:
+                pdb.set_trace()
 
 
     def walk_zone(self):
+        """Recursively traverses the domain tree, creating Zone objects and migrating
+        related DNS objects along the way.
+        """
         sql = 'SELECT * FROM domain WHERE name NOT LIKE "%%.in-addr.arpa" AND ' + \
                 'master_domain = %s;' % self.domain_id
         cursor.execute(sql)
@@ -158,13 +182,20 @@ class Zone(object):
 
 
     def get_dname(self):
+        """Finds a domain name for this Zone's domain id.
+        """
         cursor.execute('SELECT * FROM domain WHERE id = %s;' % self.domain_id)
         _, dname, _, _ = cursor.fetchall()[0]
         return dname
 
-#TODO: Cleanup functions for leftover objects to migrate (static interfaces and PTRs)
+    #TODO: Cleanup functions for leftover objects to migrate (static interfaces and PTRs)
+
 
 def gen_CNAME():
+    """Migrates CNAME objects.
+    .. note::
+        Run this only after migrating other DNS objects for every zone.
+    """
     cursor.execute("SELECT * FROM zone_cname WHERE name NOT LIKE '%.%';")
     records = cursor.fetchall()
     for _, server, name, domain_id, ttl, zone, _ in records:
@@ -205,6 +236,11 @@ if __name__ == "__main__":
 
     if options.dump:
         maintain_dump.main()
+        for option in config.options("pointer-include"):
+            (ip, hn, ptype) = config.get("pointer-include", option).split()
+            x = (ip2long(ip), hn, ptype)
+            sql = 'INSERT INTO pointer (ip, hostname, type) VALUES (%s, "%s", "%s")' % x
+            cursor.execute(sql)
 
     if options.delete:
         if options.dns:
@@ -220,7 +256,6 @@ if __name__ == "__main__":
         if options.cname:
             CNAME.objects.all().delete()
 
-
     if options.fix:
         fix_maintain.main()
 
@@ -228,8 +263,7 @@ if __name__ == "__main__":
         Domain.objects.get_or_create(name = 'arpa', is_reverse = True)
         Domain.objects.get_or_create(name = 'in-addr.arpa', is_reverse = True)
 
-        reverses = ['193.128', '10', '211.140', '201.199', '32.198', '232.111', \
-                    '127', '131.80.252.131', '5.68.98.207']
+        reverses = config.get("reverse-domains", "ips").split()
 
         for i in reverses:
             if '.' in i:
@@ -245,22 +279,13 @@ if __name__ == "__main__":
         records = cursor.fetchall()
         for domain_id, dname, _, _ in records:
             if dname == "edu":
-                pass
+                continue
             print "Creating %s zone." % dname
             Zone(domain_id = domain_id, dname = dname,)
 
     if options.cname:
         gen_CNAME()
 
-    domains = Domain.objects.all()
-    ars = AddressRecord.objects.all()
-    ptrs = PTR.objects.all()
-    soas = SOA.objects.all()
-    mxs = MX.objects.all()
-    nss = Nameserver.objects.all()
-    cnames = CNAME.objects.all()
-    statics = StaticInterface.objects.all()
-
-    print map(lambda x: len(x), [domains, ars, ptrs, soas, mxs, cnames, nss, statics])
+    print map(lambda x: len(x.objects.all()), [Domain, AddressRecord, PTR, SOA, MX, CNAME, Nameserver, StaticInterface])
 
     pdb.set_trace()
