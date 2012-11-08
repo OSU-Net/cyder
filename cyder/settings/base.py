@@ -18,19 +18,11 @@ JINGO_MINIFY_USE_STATIC = False
 MINIFY_BUNDLES = {
     'css': {
         'cyder_css': (
-            'css/lib/blueprint/ie.css',
-            'css/lib/blueprint/print.css',
-            'css/lib/blueprint/screen.css',
-            'css/lib/blueprint/plugins/buttons/screen.css',
-            'css/lib/blueprint/plugins/fancy-type/screen.css',
-            'css/lib/blueprint/plugins/link-icons/screen.css',
-            'css/lib/blueprint/plugins/rtl/screen.css',
+            'css/lib/jquery-ui-1.8.11.custom.css',
             'css/lib/jquery.autocomplete.css',
-            'css/lib/smoothness/jquery-ui-1.8.11.custom.css',
-            'css/lib/ui-lightness/jquery-ui-1.8.11.custom.css',
+            'css/sticky_footer.css',
 
             'css/base.scss',
-            'css/navtabs.scss',
             'css/globals.scss',
         ),
     },
@@ -38,39 +30,44 @@ MINIFY_BUNDLES = {
         'cyder_js': (
             'js/lib/jquery-1.6.1.min.js',
             'js/lib/attribute_adder.js',
-            'js/lib/jquery-ui-1.8.11.custom.min.js',
-            'js/lib/jquery.autocomplete.min.js',
             'js/lib/jquery.history.js',
             'js/lib/jQuery.rightclick.js',
             'js/lib/jquery.tools.min.js',
             'js/lib/jquery.validate.min.js',
             'js/lib/jquery.dataTables.js',
             'js/lib/jquery.tabletools.min.js',
+            'js/lib/jquery.autocomplete.min.js',
+            'js/lib/jquery-ui-1.8.11.custom.min.js',
             'js/lib/tablesorter.js',
 
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
-            'js/master_form.js',
-            'js/master_form_utils.js',
         ),
+        'cydns': {
+            'js/cydns/cydns_record_form.js',
+            'js/cydns/cydns_record_form_utils.js',
+        }
     }
 }
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
     'core',
-    'core.site',
-    'core.vlan',
-    'core.network',
-    'core.range',
-    'core.build',
-    'core.lib',
-    'core.interface',
-    'core.interface.static_intr',
+    'core.ctnr',
+    'core.cyuser',
     'core.search',
-    'core.lib',
-    'core.bulk_change',
+    'core.systems',
+    'cydhcp',
+    'cydhcp.site',
+    'cydhcp.vlan',
+    'cydhcp.network',
+    'cydhcp.range',
+    'cydhcp.build',
+    'cydhcp.lib',
+    'cydhcp.interface',
+    'cydhcp.interface.static_intr',
+    'cydhcp.bulk_change',
     'cydns',
     'dnsutils',
     'dnsutils.migrate',
@@ -88,8 +85,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydns.txt',
     'cydns.view',
     'cydns.cybind',
-    'cydns.master_form',
-    'systems',
 
     # Third party apps
     'djcelery',
@@ -110,6 +105,17 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
+)
+
+SESSION_COOKIE_NAME = 'cyder'
+SESSION_COOKIE_SECURE = False
+
+
+AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated
@@ -120,8 +126,10 @@ JINGO_EXCLUDE_APPS = [
     'tastytools',
 ]
 
-DJANGO_TEMPLATE_APPS = [ 'admin', ] # Tells the extract script what files to look for L10n in and what function
+DJANGO_TEMPLATE_APPS = ['admin',] # Tells the extract script what files to look for L10n in and what function
 # handles the extraction. The Tower library expects this.
+
+LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
 
 # # Use this if you have localizable HTML files:
 # DOMAIN_METHODS['lhtml'] = [
@@ -136,23 +144,7 @@ DJANGO_TEMPLATE_APPS = [ 'admin', ] # Tells the extract script what files to loo
 #    ('media/js/**.js', 'javascript'),
 # ]
 
-LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
-AUTH_PROFILE_MODULE = 'systems.UserProfile'
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.RemoteUserBackend',
-)
-
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-#########################################################
-#                   MOZ DNS                             #
-#########################################################
-
-MOZDNS_BASE_URL = "/cydns"
-CORE_BASE_URL = "/core"
-JINJA_CONFIG = {'autoescape': False}
 BUILD_PATH = 'builds'
 INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
-
-def custom_show_toolbar(request):
-    return True # Always show toolbar, for example purposes only.

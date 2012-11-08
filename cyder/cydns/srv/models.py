@@ -1,19 +1,17 @@
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
-from django.core.exceptions import ValidationError
+
 import cydns
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.models import CydnsRecord
-from cyder.cydns.validation import validate_name
-from cyder.cydns.mixins import ObjectUrlMixin
-from cyder.cydns.view.models import View
 from cyder.cydns.soa.utils import update_soa
+from cyder.cydns.validation import (validate_name, validate_srv_label,
+                                    validate_srv_port, validate_srv_priority,
+                                    validate_srv_weight, validate_srv_name,
+                                    validate_ttl, validate_srv_target)
+from cyder.cydns.view.models import View
 
-from cyder.cydns.validation import validate_srv_label, validate_srv_port
-from cyder.cydns.validation import validate_srv_priority, validate_srv_weight
-from cyder.cydns.validation import validate_srv_name, validate_ttl
-from cyder.cydns.validation import validate_srv_target
-
-import pdb
 
 # Rhetorical Question: Why is SRV not a common record?  SRV records have
 # a '_' in their label. Most domain names do not allow this.  Cydns

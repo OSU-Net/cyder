@@ -1,7 +1,7 @@
 from django.db.models import Q
 
 import cydns
-import core
+import cydhcp
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -10,7 +10,7 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.sshfp.models import SSHFP
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.txt.models import TXT
 
 from parser import Parser

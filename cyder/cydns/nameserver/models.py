@@ -1,22 +1,20 @@
-from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import models
 
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.validation import validate_label, validate_name
-from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_ttl
 from cyder.cydns.models import check_for_cname
 from cyder.cydns.soa.utils import update_soa
 
-from cyder.core.interface.static_intr.models import StaticInterface
-
-import pdb
-
 
 class Nameserver(models.Model, ObjectUrlMixin):
-    """Name server for forward domains::
+    """
+    Name server for forward domains::
 
         >>> Nameserver(domain = domain, server = server)
 
@@ -38,8 +36,7 @@ class Nameserver(models.Model, ObjectUrlMixin):
                               help_text="The name of the server this records points to.")
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
-    # "If the name server does lie within the domain it should have a
-    # corresponding A record."
+    # "If nameserver lies within domain, should have corresponding A record."
     addr_glue = models.ForeignKey(AddressRecord, null=True, blank=True,
                                   related_name="nameserver_set")
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,

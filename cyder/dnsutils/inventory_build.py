@@ -1,6 +1,6 @@
 from cyder.truth.models import Truth
-import systems
-from cyder.systems.models import System
+import cyder.core.systems
+from cyder.core.systems.models import System
 from cyder.dnsutils.build_nics import *
 from django.conf import settings
 from cyder.dnsutils.utils import *

@@ -16,7 +16,22 @@ class BaseListView(ListView):
     Inherit ListView to specify our pagination.
     """
     template_name = 'list.html'
+    extra_context = None
     paginate_by = 200
+
+    def get_context_data(self, **kwargs):
+        context = super(ListView, self).get_context_data(**kwargs)
+        context['form_title'] = "{0} Details".format(
+            self.form_class.Meta.model.__name__
+        )
+
+        # Extra_context takes precedence over original values in context.
+        try:
+            context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
+        return context
 
 
 class BaseDetailView(DetailView):
@@ -24,15 +39,17 @@ class BaseDetailView(DetailView):
     extra_context = None
 
     def get_context_data(self, **kwargs):
-
         context = super(DetailView, self).get_context_data(**kwargs)
         context['form_title'] = "{0} Details".format(
             self.form_class.Meta.model.__name__
         )
 
-        # extra_context takes precedence over original values in context
-        if self.extra_context:
+        # Extra_context takes precedence over original values in context.
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
@@ -44,7 +61,7 @@ class BaseCreateView(CreateView):
         try:
             obj = super(BaseCreateView, self).post(request, *args, **kwargs)
 
-        # redirect back to form if errors
+        # Redirect back to form if errors.
         except (IntegrityError, ValidationError), e:
             messages.error(request, str(e))
             request.method = 'GET'
@@ -61,9 +78,12 @@ class BaseCreateView(CreateView):
             self.form_class.Meta.model.__name__
         )
 
-        # extra_context takes precedence over original values in context
-        if self.extra_context:
+        # extra_context takes precedence over original values in context.
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
@@ -93,22 +113,23 @@ class BaseUpdateView(UpdateView):
         return super(BaseUpdateView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        """
-        Add extra template variables such as form title
-        """
         context = super(UpdateView, self).get_context_data(**kwargs)
         context['form_title'] = "Update {0}".format(
             self.form_class.Meta.model.__name__
         )
 
-        # extra_context takes precedence over original values in context
-        if self.extra_context:
+        # Extra_context takes precedence over original values in context.
+        try:
             context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
         return context
 
 
 class BaseDeleteView(DeleteView):
     template_name = 'confirm_delete.html'
+    extra_content = None
     success_url = '/'
 
     def get_object(self, queryset=None):
@@ -116,7 +137,7 @@ class BaseDeleteView(DeleteView):
         return obj
 
     def delete(self, request, *args, **kwargs):
-        # Get the object to delete
+        # Get the object to delete.
         obj = get_object_or_404(self.form_class.Meta.model,
                                 pk=kwargs.get('pk', 0))
 
@@ -128,6 +149,20 @@ class BaseDeleteView(DeleteView):
 
         messages.success(request, "Deletion Successful")
         return view
+
+    def get_context_data(self, **kwargs):
+        context = super(DeleteView, self).get_context_data(**kwargs)
+        context['form_title'] = "Update {0}".format(
+            self.form_class.Meta.model.__name__
+        )
+
+        # Extra_context takes precedence over original values in context.
+        try:
+            context = dict(context.items() + self.extra_context.items())
+        except AttributeError:
+            pass
+
+        return context
 
 
 class Base(DetailView):

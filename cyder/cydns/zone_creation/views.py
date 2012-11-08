@@ -30,7 +30,6 @@ import operator
 
 from gettext import gettext as _, ngettext
 import simplejson as json
-import pdb
 
 
 def zone_creation(request):

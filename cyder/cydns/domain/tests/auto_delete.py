@@ -1,9 +1,9 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.test import TestCase
 
-from cyder.systems.models import System
+from cyder.core.systems.models import System
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.txt.models import TXT
@@ -17,7 +17,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
 
-from cyder.core.site.models import Site
+from cyder.cydhcp.site.models import Site
 
 import pdb
 

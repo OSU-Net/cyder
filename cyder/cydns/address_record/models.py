@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cydns
-import core as core
+import cydhcp as cydhcp
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.view.models import View
 from cyder.cydns.ip.models import Ip
@@ -11,10 +11,8 @@ from cyder.cydns.models import check_TLD_condition
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, validate_views
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.soa.utils import update_soa
-
-import pdb
 
 
 class BaseAddressRecord(Ip):
@@ -100,9 +98,10 @@ class BaseAddressRecord(Ip):
         self.clean_ip(update_reverse_domain=urd)
 
         if not kwargs.pop("ignore_interface", False):
-            from cyder.core.interface.static_intr.models import StaticInterface
+            from cyder.cydhcp.interface.static_intr.models import StaticInterface
             if StaticInterface.objects.filter(fqdn=self.fqdn,
-                                              ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists():
+                                              ip_upper=self.ip_upper,
+                                              ip_lower=self.ip_lower).exists():
                 raise ValidationError("A Static Interface has already "
                                       "reserved this A record.")
 

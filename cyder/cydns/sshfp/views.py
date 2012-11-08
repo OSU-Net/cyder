@@ -12,6 +12,7 @@ class SSHFPView(object):
     model = SSHFP
     form_class = SSHFPForm
     queryset = SSHFP.objects.all()
+    extra_context = {'record_type': 'sshfp'}
 
 
 class SSHFPDeleteView(SSHFPView, CydnsDeleteView):

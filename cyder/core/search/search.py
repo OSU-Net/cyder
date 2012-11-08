@@ -1,13 +1,13 @@
 from django.db.models import Q
-from cyder.core.network.utils import calc_parent
+from cyder.cydhcp.network.utils import calc_parent
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 import cydns
-import core
+import cydhcp
 import operator
-from cyder.core.network.models import Network
-from cyder.core.site.models import Site
-from cyder.core.vlan.models import Vlan
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.vlan.models import Vlan
 
 import pdb
 import ipaddr
@@ -236,7 +236,7 @@ def compile_search(args):
             cnames = None
             domains = None
             if "INTR" in type_fs:
-                StaticInterface = core.interface.static_intr.models.StaticInterface
+                StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
                 intrs = StaticInterface.objects.filter(*mega_filter)
             else:
                 intrs = None
@@ -270,7 +270,7 @@ def compile_search(args):
                 domains = None
 
             if "INTR" in type_fs:
-                StaticInterface = core.interface.static_intr.models.StaticInterface
+                StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
                 intrs = StaticInterface.objects.all()
             else:
                 intrs = None
@@ -319,7 +319,7 @@ def compile_search(args):
                 *mega_filter).order_by('ip_upper').order_by('ip_lower')
             cnames = None
             domains = None
-            StaticInterface = core.interface.static_intr.models.StaticInterface
+            StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
             intrs = StaticInterface.objects.filter(*mega_filter)
             mxs = None
             nss = None
@@ -338,7 +338,7 @@ def compile_search(args):
             Domain = cydns.domain.models.Domain
             domains = Domain.objects.all()
 
-            StaticInterface = core.interface.static_intr.models.StaticInterface
+            StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
             intrs = StaticInterface.objects.all()
 
             MX = cydns.mx.models.MX

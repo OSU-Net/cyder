@@ -7,13 +7,13 @@ server {
        rewrite "/favicon.ico" /img/favicon.ico;
    }
    location /media/  {
-       root /nfs/milo/u1/username/Code/chili;
+       root /nfs/milo/u1/username/chili;
    }
    location /tmp/  {
-       root /nfs/milo/u1/username/Code/chili;
+       root /nfs/milo/u1/username/chili;
    }
 
-   proxy_set_header Host $host;
+   proxy_set_header Host $host:$server;
    location / {
        proxy_pass http://127.0.0.1:8080/;
    }

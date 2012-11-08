@@ -7,18 +7,25 @@ from django.views import static
 from funfactory.monkeypatches import patch
 patch()
 
+from cyder.core.cyuser import views as cyuser_views
+
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 admin.autodiscover()
 
-
 urlpatterns = patterns('',
    url(r'^$', direct_to_template, {'template': 'base/index.html'}, name='system-home'),
    (r'^admin/', include(admin.site.urls)),
    (r'^cydns/', include('cyder.cydns.urls')),
-   (r'^core/', include('cyder.core.urls')),
-   (r'^tasty/', include('cyder.systems.urls')),
+   (r'^cydhcp/', include('cyder.cydhcp.urls')),
+
+   (r'^ctnr/', include('cyder.core.ctnr.urls')),
+   (r'^tasty/', include('cyder.core.systems.urls')),
+   (r'^search/', include('cyder.core.search.urls')),
+
+   url(r'^login/$', cyuser_views.cylogin, name='login'),
+   url(r'^logout/$', cyuser_views.cylogout, name='logout'),
 )
 
 if settings.DEBUG:

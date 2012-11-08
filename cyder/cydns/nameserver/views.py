@@ -1,26 +1,27 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.shortcuts import render_to_response
-from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render, redirect
-from django.forms.util import ErrorList, ErrorDict
 from django.contrib import messages
-
-
-from cyder.cydns.nameserver.forms import NameserverForm
-from cyder.cydns.nameserver.forms import NSDelegated
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.views import *
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.forms.util import ErrorList, ErrorDict
+from django.shortcuts import (get_object_or_404, render, render_to_response,
+                              redirect)
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
-
-import pdb
+from cyder.cydns.nameserver.forms import (Nameserver, NameserverForm,
+                                          NSDelegated)
+from cyder.cydns.views import *
 
 
 class NSView(object):
     model = Nameserver
     form_class = NameserverForm
     queryset = Nameserver.objects.all()
+    extra_context = {'record_type': 'nameserver'}
+
+
+class NSListView(NSView, CydnsListView):
+    """ """
+    # Wooo. Huge speed boost because of select_related
+    queryset = Nameserver.objects.all().select_related()
 
 
 class NSDeleteView(NSView, CydnsDeleteView):
@@ -31,14 +32,11 @@ class NSDetailView(NSView, CydnsDetailView):
     template_name = "nameserver/nameserver_detail.html"
 
 
-class NSListView(NSView, CydnsListView):
-    """ """
-    template_name = "nameserver/nameserver_list.html"
-    queryset = Nameserver.objects.all().select_related()
-    # Wooo. Huge speed boost because of select_related
-
-
 class NSCreateView(NSView, CydnsCreateView):
+    """ """
+
+
+class NSUpdateView(NSView, CydnsUpdateView):
     """ """
 
 
@@ -78,10 +76,6 @@ def update_ns(request, nameserver_pk):
     })
 
 
-class NSUpdateView(NSView, CydnsUpdateView):
-    """ """
-
-
 def create_ns_delegated(request, domain):
     if request.method == "POST":
         form = NSDelegated(request.POST)
@@ -93,18 +87,15 @@ def create_ns_delegated(request, domain):
             ip_str = form.cleaned_data['server_ip_address']
             was_delegated = domain.delegated
             if was_delegated:
-                # Quickly and transperently Un-delegate the domain so we
-                # can add an address record.
+                # Undelegate the domain to add address record.
                 domain.delegated = False
                 domain.save()
             if was_delegated:
-                # Reset delegation status
+                # Reset delegation status.
                 domain.delegated = True
                 domain.save()
 
-        else:
-            pass  # Fall through
-    # Everything else get's the blank form
+    # Blank form for all else.
     form = NSDelegated()
     return render_to_response("nameserver/ns_delegated.html",
                               {'form': form, 'request': request})

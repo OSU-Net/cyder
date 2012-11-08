@@ -3,7 +3,7 @@ from cyder.cydns.mx.forms import MXForm
 from cyder.cydns.views import CydnsDeleteView
 from cyder.cydns.views import CydnsDetailView
 from cyder.cydns.views import CydnsCreateView
-from cyder.cydns.views import CydnsListView
+from cyder.cydns.views import cydns_list_create_record
 from cyder.cydns.views import CydnsUpdateView
 
 
@@ -28,8 +28,4 @@ class MXCreateView(MXView, CydnsCreateView):
 
 
 class MXUpdateView(MXView, CydnsUpdateView):
-    """ """
-
-
-class MXListView(MXView, CydnsListView):
     """ """

@@ -1,6 +1,10 @@
 {% extends "base/detail.html" %}
 
-{% block dns_content %}
+{% block sidebar %}
+  {% include "cydns/includes/cydns_sidebar.html" %}
+{% endblock %}
+
+{% block content %}
     {% if object.domain %}
         <a class="btn" href="{{ object.domain.get_absolute_url() }}">View Domain</a>
     {% endif %}
@@ -12,8 +16,8 @@
     <div class='dns-title'>{{ object }}</div>
 
     {% block action_bar %}
-        {% if object.get_edit_url %}
-            <a class="btn btn-primary" href="{{ object.get_edit_url() }}">Edit</a>
+        {% if object.get_update_url %}
+            <a class="btn btn-primary" href="{{ object.get_update_url() }}">Edit</a>
         {% endif %}
 
         {% block mid_action_bar %}

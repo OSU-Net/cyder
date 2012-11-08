@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cydns
-import core
+import cydhcp
 import pdb
 
 
@@ -85,7 +85,7 @@ def _build_label_domain_queries(label, domain, mx=True, sr=True, tx=True,
             **{'label': label, 'domain': domain})
         qsets.append(('AddressRecord', ars))
     if intr:
-        StaticInterface = core.interface.static_intr.models.StaticInterface
+        StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
         intrs = StaticInterface.objects.filter(
             **{'label': label, 'domain': domain})
         qsets.append(('AddressRecord', intrs))
@@ -137,7 +137,7 @@ def _build_queries(fqdn, dn=True, mx=True, sr=True, tx=True,
                       Q(**{'name{0}'.format(search_operator): fqdn}) |
                       Q(**{'ip_str{0}'.format(search_operator): ip})))
     if intr:
-        StaticInterface = core.interface.static_intr.models.StaticInterface
+        StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
         qsets.append(('StaticInterface', StaticInterface.objects.filter(
             Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
             Q(**{'ip_str{0}'.format(search_operator): ip}))))

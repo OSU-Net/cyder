@@ -1,64 +1,283 @@
 @import "globals.scss";
 
+.container {
+    margin: 0 auto;
+    width: 960px;
+}
+
+html {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    @include gradient(#eeeeee, $white);
+    background-color: $white;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+p, h1, h2, h3, h4 {
+    color: $black;
+}
+
+a {
+    color: $dark-gray;
+    font-weight: bold;
+    text-decoration: none;
+    &:hover {
+        color: $teal;
+    }
+}
+
+ul {
+    list-style-type: none;
+}
+
+input[type="text"], select {
+    background: $white;
+    border-radius: 2px;
+    padding-left: 3px;
+}
+input[type="text"] {
+    color: $light-gray;
+}
+
+a.btn {
+    background: $light-gray;
+    border-radius: 5px;
+    bottom: 0;
+    color: $dark-gray;
+    font-weight: normal;
+    margin-right: 5px;
+    padding: 5px 10px;
+    position: relative;
+    text-decoration: none;
+    right: 0;
+    transition: .5s .1s;
+    &:hover {
+        @include box-shadow(2px 2px 3px $dark-gray);
+        background: lighten($light-gray, 5%);
+        bottom: 2px;
+        color: $dark-gray;
+        cursor: pointer;
+        right: 2px;
+    }
+    &:active {
+        @include box-shadow(none);
+        background: darken($light-gray, 10%);
+        bottom: 0;
+        right: 0;
+        transition: .03s 0s;
+    }
+}
+
+.center {
+    text-align: center;
+}
+
+.hidden, .helptext {
+    display: none;
 }
 
 div#header {
-    background-color: #222;
+    background-color: $dark-gray;
     height: 50px;
-    h1 a {
-      text-decoration: none;
-      color: $white;
+    padding-top: 10px;
+    h1 {
+        top: 3px;
+        display: inline;
+        font-family: 'Gravitas One', cursive;
+        font-size: 30px;
+        a {
+            color: $white;
+            float: left;
+            font-weight: normal;
+            &:hover {
+                color: $teal;
+            }
+        }
+    }
+    .nav {
+        bottom: 18px;
+        clear: left;
+        display: inline;
+        padding-left: 13px;
+        position: relative;
+        &.nav-right {
+            bottom: 16px;
+            clear: none;
+            float: right;
+            /* Remove with blueprint */
+            margin-bottom: 0;
+            margin-right: 0;
+            li {
+                border-width: 0 1px 0 0;
+                display: inline-block;
+                padding-bottom: 13px;
+                &:first-child {
+                    border-width: 0 1px;
+                }
+                a.navlink {
+                    padding-bottom: 19px;
+                }
+            }
+        }
+        li {
+            border: solid $black 1px;
+            border-width: 0 1px 0 0;
+            display: inline;
+            margin-right: -5px;
+            padding: 30px 0 13px;
+            &:first-child {
+                border-width: 0 1px 0 1px;
+            }
+            &:not(:first-child) {
+                padding-left: 2px;
+            }
+            &.selected {
+                border: none;
+                a.navlink, a.navlink:hover {
+                    background: $light-gray;
+                    color: $dark-gray;
+                }
+            }
+            &.userinfo {
+                background: darken($dark-gray, 3%);
+                display: inline-block;
+                padding-top: 0;
+                padding-bottom: 13px;
+                text-align: center;
+                span {
+                    font-size: 12px;
+                    position: relative;
+                    top: 10px;
+                }
+                a {
+                    color: $teal;
+                    font-size: 13px;
+                    padding: 5px 10px;
+                    &:hover {
+                        color: $white;
+                    }
+                }
+                p {
+                    color: $white;
+                    line-height: 13px;
+                    margin-bottom: 0;
+                }
+            }
+            a.navlink {
+                bottom: 4px;
+                color: $white;
+                font-size: 18px;
+                font-weight: normal;
+                position: relative;
+                padding: 30px 30px 17px;
+                &:hover {
+                    background: $black;
+                    color: $teal;
+                }
+            }
+            div.logged-in {
+                color: $white;
+                font-size: 13px;
+                position: absolute;
+                a {
+                    color: $white;
+                    &:hover {
+                        color: $teal;
+                    }
+                }
+            }
+        }
     }
 }
 
-#main {
-    background-color: #eeeeee;
-    border: 1px solid #999;
-    padding: 1em;
-    box-shadow: 0 0 1px $black;
-}
-
-ul#app-buttons {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    outline: 0;
-    overflow: hidden;
-    display: inline-block;
-    border-bottom: 1px solid #778;
-    padding-top: 4px;
-    display: block;
-    li {
-      list-style-type: none;
-      margin-left: 0px;
-      $white-space: nowrap;
-      display: inline;
-      float: left;
-      padding-left: 2px;
-      padding-right: 2px;
-      &.first {
-        padding-left: 0px;
-      }
-      &.last {
-        padding-right: 0px;
-      }
+#subheader {
+    background-color: $dark-blue;
+    height: 30px;
+    padding-top: 5px;
+    #ctnr {
+        top: 2px;
+        float: left;
+        position: relative;
+        span {
+            color: $white;
+            font-size: 13px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        select {
+            padding-left: 2px;
+        }
     }
-    a {
-      padding: 3px 0.5em;
-      margin-left: 3px;
-      border-radius: 5px 5px 0 0;
-      border: 0px solid #778;
-      border-bottom: none;
-      background-color: #608925;
-      background: -moz-linear-gradient(top, #608925, #98ba40);
-      text-decoration: none;
-      color: $white;
-      font-weight: bold;
+    #search {
+        form {
+            bottom: 8px;
+            clear: right;
+            float: right;
+            display: inline;
+            position: relative;
+        }
     }
 }
 
+#sidebar {
+    float: left;
+    height: 100%;
+    margin-right: 26px;
+    width: 150px;
+    a.nav-link {
+        background: $black;
+        border: 1px solid $dark-gray;
+        color: $white;
+        display: block;
+        padding: 13px;
+        &:hover {
+            color: $teal;
+            background: $dark-gray;
+            text-decoration: none;
+        }
+        &.selected {
+            background: $light-gray;
+            border: none;
+            color: $dark-gray;
+            &:hover {
+                color: $dark-gray;
+            }
+        }
+        .nav-item {
+            display: block;
+            position: relative;
+            right: auto;
+        }
+    }
+}
+
+.main {
+    background-color: $white;
+    clear: both;
+    font-size: 13px;
+    height: 100%;
+    padding-top: 13px;
+    position: relative;
+    #kid { @include img-box-shadow(); }
+    .content {
+        clear: left;
+        display: inline;
+    }
+}
+
+#title {
+    display: inline;
+}
+
+#action-bar {
+    float: right;
+    margin-top: 5px;
+}
+
+/* Table */
 table {
     &.tablesorter {
       font-family: arial;
@@ -109,165 +328,6 @@ table {
           border-right-width: 0px;
         }
       }
-    }
-    &.racktable {
-      border: 1px solid $black;
-      td {
-        border-right: 1px solid $black;
-        border-bottom: 1px solid $black;
-        &:last-child, &.last, &:last-child, &.last {
-          border-right-width: 0px;
-        }
-      }
-      th {
-        background-color: #c4c4c4;
-        text-align: center;
-      }
-      select {
-        max-width: 220px;
-      }
-    }
-}
-
-.show {
-    padding: 3em;
-    margin: 3em;
-    background-color: #fefefe;
-    border-radius: 5px;
-    box-shadow: 0 0 3px $black;
-}
-
-dl.show {
-    font-size: 11px;
-    dt {
-      clear: left;
-      float: left;
-      width: 120px;
-      padding: 1px 0 3px;
-    }
-    dd {
-      float: left;
-      width: 340px;
-      padding-left: 10px;
-    }
-}
-
-.editform {
-    padding: 3em;
-    margin: 3em;
-    background-color: #fefefe;
-    border-radius: 5px;
-    box-shadow: 0 0 3px $black;
-}
-
-.formline {
-    clear: left;
-    margin-bottom: .75em;
-    label {
-      border-bottom: medium none;
-      float: left;
-      padding-right: 1em;
-      text-align: right;
-      width: 9em;
-      font-weight: bold;
-    }
-    textarea, input, select {
-      margin: 0;
-    }
-    .sub_form {
-      background-color: #f5f5f5;
-      border: 2px solid #ccc;
-      display: block;
-      padding: 10px 20px 10px 10px;
-      margin-bottom: 5px;
-      width: 400px;
-      float: left;
-      label {
-        width: 50px;
-        clear: left;
-        float: left;
-        text-align: left;
-      }
-    }
-}
-
-.releng_div_label {
-    padding: 0 15px 0 0;
-    margin: 0 15px 0 0;
-}
-
-.network_adapters_div {
-    margin: -15px 0 10px 120px;
-    min-height: 100px;
-    width: 850px;
-    border: 1px solid #AAA;
-}
-
-.releng_div {
-    margin: -15px 0 10px 120px;
-    height: 205px;
-    width: 360px;
-    border: 1px solid #AAA;
-    label {
-      float: left;
-      text-align: right;
-      margin: 5px 10px 0 5px;
-      width: 140px;
-    }
-}
-
-ul {
-    list-style-type: none;
-}
-
-/* DNS Menu block */
-.dns-title {
-    display: block;
-    position: relative;
-    overflow: hidden;
-    /* will contain if #first is longer than #second */
-    font-size: 15pt;
-}
-.dns-content {
-    display: block;
-    position: relative;
-    float: left;
-    overflow: hidden;
-    /* will contain if #first is longer than #second */
-    margin-left: 1em;
-    margin-top: 1em;
-    width: 700px;
-}
-.dns-menu {
-    padding-top: .75em;
-    float: left;
-    /* add this */
-    width: 150px;
-    overflow: hidden;
-    /* if you don't want #second to wrap below #first */
-}
-.nav-item, .mozdns-item {
-    display: block;
-    position: relative;
-    right: auto;
-}
-
-/* DNS Main Page */
-a.mozdns-action {
-    display: block;
-    width: 200px;
-    padding: .75em .75em .75em 1.5em;
-    color: rgb(220, 220, 220);
-    background: rgb(40, 40, 40);
-    border-radius: 4px;
-    border-style: solid none;
-    border-width: 1px;
-    border-color: rgb(46, 46, 46);
-    &:hover {
-      color: rgb(220, 220, 220);
-      background: rgb(30, 30, 30);
-      border-color: rgb(10, 10, 10);
-      text-decoration: none;
     }
 }
 
@@ -338,22 +398,34 @@ a.mozdns-action {
     text-align: right;
 }
 
-/* Links */
-a.nav-link {
-    display: block;
-    padding: .75em .75em .75em 1.5em;
-    color: rgb(220, 220, 220);
-    background: rgb(0, 0, 0);
-    border-style: solid none;
-    border-width: 1px;
-    border-color: rgb(46, 46, 46);
-    &:hover {
-      color: rgb(220, 220, 220);
-      background: rgb(30, 30, 30);
-      border-color: rgb(10, 10, 10);
-      text-decoration: none;
+#footer {
+    background-color: $dark-blue;
+    color: $white;
+    padding-top: 13px;
+    text-align: center;
+    a {
+        color: $white;
+        &:hover {
+            color: $teal;
+        }
     }
 }
-span.helptext {
-    display: none;
+
+/* Clearfix */
+.c:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+.c {
+    display: inline-block;
+}
+html[xmlns] .c {
+    display: block;
+}
+* html .c {
+    height: 1%;
 }

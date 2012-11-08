@@ -1,22 +1,16 @@
 from operator import itemgetter
+import simplejson as json
 
 from django.contrib import messages
 from django.forms import ValidationError
-from django.shortcuts import render
-from django.shortcuts import render_to_response
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.shortcuts import redirect
-from django.views.generic import UpdateView
-from django.views.generic import DetailView
-from django.views.generic import ListView
-from django.views.generic import CreateView
+from django.shortcuts import (get_object_or_404, render,
+                              render_to_response, redirect)
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.utils import tablefy
-from cyder.cydns.views import CydnsCreateView, CydnsDeleteView, CydnsListView
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.forms import DomainForm, DomainUpdateForm
 from cyder.cydns.mx.models import MX
@@ -25,56 +19,24 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.models import TXT
+from cyder.cydns.utils import tablefy
 from cyder.cydns.view.models import View
-
-import pdb
-import simplejson as json
-
-
-def domain_sort(domains):
-    """
-    This is soooooo slow.
-    """
-
-    roots = domains.filter(master_domain=None)
-    ordered = []
-    for root in roots:
-        ordered += build_tree(root, domains)
-    return ordered
-
-
-def build_tree(root, domains):
-    if len(domains) == 0:
-        return root
-    ordered = [root]
-    children = domains.filter(master_domain=root)
-    for child in children:
-        ordered += build_tree(child, domains)
-    return ordered
-
-
-def get_all_domains(request):
-    domains = [domain.name for domain in Domain.objects.all()]
-    return HttpResponse(json.dumps(domains))
+from cyder.cydns.views import CydnsCreateView, CydnsDeleteView, CydnsListView
 
 
 class DomainView(object):
     model = Domain
     queryset = Domain.objects.all().order_by('name')
     form_class = DomainForm
-
-
-class DomainDeleteView(DomainView, CydnsDeleteView):
-    """ """
+    extra_context = {'record_type': 'domain'}
 
 
 class DomainListView(DomainView, CydnsListView):
     queryset = Domain.objects.filter(is_reverse=False)
-    template_name = "domain/domain_list.html"
 
 
-class ReverseDomainListView(DomainView, CydnsListView):
-    queryset = Domain.objects.filter(is_reverse=True).order_by('name')
+class DomainDeleteView(DomainView, CydnsDeleteView):
+    """ """
 
 
 class DomainDetailView(DomainView, DetailView):
@@ -86,7 +48,7 @@ class DomainDetailView(DomainView, DetailView):
         if not domain:
             return context
 
-        # TODO this process can be generalized. It's not very high priority.
+        # TODO this process can be generalized. Not very high priority.
         mx_objects = domain.mx_set.all().order_by('label')
         mx_headers, mx_matrix, mx_urls = tablefy(mx_objects)
 
@@ -118,7 +80,8 @@ class DomainDetailView(DomainView, DetailView):
         intr_headers, intr_matrix, intr_urls = tablefy(intr_objects)
 
         address_objects = domain.addressrecord_set.all().order_by('label')
-        # This takes too long to load more than 50.
+
+        # Takes too long to load more than 50.
         if address_objects.count() > 50:
             adr_views = False
         else:
@@ -245,3 +208,35 @@ class DomainUpdateView(DomainView, UpdateView):
                          format(domain.name))
 
         return redirect(domain)
+
+
+class ReverseDomainListView(DomainView, CydnsListView):
+    extra_context = {'record_type': 'reverse_domain'}
+    queryset = Domain.objects.filter(is_reverse=True).order_by('name')
+
+
+def domain_sort(domains):
+    """
+    This is soooooo slow.
+    """
+
+    roots = domains.filter(master_domain=None)
+    ordered = []
+    for root in roots:
+        ordered += build_tree(root, domains)
+    return ordered
+
+
+def build_tree(root, domains):
+    if len(domains) == 0:
+        return root
+    ordered = [root]
+    children = domains.filter(master_domain=root)
+    for child in children:
+        ordered += build_tree(child, domains)
+    return ordered
+
+
+def get_all_domains(request):
+    domains = [domain.name for domain in Domain.objects.all()]
+    return HttpResponse(json.dumps(domains))

@@ -1,101 +1,28 @@
 {% extends "base/base.html" %}
-{% block subtitle %}: system list{% endblock %}
+
+{% block title %}Systems{% endblock %}
+
 {% block content %}
-
-<style type="text/css">
-@import "/media/css/lib/smoothness/jquery-ui-1.8.11.custom.css";
-.production { font-weight: bold; text-decoration: underline;
-	font-color: #FFF;
-
-}
-.dataTables_length {
-	float: left;
-	padding: 0 0 0 5px;
-}
-.dataTables_filter {
-	float: right;
-	padding: 0 5px 0 0px;
-}
-.ui-icon {
-	float: right;
-
-}
-.ui-toolbar {
-	margin-bottom: none;
-	padding-bottom: none;
-
-}
-.DataTables_sort_wrapper {
-	min-width: 70px;
-	text-align: center;
-	font-weight: bold;
-	font-color: #000;
-	color: #000;
-	cursor: pointer;
-	background: url("/media/css/lib/smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png");
-	margin: 0px;
-	padding: 0px;
-
-
-}
-
-th.ui-state-default {
-	margin: 0px;
-	padding: 0px;
-	background-color: none;
-	border: 1px solid #BBBBBB !important;
-	background: url("/media/css/lib/smoothness/images/ui-bg_highlight-soft_75_cccccc_1x100.png");
-}
-#example {
-	border-collapse:collapse;
-	margin-top: 0px;
-	border-top: none;
-	margin-bottom: 0px;
-	border-bottom: none;
-
-}
-#example_paginate {
-	font-color: #000;
-
-}
-#datagrid_processing {
-	padding: 5px 0 0 20px;
-	margin-left: 10px;
-	z-index: 400;
-}
-.paging_four_button {
-    cursor: pointer;
-    padding-left: 5px;
-
-}
-.paginate_enabled_next, .paginate_enabled_previous, .paginate_disabled_previous, .paginate_disabled_next{
-    padding-left: 5px;
-}
-</style>
-<h2>Listing systems</h2>
-
-<br />
-<div id="search_hits"></div>
-<table class="display" id="datagrid">
-	<thead>
+  <div id="search_hits"></div>
+  <table class="display" id="datagrid">
+  	<thead>
+      <tr>
+        <th>Host Name</th>
+        <th>Serial</th>
+        <th>Asset</th>
+        <th>Model</th>
+        <th>Rack</th>
+        <th>OOB IP</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+  	</thead>
+  	<tbody>
         <tr>
-            <th>Host Name</th>
-            <th>Serial</th>
-            <th>Asset</th>
-            <th>Model</th>
-            <th>Rack</th>
-            <th>OOB IP</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-	</thead>
-	<tbody>
-<tr>
-			<td colspan="5" class="dataTables_empty">Loading data from server</td>
-		</tr>
-	</tbody>
-</table>
+  		<td colspan="5" class="dataTables_empty">Loading data from server</td>
+  	  </tr>
+  	</tbody>
+  </table>
 
-<script src="/media/js/lib/jquery.dataTables.fnSetFilteringDelay.js"></script>
-
+  <script src="/media/js/lib/jquery.dataTables.fnSetFilteringDelay.js"></script>
 {% endblock %}

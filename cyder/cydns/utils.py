@@ -10,10 +10,9 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.view.models import View
-from cyder.core.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from copy import deepcopy
-import pdb
 
 
 def tablefy(objects, views=True):
@@ -168,11 +167,15 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
 
 
 def ensure_label_domain(fqdn):
-    """Returns a label and domain object."""
+    """
+    Returns a label and domain object.
+    """
     if fqdn == '':
         raise ValidationError("FQDN cannot be the emptry string.")
+
     if Domain.objects.filter(name=fqdn).exists():
         return '', Domain.objects.get(name=fqdn)
+
     fqdn_partition = fqdn.split('.')
     if len(fqdn_partition) == 1:
         raise ValidationError("Creating this record would force the creation "

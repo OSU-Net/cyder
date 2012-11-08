@@ -14,7 +14,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
-from cyder.core.site.models import Site
+from cyder.cydhcp.site.models import Site
 
 import pdb
 
@@ -45,7 +45,7 @@ class DomainTests(TestCase):
         f_c.save()
         f_c.details()
         self.assertTrue(f_c.get_absolute_url())
-        self.assertTrue(f_c.get_edit_url())
+        self.assertTrue(f_c.get_update_url())
         self.assertTrue(f_c.get_delete_url())
         self.assertTrue(f_c.master_domain == c)
 

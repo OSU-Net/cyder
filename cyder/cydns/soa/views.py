@@ -13,8 +13,8 @@ from cyder.cydns.views import CydnsDetailView
 from cyder.cydns.views import CydnsListView
 from cyder.cydns.views import CydnsUpdateView
 
-from cyder.core.keyvalue.utils import get_aa, get_docstrings, get_attrs
-from cyder.core.keyvalue.utils import update_attrs, dict_to_kv
+from cyder.cydhcp.keyvalue.utils import get_aa, get_docstrings, get_attrs
+from cyder.cydhcp.keyvalue.utils import update_attrs, dict_to_kv
 import simplejson as json
 
 
@@ -22,6 +22,11 @@ class SOAView(object):
     model = SOA
     form_class = SOAForm
     queryset = SOA.objects.all()
+    extra_context = {'record_type': 'soa'}
+
+
+class SOAListView(SOAView, CydnsListView):
+    """ """
 
 
 class SOADeleteView(SOAView, CydnsDeleteView):
@@ -29,7 +34,6 @@ class SOADeleteView(SOAView, CydnsDeleteView):
 
 
 class SOADetailView(SOAView, CydnsDetailView):
-    """ """
     template_name = 'soa/soa_detail.html'
 
     def get_context_data(self, **kwargs):
@@ -86,7 +90,7 @@ def update_soa(request, soa_pk):
                 kv = get_attrs(request.POST)
                 update_attrs(kv, attrs, SOAKeyValue, soa, 'soa')
                 soa = form.save()
-                return redirect(soa.get_edit_url())
+                return redirect(soa.get_update_url())
         except ValidationError, e:
             if form._errors is None:
                 form._errors = ErrorDict()
@@ -111,6 +115,3 @@ def update_soa(request, soa_pk):
             'aa': json.dumps(aa)
         })
 
-
-class SOAListView(SOAView, CydnsListView):
-    """ """

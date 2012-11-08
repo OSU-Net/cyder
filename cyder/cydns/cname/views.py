@@ -2,7 +2,7 @@ from cyder.cydns.views import CydnsDeleteView
 from cyder.cydns.views import CydnsDetailView
 from cyder.cydns.views import CydnsCreateView
 from cyder.cydns.views import CydnsUpdateView
-from cyder.cydns.views import CydnsListView
+from cyder.cydns.views import cydns_list_create_record
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.cname.forms import CNAMEForm
 
@@ -11,6 +11,7 @@ class CNAMEView(object):
     model = CNAME
     form_class = CNAMEForm
     queryset = CNAME.objects.all().order_by('fqdn')
+    extra_context = {'record_type': 'CNAME'}
 
 
 class CNAMEDeleteView(CNAMEView, CydnsDeleteView):
@@ -27,8 +28,4 @@ class CNAMECreateView(CNAMEView, CydnsCreateView):
 
 
 class CNAMEUpdateView(CNAMEView, CydnsUpdateView):
-    """ """
-
-
-class CNAMEListView(CNAMEView, CydnsListView):
     """ """

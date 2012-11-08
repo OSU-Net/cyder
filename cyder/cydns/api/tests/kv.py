@@ -4,11 +4,11 @@ from django.utils.encoding import smart_str
 
 from tastypie.test import ResourceTestCase
 
-from cyder.core.interface.static_intr.models import StaticInterface
-from cyder.core.interface.static_intr.models import StaticIntrKeyValue
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.tests.view_tests_template import GenericViewTests, random_label
-from cyder.cydns.tests.view_tests_template import random_byte
+from cyder.cydns.tests.test_views_template import GenericViewTests, random_label
+from cyder.cydns.tests.test_views_template import random_byte
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain

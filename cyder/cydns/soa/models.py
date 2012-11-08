@@ -1,15 +1,14 @@
+import os
 import time
-from django.core.exceptions import ValidationError
 
+from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models
 
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydhcp.keyvalue.models import KeyValue
+from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import validate_name
-from cyder.cydns.mixins import ObjectUrlMixin
-
-from django.conf import settings
-from cyder.core.keyvalue.models import KeyValue
-from cyder.core.keyvalue.utils import AuxAttr
-import os
 
 
 #TODO, put these defaults in a config file.
@@ -88,7 +87,7 @@ class SOA(models.Model, ObjectUrlMixin):
         )
 
     def get_debug_build_url(self):
-        return settings.MOZDNS_BASE_URL + "/bind/build_debug/{0}/".format(self.pk)
+        return reverse('build-debug', args=[self.pk])
 
     def delete(self, *args, **kwargs):
         super(SOA, self).delete(*args, **kwargs)

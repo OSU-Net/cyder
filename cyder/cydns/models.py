@@ -6,7 +6,7 @@ from django.db.models.signals import m2m_changed
 import cydns
 from cyder.cydns.domain.models import Domain, _check_TLD_condition
 from cyder.cydns.view.models import View
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, is_rfc1918, is_rfc4193
 from django.conf import settings
@@ -46,7 +46,7 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
     classes share.  This includes a foreign key to the ``domain`` table
     and a ``label`` CharField.  This class also inherits from the
     ``ObjectUrlMixin`` class to provide the ``get_absolute_url``,
-    ``get_edit_url``, and ``get_delete_url`` functions.
+    ``get_update_url``, and ``get_delete_url`` functions.
 
     This class does validation on the ``label`` field. Call
     ``clean_all`` to trigger the validation functions. Failure to
@@ -163,7 +163,8 @@ def set_fqdn(record):
 
 
 def check_for_cname(record):
-    """"If a CNAME RR is preent at a node, no other data should be
+    """"
+    If a CNAME RR is present at a node, no other data should be
     present; this ensures that the data for a canonical name and its
     aliases cannot be different."
 
@@ -183,7 +184,8 @@ def check_for_cname(record):
 
 
 def check_for_delegation(record):
-    """If an object's domain is delegated it should not be able to
+    """
+    If an object's domain is delegated it should not be able to
     be changed.  Delegated domains cannot have objects created in
     them.
     """

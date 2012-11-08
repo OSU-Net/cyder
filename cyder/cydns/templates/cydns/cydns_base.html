@@ -1,51 +1,5 @@
 {% extends "base/base.html" %}
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
 
-{% block site_tabs %}
-        <div class="dns-menu">
-                <div class="logo"><a href="/"><i class="icon-glass"></i></a></div>
-
-                <!-- DNS NAV -->
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/domain/">Domains</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/address_record/">Address Records</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/domain/reverse_domains">Reverse Domains</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/mx/">MX</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/soa/">SOA</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/nameserver/">NS</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/srv/">SRV</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/txt/">TXT</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/cname/">CNAME</a>
-                        </span>
-                        <span class="nav-item">
-                            <a class="nav-link" href="/cydns/ptr/">PTR</a>
-                        </span>
-
-        </div>
+{% block sidebar %}
+  {% include "cydns/includes/cydns_sidebar.html" %}
 {% endblock %}
-
-<div class='dns-content'>
-{% block dns_content %}{% endblock %}
-</div>

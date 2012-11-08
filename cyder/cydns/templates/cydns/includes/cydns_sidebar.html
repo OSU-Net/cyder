@@ -1,0 +1,28 @@
+<!-- DNS NAV -->
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('domain-list') in request.path }}" href="{{ url('domain-list') }}">Domains</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('address_record-list') in request.path }}" href="{{ url('address_record-list') }}">Address Records</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('cname-list') in request.path }}" href="{{ url('cname-list') }}">CNAME</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('mx-list') in request.path }}" href="{{ url('mx-list') }}">MX</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('ptr-list') in request.path }}" href="{{ url('ptr-list') }}">PTR</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('srv-list') in request.path }}" href="{{ url('srv-list') }}">SRV</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('txt-list') in request.path }}" href="{{ url('txt-list') }}">TXT</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('nameserver-list') in request.path }}" href="{{ url('nameserver-list') }}">NS</a>
+</span>
+<span class="nav-item">
+  <a class="nav-link {{ 'selected' if url('soa-list') in request.path }}" href="{{ url('soa-list') }}">SOA</a>
+</span>
