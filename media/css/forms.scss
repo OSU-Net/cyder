@@ -5,7 +5,8 @@ form {
         @include img-box-shadow();
         background: $light-gray;
         border-radius: 5px;
-        margin-bottom: 13px;
+        margin-bottom: 26px;
+        padding-bottom: 26px;
         #record-form-title {
             margin-left: 13px;
             padding-top: 13px;
@@ -16,8 +17,28 @@ form {
                 color: $dark-gray;
             }
         }
-        input[type="submit"] {
-            margin: 0 0 13px 13px;
+        ul.errorlist {
+            color: $red;
+            float: right;
+            position: relative;
+            right: 26px;
+        }
+        input[type="text"], select {
+            display: block;
+        }
+        input[type="checkbox"] {
+            left: 33%;
+            margin-top: 2px;
+            position: absolute;
+        }
+        hr {
+            margin-bottom: 26px;
+        }
+        .cancel, .submit {
+            bottom: 13px;
+            float: right;
+            position: relative;
+            right: 13px;
         }
     }
 }

@@ -22,6 +22,14 @@ $(document).ready(function() {
         $(this).next('span.helptext').toggle();
     });
 
+    // Form stuff.
+    $('.cancel').click(function() {
+        var $this = $(this);
+        $('#' + $this.attr('data-formId')).hide();
+    });
+    $('.submit').click(function() {
+        $(this).closest('form').submit();
+    });
     $('.submit-on-change').change(function() {
         this.form.submit();
     });
