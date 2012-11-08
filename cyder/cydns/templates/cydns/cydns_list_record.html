@@ -42,7 +42,7 @@
   </div>
 
   <div {% if not form.errors %}class="hidden"{% endif %} id="cydns-record-form">
-    <form method="POST">
+    <form class="page-form" method="POST">
       <h2 id="record-form-title"></h2>
       <div class="inner-form">
         {{ form.as_p() }}

@@ -24,6 +24,8 @@ MINIFY_BUNDLES = {
 
             'css/base.scss',
             'css/globals.scss',
+            'css/forms.scss',
+            'css/tables.scss',
         ),
     },
     'js': {

@@ -1,0 +1,23 @@
+@import "globals.scss";
+
+form {
+    &.page-form {
+        @include img-box-shadow();
+        background: $light-gray;
+        border-radius: 5px;
+        margin-bottom: 13px;
+        #record-form-title {
+            margin-left: 13px;
+            padding-top: 13px;
+        }
+        p {
+            margin: 26px 0 26px 26px;
+            label {
+                color: $dark-gray;
+            }
+        }
+        input[type="submit"] {
+            margin: 0 0 13px 13px;
+        }
+    }
+}
