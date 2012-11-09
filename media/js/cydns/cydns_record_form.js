@@ -2,6 +2,7 @@ $(document).ready(function(){
     var cydns = $('#cydns-record');
     var form = $('#cydns-record-form form')[0];
     var recordType = cydns.attr('data-recordType');
+    var prettyRecordType = cydns.attr('data-prettyRecordType');
     var searchUrl = cydns.attr('data-searchUrl');
     var getUrl = cydns.attr('data-getUrl');
     var domainsUrl = cydns.attr('data-domainsUrl');
@@ -18,10 +19,14 @@ $(document).ready(function(){
     // Record-search dialogs to find records to update.
     $('#record-search').click(function() {
         $('#search-dialog').dialog({
-            title: 'Search for a ' + recordType + ' record to update.',
+            title: 'Search for a ' + prettyRecordType + ' to update or delete.',
             autoShow: false,
             minWidth: 520,
             buttons: {
+                'Cancel': function() {
+                    $('#search-dialog').attr('stage_pk', ''),
+                    $(this).dialog('close');
+                },
                 'Edit Record': function() {
                     // To edit. get pk (from when selected from the
                     // dropdown, and request object's form to replace current one.
@@ -29,7 +34,7 @@ $(document).ready(function(){
                     $.get(getUrl, {'record_type': recordType,
                                    'pk': pk},
                           function(data) {
-                              $('#record-form-title').html('Update');
+                              $('#record-form-title').html('Updating a ' + prettyRecordType);
 
                               // Populate form with object and set its URL.
                               var data = JSON.parse(data);
@@ -41,10 +46,6 @@ $(document).ready(function(){
                           });
                     $(this).dialog('close');
                 },
-                'Cancel': function() {
-                    $('#search-dialog').attr('stage_pk', ''),
-                    $(this).dialog('close');
-                }
             }
         }).show();
     });
@@ -54,6 +55,10 @@ $(document).ready(function(){
             autoShow: true,
             minWidth: 520,
             buttons: {
+                'Cancel': function() {
+                    $('#search-dialog').attr('stage_soa_pk', ''),
+                    $(this).dialog('close');
+                },
                 'View ZONE file': function() {
                     // To edit. get pk (from when selected from the
                     // dropdown, and request object's form to replace current one.
@@ -61,10 +66,6 @@ $(document).ready(function(){
                                 $(this).attr('stage_soa_pk') + '/');
                     $(this).dialog('close');
                 },
-                'Cancel': function() {
-                    $('#search-dialog').attr('stage_soa_pk', ''),
-                    $(this).dialog('close');
-                }
             }
         }).show();
     });
@@ -90,7 +91,7 @@ $(document).ready(function(){
 
     // Show create form on clicking create button.
     $('#record-create').click(function() {
-        $('#record-form-title').html('Create');
+        $('#record-form-title').html('Creating a ' + prettyRecordType);
 
         clear_form_all(form);
         form.action = '?action=create';

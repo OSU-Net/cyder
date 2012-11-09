@@ -1,11 +1,13 @@
 {% extends "base/list.html" %}
 
+{% set pretty_record_type = record_type|prettify_record_type %}
+
 {% block title %}
-    {{ record_type|prettify_record_type + "s" }}
+    {{ pretty_record_type + "s" }}
 {% endblock %}
 
 {% block header %}
-    {{ record_type|prettify_record_type + "s" }}
+    {{ pretty_record_type + "s" }}
 {% endblock %}
 
 {% block sidebar %}
@@ -13,14 +15,15 @@
 {% endblock %}
 
 {% block action_bar %}
-    <a class="btn" id="record-create">Create {{ a_or_an(record_type) }} {{ record_type|prettify_record_type }}</a>
-    <a class="btn" id="record-search">Update {{ a_or_an(record_type) }} {{ record_type|prettify_record_type }}</a>
+    <a class="btn" id="record-create">Create {{ a_or_an(record_type) }} {{ pretty_record_type }}</a>
+    <a class="btn" id="record-search">Update {{ a_or_an(record_type) }} {{ pretty_record_type }}</a>
     <a class="btn" id="record-search-soa">View BIND File</a>
 {% endblock %}
 
 {% block form %}
   <span id="cydns-record"
         data-recordType="{{ record_type }}"
+        data-prettyRecordType="{{ pretty_record_type }}"
         data-searchUrl="{{ url('cydns-search-record') }}"
         data-getUrl="{{ url('cydns-get-record') }}"
         data-domainsUrl="{{ url('get-all-domains') }}">

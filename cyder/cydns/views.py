@@ -1,6 +1,7 @@
 import operator
 import simplejson as json
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.forms.util import ErrorDict, ErrorList
@@ -115,13 +116,24 @@ def cydns_record_view(request, record_type=None):
             return_form._errors = form._errors
             form = return_form
 
+    paginator = Paginator(Klass.objects.all(), 3)
+    page = request.GET.get('page')
+    try:
+        object_list = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        object_list = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        object_list = paginator.page(paginator.num_pages)
+
     return render(request, 'cydns/cydns_record_view.html', {
-        'domains': domains,
         'form': form,
+        'obj': record,
+        'object_list': object_list,
+        'domains': domains,
         'record_type': record_type,
         'pk': pk,
-        'obj': record,
-        'object_list': Klass.objects.all()[0:20]
     })
 
 

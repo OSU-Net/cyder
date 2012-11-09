@@ -18,7 +18,7 @@
 {% block content %}
   {% block form %}{% endblock %}
 
-  {% if page_obj %}
+  {% if object_list and object_list.paginator %}
     {% include "base/includes/pagination.html" %}
   {% endif %}
 
