@@ -8,13 +8,7 @@ $(document).ready(function(){
     var domainsUrl = cydns.attr('data-domainsUrl');
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
-    var inputs = $('input');
-    inputs.length;
-    for (var x = 0; x < inputs.length; x++) {
-        if(inputs[x].id === 'id_fqdn' || inputs[x].id === 'id_target' || inputs[x].id === 'id_server') {
-            make_smart_name_get_domains(inputs[x].id, true, domainsUrl);
-        }
-    }
+    make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
 
     // Record-search dialogs to find records to update.
     $('#record-search').click(function() {

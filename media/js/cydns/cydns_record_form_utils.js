@@ -1,22 +1,20 @@
-function make_smart_name(element_name, domains, append) {
+function make_smart_name(elements, domains, append) {
     // Autocomplete domains.
-    element = $('#' + element_name);
-
-    $(element).autocomplete({
+    $(elements).autocomplete({
         focus: function(event, ui) {
             // Save matching part to ui.item.value.
-            var name = element.val();
+            var name = elements.val();
 
             if (!append) {
-                element.attr('value', ui.item.label);
+                elements.attr('value', ui.item.label);
             } else if (ui.item.value !== '') {
                 var foo = name.substring(0, name.lastIndexOf(ui.item.value));
-                element.attr('value', foo + ui.item.label);
+                elements.attr('value', foo + ui.item.label);
             } else {
                 if (name.lastIndexOf('.') == name.length - 1) {
-                    element.attr('value',  name + ui.item.label);
+                    elements.attr('value',  name + ui.item.label);
                 } else {
-                    element.attr('value',  name + '.' + ui.item.label);
+                    elements.attr('value',  name + '.' + ui.item.label);
                 }
             }
             return false;
