@@ -2,11 +2,11 @@ from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
 from cyder.cydns.domain.views import *
-from cyder.cydns.views import cydns_list_create_record
+from cyder.cydns.views import cydns_record_view
 
 
 urlpatterns = patterns('',
-    url(r'^$', cydns_list_create_record, name='domain-list'),
+    url(r'^$', cydns_record_view, name='domain-list'),
 
     url(r'^get_all_domains/$', get_all_domains, name='get-all-domains'),
 
