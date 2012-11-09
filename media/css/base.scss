@@ -12,8 +12,11 @@ html {
 }
 
 body {
-    background-color: $white;
     font-family: 'Source Sans Pro', sans-serif;
+}
+
+body, .content {
+    background-color: $white;
 }
 
 p, h1, h2, h3, h4 {
@@ -90,10 +93,6 @@ a.btn {
 
 .hidden {
     display: none;
-}
-
-.helptext {
-    font-size: 10px;
 }
 
 div#header {
@@ -272,7 +271,6 @@ div#header {
 }
 
 .main {
-    background-color: $white;
     clear: both;
     font-size: 13px;
     height: 100%;
