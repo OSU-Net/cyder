@@ -8,8 +8,8 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.views import BaseListView, BaseDetailView, BaseCreateView
-from cyder.base.views import BaseUpdateView, BaseDeleteView
+from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
+                              BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
 from cyder.cydns.address_record.models import AddressRecord
@@ -29,7 +29,8 @@ from cyder.cydns.srv.forms import FQDNSRVForm, SRVForm
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
+from cyder.cydns.utils import (ensure_label_domain, prune_tree, slim_form,
+                               tablefy)
 from cyder.cydns.view.models import View
 
 
@@ -116,7 +117,7 @@ def cydns_record_view(request, record_type=None):
             return_form._errors = form._errors
             form = return_form
 
-    paginator = Paginator(Klass.objects.all(), 3)
+    paginator = Paginator(Klass.objects.all(), 50)
     page = request.GET.get('page')
     try:
         object_list = paginator.page(page)
@@ -131,6 +132,7 @@ def cydns_record_view(request, record_type=None):
         'form': form,
         'obj': record,
         'object_list': object_list,
+        'object_table': tablefy(object_list),
         'domains': domains,
         'record_type': record_type,
         'pk': pk,

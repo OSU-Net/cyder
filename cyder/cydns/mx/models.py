@@ -25,7 +25,6 @@ class MX(CydnsRecord):
     def details(self):
         return  (
             ('FQDN', self.fqdn),
-            ('Record Type', 'MX'),
             ('Server', self.server),
             ('Priority', self.priority),
             ('TTL', self.ttl)

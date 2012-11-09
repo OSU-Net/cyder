@@ -103,7 +103,7 @@ class Domain(models.Model, ObjectUrlMixin):
         return (
             ('Name', self.name),
             ('Master Domain', self.master_domain),
-            ('SOA', self.soa),
+            ('SOA', self.soa.primary if self.soa else self.soa) ,
             ('Delegated', self.delegated),
         )
 

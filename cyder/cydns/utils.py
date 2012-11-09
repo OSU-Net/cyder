@@ -29,6 +29,7 @@ def tablefy(objects, views=True):
     headers = []
     if not objects:
         return (None, None, None)
+
     # Build the headers
     for title, value in objects[0].details():
         headers.append(title)
@@ -42,12 +43,14 @@ def tablefy(objects, views=True):
         for title, value in obj.details():
             row.append(value)
         if views:
-            views = ""
+            view_field = ""
             if hasattr(obj, 'views'):
                 for view in obj.views.all():
-                    views += view.name + ", "
-                views = views.strip(", ")
-                row.append(views)
+                    view_field += view.name + ", "
+                view_field = view_field.strip(", ")
+                row.append(view_field)
+            else:
+                row.append('None')
 
         matrix.append(row)
 

@@ -7,8 +7,6 @@ from cyder.cydns.models import CydnsRecord
 from cyder.cydns.validation import validate_name, find_root_domain
 from cyder.cydns.search_utils import smart_fqdn_exists
 
-import pdb
-
 
 class CNAME(CydnsRecord):
     """CNAMES can't point to an any other records. Said another way,
@@ -34,7 +32,6 @@ class CNAME(CydnsRecord):
     def details(self):
         return  (
             ('FQDN', self.fqdn),
-            ('Record Type', 'CNAME'),
             ('Target', self.target),
         )
 

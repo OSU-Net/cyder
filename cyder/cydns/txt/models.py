@@ -17,7 +17,6 @@ class TXT(CydnsRecord):
     def details(self):
         return (
             ("FQDN", self.fqdn),
-            ("Record Type", "TXT"),
             ("Text", self.txt_data)
         )
 
