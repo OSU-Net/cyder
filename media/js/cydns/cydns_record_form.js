@@ -34,6 +34,7 @@ $(document).ready(function(){
                               // Populate form with object and set its URL.
                               var data = JSON.parse(data);
                               $('.inner-form').empty().append(data.form);
+                              initForms();
                               form.action = '?action=update&pk=' + data.pk;
                               $('#cydns-record-form').show();
                               $('#record-searchbox').attr('value', '');

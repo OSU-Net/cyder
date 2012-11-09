@@ -19,6 +19,12 @@ class ObjectUrlMixin(object):
     def absolute_url(self):
         return self.get_absolute_url()
 
+    def get_list_url(self):
+        """
+        Return the list url of an object.
+        """
+        return reverse(self._meta.db_table.replace('-', '_') + '-list')
+
     def get_update_url(self):
         """
         Return the update url of an object.

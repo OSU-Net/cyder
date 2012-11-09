@@ -73,6 +73,15 @@ a.btn {
         right: 0;
         transition: .03s 0s;
     }
+    &.red {
+        background: $red;
+        &:hover {
+            background: lighten($red, 5%);
+        }
+        &:active {
+            background: darken($red, 10%);
+        }
+    }
 }
 
 .center {

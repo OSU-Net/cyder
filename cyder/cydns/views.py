@@ -48,6 +48,7 @@ def cydns_list_create_record(request, record_type=None):
 
     # Get the object if updating.
     record = None
+    action = request.GET.get('action', None)
     pk = request.GET.get('pk', None)
     if pk:
         record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
@@ -59,6 +60,10 @@ def cydns_list_create_record(request, record_type=None):
         # May be mutating query dict for FQDN resolution and labels.
         qd = request.POST.copy()
         orig_qd = request.POST.copy()
+
+        if action == 'delete':
+            record.delete()
+            return redirect(record.get_list_url())
 
         # Create initial FQDN form.
         if record:
@@ -100,7 +105,7 @@ def cydns_list_create_record(request, record_type=None):
                 record = form.save()
             except ValidationError as e:
                 error = True
-            form = FQDNFormKlass(instance=record)
+            return redirect(record.get_list_url())
         else:
             error = True
         if error:

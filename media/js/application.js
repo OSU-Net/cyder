@@ -15,7 +15,7 @@ function add_tablesorter(table) {
     });
 }
 
-$(document).ready(function() {
+function initForms() {
     // Removes 'Hold down' helptext.
     $('.helptext:contains(' + 'Hold down "Control"' + ')').remove();
 
@@ -24,10 +24,24 @@ $(document).ready(function() {
         var $this = $(this);
         $('#' + $this.attr('data-formId')).hide();
     });
+    $('.delete').click(function() {
+        var form = $(this).closest('form')[0];
+        if (form.action.length) {
+            form.action = form.action.replace(/action=\w+&/g,
+                                              'action=delete&');
+        } else {
+            form.action = '?action=delete';
+        }
+        form.submit();
+    });
     $('.submit').click(function() {
         $(this).closest('form').submit();
     });
     $('.submit-on-change').change(function() {
         this.form.submit();
     });
+}
+
+$(document).ready(function() {
+    initForms();
 });
