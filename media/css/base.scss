@@ -79,8 +79,12 @@ a.btn {
     text-align: center;
 }
 
-.hidden, .helptext {
+.hidden {
     display: none;
+}
+
+.helptext {
+    font-size: 10px;
 }
 
 div#header {

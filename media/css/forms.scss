@@ -46,3 +46,28 @@ form {
         }
     }
 }
+
+.ui-dialog {
+    @include img-box-shadow();
+    .ui-dialog-titlebar {
+        background: $dark-blue;
+        border-color: $dark-blue;
+    }
+    .ui-widget {
+        font-size: 16px;
+    }
+    #search-dialog {
+        margin-top: 7px;
+    }
+    .ui-button {
+        background: $blue;
+        border-color: $blue;
+        color: $white;
+        font-size: 13px;
+    }
+    .ui-state-hover {
+        background: lighten($blue, 10%);
+        border-color: lighten($blue, 10%);
+        color: $white;
+    }
+}

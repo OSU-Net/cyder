@@ -16,11 +16,8 @@ function add_tablesorter(table) {
 }
 
 $(document).ready(function() {
-    $('input, select').mouseover(function(){
-        $(this).next('span.helptext').toggle();
-    }).mouseout(function() {
-        $(this).next('span.helptext').toggle();
-    });
+    // Removes 'Hold down' helptext.
+    $('.helptext:contains(' + 'Hold down "Control"' + ')').remove();
 
     // Form stuff.
     $('.cancel').click(function() {

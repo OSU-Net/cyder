@@ -195,36 +195,11 @@ class CydnsCreateView(BaseCreateView):
         # 'foo.com') will make query set controllable.
         # Permissions in self.request.
 
-        # Removes "Hold down the...." help texts for specified fields for form.
-        remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
-                                 'to select more than one.')
-        for field in form.fields:
-            if field in form.base_fields:
-                if form.base_fields[field].help_text:
-                    new_text = form.base_fields[field].help_text.replace(
-                        remove_message, '')
-                    new_text = new_text.strip()
-                    form.base_fields[field].help_text = new_text
         return form
 
 
 class CydnsUpdateView(BaseUpdateView):
     template_name = 'cydns/cydns_form.html'
-
-    def get_form(self, form_class):
-        form = super(CydnsUpdateView, self).get_form(form_class)
-        # Removes "Hold down the...." help texts for specified fields for form.
-        remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
-                                 'to select more than one.')
-
-        for field in form.fields:
-            if field in form.base_fields:
-                if form.base_fields[field].help_text:
-                    new_text = form.base_fields[field].help_text.replace(
-                        remove_message, '')
-                    new_text = new_text.strip()
-                    form.base_fields[field].help_text = new_text
-        return form
 
 
 class CydnsDeleteView(BaseDeleteView):
