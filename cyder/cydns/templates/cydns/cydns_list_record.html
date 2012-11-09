@@ -41,9 +41,9 @@
     </div>
   </div>
 
-  <div {% if not form.errors %}class="hidden"{% endif %} id="cydns-record-form">
+  <div {% if not form.errors and object_list %}class="hidden"{% endif %} id="cydns-record-form">
     <form class="page-form" method="POST">
-      <h2 id="record-form-title"></h2>
+      <h2 id="record-form-title">{{ 'Update' if obj else 'Create' }}</h2>
       <div class="inner-form">
         {{ form.as_p() }}
       </div>

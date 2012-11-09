@@ -34,7 +34,7 @@ $(document).ready(function(){
                               // Populate form with object and set its URL.
                               var data = JSON.parse(data);
                               $('.inner-form').empty().append(data.form);
-                              form.action = data.updateUrl;
+                              form.action = '?action=update&pk=' + data.pk;
                               $('#cydns-record-form').show();
                               $('#record-searchbox').attr('value', '');
                           });
@@ -92,7 +92,7 @@ $(document).ready(function(){
         $('#record-form-title').html('Create');
 
         clear_form_all(form);
-        form.action = '';
+        form.action = '?action=create';
         $('#cydns-record-form').show();
     });
 });

@@ -32,7 +32,7 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 from cyder.cydns.view.models import View
 
 
-def cydns_list_create_record(request, record_type=None, pk=None):
+def cydns_list_create_record(request, record_type=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
@@ -48,6 +48,7 @@ def cydns_list_create_record(request, record_type=None, pk=None):
 
     # Get the object if updating.
     record = None
+    pk = request.GET.get('pk', None)
     if pk:
         record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
         form = FQDNFormKlass(instance=record)
@@ -80,7 +81,7 @@ def cydns_list_create_record(request, record_type=None, pk=None):
                     'domain': domains,
                     'form': fqdn_form,
                     'record_type': record_type,
-                    'record_pk': pk,
+                    'pk': pk,
                     'obj': record
                 })
             qd['label'], qd['domain'] = label, str(domain.pk)
@@ -113,7 +114,7 @@ def cydns_list_create_record(request, record_type=None, pk=None):
         'domains': domains,
         'form': form,
         'record_type': record_type,
-        'record_pk': pk,
+        'pk': pk,
         'obj': record,
         'object_list': Klass.objects.all()[0:20]
     })
@@ -138,8 +139,7 @@ def cydns_get_record(request):
     except ObjectDoesNotExist:
         raise Http404
 
-    return HttpResponse(json.dumps({'form': form.as_p(),
-                                    'updateUrl': record.get_update_url()}))
+    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': record.pk}))
 
 
 def cydns_search_record(request):

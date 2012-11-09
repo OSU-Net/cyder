@@ -9,8 +9,9 @@ urlpatterns = patterns('',
 
    url(r'attr/$', delete_soa_attr, name='soa-attr'),
 
+   url(r'create/$', csrf_exempt(SOACreateView.as_view()), name='soa-create'),
    url(r'(?P<pk>[\w-]+)/update/$',
-       cydns_list_create_record, name='soa-update'),
+       csrf_exempt(SOAUpdateView.as_view()), name='soa-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(SOADeleteView.as_view()), name='soa-delete'),
    url(r'(?P<pk>[\w-]+)/$',

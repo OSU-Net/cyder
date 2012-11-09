@@ -59,23 +59,25 @@ function make_smart_name_get_domains(element, append, domainsUrl){
 
 
 function clear_form_all(form) {
+    $('.errorlist').empty();
+
     for (i = 0; i < form.length; i++) {
         field_type = form[i].type.toLowerCase();
         switch (field_type) {
-        case "text":
-        case "password":
-        case "textarea":
-        case "hidden":
-            form[i].value = "";
-            break;
-        case "radio":
-        case "checkbox":
-            if (form[i].checked) {
-                form[i].checked = false;
-            }
-            break;
-        default:
-            break;
+            case "text":
+            case "password":
+            case "textarea":
+            case "hidden":
+                form[i].value = "";
+                break;
+            case "radio":
+            case "checkbox":
+                if (form[i].checked) {
+                    form[i].checked = false;
+                }
+                break;
+            default:
+                break;
         }
     }
 }

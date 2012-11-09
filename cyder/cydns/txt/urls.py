@@ -11,7 +11,7 @@ urlpatterns = patterns('',
        csrf_exempt(TXTCreateView.as_view()), name='txt-create-in-domain'),
 
    url(r'(?P<pk>[\w-]+)/update/$',
-       cydns_list_create_record, name='txt-update'),
+       csrf_exempt(TXTUpdateView.as_view()), name='txt-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(TXTDeleteView.as_view()), name='txt-delete'),
    url(r'(?P<pk>[\w-]+)/$',

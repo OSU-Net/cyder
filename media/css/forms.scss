@@ -13,11 +13,13 @@ form {
             position: relative;
         }
         p {
-            margin: 26px 0;
+            margin: 13px 0;
             left: 39px;
             position: relative;
             label {
                 color: $dark-gray;
+                display: inline-block;
+                margin-bottom: 2px;
             }
         }
         ul.errorlist {

@@ -13,7 +13,7 @@ urlpatterns = patterns('',
        csrf_exempt(MXCreateView.as_view()), name='mx-create-in-domain'),
 
    url(r'(?P<pk>[\w-]+)/update/$',
-       cydns_list_create_record, name='mx-update'),
+       csrf_exempt(MXUpdateView.as_view()), name='mx-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(MXDeleteView.as_view()), name='mx-delete'),
    url(r'(?P<pk>[\w-]+)/$',

@@ -9,7 +9,7 @@ urlpatterns = patterns('',
        kwargs={'record_type': 'ptr'}),
 
    url(r'(?P<pk>[\w-]+)/update/$',
-       cydns_list_create_record, name='ptr-update'),
+       csrf_exempt(PTRUpdateView.as_view()), name='ptr-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(PTRDeleteView.as_view()), name='ptr-delete'),
    url(r'(?P<pk>[\w-]+)/$',

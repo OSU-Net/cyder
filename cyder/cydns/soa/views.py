@@ -29,6 +29,10 @@ class SOAListView(SOAView, CydnsListView):
     """ """
 
 
+class SOAUpdateView(SOAView, CydnsUpdateView):
+    """ """
+
+
 class SOADeleteView(SOAView, CydnsDeleteView):
     """ """
 

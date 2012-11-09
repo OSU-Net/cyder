@@ -11,7 +11,7 @@ urlpatterns = patterns('',
        csrf_exempt(CNAMECreateView.as_view()), name='cname-create-in-domain'),
 
    url(r'(?P<pk>[\w-]+)/update/$',
-       cydns_list_create_record, name='cname-update'),
+       csrf_exempt(CNAMEUpdateView.as_view()), name='cname-update'),
    url(r'(?P<pk>[\w-]+)/delete/$',
        csrf_exempt(CNAMEDeleteView.as_view()), name='cname-delete'),
    url(r'(?P<pk>[\w-]+)/$',
