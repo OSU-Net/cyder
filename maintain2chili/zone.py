@@ -43,13 +43,16 @@ class Zone(object):
 
 
     def gen_soa(self):
-        """Generates an SOA record object if the SOA record exists.
+        """
+        Generates an SOA record object if the SOA record exists.
+
+        :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
         """
         cursor.execute("SELECT * FROM soa WHERE domain = '%s';" % self.domain_id)
-        records = cursor.fetchall()
+        record = cursor.fetchone()
 
-        if records:
-            _, _, primary, contact, refresh, retry, expire, minimum, _ = records[0]
+        if record:
+            _, _, primary, contact, refresh, retry, expire, minimum, _ = record
             soa, _ = SOA.objects.get_or_create(primary = primary,
                                                contact = contact,
                                                refresh = refresh,
@@ -63,7 +66,10 @@ class Zone(object):
 
 
     def gen_domain(self):
-        """Generates a Domain object for this Zone from a hostname
+        """
+        Generates a Domain object for this Zone from a hostname.
+
+        :uniqueness: domain
         """
         if self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname:
             return None
@@ -72,14 +78,16 @@ class Zone(object):
 
 
     def gen_MX(self):
-        """Generates the MX Record objects related to this zone's domain.
+        """
+        Generates the MX Record objects related to this zone's domain.
+
+        .. note::
+            Where multiple records with different ttls exist, only the first is kept.
+
+        :uniqueness: label, domain, server, priority
         """
         cursor.execute("SELECT * FROM zone_mx WHERE domain = '%s';" % self.domain_id)
-        records = cursor.fetchall()
-        for _, name, _, server, priority, ttl, _, _ in records:
-            """.. note::
-                Where multiple records with different ttls exist, only the first is kept.
-            """
+        for _, name, _, server, priority, ttl, _, _ in cursor.fetchall():
             if MX.objects.filter(label = name,
                                  domain = self.domain,
                                  server = server,
@@ -97,23 +105,33 @@ class Zone(object):
 
 
     def gen_static(self):
-        """Generates the Static Interface objects related to this zone's domain.
+        """
+        Generates the Static Interface objects related to this zone's domain.
+
+        .. note::
+            Every static interface needs a system.
+
+        :System uniqueness: hostname, mac, ip_str
+
+        :StaticInterface uniqueness: hostname, mac, ip_str
         """
         cursor.execute("SELECT * FROM host WHERE ip != 0 AND domain = '%s';" % self.domain_id)
-        records = cursor.fetchall()
         for sysid, ip, dynamic_range, name, sysdomid, ha, systype, os, location, \
                 serial, last_seen, other_id, workgroup, enabled, bandwidth_rate, \
                 expire, ttl, last_update, zone, purchase_date, po_number, \
-                warranty_date, owning_unit, user_id, department in records:
+                warranty_date, owning_unit, user_id, department in cursor.fetchall():
 
             if ip == 0:
                 continue
 
             if len(ha) != 12:
                 ha = "0" * 12
+
             # TODO: Make systems unique by hostname, ip, mac tuple
             # TODO: Add key-value attributes to system objects.
+
             system, _ = System.objects.get_or_create(hostname = name)
+
             if not StaticInterface.objects.filter(label = name,
                                                   mac = clean_mac(ha),
                                                   ip_str = long2ip(ip)).exists():
@@ -123,24 +141,34 @@ class Zone(object):
                                          system = system,
                                          ip_str = long2ip(ip),
                                          ip_type = '4')
-                static.update_attrs()
+                # Static Interfaces need to be cleaned independently of saving
+                # (no get_or_create)
                 static.full_clean()
                 static.save()
 
 
     def gen_AR(self):
-        """Generates the Address Record and PTR objects related to this zone's domain.
+        """
+        Generates the Address Record and PTR objects related to this zone's domain.
+
+        .. note::
+            Some AddressRecords may need to be added to the pointer table in MAINTAIN
+            for successful migration, for example,
+            cob-dc81 and cob-dc82.bus.oregonstate.edu
+
+        .. note::
+            AddressRecords/PTRs with the same ip as a StaticInterface can't coexist,
+            so if a StaticInterface with the same ip exists, it has priority.
+
+        :AddressRecord uniqueness: label, domain, ip_str, ip_type
+
+        :PTR uniqueness: name, ip_str, ip_type
         """
         name = self.domain.name
         cursor.execute("SELECT * FROM pointer WHERE hostname LIKE '%%.%s';" % name)
-        records = cursor.fetchall()
-        for _, ip, hostname, ptr_type, _, _, enabled in records:
-            hostname = hostname.split('.')
-            label = hostname[0]
-            dname = '.'.join(hostname[1:])
+        for _, ip, hostname, ptr_type, _, _, enabled in cursor.fetchall():
 
-            if dname.lower() != name.lower():
-                continue
+            label, dname = hostname.split('.', 1)
 
             if StaticInterface.objects.filter(ip_str = long2ip(ip)).exists():
                 continue
@@ -150,19 +178,24 @@ class Zone(object):
                                                               domain = self.domain,
                                                               ip_str = long2ip(ip),
                                                               ip_type = '4')
+
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(name = name, ip_str = long2ip(ip)).exists():
                     ptr = PTR(name = name, ip_str = long2ip(ip), ip_type = '4')
+
+                    # PTRs need to be cleaned independently of saving (no get_or_create)
                     ptr.full_clean()
                     ptr.save()
 
 
     def gen_NS(self):
-        """Generates the Nameserver objects related to this zone's domain.
+        """
+        Generates the Nameserver objects related to this zone's domain.
+
+        :uniqueness: domain, server name
         """
         cursor.execute("SELECT * FROM nameserver WHERE domain='%s';" % self.domain_id)
-        records = cursor.fetchall()
-        for _, name, _, _ in records:
+        for _, name, _, _ in cursor.fetchall():
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain = self.domain, server = name)
             except ValidationError:
@@ -170,52 +203,71 @@ class Zone(object):
 
 
     def walk_zone(self):
-        """Recursively traverses the domain tree, creating Zone objects and migrating
+        """
+        Recursively traverses the domain tree, creating Zone objects and migrating
         related DNS objects along the way.
+
+        .. note::
+            Child domains will inherit this domain's SOA if they do not have
+            their own.
         """
         sql = 'SELECT * FROM domain WHERE name NOT LIKE "%%.in-addr.arpa" AND ' + \
                 'master_domain = %s;' % self.domain_id
         cursor.execute(sql)
-        subdomains = cursor.fetchall()
-        for child_id, child_name, _, _ in subdomains:
+        for child_id, child_name, _, _ in cursor.fetchall():
             Zone(child_id, child_name, self.domain.soa)
 
 
     def get_dname(self):
-        """Finds a domain name for this Zone's domain id.
+        """
+        Finds a domain name for this Zone's domain id.
         """
         cursor.execute('SELECT * FROM domain WHERE id = %s;' % self.domain_id)
-        _, dname, _, _ = cursor.fetchall()[0]
+        _, dname, _, _ = cursor.fetchone()
         return dname
 
     #TODO: Cleanup functions for leftover objects to migrate (static interfaces and PTRs)
 
 
 def gen_CNAME():
-    """Migrates CNAME objects.
+    """
+    Migrates CNAME objects.
+
     .. note::
         Run this only after migrating other DNS objects for every zone.
-    """
-    cursor.execute("SELECT * FROM zone_cname WHERE name NOT LIKE '%.%';")
-    records = cursor.fetchall()
-    for _, server, name, domain_id, ttl, zone, _ in records:
-        cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
-        dname = cursor.fetchone()
-        if not dname:
-            continue
-        dname = dname[0]
 
-        if not Domain.objects.filter(name = dname).exists():
+    .. note::
+        Because MAINTAIN is totally messed up, some hostnames in the CNAME table
+        have ``.``'s in them, so the fully qualified domain name is created first,
+        then the label is stripped off of the front of that.
+
+    .. note::
+        If the fully qualified domain name of the label + domain name already exists as
+        a domain object, that object becomes the alias and the label prefix is set to
+        the empty string. Otherwise, the alias is the label + domain name.
+
+    :uniqueness: label, domain, target
+    """
+    cursor.execute("SELECT * FROM zone_cname;")
+    for _, server, name, domain_id, ttl, zone, _ in cursor.fetchall():
+        cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
+        dname, = cursor.fetchone()
+        if not dname:
             continue
 
         fqdn = ".".join([name, dname])
+        name, dname = fqdn.split(".", 1)
+
         if Domain.objects.filter(name = fqdn).exists():
             domain = Domain.objects.get(name = fqdn)
             name = ""
-        else:
+        elif Domain.objects.filter(name = dname).exists():
             domain = Domain.objects.get(name = dname)
+        else:
+            continue
 
         cn = CNAME(label = name, domain = domain, target = server)
+        # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
         cn.save()
 
@@ -276,8 +328,7 @@ if __name__ == "__main__":
             Domain.objects.get_or_create(name = "%s.in-addr.arpa" % i, is_reverse = True)
 
         cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
-        records = cursor.fetchall()
-        for domain_id, dname, _, _ in records:
+        for domain_id, dname, _, _ in cursor.fetchall():
             if dname == "edu":
                 continue
             print "Creating %s zone." % dname
