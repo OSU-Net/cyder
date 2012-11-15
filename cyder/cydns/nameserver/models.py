@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
-from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord

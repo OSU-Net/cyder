@@ -56,7 +56,7 @@ class GenericViewTests(object):
 
     def build_base_cydns_app(self):
         """
-        ex: url(r'^/cydns/domain/$', DomainListView.as_view()),
+        List view.
         """
         def test_base_cydns_app(self):
             resp = self.client.get(reverse(self.url_slug + '-list'),
@@ -66,7 +66,7 @@ class GenericViewTests(object):
 
     def build_get_create(self):
         """
-        ex: url(r'^/cydns/domain/create/$', DomainCreateView.as_view()),
+        List view, get.
         """
         def test_get_create(self):
             resp = self.client.get(reverse(self.url_slug + '-list'),
@@ -75,6 +75,9 @@ class GenericViewTests(object):
         return test_get_create
 
     def build_post_create(self):
+        """
+        Create view, post.
+        """
         def test_post_create(self):
             resp = self.client.post(reverse(self.url_slug + '-list'),
                                     self.post_data(), follow=True)
@@ -83,7 +86,7 @@ class GenericViewTests(object):
 
     def build_get_create_in_domain(self):
         """
-        ex: url(r'^/cydns/domain/(?P<domain>[\w-]+)/create$', DomainCreateView.as_view()),
+        Create in domain view, get.
         """
         def test_get_create_in_domain(self):
             resp = self.client.get(reverse(self.url_slug + '-create-in-domain',
@@ -93,6 +96,9 @@ class GenericViewTests(object):
         return test_get_create_in_domain
 
     def build_post_create_in_domain(self):
+        """
+        Create in domain view, post.
+        """
         def test_post_create_in_domain(self):
             resp = self.client.post(reverse(self.url_slug + '-create-in-domain',
                                             args=[self.domain.pk]),
@@ -102,7 +108,7 @@ class GenericViewTests(object):
 
     def build_get_object_update(self):
         """
-        ex: url(r'^/cydns/domain/(?P<pk>[\w-]+)/update$', DomainUpdateView.as_view()),
+        Update view, get. DEPRECATED.
         """
         def test_get_object_update(self):
             resp = self.client.get(reverse(self.url_slug + '-update',
@@ -112,6 +118,9 @@ class GenericViewTests(object):
         return test_get_object_update
 
     def build_post_object_update(self):
+        """
+        Update view, post.
+        """
         def test_post_object_update(self):
             resp = self.client.post(reverse(self.url_slug + '-update',
                                             args=[self.test_obj.pk]),
@@ -123,7 +132,7 @@ class GenericViewTests(object):
 
     def build_get_object_details(self):
         """
-        ex: url(r'^/cydns/domain/(?P<pk>[\w-]+)/$', DomainDetailView.as_view()),
+        Detail view. SEMI-DEPRECATED.
         """
         def test_get_object_details(self):
             resp = self.client.get(reverse(self.url_slug + '-detail',
@@ -134,10 +143,10 @@ class GenericViewTests(object):
 
     def build_get_object_delete(self):
         """
-        ex: url(r'^/cydns/domain/(?P<pk>[\w-]+)/delete$', DomainDeleteView.as_view())
+        Delete view. SEMI-IRRELEVANT.
         """
         def test_get_object_delete(self):
-            resp = self.client.get(reverse(self.url_slug + '-delete',
+            resp = self.client.post(reverse(self.url_slug + '-list',
                                            args=[self.test_obj.pk]),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)

@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cydns
-from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name, _name_type_check

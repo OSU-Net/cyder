@@ -5,8 +5,7 @@ from cyder.cydns.ptr.views import *
 from cyder.cydns.views import cydns_record_view
 
 urlpatterns = patterns('',
-   url(r'^$', cydns_record_view, name='ptr-list',
-       kwargs={'record_type': 'ptr'}),
+   url(r'^$', cydns_record_view, name='ptr'),
 
    url(r'(?P<pk>[\w-]+)/update/$',
        csrf_exempt(PTRUpdateView.as_view()), name='ptr-update'),

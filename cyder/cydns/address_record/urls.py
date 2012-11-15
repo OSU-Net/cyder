@@ -5,7 +5,7 @@ from cyder.cydns.views import cydns_record_view
 from cyder.cydns.address_record.views import *
 
 urlpatterns = patterns('',
-    url(r'^$', cydns_record_view, name='address_record-list'),
+    url(r'^$', cydns_record_view, name='address_record'),
 
     url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(AddressRecordCreateView.as_view()),

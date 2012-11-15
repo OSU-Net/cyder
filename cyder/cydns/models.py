@@ -1,43 +1,14 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
-from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 
 import cydns
 from cyder.cydns.domain.models import Domain, _check_TLD_condition
+from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.view.models import View
-from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, is_rfc1918, is_rfc4193
-from django.conf import settings
-
-import pdb
-
-
-@receiver(m2m_changed)
-def views_handler(sender, **kwargs):
-    """ This function catches any changes to a manymany relationship and just nukes
-    the relationship to the "private" view if one exists.
-
-    One awesome side affect of this hack is there is NO way for this function
-    to relay that there was an error to the user. If we want to tell the user
-    that we nuked the record's relationship to the public view we will need to
-    do that in a form.
-    """
-    if kwargs["action"] != "post_add":
-        return
-    instance = kwargs.pop("instance", None)
-    if (not instance or not hasattr(instance, "ip_str") or
-            not hasattr(instance, "ip_type")):
-        return
-    model = kwargs.pop("model", None)
-    if not View == model:
-        return
-    if instance.views.filter(name="public").exists():
-        if instance.ip_type == '4' and is_rfc1918(instance.ip_str):
-            instance.views.remove(View.objects.get(name="public"))
-        elif instance.ip_type == '6' and is_rfc4193(instance.ip_str):
-            instance.views.remove(View.objects.get(name="public"))
 
 
 class CydnsRecord(models.Model, ObjectUrlMixin):
@@ -73,7 +44,6 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
     "the total number of octets that represent a name (i.e., the sum of
     all label octets and label lengths) is limited to 255" - RFC 4471
     """
-
     domain = models.ForeignKey(Domain, null=False, help_text="FQDN of the "
                                "domain after the short hostname. "
                                "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
@@ -97,7 +67,8 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        """The purpose of this is to help the API decide which fields to expose
+        """
+        The purpose of this is to help the API decide which fields to expose
         to the user when they are creating and updateing an Object. This
         function should be implemented in inheriting models and overriden to
         provide additional fields. Tastypie ignores any relational fields on
@@ -151,7 +122,32 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
         _check_TLD_condition(self)
 
 
-#####
+@receiver(m2m_changed)
+def views_handler(sender, **kwargs):
+    """ This function catches any changes to a manymany relationship and just nukes
+    the relationship to the "private" view if one exists.
+
+    One awesome side affect of this hack is there is NO way for this function
+    to relay that there was an error to the user. If we want to tell the user
+    that we nuked the record's relationship to the public view we will need to
+    do that in a form.
+    """
+    if kwargs["action"] != "post_add":
+        return
+    instance = kwargs.pop("instance", None)
+    if (not instance or not hasattr(instance, "ip_str") or
+            not hasattr(instance, "ip_type")):
+        return
+    model = kwargs.pop("model", None)
+    if not View == model:
+        return
+    if instance.views.filter(name="public").exists():
+        if instance.ip_type == '4' and is_rfc1918(instance.ip_str):
+            instance.views.remove(View.objects.get(name="public"))
+        elif instance.ip_type == '6' and is_rfc4193(instance.ip_str):
+            instance.views.remove(View.objects.get(name="public"))
+
+
 def set_fqdn(record):
     try:
         if record.label == '':

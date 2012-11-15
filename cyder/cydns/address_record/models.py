@@ -11,7 +11,7 @@ from cyder.cydns.models import check_TLD_condition
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, validate_views
 from cyder.cydns.domain.models import Domain
-from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.soa.utils import update_soa
 
 

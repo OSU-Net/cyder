@@ -5,8 +5,7 @@ from cyder.cydns.nameserver.views import *
 from cyder.cydns.views import cydns_record_view
 
 urlpatterns = patterns('',
-   url(r'^$', cydns_record_view, name='nameserver-list',
-       kwargs={'record_type': 'nameserver'}),
+   url(r'^$', cydns_record_view, name='nameserver'),
 
    url(r'(?P<domain>[\w-]+)/create_delegated/$',
        csrf_exempt(create_ns_delegated), name='nameserver-delegated-create'),

@@ -5,7 +5,7 @@ from cyder.cydns.soa.views import *
 from cyder.cydns.views import cydns_record_view
 
 urlpatterns = patterns('',
-   url(r'^$', cydns_record_view,name='soa-list'),
+   url(r'^$', cydns_record_view, name='soa'),
 
    url(r'attr/$', delete_soa_attr, name='soa-attr'),
 

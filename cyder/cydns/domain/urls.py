@@ -6,7 +6,7 @@ from cyder.cydns.views import cydns_record_view
 
 
 urlpatterns = patterns('',
-    url(r'^$', cydns_record_view, name='domain-list'),
+    url(r'^$', cydns_record_view, name='domain'),
 
     url(r'^get_all_domains/$', get_all_domains, name='get-all-domains'),
 
