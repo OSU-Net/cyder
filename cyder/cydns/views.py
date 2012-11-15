@@ -105,6 +105,10 @@ def cydns_record_view(request, record_type=None):
         if form.is_valid():
             try:
                 record = form.save()
+                # If domain, add to current ctnr.
+                if record_type == 'domain':
+                    request.session['ctnr'].domains.add(record)
+
                 return redirect(record.get_list_url())
             except ValidationError as e:
                 error = True
