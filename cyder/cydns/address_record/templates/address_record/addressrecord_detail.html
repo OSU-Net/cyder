@@ -4,7 +4,7 @@
 
 <div class='dns-title'>Address Record {{ object.fqdn }}</div>
     {% if object.domain %}
-        <a class="btn" href="{{ object.domain.get_absolute_url() }}">View Domain</a>
+        <a class="btn" href="{{ object.domain.get_detail_url() }}">View Domain</a>
     {% endif %}
 
         <a class="btn" href="{{ object.get_update_url() }}">Edit</a>

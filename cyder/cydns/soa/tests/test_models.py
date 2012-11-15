@@ -40,7 +40,7 @@ class SOATests(TestCase):
         soa[0].__repr__()
         soa = soa[0]
         self.assertTrue(soa.details())
-        self.assertTrue(soa.get_absolute_url())
+        self.assertTrue(soa.get_detail_url())
         self.assertTrue(soa.get_update_url())
         self.assertTrue(soa.get_delete_url())
 
@@ -55,7 +55,7 @@ class SOATests(TestCase):
         self.assertTrue(soa)
         soa = soa[0]
         self.assertTrue(soa.details())
-        self.assertTrue(soa.get_absolute_url())
+        self.assertTrue(soa.get_detail_url())
         self.assertTrue(soa.get_update_url())
         self.assertTrue(soa.get_delete_url())
 
@@ -66,7 +66,7 @@ class SOATests(TestCase):
         self.assertTrue(
             soa.serial and soa.expire and soa.retry and soa.refresh)
         self.assertTrue(soa.details())
-        self.assertTrue(soa.get_absolute_url())
+        self.assertTrue(soa.get_detail_url())
         self.assertTrue(soa.get_update_url())
         self.assertTrue(soa.get_delete_url())
 

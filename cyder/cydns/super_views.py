@@ -52,7 +52,7 @@ def commit_record(request):
         commit_data["errors"] = e.message_dict
         return return_without_domain(commit_data)
 
-    commit_data['success'] = obj.get_absolute_url()
+    commit_data['success'] = obj.get_detail_url()
     return return_without_domain(commit_data)
 
 

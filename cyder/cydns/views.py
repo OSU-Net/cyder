@@ -1,13 +1,13 @@
 import operator
 import simplejson as json
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 
+from cyder.base.utils import make_paginator
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -73,7 +73,7 @@ def cydns_record_view(request, record_type=None):
         else:
             form = FQDNFormKlass(qd)
 
-        # Resolve fqdn to domain and attach to record object.
+        # Resolve FQDN to domain and attach to record object.
         domain = None
         if 'fqdn' in qd:
             fqdn = qd.pop('fqdn')[0]
@@ -105,9 +105,9 @@ def cydns_record_view(request, record_type=None):
         if form.is_valid():
             try:
                 record = form.save()
+                return redirect(record.get_list_url())
             except ValidationError as e:
                 error = True
-            return redirect(record.get_list_url())
         else:
             error = True
         if error:
@@ -117,16 +117,7 @@ def cydns_record_view(request, record_type=None):
             return_form._errors = form._errors
             form = return_form
 
-    paginator = Paginator(Klass.objects.all(), 50)
-    page = request.GET.get('page')
-    try:
-        object_list = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        object_list = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        object_list = paginator.page(paginator.num_pages)
+    object_list = make_paginator(request, Klass.objects.all(), 50)
 
     return render(request, 'cydns/cydns_record_view.html', {
         'form': form,

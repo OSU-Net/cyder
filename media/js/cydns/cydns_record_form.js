@@ -29,13 +29,14 @@ $(document).ready(function(){
                                    'pk': pk},
                           function(data) {
                               $('#record-form-title').html('Updating a ' + prettyRecordType);
+                              $('.delete').show();
 
                               // Populate form with object and set its URL.
                               var data = JSON.parse(data);
                               $('.inner-form').empty().append(data.form);
                               initForms();
                               form.action = '?action=update&pk=' + data.pk;
-                              $('#cydns-record-form').show();
+                              $('#cydns-record-form').slideDown();
                               $('#record-searchbox').attr('value', '');
                           });
                     $(this).dialog('close');
@@ -86,9 +87,10 @@ $(document).ready(function(){
     // Show create form on clicking create button.
     $('#record-create').click(function() {
         $('#record-form-title').html('Creating a ' + prettyRecordType);
+        $('.delete').hide();
 
         clear_form_all(form);
         form.action = '?action=create';
-        $('#cydns-record-form').show();
+        $('#cydns-record-form').slideDown();
     });
 });

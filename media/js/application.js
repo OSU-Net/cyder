@@ -22,7 +22,7 @@ function initForms() {
     // Form stuff.
     $('.cancel').click(function() {
         var $this = $(this);
-        $('#' + $this.attr('data-formId')).hide();
+        $('#' + $this.attr('data-formId')).slideUp();
     });
     $('.delete').click(function() {
         var form = $(this).closest('form')[0];

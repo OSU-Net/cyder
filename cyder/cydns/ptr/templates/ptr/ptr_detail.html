@@ -4,7 +4,7 @@
 
 <div class='dns-title'>PTR {{ object.name }}</div>
     {% if object.reverse_domain %}
-        <a class="btn" href="{{ object.reverse_domain.get_absolute_url() }}">View Reverse Domain</a>
+        <a class="btn" href="{{ object.reverse_domain.get_detail_url() }}">View Reverse Domain</a>
     {% endif %}
 
         <a class="btn" href="{{ object.get_update_url() }}">Edit</a>
@@ -26,7 +26,7 @@
                 <td>
                     {% if loop.last %}
                         {% if object.data_domain %}
-                        {{value}}<br><a href='{{ object.data_domain.get_absolute_url() }}'>View {{object.data_domain.name}}</a>
+                        {{value}}<br><a href='{{ object.data_domain.get_detail_url() }}'>View {{object.data_domain.name}}</a>
                         {% else %}
                             {{ value }}
                         {% endif %}

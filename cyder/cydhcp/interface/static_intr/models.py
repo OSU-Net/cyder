@@ -122,7 +122,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def get_delete_url(self):
         return "/cydhcp/interface/{0}/delete/".format(self.pk)
 
-    def get_absolute_url(self):
+    def get_detail_url(self):
         return "/systems/show/{0}/".format(self.system.pk)
 
     def interface_name(self):

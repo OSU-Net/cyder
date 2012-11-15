@@ -9,7 +9,7 @@
 
     </script>
     <span class="dns-title">Edit {{ soa }}</span>
-    <span>Back to <a href="{{ soa.get_absolute_url() }}">{{ soa }}</a></span>
+    <span>Back to <a href="{{ soa.get_detail_url() }}">{{ soa }}</a></span>
     <br>
     <form class="well form-horizontal" method="post" action="">
         {{ form.as_p() }}
