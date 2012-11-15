@@ -169,6 +169,8 @@ class Zone(object):
         for _, ip, hostname, ptr_type, _, _, enabled in cursor.fetchall():
 
             label, dname = hostname.split('.', 1)
+            if dname != name:
+                continue
 
             if StaticInterface.objects.filter(ip_str = long2ip(ip)).exists():
                 continue
@@ -329,8 +331,6 @@ if __name__ == "__main__":
 
         cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
         for domain_id, dname, _, _ in cursor.fetchall():
-            if dname == "edu":
-                continue
             print "Creating %s zone." % dname
             Zone(domain_id = domain_id, dname = dname,)
 
