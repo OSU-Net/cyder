@@ -11,8 +11,8 @@ from cyder.cydns.nameserver.models import Nameserver
 
 class GenericViewTests(object):
     """
-    An object that builds test funtions. It's super generic and quite a huge hack.
-    You need to define a setUp function like this.
+    An object that builds test funtions. It's super generic and quite a huge
+    hack. You need to define a setUp function like this.
     def setUp(self):
         # The url slug of the app being tested
         self.url_slug = "xxxxx"
@@ -24,8 +24,8 @@ class GenericViewTests(object):
             dname = "a"+dname
             self.domain, create = Domain.objects.get_or_create(name=dname)
 
-        # Make a generic test "object". This object is called self.test_obj and is used to test datail and
-        # update views
+        # Make a generic test "object". This object is called self.test_obj and
+        # is used to test datail and update views
         server = "random"
         self.test_obj, create = Nameserver.objects.get_or_create(
             server=server, domain= self.domain)
@@ -34,7 +34,8 @@ class GenericViewTests(object):
             self.test_obj, create = Nameserver.objects.get_or_create(
                 server=server, domain= self.domain)
 
-    This function is used to generate valid data to test views that require POST data.
+    This function is used to generate valid data to test views that require
+    POST data.
 
         def post_data(self):
             server = random_label()
@@ -42,15 +43,13 @@ class GenericViewTests(object):
     """
     def build_all_tests(self):
         return (
-            self.build_get_object_delete(),
-            self.build_get_object_details(),
-            self.build_post_object_update(),
-            self.build_get_object_update(),
-            self.build_post_create_in_domain(),
-            self.build_get_create_in_domain(),
-            self.build_post_create(),
             self.build_base_cydns_app(),
             self.build_get_create(),
+            self.build_post_create(),
+            self.build_post_object_update(),
+            self.build_get_object_update(),
+            self.build_get_object_delete(),
+            self.build_get_object_details(),
             lambda junk: True
         )
 
@@ -59,7 +58,7 @@ class GenericViewTests(object):
         List view.
         """
         def test_base_cydns_app(self):
-            resp = self.client.get(reverse(self.url_slug + '-list'),
+            resp = self.client.get(self.test_class.get_list_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_base_cydns_app
@@ -69,7 +68,7 @@ class GenericViewTests(object):
         List view, get.
         """
         def test_get_create(self):
-            resp = self.client.get(reverse(self.url_slug + '-list'),
+            resp = self.client.get(self.test_class.get_create_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_create
@@ -79,40 +78,17 @@ class GenericViewTests(object):
         Create view, post.
         """
         def test_post_create(self):
-            resp = self.client.post(reverse(self.url_slug + '-list'),
+            resp = self.client.post(self.test_class.get_create_url(),
                                     self.post_data(), follow=True)
             self.assertTrue(resp.status_code in (302, 200))
         return test_post_create
-
-    def build_get_create_in_domain(self):
-        """
-        Create in domain view, get.
-        """
-        def test_get_create_in_domain(self):
-            resp = self.client.get(reverse(self.url_slug + '-create-in-domain',
-                                           args=[self.domain.pk]),
-                                   follow=True)
-            self.assertEqual(resp.status_code, 200)
-        return test_get_create_in_domain
-
-    def build_post_create_in_domain(self):
-        """
-        Create in domain view, post.
-        """
-        def test_post_create_in_domain(self):
-            resp = self.client.post(reverse(self.url_slug + '-create-in-domain',
-                                            args=[self.domain.pk]),
-                                    self.post_data(), follow=True)
-            self.assertTrue(resp.status_code in (302, 200))
-        return test_post_create_in_domain
 
     def build_get_object_update(self):
         """
         Update view, get. DEPRECATED.
         """
         def test_get_object_update(self):
-            resp = self.client.get(reverse(self.url_slug + '-update',
-                                           args=[self.test_obj.pk]),
+            resp = self.client.get(self.test_obj.get_update_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_object_update
@@ -122,35 +98,32 @@ class GenericViewTests(object):
         Update view, post.
         """
         def test_post_object_update(self):
-            resp = self.client.post(reverse(self.url_slug + '-update',
-                                            args=[self.test_obj.pk]),
+            resp = self.client.post(self.test_obj.get_update_url(),
                                     self.post_data(),
                                     follow=True)
             self.assertTrue(resp.status_code in (302, 200))
             pass
         return test_post_object_update
 
+    def build_get_object_delete(self):
+        """
+        Delete view.
+        """
+        def test_get_object_delete(self):
+            resp = self.client.post(self.test_obj.get_delete_url(),
+                                    follow=True)
+            self.assertEqual(resp.status_code, 200)
+        return test_get_object_delete
+
     def build_get_object_details(self):
         """
-        Detail view. SEMI-DEPRECATED.
+        Detail view.
         """
         def test_get_object_details(self):
-            resp = self.client.get(reverse(self.url_slug + '-detail',
-                                           args=[self.test_obj.pk]),
+            resp = self.client.get(self.test_obj.get_detail_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_get_object_details
-
-    def build_get_object_delete(self):
-        """
-        Delete view. SEMI-IRRELEVANT.
-        """
-        def test_get_object_delete(self):
-            resp = self.client.post(reverse(self.url_slug + '-list',
-                                           args=[self.test_obj.pk]),
-                                   follow=True)
-            self.assertEqual(resp.status_code, 200)
-        return test_get_object_delete
 
 
 def random_label():

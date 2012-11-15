@@ -12,46 +12,22 @@ from cyder.cydns.sshfp.models import SSHFP
 
 
 def do_setUp(self, url_slug, test_class, test_data, use_domain=True):
-    """
-    Hack hack hack, hack it up!
-    """
     self.client = Client()
     self.url_slug = url_slug
-    dname = random_label()
-    self.domain, create = Domain.objects.get_or_create(name=dname)
+    self.test_class = test_class
 
+    # Create domain.
+    create = False
     while not create:
-        dname = "a" + dname
-        self.domain, create = Domain.objects.get_or_create(name=dname)
+        self.domain, create = Domain.objects.get_or_create(name=random_label())
 
+    # Create test object.
     if use_domain:
         test_data = dict(test_data.items() + [('domain', self.domain)])
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
 
-    if not create:
-        raise Exception
 
-
-class CydnsViewTests(object):
-    def setUp(self):
-        self.client = Client()
-        self.url_slug = url_slug
-        self.domain, create = Domain.objects.get_or_create(name=random_label())
-
-        while not create:
-            dname = "a" + dname
-            self.domain, create = Domain.objects.get_or_create(name=dname)
-        label = random_label()
-        self.test_obj, create = test_class.objects.get_or_create(
-            label=label, domain=self.domain)
-
-        while not create:
-            label = "a" + label
-            self.test_obj, create = test_class.objects.get_or_create(
-                label=label, domain=self.domain)
-
-
-class CNAMEViewTests(CydnsViewTests, cyder.base.tests.TestCase):
+class CNAMEViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -66,12 +42,8 @@ class CNAMEViewTests(CydnsViewTests, cyder.base.tests.TestCase):
             'target': random_label()
         }
 
-builder = GenericViewTests()
-for test in builder.build_all_tests():
-    setattr(CNAMEViewTests, test.__name__ + "_cname", test)
 
-
-class MXViewTests(CydnsViewTests, cyder.base.tests.TestCase):
+class MXViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -90,12 +62,8 @@ class MXViewTests(CydnsViewTests, cyder.base.tests.TestCase):
             'ttl': 213
         }
 
-builder = GenericViewTests()
-for test in builder.build_all_tests():
-    setattr(MXViewTests, test.__name__ + "_mx", test)
 
-
-class SRVViewTests(CydnsViewTests, cyder.base.tests.TestCase):
+class SRVViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': "_" + random_label(),
@@ -116,12 +84,8 @@ class SRVViewTests(CydnsViewTests, cyder.base.tests.TestCase):
             'port': 222
         }
 
-builder = GenericViewTests()
-for test in builder.build_all_tests():
-    setattr(SRVViewTests, test.__name__ + "_srv", test)
 
-
-class TXTViewTests(CydnsViewTests, cyder.base.tests.TestCase):
+class TXTViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -136,12 +100,8 @@ class TXTViewTests(CydnsViewTests, cyder.base.tests.TestCase):
             'txt_data': random_label()
         }
 
-builder = GenericViewTests()
-for test in builder.build_all_tests():
-    setattr(TXTViewTests, test.__name__ + "_txt", test)
 
-
-class SSHFPViewTests(CydnsViewTests, cyder.base.tests.TestCase):
+class SSHFPViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -160,6 +120,10 @@ class SSHFPViewTests(CydnsViewTests, cyder.base.tests.TestCase):
             'key': random_label()
         }
 
-builder = GenericViewTests()
-for test in builder.build_all_tests():
-    setattr(SSHFPViewTests, test.__name__ + "_sshfp", test)
+
+# Build the tests.
+tests = [CNAMEViewTests, MXViewTests, TXTViewTests]
+for view_test in tests:
+    builder = GenericViewTests()
+    for test in builder.build_all_tests():
+        setattr(view_test, test.__name__ + "_sshfp", test)
