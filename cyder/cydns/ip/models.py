@@ -7,8 +7,6 @@ from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
 import ipaddr
 
-import pdb
-
 
 class Ip(models.Model):
     """An :class:`Ip` instance represents either an IPv4 or IPv6 address.
@@ -82,7 +80,8 @@ class Ip(models.Model):
         abstract = True
 
     def clean_ip(self, update_reverse_domain=True):
-        """The clean method in Ip is different from the rest. It needs
+        """
+        The clean method in Ip is different from the rest. It needs
         to be called with the update_reverse_domain flag. Sometimes we
         need to not update the reverse domain of an IP (i.e. when we are
         deleting a reverse_domain).
@@ -97,12 +96,20 @@ class Ip(models.Model):
             except ipaddr.AddressValueError, e:
                 raise ValidationError("Invalid Ip address {0}".
                                       format(self.ip_str))
+
             if update_reverse_domain:
-                self.reverse_domain = name_to_domain(
-                    ip_to_domain_name(self.ip_str,
-                                      ip_type='4'))
-                if (self.reverse_domain is None or self.reverse_domain.name in
-                        ('arpa', 'in-addr.arpa', 'ipv6.arpa')):
+                # Resolve IP to domain name.
+                no_match = False
+                try:
+                    self.reverse_domain = (name_to_domain(
+                                           ip_to_domain_name(self.ip_str,
+                                                             ip_type='4')))
+                except ValueError:
+                    no_match = True
+
+                if (no_match or self.reverse_domain is None or
+                    self.reverse_domain.name in ('arpa', 'in-addr.arpa',
+                                                 'ipv6.arpa')):
                     raise ValidationError("No reverse Domain found for {0} "
                                           .format(self.ip_str))
             self.ip_upper = 0

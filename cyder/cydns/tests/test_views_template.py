@@ -14,9 +14,6 @@ class GenericViewTests(object):
     An object that builds test funtions. It's super generic and quite a huge
     hack. You need to define a setUp function like this.
     def setUp(self):
-        # The url slug of the app being tested
-        self.url_slug = "xxxxx"
-
         # A name of domain to use when creating records
         dname = "food"
         self.domain, create = Domain.objects.get_or_create(name=dname)
