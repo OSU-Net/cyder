@@ -28,6 +28,8 @@ def do_setUp(self, url_slug, test_class, test_data, use_domain=True):
 
 
 class CNAMEViewTests(cyder.base.tests.TestCase):
+    name = 'cname'
+
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -37,13 +39,16 @@ class CNAMEViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'label': random_label(),
+            'fqdn': self.domain.name,
             'domain': self.domain.pk,
+            'label': random_label(),
             'target': random_label()
         }
 
 
 class MXViewTests(cyder.base.tests.TestCase):
+    name = 'mx'
+
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -55,8 +60,9 @@ class MXViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'label': random_label(),
+            'fqdn': self.domain.name,
             'domain': self.domain.pk,
+            'label': random_label(),
             'server': random_label(),
             'priority': 123,
             'ttl': 213
@@ -64,6 +70,8 @@ class MXViewTests(cyder.base.tests.TestCase):
 
 
 class SRVViewTests(cyder.base.tests.TestCase):
+    name = 'srv'
+
     def setUp(self):
         test_data = {
             'label': "_" + random_label(),
@@ -76,8 +84,9 @@ class SRVViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'label': "_" + random_label(),
+            'fqdn': self.domain.name,
             'domain': self.domain.pk,
+            'label': "_" + random_label(),
             'target': random_label(),
             'priority': 2,
             'weight': 2222,
@@ -86,6 +95,8 @@ class SRVViewTests(cyder.base.tests.TestCase):
 
 
 class TXTViewTests(cyder.base.tests.TestCase):
+    name = 'txt'
+
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -95,13 +106,16 @@ class TXTViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'label': random_label(),
+            'fqdn': self.domain.name,
             'domain': self.domain.pk,
+            'label': random_label(),
             'txt_data': random_label()
         }
 
 
 class SSHFPViewTests(cyder.base.tests.TestCase):
+    name = 'sshfp'
+
     def setUp(self):
         test_data = {
             'label': random_label(),
@@ -113,8 +127,9 @@ class SSHFPViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'label': random_label(),
+            'fqdn': self.domain.name,
             'domain': self.domain.pk,
+            'label': random_label(),
             'algorithm_number': 1,
             'fingerprint_type': 1,
             'key': random_label()
@@ -126,4 +141,5 @@ tests = [CNAMEViewTests, MXViewTests, TXTViewTests]
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_all_tests():
-        setattr(view_test, test.__name__ + "_sshfp", test)
+        # Set name of test.
+        setattr(view_test, test.__name__ + '_' + view_test.name, test)

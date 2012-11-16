@@ -65,7 +65,7 @@ class GenericViewTests(object):
 
     def build_get_create(self):
         """
-        List view, get.
+        Create view, get.
         """
         def test_get_create(self):
             resp = self.client.get(self.test_class.get_create_url(),
@@ -78,9 +78,11 @@ class GenericViewTests(object):
         Create view, post.
         """
         def test_post_create(self):
+            count = self.test_class.objects.count()
             resp = self.client.post(self.test_class.get_create_url(),
                                     self.post_data(), follow=True)
             self.assertTrue(resp.status_code in (302, 200))
+            self.assertTrue(self.test_class.objects.count() > count)
         return test_post_create
 
     def build_get_object_update(self):
@@ -102,7 +104,6 @@ class GenericViewTests(object):
                                     self.post_data(),
                                     follow=True)
             self.assertTrue(resp.status_code in (302, 200))
-            pass
         return test_post_object_update
 
     def build_get_object_delete(self):
@@ -110,9 +111,11 @@ class GenericViewTests(object):
         Delete view.
         """
         def test_get_object_delete(self):
+            count = self.test_class.objects.count()
             resp = self.client.post(self.test_obj.get_delete_url(),
                                     follow=True)
             self.assertEqual(resp.status_code, 200)
+            self.assertTrue(self.test_class.objects.count() < count)
         return test_get_object_delete
 
     def build_get_object_details(self):
