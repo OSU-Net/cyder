@@ -60,7 +60,7 @@ class Range(models.Model, ObjectUrlMixin):
         (STATIC, 'Static'),
         (DYNAMIC, 'Dynamic'),
     )
-    models.CharField(max_length=2, choices=RANGE_TYPE, default=STATIC,
+    range_type = models.CharField(max_length=2, choices=RANGE_TYPE, default=STATIC,
                      editable=False)
 
     class Meta:
