@@ -3,11 +3,11 @@
 {% block content %}
     <div class='dns-title'>The {{ object.name }} Domain</div>
     {% if object.master_domain %}
-    Goto <a class="btn" href="{{ object.master_domain.get_absolute_url() }}">{{ object.master_domain.name }}</a>
+    Goto <a class="btn" href="{{ object.master_domain.get_detail_url() }}">{{ object.master_domain.name }}</a>
     <br>
     {% endif %}
     {% if object.soa %}
-    <a class="btn" href="{{ object.soa.get_absolute_url() }}">View SOA</a>
+    <a class="btn" href="{{ object.soa.get_detail_url() }}">View SOA</a>
     <br>
     {% endif %}
     <a class="btn" href="{{ object.get_update_url() }}">Edit</a>

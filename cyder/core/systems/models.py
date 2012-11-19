@@ -578,7 +578,7 @@ class System(DirtyFieldsMixin, models.Model):
     def get_switches(self):
         return System.objects.filter(is_switch=1)
 
-    def get_absolute_url(self):
+    def get_detail_url(self):
         return "/systems/show/{0}/".format(self.pk)
 
     def check_for_adapter(self, adapter_id):

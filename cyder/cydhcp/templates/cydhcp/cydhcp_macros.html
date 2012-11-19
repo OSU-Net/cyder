@@ -11,16 +11,16 @@
             <tbody>
                 {% for network in networks %}
                 <tr>
-                        <td><a href='{{ network.absolute_url() }}'>{{ network }}</a></td>
+                        <td><a href='{{ network.get_detail_url() }}'>{{ network }}</a></td>
                     {% if vlan %}
                         {% if network.vlan %}
-                            <td><a href='{{ network.vlan.absolute_url() }}'>{{ network.vlan }}</a></td>
+                            <td><a href='{{ network.vlan.get_detail_url() }}'>{{ network.vlan }}</a></td>
                         {% else %}
                             <td>None</td>
                         {% endif %}
                     {% endif %}
                     {% if network.site %}
-                        <td><a href='{{ network.site.absolute_url() }}'>{{ network.site }}</a></td>
+                        <td><a href='{{ network.site.get_detail_url() }}'>{{ network.site }}</a></td>
                     {% else %}
                         <td>None</td>
                     {% endif %}

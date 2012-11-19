@@ -8,7 +8,6 @@ class TXT(CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
-
     id = models.AutoField(primary_key=True)
     txt_data = models.TextField(help_text="The text data for this record.")
 
@@ -17,7 +16,6 @@ class TXT(CydnsRecord):
     def details(self):
         return (
             ("FQDN", self.fqdn),
-            ("Record Type", "TXT"),
             ("Text", self.txt_data)
         )
 

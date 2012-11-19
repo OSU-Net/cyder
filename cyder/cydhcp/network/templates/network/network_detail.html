@@ -37,12 +37,12 @@
                     <td>{{ value }}</td>
                 {% endfor %}
                 {% if network.vlan %}
-                    <td><a href='{{ network.vlan.absolute_url() }}'>{{ network.vlan }}</a></td>
+                    <td><a href='{{ network.vlan.get_detail_url() }}'>{{ network.vlan }}</a></td>
                 {% else %}
                     <td>None</td>
                 {% endif %}
                 {% if network.site %}
-                    <td><a href='{{ network.site.absolute_url() }}'>{{ network.site }}</a></td>
+                    <td><a href='{{ network.site.get_detail_url() }}'>{{ network.site }}</a></td>
                 {% endif %}
                 </tr>
             </tbody>
@@ -81,7 +81,7 @@
             <tbody>
                 <tr>
                 {% for range in ranges %}
-                <td>Start: <a href='{{range.get_absolute_url()}}'>{{ range.start_str }}</a> End: <a href='{{range.get_absolute_url()}}'>{{ range.end_str }}</a></td>
+                <td>Start: <a href='{{range.get_detail_url()}}'>{{ range.start_str }}</a> End: <a href='{{range.get_detail_url()}}'>{{ range.end_str }}</a></td>
                 {% endfor %}
                 </tr>
             </tbody>

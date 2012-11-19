@@ -64,7 +64,7 @@
 
     <tbody>
             {% for obj in object_list %}
-                <tr><th><a href='{{ obj.absolute_url() }}'>{{ obj }}</a></th></tr>
+                <tr><th><a href='{{ obj.get_detail_url() }}'>{{ obj }}</a></th></tr>
             {% endfor %}
     </tbody>
     </table>

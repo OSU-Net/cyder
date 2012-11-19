@@ -12,8 +12,11 @@ html {
 }
 
 body {
-    background-color: $white;
     font-family: 'Source Sans Pro', sans-serif;
+}
+
+body, .content {
+    background-color: $white;
 }
 
 p, h1, h2, h3, h4 {
@@ -33,6 +36,10 @@ ul {
     list-style-type: none;
 }
 
+hr {
+    color: $white;
+}
+
 input[type="text"], select {
     background: $white;
     border-radius: 2px;
@@ -43,12 +50,12 @@ input[type="text"] {
 }
 
 a.btn {
-    background: $light-gray;
+    background: $blue;
     border-radius: 5px;
     bottom: 0;
-    color: $dark-gray;
+    color: $white;
     font-weight: normal;
-    margin-right: 5px;
+    margin-right: 10px;
     padding: 5px 10px;
     position: relative;
     text-decoration: none;
@@ -56,18 +63,27 @@ a.btn {
     transition: .5s .1s;
     &:hover {
         @include box-shadow(2px 2px 3px $dark-gray);
-        background: lighten($light-gray, 5%);
+        background: lighten($blue, 5%);
         bottom: 2px;
-        color: $dark-gray;
+        color: $white;
         cursor: pointer;
         right: 2px;
     }
     &:active {
         @include box-shadow(none);
-        background: darken($light-gray, 10%);
+        background: darken($blue, 10%);
         bottom: 0;
         right: 0;
         transition: .03s 0s;
+    }
+    &.red {
+        background: $red;
+        &:hover {
+            background: lighten($red, 5%);
+        }
+        &:active {
+            background: darken($red, 10%);
+        }
     }
 }
 
@@ -75,7 +91,7 @@ a.btn {
     text-align: center;
 }
 
-.hidden, .helptext {
+.hidden {
     display: none;
 }
 
@@ -255,7 +271,6 @@ div#header {
 }
 
 .main {
-    background-color: $white;
     clear: both;
     font-size: 13px;
     height: 100%;
@@ -264,70 +279,22 @@ div#header {
     #kid { @include img-box-shadow(); }
     .content {
         clear: left;
-        display: inline;
+        display: inline-block;
+        margin-top: 13px;
+        overflow: visible;
+        // Container - sidebar width - sidebar gutter - gutter.
+        // TODO: gridding.
+        width: 771px;
     }
 }
 
-#title {
-    display: inline;
-}
-
-#action-bar {
-    float: right;
-    margin-top: 5px;
-}
-
-/* Table */
-table {
-    &.tablesorter {
-      font-family: arial;
-      background-color: #CDCDCD;
-      margin: 10px 0pt 15px;
-      font-size: 8pt;
-      text-align: left;
-      border: 1px solid #bbbbbb;
-      thead tr th, tfoot tr th {
-        background-color: #b3bbbb;
-        border: 1px solid #FFF;
-        font-size: 8pt;
-        padding: 4px;
-      }
-      thead tr .header {
-        background-image: url(images/bg.gif);
-        background-repeat: no-repeat;
-        background-position: center right;
-        cursor: pointer;
-      }
-      tbody {
-        td {
-          color: #3D3D3D;
-          padding: 4px;
-          background-color: #FFF;
-          vertical-align: top;
-        }
-        tr.odd td {
-          background-color: #F0F0F6;
-        }
-      }
-      thead tr {
-        .headerSortUp {
-          background-image: url(images/asc.gif);
-        }
-        .headerSortDown {
-          background-image: url(images/desc.gif);
-          background-color: #8dbdd8;
-        }
-        .headerSortUp {
-          background-color: #8dbdd8;
-        }
-      }
-      td {
-        border-right: 1px solid #bbbbbb;
-        border-bottom: 1px solid #bbbbbb;
-        &:last-child, &.last, &:last-child, &.last {
-          border-right-width: 0px;
-        }
-      }
+.page-header {
+    #title {
+        display: inline;
+    }
+    #action-bar {
+        float: right;
+        margin-top: 5px;
     }
 }
 
@@ -401,6 +368,7 @@ table {
 #footer {
     background-color: $dark-blue;
     color: $white;
+    font-size: 13px;
     padding-top: 13px;
     text-align: center;
     a {

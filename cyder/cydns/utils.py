@@ -1,18 +1,17 @@
-# Random functions that get used in different places.
-from django.http import Http404
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from copy import deepcopy
 
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.mx.models import MX
-from cyder.cydns.sshfp.models import SSHFP
-from cyder.cydns.txt.models import TXT
-from cyder.cydns.srv.models import SRV
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.http import Http404
+
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.mx.models import MX
+from cyder.cydns.srv.models import SRV
+from cyder.cydns.txt.models import TXT
+from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-
-from copy import deepcopy
 
 
 def tablefy(objects, views=True):
@@ -29,6 +28,7 @@ def tablefy(objects, views=True):
     headers = []
     if not objects:
         return (None, None, None)
+
     # Build the headers
     for title, value in objects[0].details():
         headers.append(title)
@@ -38,16 +38,18 @@ def tablefy(objects, views=True):
     # Build the matrix and urls
     for obj in objects:
         row = []
-        urls.append(obj.get_absolute_url())
+        urls.append(obj.get_detail_url())
         for title, value in obj.details():
             row.append(value)
         if views:
-            views = ""
+            view_field = ""
             if hasattr(obj, 'views'):
                 for view in obj.views.all():
-                    views += view.name + ", "
-                views = views.strip(", ")
-                row.append(views)
+                    view_field += view.name + ", "
+                view_field = view_field.strip(", ")
+                row.append(view_field)
+            else:
+                row.append('None')
 
         matrix.append(row)
 

@@ -154,7 +154,7 @@ def create_no_system_static_interface(request):
                 'form': interface_form,
             })
 
-        return redirect(intr.system.get_absolute_url())
+        return redirect(intr.system.get_detail_url())
 
     else:
         initial = {}

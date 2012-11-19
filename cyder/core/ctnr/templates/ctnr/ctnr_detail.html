@@ -1,36 +1,30 @@
 {% extends "core/core_detail.html" %}
 
 {% block title %}
-    {{ object.name }}
+  Container {{ object.name }}
 {% endblock %}
 
-{% block header %}
-    Container {{ object.name }}
-{% endblock %}
-
-{% block mid_action_bar %}
-    {% if request.session.superuser or (request.session.ctnr == object and request.session.level == 2) %}
-        <a class="btn" href="/ctnr/{{ object.id }}/add_user/">Add Users to Container</a>
-    {% endif %}
+{% block action_bar %}
+  {% if request.session.superuser or (request.session.ctnr == object and request.session.level == 2) %}
+    <a class="btn" href="{{ url('ctnr-add-user', object.id) }}">Add Users to Container</a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
-    {{ super() }}
+  {% from "base/tables.html" import render_table %}
 
-    {% from "tables.html" import render_table %}
+  {% if user_matrix %}
+    <h3>Users</h3>
+    {{ render_table(user_headers, user_matrix, user_urls) }}
+  {% endif %}
 
-    {% if user_matrix %}
-        <h3>Users</h3>
-        {{ render_table(user_headers, user_matrix, user_urls) }}
-    {% endif %}
+  {% if domain_matrix %}
+    <h3>Domains</h3>
+    {{ render_table(domain_headers, domain_matrix, domain_urls) }}
+  {% endif %}
 
-    {% if domain_matrix %}
-        <h3>Domains</h3>
-        {{ render_table(domain_headers, domain_matrix, domain_urls) }}
-    {% endif %}
-
-    {% if rdomain_matrix %}
-        <h3>Reverse Domains</h3>
-        {{ render_table(rdomain_headers, rdomain_matrix, rdomain_urls) }}
-    {% endif %}
+  {% if rdomain_matrix %}
+    <h3>Reverse Domains</h3>
+    {{ render_table(rdomain_headers, rdomain_matrix, rdomain_urls) }}
+  {% endif %}
 {% endblock %}

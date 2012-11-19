@@ -202,7 +202,7 @@ def redirect_to_range_from_ip(request):
     else:
         return HttpResponse(json.dumps(
             {'success': True,
-             'redirect_url': range_[0].get_absolute_url()}))
+             'redirect_url': range_[0].get_detail_url()}))
 
 
 class RangeUpdateView(RangeView, CoreUpdateView):

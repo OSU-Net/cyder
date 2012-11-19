@@ -11,7 +11,7 @@ from cyder.cydns.models import check_TLD_condition
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, validate_views
 from cyder.cydns.domain.models import Domain
-from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.soa.utils import update_soa
 
 
@@ -22,10 +22,6 @@ class BaseAddressRecord(Ip):
         ... ip_type=ip_type)
 
     """
-    ############################
-    # See Ip for all ip fields #
-    ############################
-
     label = models.CharField(max_length=63, blank=True, null=True,
                              validators=[validate_first_label],
                              help_text="The short hostname goes here. If this is a record "
@@ -179,9 +175,6 @@ class AddressRecord(BaseAddressRecord, ObjectUrlMixin):
         ... ip_type=ip_type)
 
     """
-    ############################
-    # See Ip for all ip fields #
-    ############################
     id = models.AutoField(primary_key=True)
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name="addressrecordomain_set")

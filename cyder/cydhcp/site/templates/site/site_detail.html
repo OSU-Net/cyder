@@ -4,7 +4,7 @@
 {% block content %}
     {% if site.parent %}
         <div class='dns-title'>{{ site.get_full_name() }}</div>
-        Parent site: <a href='{{ site.parent.get_absolute_url() }}'>{{ site.parent.get_full_name() }}</a>
+        Parent site: <a href='{{ site.parent.get_detail_url() }}'>{{ site.parent.get_full_name() }}</a>
         </br>
     {% else %}
         <div class='dns-title'>{{ site.get_full_name() }}</div>
@@ -65,7 +65,7 @@
 
                 <tbody>
                     {% for child_site in child_sites %}
-                        <td><a href='{{ child_site.get_absolute_url() }}'>{{ child_site.get_full_name() }}</a></td>
+                        <td><a href='{{ child_site.get_detail_url() }}'>{{ child_site.get_full_name() }}</a></td>
                     {% endfor %}
                 </tbody>
             </table>
@@ -84,11 +84,11 @@
                     {% for net in vlan.network_set.filter(site=site) %}
                     <tr>
                     {% if loop.first %}
-                        <td><a href='{{ vlan.absolute_url() }}'>{{ vlan }}</a></td>
+                        <td><a href='{{ vlan.get_detail_url() }}'>{{ vlan }}</a></td>
                     {% else %}
                         <td> </td>
                     {% endif %}
-                    <td><a href='{{ net.absolute_url() }}'>{{ net }}</a></td>
+                    <td><a href='{{ net.get_detail_url() }}'>{{ net }}</a></td>
                     </tr>
                     {% endfor %}
                 {% endfor %}

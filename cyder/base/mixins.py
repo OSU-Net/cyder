@@ -9,15 +9,18 @@ class ObjectUrlMixin(object):
     calculate URLs. Because of this, you must use the app label of your
     class when declaring urls in your urls.py.
     """
-    def get_absolute_url(self):
+    def get_detail_url(self):
         """
-        Return the absolute url of an object.
+        Return the detail url of an object.
         """
         return reverse(self._meta.db_table.replace('-', '_') + '-detail',
                        args=[self.pk])
 
-    def absolute_url(self):
-        return self.get_absolute_url()
+    def get_list_url(self):
+        """
+        Return the list url of an object.
+        """
+        return reverse(self._meta.db_table.replace('-', '_') + '-list')
 
     def get_update_url(self):
         """

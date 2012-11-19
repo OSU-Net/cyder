@@ -65,7 +65,7 @@
     <tbody>
         {% from 'cydhcp/cydhcp_macros.html' import display_networks %}
             {% for obj in object_list %}
-            <tr><td><a href='{{ obj.absolute_url() }}'>{{ obj }}</a></td></tr>
+            <tr><td><a href='{{ obj.get_detail_url() }}'>{{ obj }}</a></td></tr>
                     <tr>{{ display_networks(obj.network_set.all(), vlan=False) }}</td><tr>
             {% endfor %}
     </tbody>

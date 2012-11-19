@@ -7,8 +7,9 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.views import BaseListView, BaseDetailView, BaseCreateView
-from cyder.base.views import BaseUpdateView, BaseDeleteView
+from cyder.base.utils import make_paginator
+from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
+                              BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
 from cyder.cydns.address_record.models import AddressRecord
@@ -28,11 +29,12 @@ from cyder.cydns.srv.forms import FQDNSRVForm, SRVForm
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
+from cyder.cydns.utils import (ensure_label_domain, prune_tree, slim_form,
+                               tablefy)
 from cyder.cydns.view.models import View
 
 
-def cydns_list_create_record(request, record_type=None, pk=None):
+def cydns_record_view(request, record_type=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
@@ -48,6 +50,8 @@ def cydns_list_create_record(request, record_type=None, pk=None):
 
     # Get the object if updating.
     record = None
+    action = request.GET.get('action', None)
+    pk = request.GET.get('pk', None)
     if pk:
         record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
         form = FQDNFormKlass(instance=record)
@@ -59,13 +63,17 @@ def cydns_list_create_record(request, record_type=None, pk=None):
         qd = request.POST.copy()
         orig_qd = request.POST.copy()
 
+        if action == 'delete':
+            record.delete()
+            return redirect(record.get_list_url())
+
         # Create initial FQDN form.
         if record:
             form = FQDNFormKlass(qd, instance=record)
         else:
             form = FQDNFormKlass(qd)
 
-        # Resolve fqdn to domain and attach to record object.
+        # Resolve FQDN to domain and attach to record object.
         domain = None
         if 'fqdn' in qd:
             fqdn = qd.pop('fqdn')[0]
@@ -76,11 +84,11 @@ def cydns_list_create_record(request, record_type=None, pk=None):
                 fqdn_form = FQDNFormKlass(orig_qd)
                 fqdn_form._errors = ErrorDict()
                 fqdn_form._errors['__all__'] = ErrorList(e.messages)
-                return render(request, 'cydns/cydns_list_record.html', {
+                return render(request, 'cydns/cydns_record_view.html', {
                     'domain': domains,
                     'form': fqdn_form,
                     'record_type': record_type,
-                    'record_pk': pk,
+                    'pk': pk,
                     'obj': record
                 })
             qd['label'], qd['domain'] = label, str(domain.pk)
@@ -97,9 +105,13 @@ def cydns_list_create_record(request, record_type=None, pk=None):
         if form.is_valid():
             try:
                 record = form.save()
+                # If domain, add to current ctnr.
+                if record_type == 'domain':
+                    request.session['ctnr'].domains.add(record)
+
+                return redirect(record.get_list_url())
             except ValidationError as e:
                 error = True
-            form = FQDNFormKlass(instance=record)
         else:
             error = True
         if error:
@@ -109,13 +121,16 @@ def cydns_list_create_record(request, record_type=None, pk=None):
             return_form._errors = form._errors
             form = return_form
 
-    return render(request, 'cydns/cydns_list_record.html', {
-        'domains': domains,
+    object_list = make_paginator(request, Klass.objects.all(), 50)
+
+    return render(request, 'cydns/cydns_record_view.html', {
         'form': form,
-        'record_type': record_type,
-        'record_pk': pk,
         'obj': record,
-        'object_list': Klass.objects.all()[0:20]
+        'object_list': object_list,
+        'object_table': tablefy(object_list),
+        'domains': domains,
+        'record_type': record_type,
+        'pk': pk,
     })
 
 
@@ -138,8 +153,7 @@ def cydns_get_record(request):
     except ObjectDoesNotExist:
         raise Http404
 
-    return HttpResponse(json.dumps({'form': form.as_p(),
-                                    'updateUrl': record.get_update_url()}))
+    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': record.pk}))
 
 
 def cydns_search_record(request):
@@ -195,36 +209,11 @@ class CydnsCreateView(BaseCreateView):
         # 'foo.com') will make query set controllable.
         # Permissions in self.request.
 
-        # Removes "Hold down the...." help texts for specified fields for form.
-        remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
-                                 'to select more than one.')
-        for field in form.fields:
-            if field in form.base_fields:
-                if form.base_fields[field].help_text:
-                    new_text = form.base_fields[field].help_text.replace(
-                        remove_message, '')
-                    new_text = new_text.strip()
-                    form.base_fields[field].help_text = new_text
         return form
 
 
 class CydnsUpdateView(BaseUpdateView):
     template_name = 'cydns/cydns_form.html'
-
-    def get_form(self, form_class):
-        form = super(CydnsUpdateView, self).get_form(form_class)
-        # Removes "Hold down the...." help texts for specified fields for form.
-        remove_message = unicode(' Hold down "Control", or "Command" on a Mac,'
-                                 'to select more than one.')
-
-        for field in form.fields:
-            if field in form.base_fields:
-                if form.base_fields[field].help_text:
-                    new_text = form.base_fields[field].help_text.replace(
-                        remove_message, '')
-                    new_text = new_text.strip()
-                    form.base_fields[field].help_text = new_text
-        return form
 
 
 class CydnsDeleteView(BaseDeleteView):

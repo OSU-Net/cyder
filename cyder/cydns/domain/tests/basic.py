@@ -44,7 +44,7 @@ class DomainTests(TestCase):
         f_c.save()
         f_c.save()
         f_c.details()
-        self.assertTrue(f_c.get_absolute_url())
+        self.assertTrue(f_c.get_detail_url())
         self.assertTrue(f_c.get_update_url())
         self.assertTrue(f_c.get_delete_url())
         self.assertTrue(f_c.master_domain == c)

@@ -23,7 +23,9 @@ class CtnrDeleteView(CtnrView, CoreDeleteView):
 
 
 class CtnrDetailView(CtnrView, CoreDetailView):
-    """ """
+    """
+    Shows users, domains, and reverse domains within ctnr.
+    """
     template_name = 'ctnr/ctnr_detail.html'
 
     def get_context_data(self, **kwargs):
@@ -61,7 +63,7 @@ class CtnrCreateView(CtnrView, CoreCreateView):
     def post(self, request, *args, **kwargs):
         ctnr_form = CtnrForm(request.POST)
 
-        # try to save the ctnr
+        # Try to save the ctnr.
         # TODO: check perms
         try:
             ctnr = ctnr_form.save(commit=False)
@@ -70,7 +72,7 @@ class CtnrCreateView(CtnrView, CoreCreateView):
 
         ctnr.save()
 
-        # update ctnr-related session variables
+        # Update ctnr-related session variables.
         request.session['ctnrs'].append(ctnr)
         ctnr_names = simplejson.loads(request.session['ctnr_names_json'])
         ctnr_names.append(ctnr.name)

@@ -1,0 +1,93 @@
+@import "globals.scss";
+
+.helptext {
+    font-size: 10px;
+    font-style: italic;
+}
+
+form {
+    &.page-form {
+        @include img-box-shadow();
+        background: $light-gray;
+        border-radius: 5px;
+        margin-bottom: 26px;
+        padding-bottom: 26px;
+        #record-form-title {
+            left: 26px;
+            padding-top: 13px;
+            position: relative;
+        }
+        p {
+            margin: 13px 0;
+            left: 39px;
+            position: relative;
+            label {
+                color: $dark-gray;
+                font-weight: bold;
+                display: inline-block;
+                margin-bottom: 2px;
+            }
+        }
+        ul.errorlist {
+            color: $red;
+            float: right;
+            position: relative;
+            right: 26px;
+        }
+        input[type="text"], select {
+            display: block;
+        }
+        input[type="checkbox"] {
+            left: 100px;
+            margin-top: 2px;
+            position: absolute;
+        }
+        hr {
+            margin-bottom: 26px;
+        }
+        .form-btns .btn {
+            bottom: 13px;
+            float: right;
+            position: relative;
+        }
+    }
+}
+
+.ui-dialog {
+    @include img-box-shadow();
+    .ui-dialog-titlebar {
+        background: $dark-blue;
+        border-color: $dark-blue;
+    }
+}
+.ui-widget {
+    font-size: 16px;
+}
+#search-dialog {
+    margin-top: 7px;
+}
+button.ui-button.ui-widget.ui-state-default {
+    background: $blue;
+    border-color: $blue;
+    font-size: 13px;
+    &.ui-state-hover {
+        background: lighten($blue, 10%);
+        border-color: lighten($blue, 10%);
+        cursor: pointer;
+    }
+    .ui-button-text {
+        color: $white;
+    }
+}
+li.ui-menu-item {
+    color: $dark-gray;
+    a {
+        font-weight: normal;
+        &.ui-state-hover {
+            background: $light-blue;
+            border-color: $light-blue;
+            color: $dark-gray;
+            cursor: pointer;
+        }
+    }
+}
