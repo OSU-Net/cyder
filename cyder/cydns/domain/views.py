@@ -19,7 +19,7 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import tablefy
+from cyder.base.utils import tablefy
 from cyder.cydns.view.models import View
 from cyder.cydns.views import CydnsCreateView, CydnsDeleteView, CydnsListView
 
@@ -50,16 +50,17 @@ class DomainDetailView(DomainView, DetailView):
 
         # TODO this process can be generalized. Not very high priority.
         mx_objects = domain.mx_set.all().order_by('label')
-        mx_headers, mx_matrix, mx_urls = tablefy(mx_objects)
+        mx_headers, mx_matrix, mx_urls = tablefy(mx_objects, views=True)
 
         srv_objects = domain.srv_set.all().order_by('label')
-        srv_headers, srv_matrix, srv_urls = tablefy(srv_objects)
+        srv_headers, srv_matrix, srv_urls = tablefy(srv_objects, views=True)
 
         txt_objects = domain.txt_set.all().order_by('label')
-        txt_headers, txt_matrix, txt_urls = tablefy(txt_objects)
+        txt_headers, txt_matrix, txt_urls = tablefy(txt_objects, views=True)
 
         sshfp_objects = domain.sshfp_set.all().order_by('label')
-        sshfp_headers, sshfp_matrix, sshfp_urls = tablefy(sshfp_objects)
+        sshfp_headers, sshfp_matrix, sshfp_urls = tablefy(sshfp_objects,
+                                                          views=True)
 
         cname_objects = domain.cname_set.order_by('label')
         if cname_objects.count() > 50:
@@ -71,13 +72,13 @@ class DomainDetailView(DomainView, DetailView):
 
         # TODO, include Static Registrations
         ptr_objects = domain.ptr_set.all().order_by('ip_str')
-        ptr_headers, ptr_matrix, ptr_urls = tablefy(ptr_objects)
+        ptr_headers, ptr_matrix, ptr_urls = tablefy(ptr_objects, views=True)
 
         # TODO, include Static Registrations
         all_static_intr = StaticInterface.objects.all()
         intr_objects = domain.staticinterface_set.all().order_by(
             'name').order_by('ip_str')
-        intr_headers, intr_matrix, intr_urls = tablefy(intr_objects)
+        intr_headers, intr_matrix, intr_urls = tablefy(intr_objects, views=True)
 
         address_objects = domain.addressrecord_set.all().order_by('label')
 
@@ -89,7 +90,7 @@ class DomainDetailView(DomainView, DetailView):
         adr_headers, adr_matrix, adr_urls = tablefy(address_objects, adr_views)
 
         ns_objects = domain.nameserver_set.all().order_by('server')
-        ns_headers, ns_matrix, ns_urls = tablefy(ns_objects)
+        ns_headers, ns_matrix, ns_urls = tablefy(ns_objects, views=True)
 
         # Join the two dicts
         context = dict({

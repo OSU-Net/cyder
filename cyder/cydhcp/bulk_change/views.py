@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.forms.util import ErrorList
 from django.http import HttpResponse
 
-from cyder.core.systems.models import System
+from cyder.core.system.models import System
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue

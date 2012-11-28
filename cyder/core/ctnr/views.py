@@ -9,7 +9,7 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.utils import tablefy_users
 from cyder.core.views import CoreListView, CoreDetailView, CoreCreateView
 from cyder.core.views import CoreDeleteView, CoreUpdateView
-from cyder.cydns.utils import tablefy
+from cyder.base.utils import tablefy
 
 
 class CtnrView(object):

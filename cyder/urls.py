@@ -15,13 +15,14 @@ from cyder.core.cyuser import views as cyuser_views
 admin.autodiscover()
 
 urlpatterns = patterns('',
-   url(r'^$', direct_to_template, {'template': 'base/index.html'}, name='system-home'),
+   (r'^$', include('cyder.core.system.urls')),
+   (r'^tasty/', include('cyder.core.system.urls')),
+
    (r'^admin/', include(admin.site.urls)),
    (r'^cydns/', include('cyder.cydns.urls')),
    (r'^cydhcp/', include('cyder.cydhcp.urls')),
 
    (r'^ctnr/', include('cyder.core.ctnr.urls')),
-   (r'^tasty/', include('cyder.core.systems.urls')),
    (r'^search/', include('cyder.core.search.urls')),
 
    url(r'^login/$', cyuser_views.cylogin, name='login'),

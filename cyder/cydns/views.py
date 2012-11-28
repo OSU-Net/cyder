@@ -7,7 +7,7 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.utils import make_paginator
+from cyder.base.utils import make_paginator, tablefy
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -29,8 +29,7 @@ from cyder.cydns.srv.forms import FQDNSRVForm, SRVForm
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import (ensure_label_domain, prune_tree, slim_form,
-                               tablefy)
+from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 from cyder.cydns.view.models import View
 
 
@@ -127,7 +126,7 @@ def cydns_record_view(request, record_type=None):
         'form': form,
         'obj': record,
         'object_list': object_list,
-        'object_table': tablefy(object_list),
+        'object_table': tablefy(object_list, views=True),
         'domains': domains,
         'record_type': record_type,
         'pk': pk,

@@ -53,254 +53,6 @@ class SystemWithRelatedManager(models.Manager):
         )
 
 
-class Allocation(models.Model):
-    name = models.CharField(max_length=255, blank=False)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        db_table = u'allocations'
-        ordering = ['name']
-
-
-class ScheduledTask(models.Model):
-    task = models.CharField(max_length=255, blank=False, unique=True)
-    type = models.CharField(max_length=255, blank=False)
-    objects = QuerySetManager()
-
-    class QuerySet(QuerySet):
-        def delete_all_reverse_dns(self):
-            self.filter(type='reverse_dns_zone').delete()
-
-        def delete_all_dhcp(self):
-            self.filter(type='dhcp').delete()
-
-        def get_all_dhcp(self):
-            return self.filter(type='dhcp')
-
-        def get_all_reverse_dns(self):
-            return self.filter(type='reverse_dns_zone')
-
-        def get_next_task(self, type=None):
-            if type is not None:
-                try:
-                    return self.filter(type=type)[0]
-                except:
-                    return None
-            else:
-                return None
-
-        def get_last_task(self, type=None):
-            if type is not None:
-                try:
-                    return self.filter(type=type)[-1]
-                except:
-                    return None
-            else:
-                return None
-
-    class Meta:
-        db_table = u'scheduled_tasks'
-        ordering = ['task']
-
-
-class Contract(models.Model):
-    contract_number = models.CharField(max_length=255, blank=True)
-    support_level = models.CharField(max_length=255, blank=True)
-    contract_link = models.CharField(max_length=255, blank=True)
-    phone = models.CharField(max_length=40, blank=True)
-    expiration = models.DateTimeField(null=True, blank=True)
-    system = models.ForeignKey('System')
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        db_table = u'contracts'
-
-
-class Location(models.Model):
-    name = models.CharField(unique=True, max_length=255, blank=True)
-    address = models.TextField(blank=True, null=True)
-    note = models.TextField(blank=True, null=True)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        db_table = u'locations'
-        ordering = ['name']
-
-
-class ApiManager(models.Manager):
-    def get_query_set(self):
-        results = super(ApiManager, self).get_query_set()
-        return results
-
-
-class KeyValue(models.Model):
-    system = models.ForeignKey('System')
-    key = models.CharField(max_length=255, blank=True, null=True)
-    value = models.CharField(max_length=255, blank=True, null=True)
-    objects = models.Manager()
-    expanded_objects = ApiManager()
-
-    def __unicode__(self):
-        return self.key if self.key else ''
-
-    def __repr__(self):
-        return "<{0}: '{1}'>".format(self.key, self.value)
-
-    def __repr__(self):
-        return self.key if self.key else ''
-
-    def save(self, *args, **kwargs):
-        dirty = False
-        schedule_dns = False
-        from cyder.dnsutils.build_nics import build_nic
-        from cyder.dnsutils.dns_build import ip_to_site
-
-        is_nic = re.match('^nic\.\d+\.(.*)\.\d+$', self.key)
-        if self.pk:
-            # Make sure that there was actually a change to some data.
-            self_ = KeyValue.objects.get(pk=self.pk)
-            if self_.value == self.value:
-                ditry = False
-            else:
-                dirty = True
-        if is_nic and dirty:
-            # If a nic was changed and the changed key type was dns related, we
-            # need to schedule dns to be built.
-            nic_type = is_nic.groups(0)
-            dns_related_types = ('hostname', 'ipv4_address', 'dns_auto_build',
-                                 'dns_auto_hostname', 'dns_has_conflict')
-            # dns_has_conflict is probably not needed.
-            if nic_type and nic_type[0] in dns_related_types:
-                schedule_dns = True
-            else:
-                schedule_dns = False
-
-        if re.match('^nic\.\d+\.mac_address\.\d+$', self.key):
-            self.value = validate_mac(self.value)
-
-        super(KeyValue, self).save(*args, **kwargs)
-
-        if schedule_dns:
-        # We should rebuild dns.
-        # If hostname changed, we need the ip. If dns_auto_build
-        # changed, we need the ip, if dns_auto_hostame changed, we need
-        # the ip... We always need the ip. Use the build nic function
-        # to construct an interface and find the ip in the interface.
-            intr = build_nic(self.system.keyvalue_set.all())
-            for ip in intr.ips:
-                kv = dnsutils.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
-                if kv:
-                    try:
-                        ScheduledTask(type='dns', task=kv.key).save()
-                    except IntegrityError, e:
-                        # The task already existed.
-                        pass
-
-    class Meta:
-        db_table = u'key_value'
-
-# Eventually, should this go in the KV class? Depends on whether other code
-# calls this.
-
-
-def validate_mac(mac):
-    """
-    Validates a mac address. If the mac is in the form XX-XX-XX-XX-XX-XX this
-    function will replace all '-' with ':'.
-
-    :param mac: The mac address
-    :type mac: str
-    :returns: The valid mac address.
-    :raises: ValidationError
-    """
-    mac = mac.replace('-', ':')
-    if not re.match('^([0-9a-fA-F]{2}(:|$)){6}$', mac):
-        raise ValidationError("Please enter a valid Mac Address in the form "
-                              "XX:XX:XX:XX:XX:XX")
-    return mac
-
-
-class Mac(models.Model):
-    system = models.ForeignKey('System')
-    mac = models.CharField(unique=True, max_length=17)
-
-    class Meta:
-        db_table = u'macs'
-
-
-class OperatingSystem(models.Model):
-    name = models.CharField(max_length=255, blank=True)
-    version = models.CharField(max_length=255, blank=True)
-
-    def __unicode__(self):
-        return "%s - %s" % (self.name, self.version)
-
-    class Meta:
-        db_table = u'operating_systems'
-        ordering = ['name', 'version']
-
-
-class ServerModel(models.Model):
-    vendor = models.CharField(max_length=255, blank=True)
-    model = models.CharField(max_length=255, blank=True)
-    description = models.TextField(blank=True, null=True)
-    part_number = models.CharField(max_length=255, blank=True, null=True)
-
-    def __unicode__(self):
-        return "%s - %s" % (self.vendor, self.model)
-
-    class Meta:
-        db_table = u'server_models'
-        ordering = ['vendor', 'model']
-
-
-class SystemRack(models.Model):
-    name = models.CharField(max_length=255, blank=True)
-    location = models.ForeignKey('Location')
-
-    def __unicode__(self):
-        return "%s - %s" % (self.name, self.location.name)
-
-    def delete(self, *args, **kwargs):
-        self.system_set.clear()
-        super(SystemRack, self).delete(*args, **kwargs)
-
-    def systems(self):
-        return self.system_set.select_related().order_by('rack_order')
-
-    class Meta:
-        db_table = u'system_racks'
-        ordering = ['name']
-
-
-class SystemType(models.Model):
-    type_name = models.CharField(max_length=255, blank=True)
-
-    def __unicode__(self):
-        return self.type_name
-
-    class Meta:
-        db_table = u'system_types'
-
-
-class SystemStatus(models.Model):
-    status = models.CharField(max_length=255, blank=True)
-    color = models.CharField(max_length=255, blank=True)
-    color_code = models.CharField(max_length=255, blank=True)
-
-    def __unicode__(self):
-        return self.status
-
-    class Meta:
-        db_table = u'system_statuses'
-        ordering = ['status']
-
-
 class System(DirtyFieldsMixin, models.Model):
 
     YES_NO_CHOICES = (
@@ -340,6 +92,17 @@ class System(DirtyFieldsMixin, models.Model):
         choices=YES_NO_CHOICES, blank=True, null=True)
     is_switch = models.IntegerField(
         choices=YES_NO_CHOICES, blank=True, null=True)
+
+    class Meta:
+        db_table = u'systems'
+
+    def details(self):
+        return (
+            ('Hostname', self.hostname),
+            ('OS', self.operating_system),
+            ('Last Updated', self.updated_on)
+        )
+
 
     @property
     def primary_ip(self):
@@ -643,8 +406,253 @@ class System(DirtyFieldsMixin, models.Model):
     def get_adapter_count(self):
         return len(self.get_adapter_numbers())
 
+
+class Allocation(models.Model):
+    name = models.CharField(max_length=255, blank=False)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
-        db_table = u'systems'
+        db_table = u'allocations'
+        ordering = ['name']
+
+
+class ScheduledTask(models.Model):
+    task = models.CharField(max_length=255, blank=False, unique=True)
+    type = models.CharField(max_length=255, blank=False)
+    objects = QuerySetManager()
+
+    class QuerySet(QuerySet):
+        def delete_all_reverse_dns(self):
+            self.filter(type='reverse_dns_zone').delete()
+
+        def delete_all_dhcp(self):
+            self.filter(type='dhcp').delete()
+
+        def get_all_dhcp(self):
+            return self.filter(type='dhcp')
+
+        def get_all_reverse_dns(self):
+            return self.filter(type='reverse_dns_zone')
+
+        def get_next_task(self, type=None):
+            if type is not None:
+                try:
+                    return self.filter(type=type)[0]
+                except:
+                    return None
+            else:
+                return None
+
+        def get_last_task(self, type=None):
+            if type is not None:
+                try:
+                    return self.filter(type=type)[-1]
+                except:
+                    return None
+            else:
+                return None
+
+    class Meta:
+        db_table = u'scheduled_tasks'
+        ordering = ['task']
+
+
+class Contract(models.Model):
+    contract_number = models.CharField(max_length=255, blank=True)
+    support_level = models.CharField(max_length=255, blank=True)
+    contract_link = models.CharField(max_length=255, blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+    expiration = models.DateTimeField(null=True, blank=True)
+    system = models.ForeignKey('System')
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = u'contracts'
+
+
+class Location(models.Model):
+    name = models.CharField(unique=True, max_length=255, blank=True)
+    address = models.TextField(blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        db_table = u'locations'
+        ordering = ['name']
+
+
+class ApiManager(models.Manager):
+    def get_query_set(self):
+        results = super(ApiManager, self).get_query_set()
+        return results
+
+
+class KeyValue(models.Model):
+    system = models.ForeignKey('System')
+    key = models.CharField(max_length=255, blank=True, null=True)
+    value = models.CharField(max_length=255, blank=True, null=True)
+    objects = models.Manager()
+    expanded_objects = ApiManager()
+
+    def __unicode__(self):
+        return self.key if self.key else ''
+
+    def __repr__(self):
+        return "<{0}: '{1}'>".format(self.key, self.value)
+
+    def __repr__(self):
+        return self.key if self.key else ''
+
+    def save(self, *args, **kwargs):
+        dirty = False
+        schedule_dns = False
+        from cyder.dnsutils.build_nics import build_nic
+        from cyder.dnsutils.dns_build import ip_to_site
+
+        is_nic = re.match('^nic\.\d+\.(.*)\.\d+$', self.key)
+        if self.pk:
+            # Make sure that there was actually a change to some data.
+            self_ = KeyValue.objects.get(pk=self.pk)
+            if self_.value == self.value:
+                ditry = False
+            else:
+                dirty = True
+        if is_nic and dirty:
+            # If a nic was changed and the changed key type was dns related, we
+            # need to schedule dns to be built.
+            nic_type = is_nic.groups(0)
+            dns_related_types = ('hostname', 'ipv4_address', 'dns_auto_build',
+                                 'dns_auto_hostname', 'dns_has_conflict')
+            # dns_has_conflict is probably not needed.
+            if nic_type and nic_type[0] in dns_related_types:
+                schedule_dns = True
+            else:
+                schedule_dns = False
+
+        if re.match('^nic\.\d+\.mac_address\.\d+$', self.key):
+            self.value = validate_mac(self.value)
+
+        super(KeyValue, self).save(*args, **kwargs)
+
+        if schedule_dns:
+        # We should rebuild dns.
+        # If hostname changed, we need the ip. If dns_auto_build
+        # changed, we need the ip, if dns_auto_hostame changed, we need
+        # the ip... We always need the ip. Use the build nic function
+        # to construct an interface and find the ip in the interface.
+            intr = build_nic(self.system.keyvalue_set.all())
+            for ip in intr.ips:
+                kv = dnsutils.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
+                if kv:
+                    try:
+                        ScheduledTask(type='dns', task=kv.key).save()
+                    except IntegrityError, e:
+                        # The task already existed.
+                        pass
+
+    class Meta:
+        db_table = u'key_value'
+
+# Eventually, should this go in the KV class? Depends on whether other code
+# calls this.
+
+
+def validate_mac(mac):
+    """
+    Validates a mac address. If the mac is in the form XX-XX-XX-XX-XX-XX this
+    function will replace all '-' with ':'.
+
+    :param mac: The mac address
+    :type mac: str
+    :returns: The valid mac address.
+    :raises: ValidationError
+    """
+    mac = mac.replace('-', ':')
+    if not re.match('^([0-9a-fA-F]{2}(:|$)){6}$', mac):
+        raise ValidationError("Please enter a valid Mac Address in the form "
+                              "XX:XX:XX:XX:XX:XX")
+    return mac
+
+
+class Mac(models.Model):
+    system = models.ForeignKey('System')
+    mac = models.CharField(unique=True, max_length=17)
+
+    class Meta:
+        db_table = u'macs'
+
+
+class OperatingSystem(models.Model):
+    name = models.CharField(max_length=255, blank=True)
+    version = models.CharField(max_length=255, blank=True)
+
+    def __unicode__(self):
+        return "%s - %s" % (self.name, self.version)
+
+    class Meta:
+        db_table = u'operating_systems'
+        ordering = ['name', 'version']
+
+
+class ServerModel(models.Model):
+    vendor = models.CharField(max_length=255, blank=True)
+    model = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True, null=True)
+    part_number = models.CharField(max_length=255, blank=True, null=True)
+
+    def __unicode__(self):
+        return "%s - %s" % (self.vendor, self.model)
+
+    class Meta:
+        db_table = u'server_models'
+        ordering = ['vendor', 'model']
+
+
+class SystemRack(models.Model):
+    name = models.CharField(max_length=255, blank=True)
+    location = models.ForeignKey('Location')
+
+    def __unicode__(self):
+        return "%s - %s" % (self.name, self.location.name)
+
+    def delete(self, *args, **kwargs):
+        self.system_set.clear()
+        super(SystemRack, self).delete(*args, **kwargs)
+
+    def systems(self):
+        return self.system_set.select_related().order_by('rack_order')
+
+    class Meta:
+        db_table = u'system_racks'
+        ordering = ['name']
+
+
+class SystemType(models.Model):
+    type_name = models.CharField(max_length=255, blank=True)
+
+    def __unicode__(self):
+        return self.type_name
+
+    class Meta:
+        db_table = u'system_types'
+
+
+class SystemStatus(models.Model):
+    status = models.CharField(max_length=255, blank=True)
+    color = models.CharField(max_length=255, blank=True)
+    color_code = models.CharField(max_length=255, blank=True)
+
+    def __unicode__(self):
+        return self.status
+
+    class Meta:
+        db_table = u'system_statuses'
+        ordering = ['status']
 
 
 class SystemChangeLog(models.Model):

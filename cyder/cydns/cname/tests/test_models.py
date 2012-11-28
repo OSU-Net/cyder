@@ -13,7 +13,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.ip.utils import ip_to_domain_name
 
-from cyder.core.systems.models import System
+from cyder.core.system.models import System
 
 
 class CNAMETests(cyder.base.tests.TestCase):

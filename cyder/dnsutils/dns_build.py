@@ -9,7 +9,7 @@ from cyder.dnsutils.svn_build import get_reverse_svn_sites_changed
 from cyder.dnsutils.build_nics import *
 from cyder.dnsutils.utils import *
 import ipaddr
-from cyder.core.systems.models import ScheduledTask
+from cyder.core.system.models import ScheduledTask
 from django.conf import settings
 from django.conf import settings
 from django.conf import settings
