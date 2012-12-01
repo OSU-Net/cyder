@@ -13,9 +13,23 @@ class TXT(CydnsRecord):
 
     search_fields = ("fqdn", "txt_data")
 
+    class Meta:
+        db_table = "txt"
+        # unique_together = ("domain", "label", "txt_data")
+        # TODO
+        # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
+        # "txt_data" used in key specification without a key length")
+        # Fix that ^
+
+    def __str__(self):
+        return "{0} TXT {1}".format(self.fqdn, self.txt_data)
+
+    def __repr__(self):
+        return "<TXT {0}>".format(self)
+
     def details(self):
         return (
-            ("FQDN", self.fqdn),
+            ("Domain", self.domain),
             ("Text", self.txt_data)
         )
 
@@ -32,17 +46,3 @@ class TXT(CydnsRecord):
         super(TXT, self).clean()
         super(TXT, self).check_for_delegation()
         super(TXT, self).check_for_cname()
-
-    class Meta:
-        db_table = "txt"
-        # unique_together = ("domain", "label", "txt_data")
-        # TODO
-        # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
-        # "txt_data" used in key specification without a key length")
-        # Fix that ^
-
-    def __str__(self):
-        return "{0} TXT {1}".format(self.fqdn, self.txt_data)
-
-    def __repr__(self):
-        return "<TXT {0}>".format(self)

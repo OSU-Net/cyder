@@ -32,20 +32,25 @@ class PTR(Ip, ObjectUrlMixin):
 
     search_fields = ('ip_str', 'name')
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['ip_str', 'ip_type', 'name', 'ttl', 'comment']
-
-    def details(self):
-        return (
-            ('Ip', str(self.ip_str)),
-            ('Record Type', 'PTR'),
-            ('Name', self.name),
-        )
-
     class Meta:
         db_table = 'ptr'
         unique_together = ('ip_str', 'ip_type', 'name')
+
+    def __str__(self):
+        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.name)
+
+    def __repr__(self):
+        return "<{0}>".format(str(self))
+
+    def details(self):
+        return (
+            ('Name', self),
+            ('Ip', str(self.ip_str)),
+        )
+
+    @classmethod
+    def get_api_fields(cls):
+        return ['ip_str', 'ip_type', 'name', 'ttl', 'comment']
 
     def save(self, *args, **kwargs):
         if self.reverse_domain and self.reverse_domain.soa:
@@ -88,12 +93,6 @@ class PTR(Ip, ObjectUrlMixin):
                                            ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()):
             raise ValidationError("An Interface has already used this IP and "
                                   "Name.")
-
-    def __str__(self):
-        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.name)
-
-    def __repr__(self):
-        return "<{0}>".format(str(self))
 
     def dns_name(self):
         """Return the cononical name of this ptr that can be placed in a

@@ -1,33 +1,35 @@
 {% macro render_table(headers, matrix, urls, views=True) %}
 
 <table class="table">
-    <thead>
-        <tr>
-            {% for header in headers %}
-                {# print header #}
-                <th>{{ header }}</th>
-            {% endfor %}
-            {# if views %}
-                <th>Views</th>
-            {% endif #}
-        </tr>
-    </thead>
+  <thead>
+    <tr>
+      {% for header in headers %}
+        {# print header #}
+        <th>{{ header }}</th>
+      {% endfor %}
+      {# if views %}
+        <th>Views</th>
+      {% endif #}
+    </tr>
+  </thead>
 
-    <tbody>
-        {% for row in matrix %}
-            <tr>
-                <th><a href='{{ urls[loop.index0] }}'>{{ row[0] }}</a></th>
-                {% for col in row %}
-                    {% if loop.first %}
-                        {# Do nothing #}
-                    {% else %}
-                        {# print data #}
-                        <th>{{ col }}</th>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+  <tbody>
+    {% for row in matrix %}
+      {% set outer_loop = loop.index0 %}
+      <tr>
+        {% for col in row %}
+          {% set url = urls[outer_loop][loop.index0] %}
+          <td>
+            {% if url %}
+              <a href='{{ url }}'>{{ col }}</a>
+            {% else %}
+              <p>{{ col }}</p>
+            {% endif %}
+          </td>
         {% endfor %}
-    </tbody>
+      </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
 {% endmacro %}

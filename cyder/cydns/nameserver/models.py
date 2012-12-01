@@ -51,17 +51,23 @@ class Nameserver(models.Model, ObjectUrlMixin):
         db_table = "nameserver"
         unique_together = ("domain", "server")
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['ttl', 'comment', 'server']
+    def __repr__(self):
+        return "<Forward '{0}'>".format(str(self))
+
+    def __str__(self):
+        return "{0} {1} {2}".format(self.domain.name, "NS", self.server)
 
     def details(self):
         details = [
             ("Server", self.server),
-            ("Domain", self.domain.name),
+            ("Domain", self.domain),
             ("Glue", self.get_glue()),
         ]
         return tuple(details)
+
+    @classmethod
+    def get_api_fields(cls):
+        return ['ttl', 'comment', 'server']
 
     def delete(self, *args, **kwargs):
         from cyder.cydns.utils import prune_tree
@@ -151,12 +157,6 @@ class Nameserver(models.Model, ObjectUrlMixin):
                         self.glue = addr_glue[0]
                     else:
                         self.glue = intr_glue[0]
-
-    def __repr__(self):
-        return "<Forward '{0}'>".format(str(self))
-
-    def __str__(self):
-        return "{0} {1} {2}".format(self.domain.name, "NS", self.server)
 
     def _needs_glue(self):
         # Replace the domain portion of the server with "".

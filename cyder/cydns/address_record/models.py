@@ -42,18 +42,25 @@ class BaseAddressRecord(Ip):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return "{0} {1} {2}".format(self.fqdn,
+                                    self.record_type(), str(self.ip_str))
+
+    def __repr__(self):
+        return "<Address Record '{0}'>".format(str(self))
+
+    def details(self):
+        return  (
+            ("Domain", self.domain),
+            ("Record Type", self.record_type()),
+            ("IP", str(self.ip_str)),
+        )
+
     @property
     def rdtype(self):
         if self.ip_type == '6':
             return 'AAAA'
         return 'A'
-
-    def details(self):
-        return  (
-            ("FQDN", self.fqdn),
-            ("Record Type", self.record_type()),
-            ("IP", str(self.ip_str)),
-        )
 
     @classmethod
     def get_api_fields(cls):
@@ -159,13 +166,6 @@ class BaseAddressRecord(Ip):
             return 'A'
         else:
             return 'AAAA'
-
-    def __str__(self):
-        return "{0} {1} {2}".format(self.fqdn,
-                                    self.record_type(), str(self.ip_str))
-
-    def __repr__(self):
-        return "<Address Record '{0}'>".format(str(self))
 
 
 class AddressRecord(BaseAddressRecord, ObjectUrlMixin):

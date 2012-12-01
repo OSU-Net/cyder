@@ -65,15 +65,18 @@ class SOA(models.Model, ObjectUrlMixin):
 
     attrs = None
 
-    def update_attrs(self):
-        self.attrs = AuxAttr(SOAKeyValue, self, 'soa')
-
     class Meta:
         db_table = 'soa'
         # We are using the comment field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
         # Domain models.py file for more info.
         unique_together = ('primary', 'contact', 'comment')
+
+    def __str__(self):
+        return "{0}".format(str(self.comment))
+
+    def __repr__(self):
+        return "<'{0}'>".format(str(self))
 
     def details(self):
         return  (
@@ -83,8 +86,11 @@ class SOA(models.Model, ObjectUrlMixin):
             ('Expire', self.expire),
             ('Retry', self.retry),
             ('Refresh', self.refresh),
-            ('Comment', self.comment),
+            ('Comment', self),
         )
+
+    def update_attrs(self):
+        self.attrs = AuxAttr(SOAKeyValue, self, 'soa')
 
     def get_debug_build_url(self):
         return reverse('build-debug', args=[self.pk])
@@ -104,12 +110,6 @@ class SOA(models.Model, ObjectUrlMixin):
                 if getattr(db_self, field) != getattr(self, field):
                     self.dirty = True
         super(SOA, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return "{0}".format(str(self.comment))
-
-    def __repr__(self):
-        return "<'{0}'>".format(str(self))
 
 
 class SOAKeyValue(KeyValue):

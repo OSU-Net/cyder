@@ -233,6 +233,6 @@ def get_klasses(record_type):
         'nameserver': (Nameserver, NameserverForm, NameserverForm),
         'ptr': (PTR, PTRForm, PTRForm),
         'soa': (SOA, SOAForm, SOAForm),
-        'srv': (SRV, SRVForm, FQDNSRVForm),
+        'srv': (SRV, SRVForm, SRVForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
     }.get(record_type, (None, None, None))

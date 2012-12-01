@@ -33,8 +33,6 @@ class SRV(models.Model, ObjectUrlMixin):
                                "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
     fqdn = models.CharField(max_length=255, blank=True, null=True,
                             validators=[validate_srv_name])
-    # fqdn = label + domain.name <--- see set_fqdn
-
     views = models.ManyToManyField(View, blank=True)
 
     target = models.CharField(max_length=100,
@@ -55,19 +53,26 @@ class SRV(models.Model, ObjectUrlMixin):
 
     search_fields = ("fqdn", "target")
 
+    class Meta:
+        db_table = "srv"
+        unique_together = ("label", "domain", "target", "port")
+
+    def __str__(self):
+        return "{0} {1} {2} {3} {4} {5} {6}".format(self.fqdn, "IN", "SRV",
+                                                    self.priority, self.weight,
+                                                    self.port, self.target)
+
+    def __repr__(self):
+        return "<SRV '{0}'>".format(str(self))
+
     def details(self):
         return  (
-            ("FQDN", self.fqdn),
-            ("Record Type", "SRV"),
-            ("Targer", self.target),
+            ("Domain", self.domain),
+            ("Target", self.target),
             ("Port", self.port),
             ("Priority", self.priority),
             ("Weight", self.weight),
         )
-
-    class Meta:
-        db_table = "srv"
-        unique_together = ("label", "domain", "target", "port")
 
     @classmethod
     def get_api_fields(cls):
@@ -100,14 +105,6 @@ class SRV(models.Model, ObjectUrlMixin):
         self.set_fqdn()
         self.check_for_cname()
         self.check_for_delegation()
-
-    def __str__(self):
-        return "{0} {1} {2} {3} {4} {5} {6}".format(self.fqdn, "IN", "SRV",
-                                                    self.priority, self.weight,
-                                                    self.port, self.target)
-
-    def __repr__(self):
-        return "<SRV '{0}'>".format(str(self))
 
     def set_fqdn(self):
         try:

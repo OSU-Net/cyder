@@ -99,11 +99,17 @@ class Domain(models.Model, ObjectUrlMixin):
     class Meta:
         db_table = 'domain'
 
+    def __str__(self):
+        return "{0}".format(self.name)
+
+    def __repr__(self):
+        return "<Domain '{0}'>".format(self.name)
+
     def details(self):
         return (
-            ('Name', self.name),
+            ('Name', self),
             ('Master Domain', self.master_domain),
-            ('SOA', self.soa.primary if self.soa else self.soa) ,
+            ('SOA', self.soa),
             ('Delegated', self.delegated),
         )
 
@@ -156,12 +162,6 @@ class Domain(models.Model, ObjectUrlMixin):
                 objects = qset.all()
                 raise ValidationError("Objects with this name already "
                                       "exist {0}".format(objects))
-
-    def __str__(self):
-        return "{0}".format(self.name)
-
-    def __repr__(self):
-        return "<Domain '{0}'>".format(self.name)
 
     def check_for_children(self):
         if self.domain_set.all().exists():

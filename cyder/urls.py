@@ -16,7 +16,6 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
    (r'^$', include('cyder.core.system.urls')),
-   (r'^tasty/', include('cyder.core.system.urls')),
 
    (r'^admin/', include(admin.site.urls)),
    (r'^cydns/', include('cyder.cydns.urls')),

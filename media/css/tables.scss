@@ -14,10 +14,7 @@ table.table {
     tbody {
         tr {
             td {
-                a, p, span {
-                    position: relative;
-                    left: 13px;
-                }
+                text-align: center;
             }
             &:hover {
                 background: darken($white, 10%);

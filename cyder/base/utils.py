@@ -42,12 +42,15 @@ def tablefy(objects, views=False):
     # Build the matrix and urls
     for obj in objects:
         row = []
-        try:
-            urls.append(obj.get_detail_url())
-        except NoReverseMatch:
-            urls.append('')
+        row_urls = []
+
         for title, value in obj.details():
+            try:
+                row_urls.append(value.get_detail_url())
+            except AttributeError:
+                row_urls.append('')
             row.append(value)
+
         if views:
             view_field = ""
             if hasattr(obj, 'views'):
@@ -57,7 +60,9 @@ def tablefy(objects, views=False):
                 row.append(view_field)
             else:
                 row.append('None')
+            row_urls.append('')
 
         matrix.append(row)
+        urls.append(row_urls)
 
     return (headers, matrix, urls)
