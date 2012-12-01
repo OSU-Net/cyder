@@ -1,4 +1,6 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import NoReverseMatch
+
 
 def make_paginator(request, qs, num):
     """
@@ -40,7 +42,10 @@ def tablefy(objects, views=False):
     # Build the matrix and urls
     for obj in objects:
         row = []
-        urls.append(obj.get_detail_url())
+        try:
+            urls.append(obj.get_detail_url())
+        except NoReverseMatch:
+            urls.append('')
         for title, value in obj.details():
             row.append(value)
         if views:
@@ -56,4 +61,3 @@ def tablefy(objects, views=False):
         matrix.append(row)
 
     return (headers, matrix, urls)
-

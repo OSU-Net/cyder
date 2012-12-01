@@ -1,45 +1,22 @@
 {% extends "cydns/cydns_detail.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block title%}Domain {{ object.name }}{% endblock %}
+{% block header %}Domain {{ object.name }}{% endblock %}
+
+{% block extra_action_bar %}
+  {% if object.soa %}
+    <a class="btn" href="{{ object.soa.get_detail_url() }}">View SOA</a>
+  {% endif %}
+{% endblock %}
 
 {% block content %}
-    <div class='dns-title'>The {{ object.name }} Domain</div>
-    {% if object.master_domain %}
-    Goto <a class="btn" href="{{ object.master_domain.get_detail_url() }}">{{ object.master_domain.name }}</a>
-    <br>
-    {% endif %}
-    {% if object.soa %}
-    <a class="btn" href="{{ object.soa.get_detail_url() }}">View SOA</a>
-    <br>
-    {% endif %}
-    <a class="btn" href="{{ object.get_update_url() }}">Edit</a>
-    <a class="btn" href="{{ object.get_delete_url() }}">Delete</a>
+    {{ render_table(domain_headers, domain_matrix, domain_urls) }}
 
-
-    {% from "base/tables.html" import render_table %}
-
-    {% if ns_matrix %}
-        <h3> Nameservers </h3>
-        {{ render_table(ns_headers, ns_matrix, ns_urls) }}
-    {% endif %}
-
-
-    {% if mx_matrix %}
-        <h3> MX Records </h3>
-        {{ render_table(mx_headers, mx_matrix, mx_urls) }}
-    {% endif %}
-
-    {% if srv_matrix %}
-        <h3> SRV Records </h3>
-        {{ render_table(srv_headers, srv_matrix, srv_urls) }}
-    {% endif %}
-
-    {% if txt_matrix %}
-        <h3> TXT Records </h3>
-        {{ render_table(txt_headers, txt_matrix, txt_urls) }}
-    {% endif %}
-
-    {% if sshfp_matrix %}
-        <h3> SSHFP Records </h3>
-        {{ render_table(sshfp_headers, sshfp_matrix, sshfp_urls) }}
+    {% if address_matrix %}
+        <h3> Address Records </h3>
+        {{ render_table(address_headers, address_matrix, address_urls,
+        address_views) }}
     {% endif %}
 
     {% if cname_matrix %}
@@ -53,14 +30,33 @@
         {{ render_table(intr_headers, intr_matrix, intr_urls) }}
     {% endif %}
 
-    {% if address_matrix %}
-        <h3> Address Records </h3>
-        {{ render_table(address_headers, address_matrix, address_urls,
-        address_views) }}
+    {% if mx_matrix %}
+        <h3> MX Records </h3>
+        {{ render_table(mx_headers, mx_matrix, mx_urls) }}
+    {% endif %}
+
+    {% if ns_matrix %}
+        <h3> Nameservers </h3>
+        {{ render_table(ns_headers, ns_matrix, ns_urls) }}
     {% endif %}
 
     {% if ptr_matrix %}
         <h3> PTR Records </h3>
         {{ render_table(ptr_headers, ptr_matrix, ptr_urls) }}
+    {% endif %}
+
+    {% if srv_matrix %}
+        <h3> SRV Records </h3>
+        {{ render_table(srv_headers, srv_matrix, srv_urls) }}
+    {% endif %}
+
+    {% if sshfp_matrix %}
+        <h3> SSHFP Records </h3>
+        {{ render_table(sshfp_headers, sshfp_matrix, sshfp_urls) }}
+    {% endif %}
+
+    {% if txt_matrix %}
+        <h3> TXT Records </h3>
+        {{ render_table(txt_headers, txt_matrix, txt_urls) }}
     {% endif %}
 {% endblock %}

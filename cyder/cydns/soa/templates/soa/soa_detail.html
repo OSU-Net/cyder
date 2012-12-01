@@ -1,25 +1,21 @@
 {% extends "cydns/cydns_detail.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block title %}SOA {{ object.comment }}{% endblock %}
+{% block header %}SOA {{ object.comment }}{% endblock %}
+
+{% block extra_action_bar %}
+  <a class="btn" href='/cydns/bind/build_debug/{{ object.pk }}/'>View BIND file</a>
+{% endblock %}
 
 {% block content %}
-    {% block title %}
-        {{ object.comment }}
-    {% endblock %}
+  {% if dom_matrix %}
+    <h3> Domains </h3>
+    {{ render_table(dom_headers, dom_matrix, dom_urls, views=False) }}
+  {% endif %}
 
-
-
-    {{ super() }}
-
-    {% from "base/tables.html" import render_table %}
-    <p><a href='/cydns/bind/build_debug/{{ soa.pk }}/'>See compiled BIND file for this Zone</a></p>
-
-    {% if dom_matrix %}
-        <h3> Domains </h3>
-        {{ render_table(dom_headers, dom_matrix, dom_urls, views=False) }}
-    {% endif %}
-
-    {% if rdom_matrix %}
-        <h3> Reverse Domains </h3>
-        {{ render_table(rdom_headers, rdom_matrix, rdom_urls, views=False) }}
-    {% endif %}
-
+  {% if rdom_matrix %}
+    <h3> Reverse Domains </h3>
+    {{ render_table(rdom_headers, rdom_matrix, rdom_urls, views=False) }}
+  {% endif %}
 {% endblock %}

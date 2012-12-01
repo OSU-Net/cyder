@@ -18,25 +18,7 @@ class NSView(object):
     extra_context = {'record_type': 'nameserver'}
 
 
-class NSListView(NSView, CydnsListView):
-    """ """
-    # Wooo. Huge speed boost because of select_related
-    queryset = Nameserver.objects.all().select_related()
-
-
-class NSDeleteView(NSView, CydnsDeleteView):
-    """ """
-
-
-class NSDetailView(NSView, CydnsDetailView):
-    template_name = "nameserver/nameserver_detail.html"
-
-
 class NSCreateView(NSView, CydnsCreateView):
-    """ """
-
-
-class NSUpdateView(NSView, CydnsUpdateView):
     """ """
 
 

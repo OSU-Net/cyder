@@ -49,6 +49,9 @@ class DomainDetailView(DomainView, DetailView):
             return context
 
         # TODO this process can be generalized. Not very high priority.
+        domain_headers, domain_matrix, domain_urls = tablefy((domain,),
+                                                             views=True)
+
         mx_objects = domain.mx_set.all().order_by('label')
         mx_headers, mx_matrix, mx_urls = tablefy(mx_objects, views=True)
 
@@ -94,18 +97,35 @@ class DomainDetailView(DomainView, DetailView):
 
         # Join the two dicts
         context = dict({
-            "ns_headers": ns_headers,
-            "ns_matrix": ns_matrix,
-            "ns_urls": ns_urls,
-
             "address_headers": adr_headers,
             "address_matrix": adr_matrix,
             "address_urls": adr_urls,
             "address_views": adr_views,
 
+            "cname_headers": cname_headers,
+            "cname_matrix": cname_matrix,
+            "cname_urls": cname_urls,
+            "cname_views": cname_views,
+
+            "domain_headers": domain_headers,
+            "domain_matrix": domain_matrix,
+            "domain_urls": domain_urls,
+
+            "intr_headers": intr_headers,
+            "intr_matrix": intr_matrix,
+            "intr_urls": intr_urls,
+
             "mx_headers": mx_headers,
             "mx_matrix": mx_matrix,
             "mx_urls": mx_urls,
+
+            "ns_headers": ns_headers,
+            "ns_matrix": ns_matrix,
+            "ns_urls": ns_urls,
+
+            "ptr_headers": ptr_headers,
+            "ptr_matrix": ptr_matrix,
+            "ptr_urls": ptr_urls,
 
             "srv_headers": srv_headers,
             "srv_matrix": srv_matrix,
@@ -118,19 +138,6 @@ class DomainDetailView(DomainView, DetailView):
             "sshfp_headers": sshfp_headers,
             "sshfp_matrix": sshfp_matrix,
             "sshfp_urls": sshfp_urls,
-
-            "cname_headers": cname_headers,
-            "cname_matrix": cname_matrix,
-            "cname_urls": cname_urls,
-            "cname_views": cname_views,
-
-            "ptr_headers": ptr_headers,
-            "ptr_matrix": ptr_matrix,
-            "ptr_urls": ptr_urls,
-
-            "intr_headers": intr_headers,
-            "intr_matrix": intr_matrix,
-            "intr_urls": intr_urls
         }.items() + context.items())
 
         return context

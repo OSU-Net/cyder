@@ -11,11 +11,4 @@ urlpatterns = patterns('',
        csrf_exempt(create_ns_delegated), name='nameserver-delegated-create'),
    url(r'(?P<domain>[\w-]+)/create/$',
        csrf_exempt(NSCreateView.as_view()), name='nameserver-by-domain-create'),
-
-   url(r'(?P<pk>[\w-]+)/update/$',
-       csrf_exempt(NSUpdateView.as_view()), name='nameserver-update'),
-   url(r'(?P<pk>[\w-]+)/delete/$',
-       csrf_exempt(NSDeleteView.as_view()), name='nameserver-delete'),
-   url(r'(?P<pk>[\w-]+)/$',
-       csrf_exempt(NSDetailView.as_view()), name='nameserver-detail'),
 )
