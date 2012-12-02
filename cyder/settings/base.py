@@ -10,7 +10,7 @@ MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
 SASS_PREPROCESS = True
-SASS_BIN = '/usr/bin/sass'
+SASS_BIN = '/usr/local/bin/sass'
 JINGO_MINIFY_USE_STATIC = False
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
@@ -126,10 +126,9 @@ JINGO_EXCLUDE_APPS = [
     'tastytools',
 ]
 
-DJANGO_TEMPLATE_APPS = ['admin',] # Tells the extract script what files to look for L10n in and what function
-# handles the extraction. The Tower library expects this.
+DJANGO_TEMPLATE_APPS = ['admin']
 
-LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
+LOGGING = dict(loggers=dict(playdoh={'level': logging.INFO}))
 
 # # Use this if you have localizable HTML files:
 # DOMAIN_METHODS['lhtml'] = [
@@ -147,4 +146,4 @@ LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 BUILD_PATH = 'builds'
-INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
+INTERNAL_IPS = ('127.0.0.1', '10.22.74.139', '10.250.2.54')
