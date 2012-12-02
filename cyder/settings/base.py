@@ -22,15 +22,15 @@ MINIFY_BUNDLES = {
             'css/lib/jquery.autocomplete.css',
             'css/sticky_footer.css',
 
-            'css/base.scss',
             'css/globals.scss',
+            'css/base.scss',
             'css/forms.scss',
             'css/tables.scss',
         ),
     },
     'js': {
         'cyder_js': (
-            'js/lib/jquery-1.6.1.min.js',
+            'js/lib/jquery-1.8.3.min.js',
             'js/lib/attribute_adder.js',
             'js/lib/jquery.history.js',
             'js/lib/jQuery.rightclick.js',
@@ -39,8 +39,15 @@ MINIFY_BUNDLES = {
             'js/lib/jquery.autocomplete.min.js',
             'js/lib/jquery-ui-1.8.11.custom.min.js',
             'js/lib/tablesorter.js',
+            'js/lib/editablegrid/editablegrid.js',
+            'js/lib/editablegrid/editablegrid_renderers.js',
+            'js/lib/editablegrid/editablegrid_editors.js',
+            'js/lib/editablegrid/editablegrid_validators.js',
+            'js/lib/editablegrid/editablegrid_utils.js',
+            'js/lib/editablegrid/editablegrid_charts.js',
 
             'js/application.js',
+            'js/tables.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
         ),

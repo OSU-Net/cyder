@@ -1,4 +1,6 @@
 # Jingo helpers (Jinja2 custom filters)
+import json
+
 from jingo import register
 
 
@@ -19,7 +21,6 @@ def humanized_class_name(obj, *args, **kwargs):
             humanized += ' '
 
     return humanized
-
 
 @register.filter
 def prettify_record_type(record_type, *args, **kwargs):
@@ -63,3 +64,14 @@ def a_or_an(next_word):
         return 'an'
     else:
         return 'a'
+
+
+@register.function
+def has_attr(obj, attr):
+    return hasattr(obj, attr)
+
+
+@register.filter
+def to_json(obj):
+    """Object to JSON."""
+    return json.dumps(obj)

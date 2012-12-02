@@ -1,6 +1,6 @@
 {% macro render_table(headers, matrix, urls, views=True) %}
 
-<table class="table">
+<table id="htmlgrid" class="table">
   <thead>
     <tr>
       {% for header in headers %}
@@ -16,7 +16,7 @@
   <tbody>
     {% for row in matrix %}
       {% set outer_loop = loop.index0 %}
-      <tr>
+      <tr id="{{ 'R' ~ loop.index }}">
         {% for col in row %}
           {% set url = urls[outer_loop][loop.index0] %}
           <td>

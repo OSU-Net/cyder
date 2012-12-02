@@ -9,7 +9,15 @@ table.table {
     }
     thead {
         background: $dark-blue;
-        color: $white;
+        th {
+            color: $white;
+            a {
+                color: $white;
+                &:hover {
+                    color: $teal;
+                }
+            }
+        }
     }
     tbody {
         tr {
