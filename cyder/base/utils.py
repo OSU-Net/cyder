@@ -19,50 +19,58 @@ def make_paginator(request, qs, num):
 
 
 def tablefy(objects, views=False):
-    """Given a list of objects, build a matrix that is can be printed as a
-    table. Also return the headers for that table. Populate the given url with
-    the pk of the object. Return all headers, field array, and urls in a
-    separate lists.
+    """Make list of table headers, rows of table data, list of urls
+    that may be associated with table data, and metadata about the rows to be
+    used as HTML data attributes.
 
-    :param  objects: A list of objects to make the matrix out of.
-    :type   objects: AddressRecords
+    :param  objects: A list of objects to make table from.
+    :type   objects: Generic object.
     """
-    matrix = []
-    urls = []
-    headers = []
     if not objects:
-        return (None, None, None)
+        return None
 
-    # Build the headers
+    metadata = []
+    headers = []
+    data = []
+    urls = []
+
+    # Build headers.
     for title, value in objects[0].details():
         headers.append(title)
     if views:
         headers.append("Views")
 
-    # Build the matrix and urls
     for obj in objects:
-        row = []
+        row_data = []
         row_urls = []
 
-        for title, value in obj.details():
+        for title, value in obj.details()['data']:
+            # Build data.
             try:
-                row_urls.append(value.get_detail_url())
+                url = value.get_detail_url()
             except AttributeError:
-                row_urls.append('')
-            row.append(value)
+                url = None
+            row_data.append({'value': value, 'url': url})
 
+        # Views.
         if views:
-            view_field = ""
+            view_field = None
             if hasattr(obj, 'views'):
                 for view in obj.views.all():
-                    view_field += view.name + ", "
-                view_field = view_field.strip(", ")
-                row.append(view_field)
+                    if view_field:
+                        view_field += ' ' + view.name
+                    else:
+                        view_field = view.name
+                row.append('value': view_field, 'url': None)
             else:
-                row.append('None')
-            row_urls.append('')
+                row.append({'value': 'None', 'url': None})
 
-        matrix.append(row)
+        # Build table.
+        data.append(row_data)
         urls.append(row_urls)
 
-    return (headers, matrix, urls)
+    return {
+        'headers': headers
+        'data': data
+        'urls': urls
+    }

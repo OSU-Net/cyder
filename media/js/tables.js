@@ -1,3 +1,17 @@
+var CyObject = Backbone.Model.extend({
+    /* A generic model representing an object. */
+    id: null,
+    type: null,
+    url: null,
+    data: {},
+});
+
+
+var CyObjects = Backbone.Collection.extend({
+    model: CyObject,
+});
+
+
 function enableEditableGrid() {
     var $eg = $('#eg');
     if (!$eg) {
@@ -17,10 +31,12 @@ function enableEditableGrid() {
     editableGrid.renderGrid();
 }
 
+
 $(document).ready(function() {
     var $enableEg = $('#enable-eg');
     $enableEg[0].reset();
 
+    // Enable editable grid on checkbox.
     $enableEg.find('input').removeAttr('disabled').change(function() {
         $this = $(this);
         if ($this.attr('checked')) {

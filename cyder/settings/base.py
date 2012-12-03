@@ -51,6 +51,7 @@ MINIFY_BUNDLES = {
             'js/key_value_validators.js',
         ),
         'tables': (
+            'js/lib/underscore-min.js',
             'js/lib/backbone-min.js',
             'js/tables.js',
         ),
