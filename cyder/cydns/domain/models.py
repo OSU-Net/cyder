@@ -108,12 +108,13 @@ class Domain(models.Model, ObjectUrlMixin):
         return {
             'metadata': [
                 ('id', self.id),
+                ('url', ''),
             ],
             'data': [
-                ('name', self),
-                ('master_domain', self.master_domain),
-                ('soa', self.soa),
-                ('delegated', self.delegated),
+                ('Name', 'name', self),
+                ('Master Domain', 'master_domain', self.master_domain),
+                ('SOA', 'soa', self.soa),
+                ('Delegated', 'delegated', self.delegated),
             ]
         }
 

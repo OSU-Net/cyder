@@ -10,7 +10,7 @@ MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
 SASS_PREPROCESS = True
-SASS_BIN = '/usr/local/bin/sass'
+SASS_BIN = '/usr/bin/sass'
 JINGO_MINIFY_USE_STATIC = False
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
@@ -51,8 +51,6 @@ MINIFY_BUNDLES = {
             'js/key_value_validators.js',
         ),
         'tables': (
-            'js/lib/underscore-min.js',
-            'js/lib/backbone-min.js',
             'js/tables.js',
         ),
         'cydns': {

@@ -1,17 +1,3 @@
-var CyObject = Backbone.Model.extend({
-    /* A generic model representing an object. */
-    id: null,
-    type: null,
-    url: null,
-    data: {},
-});
-
-
-var CyObjects = Backbone.Collection.extend({
-    model: CyObject,
-});
-
-
 function enableEditableGrid() {
     var $eg = $('#eg');
     if (!$eg) {
@@ -22,7 +8,9 @@ function enableEditableGrid() {
     // we do CellRenderers.
     $('#egtable').find('td').each(function (i, td) {
         var $td = $(td);
-        $td.text($td.children()[0].innerHTML);
+        if ($td.children().length) {
+            $td.text($td.children()[0].innerHTML);
+        }
     });
 
     editableGrid = new EditableGrid("My Editable Grid");

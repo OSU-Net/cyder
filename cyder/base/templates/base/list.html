@@ -28,9 +28,7 @@
     <form id="enable-eg"><input type="checkbox" name="eg"> Enable spreadsheet view</form>
   {% endif %}
 
-  {% if object_table and object_table[0] and object_table[1] and object_table[2] %}
-    {{ render_table(object_table[0], object_table[1], object_table[2]) }}
-  {% endif %}
+  {{ render_table(object_table) }}
 
   {{ js('tables') }}
 

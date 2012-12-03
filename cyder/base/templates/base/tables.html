@@ -1,29 +1,24 @@
-{% macro render_table(headers, matrix, urls, views=True) %}
+{% macro render_table(object_table) %}
+{% if object_table %}
 
 <table id="egtable" class="table">
   <thead>
     <tr>
-      {% for header in headers %}
-        {# print header #}
+      {% for header in object_table['headers'] %}
         <th>{{ header }}</th>
       {% endfor %}
-      {# if views %}
-        <th>Views</th>
-      {% endif #}
     </tr>
   </thead>
 
   <tbody>
-    {% for row in matrix %}
-      {% set outer_loop = loop.index0 %}
-      <tr id="{{ 'R' ~ loop.index }}">
+    {% for row in object_table['data'] %}
+      <tr{% for md in object_table['metadata'][loop.index0] %} data-{{ md[0] }}="{{ md[1] }}" {% endfor %}>
         {% for col in row %}
-          {% set url = urls[outer_loop][loop.index0] %}
-          <td>
-            {% if url %}
-              <a href='{{ url }}'>{{ col }}</a>
+          <td data-field="{{ col['field'] }}">
+            {% if col['url'] %}
+              <a href="{{ col['url'] }}">{{ col['value'] }}</a>
             {% else %}
-              <p>{{ col }}</p>
+              {{ col['value'] }}
             {% endif %}
           </td>
         {% endfor %}
@@ -32,4 +27,5 @@
   </tbody>
 </table>
 
+{% endif %}
 {% endmacro %}
