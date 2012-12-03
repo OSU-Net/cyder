@@ -47,9 +47,12 @@ MINIFY_BUNDLES = {
             'js/lib/editablegrid/editablegrid_charts.js',
 
             'js/application.js',
-            'js/tables.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
+        ),
+        'tables': (
+            'js/lib/backbone-min.js',
+            'js/tables.js',
         ),
         'cydns': {
             'js/cydns/cydns_record_form.js',
