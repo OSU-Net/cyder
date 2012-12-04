@@ -24,22 +24,48 @@ class SSHFP(CydnsRecord):
     id = models.AutoField(primary_key=True)
     key = models.TextField()
     algorithm_number = models.PositiveIntegerField(null=False, blank=False,
-                                                   validators=[validate_algorithm], help_text="Algorithm number must "
-                                                   "be with 1 (RSA) or 2 (DSA)")
+        validators=[validate_algorithm],
+        help_text='Algorithm number must be with 1 (RSA) or 2 (DSA)')
     fingerprint_type = models.PositiveIntegerField(null=False, blank=False,
-                                                   validators=[validate_fingerprint], help_text="Fingerprint type "
-                                                   "must be 1 (SHA-1)")
+        validators=[validate_fingerprint],
+        help_text='Fingerprint type must be 1 (SHA-1)')
 
     search_fields = ("fqdn", "key")
 
     def details(self):
-        return (
-            ("FQDN", self.fqdn),
-            ("Record Type", "SSHFP"),
-            ("Algorithm", self.algorithm_number),
-            ("Finger Print Type", self.fingerprint_type),
-            ("Key", self.key),
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ("Domain", self.fqdn),
+                ("Algorithm", self.algorithm_number),
+                ("Fingerprint Type", self.fingerprint_type),
+                ("Key", self.key),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'target', 'datatype': 'string', 'editable': True},
+            {'name': 'port', 'datatype': 'integer', 'editable': True},
+            {'name': 'priority', 'datatype': 'integer', 'editable': True},
+            {'name': 'weight', 'datatype': 'integer', 'editable': True},
+        ]}
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'algorithm', 'datatype': 'integer', 'editable': True},
+            {'name': 'fingerprint_type', 'datatype': 'integer',
+             'editable': True},
+            {'name': 'key', 'datatype': 'string', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):

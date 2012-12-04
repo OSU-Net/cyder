@@ -38,9 +38,27 @@ class CNAME(CydnsRecord):
 
     def details(self):
         return  (
-            ('Domain', self.target_domain),
-            ('Target', self.target),
         )
+
+    def details(self):
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ('Domain', self.target_domain),
+                ('Target', self.target),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'target', 'datatype': 'string', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):

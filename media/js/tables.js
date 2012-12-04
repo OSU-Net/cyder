@@ -11,10 +11,11 @@ function enableEditableGrid() {
         if ($td.children().length) {
             $td.text($td.children()[0].innerHTML);
         }
+        $td.text($td.text().trim());
     });
 
     editableGrid = new EditableGrid("My Editable Grid");
-    editableGrid.load(JSON.parse($eg.attr('data-metadata')));
+    editableGrid.loadJSONFromString($eg.attr('data-metadata'));
     editableGrid.attachToHTMLTable('egtable');
     editableGrid.renderGrid();
 }
@@ -22,14 +23,16 @@ function enableEditableGrid() {
 
 $(document).ready(function() {
     var $enableEg = $('#enable-eg');
-    $enableEg[0].reset();
+    if ($enableEg.length) {
+        $enableEg[0].reset();
 
-    // Enable editable grid on checkbox.
-    $enableEg.find('input').removeAttr('disabled').change(function() {
-        $this = $(this);
-        if ($this.attr('checked')) {
-            enableEditableGrid();
-            $this.attr('disabled', true);
-        }
-    });
+        // Enable editable grid on checkbox.
+        $enableEg.find('input').removeAttr('disabled').change(function() {
+            $this = $(this);
+            if ($this.attr('checked')) {
+                enableEditableGrid();
+                $this.attr('disabled', true);
+            }
+        });
+    }
 });

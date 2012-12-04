@@ -66,13 +66,30 @@ class SRV(models.Model, ObjectUrlMixin):
         return "<SRV '{0}'>".format(str(self))
 
     def details(self):
-        return  (
-            ("Domain", self.domain),
-            ("Target", self.target),
-            ("Port", self.port),
-            ("Priority", self.priority),
-            ("Weight", self.weight),
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ("Domain", self.domain),
+                ("Target", self.target),
+                ("Port", self.port),
+                ("Priority", self.priority),
+                ("Weight", self.weight),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'target', 'datatype': 'string', 'editable': True},
+            {'name': 'port', 'datatype': 'integer', 'editable': True},
+            {'name': 'priority', 'datatype': 'integer', 'editable': True},
+            {'name': 'weight', 'datatype': 'integer', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):

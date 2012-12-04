@@ -79,15 +79,34 @@ class SOA(models.Model, ObjectUrlMixin):
         return "<'{0}'>".format(str(self))
 
     def details(self):
-        return  (
-            ('Primary', self.primary),
-            ('Contact', self.contact),
-            ('Serial', self.serial),
-            ('Expire', self.expire),
-            ('Retry', self.retry),
-            ('Refresh', self.refresh),
-            ('Comment', self),
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ('Primary', self.primary),
+                ('Contact', self.contact),
+                ('Serial', self.serial),
+                ('Expire', self.expire),
+                ('Retry', self.retry),
+                ('Refresh', self.refresh),
+                ('Comment', self),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'primary', 'datatype': 'string', 'editable': True},
+            {'name': 'contact', 'datatype': 'string', 'editable': True},
+            {'name': 'serial', 'datatype': 'integer', 'editable': True},
+            {'name': 'expire', 'datatype': 'integer', 'editable': True},
+            {'name': 'retry', 'datatype': 'integer', 'editable': True},
+            {'name': 'refresh', 'datatype': 'integer', 'editable': True},
+            {'name': 'comment', 'datatype': 'string', 'editable': True},
+        ]}
 
     def update_attrs(self):
         self.attrs = AuxAttr(SOAKeyValue, self, 'soa')

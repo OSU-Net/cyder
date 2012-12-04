@@ -58,12 +58,26 @@ class Nameserver(models.Model, ObjectUrlMixin):
         return "{0} {1} {2}".format(self.domain.name, "NS", self.server)
 
     def details(self):
-        details = [
-            ("Server", self.server),
-            ("Domain", self.domain),
-            ("Glue", self.get_glue()),
-        ]
-        return tuple(details)
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ("Domain", self.domain),
+                ("Server", self.server),
+                ("Glue", self.get_glue()),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'server', 'datatype': 'string', 'editable': True},
+            {'name': 'glue', 'datatype': 'string', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):

@@ -111,16 +111,16 @@ class Domain(models.Model, ObjectUrlMixin):
                 ('url', ''),
             ],
             'data': [
-                ('Name', 'name', self),
-                ('Master Domain', 'master_domain', self.master_domain),
-                ('SOA', 'soa', self.soa),
-                ('Delegated', 'delegated', self.delegated),
+                ('Name', self),
+                ('Master Domain', self.master_domain),
+                ('SOA', self.soa),
+                ('Delegated', self.delegated),
             ]
         }
 
     def eg_metadata(self):
         """EditableGrid metadata."""
-        return {"metadata": [
+        return {'metadata': [
             {'name': 'name', 'datatype': 'string', 'editable': True},
             {'name': 'master_domain', 'datatype': 'string', 'editable': True},
             {'name': 'soa', 'datatype': 'string', 'editable': False},

@@ -35,7 +35,7 @@ def tablefy(objects, views=False):
     urls = []
 
     # Build headers.
-    for title, field, value in objects[0].details()['data']:
+    for title, value in objects[0].details()['data']:
         headers.append(title)
     if views:
         headers.append('Views')
@@ -43,13 +43,13 @@ def tablefy(objects, views=False):
     for obj in objects:
         row_data = []
 
-        for title, field, value in obj.details()['data']:
+        for title, value in obj.details()['data']:
             # Build data.
             try:
                 url = value.get_detail_url()
             except AttributeError:
                 url = None
-            row_data.append({'value': value, 'field': field, 'url': url})
+            row_data.append({'value': value, 'url': url})
 
         # Views.
         if views:
@@ -60,9 +60,9 @@ def tablefy(objects, views=False):
                         view_field += ' ' + view.name
                     else:
                         view_field = view.name
-                row_data.append({'value': view_field, 'field': 'view', 'url': None})
+                row_data.append({'value': view_field, 'url': None})
             else:
-                row_data.append({'value': 'None', 'field': 'view', 'url': None})
+                row_data.append({'value': 'None', 'url': None})
 
         # Build table.
         data.append(row_data)

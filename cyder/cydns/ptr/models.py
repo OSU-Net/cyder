@@ -43,10 +43,24 @@ class PTR(Ip, ObjectUrlMixin):
         return "<{0}>".format(str(self))
 
     def details(self):
-        return (
-            ('Name', self),
-            ('Ip', str(self.ip_str)),
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ('Name', self),
+                ('IP', str(self.ip_str)),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'ip_str', 'datatype': 'string', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):

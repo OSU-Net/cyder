@@ -28,10 +28,24 @@ class TXT(CydnsRecord):
         return "<TXT {0}>".format(self)
 
     def details(self):
-        return (
-            ("Domain", self.domain),
-            ("Text", self.txt_data)
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ("Domain", self.domain),
+                ("Text", self.txt_data)
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'text', 'datatype': 'string', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):

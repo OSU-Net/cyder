@@ -12,9 +12,9 @@
 
   <tbody>
     {% for row in object_table['data'] %}
-      <tr{% for md in object_table['metadata'][loop.index0] %} data-{{ md[0] }}="{{ md[1] }}" {% endfor %}>
+      <tr id="{{ R ~ loop.index }}"{% for md in object_table['metadata'][loop.index0] %} data-{{ md[0] }}="{{ md[1] }}" {% endfor %}>
         {% for col in row %}
-          <td data-field="{{ col['field'] }}">
+          <td>
             {% if col['url'] %}
               <a href="{{ col['url'] }}">{{ col['value'] }}</a>
             {% else %}

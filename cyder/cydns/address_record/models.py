@@ -50,11 +50,26 @@ class BaseAddressRecord(Ip):
         return "<Address Record '{0}'>".format(str(self))
 
     def details(self):
-        return  (
-            ("Domain", self.domain),
-            ("Record Type", self.record_type()),
-            ("IP", str(self.ip_str)),
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ('Domain', self.domain),
+                ('Record Type', self.record_type()),
+                ('IP', str(self.ip_str)),
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'record_type', 'datatype': 'string', 'editable': False},
+            {'name': 'ip_str', 'datatype': 'string', 'editable': True},
+        ]}
 
     @property
     def rdtype(self):

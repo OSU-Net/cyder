@@ -34,12 +34,28 @@ class MX(CydnsRecord):
         return "<MX '{0}'>".format(str(self))
 
     def details(self):
-        return  (
-            ('Domain', self.domain),
-            ('Server', self.server),
-            ('Priority', self.priority),
-            ('TTL', self.ttl)
-        )
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ('Domain', self.domain),
+                ('Server', self.server),
+                ('Priority', self.priority),
+                ('TTL', self.ttl)
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'server', 'datatype': 'string', 'editable': True},
+            {'name': 'priority', 'datatype': 'integer', 'editable': True},
+            {'name': 'ttl', 'datatype': 'integer', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):
