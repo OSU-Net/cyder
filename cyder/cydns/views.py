@@ -179,6 +179,17 @@ def cydns_search_record(request):
     return HttpResponse(json.dumps(records))
 
 
+def table_update(request, pk, object_type=None):
+    """
+    Called from editableGrid tables when updating a field. Try to update
+    an object specified by pk with the post data.
+    """
+    # Infer object_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
+    object_type = object_type or request.path.split('/')[2]
+    return HttpResponse(object_type)
+
+
 class CydnsListView(BaseListView):
     """ """
     template_name = 'cydns/cydns_list.html'

@@ -11,52 +11,50 @@
 {% endblock %}
 
 {% block content %}
-    {{ render_table(domain_headers, domain_matrix, domain_urls) }}
+    {{ render_table(domain_table) }}
 
-    {% if address_matrix %}
+    {% if address_table %}
         <h3> Address Records </h3>
-        {{ render_table(address_headers, address_matrix, address_urls,
-        address_views) }}
+        {{ render_table(address_table) }}
     {% endif %}
 
-    {% if cname_matrix %}
+    {% if cname_table %}
         <h3> CNAME Records </h3>
-        {{ render_table(cname_headers, cname_matrix, cname_urls,
-        views=cname_views) }}
+        {{ render_table(cname_table) }}
     {% endif %}
 
-    {% if intr_matrix %}
+    {% if intr_table %}
         <h3> Interface Records </h3>
-        {{ render_table(intr_headers, intr_matrix, intr_urls) }}
+        {{ render_table(intr_table) }}
     {% endif %}
 
-    {% if mx_matrix %}
+    {% if mx_table %}
         <h3> MX Records </h3>
-        {{ render_table(mx_headers, mx_matrix, mx_urls) }}
+        {{ render_table(mx_table) }}
     {% endif %}
 
-    {% if ns_matrix %}
+    {% if ns_table %}
         <h3> Nameservers </h3>
-        {{ render_table(ns_headers, ns_matrix, ns_urls) }}
+        {{ render_table(ns_table) }}
     {% endif %}
 
-    {% if ptr_matrix %}
+    {% if ptr_table %}
         <h3> PTR Records </h3>
-        {{ render_table(ptr_headers, ptr_matrix, ptr_urls) }}
+        {{ render_table(ptr_table) }}
     {% endif %}
 
-    {% if srv_matrix %}
+    {% if srv_table %}
         <h3> SRV Records </h3>
-        {{ render_table(srv_headers, srv_matrix, srv_urls) }}
+        {{ render_table(srv_table) }}
     {% endif %}
 
-    {% if sshfp_matrix %}
+    {% if sshfp_table %}
         <h3> SSHFP Records </h3>
-        {{ render_table(sshfp_headers, sshfp_matrix, sshfp_urls) }}
+        {{ render_table(sshfp_table) }}
     {% endif %}
 
-    {% if txt_matrix %}
+    {% if txt_table %}
         <h3> TXT Records </h3>
-        {{ render_table(txt_headers, txt_matrix, txt_urls) }}
+        {{ render_table(txt_table) }}
     {% endif %}
 {% endblock %}

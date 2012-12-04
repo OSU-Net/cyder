@@ -34,18 +34,14 @@ class SSHFP(CydnsRecord):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ("Domain", self.fqdn),
-                ("Algorithm", self.algorithm_number),
-                ("Fingerprint Type", self.fingerprint_type),
-                ("Key", self.key),
-            ]
-        }
+        data = super(SRV, self).details()
+        data['data'] = [
+            ('Domain', self.fqdn),
+            ('Algorithm', self.algorithm_number),
+            ('Fingerprint Type', self.fingerprint_type),
+            ('Key', self.key),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

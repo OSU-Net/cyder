@@ -42,16 +42,12 @@ class CNAME(CydnsRecord):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ('Domain', self.target_domain),
-                ('Target', self.target),
-            ]
-        }
+        data = super(CNAME, self).details()
+        data['data'] = [
+            ('Domain', self.target_domain),
+            ('Target', self.target),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

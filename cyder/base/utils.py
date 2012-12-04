@@ -20,8 +20,7 @@ def make_paginator(request, qs, num):
 
 def tablefy(objects, views=False):
     """Make list of table headers, rows of table data, list of urls
-    that may be associated with table data, and metadata about the rows to be
-    used as HTML data attributes.
+    that may be associated with table data, and postback urls.
 
     :param  objects: A list of objects to make table from.
     :type   objects: Generic object.
@@ -29,7 +28,6 @@ def tablefy(objects, views=False):
     if not objects:
         return None
 
-    metadata = []
     headers = []
     data = []
     urls = []
@@ -68,7 +66,7 @@ def tablefy(objects, views=False):
         data.append(row_data)
 
     return {
-        'metadata': [obj.details()['metadata'] for obj in objects],
         'headers': headers,
+        'postback_urls': [obj.details()['url'] for obj in objects],
         'data': data,
     }

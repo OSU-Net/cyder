@@ -16,6 +16,12 @@ function enableEditableGrid() {
 
     editableGrid = new EditableGrid("My Editable Grid");
     editableGrid.loadJSONFromString($eg.attr('data-metadata'));
+    editableGrid.modelChanged = function(rowIndex, columnIndex, oldValue, newValue, row) {
+        /* Callback function on change. */
+        $.get($(row).attr('data-url'), function(resp) {
+            console.log(resp);
+        });
+    };
     editableGrid.attachToHTMLTable('egtable');
     editableGrid.renderGrid();
 }

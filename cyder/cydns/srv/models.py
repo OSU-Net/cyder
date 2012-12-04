@@ -73,13 +73,20 @@ class SRV(models.Model, ObjectUrlMixin):
                 ('url', ''),
             ],
             'data': [
-                ("Domain", self.domain),
-                ("Target", self.target),
-                ("Port", self.port),
-                ("Priority", self.priority),
-                ("Weight", self.weight),
             ]
         }
+
+    def details(self):
+        """For tables."""
+        data = super(SRV, self).details()
+        data['data'] = [
+            ("Domain", self.domain),
+            ("Target", self.target),
+            ("Port", self.port),
+            ("Priority", self.priority),
+            ("Weight", self.weight),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

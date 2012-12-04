@@ -15,7 +15,7 @@ from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.soa.utils import update_soa
 
 
-class BaseAddressRecord(Ip):
+class BaseAddressRecord(Ip, ObjectUrlMixin):
     """AddressRecord is the class that generates A and AAAA records
 
         >>> AddressRecord(label=label, domain=domain_object, ip_str=ip_str,
@@ -51,17 +51,13 @@ class BaseAddressRecord(Ip):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ('Domain', self.domain),
-                ('Record Type', self.record_type()),
-                ('IP', str(self.ip_str)),
-            ]
-        }
+        data = super(BaseAddressRecord, self).details()
+        data['data'] = [
+            ('Domain', self.domain),
+            ('Record Type', self.record_type()),
+            ('IP', str(self.ip_str)),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""
@@ -183,7 +179,7 @@ class BaseAddressRecord(Ip):
             return 'AAAA'
 
 
-class AddressRecord(BaseAddressRecord, ObjectUrlMixin):
+class AddressRecord(BaseAddressRecord):
     """AddressRecord is the class that generates A and AAAA records
 
         >>> AddressRecord(label=label, domain=domain_object, ip_str=ip_str,

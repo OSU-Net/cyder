@@ -35,18 +35,14 @@ class MX(CydnsRecord):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ('Domain', self.domain),
-                ('Server', self.server),
-                ('Priority', self.priority),
-                ('TTL', self.ttl)
-            ]
-        }
+        data = super(MX, self).details()
+        data['data'] = [
+            ('Domain', self.domain),
+            ('Server', self.server),
+            ('Priority', self.priority),
+            ('TTL', self.ttl)
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

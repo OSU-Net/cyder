@@ -12,7 +12,8 @@ class ObjectUrlMixin(object):
     @classmethod
     def get_list_url(cls):
         """
-        Return the 'list' url of an object.
+        Return the 'list' url of an object. Class method since don't
+        need specific instance of object.
         """
         return reverse(cls._meta.db_table)
 
@@ -25,7 +26,8 @@ class ObjectUrlMixin(object):
 
     def get_update_url(self):
         """
-        Return the update url of an object (to be posted to).
+        Return the update url of an object (to be posted to). Not class method
+        because object pk needed.
         """
         return self.get_list_url() + '?action=update&pk=' + str(self.pk)
 
@@ -40,3 +42,10 @@ class ObjectUrlMixin(object):
         Return the detail url of an object.
         """
         return reverse(self._meta.db_table + '-detail', args=[self.pk])
+
+    def details(self):
+        """
+        Return base details with generic postback URL for editable tables.
+        """
+        return {'url': reverse(self._meta.db_table + '-table-update',
+                               args=[self.pk])}

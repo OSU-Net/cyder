@@ -105,18 +105,14 @@ class Domain(models.Model, ObjectUrlMixin):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ('Name', self),
-                ('Master Domain', self.master_domain),
-                ('SOA', self.soa),
-                ('Delegated', self.delegated),
-            ]
-        }
+        data = super(Domain, self).details()
+        data['data'] = [
+            ('Name', self),
+            ('Master Domain', self.master_domain),
+            ('SOA', self.soa),
+            ('Delegated', self.delegated),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

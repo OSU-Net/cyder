@@ -59,17 +59,13 @@ class Nameserver(models.Model, ObjectUrlMixin):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ("Domain", self.domain),
-                ("Server", self.server),
-                ("Glue", self.get_glue()),
-            ]
-        }
+        data = super(Nameserver, self).details()
+        data['data'] = [
+            ("Domain", self.domain),
+            ("Server", self.server),
+            ("Glue", self.get_glue()),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

@@ -12,7 +12,7 @@
 
   <tbody>
     {% for row in object_table['data'] %}
-      <tr id="{{ R ~ loop.index }}"{% for md in object_table['metadata'][loop.index0] %} data-{{ md[0] }}="{{ md[1] }}" {% endfor %}>
+      <tr id="{{ R ~ loop.index }}" data-url="{{ object_table['postback_urls'][loop.index0] }}">
         {% for col in row %}
           <td>
             {% if col['url'] %}

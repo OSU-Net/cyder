@@ -50,10 +50,17 @@ class PTR(Ip, ObjectUrlMixin):
                 ('url', ''),
             ],
             'data': [
-                ('Name', self),
-                ('IP', str(self.ip_str)),
             ]
         }
+
+    def details(self):
+        """For tables."""
+        data = super(PTR, self).details()
+        data['data'] = [
+            ('Name', self),
+            ('IP', str(self.ip_str)),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

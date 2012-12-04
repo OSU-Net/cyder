@@ -49,98 +49,64 @@ class DomainDetailView(DomainView, DetailView):
             return context
 
         # TODO this process can be generalized. Not very high priority.
-        domain_headers, domain_matrix, domain_urls = tablefy((domain,),
-                                                             views=True)
+        domain_table = tablefy((domain,), views=True)
 
         mx_objects = domain.mx_set.all().order_by('label')
-        mx_headers, mx_matrix, mx_urls = tablefy(mx_objects, views=True)
+        mx_table = tablefy(mx_objects, views=True)
 
         srv_objects = domain.srv_set.all().order_by('label')
-        srv_headers, srv_matrix, srv_urls = tablefy(srv_objects, views=True)
+        srv_table = tablefy(srv_objects, views=True)
 
         txt_objects = domain.txt_set.all().order_by('label')
-        txt_headers, txt_matrix, txt_urls = tablefy(txt_objects, views=True)
+        txt_table = tablefy(txt_objects, views=True)
 
         sshfp_objects = domain.sshfp_set.all().order_by('label')
-        sshfp_headers, sshfp_matrix, sshfp_urls = tablefy(sshfp_objects,
-                                                          views=True)
+        sshfp_table = tablefy(sshfp_objects, views=True)
 
         cname_objects = domain.cname_set.order_by('label')
         if cname_objects.count() > 50:
             cname_views = False
         else:
             cname_views = True
-        cname_headers, cname_matrix, cname_urls = tablefy(cname_objects,
-                                                          cname_views)
+        cname_table = tablefy(cname_objects, cname_views)
 
         # TODO, include Static Registrations
         ptr_objects = domain.ptr_set.all().order_by('ip_str')
-        ptr_headers, ptr_matrix, ptr_urls = tablefy(ptr_objects, views=True)
+        ptr_table = tablefy(ptr_objects, views=True)
 
         # TODO, include Static Registrations
         all_static_intr = StaticInterface.objects.all()
         intr_objects = domain.staticinterface_set.all().order_by(
             'name').order_by('ip_str')
-        intr_headers, intr_matrix, intr_urls = tablefy(intr_objects, views=True)
-
-        address_objects = domain.addressrecord_set.all().order_by('label')
+        intr_table = tablefy(intr_objects, views=True)
 
         # Takes too long to load more than 50.
+        address_objects = domain.addressrecord_set.all().order_by('label')
         if address_objects.count() > 50:
-            adr_views = False
+            address_views = False
         else:
-            adr_views = True
-        adr_headers, adr_matrix, adr_urls = tablefy(address_objects, adr_views)
+            address_views = True
+        address_table = tablefy(address_objects, address_views)
 
         ns_objects = domain.nameserver_set.all().order_by('server')
-        ns_headers, ns_matrix, ns_urls = tablefy(ns_objects, views=True)
+        ns_table = tablefy(ns_objects, views=True)
 
         # Join the two dicts
-        context = dict({
-            "address_headers": adr_headers,
-            "address_matrix": adr_matrix,
-            "address_urls": adr_urls,
-            "address_views": adr_views,
+        return dict({
+            'address_views': address_views,
+            'cname_views': cname_views,
 
-            "cname_headers": cname_headers,
-            "cname_matrix": cname_matrix,
-            "cname_urls": cname_urls,
-            "cname_views": cname_views,
-
-            "domain_headers": domain_headers,
-            "domain_matrix": domain_matrix,
-            "domain_urls": domain_urls,
-
-            "intr_headers": intr_headers,
-            "intr_matrix": intr_matrix,
-            "intr_urls": intr_urls,
-
-            "mx_headers": mx_headers,
-            "mx_matrix": mx_matrix,
-            "mx_urls": mx_urls,
-
-            "ns_headers": ns_headers,
-            "ns_matrix": ns_matrix,
-            "ns_urls": ns_urls,
-
-            "ptr_headers": ptr_headers,
-            "ptr_matrix": ptr_matrix,
-            "ptr_urls": ptr_urls,
-
-            "srv_headers": srv_headers,
-            "srv_matrix": srv_matrix,
-            "srv_urls": srv_urls,
-
-            "txt_headers": txt_headers,
-            "txt_matrix": txt_matrix,
-            "txt_urls": txt_urls,
-
-            "sshfp_headers": sshfp_headers,
-            "sshfp_matrix": sshfp_matrix,
-            "sshfp_urls": sshfp_urls,
+            'address_table': address_table,
+            'cname_table': cname_table,
+            'domain_table': domain_table,
+            'intr_table': intr_table,
+            'mx_table': mx_table,
+            'ns_table': ns_table,
+            'ptr_table': ptr_table,
+            'srv_table': srv_table,
+            'txt_table': txt_table,
+            'sshfp_table': sshfp_table,
         }.items() + context.items())
-
-        return context
 
 
 class DomainCreateView(DomainView, CreateView):

@@ -80,21 +80,17 @@ class SOA(models.Model, ObjectUrlMixin):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-                ('Primary', self.primary),
-                ('Contact', self.contact),
-                ('Serial', self.serial),
-                ('Expire', self.expire),
-                ('Retry', self.retry),
-                ('Refresh', self.refresh),
-                ('Comment', self),
-            ]
-        }
+        data = super(SOA, self).details()
+        data['data'] = [
+            ('Primary', self.primary),
+            ('Contact', self.contact),
+            ('Serial', self.serial),
+            ('Expire', self.expire),
+            ('Retry', self.retry),
+            ('Refresh', self.refresh),
+            ('Comment', self),
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""
