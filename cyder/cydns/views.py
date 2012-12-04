@@ -187,21 +187,21 @@ def table_update(request, pk, object_type=None):
     # Infer object_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
     object_type = object_type or request.path.split('/')[2]
-    return HttpResponse(object_type)
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses(object_type)
+
+    return HttpResponse('WIP: ' + object_type + ' not updated yet.')
 
 
 class CydnsListView(BaseListView):
-    """ """
     template_name = 'cydns/cydns_list.html'
 
 
 class CydnsDetailView(BaseDetailView):
-    """ """
     template_name = 'cydns/cydns_detail.html'
 
 
 class CydnsCreateView(BaseCreateView):
-    """ """
     template_name = 'cydns/cydns_form.html'
 
     def get_form(self, form_class):
@@ -229,7 +229,6 @@ class CydnsUpdateView(BaseUpdateView):
 
 
 class CydnsDeleteView(BaseDeleteView):
-    """ """
     template_name = 'cydns/cydns_confirm_delete.html'
     succcess_url = '/cydns/'
 

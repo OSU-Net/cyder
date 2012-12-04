@@ -17,8 +17,14 @@ function enableEditableGrid() {
     editableGrid = new EditableGrid("My Editable Grid");
     editableGrid.loadJSONFromString($eg.attr('data-metadata'));
     editableGrid.modelChanged = function(rowIndex, columnIndex, oldValue, newValue, row) {
-        /* Callback function on change. */
-        $.get($(row).attr('data-url'), function(resp) {
+        /*
+        Callback function on change. Send whatever was changed so the change
+        can be validated and the object can be updated.
+        */
+        var postData = {};
+        postData[editableGrid.getColumnName(columnIndex)] = newValue;
+
+        $.post($(row).attr('data-url'), postData, function(resp) {
             console.log(resp);
         });
     };
