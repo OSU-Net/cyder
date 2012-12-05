@@ -190,7 +190,24 @@ def table_update(request, pk, object_type=None):
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(object_type)
 
-    return HttpResponse('WIP: ' + object_type + ' not updated yet.')
+    obj = None
+    record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
+    for attr in request.POST:
+       setattr(record, attr, request.POST[attr])
+
+    try:
+        record.save()
+        return HttpResponse()
+    except ValidationError as e:
+        return HttpResponse(json.dumps({'errors': str(e)}))
+
+    # Put updated object into form.
+    # form = FQDNFormKlass(instance=record)
+    #if form.is_valid():
+    #    record = form.save()
+    #    return HttpResponse(json.dumps({'success': True}))
+    #else:
+    #    return HttpResponse(json.dumps({'success': False, 'error': form.errors}))
 
 
 class CydnsListView(BaseListView):

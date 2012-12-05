@@ -47,7 +47,7 @@ class MX(CydnsRecord):
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'server', 'datatype': 'string', 'editable': True},
             {'name': 'priority', 'datatype': 'integer', 'editable': True},
             {'name': 'ttl', 'datatype': 'integer', 'editable': True},
