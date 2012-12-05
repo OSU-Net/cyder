@@ -1,7 +1,6 @@
 from django.db import models
 
 from cyder.cydns.models import CydnsRecord
-import pdb
 
 
 class TXT(CydnsRecord):

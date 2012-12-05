@@ -32,8 +32,9 @@ class Nameserver(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
                                "record is for.")
-    server = models.CharField(max_length=255, validators=[validate_name],
-                              help_text="The name of the server this records points to.")
+    server = models.CharField(
+        max_length=255, validators=[validate_name],
+        help_text="The name of the server this records points to.")
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
     # "If nameserver lies within domain, should have corresponding A record."

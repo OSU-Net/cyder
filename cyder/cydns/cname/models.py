@@ -23,9 +23,9 @@ class CNAME(CydnsRecord):
     id = models.AutoField(primary_key=True)
     target = models.CharField(max_length=100, validators=[validate_name],
                               help_text="CNAME Target")
-    target_domain = models.ForeignKey(Domain, null=True,
-                                      related_name='target_domains', blank=True,
-                                      on_delete=models.SET_NULL)
+    target_domain = models.ForeignKey(
+        Domain, null=True, related_name='target_domains', blank=True,
+        on_delete=models.SET_NULL)
 
     search_fields = ('fqdn', 'target')
 
@@ -35,10 +35,6 @@ class CNAME(CydnsRecord):
 
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)
-
-    def details(self):
-        return  (
-        )
 
     def details(self):
         """For tables."""

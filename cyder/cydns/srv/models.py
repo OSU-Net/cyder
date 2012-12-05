@@ -4,12 +4,11 @@ from django.db import models
 import cydns
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.models import CydnsRecord
 from cyder.cydns.soa.utils import update_soa
-from cyder.cydns.validation import (validate_name, validate_srv_label,
-                                    validate_srv_port, validate_srv_priority,
-                                    validate_srv_weight, validate_srv_name,
-                                    validate_ttl, validate_srv_target)
+from cyder.cydns.validation import (validate_srv_label, validate_srv_port,
+                                    validate_srv_priority, validate_srv_weight,
+                                    validate_srv_name, validate_ttl,
+                                    validate_srv_target)
 from cyder.cydns.view.models import View
 
 
@@ -25,9 +24,9 @@ class SRV(models.Model, ObjectUrlMixin):
     ... priority=priority, weight=weight, ttl=ttl)
     """
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=63, blank=True, null=True,
-                             validators=[validate_srv_label], help_text="Short name of the "
-                             "fqdn")
+    label = models.CharField(
+        max_length=63, blank=True, null=True, validators=[validate_srv_label],
+        help_text='Short name of the FQDN')
     domain = models.ForeignKey(Domain, null=False, help_text="FQDN of the "
                                "domain after the short hostname. "
                                "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
@@ -64,17 +63,6 @@ class SRV(models.Model, ObjectUrlMixin):
 
     def __repr__(self):
         return "<SRV '{0}'>".format(str(self))
-
-    def details(self):
-        """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-            ]
-        }
 
     def details(self):
         """For tables."""
