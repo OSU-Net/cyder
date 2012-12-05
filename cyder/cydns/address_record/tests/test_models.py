@@ -348,9 +348,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                             'domain'], ip_str=data['ip'], ip_type='4')
         rec.save()
         self.assertTrue(rec.__repr__())
-        self.assertTrue(rec.get_detail_url())
-        self.assertTrue(rec.get_update_url())
-        self.assertTrue(rec.get_delete_url())
         self.assertTrue(rec.details())
 
         search = AddressRecord.objects.filter(label=data['label'], domain=data['domain'], ip_type='4', ip_str=data['ip'])
@@ -366,9 +363,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                             'domain'], ip_str=data['ip'], ip_type='6')
         rec.save()
         self.assertTrue(rec.__repr__())
-        self.assertTrue(rec.get_detail_url())
-        self.assertTrue(rec.get_update_url())
-        self.assertTrue(rec.get_delete_url())
         self.assertTrue(rec.details())
 
     ### GLOB * ### Records

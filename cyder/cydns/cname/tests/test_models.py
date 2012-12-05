@@ -62,9 +62,6 @@ class CNAMETests(cyder.base.tests.TestCase):
         cn.full_clean()
         cn.save()
         cn.save()
-        self.assertTrue(cn.get_detail_url())
-        self.assertTrue(cn.get_update_url())
-        self.assertTrue(cn.get_delete_url())
         self.assertTrue(cn.details())
 
         cs = CNAME.objects.filter(

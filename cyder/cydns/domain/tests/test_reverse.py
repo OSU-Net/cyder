@@ -541,9 +541,6 @@ class ReverseDomainTests(TestCase):
                 self.assertEqual(rd[1].master_domain, self.i6_arpa)
             else:
                 self.assertEqual(rd[1].master_domain, rds[rd[0] - 1])
-            self.assertTrue(rd[1].get_detail_url())
-            self.assertTrue(rd[1].get_update_url())
-            self.assertTrue(rd[1].get_delete_url())
 
         try:
             Domain.objects.filter(

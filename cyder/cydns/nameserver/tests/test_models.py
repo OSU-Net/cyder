@@ -56,9 +56,6 @@ class NSTestsModels(TestCase):
         ns.save()
         self.assertTrue(ns.__repr__())
         self.assertTrue(ns.details())
-        self.assertTrue(ns.get_detail_url())
-        self.assertTrue(ns.get_update_url())
-        self.assertTrue(ns.get_delete_url())
         ret = Nameserver.objects.filter(domain=domain, server=server)
         self.assertEqual(len(ret), 1)
         return ns

@@ -10,7 +10,7 @@ MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
 SASS_PREPROCESS = True
-SASS_BIN = '/usr/local/bin/sass'
+SASS_BIN = '/home/uberj/.gem/ruby/1.9.1/gems/sass-3.2.3/bin/sass'
 JINGO_MINIFY_USE_STATIC = False
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
