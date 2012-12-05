@@ -25,8 +25,10 @@ function enableEditableGrid() {
         postData[editableGrid.getColumnName(columnIndex)] = newValue;
 
         $.post($(row).attr('data-url'), postData, function(resp) {
-            console.log(resp);
-        });
+            if (resp.error) {
+                $(row).after($('<tr></tr>').html(resp.error[0]));
+            }
+        }, 'json');
     };
     editableGrid.attachToHTMLTable('egtable');
     editableGrid.renderGrid();

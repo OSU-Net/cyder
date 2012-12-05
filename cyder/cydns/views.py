@@ -3,8 +3,9 @@ import simplejson as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.forms.util import ErrorDict, ErrorList
-from django.http import Http404, HttpResponse, QueryDict
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.base.utils import make_paginator, tablefy
@@ -27,12 +28,11 @@ from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.sshfp.forms import FQDNSSHFPForm, SSHFPForm
 from cyder.cydns.sshfp.models import SSHFP
-from cyder.cydns.srv.forms import FQDNSRVForm, SRVForm
+from cyder.cydns.srv.forms import SRVForm
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
-from cyder.cydns.view.models import View
 
 
 def cydns_record_view(request, record_type=None):
@@ -189,25 +189,62 @@ def table_update(request, pk, object_type=None):
     object_type = object_type or request.path.split('/')[2]
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(object_type)
-
-    obj = None
-    record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
-    for attr in request.POST:
-       setattr(record, attr, request.POST[attr])
-
-    try:
-        record.save()
-        return HttpResponse()
-    except ValidationError as e:
-        return HttpResponse(json.dumps({'errors': str(e)}))
+    obj = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
 
     # Put updated object into form.
-    # form = FQDNFormKlass(instance=record)
-    #if form.is_valid():
-    #    record = form.save()
-    #    return HttpResponse(json.dumps({'success': True}))
-    #else:
-    #    return HttpResponse(json.dumps({'success': False, 'error': form.errors}))
+    form = FQDNFormKlass(instance=obj)
+
+    qd = request.POST.copy()
+    if 'fqdn' in qd:
+        fqdn = qd.pop('fqdn')[0]
+        try:
+            # Call prune tree later if error, else domain leak.
+            label, domain = ensure_label_domain(fqdn)
+        except ValidationError, e:
+            return HttpResponse(json.dumps({'error': e.messages}))
+        qd['label'], qd['domain'] = label, str(domain.pk)
+
+    form = FormKlass(model_to_post(qd, obj), instance=obj)
+    if form.is_valid():
+        form.save()
+        return HttpResponse()
+    else:
+        return HttpResponse(json.dumps({'error': form.errors}))
+
+
+def model_to_post(post, obj):
+    """
+    Updates request's POST dictionary with values from object, for update
+    purposes.
+    """
+    ret = {}
+    # Convert QueryDict to Python dict.
+    for k in post:
+        ret[k] = post[k]
+    # Copy model values to dict.
+    for k, v in model_to_dict(obj).iteritems():
+        if k not in post:
+            ret[k] = v
+    return ret
+
+
+def get_klasses(record_type):
+    """
+    Given record type string, grab its class and forms.
+    """
+    return {
+        'address_record': (AddressRecord, AddressRecordForm,
+                           AddressRecordFQDNForm),
+        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
+        'domain': (Domain, DomainForm, DomainForm),
+        'mx': (MX, MXForm, FQDNMXForm),
+        'nameserver': (Nameserver, NameserverForm, NameserverForm),
+        'ptr': (PTR, PTRForm, PTRForm),
+        'soa': (SOA, SOAForm, SOAForm),
+        'srv': (SRV, SRVForm, SRVForm),
+        'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
+        'txt': (TXT, TXTForm, FQDNTXTForm),
+    }.get(record_type, (None, None, None))
 
 
 class CydnsListView(BaseListView):
@@ -248,21 +285,3 @@ class CydnsUpdateView(BaseUpdateView):
 class CydnsDeleteView(BaseDeleteView):
     template_name = 'cydns/cydns_confirm_delete.html'
     succcess_url = '/cydns/'
-
-
-def get_klasses(record_type):
-    """
-    Given record type string, grab its class and forms.
-    """
-    return {
-        'address_record': (AddressRecord, AddressRecordForm, AddressRecordFQDNForm),
-        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
-        'domain': (Domain, DomainForm, DomainForm),
-        'mx': (MX, MXForm, FQDNMXForm),
-        'nameserver': (Nameserver, NameserverForm, NameserverForm),
-        'ptr': (PTR, PTRForm, PTRForm),
-        'soa': (SOA, SOAForm, SOAForm),
-        'srv': (SRV, SRVForm, SRVForm),
-        'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
-        'txt': (TXT, TXTForm, FQDNTXTForm),
-    }.get(record_type, (None, None, None))
