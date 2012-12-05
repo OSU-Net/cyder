@@ -43,20 +43,11 @@ class SSHFP(CydnsRecord):
         ]
         return data
 
-    def eg_metadata(self):
-        """EditableGrid metadata."""
-        return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
-            {'name': 'target', 'datatype': 'string', 'editable': True},
-            {'name': 'port', 'datatype': 'integer', 'editable': True},
-            {'name': 'priority', 'datatype': 'integer', 'editable': True},
-            {'name': 'weight', 'datatype': 'integer', 'editable': True},
-        ]}
 
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'algorithm', 'datatype': 'integer', 'editable': True},
             {'name': 'fingerprint_type', 'datatype': 'integer',
              'editable': True},

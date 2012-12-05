@@ -43,7 +43,7 @@ class TXT(CydnsRecord):
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'text', 'datatype': 'string', 'editable': True},
         ]}
 

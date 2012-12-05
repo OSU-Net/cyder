@@ -62,7 +62,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'record_type', 'datatype': 'string', 'editable': False},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}

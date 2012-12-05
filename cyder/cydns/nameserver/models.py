@@ -70,7 +70,7 @@ class Nameserver(models.Model, ObjectUrlMixin):
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'server', 'datatype': 'string', 'editable': True},
             {'name': 'glue', 'datatype': 'string', 'editable': True},
         ]}

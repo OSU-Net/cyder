@@ -52,7 +52,7 @@ class CNAME(CydnsRecord):
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'target', 'datatype': 'string', 'editable': True},
         ]}
 
