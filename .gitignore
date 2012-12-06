@@ -28,3 +28,6 @@ mdns/migrate/zone_configs/
 local.py
 .sass-cache
 *.css
+parser.out
+parsetab.py
+cyder/working_tests.py
