@@ -98,7 +98,7 @@ class Domain(models.Model, ObjectUrlMixin):
         db_table = 'domain'
 
     def __str__(self):
-        return "{0}".format(self.name)
+        return '{0}'.format(self.name)
 
     def __repr__(self):
         return "<Domain '{0}'>".format(self.name)

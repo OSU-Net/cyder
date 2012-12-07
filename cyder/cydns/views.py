@@ -1,14 +1,12 @@
-import operator
 import simplejson as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.utils import make_paginator, tablefy
+from cyder.base.utils import make_paginator, make_megafilter, tablefy
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -162,18 +160,13 @@ def cydns_search_record(request):
     Returns a list of records of 'record_type' matching 'term'.
     """
     record_type = request.GET.get('record_type', '')
-    query = request.GET.get('term', '')
-    if not (record_type and query):
+    term = request.GET.get('term', '')
+    if not (record_type and term):
         raise Http404
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
 
-    # Try to match query to records.
-    mega_filter = [Q(**{"{0}__icontains".format(field): query}) for field in
-                   Klass.search_fields]
-    mega_filter = reduce(operator.or_, mega_filter)
-
-    records = Klass.objects.filter(mega_filter)[:15]
+    records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]
 
     return HttpResponse(json.dumps(records))

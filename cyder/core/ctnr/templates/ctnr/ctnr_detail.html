@@ -6,12 +6,11 @@
 
 {% block action_bar %}
   {% if request.session.superuser or (request.session.ctnr == object and request.session.level == 2) %}
-    <a class="btn" href="{{ url('ctnr-add-user', object.id) }}">Add Users to Container</a>
+    <a id="add-user-ctnr" class="btn" href="#">Add Users to Container</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
-
   {% if user_table %}
     <h3>Users</h3>
     {{ render_table(user_table) }}
@@ -27,4 +26,17 @@
     {{ render_table(rdomain_table) }}
   {% endif %}
 
+  <span id="ctnr-data"
+        data-searchUserUrl="{{ url('user-search') }}"
+        data-ctnrName="{{ object.name }}">
+  </span>
+  <div id="add-user-dialog" class="hidden">
+    <div>
+      <label for="search-user">
+        Search: <input type="text" id="user-searchbox" style="width: 400px;" value="">
+      </label>
+    </div>
+  </div>
+
+  {{ js('ctnr') }}
 {% endblock %}

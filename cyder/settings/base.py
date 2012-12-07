@@ -56,6 +56,9 @@ MINIFY_BUNDLES = {
         'cydns': {
             'js/cydns/cydns_record_form.js',
             'js/cydns/cydns_record_form_utils.js',
+        },
+        'ctnr': {
+            'js/ctnr/ctnr.js',
         }
     }
 }

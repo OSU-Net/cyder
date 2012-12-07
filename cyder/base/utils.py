@@ -1,4 +1,7 @@
+import operator
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 
 def make_paginator(request, qs, num):
@@ -86,3 +89,13 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         'postback_urls': [obj.details()['url'] for obj in objects],
         'data': data,
     }
+
+
+def make_megafilter(Klass, term):
+    """
+    Builds a query string that searches over fields in model's
+    search_fields.
+    """
+    megafilter = [Q(**{"{0}__icontains".format(field): term}) for field in
+                  Klass.search_fields]
+    return reduce(operator.or_, megafilter)
