@@ -15,7 +15,6 @@ class CtnrUserForm(forms.ModelForm):
     class Meta:
         model = CtnrUser
         widgets = {
-            'user': forms.Textarea(
-                attrs={'id': 'user-searchbox', 'col': 80, 'rows': 1}),
+            'user': forms.TextInput(attrs={'id': 'user-searchbox'}),
             'ctnr': forms.HiddenInput(),
         }

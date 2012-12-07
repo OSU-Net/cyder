@@ -5,51 +5,59 @@
     font-style: italic;
 }
 
-form {
-    &.page-form {
-        @include img-box-shadow();
-        background: $light-gray;
-        border-radius: 5px;
-        margin-bottom: 26px;
-        padding-bottom: 26px;
-        #record-form-title {
-            left: 26px;
-            padding-top: 13px;
-            position: relative;
+.form {
+    @include img-box-shadow();
+    background: $light-gray;
+    border-radius: 5px;
+    margin-bottom: 26px;
+    padding-bottom: 26px;
+    h2, h3 {
+        left: 26px;
+        padding-top: 13px;
+        position: relative;
+    }
+    p, li {
+        margin: 13px 0;
+        left: 39px;
+        position: relative;
+        label {
+            color: $dark-gray;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 2px;
         }
-        p {
-            margin: 13px 0;
-            left: 39px;
-            position: relative;
-            label {
-                color: $dark-gray;
-                font-weight: bold;
-                display: inline-block;
-                margin-bottom: 2px;
+    }
+    ul {
+        position: relative;
+        left: 13px;
+        li label {
+            font-weight: normal;
+            input {
+                margin-right: 5px;
             }
         }
-        ul.errorlist {
-            color: $red;
-            float: right;
-            position: relative;
-            right: 26px;
-        }
-        input[type="text"], select, textarea {
-            display: block;
-        }
-        input[type="checkbox"] {
-            left: 100px;
-            margin-top: 2px;
-            position: absolute;
-        }
-        hr {
-            margin-bottom: 26px;
-        }
-        .form-btns .btn {
-            bottom: 13px;
-            float: right;
-            position: relative;
-        }
+    }
+    ul.errorlist {
+        color: $red;
+        float: right;
+        position: relative;
+        right: 26px;
+    }
+    input[type="text"], select, textarea {
+        display: block;
+    }
+    input[type="checkbox"] {
+        left: 100px;
+        margin-top: 2px;
+        position: absolute;
+    }
+    hr {
+        margin-bottom: 26px;
+    }
+    .form-btns .btn {
+        bottom: 13px;
+        float: right;
+        position: relative;
     }
 }
 

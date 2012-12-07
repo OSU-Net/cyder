@@ -1,6 +1,6 @@
 $black: rgb(10, 10, 20);
 $dark-gray: rgb(50, 50, 60);
-$light-gray: rgb(200, 200, 210);
+$light-gray: rgb(215, 215, 210);
 $white: rgb(250, 250, 250);
 
 $dark-blue: #002163;
@@ -19,7 +19,7 @@ $green: #00C90D;
 }
 
 @mixin img-box-shadow() {
-    @include box-shadow(2px 2px 4px #888888);
+    @include box-shadow(1px 1px 2px #888888);
 }
 
 @mixin gradient($color1, $color2) {

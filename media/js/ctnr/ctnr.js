@@ -22,7 +22,12 @@ $(document).ready(function() {
             level: $('#add-user input[name="level"]:checked')[0].value
         };
         $.post(addUserUrl, postData, function(data) {
-            console.log(data.error);
+            if (data.error) {
+                console.log(data.error);
+            } else {
+                $('#user-searchbox').val('');
+                userPk = null;
+            }
         }, 'json');
     });
 });
