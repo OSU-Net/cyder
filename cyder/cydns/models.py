@@ -44,23 +44,26 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
     "the total number of octets that represent a name (i.e., the sum of
     all label octets and label lengths) is limited to 255" - RFC 4471
     """
-    domain = models.ForeignKey(Domain, null=False, help_text="FQDN of the "
-                               "domain after the short hostname. "
-                               "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
-    # "The length of any one label is limited to between 1 and 63 octets."
-    # RFC218
+    domain = models.ForeignKey(
+        Domain, null=False,
+        help_text='FQDN of the domain after the short hostname. '
+                  '(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)')
+    # RFC218: "The length of any one label is limited to between 1 and 63
+    # octets."
     label = models.CharField(max_length=63, blank=True, null=True,
                              validators=[validate_first_label],
-                             help_text="Short name of the fqdn")
+                             help_text='Short name of the FQDN.')
+    # fqdn = label + domain.name (set_fqdn)
     fqdn = models.CharField(max_length=255, blank=True, null=True,
-                            validators=[validate_name], db_index=True)
+                            validators=[validate_name], db_index=True,
+                            verbose_name='FQDN',
+                            help_text='Fully-qualified domain name.')
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
-                                      help_text="Time to Live of this record")
+                                      verbose_name='Time to Live')
     views = models.ManyToManyField(View, blank=True)
     comment = models.CharField(max_length=1000, blank=True, null=True,
-                               help_text="Comments about this record.")
-    # fqdn = label + domain.name <--- see set_fqdn
+                               help_text='Comments about this record.')
 
     class Meta:
         abstract = True
@@ -124,7 +127,8 @@ class CydnsRecord(models.Model, ObjectUrlMixin):
 
 @receiver(m2m_changed)
 def views_handler(sender, **kwargs):
-    """ This function catches any changes to a manymany relationship and just nukes
+    """
+    This function catches any changes to a manymany relationship and just nukes
     the relationship to the "private" view if one exists.
 
     One awesome side affect of this hack is there is NO way for this function

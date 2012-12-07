@@ -118,7 +118,7 @@ class Domain(models.Model, ObjectUrlMixin):
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'name', 'datatype': 'string', 'editable': True},
-            {'name': 'master_domain', 'datatype': 'string', 'editable': True},
+            {'name': 'master_domain', 'datatype': 'string', 'editable': False},
             {'name': 'soa', 'datatype': 'string', 'editable': False},
             {'name': 'delegated', 'datatype': 'boolean', 'editable': True},
         ]}
