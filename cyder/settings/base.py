@@ -4,13 +4,13 @@
 from funfactory.settings_base import *
 from cyder.settings.dns import *
 
+
 ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
 SASS_PREPROCESS = True
-SASS_BIN = '/usr/local/bin/sass'
 JINGO_MINIFY_USE_STATIC = False
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
