@@ -99,3 +99,11 @@ def make_megafilter(Klass, term):
     megafilter = [Q(**{"{0}__icontains".format(field): term}) for field in
                   Klass.search_fields]
     return reduce(operator.or_, megafilter)
+
+
+def qd_to_py_dict(qd):
+    """Django QueryDict to Python dict."""
+    ret = {}
+    for k in qd:
+        ret[k] = qd[k]
+    return ret

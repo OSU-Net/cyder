@@ -6,7 +6,8 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.utils import make_paginator, make_megafilter, tablefy
+from cyder.base.utils import (make_paginator, make_megafilter, qd_to_py_dict,
+                              tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -210,10 +211,7 @@ def model_to_post(post, obj):
     Updates request's POST dictionary with values from object, for update
     purposes.
     """
-    ret = {}
-    # Convert QueryDict to Python dict.
-    for k in post:
-        ret[k] = post[k]
+    ret = qd_to_py_dict(post)
     # Copy model values to dict.
     for k, v in model_to_dict(obj).iteritems():
         if k not in post:

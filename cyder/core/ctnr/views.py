@@ -1,11 +1,12 @@
-import simplejson
+import json
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from cyder.base.constants import LEVELS
-from cyder.base.utils import tablefy
+from cyder.base.utils import qd_to_py_dict, tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.views import (CoreCreateView, CoreDetailView, CoreDeleteView,
@@ -16,10 +17,6 @@ class CtnrView(object):
     model = Ctnr
     queryset = Ctnr.objects.all()
     form_class = CtnrForm
-
-
-class CtnrDeleteView(CtnrView, CoreDeleteView):
-    """"""
 
 
 class CtnrDetailView(CtnrView, CoreDetailView):
@@ -34,6 +31,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         if not ctnr:
             return context
 
+        # Add user levels of ctnr to user table.
         users = ctnr.users.all()
         extra_cols = [{'header': 'Level to %s' % ctnr.name}]
         extra_cols[0]['data'] = [
@@ -47,11 +45,24 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         rdomains = ctnr.domains.filter(is_reverse=True)
         rdomain_table = tablefy(rdomains)
 
+        add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
         return dict({
             'user_table': user_table,
             'domain_table': domain_table,
             'rdomain_table': rdomain_table,
+            'add_user_form': add_user_form
         }.items() + context.items())
+
+
+def add_user(request, pk):
+    """Add user to container."""
+    form = CtnrUserForm(qd_to_py_dict(request.POST))
+    if form.is_valid():
+        form.save()
+        return HttpResponse()
+    else:
+        return HttpResponse(
+            json.dumps({'error': [form.errors[err] for err in form.errors]}))
 
 
 class CtnrCreateView(CtnrView, CoreCreateView):
@@ -69,14 +80,18 @@ class CtnrCreateView(CtnrView, CoreCreateView):
 
         # Update ctnr-related session variables.
         request.session['ctnrs'].append(ctnr)
-        ctnr_names = simplejson.loads(request.session['ctnr_names_json'])
+        ctnr_names = json.loads(request.session['ctnr_names_json'])
         ctnr_names.append(ctnr.name)
-        request.session['ctnr_names_json'] = simplejson.dumps(ctnr_names)
+        request.session['ctnr_names_json'] = json.dumps(ctnr_names)
 
         return redirect(reverse('ctnr-detail', args=[ctnr.id]))
 
     def get(self, request, *args, **kwargs):
         return super(CtnrCreateView, self).get(request, *args, **kwargs)
+
+
+class CtnrDeleteView(CtnrView, CoreDeleteView):
+    """"""
 
 
 class CtnrUpdateView(CtnrView, CoreUpdateView):
