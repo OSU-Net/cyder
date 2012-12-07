@@ -1,7 +1,7 @@
 {% extends "cydns/cydns_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% block title%}Domain {{ object.name }}{% endblock %}
+{% block title %}Domain {{ object.name }}{% endblock %}
 {% block header %}Domain {{ object.name }}{% endblock %}
 
 {% block extra_action_bar %}
@@ -11,8 +11,6 @@
 {% endblock %}
 
 {% block content %}
-    {{ render_table(domain_table) }}
-
     {% if address_table %}
         <h3> Address Records </h3>
         {{ render_table(address_table) }}

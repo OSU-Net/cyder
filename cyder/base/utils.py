@@ -1,5 +1,4 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.urlresolvers import NoReverseMatch
 
 
 def make_paginator(request, qs, num):
@@ -18,29 +17,40 @@ def make_paginator(request, qs, num):
         return paginator.page(paginator.num_pages)
 
 
-def tablefy(objects, views=False):
+def tablefy(objects, views=False, users=False, extra_cols=None):
     """Make list of table headers, rows of table data, list of urls
     that may be associated with table data, and postback urls.
 
     :param  objects: A list of objects to make table from.
     :type   objects: Generic object.
+    :param  extra_cols: Extra columns to add outside of objects' .details()
+    :type  extra_cols: [{'col_header': '',
+                         'col_data': [{'value': '',
+                                       'url': ''}]
+                       },]
     """
     if not objects:
         return None
 
+    if users:
+        objects = [user.get_profile() for user in objects]
+
     headers = []
     data = []
-    urls = []
 
     # Build headers.
     for title, value in objects[0].details()['data']:
         headers.append(title)
+    if extra_cols:
+        for col in extra_cols:
+            headers.append(col['header'])
     if views:
         headers.append('Views')
 
     for obj in objects:
         row_data = []
 
+        # Columns.
         for title, value in obj.details()['data']:
             # Build data.
             try:
@@ -49,8 +59,14 @@ def tablefy(objects, views=False):
                 url = None
             row_data.append({'value': value, 'url': url})
 
-        # Views.
+        if extra_cols:
+            # Manual extra columns.
+            for col in extra_cols:
+                for d in col['data']:
+                    row_data.append({'value': d['value'], 'url': d['url']})
+
         if views:
+            # Another column for views.
             view_field = None
             if hasattr(obj, 'views'):
                 for view in obj.views.all():

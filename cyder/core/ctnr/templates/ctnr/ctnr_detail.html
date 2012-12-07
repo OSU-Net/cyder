@@ -1,8 +1,8 @@
 {% extends "core/core_detail.html" %}
+{% from "base/tables.html" import render_table %}
 
-{% block title %}
-  Container {{ object.name }}
-{% endblock %}
+{% block title %}Container {{ object.name }}{% endblock %}
+{% block header %}Container {{ object.name }}{% endblock %}
 
 {% block action_bar %}
   {% if request.session.superuser or (request.session.ctnr == object and request.session.level == 2) %}
@@ -11,20 +11,20 @@
 {% endblock %}
 
 {% block content %}
-  {% from "base/tables.html" import render_table %}
 
-  {% if user_matrix %}
+  {% if user_table %}
     <h3>Users</h3>
-    {{ render_table(user_headers, user_matrix, user_urls) }}
+    {{ render_table(user_table) }}
   {% endif %}
 
-  {% if domain_matrix %}
+  {% if domain_table %}
     <h3>Domains</h3>
-    {{ render_table(domain_headers, domain_matrix, domain_urls) }}
+    {{ render_table(domain_table) }}
   {% endif %}
 
-  {% if rdomain_matrix %}
+  {% if rdomain_table %}
     <h3>Reverse Domains</h3>
-    {{ render_table(rdomain_headers, rdomain_matrix, rdomain_urls) }}
+    {{ render_table(rdomain_table) }}
   {% endif %}
+
 {% endblock %}

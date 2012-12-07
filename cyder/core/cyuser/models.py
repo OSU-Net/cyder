@@ -16,6 +16,19 @@ class UserProfile(models.Model):
     class Meta:
         db_table = 'auth_user_profile'
 
+    def details(self):
+        """For tables."""
+        return {
+            'url': '',
+            'data': [
+                ('User', self.user.username),
+                ('First Name', self.user.first_name),
+                ('Last Name', self.user.last_name),
+                ('Email', self.user.email),
+                ('Default Container', self.default_ctnr),
+            ]
+        }
+
 
 def create_user_profile(sender, **kwargs):
     user = kwargs['instance']

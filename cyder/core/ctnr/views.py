@@ -1,15 +1,15 @@
 import simplejson
 
 from django.contrib import messages
-from django import forms
+from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 
+from cyder.base.constants import LEVELS
+from cyder.base.utils import tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
-from cyder.core.cyuser.utils import tablefy_users
-from cyder.core.views import CoreListView, CoreDetailView, CoreCreateView
-from cyder.core.views import CoreDeleteView, CoreUpdateView
-from cyder.base.utils import tablefy
+from cyder.core.views import (CoreCreateView, CoreDetailView, CoreDeleteView,
+                              CoreListView, CoreUpdateView)
 
 
 class CtnrView(object):
@@ -19,7 +19,7 @@ class CtnrView(object):
 
 
 class CtnrDeleteView(CtnrView, CoreDeleteView):
-    """ """
+    """"""
 
 
 class CtnrDetailView(CtnrView, CoreDetailView):
@@ -35,40 +35,35 @@ class CtnrDetailView(CtnrView, CoreDetailView):
             return context
 
         users = ctnr.users.all()
-        user_headers, user_matrix, user_urls = tablefy_users(users)
+        extra_cols = [{'header': 'Level to %s' % ctnr.name}]
+        extra_cols[0]['data'] = [
+            {'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level],
+             'url': ''} for user in users]
+        user_table = tablefy(users, users=True, extra_cols=extra_cols)
 
         domains = ctnr.domains.filter(is_reverse=False)
-        domain_headers, domain_matrix, domain_urls = tablefy(domains)
+        domain_table = tablefy(domains)
 
         rdomains = ctnr.domains.filter(is_reverse=True)
-        rdomain_headers, rdomain_matrix, rdomain_urls = tablefy(rdomains)
+        rdomain_table = tablefy(rdomains)
 
         return dict({
-            "user_headers": user_headers,
-            "user_matrix": user_matrix,
-            "user_urls": user_urls,
-
-            "domain_headers": domain_headers,
-            "domain_matrix": domain_matrix,
-            "domain_urls": domain_urls,
-
-            "rdomain_headers": rdomain_headers,
-            "rdomain_matrix": rdomain_matrix,
-            "rdomain_urls": rdomain_urls,
+            'user_table': user_table,
+            'domain_table': domain_table,
+            'rdomain_table': rdomain_table,
         }.items() + context.items())
 
 
 class CtnrCreateView(CtnrView, CoreCreateView):
-    """ """
     def post(self, request, *args, **kwargs):
         ctnr_form = CtnrForm(request.POST)
 
         # Try to save the ctnr.
-        # TODO: check perms
         try:
+            # TODO: ACLs
             ctnr = ctnr_form.save(commit=False)
-        except ValueError as e:
-            return render(request, "ctnr/ctnr_form.html", {'form': ctnr_form})
+        except ValueError:
+            return render(request, 'ctnr/ctnr_form.html', {'form': ctnr_form})
 
         ctnr.save()
 
@@ -78,18 +73,18 @@ class CtnrCreateView(CtnrView, CoreCreateView):
         ctnr_names.append(ctnr.name)
         request.session['ctnr_names_json'] = simplejson.dumps(ctnr_names)
 
-        return redirect('/ctnr/' + str(ctnr.id) + '/')
+        return redirect(reverse('ctnr-detail', args=[ctnr.id]))
 
     def get(self, request, *args, **kwargs):
         return super(CtnrCreateView, self).get(request, *args, **kwargs)
 
 
 class CtnrUpdateView(CtnrView, CoreUpdateView):
-    """ """
+    """"""
 
 
 class CtnrListView(CtnrView, CoreListView):
-    """ """
+    """"""
     template_name = 'ctnr/ctnr_list.html'
 
 
@@ -100,7 +95,7 @@ class CtnrUserView(object):
 
 
 class CtnrUserCreateView(CtnrUserView, CoreCreateView):
-    """ """
+    """"""
     def get_queryset(self):
         return Ctnr.objects.get(id=self.args[0])
 
