@@ -1,32 +1,30 @@
 #! /usr/bin/python
-from optparse import OptionParser
 from ConfigParser import ConfigParser
-import pdb
-
-import chili_manage
-import fix_maintain, maintain_dump
-from utilities import get_cursor, long2ip, ip2long, clean_mac, config
+from optparse import OptionParser
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
+from . import chili_manage, fix_maintain, maintain_dump
+from utilities import clean_mac, config, get_cursor, ip2long, long2ip
+
 from cyder.core.systems.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.soa.models import SOA
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
-from cyder.cydns.cname.models import CNAME
-
+from cyder.cydns.soa.models import SOA
 from cyder.cydns.utils import ensure_label_domain, ensure_domain
 
-BAD_DNAMES = ['', '.', '_']
 
+BAD_DNAMES = ['', '.', '_']
 cursor = get_cursor('maintain_sb')
 
+
 class Zone(object):
+
     def __init__(self, domain_id = None, dname = None, soa = None):
         self.domain_id = 541 if domain_id == None else domain_id
         self.dname = self.get_dname() if dname == None else dname
@@ -41,10 +39,8 @@ class Zone(object):
             self.gen_NS()
             self.walk_zone()
 
-
     def gen_soa(self):
-        """
-        Generates an SOA record object if the SOA record exists.
+        """Generates an SOA record object if the SOA record exists.
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
         """
@@ -53,33 +49,24 @@ class Zone(object):
 
         if record:
             _, _, primary, contact, refresh, retry, expire, minimum, _ = record
-            soa, _ = SOA.objects.get_or_create(primary = primary,
-                                               contact = contact,
-                                               refresh = refresh,
-                                               retry = retry,
-                                               expire = expire,
-                                               minimum = minimum,
-                                               comment = "SOA for %s zone" % self.dname)
+            soa, _ = SOA.objects.get_or_create(
+                primary = primary, contact = contact, refresh = refresh,
+                retry = retry, expire = expire, minimum = minimum,
+                comment = 'SOA for %s zone' % self.dname)
             return soa
         else:
             return None
 
-
     def gen_domain(self):
-        """
-        Generates a Domain object for this Zone from a hostname.
+        """Generates a Domain object for this Zone from a hostname.
 
         :uniqueness: domain
         """
-        if self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname:
-            return None
-
-        return ensure_domain(name = self.dname, force=True)
-
+        if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
+            return ensure_domain(name = self.dname, force=True)
 
     def gen_MX(self):
-        """
-        Generates the MX Record objects related to this zone's domain.
+        """Generates the MX Record objects related to this zone's domain.
 
         .. note::
             Where multiple records with different ttls exist, only the first is kept.
@@ -87,6 +74,7 @@ class Zone(object):
         :uniqueness: label, domain, server, priority
         """
         cursor.execute("SELECT * FROM zone_mx WHERE domain = '%s';" % self.domain_id)
+
         for _, name, _, server, priority, ttl, _, _ in cursor.fetchall():
             if MX.objects.filter(label = name,
                                  domain = self.domain,
@@ -101,8 +89,7 @@ class Zone(object):
                                                  priority = priority,
                                                  ttl = ttl)
             except ValidationError:
-                pdb.set_trace()
-
+                 print "Error generating MX."
 
     def gen_static(self):
         """
@@ -132,20 +119,17 @@ class Zone(object):
 
             system, _ = System.objects.get_or_create(hostname = name)
 
-            if not StaticInterface.objects.filter(label = name,
-                                                  mac = clean_mac(ha),
-                                                  ip_str = long2ip(ip)).exists():
-                static = StaticInterface(label = name,
-                                         domain = self.domain,
-                                         mac = clean_mac(ha),
-                                         system = system,
-                                         ip_str = long2ip(ip),
-                                         ip_type = '4')
-                # Static Interfaces need to be cleaned independently of saving
+            if not (StaticInterface.objects.filter(
+                    label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+                    .exists()):
+                static = StaticInterface(label=name,
+                    domain=self.domain, mac=clean_mac(ha), system=system,
+                    ip_str=long2ip(ip), ip_type='4')
+
+                # Static Interfaces need to be cleaned independently of saving.
                 # (no get_or_create)
                 static.full_clean()
                 static.save()
-
 
     def gen_AR(self):
         """
@@ -189,7 +173,6 @@ class Zone(object):
                     ptr.full_clean()
                     ptr.save()
 
-
     def gen_NS(self):
         """
         Generates the Nameserver objects related to this zone's domain.
@@ -201,8 +184,7 @@ class Zone(object):
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain = self.domain, server = name)
             except ValidationError:
-                pdb.set_trace()
-
+                print "Error generating NS."
 
     def walk_zone(self):
         """
@@ -213,8 +195,8 @@ class Zone(object):
             Child domains will inherit this domain's SOA if they do not have
             their own.
         """
-        sql = 'SELECT * FROM domain WHERE name NOT LIKE "%%.in-addr.arpa" AND ' + \
-                'master_domain = %s;' % self.domain_id
+        sql = ('SELECT * FROM domain WHERE name NOT LIKE "%%.in-addr.arpa" AND '
+               'master_domain = %s;' % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name, _, _ in cursor.fetchall():
             Zone(child_id, child_name, self.domain.soa)
@@ -232,8 +214,7 @@ class Zone(object):
 
 
 def gen_CNAME():
-    """
-    Migrates CNAME objects.
+    """Migrates CNAME objects.
 
     .. note::
         Run this only after migrating other DNS objects for every zone.
@@ -251,6 +232,7 @@ def gen_CNAME():
     :uniqueness: label, domain, target
     """
     cursor.execute("SELECT * FROM zone_cname;")
+
     for _, server, name, domain_id, ttl, zone, _ in cursor.fetchall():
         cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
         dname, = cursor.fetchone()
@@ -276,15 +258,15 @@ def gen_CNAME():
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("-D", "--dump", dest="dump", default=False, \
+    parser.add_option("-D", "--dump", dest="dump", default=False,
             action="store_true", help="Get a fresh dump of MAINTAIN.")
-    parser.add_option("-f", "--fix", dest="fix", default=False, \
+    parser.add_option("-f", "--fix", dest="fix", default=False,
             action="store_true", help="Fix MAINTAIN.")
-    parser.add_option("-d", "--dns", dest="dns", default=False, \
+    parser.add_option("-d", "--dns", dest="dns", default=False,
             action="store_true", help="Migrate DNS objects.")
-    parser.add_option("-c", "--cname", dest="cname", default=False, \
+    parser.add_option("-c", "--cname", dest="cname", default=False,
             action="store_true", help="Migrate CNAMEs.")
-    parser.add_option("-X", "--delete", dest="delete", default=False, \
+    parser.add_option("-X", "--delete", dest="delete", default=False,
             action="store_true", help="Delete old objects.")
     (options, args) = parser.parse_args()
 
@@ -293,20 +275,20 @@ if __name__ == "__main__":
         for option in config.options("pointer-include"):
             (ip, hn, ptype) = config.get("pointer-include", option).split()
             x = (ip2long(ip), hn, ptype)
-            sql = 'INSERT INTO pointer (ip, hostname, type) VALUES (%s, "%s", "%s")' % x
+            sql = ('INSERT INTO pointer (ip, hostname, type) '
+                   'VALUES (%s, "%s", "%s")' % x)
             cursor.execute(sql)
 
     if options.delete:
         if options.dns:
-            Domain.objects.all().delete()
             AddressRecord.objects.all().delete()
-            SOA.objects.all().delete()
+            Domain.objects.all().delete()
             MX.objects.all().delete()
             Nameserver.objects.all().delete()
             PTR.objects.all().delete()
-            System.objects.all().delete()
+            SOA.objects.all().delete()
             StaticInterface.objects.all().delete()
-
+            System.objects.all().delete()
         if options.cname:
             CNAME.objects.all().delete()
 
@@ -327,7 +309,8 @@ if __name__ == "__main__":
 
         for i in reverses:
             print "%s.in-addr.arpa" % i
-            Domain.objects.get_or_create(name = "%s.in-addr.arpa" % i, is_reverse = True)
+            Domain.objects.get_or_create(name = "%s.in-addr.arpa" % i,
+                                         is_reverse = True)
 
         cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
         for domain_id, dname, _, _ in cursor.fetchall():
@@ -338,5 +321,4 @@ if __name__ == "__main__":
         gen_CNAME()
 
     print map(lambda x: len(x.objects.all()), [Domain, AddressRecord, PTR, SOA, MX, CNAME, Nameserver, StaticInterface])
-
-    pdb.set_trace()
+    import pdb; pdb.set_trace()

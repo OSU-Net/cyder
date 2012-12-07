@@ -1,9 +1,11 @@
 from ConfigParser import ConfigParser
 import MySQLdb
-CONFIG_FILE = "database.cfg"
 
+
+CONFIG_FILE = "database.cfg"
 config = ConfigParser()
 config.read(CONFIG_FILE)
+
 
 def get_cursor(name):
     connection = MySQLdb.connect(host = config.get(name, 'host'),
