@@ -46,6 +46,7 @@ MINIFY_BUNDLES = {
             'js/lib/editablegrid/editablegrid_utils.js',
             'js/lib/editablegrid/editablegrid_charts.js',
 
+            'js/utils.js',
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',

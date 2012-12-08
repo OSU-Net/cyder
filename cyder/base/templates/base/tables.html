@@ -1,7 +1,7 @@
-{% macro render_table(object_table) %}
+{% macro render_table(object_table, class) %}
 {% if object_table %}
 
-<table id="egtable" class="table">
+<table id="egtable" class="table {{ class }}">
   <thead>
     <tr>
       {% for header in object_table['headers'] %}

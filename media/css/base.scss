@@ -276,7 +276,7 @@ div#header {
     height: 100%;
     padding-top: 13px;
     position: relative;
-    #kid { @include img-box-shadow(); }
+    #kid { @include default-box-shadow(); }
     .content {
         clear: left;
         display: inline-block;

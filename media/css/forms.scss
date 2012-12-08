@@ -6,7 +6,7 @@
 }
 
 .form {
-    @include img-box-shadow();
+    @include default-box-shadow();
     background: $light-gray;
     border-radius: 5px;
     margin-bottom: 26px;
@@ -46,6 +46,9 @@
     input[type="text"], select, textarea {
         display: block;
     }
+    input[type="text"] {
+        @include box-shadow(1px 1px 1px darken($light-gray, 10%));
+    }
     input[type="checkbox"] {
         left: 100px;
         margin-top: 2px;
@@ -62,7 +65,7 @@
 }
 
 .ui-dialog {
-    @include img-box-shadow();
+    @include default-box-shadow();
     .ui-dialog-titlebar {
         background: $dark-blue;
         border-color: $dark-blue;

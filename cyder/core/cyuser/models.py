@@ -30,7 +30,6 @@ class UserProfile(models.Model):
                 ('First Name', self.user.first_name),
                 ('Last Name', self.user.last_name),
                 ('Email', self.user.email),
-                ('Default Container', self.default_ctnr),
             ]
         }
 

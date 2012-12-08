@@ -1,6 +1,7 @@
 import json
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -58,8 +59,14 @@ def add_user(request, pk):
     """Add user to container."""
     form = CtnrUserForm(qd_to_py_dict(request.POST))
     if form.is_valid():
+        # Create table so client can inside new row into user table.
+        extra_cols = [{'header': ''}]
+        extra_cols[0]['data'] = [{'value': LEVELS[int(request.POST['level'])],
+                                  'url': ''}]
+        user_table = tablefy(User.objects.filter(id=request.POST['user']),
+                             users=True, extra_cols=extra_cols)
         form.save()
-        return HttpResponse()
+        return HttpResponse(json.dumps({'user': user_table}))
     else:
         return HttpResponse(
             json.dumps({'error': [form.errors[err] for err in form.errors]}))

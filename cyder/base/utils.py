@@ -50,7 +50,7 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     if views:
         headers.append('Views')
 
-    for obj in objects:
+    for i, obj in enumerate(objects):
         row_data = []
 
         # Columns.
@@ -65,8 +65,8 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         if extra_cols:
             # Manual extra columns.
             for col in extra_cols:
-                for d in col['data']:
-                    row_data.append({'value': d['value'], 'url': d['url']})
+                d = col['data'][i]
+                row_data.append({'value': d['value'], 'url': d['url']})
 
         if views:
             # Another column for views.

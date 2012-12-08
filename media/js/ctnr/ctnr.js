@@ -23,10 +23,14 @@ $(document).ready(function() {
         };
         $.post(addUserUrl, postData, function(data) {
             if (data.error) {
+                // Put error message.
                 console.log(data.error);
             } else {
-                $('#user-searchbox').val('');
+                // Append row to user table.
+                insertTablefyRow(data.user, $('.user-table tbody'));
+
                 userPk = null;
+                $('#user-searchbox').val('');
             }
         }, 'json');
     });
