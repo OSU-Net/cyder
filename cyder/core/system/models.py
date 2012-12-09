@@ -4,11 +4,11 @@ import socket
 
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models, IntegrityError
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 
+from cyder.base.models import BaseModel
 import dnsutils
 
 
@@ -23,75 +23,53 @@ class QuerySetManager(models.Manager):
 class DirtyFieldsMixin(object):
     def __init__(self, *args, **kwargs):
         super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
-        post_save.connect(self._reset_state, sender=self.__class__,
-                          dispatch_uid='%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__)
+        post_save.connect(
+            self._reset_state, sender=self.__class__,
+            dispatch_uid=('%s-DirtyFieldsMixin-sweeper' %
+                          self.__class__.__name__))
         self._reset_state()
 
     def _reset_state(self, *args, **kwargs):
         self._original_state = self._as_dict()
 
     def _as_dict(self):
-        return dict([(f.attname, getattr(self, f.attname)) for f in self._meta.local_fields])
+        return dict([(f.attname, getattr(self, f.attname))
+                     for f in self._meta.local_fields])
 
     def get_dirty_fields(self):
         new_state = self._as_dict()
-        return dict([(key, value) for key, value in self._original_state.iteritems() if value != new_state[key]])
+        return dict([(key, value)
+                     for key, value in self._original_state.iteritems()
+                     if value != new_state[key]])
 
 
 class BuildManager(models.Manager):
     def get_query_set(self):
-        return super(BuildManager, self).get_query_set().filter(allocation__name='release')
+        return (super(BuildManager, self).get_query_set()
+                .filter(allocation__name='release'))
 
 
 class SystemWithRelatedManager(models.Manager):
     def get_query_set(self):
-        return super(SystemWithRelatedManager, self).get_query_set().select_related(
-            'operating_system',
-            'server_model',
-            'allocation',
-            'system_rack',
-        )
+        return (super(SystemWithRelatedManager, self)
+                .get_query_set().select_related(
+                    'operating_system',
+                    'server_model',
+                    'allocation',
+                    'system_rack',))
 
 
-class System(DirtyFieldsMixin, models.Model):
-
+class System(BaseModel, DirtyFieldsMixin):
     YES_NO_CHOICES = (
         (0, 'No'),
         (1, 'Yes'),
     )
     hostname = models.CharField(unique=True, max_length=255)
-    serial = models.CharField(max_length=255, blank=True, null=True)
     operating_system = models.ForeignKey(
         'OperatingSystem', blank=True, null=True)
-    server_model = models.ForeignKey('ServerModel', blank=True, null=True)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    oob_ip = models.CharField(max_length=30, blank=True, null=True)
-    asset_tag = models.CharField(max_length=255, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    licenses = models.TextField(blank=True, null=True)
     allocation = models.ForeignKey('Allocation', blank=True, null=True)
-    system_rack = models.ForeignKey('SystemRack', blank=True, null=True)
-    rack_order = models.DecimalField(
-        null=True, blank=True, max_digits=6, decimal_places=2)
-    switch_ports = models.CharField(max_length=255, blank=True, null=True)
-    patch_panel_port = models.CharField(max_length=255, blank=True, null=True)
-    oob_switch_port = models.CharField(max_length=255, blank=True, null=True)
-    purchase_date = models.DateField(null=True, blank=True)
-    purchase_price = models.CharField(max_length=255, blank=True, null=True)
-    system_status = models.ForeignKey('SystemStatus', blank=True, null=True)
     change_password = models.DateTimeField(null=True, blank=True)
-    ram = models.CharField(max_length=255, blank=True, null=True)
-    is_dhcp_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_dns_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_puppet_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_nagios_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_switch = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
 
     class Meta:
         db_table = u'systems'
@@ -103,7 +81,6 @@ class System(DirtyFieldsMixin, models.Model):
             ('Last Updated', self.updated_on)
         )
 
-
     @property
     def primary_ip(self):
         try:
@@ -114,7 +91,6 @@ class System(DirtyFieldsMixin, models.Model):
             return None
 
     def update_adapter(self, **kwargs):
-        from .system_api import SystemResource
         interface = kwargs.pop('interface', None)
         ip_address = kwargs.pop('ip_address', None)
         mac_address = kwargs.pop('mac_address', None)
@@ -151,10 +127,10 @@ class System(DirtyFieldsMixin, models.Model):
         """
         adapter_type, primary, alias = SystemResource.extract_nic_attrs(
             adapter_name)
-        #self.staticinterface_set.get(type = adapter_type, primary = primary, alias = alias).delete()
         for i in self.staticinterface_set.all():
             i.update_attrs()
-            if i.attrs.interface_type == adapter_type and i.attrs.primary == primary and i.attrs.alias == alias:
+            if (i.attrs.interface_type == adapter_type and
+                  i.attrs.primary == primary and i.attrs.alias == alias):
                 i.delete()
         return True
 
@@ -189,7 +165,7 @@ class System(DirtyFieldsMixin, models.Model):
                 i.update_attrs()
                 try:
                     primary_list.append(int(i.attrs.primary))
-                except AttributeError, e:
+                except AttributeError:
                     continue
 
             ## sort and reverse the list to get the highest
@@ -276,8 +252,7 @@ class System(DirtyFieldsMixin, models.Model):
                         if fqdn:
                             self.update_host_for_migration(fqdn[0])
                             updated = True
-                    except Exception, e:
-                        #print e
+                    except Exception:
                         pass
             if not updated:
                 pass
@@ -323,7 +298,10 @@ class System(DirtyFieldsMixin, models.Model):
                     remote_user = request.META['REMOTE_USER']
                 except Exception, e:
                     remote_user = 'changed_user'
-                tmp = SystemChangeLog(system=system, changed_by=remote_user, changed_text=save_string, changed_date=datetime.datetime.now())
+                tmp = SystemChangeLog(
+                    system=system, changed_by=remote_user,
+                    changed_text=save_string,
+                    changed_date=datetime.datetime.now())
                 tmp.save()
         except Exception, e:
             print e
@@ -386,7 +364,9 @@ class System(DirtyFieldsMixin, models.Model):
             for pattern in patterns:
                 m = re.search(pattern, self.notes)
                 if m:
-                    self.notes = re.sub(pattern, '<a href="%s%s">Bug %s</a>' % (settings.BUG_URL, m.group(1), m.group(1)), self.notes)
+                    self.notes = re.sub(
+                        pattern, '<a href="%s%s">Bug %s</a>' %
+                        (settings.BUG_URL, m.group(1), m.group(1)), self.notes)
             return self.notes
         else:
             return ''
@@ -395,7 +375,8 @@ class System(DirtyFieldsMixin, models.Model):
         nic_numbers = self.get_adapter_numbers()
         if len(nic_numbers) > 0:
             nic_numbers.sort()
-            ## The last item in the array should be an int, but just in case we'll catch the exception and return a 1
+            # The last item in the array should be an int, but just in case
+            # we'll catch the exception and return a 1
             try:
                 return nic_numbers[-1] + 1
             except:
@@ -502,7 +483,7 @@ class KeyValue(models.Model):
     def __unicode__(self):
         return self.key if self.key else ''
 
-    def __repr__(self):
+    def __str__(self):
         return "<{0}: '{1}'>".format(self.key, self.value)
 
     def __repr__(self):
@@ -512,14 +493,13 @@ class KeyValue(models.Model):
         dirty = False
         schedule_dns = False
         from cyder.dnsutils.build_nics import build_nic
-        from cyder.dnsutils.dns_build import ip_to_site
 
         is_nic = re.match('^nic\.\d+\.(.*)\.\d+$', self.key)
         if self.pk:
             # Make sure that there was actually a change to some data.
             self_ = KeyValue.objects.get(pk=self.pk)
             if self_.value == self.value:
-                ditry = False
+                dirty = False
             else:
                 dirty = True
         if is_nic and dirty:
@@ -547,11 +527,11 @@ class KeyValue(models.Model):
         # to construct an interface and find the ip in the interface.
             intr = build_nic(self.system.keyvalue_set.all())
             for ip in intr.ips:
-                kv = dnsutils.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
+                kv = dnsutils.dns_build.ip_to_site(ip, settings.MOZ_SITE_PATH)
                 if kv:
                     try:
                         ScheduledTask(type='dns', task=kv.key).save()
-                    except IntegrityError, e:
+                    except IntegrityError:
                         # The task already existed.
                         pass
 

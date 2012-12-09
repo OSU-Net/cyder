@@ -2,7 +2,7 @@ from django.db import models
 
 from cyder.cydhcp.ctnr.models import Ctnr
 from cyder.cydhcp.interface.models import BaseInterface
-from cyder.cydns.mozdhcp.range.models import Range
+from cyder.cydhcp.range.models import Range
 
 
 class DynamicInterface(BaseInterface):
