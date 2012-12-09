@@ -16,8 +16,8 @@ from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs, get_dhcp_aa
 from cyder.cydhcp.keyvalue.utils import get_dhcp_docstrings, dict_to_kv
 from cyder.cydhcp.range.forms import RangeForm
 
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView
+from cyder.cydhcp.views import CydhcpDeleteView, CydhcpListView
+from cyder.cydhcp.views import CydhcpCreateView
 from cyder.cydns.ip.models import ipv6_to_longs
 from django.forms.formsets import formset_factory
 
@@ -36,11 +36,11 @@ class NetworkView(object):
 is_attr = re.compile("^attr_\d+$")
 
 
-class NetworkDeleteView(NetworkView, CoreDeleteView):
+class NetworkDeleteView(NetworkView, CydhcpDeleteView):
     success_url = "/cydhcp/network/"
 
 
-class NetworkListView(NetworkView, CoreListView):
+class NetworkListView(NetworkView, CydhcpListView):
     """ """
     template_name = 'network/network_list.html'
 

@@ -10,8 +10,8 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import ipv6_to_longs
-from cyder.cydhcp.views import CoreDeleteView, CoreDetailView
-from cyder.cydhcp.views import CoreCreateView, CoreUpdateView, CoreListView
+from cyder.cydhcp.views import CydhcpDeleteView, CydhcpDetailView
+from cyder.cydhcp.views import CydhcpCreateView, CydhcpUpdateView, CydhcpListView
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
 from cyder.cydhcp.keyvalue.utils import get_docstrings, dict_to_kv
 from django.forms.util import ErrorList, ErrorDict
@@ -27,11 +27,11 @@ class RangeView(object):
     queryset = Range.objects.all()
 
 
-class RangeDeleteView(RangeView, CoreDeleteView):
+class RangeDeleteView(RangeView, CydhcpDeleteView):
     success_url = "/cydhcp/range/"
 
 
-class RangeDetailView(RangeView, CoreDetailView):
+class RangeDetailView(RangeView, CydhcpDetailView):
     template_name = 'range/range_detail.html'
 
     def get_context_data(self, **kwargs):
@@ -120,7 +120,7 @@ def range_detail(request, range_pk):
     })
 
 
-class RangeCreateView(RangeView, CoreCreateView):
+class RangeCreateView(RangeView, CydhcpCreateView):
     """ """
 
 
@@ -205,9 +205,9 @@ def redirect_to_range_from_ip(request):
              'redirect_url': range_[0].get_detail_url()}))
 
 
-class RangeUpdateView(RangeView, CoreUpdateView):
+class RangeUpdateView(RangeView, CydhcpUpdateView):
     """ """
 
 
-class RangeListView(RangeView, CoreListView):
+class RangeListView(RangeView, CydhcpListView):
     """ """

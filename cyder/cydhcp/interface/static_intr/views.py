@@ -1,4 +1,3 @@
-import ipaddr
 import re
 import simplejson as json
 
@@ -20,7 +19,6 @@ from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
                                          get_docstrings, dict_to_kv)
 from cyder.cydhcp.network.utils import calc_parent_str
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.views import CoreDeleteView, CoreCreateView
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
@@ -96,8 +94,9 @@ def combine_a_ptr_to_interface(request, addr_pk, ptr_pk):
                 system = None
         if system:
             try:
-                intr, addr_deleted, ptr_deleted = do_combine_a_ptr_to_interface(
-                    addr, ptr, system, mac_address="00:00:00:00:00:00")
+                intr, addr_deleted, ptr_deleted = (
+                    do_combine_a_ptr_to_interface(
+                        addr, ptr, system, mac_address="00:00:00:00:00:00"))
             except ValidationError, e:
                 return HttpResponse(json.dumps({'success': False, 'error':
                                                 e.messages[0]}))
@@ -115,8 +114,8 @@ def combine_a_ptr_to_interface(request, addr_pk, ptr_pk):
         if form.is_valid():
             system = form.cleaned_data['system']
             try:
-                intr, addr_deleted, ptr_deleted = do_combine_a_ptr_to_interface(
-                    addr, ptr, system)
+                intr, addr_deleted, ptr_deleted = (
+                    do_combine_a_ptr_to_interface(addr, ptr, system))
                 return redirect(intr)
             except ValidationError, e:
                 form.errors['__all__'] = ErrorList(e.messages)
@@ -159,8 +158,8 @@ def create_no_system_static_interface(request):
             ip_type = request.GET['ip_type']
             network = calc_parent_str(ip_str, ip_type)
             if network and network.vlan and network.site:
-                expected_name = "{0}.{1}.mozilla.com".format(network.vlan.name,
-                                                             network.site.get_site_path())
+                expected_name = "{0}.{1}.mozilla.com".format(
+                    network.vlan.name, network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist, e:
@@ -190,7 +189,7 @@ def delete_static_interface(reqeust, intr_pk):
     system = intr.system
     try:
         intr.delete()
-    except ValidationError, e:
+    except ValidationError:
         pass
     return redirect(system)
 
@@ -334,30 +333,31 @@ def quick_create(request, system_pk):
                     if network.site.get_site_path() == site.get_site_path():
                         networks.append(network)
                 if not networks:
-                    raise ValidationError("No appropriate networks found. "
-                                          "Consider adding this interface manually.")
+                    raise ValidationError(
+                        "No appropriate networks found. "
+                        "Consider adding this interface manually.")
 
                 ip = mrange.get_next_ip()
                 if ip is None:
-                    raise ValidationError("No appropriate IP found "
-                                          "in {0} Vlan {1} Range {2} - {3}. Consider adding "
-                                          "this interface manually.".format(site.name, vlan.name,
-                                                                            mrange.start_str, mrange.end_str))
+                    raise ValidationError(
+                        "No appropriate IP found in {0} Vlan {1} "
+                        "Range {2} - {3}. Consider adding this interface "
+                        "manually.".format(site.name, vlan.name,
+                                           mrange.start_str, mrange.end_str))
 
-                expected_name = "{0}.{1}.mozilla.com".format(vlan.name,
-                                                             site.get_site_path())
-                print "Expected name {0}".format(expected_name)
+                expected_name = "{0}.{1}.mozilla.com".format(
+                    vlan.name, site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist, e:
-                    raise ValidationError("The domain '{0}' doesn't seem to "
-                                          "exist. Consider creating this interface "
-                                          "manually.".format(expected_name))
+                    raise ValidationError(
+                        "The domain '{0}' doesn't seem to exist. "
+                        "Consider creating this interface "
+                        "manually.".format(expected_name))
 
                 intr = StaticInterface(label=label, domain=domain,
-                                       ip_str=str(ip),
-                                       #ip_type=ip_type, mac=mac, system=system)
-                                       ip_type=ip_type, system=system)
+                                       ip_str=str(ip), ip_type=ip_type,
+                                       system=system)
                 intr.full_clean()
                 intr.save()
             except ValidationError, e:

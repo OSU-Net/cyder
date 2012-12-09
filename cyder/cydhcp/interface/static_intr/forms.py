@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import models
 from django.core.exceptions import ValidationError
 
 import ipaddr
@@ -7,10 +6,7 @@ import ipaddr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.validation import validate_mac
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_label
 
@@ -21,7 +17,7 @@ def validate_ip(ip):
     except ipaddr.AddressValueError, e:
         try:
             ipaddr.IPv6Address(ip)
-        except ipaddr.AddressValueError, e:
+        except ipaddr.AddressValueError:
             raise ValidationError("IP address not in valid form.")
 
 

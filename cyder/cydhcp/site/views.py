@@ -13,8 +13,8 @@ from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
 
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView, CoreUpdateView
+from cyder.cydhcp.views import CydhcpDeleteView, CydhcpListView
+from cyder.cydhcp.views import CydhcpCreateView, CydhcpUpdateView
 
 import re
 import pdb
@@ -30,7 +30,7 @@ class SiteView(object):
 is_attr = re.compile("^attr_\d+$")
 
 
-class SiteDeleteView(SiteView, CoreDeleteView):
+class SiteDeleteView(SiteView, CydhcpDeleteView):
     success_url = "/cydhcp/site/"
 
 
@@ -43,17 +43,17 @@ def delete_site(request, site_pk):
         return render(request, "site/site_confirm_delete.html")
 
 
-class SiteListView(SiteView, CoreListView):
+class SiteListView(SiteView, CydhcpListView):
     """ """
     template_name = "cydhcp/cydhcp_list.html"
 
 
-class SiteCreateView(SiteView, CoreCreateView):
+class SiteCreateView(SiteView, CydhcpCreateView):
     """ """
     template_name = "cydhcp/cydhcp_form.html"
 
 
-class SiteUpdateView(SiteView, CoreUpdateView):
+class SiteUpdateView(SiteView, CydhcpUpdateView):
     """ """
     template_name = "site/site_edit.html"
 

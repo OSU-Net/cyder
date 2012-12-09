@@ -11,10 +11,7 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.models import Ip
-from cyder.cydns.models import CydnsRecord
 from cyder.cydns.view.models import View
 
 
@@ -38,9 +35,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     In terms of DNS, a static interface represents a PTR and A record and must
     adhear to the requirements of those classes. The interface inherits from
-    BaseAddressRecord and will call it's clean method with 'update_reverse_domain'
-    set to True. This will ensure that it's A record is valid *and* that it's
-    PTR record is valid.
+    BaseAddressRecord and will call it's clean method with
+    'update_reverse_domain' set to True. This will ensure that it's A record is
+    valid *and* that it's PTR record is valid.
 
     Using the 'attrs' attribute.
 
@@ -82,16 +79,15 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                            help_text="Mac address in format XX:XX:XX:XX:XX:XX")
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name="staticintrdomain_set")
-
-    system = models.ForeignKey(System, null=True, blank=True,
-                               help_text="System to associate the interface with")
-    dhcp_enabled = models.BooleanField(default=True,
-                                       help_text="Enable dhcp for this interface?")
-    dns_enabled = models.BooleanField(default=True,
-                                      help_text="Enable dns for this interface?")
+    system = models.ForeignKey(
+        System, null=True, blank=True,
+        help_text="System to associate the interface with")
+    dhcp_enabled = models.BooleanField(
+        default=True, help_text="Enable dhcp for this interface?")
+    dns_enabled = models.BooleanField(
+        default=True, help_text="Enable dns for this interface?")
 
     attrs = None
-
     search_fields = ("mac", "ip_str", "fqdn")
 
     def update_attrs(self):
@@ -110,8 +106,8 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return super(StaticInterface, cls).get_api_fields() + ['mac',
-                                                               'dhcp_enabled', 'dns_enabled']
+        return (super(StaticInterface, cls).get_api_fields() +
+                ['mac', 'dhcp_enabled', 'dns_enabled'])
 
     def get_update_url(self):
         return "/cydhcp/interface/{0}/update/".format(self.pk)

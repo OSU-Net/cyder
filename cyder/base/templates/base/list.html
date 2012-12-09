@@ -31,7 +31,11 @@
     </form>
   {% endif %}
 
-  {{ render_table(object_table) }}
+  {% if object_table %}
+    {{ render_table(object_table) }}
+  {% else %}
+    {% include "base/includes/object_table.html" %}
+  {% endif %}
 
   {{ js('tables') }}
 

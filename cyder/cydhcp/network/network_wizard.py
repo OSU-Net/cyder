@@ -15,8 +15,8 @@ from cyder.cydhcp.site.forms import SiteForm
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
 from cyder.cydhcp.range.forms import RangeForm
 
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView
+from cyder.cydhcp.views import CydhcpDeleteView, CydhcpListView
+from cyder.cydhcp.views import CydhcpCreateView
 from cyder.cydns.ip.models import ipv6_to_longs
 from django.forms.formsets import formset_factory
 

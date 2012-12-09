@@ -8,6 +8,7 @@ from django.http import HttpResponse
 
 from cyder.core.system.models import System
 
+from cyder.core.views import CoreDeleteView, CoreCreateView
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
@@ -16,7 +17,6 @@ from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceQuickForm
 from cyder.cydhcp.interface.static_intr.forms import CombineForm
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
 from cyder.cydhcp.keyvalue.utils import get_docstrings, dict_to_kv
-from cyder.cydhcp.views import CoreDeleteView, CoreCreateView
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.utils import calc_parent_str
 

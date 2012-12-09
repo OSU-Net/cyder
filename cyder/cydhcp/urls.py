@@ -3,7 +3,8 @@ from django.views.generic.simple import direct_to_template
 
 
 urlpatterns = patterns('',
-   url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_base.html'}, name='cydhcp-index'),
+   url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_base.html'},
+       name='cydhcp-index'),
    url(r'^build/', include('cyder.cydhcp.build.urls')),
    url(r'^bulk_change/', include('cyder.cydhcp.bulk_change.urls')),
    url(r'^interface/', include('cyder.cydhcp.interface.urls')),
