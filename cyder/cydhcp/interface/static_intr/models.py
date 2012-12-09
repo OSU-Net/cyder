@@ -1,23 +1,21 @@
+import re
+
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.core.system.models import System
-
 import cydns
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.core.system.models import System
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.validation import validate_mac
-from cyder.cydns.address_record.models import BaseAddressRecord
+from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.ip.models import Ip
 from cyder.cydns.models import CydnsRecord
 from cyder.cydns.view.models import View
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ip.models import Ip
-from django.conf import settings
-
-import re
-import pdb
 
 
 class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
@@ -28,7 +26,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         >>> s.full_clean()
         >>> s.save()
 
-    This class is the main interface to DNS and DHCP in mozinv. A static
+    This class is the main interface to DNS and DHCP. A static
     interface consists of three key pieces of information: Ip address, Mac
     Address, and Hostname (the hostname is comprised of a label and a domain).
     From these three peices of information, three things are ensured: An A or
@@ -43,7 +41,6 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     BaseAddressRecord and will call it's clean method with 'update_reverse_domain'
     set to True. This will ensure that it's A record is valid *and* that it's
     PTR record is valid.
-
 
     Using the 'attrs' attribute.
 
@@ -145,13 +142,13 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         #if not isinstance(self.mac, basestring):
         #    raise ValidationError("Mac Address not of valid type.")
         #self.mac = self.mac.lower()
+        from cyder.cydns.ptr.models import PTR
+
         if not self.system:
             raise ValidationError("An interface means nothing without it's "
                                   "system.")
-        from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError("A PTR already uses this Name and IP")
-        from cyder.cydns.address_record.models import AddressRecord
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
             raise ValidationError("An A record already uses this Name and IP")
@@ -159,15 +156,17 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         if kwargs.pop("validate_glue", True):
             self.check_glue_status()
 
-        super(StaticInterface, self).clean(validate_glue=False,
-                                           update_reverse_domain=True, ignore_interface=True)
+        super(StaticInterface, self).clean(
+            validate_glue=False, update_reverse_domain=True,
+            ignore_interface=True)
 
         if self.pk and self.ip_str.startswith("10."):
             p = View.objects.filter(name="private")
             if p:
                 self.views.add(p[0])
-                super(StaticInterface, self).clean(validate_glue=False,
-                                                   update_reverse_domain=True, ignore_interface=True)
+                super(StaticInterface, self).clean(
+                    validate_glue=False, update_reverse_domain=True,
+                    ignore_interface=True)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
@@ -185,9 +184,10 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         # The label of the domain changed. Make sure it's not a glue record
         Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
-            raise ValidationError("This Interface represents a glue record "
-                                  "for a Nameserver. Change the Nameserver to edit this "
-                                  "record.")
+            raise ValidationError(
+                'This Interface represents a glue record '
+                'for a Nameserver. Change the Nameserver to edit this '
+                'record.')
 
     def record_type(self):
         return "A/PTR"
@@ -195,8 +195,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         if kwargs.pop("validate_glue", True):
             if self.intrnameserver_set.exists():
-                raise ValidationError("Cannot delete the record {0}. It is a "
-                                      "glue record.".format(self.record_type()))
+                raise ValidationError(
+                    "Cannot delete the record {0}. It is a "
+                    "glue record.".format(self.record_type()))
         check_cname = kwargs.pop("check_cname", True)
         super(StaticInterface, self).delete(validate_glue=False,
                                             check_cname=check_cname)
@@ -211,10 +212,6 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                                              self.fqdn)
 
 
-is_eth = re.compile("^eth$")
-is_mgmt = re.compile("^mgmt$")
-
-
 class StaticIntrKeyValue(KeyValue):
     intr = models.ForeignKey(StaticInterface, null=False)
 
@@ -223,43 +220,45 @@ class StaticIntrKeyValue(KeyValue):
         unique_together = ("key", "value", "intr")
 
     def _aa_primary(self):
-        """The primary number of this interface (I.E. eth1.0 would have a primary
-        number of '1')"""
+        """
+        The primary number of this interface (I.E. eth1.0 would have a primary
+        number of '1').
+        """
         if not self.value.isdigit():
             raise ValidationError("The primary number must be a number.")
 
     def _aa_alias(self):
-        """The alias of this interface (I.E. eth1.0 would have a primary
-        number of '0')."""
+        """
+        The alias of this interface (I.E. eth1.0 would have a primary number of
+        '0').
+        """
         if not self.value.isdigit():
             raise ValidationError("The alias number must be a number.")
 
     def _aa_hostname(self):
-        """DHCP option hostname
-        """
+        """DHCP option hostname."""
         if not self.value:
             raise ValidationError("Hostname Required")
 
     def _aa_domain_name_servers(self):
-        """DHCP option domain-name-servers
-        """
+        """DHCP option domain-name-servers."""
         if not self.value:
             raise ValidationError("Domain Name Servers Required")
 
     def _aa_domain_name(self):
-        """DHCP option domain-name
-        """
+        """DHCP option domain-name."""
         if not self.value:
             raise ValidationError("Domain Name Required")
 
     def _aa_filename(self):
-        """DHCP option filename
-        """
+        """DHCP option filename."""
         if not self.value:
             raise ValidationError("Filename Required")
 
     def _aa_interface_type(self):
         """Either eth (ethernet) or mgmt (mgmt)."""
+        is_eth = re.compile("^eth$")
+        is_mgmt = re.compile("^mgmt$")
         if not (is_eth.match(self.value) or is_mgmt.match(self.value)):
             raise ValidationError("Interface type must either be 'eth' "
                                   "or 'mgmt'")

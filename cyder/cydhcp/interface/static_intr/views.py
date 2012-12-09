@@ -1,32 +1,29 @@
+import ipaddr
+import re
+import simplejson as json
+
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render
 from django.contrib import messages
 from django.forms.util import ErrorList
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.core.system.models import System
-
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
-from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
-from cyder.cydhcp.interface.static_intr.forms import FullStaticInterfaceForm
-from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceQuickForm
-from cyder.cydhcp.interface.static_intr.forms import CombineForm
-from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
-from cyder.cydhcp.keyvalue.utils import get_docstrings, dict_to_kv
-from cyder.cydhcp.views import CoreDeleteView, CoreCreateView
-from cyder.cydhcp.range.models import Range
+from cyder.core.system.system_api import SystemResource
+from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
+                                                       StaticIntrKeyValue)
+from cyder.cydhcp.interface.static_intr.forms import (StaticInterfaceForm,
+                                                      FullStaticInterfaceForm,
+                                                      StaticInterfaceQuickForm,
+                                                      CombineForm)
+from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
+                                         get_docstrings, dict_to_kv)
 from cyder.cydhcp.network.utils import calc_parent_str
-
-from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.views import CoreDeleteView, CoreCreateView
 from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
-
-import pdb
-import re
-import ipaddr
-import simplejson as json
 
 
 def do_combine_a_ptr_to_interface(
@@ -54,7 +51,6 @@ def do_combine_a_ptr_to_interface(
     intr.full_clean()
     intr.save()
     if interface:
-        from cyder.core.system.system_api import SystemResource
         intr.update_attrs()
         adapter_type, primary, alias = SystemResource.extract_nic_attrs(
             interface)
