@@ -25,7 +25,10 @@
 
   {% if object_list and has_attr(object_list[0], 'eg_metadata') %}
     <span id="eg" data-metadata="{{ object_list[0].eg_metadata()|to_json }}"></span>
-    <form id="enable-eg"><input type="checkbox" name="eg"> Enable spreadsheet view</form>
+    <form id="enable-eg">
+      <input type="checkbox" name="eg" id="enable-eg-check">
+      <label for="enable-eg-check"> Enable spreadsheet view</label>
+    </form>
   {% endif %}
 
   {{ render_table(object_table) }}
