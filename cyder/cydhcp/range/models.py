@@ -1,17 +1,17 @@
-from django.db import models
 from django.core.exceptions import ValidationError
-
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter
-from cyder.base.mixins import ObjectUrlMixin
-from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydns.ip.models import ipv6_to_longs
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
+from django.db import models
+from django.http import HttpResponse
 
 import ipaddr
 
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.utils import IPFilter
+from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.ip.models import ipv6_to_longs
+from cyder.cydns.ptr.models import PTR
 
 
 class Range(models.Model, ObjectUrlMixin):
@@ -66,6 +66,26 @@ class Range(models.Model, ObjectUrlMixin):
         db_table = 'range'
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
+
+    def __str__(self):
+        x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End -  {4}"
+        return x.format(self.network.site, self.network.vlan, self.network,
+                        self.start_str, self.end_str)
+
+    def __repr__(self):
+        return "<Range: {0}>".format(str(self))
+
+    def details(self):
+        """For tables."""
+        data = super(Range, self).details()
+        data['data'] = [
+            ('Site', self.network.site),
+            ('Vlan', self.network.vlan),
+            ('Network', self.network),
+            ('Start', self.start_str),
+            ('End', self.end_str)
+        ]
+        return data
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -166,11 +186,6 @@ class Range(models.Model, ObjectUrlMixin):
             raise ValidationError("Ranges cannot exist inside of other "
                                   "ranges.")
 
-    def __str__(self):
-        x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End -  {4}"
-        return x.format(self.network.site, self.network.vlan, self.network,
-                        self.start_str, self.end_str)
-
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
@@ -195,9 +210,6 @@ class Range(models.Model, ObjectUrlMixin):
         return "{0} - {1} - ({2}) {3} to {4}".format(
             site_name, vlan_name,
             self.network, self.start_str, self.end_str)
-
-    def __repr__(self):
-        return "<Range: {0}>".format(str(self))
 
     def get_next_ip(self):
         """Find's the most appropriate ip address within a range. If it can't
@@ -248,12 +260,12 @@ def find_free_ip(start, end, ip_type='4'):
                 if ptr.ip_lower == i:
                     taken = True
                     break
-            if taken == False:
+            if not taken:
                 for intr in intrs:
                     if intr.ip_lower == i:
                         taken = True
                         break
-            if taken == False:
+            if not taken:
                 ip = ipaddr.IPv4Address(i)
                 return ip
     else:

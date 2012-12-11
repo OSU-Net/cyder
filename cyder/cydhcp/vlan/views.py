@@ -20,11 +20,11 @@ class VlanDeleteView(VlanView, CydhcpDeleteView):
 
 
 class VlanListView(VlanView, CydhcpListView):
-    """ """
+    """"""
 
 
 class VlanCreateView(VlanView, CydhcpCreateView):
-    """ """
+    """"""
     template_name = "cydhcp/cydhcp_form.html"
 
 

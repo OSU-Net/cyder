@@ -11,8 +11,9 @@ import ipaddr
 from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpDetailView, CydhcpCreateView,
-                                CydhcpUpdateView, CydhcpListView)
+from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpDetailView,
+                                CydhcpCreateView, CydhcpUpdateView,
+                                CydhcpListView)
 from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
                                          get_docstrings, dict_to_kv)
 from cyder.cydns.address_record.models import AddressRecord
@@ -32,18 +33,6 @@ class RangeDeleteView(RangeView, CydhcpDeleteView):
 
 class RangeDetailView(RangeView, CydhcpDetailView):
     template_name = 'range/range_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(RangeDetailView, self).get_context_data(
-            **kwargs)
-        context['form_title'] = "{0} Details".format(
-            self.form_class.Meta.model.__name__
-        )
-
-        # extra_context takes precedence over original values in context
-        if self.extra_context:
-            context = dict(context.items() + self.extra_context.items())
-        return context
 
 
 def delete_range_attr(request, attr_pk):
@@ -109,7 +98,7 @@ def range_detail(request, range_pk):
                 taken = True
                 break
 
-        if taken == False:
+        if not taken:
             range_data.append((None, ip_str))
 
     return render(request, 'range/range_detail.html', {
@@ -120,7 +109,7 @@ def range_detail(request, range_pk):
 
 
 class RangeCreateView(RangeView, CydhcpCreateView):
-    """ """
+    """"""
 
 
 def update_range(request, range_pk):
@@ -183,9 +172,10 @@ def redirect_to_range_from_ip(request):
         try:
             ip_upper, ip_lower = 0, int(ipaddr.IPv4Address(ip_str))
         except ipaddr.AddressValueError, e:
-            return HttpResponse(json.dumps({'success': False,
-                                           'message': "Failure to recognize {0} as an IPv4 "
-                                           "Address.".format(ip_str)}))
+            return HttpResponse(json.dumps(
+                {'success': False,
+                 'message': "Failure to recognize {0} as an IPv4 "
+                            "Address.".format(ip_str)}))
     else:
         try:
             ip_upper, ip_lower = ipv6_to_longs(ip_str)
@@ -193,9 +183,9 @@ def redirect_to_range_from_ip(request):
             return HttpResponse(json.dumps({'success': False,
                                             'message': 'Invalid IP'}))
 
-    range_ = Range.objects.filter(start_upper__lte=ip_upper,
-                                  start_lower__lte=ip_lower, end_upper__gte=ip_upper,
-                                  end_lower__gte=ip_lower)
+    range_ = Range.objects.filter(
+        start_upper__lte=ip_upper, start_lower__lte=ip_lower,
+        end_upper__gte=ip_upper, end_lower__gte=ip_lower)
     if not len(range_) == 1:
         return HttpResponse(json.dumps({'failure': "Failture to find range"}))
     else:
@@ -205,8 +195,8 @@ def redirect_to_range_from_ip(request):
 
 
 class RangeUpdateView(RangeView, CydhcpUpdateView):
-    """ """
+    """"""
 
 
 class RangeListView(RangeView, CydhcpListView):
-    """ """
+    """"""

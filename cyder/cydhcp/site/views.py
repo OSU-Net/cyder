@@ -35,17 +35,17 @@ def delete_site(request, site_pk):
 
 
 class SiteListView(SiteView, CydhcpListView):
-    """ """
+    """"""
     template_name = "cydhcp/cydhcp_list.html"
 
 
 class SiteCreateView(SiteView, CydhcpCreateView):
-    """ """
+    """"""
     template_name = "cydhcp/cydhcp_form.html"
 
 
 class SiteUpdateView(SiteView, CydhcpUpdateView):
-    """ """
+    """"""
     template_name = "site/site_edit.html"
 
 

@@ -4,6 +4,8 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render, render_to_response
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from cyder.base.utils import tablefy
+
 
 def home(request):
     return render_to_response('base/index.html', {
@@ -17,12 +19,13 @@ class BaseListView(ListView):
     """
     template_name = 'list.html'
     extra_context = None
-    paginate_by = 50
+    paginate_by = 30
 
     def get_context_data(self, **kwargs):
         context = super(ListView, self).get_context_data(**kwargs)
         context['Model'] = self.model
         context['model_name'] = self.model._meta.db_table
+        context['object_table'] = tablefy(context['page_obj'])
 
         # Extra_context takes precedence over original values in context.
         try:

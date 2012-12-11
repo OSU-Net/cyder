@@ -1,12 +1,10 @@
 from django.db import models
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
-from cyder.cydhcp.site.models import Site
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
 
 from cyder.cydhcp.keyvalue.models import KeyValue
-
 
 
 class Vlan(models.Model, ObjectUrlMixin):
@@ -14,21 +12,24 @@ class Vlan(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=255)
     number = models.PositiveIntegerField()
 
-    def details(self):
-        return (
-            ("Name", self.name),
-            ("Number", self.number),
-        )
-
     class Meta:
         db_table = "vlan"
         unique_together = ("name", "number")
 
     def __str__(self):
-        return "{0} {1}".format(self.name, self.number)
+        return "{0}".format(self.name)
 
     def __repr__(self):
         return "<Vlan {0}>".format(str(self))
+
+    def details(self):
+        """For tables."""
+        data = super(Vlan, self).details()
+        data['data'] = [
+            ('Name', self),
+            ('Number', self.number),
+        ]
+        return data
 
     def find_domain(self):
         """
@@ -37,11 +38,11 @@ class Vlan(models.Model, ObjectUrlMixin):
         """
         for network in self.network_set.all():
             if network.site:
-                expected_name = "{0}.{1}.mozilla.com".format(self.name,
-                                                             network.site.get_site_path())
+                expected_name = "{0}.{1}.mozilla.com".format(
+                    self.name, network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
-                except ObjectDoesNotExist, e:
+                except ObjectDoesNotExist:
                     continue
                 return domain.name
 

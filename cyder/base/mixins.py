@@ -1,5 +1,4 @@
-from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import NoReverseMatch, reverse
 
 
 class ObjectUrlMixin(object):
@@ -22,7 +21,7 @@ class ObjectUrlMixin(object):
         """
         Return the create url of the type of object (to be posted to).
         """
-        return cls.get_list_url() + '-create'
+        return reverse(cls._meta.db_table + '-create')
 
     def get_update_url(self):
         """
@@ -47,5 +46,8 @@ class ObjectUrlMixin(object):
         """
         Return base details with generic postback URL for editable tables.
         """
-        return {'url': reverse(self._meta.db_table + '-table-update',
-                               args=[self.pk])}
+        try:
+            return {'url': reverse(self._meta.db_table + '-table-update',
+                                   args=[self.pk])}
+        except NoReverseMatch:
+            return {'url': ''}

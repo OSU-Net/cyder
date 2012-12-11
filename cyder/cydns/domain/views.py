@@ -1,27 +1,17 @@
-from operator import itemgetter
-import simplejson as json
+import json
 
 from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpResponse
-from django.shortcuts import (get_object_or_404, render,
-                              render_to_response, redirect)
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic import CreateView, DetailView, UpdateView
 
+from cyder.base.utils import tablefy
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.forms import DomainForm, DomainUpdateForm
-from cyder.cydns.mx.models import MX
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.txt.models import TXT
-from cyder.base.utils import tablefy
-from cyder.cydns.view.models import View
-from cyder.cydns.views import CydnsCreateView, CydnsDeleteView, CydnsListView
+from cyder.cydns.views import CydnsDeleteView, CydnsListView
 
 
 class DomainView(object):
@@ -36,7 +26,7 @@ class DomainListView(DomainView, CydnsListView):
 
 
 class DomainDeleteView(DomainView, CydnsDeleteView):
-    """ """
+    """"""
 
 
 class DomainDetailView(DomainView, DetailView):
@@ -128,8 +118,8 @@ class DomainCreateView(DomainView, CreateView):
                 domain.soa = domain.master_domain.soa
                 domain.save()
         except ValidationError, e:
-            return render(request, "cydns/cydns_form.html", {'form':
-                                                               domain_form, 'form_title': 'Create Domain'})
+            return render(request, "cydns/cydns_form.html",
+                         {'form': domain_form, 'form_title': 'Create Domain'})
         # Success. Redirect.
         messages.success(request, "{0} was successfully created.".
                          format(domain.name))
@@ -137,8 +127,8 @@ class DomainCreateView(DomainView, CreateView):
 
     def get(self, request, *args, **kwargs):
         domain_form = DomainForm()
-        return render(request, "cydns/cydns_form.html", {'form': domain_form,
-                                                           'form_title': 'Create Domain'})
+        return render(request, "cydns/cydns_form.html",
+                      {'form': domain_form, 'form_title': 'Create Domain'})
 
 
 class DomainUpdateView(DomainView, UpdateView):

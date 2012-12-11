@@ -15,17 +15,17 @@ class TXTView(object):
 
 
 class TXTDeleteView(TXTView, CydnsDeleteView):
-    """ """
+    """"""
 
 
 class TXTDetailView(TXTView, CydnsDetailView):
-    """ """
+    """"""
     template_name = 'txt/txt_detail.html'
 
 
 class TXTCreateView(TXTView, CydnsCreateView):
-    """ """
+    """"""
 
 
 class TXTUpdateView(TXTView, CydnsUpdateView):
-    """ """
+    """"""

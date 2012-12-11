@@ -23,6 +23,7 @@ def humanized_class_name(obj, *args, **kwargs):
 
     return humanized
 
+
 @register.filter
 def humanized_model_name(model_name, *args, **kwargs):
     """

@@ -10,10 +10,24 @@ class Site(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=255)
     parent = models.ForeignKey("self", null=True, blank=True)
 
+    class Meta:
+        db_table = 'site'
+        unique_together = ('name', 'parent')
+
+    def __str__(self):
+        return "{0}".format(self.get_full_name())
+
+    def __repr__(self):
+        return "<Site {0}>".format(str(self))
+
     def details(self):
-        return (
-            ('Name', self.get_full_name()),
+        """For tables."""
+        data = super(Site, self).details()
+        data['data'] = (
+            ('Name', self),
+            ('Parent', self.parent),
         )
+        return data
 
     def get_full_name(self):
         full_name = self.name
@@ -36,16 +50,6 @@ class Site(models.Model, ObjectUrlMixin):
                 full_name = target.name + '.' + target.parent.name
                 target = target.parent
         return full_name
-
-    class Meta:
-        db_table = 'site'
-        unique_together = ('name', 'parent')
-
-    def __str__(self):
-        return "{0}".format(self.get_full_name())
-
-    def __repr__(self):
-        return "<Site {0}>".format(str(self))
 
 
 class SiteKeyValue(KeyValue):
