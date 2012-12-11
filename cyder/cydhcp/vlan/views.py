@@ -1,21 +1,12 @@
-import re
-
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.forms.util import ErrorList
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render
-
-import ipaddr
+from django.core.exceptions import ValidationError
+from django.forms.util import ErrorList, ErrorDict
+from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.vlan.forms import VlanForm
-from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
 from cyder.cydhcp.views import (CydhcpCreateView, CydhcpDeleteView,
                                 CydhcpListView)
+from cyder.cydhcp.vlan.forms import VlanForm
+from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
 
 
 class VlanView(object):

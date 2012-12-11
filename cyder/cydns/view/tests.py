@@ -14,7 +14,6 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-import pdb
 
 
 class ViewTests(TestCase):

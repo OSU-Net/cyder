@@ -12,7 +12,6 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 
 import ipaddr
-import pdb
 
 
 class Network(models.Model, ObjectUrlMixin):

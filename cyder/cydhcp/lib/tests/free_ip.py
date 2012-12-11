@@ -15,7 +15,6 @@ from cyder.core.system.models import System
 
 import random
 import ipaddr
-import pdb
 
 
 class LibTestsFreeIP(TestCase):

@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cydns
 import cydhcp
-import pdb
 
 
 def fqdn_search(fqdn, *args, **kwargs):

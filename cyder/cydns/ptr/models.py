@@ -10,7 +10,6 @@ from cyder.cydns.validation import validate_views
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
-import pdb
 
 
 class PTR(Ip, ObjectUrlMixin):

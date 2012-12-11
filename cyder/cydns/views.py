@@ -121,13 +121,13 @@ def cydns_record_view(request, record_type=None):
             return_form._errors = form._errors
             form = return_form
 
-    object_list = make_paginator(request, Klass.objects.all(), 50)
+    page_obj = make_paginator(request, Klass.objects.all(), 50)
 
     return render(request, 'cydns/cydns_record_view.html', {
         'form': form,
         'obj': record,
-        'object_list': object_list,
-        'object_table': tablefy(object_list, views=True),
+        'page_obj': page_obj,
+        'object_table': tablefy(page_obj, views=True),
         'domains': domains,
         'record_type': record_type,
         'pk': pk,

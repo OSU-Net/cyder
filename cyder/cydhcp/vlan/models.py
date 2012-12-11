@@ -7,7 +7,6 @@ from cyder.cydns.domain.models import Domain
 
 from cyder.cydhcp.keyvalue.models import KeyValue
 
-import pdb
 
 
 class Vlan(models.Model, ObjectUrlMixin):

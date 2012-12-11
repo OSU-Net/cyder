@@ -7,7 +7,6 @@ from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 import ipaddr
-import pdb
 
 
 class NetworkForm(forms.ModelForm):

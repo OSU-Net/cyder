@@ -1,7 +1,6 @@
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
-import pdb
 
 # This doesn't work for IPv6
 

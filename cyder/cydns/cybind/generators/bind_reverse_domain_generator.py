@@ -2,7 +2,6 @@ from cyder.cydns.cybind.generators.bind_domain_generator import render_ns
 from cyder.cydns.ip.utils import ip_to_dns_form
 
 from string import Template
-import pdb
 # Knobs
 ip_just = 30
 name_just = 1

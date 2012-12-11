@@ -12,7 +12,6 @@ from cyder.cydns.ptr.models import PTR
 
 import ipaddr
 
-import pdb
 
 
 class Range(models.Model, ObjectUrlMixin):

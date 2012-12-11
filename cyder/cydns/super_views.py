@@ -8,7 +8,6 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.domain.models import Domain
 
 import simplejson as json
-import pdb
 
 
 def cydns_home(request):

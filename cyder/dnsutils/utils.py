@@ -1,5 +1,4 @@
 INV_URL = "https://inventory.mozilla.org/en-US/"
-import pdb
 import re
 
 INFO = 0

@@ -19,7 +19,6 @@ from cyder.cydns.soa.models import SOA
 
 from cyder.cydhcp.site.models import Site
 
-import pdb
 
 
 class AutoDeleteTests(TestCase):

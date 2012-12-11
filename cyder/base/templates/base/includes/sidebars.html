@@ -1,7 +1,7 @@
 {% macro render_sidebar(request, urls_names) -%}
   {% for named_url, name in urls_names %}
     <span class="nav-item">
-      <a class="nav-link {{ 'selected' if url(named_url) in request.path }}" href="{{ url(named_url) }}">{{ name }}</a>
+      <a class="nav-link {{ 'selected' if url(named_url) == request.path }}" href="{{ url(named_url) }}">{{ name }}</a>
     </span>
   {% endfor %}
 {%- endmacro %}

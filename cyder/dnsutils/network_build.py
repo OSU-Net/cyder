@@ -10,36 +10,17 @@ from cyder.dnsutils.build_nics import *
 from cyder.dnsutils.utils import *
 import ipaddr
 from cyder.core.system.models import ScheduledTask
-from django.conf import settings
-from django.conf import settings
-from django.conf import settings
-from django.conf import settings
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.network.utils import calc_parent
 from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 import truth
 
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.mx.models import MX
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.soa.models import SOA
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.view_tests import random_label
-from cyder.cydns.txt.models import TXT
 from cyder.cydns.domain.utils import *
-from cyder.cydns.ip.utils import ip_to_domain_name
-from cyder.cydns.view.models import View
 
-import os.path
 import pprint
 import re
 import ipaddr
-import pdb
 
 DEBUG = 3
 DO_DEBUG = False

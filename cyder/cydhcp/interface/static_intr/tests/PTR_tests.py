@@ -8,7 +8,6 @@ from cyder.cydns.ptr.models import PTR
 
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
-import pdb
 
 
 class PTRStaticRegTests(TestCase):

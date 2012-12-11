@@ -11,25 +11,37 @@ http://www.cssstickyfooter.com
 vertical margins (top and bottom) to add spacing, else those margins get added to total height
 and your footer gets pushed down a bit more, creating vertical scroll bars in the browser */
 
-html, body {height: 100%;}
+html, body {
+    height: 100%;
+}
 
-.wrap {min-height: 100%;}
+.wrap {
+    min-height: 100%;
+}
 
-.main {overflow:auto;
-    padding-bottom: 280px;}  /* must be same height as the footer */
+.main {
+    display: block;
+    overflow:auto;
+    padding-bottom: 280px;
+    min-height: 150%;
+}  /* must be same height as the footer */
 
-#footer {position: relative;
+#footer {
+    clear: both;
+    position: relative;
     margin-top: -140px; /* negative value of footer height */
     height: 140px;
-    clear:both;}
+    clear:both;
+}
 
 /*Opera Fix*/
-body:before {/* thanks to Maleika (Kohoutec)*/
-content:"";
-height:100%;
-float:left;
-width:0;
-margin-top:-32767px;/* thank you Erik J - negate effect of float*/
+body:before {
+    /* thanks to Maleika (Kohoutec)*/
+    content:"";
+    height:100%;
+    float:left;
+    width:0;
+    margin-top:-32767px;/* thank you Erik J - negate effect of float*/
 }
 
 /* IMPORTANT

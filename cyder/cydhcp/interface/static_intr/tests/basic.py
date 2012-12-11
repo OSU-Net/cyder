@@ -10,7 +10,6 @@ from cyder.cydns.view.models import View
 
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
-import pdb
 
 
 class StaticInterTests(TestCase):

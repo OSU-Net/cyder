@@ -23,7 +23,6 @@ from cyder.cydns.view.models import View
 
 import simplejson as json
 from urlparse import urlparse, urlsplit
-import pdb
 
 API_VERSION = '1'
 

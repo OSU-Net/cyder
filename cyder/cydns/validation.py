@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 
 import string
-import pdb
 import ipaddr
 
 

@@ -29,7 +29,6 @@ from tastypie.authorization import Authorization
 
 from tastypie.api import Api
 
-import pdb
 import sys
 import re
 import traceback

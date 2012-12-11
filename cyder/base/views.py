@@ -17,13 +17,12 @@ class BaseListView(ListView):
     """
     template_name = 'list.html'
     extra_context = None
-    paginate_by = 200
+    paginate_by = 50
 
     def get_context_data(self, **kwargs):
         context = super(ListView, self).get_context_data(**kwargs)
-        context['form_title'] = "{0} Details".format(
-            self.form_class.Meta.model.__name__
-        )
+        context['Model'] = self.model
+        context['model_name'] = self.model._meta.db_table
 
         # Extra_context takes precedence over original values in context.
         try:

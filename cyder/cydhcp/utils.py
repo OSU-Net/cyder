@@ -1,7 +1,6 @@
 from django.db.models import Q
 
 import ipaddr
-import pdb
 
 
 def get_interfaces_range(start, stop):

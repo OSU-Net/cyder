@@ -15,7 +15,6 @@ from cyder.cydns.txt.models import TXT
 
 from lexer import Lexer
 import re
-import pdb
 
 PR_UOP = 1
 PR_LPAREN = 2

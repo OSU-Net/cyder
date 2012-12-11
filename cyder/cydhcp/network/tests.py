@@ -8,7 +8,6 @@ from cyder.cydns.ip.models import ipv6_to_longs
 
 import random
 import ipaddr
-import pdb
 
 
 class NetworkTests(TestCase):

@@ -10,7 +10,6 @@ import ipaddr
 import re
 import copy
 import pprint
-import pdb
 import string
 
 pp = pprint.PrettyPrinter(indent=2)

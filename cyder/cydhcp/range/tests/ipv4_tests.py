@@ -7,7 +7,6 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 
-import pdb
 
 
 class V4RangeTests(TestCase):

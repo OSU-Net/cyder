@@ -11,7 +11,6 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 
-import pdb
 
 
 class NSTestsModels(TestCase):
