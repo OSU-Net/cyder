@@ -37,6 +37,27 @@ class Site(models.Model, ObjectUrlMixin):
                 target = target.parent
         return full_name
 
+    def get_related_networks(self):
+        networks = set()
+        related_networks = Network.objects.filter(site = self)
+        if related_networks:
+            for network in related_networks:
+                networks.update(network.get_related_networks())
+            return networks.update(related_networks)
+        return set([self])
+       
+    def get_related_sites(self):
+        sites = set()
+        related_sites = Site.objects.filters(parent=site)
+        if related_sites:
+            for site in related_sites:
+                sites.update(site.get_related_sites())
+            return sites.update(set(related_sites))
+        return set([self])
+
+    def get_related(self):
+        return set([self.get_related_networks(), self.get_related_sites()])
+
     class Meta:
         db_table = 'site'
         unique_together = ('name', 'parent')
