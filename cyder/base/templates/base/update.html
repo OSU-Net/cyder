@@ -1,16 +1,16 @@
 {% extends "base/base.html" %}
 
 {% block title %}
-    {{ form.instance }}
+  {{ form.instance }}
 {% endblock %}
 
 {% block header %}
-    Editing {{ form.instance }}
+  Editing {{ form.instance }}
 {% endblock %}
 
 {% block content %}
-    <form class="well horizontal-form" method="post" action="">
-        {{ form }}
-        <input type="submit" value="submit"/>
-    </form>
+  <form class="form" method="post" action="">
+    {{ form }}
+    <input type="submit" value="submit">
+  </form>
 {% endblock %}

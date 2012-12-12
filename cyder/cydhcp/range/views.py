@@ -1,7 +1,7 @@
 import json
 
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -171,7 +171,7 @@ def redirect_to_range_from_ip(request):
     if ip_type == '4':
         try:
             ip_upper, ip_lower = 0, int(ipaddr.IPv4Address(ip_str))
-        except ipaddr.AddressValueError, e:
+        except ipaddr.AddressValueError:
             return HttpResponse(json.dumps(
                 {'success': False,
                  'message': "Failure to recognize {0} as an IPv4 "

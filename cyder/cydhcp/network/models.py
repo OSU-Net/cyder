@@ -3,13 +3,14 @@ from django.core.exceptions import ValidationError
 
 import ipaddr
 
-from cyder.cydns.validation import validate_ip_type
-from cyder.cydns.ip.models import ipv6_to_longs
+from cyder.base.constants import IP_TYPES
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, two_to_four
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.base.mixins import ObjectUrlMixin
-from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydns.validation import validate_ip_type
+from cyder.cydns.ip.models import ipv6_to_longs
 
 
 class Network(models.Model, ObjectUrlMixin):
@@ -20,8 +21,7 @@ class Network(models.Model, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
 
     # NETWORK/NETMASK FIELDS
-    IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
-    ip_type = models.CharField(max_length=1, choices=IP_TYPE_CHOICES,
+    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items(),
                                editable=True, validators=[validate_ip_type])
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)

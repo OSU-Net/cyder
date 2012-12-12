@@ -1,31 +1,31 @@
 from django import forms
-from django.db.models.query import EmptyQuerySet
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 
+import ipaddr
+
+from cyder.base.constants import IP_TYPES
+from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.network.utils import calc_networks, calc_parent
-import ipaddr
+from cydns.ip.models import ipv6_to_longs
 
 
 class NetworkForm(forms.ModelForm):
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         empty_label="(Defaults to parent's site.)",
-        required=False
+        required=False,
+        help_text='The site the network will be put into. '
+                  'Defaults to parent network\'s site'
     )
 
     def __init__(self, *args, **kwargs):
         super(NetworkForm, self).__init__(*args, **kwargs)
         self.fields['dhcpd_raw_include'].label = "DHCP Config Extras"
         self.fields['dhcpd_raw_include'].widget.attrs.update(
-                {'cols': '80',
-                 'style': \
-                    'display: none;\
-                     width: 680px;'\
-                }
-        )
+            {'cols': '80',
+             'style':
+             'display: none; width: 680px;'})
 
     class Meta:
         model = Network
@@ -54,10 +54,13 @@ class NetworkForm(forms.ModelForm):
             raise ValidationError("This network has already been allocated.")
         return cleaned_data
 
+
 class NetworkForm_network(forms.Form):
-    network = forms.CharField(required=True)
-    IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
-    ip_type = forms.ChoiceField(choices=IP_TYPE_CHOICES)
+    network = forms.CharField(
+        required=True,
+        help_text='Enter the address and mask in '
+                 'CIDR notation (e.g. 10.0.0.0/24)')
+    ip_type = forms.ChoiceField(choices=IP_TYPES.items())
 
 
 class NetworkForm_site(forms.Form):
@@ -70,17 +73,13 @@ class NetworkForm_site(forms.Form):
 class NetworkForm_vlan(forms.Form):
     vlan = forms.ModelChoiceField(
         queryset=Vlan.objects.all(),
-        required=True
+        required=True,
     )
-
-    CREATE_CHOICE = (
-        ("existing", "Use existing VLAN template."),
-        ("new", "Create New Vlan"),
-        ("none", "Don't assign a vlan"),
-    )
-
-    create_choice = forms.ChoiceField(widget=forms.RadioSelect, initial='e',
-                                      choices=CREATE_CHOICE)
-
     name = forms.CharField()
     number = forms.IntegerField()
+    create_choice = forms.ChoiceField(
+        widget=forms.RadioSelect, initial='e', choices=(
+            ('existing', 'Use existing VLAN template.'),
+            ('new', 'Create New Vlan'),
+            ('none', 'Don\'t assign a vlan'),
+        ))

@@ -17,8 +17,8 @@
     {% include "base/includes/pagination.html" %}
   {% endif %}
 
-  {% if object_list and has_attr(object_list[0], 'eg_metadata') %}
-    <span id="eg" data-metadata="{{ object_list[0].eg_metadata()|to_json }}"></span>
+  {% if page_obj and has_attr(page_obj[0], 'eg_metadata') %}
+    <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
     <form id="enable-eg">
       <input type="checkbox" name="eg" id="enable-eg-check">
       <label for="enable-eg-check"> Enable spreadsheet view</label>
@@ -27,7 +27,7 @@
 
   {% if object_table %}
     {{ render_table(object_table) }}
-  {% else %}
+  {% elif page_obj %}
     {% include "base/includes/object_table.html" %}
   {% endif %}
 
