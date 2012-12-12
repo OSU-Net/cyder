@@ -1,14 +1,11 @@
 {% extends "cydhcp/cydhcp_base.html" %}
 
-
 {% block content %}
-    <form class="well form-horizontal" method="post" action="">
-        {% for form in range_formset.forms %}
-            {{ form }}
-            <br>
-        {% endfor %}
-        <br>
-        <input type="submit" value="Submit" />
-        <input type="hidden" value="{{ action }}", name="action"/>
-    </form>
+  <form class="well form-horizontal" method="post" action="">
+    {% for form in range_formset.forms %}
+      {{ form }}
+    {% endfor %}
+    <input type="submit" value="Submit" />
+    <input type="hidden" value="{{ action }}", name="action"/>
+  </form>
 {% endblock %}
