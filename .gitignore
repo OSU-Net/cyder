@@ -25,3 +25,6 @@ private_tests.py
 tastytools/*.pyc
 *.pyc
 mdns/migrate/zone_configs/
+local.py
+.sass-cache
+*.css

@@ -1,0 +1,85 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Cyder | {% block title %}Cyder{% endblock %}</title>
+    <link rel="shortcut icon" href="/media/img/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Gravitas+One' rel='stylesheet' type='text/css'>
+    {{ css('cyder_css') }}
+    {{ js('cyder_js') }}
+    {% block head %}{% endblock %}
+  </head>
+
+  <body>
+    <div id="header">
+      <div class="container">
+        <h1><a href="/">Cyder</a></h1>
+        <ul class="nav">
+          <li class="userinfo">
+            <span>
+              <a href="#">{{ request.user.username }}</a>
+              <p>on</p>
+              <a href="{{ request.session.ctnr.get_detail_url() }}">{{ request.session.ctnr.name }}</a>
+            </span>
+          </li>
+          <li class="{{ 'selected' if url('cydns-index') in request.path }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
+          <li class="{{ 'selected' if url('cydhcp-index') in request.path }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
+        </ul>
+        <ul class="nav nav-right">
+          <li class="{{ 'selected' if url('search') in request.path }}"><a class="navlink" href="{{ url('search') }}">Search</a></li>
+          <li><a class="navlink" href="{{ url('logout') }}">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="subheader">
+      <div class="container">
+        <span id="ctnr">
+          <form action="{{ url('ctnr-change') }}" method="post">
+            <span>Container</span>
+            <select name="ctnr_name" class="submit-on-change">
+              <option value="{{ request.session.ctnr }}">{{ request.session.ctnr.name }}</option>
+              {% for ctnr in request.session.ctnrs %}
+                <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </span>
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <span id="search">
+          <form action="{{ url('search') }}" method="get">
+            <input type="text" name="search" value="Search..."></input>
+          </form>
+        </span>
+      </div>
+    </div>
+
+    <div class="main wrap container">
+        <img id="kid" style="position: fixed; right: -25px; top: 95px; opacity:.3;" src="/media/img/cyder.gif">
+
+        {% if self.sidebar() %}<div id="sidebar">{% endif %}
+        {% block sidebar %}{% endblock %}
+        {% if self.sidebar() %}</div>{% endif %}
+
+        <div class="page-header">
+          <h1 id="title">{{ self.title() }}</h1>
+          <span id="action-bar" class="c">{% block action_bar %}{% endblock %}</span>
+        </div>
+
+        <div class="content">
+          {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <div id="footer">
+      <a href="http://github.com/ngokevin/chili">Source Code</a>
+    </div>
+  </body>
+</html>

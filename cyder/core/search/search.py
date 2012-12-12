@@ -1,13 +1,13 @@
 from django.db.models import Q
-from cyder.core.network.utils import calc_parent
+from cyder.cydhcp.network.utils import calc_parent
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-import mozdns
-import core
+import cydns
+import cydhcp
 import operator
-from cyder.core.network.models import Network
-from cyder.core.site.models import Site
-from cyder.core.vlan.models import Vlan
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.vlan.models import Vlan
 
 import pdb
 import ipaddr
@@ -228,7 +228,7 @@ def compile_search(args):
             # We need to AND all of these Q set's together.
             mega_filter = tuple(range_queries)
             if 'A' in type_fs:
-                AddressRecord = mozdns.address_record.models.AddressRecord
+                AddressRecord = cydns.address_record.models.AddressRecord
                 addrs = AddressRecord.objects.filter(
                     *mega_filter).order_by('ip_upper').order_by('ip_lower')
             else:
@@ -236,14 +236,14 @@ def compile_search(args):
             cnames = None
             domains = None
             if "INTR" in type_fs:
-                StaticInterface = core.interface.static_intr.models.StaticInterface
+                StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
                 intrs = StaticInterface.objects.filter(*mega_filter)
             else:
                 intrs = None
             mxs = None
             nss = None
             if "PTR" in type_fs:
-                PTR = mozdns.ptr.models.PTR
+                PTR = cydns.ptr.models.PTR
                 ptrs = PTR.objects.filter(*mega_filter)
             else:
                 ptrs = None
@@ -252,61 +252,61 @@ def compile_search(args):
             sshfps = None
         else:
             if "A" in type_fs:
-                AddressRecord = mozdns.address_record.models.AddressRecord
+                AddressRecord = cydns.address_record.models.AddressRecord
                 addrs = AddressRecord.objects.all()
             else:
                 addrs = None
 
             if "CNAME" in type_fs:
-                CNAME = mozdns.cname.models.CNAME
+                CNAME = cydns.cname.models.CNAME
                 cnames = CNAME.objects.all()
             else:
                 cnames = None
 
             if "DOMAIN" in type_fs:
-                Domain = mozdns.domain.models.Domain
+                Domain = cydns.domain.models.Domain
                 domains = Domain.objects.all()
             else:
                 domains = None
 
             if "INTR" in type_fs:
-                StaticInterface = core.interface.static_intr.models.StaticInterface
+                StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
                 intrs = StaticInterface.objects.all()
             else:
                 intrs = None
 
             if "MX" in type_fs:
-                MX = mozdns.mx.models.MX
+                MX = cydns.mx.models.MX
                 mxs = MX.objects.all()
             else:
                 mxs = None
 
             if "NS" in type_fs:
-                Nameserver = mozdns.nameserver.models.Nameserver
+                Nameserver = cydns.nameserver.models.Nameserver
                 nss = Nameserver.objects.all()
             else:
                 nss = None
 
             if "PTR" in type_fs:
-                PTR = mozdns.ptr.models.PTR
+                PTR = cydns.ptr.models.PTR
                 ptrs = PTR.objects.all()
             else:
                 ptrs = None
 
             if "SRV" in type_fs:
-                SRV = mozdns.srv.models.SRV
+                SRV = cydns.srv.models.SRV
                 srvs = SRV.objects.all()
             else:
                 srvs = None
 
             if "TXT" in type_fs:
-                TXT = mozdns.txt.models.TXT
+                TXT = cydns.txt.models.TXT
                 txts = TXT.objects.all()
             else:
                 txts = None
 
             if "SSHFP" in type_fs:
-                SSHFP = mozdns.sshfp.models.SSHFP
+                SSHFP = cydns.sshfp.models.SSHFP
                 sshfps = SSHFP.objects.all()
             else:
                 sshfps = None
@@ -314,49 +314,49 @@ def compile_search(args):
         if range_queries:
             # We need to AND all of these Q set's together.
             mega_filter = tuple(range_queries)
-            AddressRecord = mozdns.address_record.models.AddressRecord
+            AddressRecord = cydns.address_record.models.AddressRecord
             addrs = AddressRecord.objects.filter(
                 *mega_filter).order_by('ip_upper').order_by('ip_lower')
             cnames = None
             domains = None
-            StaticInterface = core.interface.static_intr.models.StaticInterface
+            StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
             intrs = StaticInterface.objects.filter(*mega_filter)
             mxs = None
             nss = None
-            PTR = mozdns.ptr.models.PTR
+            PTR = cydns.ptr.models.PTR
             ptrs = PTR.objects.filter(*mega_filter)
             srvs = None
             txts = None
             sshfps = None
         else:
-            AddressRecord = mozdns.address_record.models.AddressRecord
+            AddressRecord = cydns.address_record.models.AddressRecord
             addrs = AddressRecord.objects.all()
 
-            CNAME = mozdns.cname.models.CNAME
+            CNAME = cydns.cname.models.CNAME
             cnames = CNAME.objects.all()
 
-            Domain = mozdns.domain.models.Domain
+            Domain = cydns.domain.models.Domain
             domains = Domain.objects.all()
 
-            StaticInterface = core.interface.static_intr.models.StaticInterface
+            StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
             intrs = StaticInterface.objects.all()
 
-            MX = mozdns.mx.models.MX
+            MX = cydns.mx.models.MX
             mxs = MX.objects.all()
 
-            Nameserver = mozdns.nameserver.models.Nameserver
+            Nameserver = cydns.nameserver.models.Nameserver
             nss = Nameserver.objects.all()
 
-            PTR = mozdns.ptr.models.PTR
+            PTR = cydns.ptr.models.PTR
             ptrs = PTR.objects.all()
 
-            SRV = mozdns.srv.models.SRV
+            SRV = cydns.srv.models.SRV
             srvs = SRV.objects.all()
 
-            TXT = mozdns.txt.models.TXT
+            TXT = cydns.txt.models.TXT
             txts = TXT.objects.all()
 
-            SSHFP = mozdns.sshfp.models.SSHFP
+            SSHFP = cydns.sshfp.models.SSHFP
             sshfps = SSHFP.objects.all()
 
     # Exclude types

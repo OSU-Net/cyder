@@ -1,0 +1,399 @@
+@import "globals.scss";
+
+.container {
+    margin: 0 auto;
+    width: 960px;
+}
+
+html {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+body, .content {
+    background-color: $white;
+}
+
+p, h1, h2, h3, h4 {
+    color: $black;
+}
+
+a {
+    color: $dark-gray;
+    font-weight: bold;
+    text-decoration: none;
+    &:hover {
+        color: $teal;
+    }
+}
+
+ul {
+    list-style-type: none;
+}
+
+hr {
+    color: $white;
+}
+
+input[type="text"], select {
+    background: $white;
+    border-radius: 2px;
+    padding-left: 3px;
+}
+input[type="text"] {
+    color: $light-gray;
+}
+
+a.btn {
+    background: $blue;
+    border-radius: 5px;
+    bottom: 0;
+    color: $white;
+    font-weight: normal;
+    margin-right: 10px;
+    padding: 5px 10px;
+    position: relative;
+    text-decoration: none;
+    right: 0;
+    transition: .5s .1s;
+    &:hover {
+        @include box-shadow(2px 2px 3px $dark-gray);
+        background: lighten($blue, 5%);
+        bottom: 2px;
+        color: $white;
+        cursor: pointer;
+        right: 2px;
+    }
+    &:active {
+        @include box-shadow(none);
+        background: darken($blue, 10%);
+        bottom: 0;
+        right: 0;
+        transition: .03s 0s;
+    }
+    &.red {
+        background: $red;
+        &:hover {
+            background: lighten($red, 5%);
+        }
+        &:active {
+            background: darken($red, 10%);
+        }
+    }
+}
+
+.center {
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+div#header {
+    background-color: $dark-gray;
+    height: 50px;
+    padding-top: 10px;
+    h1 {
+        top: 3px;
+        display: inline;
+        font-family: 'Gravitas One', cursive;
+        font-size: 30px;
+        a {
+            color: $white;
+            float: left;
+            font-weight: normal;
+            &:hover {
+                color: $teal;
+            }
+        }
+    }
+    .nav {
+        bottom: 18px;
+        clear: left;
+        display: inline;
+        padding-left: 13px;
+        position: relative;
+        &.nav-right {
+            bottom: 16px;
+            clear: none;
+            float: right;
+            /* Remove with blueprint */
+            margin-bottom: 0;
+            margin-right: 0;
+            li {
+                border-width: 0 1px 0 0;
+                display: inline-block;
+                padding-bottom: 13px;
+                &:first-child {
+                    border-width: 0 1px;
+                }
+                a.navlink {
+                    padding-bottom: 19px;
+                }
+            }
+        }
+        li {
+            border: solid $black 1px;
+            border-width: 0 1px 0 0;
+            display: inline;
+            margin-right: -5px;
+            padding: 30px 0 13px;
+            &:first-child {
+                border-width: 0 1px 0 1px;
+            }
+            &:not(:first-child) {
+                padding-left: 2px;
+            }
+            &.selected {
+                border: none;
+                a.navlink, a.navlink:hover {
+                    background: $light-gray;
+                    color: $dark-gray;
+                }
+            }
+            &.userinfo {
+                background: darken($dark-gray, 3%);
+                display: inline-block;
+                padding-top: 0;
+                padding-bottom: 13px;
+                text-align: center;
+                span {
+                    font-size: 12px;
+                    position: relative;
+                    top: 10px;
+                }
+                a {
+                    color: $teal;
+                    font-size: 13px;
+                    padding: 5px 10px;
+                    &:hover {
+                        color: $white;
+                    }
+                }
+                p {
+                    color: $white;
+                    line-height: 13px;
+                    margin-bottom: 0;
+                }
+            }
+            a.navlink {
+                bottom: 4px;
+                color: $white;
+                font-size: 18px;
+                font-weight: normal;
+                position: relative;
+                padding: 30px 30px 17px;
+                &:hover {
+                    background: $black;
+                    color: $teal;
+                }
+            }
+            div.logged-in {
+                color: $white;
+                font-size: 13px;
+                position: absolute;
+                a {
+                    color: $white;
+                    &:hover {
+                        color: $teal;
+                    }
+                }
+            }
+        }
+    }
+}
+
+#subheader {
+    background-color: $dark-blue;
+    height: 30px;
+    padding-top: 5px;
+    #ctnr {
+        top: 2px;
+        float: left;
+        position: relative;
+        span {
+            color: $white;
+            font-size: 13px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        select {
+            padding-left: 2px;
+        }
+    }
+    #search {
+        form {
+            bottom: 8px;
+            clear: right;
+            float: right;
+            display: inline;
+            position: relative;
+        }
+    }
+}
+
+#sidebar {
+    float: left;
+    height: 100%;
+    margin-right: 26px;
+    width: 150px;
+    a.nav-link {
+        background: $black;
+        border: 1px solid $dark-gray;
+        color: $white;
+        display: block;
+        padding: 13px;
+        &:hover {
+            color: $teal;
+            background: $dark-gray;
+            text-decoration: none;
+        }
+        &.selected {
+            background: $light-gray;
+            border: none;
+            color: $dark-gray;
+            &:hover {
+                color: $dark-gray;
+            }
+        }
+        .nav-item {
+            display: block;
+            position: relative;
+            right: auto;
+        }
+    }
+}
+
+.main {
+    clear: both;
+    font-size: 13px;
+    height: 100%;
+    padding-top: 13px;
+    position: relative;
+    #kid { @include img-box-shadow(); }
+    .content {
+        clear: left;
+        display: inline-block;
+        margin-top: 13px;
+        overflow: visible;
+        // Container - sidebar width - sidebar gutter - gutter.
+        // TODO: gridding.
+        width: 771px;
+    }
+}
+
+.page-header {
+    #title {
+        display: inline;
+    }
+    #action-bar {
+        float: right;
+        margin-top: 5px;
+    }
+}
+
+/* Pagination */
+.pagination {
+    height: 36px;
+    margin: 18px 0;
+    ul {
+      display: inline-block;
+      *display: inline;
+      /* IE7 inline-block hack */
+      *zoom: 1;
+      margin-left: 0;
+      margin-bottom: 0;
+      border-radius: 3px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    li {
+      display: inline;
+    }
+    a {
+      float: left;
+      padding: 0 14px;
+      line-height: 34px;
+      text-decoration: none;
+      border: 1px solid #ddd;
+      border-left-width: 0;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+    .active a {
+      background-color: #f5f5f5;
+      color: #999999;
+      cursor: default;
+    }
+    .disabled {
+      span {
+        color: #999999;
+        background-color: transparent;
+        cursor: default;
+      }
+      a {
+        color: #999999;
+        background-color: transparent;
+        cursor: default;
+        &:hover {
+          color: #999999;
+          background-color: transparent;
+          cursor: default;
+        }
+      }
+    }
+    li {
+      &:first-child a {
+        border-left-width: 1px;
+        border-radius: 3px 0 0 3px;
+      }
+      &:last-child a {
+        border-radius: 0 3px 3px 0;
+      }
+    }
+}
+.pagination-centered {
+    text-align: center;
+}
+.pagination-right {
+    text-align: right;
+}
+
+#footer {
+    background-color: $dark-blue;
+    color: $white;
+    font-size: 13px;
+    padding-top: 13px;
+    text-align: center;
+    a {
+        color: $white;
+        &:hover {
+            color: $teal;
+        }
+    }
+}
+
+/* Clearfix */
+.c:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+.c {
+    display: inline-block;
+}
+html[xmlns] .c {
+    display: block;
+}
+* html .c {
+    height: 1%;
+}

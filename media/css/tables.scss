@@ -1,0 +1,87 @@
+@import "globals.scss";
+
+table.table {
+    padding: 13px 0;
+    margin-bottom: 13px;
+    width: 100%;
+    td, th {
+        padding: 5px 0;
+    }
+    thead {
+        background: $dark-blue;
+        color: $white;
+    }
+    tbody {
+        tr {
+            td {
+                a, p, span {
+                    position: relative;
+                    left: 13px;
+                }
+            }
+            &:hover {
+                background: darken($white, 10%);
+                cursor: pointer;
+            }
+            &:nth-child(even) {
+                background: $light-blue;
+                &:hover {
+                    background: darken($light-blue, 10%);
+                }
+            }
+        }
+    }
+}
+
+table {
+    &.tablesorter {
+      font-family: arial;
+      background-color: #CDCDCD;
+      margin: 10px 0pt 15px;
+      font-size: 8pt;
+      text-align: left;
+      border: 1px solid #bbbbbb;
+      thead tr th, tfoot tr th {
+        background-color: #b3bbbb;
+        border: 1px solid #FFF;
+        font-size: 8pt;
+        padding: 4px;
+      }
+      thead tr .header {
+        background-image: url(images/bg.gif);
+        background-repeat: no-repeat;
+        background-position: center right;
+        cursor: pointer;
+      }
+      tbody {
+        td {
+          color: #3D3D3D;
+          padding: 4px;
+          background-color: #FFF;
+          vertical-align: top;
+        }
+        tr.odd td {
+          background-color: #F0F0F6;
+        }
+      }
+      thead tr {
+        .headerSortUp {
+          background-image: url(images/asc.gif);
+        }
+        .headerSortDown {
+          background-image: url(images/desc.gif);
+          background-color: #8dbdd8;
+        }
+        .headerSortUp {
+          background-color: #8dbdd8;
+        }
+      }
+      td {
+        border-right: 1px solid #bbbbbb;
+        border-bottom: 1px solid #bbbbbb;
+        &:last-child, &.last, &:last-child, &.last {
+          border-right-width: 0px;
+        }
+      }
+    }
+}

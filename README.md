@@ -1,17 +1,16 @@
-Mozilla Inventory
-=======
+Cyder
+=====
 
-Mozilla's Inventory is a web application template based on Playdoh and django.
+Cyder is a DNS/DHCP web manager written in Python.
 
-To get things up and running I installed:
+Installation
+============
 
-* python-ldap
-=======
 ```
-sudo pip install ipaddr
-
-# Use my fork. git://github.com/uberj/dnspython.git
+git submodule update --init --recursive
+pip install requirements/dev.txt
 pip install -e git+git://github.com/uberj/dnspython.git#egg=dnspython
-
-sudo pip install easyzone
+rubygems install sass
+python manage.py syncdb
+python manage.py loaddata cyder/core/fixtures/initial_data.json
 ```

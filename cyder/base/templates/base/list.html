@@ -1,0 +1,30 @@
+{% extends "base/base.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block title %}
+  {% if object_list %}
+    {{ object_list[0]|humanized_class_name + 's'}}
+  {% endif %}
+{% endblock %}
+
+{% block header %}
+  {% if object_list %}
+    {{ object_list[0]|humanized_class_name + 's'}}
+  {% endif %}
+{% endblock %}
+
+{% block action_bar %}
+{% endblock %}
+
+{% block content %}
+  {% block form %}{% endblock %}
+
+  {% if object_list and object_list.paginator %}
+    {% include "base/includes/pagination.html" %}
+  {% endif %}
+
+  {% if object_table and object_table[0] and object_table[1] and object_table[2] %}
+    {{ render_table(object_table[0], object_table[1], object_table[2]) }}
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base/list.html" %}
+
+{% block title %}
+    {{ record_type|prettify_record_type + 's' }}
+{% endblock %}
+
+{% block header %}
+    {{ record_type|prettify_record_type + 's' }}
+{% endblock %}
+
+{% block sidebar %}
+  {% include "cydns/includes/cydns_sidebar.html" %}
+{% endblock %}
+
+{% block form %}
+  {{ form }}
+  {{ js('cydns') }}
+{% endblock %}
