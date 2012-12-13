@@ -154,7 +154,7 @@ class Network(models.Model, ObjectUrlMixin):
     def get_related_network(self):
         networks = set()
         _, related_networks = calc_networks(self)
-        networks.update(related_networks)
+        networks.update(set(related_networks))
         while related_networks:
             subnets = set()
             for network in related_networks:
@@ -162,7 +162,7 @@ class Network(models.Model, ObjectUrlMixin):
                 subnets.update(set(sub_networks))
             networks.update(subnets)
             related_networks = subnets
-        return related_networks
+        return networks
         
     def update_network(self):
         """This function will look at the value of network_str to update other
