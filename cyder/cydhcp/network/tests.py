@@ -127,3 +127,35 @@ class NetworkTests(TestCase):
         r.delete()
         s.delete()
         self.assertEqual(len(Network.objects.filter(pk=s_pk)), 0)
+
+    def test_get_related_networks(self):
+        network = "129.0.0.1"
+        prefixlen = "20"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s1 = self.do_basic_add(**kwargs)
+
+        network = "129.0.2.1"
+        prefixlen = "25"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s2 = self.do_basic_add(**kwargs)
+
+        network = "129.0.4.1"
+        prefixlen = "29"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s3 = self.do_basic_add(**kwargs)
+
+        network = "129.0.2.1"
+        prefixlen = "29"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s4 = self.do_basic_add(**kwargs)
+       
+        network = "233.0.2.1"
+        prefixlen = "29"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s5 = self.do_basic_add(**kwargs)
+
+        related = s1.get_related_network()
+        self.assertEqual(set([s2,s3,s4]), set(related))
+
+        
+        

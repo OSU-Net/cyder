@@ -9,6 +9,7 @@ from cyder.cydhcp.site.models import Site
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydhcp.network.utils import calc_networks
 
 import ipaddr
 import pdb
@@ -29,13 +30,13 @@ class Network(models.Model, ObjectUrlMixin):
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
     network_str = models.CharField(max_length=49, editable=True,
-                                   help_text="The network address of this network.")
+                    help_text="The network address of this network.")
     prefixlen = models.PositiveIntegerField(null=False,
-                                            help_text="The number of binary 1's in the netmask.")
+                    help_text="The number of binary 1's in the netmask.")
 
-    dhcpd_raw_include = models.TextField(null=True, blank=True, help_text="The"
-                                         " config options in this box will be included *as is* in the "
-                                         "dhcpd.conf file for this subnet.")
+    dhcpd_raw_include = models.TextField(null=True, blank=True, 
+                help_text = "The config options in this box will be included "
+                            "*as is* in the dhcpd.conf file for this subnet.")
 
     network = None
 
@@ -150,6 +151,19 @@ class Network(models.Model, ObjectUrlMixin):
             int(self.network.network), int(self.network.broadcast))
         self.ipf = IPFilter(self, self.ip_type, *ip_info)
 
+    def get_related_network(self):
+        networks = set()
+        _, related_networks = calc_networks(self)
+        networks.update(related_networks)
+        while related_networks:
+            subnets = set()
+            for network in related_networks:
+                _, sub_networks = calc_networks(network)
+                subnets.update(set(sub_networks))
+            networks.update(subnets)
+            related_networks = subnets
+        return related_networks
+        
     def update_network(self):
         """This function will look at the value of network_str to update other
         fields in the network object. This function will also set the 'network'
