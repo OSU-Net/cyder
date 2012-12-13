@@ -14,9 +14,9 @@ import pdb
 
 class NetworkTests(TestCase):
 
-    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None, parent=None):
-        if parent:
-            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=parent)
+    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None, site=None):
+        if site:
+            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=site)
         else:
             s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
         s.clean()
@@ -163,11 +163,44 @@ class NetworkTests(TestCase):
 
         network = "233.0.2.1"
         prefixlen = "29"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'parent': s}
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s}
         s5 = self.do_basic_add(**kwargs)
 
         related = s1.get_related_networks()
         self.assertEqual(set([s2,s3,s4]), set(related))
+
+    def test_get_related_sites(self):
+        s1 = self.do_basic_add_site("Kerr")
+        s2 = self.do_basic_add_site("Business", parent=s1)
+        s3 = self.do_basic_add_site("Registration", parent=s1)
+
+        network = "129.0.0.0"
+        prefixlen = "19"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site':s1}
+        n1 = self.do_basic_add(**kwargs)
+
+        network = "129.0.1.0"
+        prefixlen = "24"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site':s2}
+        n2 = self.do_basic_add(**kwargs)
+
+        network = "129.0.1.0"
+        prefixlen = "22"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s3}
+        n3 = self.do_basic_add(**kwargs)
+
+        network = "129.0.1.0"
+        prefixlen = "25"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        n4 = self.do_basic_add(**kwargs)
+
+        """
+        if we choose s1 as a site then s2, s3, n1, n2, n3, and n4 are returned
+
+        if we choose n2 then n3 and n4 should be returned
+
+        if we choose s3 then n2, n3, and n4 s
+
 
 
 
