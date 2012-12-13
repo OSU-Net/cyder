@@ -9,7 +9,6 @@ from cyder.cydhcp.site.models import Site
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.network.utils import calc_networks
 
 import ipaddr
 import pdb
@@ -34,7 +33,7 @@ class Network(models.Model, ObjectUrlMixin):
     prefixlen = models.PositiveIntegerField(null=False,
                     help_text="The number of binary 1's in the netmask.")
 
-    dhcpd_raw_include = models.TextField(null=True, blank=True, 
+    dhcpd_raw_include = models.TextField(null=True, blank=True,
                 help_text = "The config options in this box will be included "
                             "*as is* in the dhcpd.conf file for this subnet.")
 
@@ -72,9 +71,9 @@ class Network(models.Model, ObjectUrlMixin):
             raise ValidationError("Cannot delete this network because it has "
                                   "child ranges")
         super(Network, self).delete(*args, **kwargs)
-
+    """
     def check_valid_site(self):
-        from cyder.core.network.utils import calc_networks, calc_parent
+        from cyder.cydhcp.network.utils import calc_networks, calc_parent
         self.update_network()
         # If the network contains or is contained in another network make sure
         # that they share a parent
@@ -89,10 +88,10 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
         if fail:
-            raise ValidationError("This network has child or parent networks"
+            raise ValidationError("This network has child or parent networks "
                                   "which have different parent sites")
         return
-
+    """
     def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
         # in the subnet?
@@ -141,7 +140,7 @@ class Network(models.Model, ObjectUrlMixin):
 
     def clean(self):
         self.check_valid_range()
-        self.check_valid_site()
+        #self.check_valid_site()
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
@@ -151,10 +150,10 @@ class Network(models.Model, ObjectUrlMixin):
             int(self.network.network), int(self.network.broadcast))
         self.ipf = IPFilter(self, self.ip_type, *ip_info)
 
-    def get_related_network(self):
-        networks = set()
+    def get_related_networks(self):
+        from cyder.cydhcp.network.utils import calc_networks
         _, related_networks = calc_networks(self)
-        networks.update(set(related_networks))
+        networks = set(related_networks)
         while related_networks:
             subnets = set()
             for network in related_networks:
@@ -163,7 +162,13 @@ class Network(models.Model, ObjectUrlMixin):
             networks.update(subnets)
             related_networks = subnets
         return networks
-        
+
+    def get_related_sites(self):
+        sites = set()
+        for network in self.get_related_networks():
+            sites.update(network.site)
+        return sites
+
     def update_network(self):
         """This function will look at the value of network_str to update other
         fields in the network object. This function will also set the 'network'

@@ -1,5 +1,5 @@
-from cyder.cydhcp.network.models import Network
 import ipaddr
+from cyder.cydhcp.network.models import Network
 
 def calc_networks(network):
     network.update_network()

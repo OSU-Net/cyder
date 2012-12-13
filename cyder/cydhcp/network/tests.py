@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
@@ -13,9 +14,8 @@ import pdb
 
 class NetworkTests(TestCase):
 
-    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None, site=None):
-        if site:
-            parent = Site.objects.get(id = site)
+    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None, parent=None):
+        if parent:
             s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=parent)
         else:
             s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
@@ -24,18 +24,14 @@ class NetworkTests(TestCase):
         self.assertTrue(s)
         return s
 
-    def do_basic_add_site(self, name):
-        s = Site(name=name)
+    def do_basic_add_site(self, name, parent=None):
+        s = Site(name=name, parent=parent)
         s.clean()
         s.save()
         self.assertTrue(s)
         return s
-
+    """
     def test_bad_site(self):
-        """
-        This test ensures that networks which contain each other
-        share a parent site
-        """
         network = "111.111.111.0"
         prefixlen1 = "24"
         prefixlen2 = "28"
@@ -48,6 +44,21 @@ class NetworkTests(TestCase):
         kwargs = {'network_str': network + '/' + prefixlen2, 'ip_type': '4', 'site': s2}
         n2 = Network(**kwargs)
         self.assertRaises(ValidationError, n2.clean)
+
+    def test_valid_site(self):
+        network = "111.111.111.0"
+        prefixlen1 = "24"
+        prefixlen2 = "28"
+        site1 = "Kerr"
+        site2 = "Newport"
+        s1 = self.do_basic_add_site({'name': site1})
+        s2 = self.do_basic_add_site({'name': site2})
+        kwargs = {'network': network, 'prefixlen': prefixlen1, 'ip_type': '4', 'site': s1.id}
+        n1 = self.do_basic_add(**kwargs)
+        kwargs = {'network_str': network + '/' + prefixlen2, 'ip_type': '4', 'site': s2}
+        n2 = Network(**kwargs)
+        self.assertRaises(ValidationError, n2.clean)
+    """
 
     def test1_create_ipv6(self):
         network = "f::"
@@ -129,6 +140,7 @@ class NetworkTests(TestCase):
         self.assertEqual(len(Network.objects.filter(pk=s_pk)), 0)
 
     def test_get_related_networks(self):
+        s = self.do_basic_add_site("other")
         network = "129.0.0.1"
         prefixlen = "20"
         kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
@@ -148,14 +160,14 @@ class NetworkTests(TestCase):
         prefixlen = "29"
         kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
         s4 = self.do_basic_add(**kwargs)
-       
+
         network = "233.0.2.1"
         prefixlen = "29"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'parent': s}
         s5 = self.do_basic_add(**kwargs)
 
         related = s1.get_related_network()
         self.assertEqual(set([s2,s3,s4]), set(related))
 
-        
-        
+
+
