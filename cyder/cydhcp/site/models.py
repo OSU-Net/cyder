@@ -37,7 +37,7 @@ class Site(models.Model, ObjectUrlMixin):
                 target = target.parent
         return full_name
 
-    def get_related_networks(self, related_sites)
+    def get_related_networks(self, related_sites):
         networks = set()
         for site in related_sites:
             root_networks = Network.objects.filter(site=site)
@@ -47,12 +47,12 @@ class Site(models.Model, ObjectUrlMixin):
         return networks
 
     def get_related_sites(self):
-        related_sites = Site.objects.filters(parent=self)
+        related_sites = Site.objects.filter(parent=self)
         sites = set(related_sites)
         while related_sites:
             sub_sites = set()
             for site in related_sites:
-                sub_sites.update(set(Site.objects.filters(parent=site)))
+                sub_sites.update(set(Site.objects.filter(parent=site)))
             related_sites = sub_sites
             sites.update(set(related_sites))
         return sites

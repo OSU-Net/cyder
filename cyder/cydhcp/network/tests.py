@@ -166,7 +166,7 @@ class NetworkTests(TestCase):
         kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'parent': s}
         s5 = self.do_basic_add(**kwargs)
 
-        related = s1.get_related_network()
+        related = s1.get_related_networks()
         self.assertEqual(set([s2,s3,s4]), set(related))
 
 

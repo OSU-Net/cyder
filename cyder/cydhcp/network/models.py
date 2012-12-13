@@ -163,11 +163,16 @@ class Network(models.Model, ObjectUrlMixin):
             related_networks = subnets
         return networks
 
-    def get_related_sites(self):
+    def get_related_sites(self, related_networks):
         sites = set()
-        for network in self.get_related_networks():
+        for network in related_networks:
             sites.update(network.site)
         return sites
+
+    def get_related(self):
+        related_networks = self.get_related_networks()
+        related_sites = self.get_related_sites(related_networks)
+        return [related_sites, related_networks]
 
     def update_network(self):
         """This function will look at the value of network_str to update other
