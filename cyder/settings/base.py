@@ -54,13 +54,13 @@ MINIFY_BUNDLES = {
         'tables': (
             'js/tables.js',
         ),
-        'cydns': {
+        'cydns': (
             'js/cydns/cydns_record_form.js',
             'js/cydns/cydns_record_form_utils.js',
-        },
-        'ctnr': {
+        ),
+        'ctnr': (
             'js/ctnr/ctnr.js',
-        }
+        )
     }
 }
 
