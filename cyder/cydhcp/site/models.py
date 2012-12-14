@@ -57,6 +57,13 @@ class Site(models.Model, ObjectUrlMixin):
             sites.update(set(related_sites))
         return sites
 
+    def get_related_vlans(self,related_networks):
+        vlans = set()
+        for network in related_networks:
+            if network.vlan:
+                vlands.update(network.vlan)
+        return vlans
+
     def get_related(self):
         related_sites = self.get_related_sites()
         related_networks =  self.get_related_networks(related_sites)
