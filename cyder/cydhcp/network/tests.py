@@ -201,6 +201,8 @@ class NetworkTests(TestCase):
 
         if we choose s3 then n2, n3, and n4 s
 
+        if we choose
+        """
 
 
 
