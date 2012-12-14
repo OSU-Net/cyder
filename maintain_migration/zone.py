@@ -4,7 +4,7 @@ from optparse import OptionParser
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from . import chili_manage, fix_maintain, maintain_dump
+import chili_manage, fix_maintain, maintain_dump
 from utilities import clean_mac, config, get_cursor, ip2long, long2ip
 
 from cyder.core.systems.models import System
