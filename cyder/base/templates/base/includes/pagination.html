@@ -1,4 +1,4 @@
-<div class="pagination">
+<div class="pagination .pagination-left">
   <ul>
   <li><a href="?page=1">First</a></li>
   {% if page_obj.has_previous() %}
@@ -13,8 +13,8 @@
 
   {% for page in range(1, page_obj.paginator.num_pages + 1) %}
     {# Divide range of pages into 10 so it doesn't fill up screen.
-       So 100-page-paginator would show 0...10...20...30 #}
-    {% if page_obj.paginator.num_pages / 10 == 0 or page_obj.paginator.num_pages < 10 %}
+       e.g. 100-page-paginator would show 0...10...20...30 #}
+    {% if page % (page_obj.paginator.num_pages / 12)|round == 0 or page_obj.paginator.num_pages < 10 %}
       {% if page_obj.number == page %}
         <li class="active">
           <a href="#">{{ page }}</a>
