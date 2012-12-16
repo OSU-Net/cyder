@@ -1,7 +1,9 @@
 from django.conf.urls.defaults import *
 
-from cyder.core.ctnr.views import *
+from cyder.core.system.views import *
 
-urlpatterns = patterns('cyder.core.system.views',
-    url(r'^$', 'systems', name='systems-index'),
+
+urlpatterns = patterns('',
+    url(r'^$', SystemListView.as_view(), name='system'),
+    url(r'^system/create/$', SystemListView.as_view(), name='system-create'),
 )

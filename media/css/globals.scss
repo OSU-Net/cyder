@@ -31,3 +31,13 @@ $green: #00C90D;
     background-image:      -o-linear-gradient($color1, $color2);
     background-image:         linear-gradient($color1, $color2);
 }
+
+@mixin radial-gradient($color1, $color2) {
+    background: $color2;
+    background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 500, from($color1), to($color2));
+    background: -webkit-radial-gradient($color1, $color2);
+    background: -moz-radial-gradient($color1, $color2);
+    background: -ms-radial-gradient($color1, $color2);
+    background: -o-radial-gradient($color1, $color2);
+    background: radial-gradient($color1, $color2);
+}
