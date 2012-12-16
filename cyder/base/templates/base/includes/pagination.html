@@ -1,4 +1,6 @@
-<div class="pagination .pagination-left">
+{% if page_obj.paginator.num_pages > 1 %}
+
+<div class="pagination">
   <ul>
   <li><a href="?page=1">First</a></li>
   {% if page_obj.has_previous() %}
@@ -39,3 +41,5 @@
     <li><a href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
   </ul>
 </div>
+
+{% endif %}
