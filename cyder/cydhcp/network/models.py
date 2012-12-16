@@ -151,12 +151,7 @@ class Network(models.Model, ObjectUrlMixin):
         self.ipf = IPFilter(self, self.ip_type, *ip_info)
 
     def get_related_vlans(self, related_networks):
-        lanss = set()
-        for network in related_networks:
-            if network.vlan:
-                vlans.update(network.vlan)
-        return vlans
-
+        return set([network.vlan for network in related_networks])
 
     def get_related_networks(self):
         from cyder.cydhcp.network.utils import calc_networks
@@ -172,11 +167,7 @@ class Network(models.Model, ObjectUrlMixin):
         return networks
 
     def get_related_sites(self, related_networks):
-        sites = set()
-        for network in related_networks:
-            if network.site:
-                sites.update(network.site)
-        return sites
+        return set([network.site for network in related_networks])
 
     def get_related(self):
         related_networks = self.get_related_networks()

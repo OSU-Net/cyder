@@ -52,22 +52,19 @@ class Site(models.Model, ObjectUrlMixin):
         while related_sites:
             sub_sites = set()
             for site in related_sites:
-                sub_sites.update(set(Site.objects.filter(parent=site)))
+                sub_sites.update(Site.objects.filter(parent=site))
             related_sites = sub_sites
             sites.update(set(related_sites))
         return sites
 
     def get_related_vlans(self,related_networks):
-        vlans = set()
-        for network in related_networks:
-            if network.vlan:
-                vlands.update(network.vlan)
-        return vlans
+        return set([network.vlan for network in related_networks])
 
     def get_related(self):
         related_sites = self.get_related_sites()
         related_networks =  self.get_related_networks(related_sites)
-        return [related_sites, related_networks]
+        related_vlans = self.get_related_vlans(realted_networks)
+        return [related_sites, related_networks, related_vlans]
 
     class Meta:
         db_table = 'site'
