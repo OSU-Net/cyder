@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Cyder | {% block title %}Cyder{% endblock %}</title>
-    <link rel="shortcut icon" href="/media/img/favicon.ico">
+    <link rel="shortcut icon" href="/media/img/favicon.ico?v=3">
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Gravitas+One' rel='stylesheet' type='text/css'>
     {{ css('cyder_css') }}
@@ -23,6 +23,7 @@
               <a href="{{ request.session.ctnr.get_detail_url() }}">{{ request.session.ctnr.name }}</a>
             </span>
           </li>
+          <li class="{{ 'selected' if url('system') == request.path }}"><a class="navlink" href="{{ url('system') }}">Systems</a></li>
           <li class="{{ 'selected' if url('cydns-index') in request.path }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
           <li class="{{ 'selected' if url('cydhcp-index') in request.path }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
         </ul>

@@ -1,7 +1,6 @@
 import re
-import pdb
-import cyder.core.systems.models
-from cyder.core.systems.models import System
+import cyder.core.system.models
+from cyder.core.system.models import System
 from cyder.dnsutils.utils import *
 
 import pprint

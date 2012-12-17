@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 
 import string
-import pdb
 import ipaddr
 
 
@@ -338,7 +337,7 @@ def validate_name(fqdn):
 
     for label in fqdn.split('.'):
         if not label:
-            raise ValidationError("Ivalid name {0}. Empty label."
+            raise ValidationError("Invalid name {0}. Empty label."
                                   .format(label))
         validate_label(label)
 
@@ -427,9 +426,9 @@ def validate_srv_label(srv_label):
     """This function is the same as :func:`validate_label` expect
     :class:`SRV` records can have a ``_`` preceding its label.
     """
-    if srv_label == "":
+    if not srv_label:
         return
-    if srv_label and srv_label[0] != '_':
+    if srv_label[0] != '_':
         raise ValidationError("Error: SRV label must start with '_'")
     validate_label(srv_label[1:])  # Get rid of '_'
 

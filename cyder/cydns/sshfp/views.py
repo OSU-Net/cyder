@@ -16,21 +16,21 @@ class SSHFPView(object):
 
 
 class SSHFPDeleteView(SSHFPView, CydnsDeleteView):
-    """ """
+    """"""
 
 
 class SSHFPDetailView(SSHFPView, CydnsDetailView):
-    """ """
+    """"""
     template_name = 'sshfp/sshfp_detail.html'
 
 
 class SSHFPCreateView(SSHFPView, CydnsCreateView):
-    """ """
+    """"""
 
 
 class SSHFPUpdateView(SSHFPView, CydnsUpdateView):
-    """ """
+    """"""
 
 
 class SSHFPListView(SSHFPView, CydnsListView):
-    """ """
+    """"""

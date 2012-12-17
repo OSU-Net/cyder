@@ -1,38 +1,8 @@
-from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.shortcuts import render
-from django.contrib import messages
-from django.forms.util import ErrorList
 from django.http import HttpResponse
-
-from cyder.core.systems.models import System
-
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
-from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
-from cyder.cydhcp.interface.static_intr.forms import FullStaticInterfaceForm
-from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceQuickForm
-from cyder.cydhcp.interface.static_intr.forms import CombineForm
-from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs, get_aa, get_docstrings
-from cyder.cydhcp.keyvalue.utils import get_docstrings, dict_to_kv
-from cyder.cydhcp.views import CoreDeleteView, CoreCreateView
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.network.utils import calc_parent_str
-
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
 
 from cyder.core.search.parser import parse
 from cyder.core.search.search import compile_search
-
-import pdb
-import re
-import ipaddr
-import operator
-import simplejson as json
-
 
 from jinja2 import Environment, PackageLoader
 env = Environment(loader=PackageLoader('cydhcp.bulk_change', 'templates'))

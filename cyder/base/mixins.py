@@ -1,5 +1,4 @@
-from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import NoReverseMatch, reverse
 
 
 class ObjectUrlMixin(object):
@@ -9,39 +8,46 @@ class ObjectUrlMixin(object):
     calculate URLs. Because of this, you must use the app label of your
     class when declaring urls in your urls.py.
     """
+    @classmethod
+    def get_list_url(cls):
+        """
+        Return the 'list' url of an object. Class method since don't
+        need specific instance of object.
+        """
+        return reverse(cls._meta.db_table)
+
+    @classmethod
+    def get_create_url(cls):
+        """
+        Return the create url of the type of object (to be posted to).
+        """
+        return reverse(cls._meta.db_table + '-create')
+
+    def get_update_url(self):
+        """
+        Return the update url of an object (to be posted to). Not class method
+        because object pk needed.
+        """
+        return reverse(self._meta.db_table + '-update', args=[self.pk])
+
+    def get_delete_url(self):
+        """
+        Return the delete url of an object (to be posted to).
+        """
+        return reverse(self._meta.db_table + '-delete', args=[self.pk])
+
     def get_detail_url(self):
         """
         Return the detail url of an object.
         """
-        return reverse(self._meta.db_table.replace('-', '_') + '-detail',
-                       args=[self.pk])
+        return reverse(self._meta.db_table + '-detail', args=[self.pk])
 
-    def get_list_url(self):
+    def details(self):
         """
-        Return the list url of an object.
-        """
-        return reverse(self._meta.db_table.replace('-', '_') + '-list')
-
-    def get_update_url(self):
-        """
-        Return the update url of an object.
-        """
-        return reverse(self._meta.db_table.replace('-', '_') + '-update',
-                       args=[self.pk])
-
-    def get_delete_url(self):
-        """
-        Return the delete url of an object.
-        """
-        return reverse(self._meta.db_table.replace('-', '_') + '-delete',
-                       args=[self.pk])
-
-    def get_create_url(self):
-        """
-        Return the create url of the type of object.
+        Return base details with generic postback URL for editable tables.
         """
         try:
-            return reverse(self._meta.db_table.replace('-', '_') + '-create',
-                           args=[self.pk])
-        except:
-            return reverse(self._meta.db_table.replace('-', '_') + '-create')
+            return {'url': reverse(self._meta.db_table + '-table-update',
+                                   args=[self.pk])}
+        except NoReverseMatch:
+            return {'url': ''}

@@ -23,21 +23,34 @@ class CNAME(CydnsRecord):
     id = models.AutoField(primary_key=True)
     target = models.CharField(max_length=100, validators=[validate_name],
                               help_text="CNAME Target")
-    target_domain = models.ForeignKey(Domain, null=True,
-                                      related_name='target_domains', blank=True,
-                                      on_delete=models.SET_NULL)
+    target_domain = models.ForeignKey(
+        Domain, null=True, related_name='target_domains', blank=True,
+        on_delete=models.SET_NULL)
 
     search_fields = ('fqdn', 'target')
-
-    def details(self):
-        return  (
-            ('FQDN', self.fqdn),
-            ('Target', self.target),
-        )
 
     class Meta:
         db_table = 'cname'
         unique_together = ('domain', 'label', 'target')
+
+    def __str__(self):
+        return "{0} CNAME {1}".format(self.fqdn, self.target)
+
+    def details(self):
+        """For tables."""
+        data = super(CNAME, self).details()
+        data['data'] = [
+            ('Domain', self.target_domain),
+            ('Target', self.target),
+        ]
+        return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'target', 'datatype': 'string', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):
@@ -60,9 +73,6 @@ class CNAME(CydnsRecord):
         self.check_SOA_condition()
         self.target_domain = _name_to_domain(self.target)
         self.existing_node_check()
-
-    def __str__(self):
-        return "{0} CNAME {1}".format(self.fqdn, self.target)
 
     def check_SOA_condition(self):
         """We need to check if the domain is the root domain in a zone.

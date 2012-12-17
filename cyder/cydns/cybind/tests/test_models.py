@@ -13,7 +13,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
-from cyder.core.systems.models import System
+from cyder.core.system.models import System
 
 
 class DirtySOATests(cyder.base.tests.TestCase):

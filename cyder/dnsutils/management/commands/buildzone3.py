@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
 from cyder.dnsutils.zone_migrate import buildzone3
-import pdb
 
 
 class Command(BaseCommand):

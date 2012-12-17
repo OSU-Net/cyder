@@ -1,7 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.cydns.domain.models import Domain, name_to_domain
+from cyder.base.constants import IP_TYPES
+from cyder.cydns.domain.models import name_to_domain
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
@@ -39,8 +40,9 @@ class Ip(models.Model):
     belongs to is done by applying a 'longest prefix match' to all
     reverse domains in the :ref:`domain` table.
 
-    :ref:`address_record` objects need the ip validation that happens in this class
-    but do not need their :class:`Ip`'s to be tied back to a reverse domain.
+    :ref:`address_record` objects need the ip validation that happens
+    in this class but do not need their :class:`Ip`'s to be tied back to
+    a reverse domain.
 
     :ref:`staticinterface` objects need to have their ip tied back to reverse
     domain because they represent a :ref:`PTR` record as well as an
@@ -54,7 +56,6 @@ class Ip(models.Model):
         This class is abstract.
 
     """
-    IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
     ip_str = models.CharField(max_length=39, editable=True, verbose_name='IP',
                               help_text="IP Address in IPv4 or IPv6 Format")
     # ip_upper/lower are calculated from ip_str on ip_clean.
@@ -73,8 +74,9 @@ class Ip(models.Model):
     # related field 'Domain.addressrecord_set'. Add a related_name argument to
     # the definition for 'domain'.
     # reverse_domain = models.ForeignKey(Domain, null=True, blank=True)
-    ip_type = models.CharField(max_length=1, choices=IP_TYPE_CHOICES,
-                               editable=True, help_text='IPv4 or IPv6 Address type')
+    ip_type = models.CharField(
+            max_length=1, choices=IP_TYPES.items(), editable=True,
+            help_text='IPv4 or IPv6 Address type')
 
     class Meta:
         abstract = True
@@ -93,7 +95,7 @@ class Ip(models.Model):
             try:
                 ip = ipaddr.IPv4Address(self.ip_str)
                 self.ip_str = str(ip)
-            except ipaddr.AddressValueError, e:
+            except ipaddr.AddressValueError:
                 raise ValidationError("Invalid Ip address {0}".
                                       format(self.ip_str))
 
@@ -118,7 +120,7 @@ class Ip(models.Model):
             try:
                 ip = ipaddr.IPv6Address(self.ip_str)
                 self.ip_str = str(ip)
-            except ipaddr.AddressValueError, e:
+            except ipaddr.AddressValueError:
                 raise ValidationError("Invalid ip {0} for IPv6s.".
                                       format(self.ip_str))
 
@@ -158,7 +160,7 @@ def ipv6_to_longs(addr):
     """
     try:
         ip = ipaddr.IPv6Address(addr)
-    except ipaddr.AddressValueError, e:
+    except ipaddr.AddressValueError:
         raise ValidationError("AddressValueError: Invalid IPv6 address {0}".
                               format(addr))
     # TODO, use int() instead of _int. Make sure tests pass

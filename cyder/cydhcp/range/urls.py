@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from cyder.cydhcp.range.views import *
 
 urlpatterns = patterns('',
-    url(r'^$', csrf_exempt(RangeListView.as_view()), name='range-list'),
+    url(r'^$', csrf_exempt(RangeListView.as_view()), name='range'),
     url(r'find_range/',
        csrf_exempt(redirect_to_range_from_ip), name='range-find'),
     url(r'create/$', csrf_exempt(

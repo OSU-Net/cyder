@@ -2,14 +2,13 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.core.systems.models import System
+from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
-import pdb
 
 
 class V6StaticInterTests(TestCase):

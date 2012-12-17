@@ -22,18 +22,36 @@ class MX(CydnsRecord):
                                            validators=[validate_mx_priority])
     search_fields = ('fqdn', 'server')
 
+    class Meta:
+        db_table = 'mx'
+        unique_together = ('domain', 'label', 'server', 'priority')
+
+    def __str__(self):
+        return "{0} {1} {3} {4} {5}".format(self.fqdn, self.ttl, 'IN', 'MX',
+                                            self.priority, self.server)
+
+    def __repr__(self):
+        return "<MX '{0}'>".format(str(self))
+
     def details(self):
-        return  (
-            ('FQDN', self.fqdn),
+        """For tables."""
+        data = super(MX, self).details()
+        data['data'] = [
+            ('Domain', self.domain),
             ('Server', self.server),
             ('Priority', self.priority),
             ('TTL', self.ttl)
-        )
+        ]
+        return data
 
-    class Meta:
-        db_table = 'mx'
-        # label and domain in CydnsRecord
-        unique_together = ('domain', 'label', 'server', 'priority')
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'server', 'datatype': 'string', 'editable': True},
+            {'name': 'priority', 'datatype': 'integer', 'editable': True},
+            {'name': 'ttl', 'datatype': 'integer', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):
@@ -48,13 +66,6 @@ class MX(CydnsRecord):
         super(MX, self).check_for_delegation()
         super(MX, self).check_for_cname()
         self.no_point_to_cname()
-
-    def __str__(self):
-        return "{0} {1} {3} {4} {5}".format(self.fqdn, self.ttl, 'IN', 'MX',
-                                            self.priority, self.server)
-
-    def __repr__(self):
-        return "<MX '{0}'>".format(str(self))
 
     def no_point_to_cname(self):
         """MX records should not point to CNAMES."""

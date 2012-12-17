@@ -9,15 +9,20 @@ table.table {
     }
     thead {
         background: $dark-blue;
-        color: $white;
+        th {
+            color: $white;
+            a {
+                color: $white;
+                &:hover {
+                    color: $teal;
+                }
+            }
+        }
     }
     tbody {
         tr {
             td {
-                a, p, span {
-                    position: relative;
-                    left: 13px;
-                }
+                text-align: center;
             }
             &:hover {
                 background: darken($white, 10%);

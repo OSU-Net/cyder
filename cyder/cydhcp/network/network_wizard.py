@@ -1,29 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.shortcuts import render
-from django.contrib import messages
 from django.forms.util import ErrorList, ErrorDict
-from django.http import HttpResponse
 
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
+import ipaddr
+
+from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.forms import *
-from cyder.cydhcp.network.utils import calc_networks, calc_parent_str
+from cyder.cydhcp.network.utils import calc_parent_str
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.site.forms import SiteForm
-from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
-from cyder.cydhcp.range.forms import RangeForm
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView
 from cyder.cydns.ip.models import ipv6_to_longs
-
-from django.forms.formsets import formset_factory
-from django.http import HttpResponse
-import json
-import re
-import pdb
-import ipaddr
 
 def test_wizard(request):
     net_form = NetworkForm_network()
@@ -209,9 +196,10 @@ def network_wizard1(request):
                 form.is_valid()
                 nvars = request.session['net_wiz_vars']
                 if 'create_choice' not in form.data:
-                    raise ValidationError("Select whether you are using an "
-                                          "exiting Vlan or if you are going to make a "
-                                          "new one.")
+                    raise ValidationError(
+                        "Select whether you are using an "
+                        "exiting Vlan or if you are going to make a "
+                        "new one.")
                 create_choice = form.data['create_choice']
                 if create_choice == 'new':
                     if 'name' not in form.data:
@@ -223,14 +211,16 @@ def network_wizard1(request):
                     vlan_name = form.data['name']
                     vlan_number = form.data['number']
                     if not (vlan_name and vlan_number):
-                        raise ValidationError("When creating a new Vlan, "
-                                              "please provide a string for the name and "
-                                              "an integer for the number.")
+                        raise ValidationError(
+                            "When creating a new Vlan, "
+                            "please provide a string for the name and "
+                            "an integer for the number.")
                     vlan = Vlan.objects.filter(name=vlan_name,
                                                number=vlan_number).exists()
                     if vlan:
-                        raise ValidationError("The Vlan {0} {1} already "
-                                              "exists.".format(vlan_name, vlan_number))
+                        raise ValidationError(
+                            "The Vlan {0} {1} already "
+                            "exists.".format(vlan_name, vlan_number))
                     else:
                         nvars['vlan_action'] = "new"
                         nvars['vlan_name'] = vlan_name

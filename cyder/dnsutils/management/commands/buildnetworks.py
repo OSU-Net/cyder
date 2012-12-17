@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
 from cyder.dnsutils.network_build import migrate_networks
-import pdb
 
 
 class Command(BaseCommand):

@@ -1,12 +1,12 @@
 from django.core.exceptions import ValidationError
+from django.forms.util import ErrorList, ErrorDict
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
-from django.forms.util import ErrorList, ErrorDict
 
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA, SOAKeyValue
-from cyder.cydns.utils import tablefy
+from cyder.base.utils import tablefy
 from cyder.cydns.views import CydnsCreateView
 from cyder.cydns.views import CydnsDeleteView
 from cyder.cydns.views import CydnsDetailView
@@ -26,15 +26,15 @@ class SOAView(object):
 
 
 class SOAListView(SOAView, CydnsListView):
-    """ """
+    """"""
 
 
 class SOAUpdateView(SOAView, CydnsUpdateView):
-    """ """
+    """"""
 
 
 class SOADeleteView(SOAView, CydnsDeleteView):
-    """ """
+    """"""
 
 
 class SOADetailView(SOAView, CydnsDetailView):
@@ -48,7 +48,7 @@ class SOADetailView(SOAView, CydnsDetailView):
 
         dom_objects = soa.domain_set.all().order_by('master_domain'
                                                     ).select_related()
-        dom_headers, dom_matrix, dom_urls = tablefy(dom_objects)
+        dom_headers, dom_matrix, dom_urls = tablefy(dom_objects, views=True)
 
         context = dict({
             "dom_headers": dom_headers,
@@ -60,7 +60,7 @@ class SOADetailView(SOAView, CydnsDetailView):
 
 
 class SOACreateView(SOAView, CydnsCreateView):
-    """ """
+    """"""
 
 
 def delete_soa_attr(request, attr_pk):
@@ -118,4 +118,3 @@ def update_soa(request, soa_pk):
             'docs': docs,
             'aa': json.dumps(aa)
         })
-

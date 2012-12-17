@@ -1,13 +1,13 @@
-import operator
 import simplejson as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.forms.util import ErrorDict, ErrorList
-from django.http import Http404, HttpResponse, QueryDict
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.utils import make_paginator
+from cyder.base.utils import (make_paginator, make_megafilter, qd_to_py_dict,
+                              tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -25,13 +25,13 @@ from cyder.cydns.ptr.forms import PTRForm
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA
-from cyder.cydns.srv.forms import FQDNSRVForm, SRVForm
+from cyder.cydns.sshfp.forms import FQDNSSHFPForm, SSHFPForm
+from cyder.cydns.sshfp.models import SSHFP
+from cyder.cydns.srv.forms import SRVForm
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import (ensure_label_domain, prune_tree, slim_form,
-                               tablefy)
-from cyder.cydns.view.models import View
+from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 
 def cydns_record_view(request, record_type=None):
@@ -121,13 +121,13 @@ def cydns_record_view(request, record_type=None):
             return_form._errors = form._errors
             form = return_form
 
-    object_list = make_paginator(request, Klass.objects.all(), 50)
+    page_obj = make_paginator(request, Klass.objects.all(), 50)
 
     return render(request, 'cydns/cydns_record_view.html', {
         'form': form,
         'obj': record,
-        'object_list': object_list,
-        'object_table': tablefy(object_list),
+        'page_obj': page_obj,
+        'object_table': tablefy(page_obj, views=True),
         'domains': domains,
         'record_type': record_type,
         'pk': pk,
@@ -161,35 +161,92 @@ def cydns_search_record(request):
     Returns a list of records of 'record_type' matching 'term'.
     """
     record_type = request.GET.get('record_type', '')
-    query = request.GET.get('term', '')
-    if not (record_type and query):
+    term = request.GET.get('term', '')
+    if not (record_type and term):
         raise Http404
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
 
-    # Try to match query to records.
-    mega_filter = [Q(**{"{0}__icontains".format(field): query}) for field in
-                   Klass.search_fields]
-    mega_filter = reduce(operator.or_, mega_filter)
-
-    records = Klass.objects.filter(mega_filter)[:15]
+    records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]
 
     return HttpResponse(json.dumps(records))
 
 
+def table_update(request, pk, object_type=None):
+    """
+    Called from editableGrid tables when updating a field. Try to update
+    an object specified by pk with the post data.
+    """
+    # Infer object_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
+    object_type = object_type or request.path.split('/')[2]
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses(object_type)
+    obj = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
+
+    # Put updated object into form.
+    form = FQDNFormKlass(instance=obj)
+
+    qd = request.POST.copy()
+    if 'fqdn' in qd:
+        fqdn = qd.pop('fqdn')[0]
+        try:
+            # Call prune tree later if error, else domain leak.
+            label, domain = ensure_label_domain(fqdn)
+        except ValidationError, e:
+            return HttpResponse(json.dumps({'error': e.messages}))
+        qd['label'], qd['domain'] = label, str(domain.pk)
+
+    form = FormKlass(model_to_post(qd, obj), instance=obj)
+    if form.is_valid():
+        form.save()
+        return HttpResponse()
+    else:
+        return HttpResponse(json.dumps({'error': form.errors}))
+
+
+def model_to_post(post, obj):
+    """
+    Updates request's POST dictionary with values from object, for update
+    purposes.
+    """
+    ret = qd_to_py_dict(post)
+    # Copy model values to dict.
+    for k, v in model_to_dict(obj).iteritems():
+        if k not in post:
+            ret[k] = v
+    return ret
+
+
+def get_klasses(record_type):
+    """
+    Given record type string, grab its class and forms.
+    """
+    return {
+        'address_record': (AddressRecord, AddressRecordForm,
+                           AddressRecordFQDNForm),
+        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
+        'domain': (Domain, DomainForm, DomainForm),
+        'mx': (MX, MXForm, FQDNMXForm),
+        'nameserver': (Nameserver, NameserverForm, NameserverForm),
+        'ptr': (PTR, PTRForm, PTRForm),
+        'soa': (SOA, SOAForm, SOAForm),
+        'srv': (SRV, SRVForm, SRVForm),
+        'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
+        'txt': (TXT, TXTForm, FQDNTXTForm),
+    }.get(record_type, (None, None, None))
+
+
 class CydnsListView(BaseListView):
-    """ """
     template_name = 'cydns/cydns_list.html'
 
 
 class CydnsDetailView(BaseDetailView):
-    """ """
     template_name = 'cydns/cydns_detail.html'
 
 
 class CydnsCreateView(BaseCreateView):
-    """ """
     template_name = 'cydns/cydns_form.html'
 
     def get_form(self, form_class):
@@ -217,23 +274,5 @@ class CydnsUpdateView(BaseUpdateView):
 
 
 class CydnsDeleteView(BaseDeleteView):
-    """ """
     template_name = 'cydns/cydns_confirm_delete.html'
     succcess_url = '/cydns/'
-
-
-def get_klasses(record_type):
-    """
-    Given record type string, grab its class and forms.
-    """
-    return {
-        'address_record': (AddressRecord, AddressRecordForm, AddressRecordFQDNForm),
-        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
-        'domain': (Domain, DomainForm, DomainForm),
-        'mx': (MX, MXForm, FQDNMXForm),
-        'nameserver': (Nameserver, NameserverForm, NameserverForm),
-        'ptr': (PTR, PTRForm, PTRForm),
-        'soa': (SOA, SOAForm, SOAForm),
-        'srv': (SRV, SRVForm, FQDNSRVForm),
-        'txt': (TXT, TXTForm, FQDNTXTForm),
-    }.get(record_type, (None, None, None))

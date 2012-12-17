@@ -1,5 +1,4 @@
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.forms.util import ErrorList, ErrorDict
 from django.shortcuts import (get_object_or_404, render, render_to_response,
                               redirect)
@@ -18,26 +17,8 @@ class NSView(object):
     extra_context = {'record_type': 'nameserver'}
 
 
-class NSListView(NSView, CydnsListView):
-    """ """
-    # Wooo. Huge speed boost because of select_related
-    queryset = Nameserver.objects.all().select_related()
-
-
-class NSDeleteView(NSView, CydnsDeleteView):
-    """ """
-
-
-class NSDetailView(NSView, CydnsDetailView):
-    template_name = "nameserver/nameserver_detail.html"
-
-
 class NSCreateView(NSView, CydnsCreateView):
-    """ """
-
-
-class NSUpdateView(NSView, CydnsUpdateView):
-    """ """
+    """"""
 
 
 def update_ns(request, nameserver_pk):
@@ -83,8 +64,6 @@ def create_ns_delegated(request, domain):
         if not domain:
             pass  # Fall through. Maybe send a message saying no domain?
         elif form.is_valid():
-            server = form.cleaned_data['server']
-            ip_str = form.cleaned_data['server_ip_address']
             was_delegated = domain.delegated
             if was_delegated:
                 # Undelegate the domain to add address record.

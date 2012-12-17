@@ -1,11 +1,10 @@
 from django.db import models
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 
 import cydns
 from cyder.cydns.mixins import ObjectUrlMixin
-from cyder.cydhcp.site.models import Site
 from cyder.cydns.soa.models import SOA
-from cyder.cydns.validation import validate_domain_name, _name_type_check
+from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
@@ -80,7 +79,6 @@ class Domain(models.Model, ObjectUrlMixin):
         Deleting a domain will delete all records associated to that domain.
 
     """
-
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, unique=True,
                             validators=[validate_domain_name])
@@ -99,13 +97,31 @@ class Domain(models.Model, ObjectUrlMixin):
     class Meta:
         db_table = 'domain'
 
+    def __str__(self):
+        return '{0}'.format(self.name)
+
+    def __repr__(self):
+        return "<Domain '{0}'>".format(self.name)
+
     def details(self):
-        return (
-            ('Name', self.name),
+        """For tables."""
+        data = super(Domain, self).details()
+        data['data'] = [
+            ('Name', self),
             ('Master Domain', self.master_domain),
-            ('SOA', self.soa.primary if self.soa else self.soa) ,
+            ('SOA', self.soa),
             ('Delegated', self.delegated),
-        )
+        ]
+        return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'master_domain', 'datatype': 'string', 'editable': False},
+            {'name': 'soa', 'datatype': 'string', 'editable': False},
+            {'name': 'delegated', 'datatype': 'boolean', 'editable': True},
+        ]}
 
     def delete(self, *args, **kwargs):
         self.check_for_children()
@@ -156,12 +172,6 @@ class Domain(models.Model, ObjectUrlMixin):
                 objects = qset.all()
                 raise ValidationError("Objects with this name already "
                                       "exist {0}".format(objects))
-
-    def __str__(self):
-        return "{0}".format(self.name)
-
-    def __repr__(self):
-        return "<Domain '{0}'>".format(self.name)
 
     def check_for_children(self):
         if self.domain_set.all().exists():

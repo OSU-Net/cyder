@@ -15,21 +15,21 @@ class ViewView(object):
 
 
 class ViewDeleteView(ViewView, CydnsDeleteView):
-    """ """
+    """"""
 
 
 class ViewDetailView(ViewView, CydnsDetailView):
-    """ """
+    """"""
     template_name = 'view/view_detail.html'
 
 
 class ViewCreateView(ViewView, CydnsCreateView):
-    """ """
+    """"""
 
 
 class ViewUpdateView(ViewView, CydnsUpdateView):
-    """ """
+    """"""
 
 
 class ViewListView(ViewView, CydnsListView):
-    """ """
+    """"""

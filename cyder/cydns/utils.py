@@ -14,48 +14,6 @@ from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
 
 
-def tablefy(objects, views=True):
-    """Given a list of objects, build a matrix that is can be printed as a
-    table. Also return the headers for that table. Populate the given url with
-    the pk of the object. Return all headers, field array, and urls in a
-    seperate lists.
-
-    :param  objects: A list of objects to make the matrix out of.
-    :type   objects: AddressRecords
-    """
-    matrix = []
-    urls = []
-    headers = []
-    if not objects:
-        return (None, None, None)
-
-    # Build the headers
-    for title, value in objects[0].details():
-        headers.append(title)
-    if views:
-        headers.append("Views")
-
-    # Build the matrix and urls
-    for obj in objects:
-        row = []
-        urls.append(obj.get_detail_url())
-        for title, value in obj.details():
-            row.append(value)
-        if views:
-            view_field = ""
-            if hasattr(obj, 'views'):
-                for view in obj.views.all():
-                    view_field += view.name + ", "
-                view_field = view_field.strip(", ")
-                row.append(view_field)
-            else:
-                row.append('None')
-
-        matrix.append(row)
-
-    return (headers, matrix, urls)
-
-
 def slim_form(domain_pk=None, form=None):
     """ What is going on? We want only one domain showing up in the
     choices.  We are replacing the query set with just one object. Ther

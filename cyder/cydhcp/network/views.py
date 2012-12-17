@@ -1,30 +1,17 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db import IntegrityError
+import json
+
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
-from django.contrib import messages
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.network.forms import *
-from cyder.cydhcp.network.utils import calc_networks, calc_parent_str
-from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.site.forms import SiteForm
-from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs, get_dhcp_aa
-from cyder.cydhcp.keyvalue.utils import get_dhcp_docstrings, dict_to_kv
-from cyder.cydhcp.range.forms import RangeForm
-
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView
-from cyder.cydns.ip.models import ipv6_to_longs
-from django.forms.formsets import formset_factory
-
-import re
-import pdb
-import ipaddr
-import simplejson as json
+from cyder.cydhcp.network.models import Network, NetworkKeyValue
+from cyder.cydhcp.network.utils import calc_networks
+from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_dhcp_aa,
+                                         get_dhcp_docstrings, dict_to_kv)
+from cyder.cydhcp.views import CydhcpDeleteView, CydhcpListView
 
 
 class NetworkView(object):
@@ -33,15 +20,13 @@ class NetworkView(object):
     form_class = NetworkForm
 
 
-is_attr = re.compile("^attr_\d+$")
-
-
-class NetworkDeleteView(NetworkView, CoreDeleteView):
+class NetworkDeleteView(NetworkView, CydhcpDeleteView):
     success_url = "/cydhcp/network/"
 
-class NetworkListView(NetworkView, CoreListView):
-    template_name = 'network/network_list.html'
 
+class NetworkListView(NetworkView, CydhcpListView):
+    """"""
+    template_name = 'network/network_list.html'
 
 def delete_network_attr(request, attr_pk):
     """

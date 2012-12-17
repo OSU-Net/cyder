@@ -1,7 +1,6 @@
 from django.db import models
 
 from cyder.cydns.models import CydnsRecord
-import pdb
 
 
 class TXT(CydnsRecord):
@@ -12,26 +11,6 @@ class TXT(CydnsRecord):
     txt_data = models.TextField(help_text="The text data for this record.")
 
     search_fields = ("fqdn", "txt_data")
-
-    def details(self):
-        return (
-            ("FQDN", self.fqdn),
-            ("Text", self.txt_data)
-        )
-
-    @classmethod
-    def get_api_fields(cls):
-        data = super(TXT, cls).get_api_fields() + ['txt_data']
-        return data
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super(TXT, self).save(*args, **kwargs)
-
-    def clean(self):
-        super(TXT, self).clean()
-        super(TXT, self).check_for_delegation()
-        super(TXT, self).check_for_cname()
 
     class Meta:
         db_table = "txt"
@@ -46,3 +25,37 @@ class TXT(CydnsRecord):
 
     def __repr__(self):
         return "<TXT {0}>".format(self)
+
+    def details(self):
+        """For tables."""
+        return {
+            'metadata': [
+                ('id', self.id),
+                ('url', ''),
+            ],
+            'data': [
+                ("Domain", self.domain),
+                ("Text", self.txt_data)
+            ]
+        }
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'text', 'datatype': 'string', 'editable': True},
+        ]}
+
+    @classmethod
+    def get_api_fields(cls):
+        data = super(TXT, cls).get_api_fields() + ['txt_data']
+        return data
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(TXT, self).save(*args, **kwargs)
+
+    def clean(self):
+        super(TXT, self).clean()
+        super(TXT, self).check_for_delegation()
+        super(TXT, self).check_for_cname()

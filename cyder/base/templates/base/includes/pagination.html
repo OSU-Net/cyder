@@ -1,9 +1,11 @@
+{% if page_obj.paginator.num_pages > 1 %}
+
 <div class="pagination">
   <ul>
   <li><a href="?page=1">First</a></li>
-  {% if object_list.has_previous() %}
+  {% if page_obj.has_previous() %}
     <li>
-      <a href="?page={{ object_list.previous_page_number() }}">Prev</a>
+      <a href="?page={{ page_obj.previous_page_number() }}">Prev</a>
     </li>
   {% else %}
     <li class="disabled">
@@ -11,11 +13,12 @@
   {% endif %}
     </li>
 
-  {% for page in range(1, object_list.paginator.num_pages + 1) %}
+  {% set page_interval = (page_obj.paginator.num_pages / 12)|int %}
+  {% for page in range(1, page_obj.paginator.num_pages + 1) %}
     {# Divide range of pages into 10 so it doesn't fill up screen.
-       So 100-page-paginator would show 0...10...20...30 #}
-    {% if object_list.paginator.num_pages / 10 == 0 or object_list.paginator.num_pages < 10 %}
-      {% if object_list.number == page %}
+       e.g. 100-page-paginator would show 0...10...20...30 #}
+    {% if page_obj.paginator.num_pages < 12 or page % page_interval == 0 %}
+      {% if page_obj.number == page %}
         <li class="active">
           <a href="#">{{ page }}</a>
         </li>
@@ -27,14 +30,16 @@
     {% endif %}
   {% endfor %}
 
-  {% if object_list.has_next() %}
+  {% if page_obj.has_next() %}
     <li>
-      <a href="?page={{ object_list.next_page_number() }}">Next</a></li>
+      <a href="?page={{ page_obj.next_page_number() }}">Next</a></li>
   {% else %}
     <li class="disabled">
       <a href="#">Next</a></li>
   {% endif %}
     </li>
-    <li><a href="?page={{ object_list.paginator.num_pages }}">Last</a></li>
+    <li><a href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
   </ul>
 </div>
+
+{% endif %}

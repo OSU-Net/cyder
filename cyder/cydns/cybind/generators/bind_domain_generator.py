@@ -1,5 +1,4 @@
 from string import Template
-import pdb
 # Knobs
 name_just = 40
 type_just = 15

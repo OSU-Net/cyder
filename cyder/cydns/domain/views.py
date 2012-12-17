@@ -1,27 +1,17 @@
-from operator import itemgetter
-import simplejson as json
+import json
 
 from django.contrib import messages
 from django.forms import ValidationError
 from django.http import HttpResponse
-from django.shortcuts import (get_object_or_404, render,
-                              render_to_response, redirect)
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic import CreateView, DetailView, UpdateView
 
+from cyder.base.utils import tablefy
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.forms import DomainForm, DomainUpdateForm
-from cyder.cydns.mx.models import MX
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import tablefy
-from cyder.cydns.view.models import View
-from cyder.cydns.views import CydnsCreateView, CydnsDeleteView, CydnsListView
+from cyder.cydns.views import CydnsDeleteView, CydnsListView
 
 
 class DomainView(object):
@@ -36,7 +26,7 @@ class DomainListView(DomainView, CydnsListView):
 
 
 class DomainDeleteView(DomainView, CydnsDeleteView):
-    """ """
+    """"""
 
 
 class DomainDetailView(DomainView, DetailView):
@@ -49,90 +39,64 @@ class DomainDetailView(DomainView, DetailView):
             return context
 
         # TODO this process can be generalized. Not very high priority.
+        domain_table = tablefy((domain,), views=True)
+
         mx_objects = domain.mx_set.all().order_by('label')
-        mx_headers, mx_matrix, mx_urls = tablefy(mx_objects)
+        mx_table = tablefy(mx_objects, views=True)
 
         srv_objects = domain.srv_set.all().order_by('label')
-        srv_headers, srv_matrix, srv_urls = tablefy(srv_objects)
+        srv_table = tablefy(srv_objects, views=True)
 
         txt_objects = domain.txt_set.all().order_by('label')
-        txt_headers, txt_matrix, txt_urls = tablefy(txt_objects)
+        txt_table = tablefy(txt_objects, views=True)
 
         sshfp_objects = domain.sshfp_set.all().order_by('label')
-        sshfp_headers, sshfp_matrix, sshfp_urls = tablefy(sshfp_objects)
+        sshfp_table = tablefy(sshfp_objects, views=True)
 
         cname_objects = domain.cname_set.order_by('label')
         if cname_objects.count() > 50:
             cname_views = False
         else:
             cname_views = True
-        cname_headers, cname_matrix, cname_urls = tablefy(cname_objects,
-                                                          cname_views)
+        cname_table = tablefy(cname_objects, cname_views)
 
         # TODO, include Static Registrations
         ptr_objects = domain.ptr_set.all().order_by('ip_str')
-        ptr_headers, ptr_matrix, ptr_urls = tablefy(ptr_objects)
+        ptr_table = tablefy(ptr_objects, views=True)
 
         # TODO, include Static Registrations
         all_static_intr = StaticInterface.objects.all()
         intr_objects = domain.staticinterface_set.all().order_by(
             'name').order_by('ip_str')
-        intr_headers, intr_matrix, intr_urls = tablefy(intr_objects)
-
-        address_objects = domain.addressrecord_set.all().order_by('label')
+        intr_table = tablefy(intr_objects, views=True)
 
         # Takes too long to load more than 50.
+        address_objects = domain.addressrecord_set.all().order_by('label')
         if address_objects.count() > 50:
-            adr_views = False
+            address_views = False
         else:
-            adr_views = True
-        adr_headers, adr_matrix, adr_urls = tablefy(address_objects, adr_views)
+            address_views = True
+        address_table = tablefy(address_objects, address_views)
 
         ns_objects = domain.nameserver_set.all().order_by('server')
-        ns_headers, ns_matrix, ns_urls = tablefy(ns_objects)
+        ns_table = tablefy(ns_objects, views=True)
 
         # Join the two dicts
-        context = dict({
-            "ns_headers": ns_headers,
-            "ns_matrix": ns_matrix,
-            "ns_urls": ns_urls,
+        return dict({
+            'address_views': address_views,
+            'cname_views': cname_views,
 
-            "address_headers": adr_headers,
-            "address_matrix": adr_matrix,
-            "address_urls": adr_urls,
-            "address_views": adr_views,
-
-            "mx_headers": mx_headers,
-            "mx_matrix": mx_matrix,
-            "mx_urls": mx_urls,
-
-            "srv_headers": srv_headers,
-            "srv_matrix": srv_matrix,
-            "srv_urls": srv_urls,
-
-            "txt_headers": txt_headers,
-            "txt_matrix": txt_matrix,
-            "txt_urls": txt_urls,
-
-            "sshfp_headers": sshfp_headers,
-            "sshfp_matrix": sshfp_matrix,
-            "sshfp_urls": sshfp_urls,
-
-            "cname_headers": cname_headers,
-            "cname_matrix": cname_matrix,
-            "cname_urls": cname_urls,
-            "cname_views": cname_views,
-
-            "ptr_headers": ptr_headers,
-            "ptr_matrix": ptr_matrix,
-            "ptr_urls": ptr_urls,
-
-            "intr_headers": intr_headers,
-            "intr_matrix": intr_matrix,
-            "intr_urls": intr_urls
+            'address_table': address_table,
+            'cname_table': cname_table,
+            'domain_table': domain_table,
+            'intr_table': intr_table,
+            'mx_table': mx_table,
+            'ns_table': ns_table,
+            'ptr_table': ptr_table,
+            'srv_table': srv_table,
+            'txt_table': txt_table,
+            'sshfp_table': sshfp_table,
         }.items() + context.items())
-
-        return context
 
 
 class DomainCreateView(DomainView, CreateView):
@@ -154,8 +118,8 @@ class DomainCreateView(DomainView, CreateView):
                 domain.soa = domain.master_domain.soa
                 domain.save()
         except ValidationError, e:
-            return render(request, "cydns/cydns_form.html", {'form':
-                                                               domain_form, 'form_title': 'Create Domain'})
+            return render(request, "cydns/cydns_form.html",
+                         {'form': domain_form, 'form_title': 'Create Domain'})
         # Success. Redirect.
         messages.success(request, "{0} was successfully created.".
                          format(domain.name))
@@ -163,8 +127,8 @@ class DomainCreateView(DomainView, CreateView):
 
     def get(self, request, *args, **kwargs):
         domain_form = DomainForm()
-        return render(request, "cydns/cydns_form.html", {'form': domain_form,
-                                                           'form_title': 'Create Domain'})
+        return render(request, "cydns/cydns_form.html",
+                      {'form': domain_form, 'form_title': 'Create Domain'})
 
 
 class DomainUpdateView(DomainView, UpdateView):

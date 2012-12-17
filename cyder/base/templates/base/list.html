@@ -1,30 +1,36 @@
 {% extends "base/base.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% block title %}
-  {% if object_list %}
-    {{ object_list[0]|humanized_class_name + 's'}}
-  {% endif %}
-{% endblock %}
-
-{% block header %}
-  {% if object_list %}
-    {{ object_list[0]|humanized_class_name + 's'}}
-  {% endif %}
-{% endblock %}
+{% block title %}{{ model_name|humanized_model_name + 's'}}{% endblock %}
+{% block header %}{{ model_name|humanized_model_name + 's'}}{% endblock %}
 
 {% block action_bar %}
+  <a class="btn" href="{{ Model.get_create_url() }}">
+    Create {{ model_name|humanized_model_name }}
+  </a>
 {% endblock %}
 
 {% block content %}
   {% block form %}{% endblock %}
 
-  {% if object_list and object_list.paginator %}
+  {% if page_obj %}
     {% include "base/includes/pagination.html" %}
   {% endif %}
 
-  {% if object_table and object_table[0] and object_table[1] and object_table[2] %}
-    {{ render_table(object_table[0], object_table[1], object_table[2]) }}
+  {% if page_obj and has_attr(page_obj[0], 'eg_metadata') %}
+    <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
+    <form id="enable-eg">
+      <input type="checkbox" name="eg" id="enable-eg-check">
+      <label for="enable-eg-check"> Enable spreadsheet view</label>
+    </form>
   {% endif %}
+
+  {% if object_table %}
+    {{ render_table(object_table) }}
+  {% elif page_obj %}
+    {% include "base/includes/object_table.html" %}
+  {% endif %}
+
+  {{ js('tables') }}
 
 {% endblock %}

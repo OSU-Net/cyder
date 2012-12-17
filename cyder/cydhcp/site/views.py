@@ -1,24 +1,19 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
-from django.contrib import messages
 from django.forms.util import ErrorList, ErrorDict
-from django.http import HttpResponse
 
 from cyder.cydhcp.site.models import Site, SiteKeyValue
 from cyder.cydhcp.site.forms import SiteForm
 from cyder.cydhcp.site.utils import get_vlans
 
-from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
 
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView, CoreUpdateView
+from cyder.cydhcp.views import CydhcpDeleteView, CydhcpListView
+from cyder.cydhcp.views import CydhcpCreateView, CydhcpUpdateView
 
 import re
-import pdb
-import ipaddr
 
 
 class SiteView(object):
@@ -30,31 +25,27 @@ class SiteView(object):
 is_attr = re.compile("^attr_\d+$")
 
 
-class SiteDeleteView(SiteView, CoreDeleteView):
+class SiteDeleteView(SiteView, CydhcpDeleteView):
     success_url = "/cydhcp/site/"
 
 
 def delete_site(request, site_pk):
-    site = get_object_or_404(Site, pk=site_pk)
-    if request.method == "POST":
-        return render(request, "site/site_confirm_delete.html")
-
-    else:
-        return render(request, "site/site_confirm_delete.html")
+    get_object_or_404(Site, pk=site_pk)
+    return render(request, "site/site_confirm_delete.html")
 
 
-class SiteListView(SiteView, CoreListView):
-    """ """
+class SiteListView(SiteView, CydhcpListView):
+    """"""
     template_name = "cydhcp/cydhcp_list.html"
 
 
-class SiteCreateView(SiteView, CoreCreateView):
-    """ """
+class SiteCreateView(SiteView, CydhcpCreateView):
+    """"""
     template_name = "cydhcp/cydhcp_form.html"
 
 
-class SiteUpdateView(SiteView, CoreUpdateView):
-    """ """
+class SiteUpdateView(SiteView, CydhcpUpdateView):
+    """"""
     template_name = "site/site_edit.html"
 
 

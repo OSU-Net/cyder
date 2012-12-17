@@ -1,4 +1,7 @@
 # Jingo helpers (Jinja2 custom filters)
+import json
+import string
+
 from jingo import register
 
 
@@ -20,6 +23,15 @@ def humanized_class_name(obj, *args, **kwargs):
 
     return humanized
 
+
+@register.filter
+def humanized_model_name(model_name, *args, **kwargs):
+    """
+    Capitalize and add spaces to underscored db table names.
+    """
+    model_name.replace('_', ' ')
+    return string.join([word[0].upper() + word[1:]
+                        for word in model_name.split()])
 
 @register.filter
 def prettify_record_type(record_type, *args, **kwargs):
@@ -63,3 +75,14 @@ def a_or_an(next_word):
         return 'an'
     else:
         return 'a'
+
+
+@register.function
+def has_attr(obj, attr):
+    return hasattr(obj, attr)
+
+
+@register.filter
+def to_json(obj):
+    """Object to JSON."""
+    return json.dumps(obj)

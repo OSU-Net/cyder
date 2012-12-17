@@ -1,0 +1,12 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>{{ page_obj[0]|humanized_class_name }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for obj in page_obj %}
+      <tr><th><a href='{{ obj.get_detail_url() }}'>{{ obj }}</a></th></tr>
+    {% endfor %}
+  </tbody>
+</table>

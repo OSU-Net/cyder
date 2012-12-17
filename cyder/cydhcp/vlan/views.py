@@ -1,22 +1,12 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render
-from django.contrib import messages
-from django.forms.util import ErrorList
-from django.http import HttpResponse
+from django.core.exceptions import ValidationError
+from django.forms.util import ErrorList, ErrorDict
+from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
-from cyder.cydhcp.vlan.forms import VlanForm
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
-
-from cyder.cydhcp.views import CoreDeleteView, CoreListView
-from cyder.cydhcp.views import CoreCreateView
-
-import re
-import pdb
-import ipaddr
+from cyder.cydhcp.views import (CydhcpCreateView, CydhcpDeleteView,
+                                CydhcpListView)
+from cyder.cydhcp.vlan.forms import VlanForm
+from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
 
 
 class VlanView(object):
@@ -25,20 +15,16 @@ class VlanView(object):
     form_class = VlanForm
 
 
-is_attr = re.compile("^attr_\d+$")
-
-
-class VlanDeleteView(VlanView, CoreDeleteView):
+class VlanDeleteView(VlanView, CydhcpDeleteView):
     success_url = "/cydhcp/vlan/"
 
 
-class VlanListView(VlanView, CoreListView):
-    """ """
-    template_name = "vlan/vlan_list.html"
+class VlanListView(VlanView, CydhcpListView):
+    """"""
 
 
-class VlanCreateView(VlanView, CoreCreateView):
-    """ """
+class VlanCreateView(VlanView, CydhcpCreateView):
+    """"""
     template_name = "cydhcp/cydhcp_form.html"
 
 

@@ -1,16 +1,26 @@
 {% extends "base/base.html" %}
 
 {% block title %}
-    {{ form_title }}
+  {{ form_title }}
 {% endblock %}
 
 {% block header %}
-    {{ form_title }}
+  {{ form_title }}
 {% endblock %}
 
 {% block content %}
-    <form class="well form-horizontal" method="post" action="">
-        {{ form.as_p() }}
-        <input type="submit" value="Submit" />
-    </form>
+  <form class="form" method="post" action="">
+    <h3>{% block form_title %}{{ form_title }}{% endblock %}</h3>
+    <div class="subtext">
+      {% block form_subtext %}{% endblock %}
+    </div>
+    <div class="inner-form">
+      {{ form.as_p() }}
+      {% block extra_inputs %}{% endblock %}
+    </div>
+    <div class="form-btns">
+      <hr>
+      <a class="btn submit">Submit</a>
+    </div>
+   </form>
 {% endblock %}

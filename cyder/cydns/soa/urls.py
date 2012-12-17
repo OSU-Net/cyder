@@ -2,10 +2,12 @@ from django.conf.urls.defaults import *
 from django.views.decorators.csrf import csrf_exempt
 
 from cyder.cydns.soa.views import *
-from cyder.cydns.views import cydns_record_view
+from cyder.cydns.views import cydns_record_view, table_update
 
 urlpatterns = patterns('',
    url(r'^$', cydns_record_view, name='soa'),
+   url(r'(?P<pk>[\w-]+)/tableupdate/$', table_update,
+       name='soa-table-update'),
 
    url(r'attr/$', delete_soa_attr, name='soa-attr'),
 

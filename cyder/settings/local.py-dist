@@ -1,15 +1,9 @@
-#filename is settings_local.py
+# Copy to local.py.
 import sys
 import os
 
-from .base import *
 
-
-_base = os.path.dirname(__file__)
-site_root = os.path.realpath(os.path.join(_base, '../'))
-sys.path.append(site_root)
-sys.path.append(site_root + '/libs')
-sys.path.append(site_root + '/vendor')
+SASS_BIN = '/usr/local/bin/sass'
 
 DEV = True
 DEBUG = True
@@ -84,10 +78,7 @@ BUG_URL = ''
 #TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
 USER_SYSTEM_ALLOWED_DELETE = ('')
 
-from jinja2 import FileSystemLoader, Environment
 TEMPLATE_DIRS = (
-    os.path.join(_base, 'templates'),
-    site_root + '/templates'
 )
 
 import logging
@@ -105,7 +96,7 @@ LOGGING = {
     },
 }
 
-#CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+# CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 API_ACCESS = ('GET','POST','PUT','DELETE')
 SCRIPT_URL = 'https://localhost.com'
 DESKTOP_EMAIL_ADDRESS = 'desktop@example.com'

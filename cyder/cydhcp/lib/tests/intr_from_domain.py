@@ -10,11 +10,10 @@ from cyder.cydhcp.lib.utils import *
 
 from cyder.cydns.domain.models import Domain
 
-from cyder.core.systems.models import System
+from cyder.core.system.models import System
 
 import random
 import ipaddr
-import pdb
 
 
 class LibTestsDomain(TestCase):

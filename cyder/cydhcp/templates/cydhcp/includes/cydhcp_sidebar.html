@@ -1,16 +1,10 @@
+{% from 'base/includes/sidebars.html' import render_sidebar %}
+
 <!-- DHCP NAV -->
-<span class="nav-item">
-  <a class="nav-link {{ 'selected' if url('site-list') in request.path }}" href="{{ url('site-list') }}">Site</a>
-</span>
-<span class="nav-item">
-  <a class="nav-link {{ 'selected' if url('network-list') in request.path }}" href="{{ url('network-list') }}">Network</a>
-</span>
-<span class="nav-item">
-  <a class="nav-link {{ 'selected' if url('network-wizard') in request.path }}" href="{{ url('network-wizard') }}">Network Wizard</a>
-</span>
-<span class="nav-item">
-  <a class="nav-link {{ 'selected' if url('vlan-list') in request.path }}" href="{{ url('vlan-list') }}">Vlan</a>
-</span>
-<span class="nav-item">
-  <a class="nav-link {{ 'selected' if url('range-list') in request.path }}" href="{{ url('range-list') }}">Range</a>
-</span>
+{{ render_sidebar(request, [
+  ('site', 'Site'),
+  ('network', 'Network'),
+  ('network-wizard', 'Network Wizard'),
+  ('range', 'Range'),
+  ('vlan', 'VLAN'),
+]) }}

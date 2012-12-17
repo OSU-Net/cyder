@@ -4,13 +4,13 @@
 from funfactory.settings_base import *
 from cyder.settings.dns import *
 
+
 ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
 SASS_PREPROCESS = True
-SASS_BIN = '/usr/bin/sass'
 JINGO_MINIFY_USE_STATIC = False
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
@@ -22,34 +22,45 @@ MINIFY_BUNDLES = {
             'css/lib/jquery.autocomplete.css',
             'css/sticky_footer.css',
 
-            'css/base.scss',
             'css/globals.scss',
+            'css/base.scss',
             'css/forms.scss',
             'css/tables.scss',
         ),
     },
     'js': {
         'cyder_js': (
-            'js/lib/jquery-1.6.1.min.js',
+            'js/lib/jquery-1.8.3.min.js',
             'js/lib/attribute_adder.js',
             'js/lib/jquery.history.js',
             'js/lib/jQuery.rightclick.js',
             'js/lib/jquery.tools.min.js',
             'js/lib/jquery.validate.min.js',
-            'js/lib/jquery.dataTables.js',
-            'js/lib/jquery.tabletools.min.js',
             'js/lib/jquery.autocomplete.min.js',
             'js/lib/jquery-ui-1.8.11.custom.min.js',
             'js/lib/tablesorter.js',
+            'js/lib/editablegrid/editablegrid.js',
+            'js/lib/editablegrid/editablegrid_renderers.js',
+            'js/lib/editablegrid/editablegrid_editors.js',
+            'js/lib/editablegrid/editablegrid_validators.js',
+            'js/lib/editablegrid/editablegrid_utils.js',
+            'js/lib/editablegrid/editablegrid_charts.js',
 
+            'js/utils.js',
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
         ),
-        'cydns': {
+        'tables': (
+            'js/tables.js',
+        ),
+        'cydns': (
             'js/cydns/cydns_record_form.js',
             'js/cydns/cydns_record_form_utils.js',
-        }
+        ),
+        'ctnr': (
+            'js/ctnr/ctnr.js',
+        )
     }
 }
 
@@ -59,7 +70,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'core.ctnr',
     'core.cyuser',
     'core.search',
-    'core.systems',
+    'core.system',
     'cydhcp',
     'cydhcp.site',
     'cydhcp.vlan',
@@ -128,10 +139,9 @@ JINGO_EXCLUDE_APPS = [
     'tastytools',
 ]
 
-DJANGO_TEMPLATE_APPS = ['admin',] # Tells the extract script what files to look for L10n in and what function
-# handles the extraction. The Tower library expects this.
+DJANGO_TEMPLATE_APPS = ['admin']
 
-LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
+LOGGING = dict(loggers=dict(playdoh={'level': logging.INFO}))
 
 # # Use this if you have localizable HTML files:
 # DOMAIN_METHODS['lhtml'] = [
@@ -149,4 +159,4 @@ LOGGING = dict(loggers=dict(playdoh = {'level': logging.INFO}))
 #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 BUILD_PATH = 'builds'
-INTERNAL_IPS = ('127.0.0.1','10.22.74.139','10.250.2.54')
+INTERNAL_IPS = ('127.0.0.1', '10.22.74.139', '10.250.2.54')

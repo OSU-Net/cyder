@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from cyder.cydns.view.views import *
 
+
 urlpatterns = patterns('',
    url(r'^$', ViewListView.as_view(), name='view-list'),
 

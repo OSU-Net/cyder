@@ -1,17 +1,16 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.cydns.validation import validate_ip_type
-from cyder.cydns.ip.models import ipv6_to_longs
+import ipaddr
+
+from cyder.base.constants import IP_TYPES
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, two_to_four
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.base.mixins import ObjectUrlMixin
-from cyder.cydhcp.keyvalue.models import KeyValue
-from cyder.cydhcp.keyvalue.base_option import CommonOption
-
-import ipaddr
-import pdb
+from cyder.cydns.validation import validate_ip_type
+from cyder.cydns.ip.models import ipv6_to_longs
 
 
 class Network(models.Model, ObjectUrlMixin):
@@ -22,16 +21,16 @@ class Network(models.Model, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
 
     # NETWORK/NETMASK FIELDS
-    IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
-    ip_type = models.CharField(max_length=1, choices=IP_TYPE_CHOICES,
+    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items(),
                                editable=True, validators=[validate_ip_type])
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
-    network_str = models.CharField(max_length=49, editable=True,
-                                   help_text="The network address of this network.")
-    prefixlen = models.PositiveIntegerField(null=False,
-                                            help_text="The number of binary 1's in the netmask.")
+    network_str = models.CharField(
+        max_length=49, editable=True,
+        help_text="The network address of this network.")
+    prefixlen = models.PositiveIntegerField(
+        null=False, help_text="The number of binary 1's in the netmask.")
 
     dhcpd_raw_include = models.TextField(null=True, blank=True, help_text="The"
                                          " config options in this box will be included *as is* in the "
@@ -39,10 +38,21 @@ class Network(models.Model, ObjectUrlMixin):
 
     network = None
 
+    def __str__(self):
+        return self.network_str
+
+    def __repr__(self):
+        return "<Network {0}>".format(str(self))
+
     def details(self):
-        return (
-            ('Network', self.network_str),
+        """For tables."""
+        data = super(Network, self).details()
+        data['data'] = (
+            ('Network', self),
+            ('Site', self.site),
+            ('Vlan', self.vlan),
         )
+        return data
 
     class Meta:
         db_table = 'network'
@@ -134,13 +144,9 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
         if fail:
-            raise ValidationError("Resizing this subnet to the requested "
-                                  "network prefix would orphan existing ranges.")
-        return
-
-    def clean(self):
-        self.check_valid_range()
-        self.check_valid_site()
+            raise ValidationError(
+                "Resizing this subnet to the requested "
+                "network prefix would orphan existing ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
@@ -165,7 +171,7 @@ class Network(models.Model, ObjectUrlMixin):
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
-        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
+        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError):
             raise ValidationError("Invalid network for ip type of "
                                   "'{0}'.".format(self, self.ip_type))
         # Update fields
@@ -173,12 +179,6 @@ class Network(models.Model, ObjectUrlMixin):
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
                                                      # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
-
-    def __str__(self):
-        return self.network_str
-
-    def __repr__(self):
-        return "<Network {0}>".format(str(self))
 
 
 class NetworkKeyValue(CommonOption):

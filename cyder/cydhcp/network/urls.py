@@ -5,8 +5,8 @@ from cyder.cydhcp.network.network_wizard import *
 
 
 urlpatterns = patterns('',
-   url(r'^$', NetworkListView.as_view(), name='network-list'),
-   url(r'^wizard_create/$', test_wizard, name='network-wizard'),
+   url(r'^$', NetworkListView.as_view(), name='network'),
+   url(r'^wizard_create/$', network_wizard, name='network-wizard'),
    url(r'^create/$', create_network, name='network-create'),
    url(r'^(?P<network_pk>[\w-]+)/$', network_detail, name='network-detail'),
    url(r'^(?P<network_pk>[\w-]+)/update/$',

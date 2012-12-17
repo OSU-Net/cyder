@@ -4,12 +4,11 @@ from django.db import models
 import cydns
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.models import CydnsRecord
 from cyder.cydns.soa.utils import update_soa
-from cyder.cydns.validation import (validate_name, validate_srv_label,
-                                    validate_srv_port, validate_srv_priority,
-                                    validate_srv_weight, validate_srv_name,
-                                    validate_ttl, validate_srv_target)
+from cyder.cydns.validation import (validate_srv_label, validate_srv_port,
+                                    validate_srv_priority, validate_srv_weight,
+                                    validate_srv_name, validate_ttl,
+                                    validate_srv_target)
 from cyder.cydns.view.models import View
 
 
@@ -25,16 +24,14 @@ class SRV(models.Model, ObjectUrlMixin):
     ... priority=priority, weight=weight, ttl=ttl)
     """
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=63, blank=True, null=True,
-                             validators=[validate_srv_label], help_text="Short name of the "
-                             "fqdn")
+    label = models.CharField(
+        max_length=63, blank=True, null=True, validators=[validate_srv_label],
+        help_text='Short name of the FQDN')
     domain = models.ForeignKey(Domain, null=False, help_text="FQDN of the "
                                "domain after the short hostname. "
                                "(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)")
     fqdn = models.CharField(max_length=255, blank=True, null=True,
                             validators=[validate_srv_name])
-    # fqdn = label + domain.name <--- see set_fqdn
-
     views = models.ManyToManyField(View, blank=True)
 
     target = models.CharField(max_length=100,
@@ -55,19 +52,39 @@ class SRV(models.Model, ObjectUrlMixin):
 
     search_fields = ("fqdn", "target")
 
-    def details(self):
-        return  (
-            ("FQDN", self.fqdn),
-            ("Record Type", "SRV"),
-            ("Targer", self.target),
-            ("Port", self.port),
-            ("Priority", self.priority),
-            ("Weight", self.weight),
-        )
-
     class Meta:
         db_table = "srv"
         unique_together = ("label", "domain", "target", "port")
+
+    def __str__(self):
+        return "{0} {1} {2} {3} {4} {5} {6}".format(self.fqdn, "IN", "SRV",
+                                                    self.priority, self.weight,
+                                                    self.port, self.target)
+
+    def __repr__(self):
+        return "<SRV '{0}'>".format(str(self))
+
+    def details(self):
+        """For tables."""
+        data = super(SRV, self).details()
+        data['data'] = [
+            ("Domain", self.domain),
+            ("Target", self.target),
+            ("Port", self.port),
+            ("Priority", self.priority),
+            ("Weight", self.weight),
+        ]
+        return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'target', 'datatype': 'string', 'editable': True},
+            {'name': 'port', 'datatype': 'integer', 'editable': True},
+            {'name': 'priority', 'datatype': 'integer', 'editable': True},
+            {'name': 'weight', 'datatype': 'integer', 'editable': True},
+        ]}
 
     @classmethod
     def get_api_fields(cls):
@@ -100,14 +117,6 @@ class SRV(models.Model, ObjectUrlMixin):
         self.set_fqdn()
         self.check_for_cname()
         self.check_for_delegation()
-
-    def __str__(self):
-        return "{0} {1} {2} {3} {4} {5} {6}".format(self.fqdn, "IN", "SRV",
-                                                    self.priority, self.weight,
-                                                    self.port, self.target)
-
-    def __repr__(self):
-        return "<SRV '{0}'>".format(str(self))
 
     def set_fqdn(self):
         try:

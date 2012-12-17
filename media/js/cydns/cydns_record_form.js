@@ -1,4 +1,4 @@
-$(document).ready(function(){
+$(document).ready(function() {
     var cydns = $('#cydns-record');
     var form = $('#cydns-record-form form')[0];
     var recordType = cydns.attr('data-recordType');
@@ -18,29 +18,26 @@ $(document).ready(function(){
             minWidth: 520,
             buttons: {
                 'Cancel': function() {
-                    $('#search-dialog').attr('stage_pk', ''),
+                    $('#search-dialog').attr('pk', ''),
                     $(this).dialog('close');
                 },
                 'Edit Record': function() {
                     // To edit. get pk (from when selected from the
                     // dropdown, and request object's form to replace current one.
-                    var pk = $(this).attr('stage_pk');
-                    $.get(getUrl, {'record_type': recordType,
-                                   'pk': pk},
-                          function(data) {
-                              $('#record-form-title').html('Updating a ' + prettyRecordType);
-                              $('.delete').show();
+                    var pk = $(this).attr('pk');
+                    $.get(getUrl, {'record_type': recordType, 'pk': pk}, function(data) {
+                        $('#record-form-title').html('Updating a ' + prettyRecordType);
+                        $('.delete').show();
 
-                              // Populate form with object and set its URL.
-                              var data = JSON.parse(data);
-                              $('.inner-form').empty().append(data.form);
-                              initForms();
-                              form.action = '?action=update&pk=' + data.pk;
-                              $('#cydns-record-form').slideDown();
-                              $('#record-searchbox').attr('value', '');
-                          });
+                        // Populate form with object and set its URL.
+                        $('.inner-form').empty().append(data.form);
+                        initForms();
+                        form.action = '?action=update&pk=' + data.pk;
+                        $('#cydns-record-form').slideDown();
+                        $('#record-searchbox').attr('value', '');
+                    }, 'json');
                     $(this).dialog('close');
-                },
+                }
             }
         }).show();
     });
@@ -51,16 +48,16 @@ $(document).ready(function(){
             minWidth: 520,
             buttons: {
                 'Cancel': function() {
-                    $('#search-dialog').attr('stage_soa_pk', ''),
+                    $('#search-soa-dialog').attr('pk', ''),
                     $(this).dialog('close');
                 },
                 'View ZONE file': function() {
                     // To edit. get pk (from when selected from the
                     // dropdown, and request object's form to replace current one.
                     window.open('/cydns/bind/build_debug/' +
-                                $(this).attr('stage_soa_pk') + '/');
+                                $(this).attr('pk') + '/');
                     $(this).dialog('close');
-                },
+                }
             }
         }).show();
     });
@@ -72,7 +69,7 @@ $(document).ready(function(){
         source: searchUrl + '?record_type=' + recordType,
         select: function( event, ui ) {
             // Save the selected pk so we can use it if the user decides to edit the record.
-            $('#search-dialog').attr('stage_pk', ui.item.pk);
+            $('#search-dialog').attr('pk', ui.item.pk);
         }
     });
     $('#soa-searchbox').autocomplete({
@@ -80,7 +77,7 @@ $(document).ready(function(){
         source: searchUrl + '?record_type=SOA',
         select: function( event, ui ) {
             // Save the selected pk so we can use it if the user decides to edit the record.
-            $('#search-soa-dialog').attr('stage_soa_pk', ui.item.pk);
+            $('#search-soa-dialog').attr('pk', ui.item.pk);
         }
     });
 

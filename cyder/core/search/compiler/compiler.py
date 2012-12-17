@@ -16,7 +16,6 @@ from cyder.cydns.txt.models import TXT
 from parser import Parser
 from utils import *
 from itertools import izip
-import pdb
 
 
 class Compiler(object):

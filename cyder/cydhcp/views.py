@@ -1,43 +1,36 @@
-from cyder.base.views import BaseListView, BaseDetailView, BaseCreateView
-from cyder.base.views import BaseUpdateView, BaseDeleteView
-
-from django.forms.util import ErrorList, ErrorDict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.forms.util import ErrorList
+from django.shortcuts import render
 
+from cyder.base.views import (BaseListView, BaseDetailView, BaseCreateView,
+                              BaseUpdateView, BaseDeleteView)
 from cyder.cydhcp.forms import IpSearchForm
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import ipv6_to_longs
-
-from django.shortcuts import render
+from cyder.cydns.ptr.models import PTR
 
 import ipaddr
 
 
-class CoreListView(BaseListView):
-    """ """
+class CydhcpListView(BaseListView):
     template_name = 'cydhcp/cydhcp_list.html'
 
 
-class CoreDetailView(BaseDetailView):
-    """ """
+class CydhcpDetailView(BaseDetailView):
     template_name = 'cydhcp/cydhcp_detail.html'
 
 
-class CoreCreateView(BaseCreateView):
-    """ """
+class CydhcpCreateView(BaseCreateView):
     template_name = 'cydhcp/cydhcp_form.html'
 
 
-class CoreUpdateView(BaseUpdateView):
-    """ """
+class CydhcpUpdateView(BaseUpdateView):
     template_name = 'cydhcp/cydhcp_form.html'
 
 
-class CoreDeleteView(BaseDeleteView):
-    """ """
+class CydhcpDeleteView(BaseDeleteView):
     template_name = 'cydhcp/cydhcp_confirm_delete.html'
     succcess_url = '/cydhcp/'
 
@@ -55,8 +48,8 @@ def search_ip(request):
                     if ip_type == '6':
                         network = ipaddr.IPv6Network(search_ip)
                 except ipaddr.AddressValueError, e:
-                    form._errors['__all__'] = ErrorList(["Bad IPv{0} Address "
-                                                         "{1}".format(ip_type, search_ip)])
+                    form._errors['__all__'] = ErrorList(
+                        ["Bad IPv{0} Address {1}".format(ip_type, search_ip)])
                     return render(request, 'cydhcp/cydhcp_form.html', {
                         'form': form
                     })

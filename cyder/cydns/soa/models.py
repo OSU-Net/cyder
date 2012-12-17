@@ -65,9 +65,6 @@ class SOA(models.Model, ObjectUrlMixin):
 
     attrs = None
 
-    def update_attrs(self):
-        self.attrs = AuxAttr(SOAKeyValue, self, 'soa')
-
     class Meta:
         db_table = 'soa'
         # We are using the comment field here to stop the same SOA from
@@ -75,16 +72,40 @@ class SOA(models.Model, ObjectUrlMixin):
         # Domain models.py file for more info.
         unique_together = ('primary', 'contact', 'comment')
 
+    def __str__(self):
+        return "{0}".format(str(self.comment))
+
+    def __repr__(self):
+        return "<'{0}'>".format(str(self))
+
     def details(self):
-        return  (
+        """For tables."""
+        data = super(SOA, self).details()
+        data['data'] = [
             ('Primary', self.primary),
             ('Contact', self.contact),
             ('Serial', self.serial),
             ('Expire', self.expire),
             ('Retry', self.retry),
             ('Refresh', self.refresh),
-            ('Comment', self.comment),
-        )
+            ('Comment', self),
+        ]
+        return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'primary', 'datatype': 'string', 'editable': True},
+            {'name': 'contact', 'datatype': 'string', 'editable': True},
+            {'name': 'serial', 'datatype': 'integer', 'editable': True},
+            {'name': 'expire', 'datatype': 'integer', 'editable': True},
+            {'name': 'retry', 'datatype': 'integer', 'editable': True},
+            {'name': 'refresh', 'datatype': 'integer', 'editable': True},
+            {'name': 'comment', 'datatype': 'string', 'editable': True},
+        ]}
+
+    def update_attrs(self):
+        self.attrs = AuxAttr(SOAKeyValue, self, 'soa')
 
     def get_debug_build_url(self):
         return reverse('build-debug', args=[self.pk])
@@ -104,12 +125,6 @@ class SOA(models.Model, ObjectUrlMixin):
                 if getattr(db_self, field) != getattr(self, field):
                     self.dirty = True
         super(SOA, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return "{0}".format(str(self.comment))
-
-    def __repr__(self):
-        return "<'{0}'>".format(str(self))
 
 
 class SOAKeyValue(KeyValue):

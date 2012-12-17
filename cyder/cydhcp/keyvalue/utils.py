@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 import re
-import pdb
 
 is_attr = re.compile("^attr_\d+$")
 

@@ -4,11 +4,12 @@ import socket
 
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models, IntegrityError
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 import dnsutils
 
 
@@ -23,34 +24,369 @@ class QuerySetManager(models.Manager):
 class DirtyFieldsMixin(object):
     def __init__(self, *args, **kwargs):
         super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
-        post_save.connect(self._reset_state, sender=self.__class__,
-                          dispatch_uid='%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__)
+        post_save.connect(
+            self._reset_state, sender=self.__class__,
+            dispatch_uid=('%s-DirtyFieldsMixin-sweeper' %
+                          self.__class__.__name__))
         self._reset_state()
 
     def _reset_state(self, *args, **kwargs):
         self._original_state = self._as_dict()
 
     def _as_dict(self):
-        return dict([(f.attname, getattr(self, f.attname)) for f in self._meta.local_fields])
+        return dict([(f.attname, getattr(self, f.attname))
+                     for f in self._meta.local_fields])
 
     def get_dirty_fields(self):
         new_state = self._as_dict()
-        return dict([(key, value) for key, value in self._original_state.iteritems() if value != new_state[key]])
+        return dict([(key, value)
+                     for key, value in self._original_state.iteritems()
+                     if value != new_state[key]])
 
 
 class BuildManager(models.Manager):
     def get_query_set(self):
-        return super(BuildManager, self).get_query_set().filter(allocation__name='release')
+        return (super(BuildManager, self).get_query_set()
+                .filter(allocation__name='release'))
 
 
 class SystemWithRelatedManager(models.Manager):
     def get_query_set(self):
-        return super(SystemWithRelatedManager, self).get_query_set().select_related(
-            'operating_system',
-            'server_model',
-            'allocation',
-            'system_rack',
+        return (super(SystemWithRelatedManager, self)
+                .get_query_set().select_related(
+                    'operating_system',
+                    'server_model',
+                    'allocation',
+                    'system_rack',))
+
+
+class System(BaseModel, ObjectUrlMixin, DirtyFieldsMixin):
+    YES_NO_CHOICES = (
+        (0, 'No'),
+        (1, 'Yes'),
+    )
+    hostname = models.CharField(unique=True, max_length=255)
+    operating_system = models.ForeignKey(
+        'OperatingSystem', blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    allocation = models.ForeignKey('Allocation', blank=True, null=True)
+    change_password = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = u'system'
+
+    def details(self):
+        return (
+            ('Hostname', self.hostname),
+            ('OS', self.operating_system),
+            ('Last Updated', self.updated_on)
         )
+
+    @property
+    def primary_ip(self):
+        try:
+            first_ip = self.keyvalue_set.filter(
+                key__contains='ipv4_address').order_by('key')[0].value
+            return first_ip
+        except:
+            return None
+
+    def update_adapter(self, **kwargs):
+        interface = kwargs.pop('interface', None)
+        ip_address = kwargs.pop('ip_address', None)
+        mac_address = kwargs.pop('mac_address', None)
+
+        if not interface:
+            raise ValidationError("Interface required to update")
+
+        for intr in self.staticinterface_set.all():
+            if intr.interface_name() == interface:
+                if ip_address:
+                    intr.ip_str = ip_address
+                if mac_address:
+                    intr.mac = mac_address
+                intr.save()
+        return True
+
+        """
+            method to update a netwrok adapter
+
+            :param **kwargs: keyword arguments of what to update
+            :type **kwargs: dict
+            :return: True on deletion, exception on failure
+        """
+    def delete_adapter(self, adapter_name):
+        from .system_api import SystemResource
+        """
+            method to get the next adapter
+            we'll want to always return an adapter with a 0 alias
+            take the highest primary if exists, increment by 1 and return
+
+            :param adapter_name: The name of the adapter to delete
+            :type adapter_name: str
+            :return: True on deletion, exception raid if not exists
+        """
+        adapter_type, primary, alias = SystemResource.extract_nic_attrs(
+            adapter_name)
+        for i in self.staticinterface_set.all():
+            i.update_attrs()
+            if (i.attrs.interface_type == adapter_type and
+                  i.attrs.primary == primary and i.attrs.alias == alias):
+                i.delete()
+        return True
+
+    def get_adapters(self):
+        """
+            method to get all adapters
+            :return: list of objects and attributes if exist, None if empty
+        """
+        adapters = None
+        if self.staticinterface_set.count() > 0:
+            adapters = []
+            for i in self.staticinterface_set.all():
+                i.update_attrs()
+                adapters.append(i)
+        return adapters
+
+    def get_next_adapter(self, intr_type='eth'):
+        """
+            method to get the next adapter
+            we'll want to always return an adapter with a 0 alias
+            take the highest primary if exists, increment by 1 and return
+
+            :param type: The type of network adapter
+            :type type: str
+            :return: 3 strings 'adapter_name', 'primary_number', 'alias_number'
+        """
+        if self.staticinterface_set.count() == 0:
+            return intr_type, '0', '0'
+        else:
+            primary_list = []
+            for i in self.staticinterface_set.all():
+                i.update_attrs()
+                try:
+                    primary_list.append(int(i.attrs.primary))
+                except AttributeError:
+                    continue
+
+            ## sort and reverse the list to get the highest
+            ## perhaps someday come up with the lowest available
+            ## this should work for now
+            primary_list.sort()
+            primary_list.reverse()
+            if not primary_list:
+                return intr_type, '0', '0'
+            else:
+                return intr_type, str(primary_list[0] + 1), '0'
+
+    def get_next_key_value_adapter(self):
+        """
+            Return the first found adapter from the
+            key value store. This will go away,
+            once we are on the StaticInterface
+            based system
+        """
+        ret = {}
+        ret['mac_address'] = None
+        ret['ip_address'] = None
+        ret['num'] = None
+        ret['dhcp_scope'] = None
+        ret['name'] = 'nic0'
+        key_value = self.keyvalue_set.filter(
+            key__startswith='nic', key__icontains='mac_address')[0]
+        m = re.search('nic\.(\d+)\.mac_address\.0', key_value.key)
+        ret['num'] = int(m.group(1))
+        key_value_set = self.keyvalue_set.filter(
+            key__startswith='nic.%s' % ret['num'])
+        if len(key_value_set) > 0:
+            for kv in key_value_set:
+                m = re.search('nic\.\d+\.(.*)\.0', kv.key)
+                if m:
+                    ret[m.group(1)] = str(kv.value)
+            return ret
+        else:
+            return False
+        #System.keyvalue_set.filter(name__startswith='nic' % key_id).delete()
+
+    def delete_key_value_adapter_by_index(self, index):
+        """
+            Delete a set of key_value items by index
+            if index = 0
+            delete where keyvalue.name startswith nic.0
+        """
+        self.keyvalue_set.filter(key__startswith='nic.%i' % index).delete()
+        return True
+
+    @property
+    def primary_reverse(self):
+        try:
+            return str(socket.gethostbyaddr(self.primary_ip)[0])
+        except:
+            return None
+
+    def get_updated_fqdn(self):
+        allowed_domains = [
+            'mozilla.com',
+            'scl3.mozilla.com',
+            'phx.mozilla.com',
+            'phx1.mozilla.com',
+            'mozilla.net',
+            'mozilla.org',
+            'build.mtv1.mozilla.com',
+            'build.mozilla.org',
+        ]
+        reverse_fqdn = self.primary_reverse
+        if self.primary_ip and reverse_fqdn:
+            current_hostname = str(self.hostname)
+
+            if current_hostname and current_hostname != reverse_fqdn:
+                res = reverse_fqdn.replace(current_hostname, '').strip('.')
+                if res in allowed_domains:
+                    self.update_host_for_migration(reverse_fqdn)
+        elif not self.primary_ip or self.primary_reverse:
+            for domain in allowed_domains:
+                updated = False
+                if not updated:
+                    try:
+                        fqdn = socket.gethostbyaddr(
+                            '%s.%s' % (self.hostname, domain))
+                        if fqdn:
+                            self.update_host_for_migration(fqdn[0])
+                            updated = True
+                    except Exception:
+                        pass
+            if not updated:
+                pass
+                #print "Could not update hostname %s" % (self.hostname)
+
+    def update_host_for_migration(self, new_hostname):
+        if new_hostname.startswith(self.hostname):
+            kv = KeyValue(system=self,
+                          key='system.hostname.alias.0', value=self.hostname)
+            kv.save()
+            try:
+                self.hostname = new_hostname
+                self.save()
+            except Exception, e:
+                print "ERROR - %s" % (e)
+
+    objects = models.Manager()
+    build_objects = BuildManager()
+    with_related = SystemWithRelatedManager()
+
+    def save(self, *args, **kwargs):
+        request = kwargs.pop('request', None)
+        try:
+            changes = self.get_dirty_fields()
+            if changes:
+                system = System.objects.get(id=self.id)
+                save_string = ''
+                for k, v in changes.items():
+                    if k == 'system_status_id':
+                        k = 'System Status'
+                        ss = SystemStatus.objects.get(id=v)
+                        v = ss
+                    if k == 'operating_system_id':
+                        k = 'Operating System'
+                        ss = OperatingSystem.objects.get(id=v)
+                        v = ss
+                    if k == 'server_model_id':
+                        k = 'Server Model'
+                        ss = ServerModel.objects.get(id=v)
+                        v = ss
+                    save_string += '%s: %s\n\n' % (k, v)
+                try:
+                    remote_user = request.META['REMOTE_USER']
+                except Exception, e:
+                    remote_user = 'changed_user'
+                tmp = SystemChangeLog(
+                    system=system, changed_by=remote_user,
+                    changed_text=save_string,
+                    changed_date=datetime.datetime.now())
+                tmp.save()
+        except Exception, e:
+            print e
+            pass
+
+        if not self.id:
+            self.created_on = datetime.datetime.now()
+        self.updated_on = datetime.datetime.now()
+
+        super(System, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.hostname
+
+    def get_switches(self):
+        return System.objects.filter(is_switch=1)
+
+    def get_detail_url(self):
+        return "/systems/show/{0}/".format(self.pk)
+
+    def check_for_adapter(self, adapter_id):
+        adapter_id = int(adapter_id)
+        if adapter_id in self.get_adapter_numbers():
+            return True
+        return False
+
+    def check_for_adapter_name(self, adapter_name):
+        adapter_name = str(adapter_name)
+        if adapter_name in self.get_nic_names():
+            return True
+        return False
+
+    def get_nic_names(self):
+        adapter_names = []
+        pairs = KeyValue.objects.filter(
+            system=self, key__startswith='nic', key__contains='adapter_name')
+        for row in pairs:
+            m = re.match('^nic\.\d+\.adapter_name\.\d+', row.key)
+            if m:
+                adapter_names.append(str(row.value))
+        return adapter_names
+
+    def get_adapter_numbers(self):
+        nic_numbers = []
+        pairs = KeyValue.objects.filter(system=self, key__startswith='nic')
+        for row in pairs:
+            m = re.match('^nic\.(\d+)\.', row.key)
+            if m:
+                match = int(m.group(1))
+                if match not in nic_numbers:
+                    nic_numbers.append(match)
+        return nic_numbers
+
+    @property
+    def notes_with_link(self):
+        if self.notes:
+            patterns = [
+                '[bB]ug#?\D#?(\d+)',
+            ]
+            for pattern in patterns:
+                m = re.search(pattern, self.notes)
+                if m:
+                    self.notes = re.sub(
+                        pattern, '<a href="%s%s">Bug %s</a>' %
+                        (settings.BUG_URL, m.group(1), m.group(1)), self.notes)
+            return self.notes
+        else:
+            return ''
+
+    def get_next_adapter_number(self):
+        nic_numbers = self.get_adapter_numbers()
+        if len(nic_numbers) > 0:
+            nic_numbers.sort()
+            # The last item in the array should be an int, but just in case
+            # we'll catch the exception and return a 1
+            try:
+                return nic_numbers[-1] + 1
+            except:
+                return 1
+        else:
+            return 1
+
+    def get_adapter_count(self):
+        return len(self.get_adapter_numbers())
 
 
 class Allocation(models.Model):
@@ -148,7 +484,7 @@ class KeyValue(models.Model):
     def __unicode__(self):
         return self.key if self.key else ''
 
-    def __repr__(self):
+    def __str__(self):
         return "<{0}: '{1}'>".format(self.key, self.value)
 
     def __repr__(self):
@@ -158,14 +494,13 @@ class KeyValue(models.Model):
         dirty = False
         schedule_dns = False
         from cyder.dnsutils.build_nics import build_nic
-        from cyder.dnsutils.dns_build import ip_to_site
 
         is_nic = re.match('^nic\.\d+\.(.*)\.\d+$', self.key)
         if self.pk:
             # Make sure that there was actually a change to some data.
             self_ = KeyValue.objects.get(pk=self.pk)
             if self_.value == self.value:
-                ditry = False
+                dirty = False
             else:
                 dirty = True
         if is_nic and dirty:
@@ -193,11 +528,11 @@ class KeyValue(models.Model):
         # to construct an interface and find the ip in the interface.
             intr = build_nic(self.system.keyvalue_set.all())
             for ip in intr.ips:
-                kv = dnsutils.dns_build.ip_to_site(ip, settingsMOZ_SITE_PATH)
+                kv = dnsutils.dns_build.ip_to_site(ip, settings.MOZ_SITE_PATH)
                 if kv:
                     try:
                         ScheduledTask(type='dns', task=kv.key).save()
-                    except IntegrityError, e:
+                    except IntegrityError:
                         # The task already existed.
                         pass
 
@@ -299,352 +634,6 @@ class SystemStatus(models.Model):
     class Meta:
         db_table = u'system_statuses'
         ordering = ['status']
-
-
-class System(DirtyFieldsMixin, models.Model):
-
-    YES_NO_CHOICES = (
-        (0, 'No'),
-        (1, 'Yes'),
-    )
-    hostname = models.CharField(unique=True, max_length=255)
-    serial = models.CharField(max_length=255, blank=True, null=True)
-    operating_system = models.ForeignKey(
-        'OperatingSystem', blank=True, null=True)
-    server_model = models.ForeignKey('ServerModel', blank=True, null=True)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    oob_ip = models.CharField(max_length=30, blank=True, null=True)
-    asset_tag = models.CharField(max_length=255, blank=True, null=True)
-    notes = models.TextField(blank=True, null=True)
-    licenses = models.TextField(blank=True, null=True)
-    allocation = models.ForeignKey('Allocation', blank=True, null=True)
-    system_rack = models.ForeignKey('SystemRack', blank=True, null=True)
-    rack_order = models.DecimalField(
-        null=True, blank=True, max_digits=6, decimal_places=2)
-    switch_ports = models.CharField(max_length=255, blank=True, null=True)
-    patch_panel_port = models.CharField(max_length=255, blank=True, null=True)
-    oob_switch_port = models.CharField(max_length=255, blank=True, null=True)
-    purchase_date = models.DateField(null=True, blank=True)
-    purchase_price = models.CharField(max_length=255, blank=True, null=True)
-    system_status = models.ForeignKey('SystemStatus', blank=True, null=True)
-    change_password = models.DateTimeField(null=True, blank=True)
-    ram = models.CharField(max_length=255, blank=True, null=True)
-    is_dhcp_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_dns_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_puppet_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_nagios_server = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-    is_switch = models.IntegerField(
-        choices=YES_NO_CHOICES, blank=True, null=True)
-
-    @property
-    def primary_ip(self):
-        try:
-            first_ip = self.keyvalue_set.filter(
-                key__contains='ipv4_address').order_by('key')[0].value
-            return first_ip
-        except:
-            return None
-
-    def update_adapter(self, **kwargs):
-        from .system_api import SystemResource
-        interface = kwargs.pop('interface', None)
-        ip_address = kwargs.pop('ip_address', None)
-        mac_address = kwargs.pop('mac_address', None)
-
-        if not interface:
-            raise ValidationError("Interface required to update")
-
-        for intr in self.staticinterface_set.all():
-            if intr.interface_name() == interface:
-                if ip_address:
-                    intr.ip_str = ip_address
-                if mac_address:
-                    intr.mac = mac_address
-                intr.save()
-        return True
-
-        """
-            method to update a netwrok adapter
-
-            :param **kwargs: keyword arguments of what to update
-            :type **kwargs: dict
-            :return: True on deletion, exception on failure
-        """
-    def delete_adapter(self, adapter_name):
-        from .system_api import SystemResource
-        """
-            method to get the next adapter
-            we'll want to always return an adapter with a 0 alias
-            take the highest primary if exists, increment by 1 and return
-
-            :param adapter_name: The name of the adapter to delete
-            :type adapter_name: str
-            :return: True on deletion, exception raid if not exists
-        """
-        adapter_type, primary, alias = SystemResource.extract_nic_attrs(
-            adapter_name)
-        #self.staticinterface_set.get(type = adapter_type, primary = primary, alias = alias).delete()
-        for i in self.staticinterface_set.all():
-            i.update_attrs()
-            if i.attrs.interface_type == adapter_type and i.attrs.primary == primary and i.attrs.alias == alias:
-                i.delete()
-        return True
-
-    def get_adapters(self):
-        """
-            method to get all adapters
-            :return: list of objects and attributes if exist, None if empty
-        """
-        adapters = None
-        if self.staticinterface_set.count() > 0:
-            adapters = []
-            for i in self.staticinterface_set.all():
-                i.update_attrs()
-                adapters.append(i)
-        return adapters
-
-    def get_next_adapter(self, intr_type='eth'):
-        """
-            method to get the next adapter
-            we'll want to always return an adapter with a 0 alias
-            take the highest primary if exists, increment by 1 and return
-
-            :param type: The type of network adapter
-            :type type: str
-            :return: 3 strings 'adapter_name', 'primary_number', 'alias_number'
-        """
-        if self.staticinterface_set.count() == 0:
-            return intr_type, '0', '0'
-        else:
-            primary_list = []
-            for i in self.staticinterface_set.all():
-                i.update_attrs()
-                try:
-                    primary_list.append(int(i.attrs.primary))
-                except AttributeError, e:
-                    continue
-
-            ## sort and reverse the list to get the highest
-            ## perhaps someday come up with the lowest available
-            ## this should work for now
-            primary_list.sort()
-            primary_list.reverse()
-            if not primary_list:
-                return intr_type, '0', '0'
-            else:
-                return intr_type, str(primary_list[0] + 1), '0'
-
-    def get_next_key_value_adapter(self):
-        """
-            Return the first found adapter from the
-            key value store. This will go away,
-            once we are on the StaticInterface
-            based system
-        """
-        ret = {}
-        ret['mac_address'] = None
-        ret['ip_address'] = None
-        ret['num'] = None
-        ret['dhcp_scope'] = None
-        ret['name'] = 'nic0'
-        key_value = self.keyvalue_set.filter(
-            key__startswith='nic', key__icontains='mac_address')[0]
-        m = re.search('nic\.(\d+)\.mac_address\.0', key_value.key)
-        ret['num'] = int(m.group(1))
-        key_value_set = self.keyvalue_set.filter(
-            key__startswith='nic.%s' % ret['num'])
-        if len(key_value_set) > 0:
-            for kv in key_value_set:
-                m = re.search('nic\.\d+\.(.*)\.0', kv.key)
-                if m:
-                    ret[m.group(1)] = str(kv.value)
-            return ret
-        else:
-            return False
-        #System.keyvalue_set.filter(name__startswith='nic' % key_id).delete()
-
-    def delete_key_value_adapter_by_index(self, index):
-        """
-            Delete a set of key_value items by index
-            if index = 0
-            delete where keyvalue.name startswith nic.0
-        """
-        self.keyvalue_set.filter(key__startswith='nic.%i' % index).delete()
-        return True
-
-    @property
-    def primary_reverse(self):
-        try:
-            return str(socket.gethostbyaddr(self.primary_ip)[0])
-        except:
-            return None
-
-    def get_updated_fqdn(self):
-        allowed_domains = [
-            'mozilla.com',
-            'scl3.mozilla.com',
-            'phx.mozilla.com',
-            'phx1.mozilla.com',
-            'mozilla.net',
-            'mozilla.org',
-            'build.mtv1.mozilla.com',
-            'build.mozilla.org',
-        ]
-        reverse_fqdn = self.primary_reverse
-        if self.primary_ip and reverse_fqdn:
-            current_hostname = str(self.hostname)
-
-            if current_hostname and current_hostname != reverse_fqdn:
-                res = reverse_fqdn.replace(current_hostname, '').strip('.')
-                if res in allowed_domains:
-                    self.update_host_for_migration(reverse_fqdn)
-        elif not self.primary_ip or self.primary_reverse:
-            for domain in allowed_domains:
-                updated = False
-                if not updated:
-                    try:
-                        fqdn = socket.gethostbyaddr(
-                            '%s.%s' % (self.hostname, domain))
-                        if fqdn:
-                            self.update_host_for_migration(fqdn[0])
-                            updated = True
-                    except Exception, e:
-                        #print e
-                        pass
-            if not updated:
-                pass
-                #print "Could not update hostname %s" % (self.hostname)
-
-    def update_host_for_migration(self, new_hostname):
-        if new_hostname.startswith(self.hostname):
-            kv = KeyValue(system=self,
-                          key='system.hostname.alias.0', value=self.hostname)
-            kv.save()
-            try:
-                self.hostname = new_hostname
-                self.save()
-            except Exception, e:
-                print "ERROR - %s" % (e)
-
-    objects = models.Manager()
-    build_objects = BuildManager()
-    with_related = SystemWithRelatedManager()
-
-    def save(self, *args, **kwargs):
-        request = kwargs.pop('request', None)
-        try:
-            changes = self.get_dirty_fields()
-            if changes:
-                system = System.objects.get(id=self.id)
-                save_string = ''
-                for k, v in changes.items():
-                    if k == 'system_status_id':
-                        k = 'System Status'
-                        ss = SystemStatus.objects.get(id=v)
-                        v = ss
-                    if k == 'operating_system_id':
-                        k = 'Operating System'
-                        ss = OperatingSystem.objects.get(id=v)
-                        v = ss
-                    if k == 'server_model_id':
-                        k = 'Server Model'
-                        ss = ServerModel.objects.get(id=v)
-                        v = ss
-                    save_string += '%s: %s\n\n' % (k, v)
-                try:
-                    remote_user = request.META['REMOTE_USER']
-                except Exception, e:
-                    remote_user = 'changed_user'
-                tmp = SystemChangeLog(system=system, changed_by=remote_user, changed_text=save_string, changed_date=datetime.datetime.now())
-                tmp.save()
-        except Exception, e:
-            print e
-            pass
-
-        if not self.id:
-            self.created_on = datetime.datetime.now()
-        self.updated_on = datetime.datetime.now()
-
-        super(System, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        return self.hostname
-
-    def get_switches(self):
-        return System.objects.filter(is_switch=1)
-
-    def get_detail_url(self):
-        return "/systems/show/{0}/".format(self.pk)
-
-    def check_for_adapter(self, adapter_id):
-        adapter_id = int(adapter_id)
-        if adapter_id in self.get_adapter_numbers():
-            return True
-        return False
-
-    def check_for_adapter_name(self, adapter_name):
-        adapter_name = str(adapter_name)
-        if adapter_name in self.get_nic_names():
-            return True
-        return False
-
-    def get_nic_names(self):
-        adapter_names = []
-        pairs = KeyValue.objects.filter(
-            system=self, key__startswith='nic', key__contains='adapter_name')
-        for row in pairs:
-            m = re.match('^nic\.\d+\.adapter_name\.\d+', row.key)
-            if m:
-                adapter_names.append(str(row.value))
-        return adapter_names
-
-    def get_adapter_numbers(self):
-        nic_numbers = []
-        pairs = KeyValue.objects.filter(system=self, key__startswith='nic')
-        for row in pairs:
-            m = re.match('^nic\.(\d+)\.', row.key)
-            if m:
-                match = int(m.group(1))
-                if match not in nic_numbers:
-                    nic_numbers.append(match)
-        return nic_numbers
-
-    @property
-    def notes_with_link(self):
-        if self.notes:
-            patterns = [
-                '[bB]ug#?\D#?(\d+)',
-            ]
-            for pattern in patterns:
-                m = re.search(pattern, self.notes)
-                if m:
-                    self.notes = re.sub(pattern, '<a href="%s%s">Bug %s</a>' % (settings.BUG_URL, m.group(1), m.group(1)), self.notes)
-            return self.notes
-        else:
-            return ''
-
-    def get_next_adapter_number(self):
-        nic_numbers = self.get_adapter_numbers()
-        if len(nic_numbers) > 0:
-            nic_numbers.sort()
-            ## The last item in the array should be an int, but just in case we'll catch the exception and return a 1
-            try:
-                return nic_numbers[-1] + 1
-            except:
-                return 1
-        else:
-            return 1
-
-    def get_adapter_count(self):
-        return len(self.get_adapter_numbers())
-
-    class Meta:
-        db_table = u'systems'
 
 
 class SystemChangeLog(models.Model):

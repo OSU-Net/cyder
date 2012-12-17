@@ -1,6 +1,6 @@
 from cyder.truth.models import Truth
-import cyder.core.systems
-from cyder.core.systems.models import System
+import cyder.core.system
+from cyder.core.system.models import System
 from cyder.dnsutils.build_nics import *
 from django.conf import settings
 from cyder.dnsutils.utils import *
@@ -10,7 +10,6 @@ import ipaddr
 import re
 import copy
 import pprint
-import pdb
 import string
 
 pp = pprint.PrettyPrinter(indent=2)

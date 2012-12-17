@@ -18,7 +18,6 @@ from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
 import ipaddr
-import pdb
 
 
 class ReverseDomainTests(TestCase):

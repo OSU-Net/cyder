@@ -1,10 +1,12 @@
+import json
+
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 
-import simplejson
-
+from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
 
@@ -59,7 +61,8 @@ def login_session(request, username):
         request.session['ctnr'] = Ctnr.objects.get(id=2)
 
     # Set session ctnr level.
-    request.session['level'] = CtnrUser.objects.get(user=request.user, ctnr=default_ctnr).level
+    request.session['level'] = CtnrUser.objects.get(user=request.user,
+                                                    ctnr=default_ctnr).level
 
     try:
         # Set ctnr list (to switch between).
@@ -70,10 +73,24 @@ def login_session(request, username):
     except CtnrUser.DoesNotExist:
         # Set ctnr list (to switch between).
         ctnrs_user = CtnrUser.objects.filter(user=request.user)
-        ctnrs = [Ctnr.objects.get(id=ctnr_pk) for ctnr_pk in  ctnrs_user.values_list('ctnr', flat=True)]
+        ctnrs = [Ctnr.objects.get(id=ctnr_pk) for ctnr_pk in
+                 ctnrs_user.values_list('ctnr', flat=True)]
         request.session['ctnrs'] = ctnrs
 
     return request
+
+
+def search(request):
+    """
+    Returns a list of users matching 'term'.
+    """
+    term = request.GET.get('term', '')
+    if not term:
+        raise Http404
+
+    users = UserProfile.objects.filter(make_megafilter(UserProfile, term))[:15]
+    users = [{'label': str(user), 'pk': user.user.pk} for user in users]
+    return HttpResponse(json.dumps(users))
 
 
 def become_user(request, username=None):
@@ -89,7 +106,8 @@ def become_user(request, username=None):
 
     # Save stack since session will be overwritten.
     if 'become_user_stack' in request.session:
-        become_user_stack = [user for user in request.session['become_user_stack']]
+        become_user_stack = [user for user in
+                             request.session['become_user_stack']]
         become_user_stack.append(current_user)
     else:
         become_user_stack = [current_user]
@@ -111,8 +129,9 @@ def unbecome_user(request):
     referer = request.META.get('HTTP_REFERER', '/')
 
     if ('become_user_stack' in request.session and
-        len(request.session['become_user_stack']) > 0):
-        become_user_stack = [user for user in request.session['become_user_stack']]
+          len(request.session['become_user_stack']) > 0):
+        become_user_stack = [user for user in
+                             request.session['become_user_stack']]
         username = become_user_stack.pop()
         messages.success(request, 'Successfully rebecame %s' % (username))
     else:

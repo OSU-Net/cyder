@@ -22,7 +22,6 @@ from cyder.dnsutils.svn_build import collect_svn_zone, collect_rev_svn_zone
 
 import dns
 import dns.zone
-import pdb
 from copy import deepcopy
 
 

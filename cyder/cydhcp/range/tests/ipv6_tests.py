@@ -6,7 +6,6 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 
 import ipaddr
-import pdb
 
 
 class V6RangeTests(TestCase):

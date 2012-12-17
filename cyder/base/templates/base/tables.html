@@ -1,33 +1,31 @@
-{% macro render_table(headers, matrix, urls, views=True) %}
+{% macro render_table(object_table, class) %}
+{% if object_table %}
 
-<table class="table">
-    <thead>
-        <tr>
-            {% for header in headers %}
-                {# print header #}
-                <th>{{ header }}</th>
-            {% endfor %}
-            {# if views %}
-                <th>Views</th>
-            {% endif #}
-        </tr>
-    </thead>
+<table id="egtable" class="table {{ class }}">
+  <thead>
+    <tr>
+      {% for header in object_table['headers'] %}
+        <th>{{ header }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
 
-    <tbody>
-        {% for row in matrix %}
-            <tr>
-                <th><a href='{{ urls[loop.index0] }}'>{{ row[0] }}</a></th>
-                {% for col in row %}
-                    {% if loop.first %}
-                        {# Do nothing #}
-                    {% else %}
-                        {# print data #}
-                        <th>{{ col }}</th>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+  <tbody>
+    {% for row in object_table['data'] %}
+      <tr id="{{ R ~ loop.index }}" data-url="{{ object_table['postback_urls'][loop.index0] }}">
+        {% for col in row %}
+          <td>
+            {% if col['url'] %}
+              <a href="{{ col['url'] }}">{{ col['value'] }}</a>
+            {% else %}
+              {{ col['value'] }}
+            {% endif %}
+          </td>
         {% endfor %}
-    </tbody>
+      </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
+{% endif %}
 {% endmacro %}
