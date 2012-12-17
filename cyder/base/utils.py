@@ -49,6 +49,7 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
             headers.append(col['header'])
     if views:
         headers.append('Views')
+    headers.append('Actions')
 
     for i, obj in enumerate(objects):
         row_data = []
@@ -60,13 +61,13 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                 url = value.get_detail_url()
             except AttributeError:
                 url = None
-            row_data.append({'value': value, 'url': url})
+            row_data.append({'value': [value], 'url': [url]})
 
         if extra_cols:
             # Manual extra columns.
             for col in extra_cols:
                 d = col['data'][i]
-                row_data.append({'value': d['value'], 'url': d['url']})
+                row_data.append({'value': [d['value']], 'url': [d['url']]})
 
         if views:
             # Another column for views.
@@ -77,9 +78,15 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                         view_field += ' ' + view.name
                     else:
                         view_field = view.name
-                row_data.append({'value': view_field, 'url': None})
+                row_data.append({'value': [view_field], 'url': [None]})
             else:
-                row_data.append({'value': 'None', 'url': None})
+                row_data.append({'value': ['None'], 'url': [None]})
+
+        # Actions
+        row_data.append({'value': ['Update', 'Delete'],
+                         'url': ['#', '#'],
+                         'data': [[('pk', obj.id)], [('pk', obj.id)]],
+                         'class': ['update', 'delete']})
 
         # Build table.
         data.append(row_data)

@@ -15,11 +15,17 @@
       <tr id="{{ R ~ loop.index }}" data-url="{{ object_table['postback_urls'][loop.index0] }}">
         {% for col in row %}
           <td>
-            {% if col['url'] %}
-              <a href="{{ col['url'] }}">{{ col['value'] }}</a>
-            {% else %}
-              {{ col['value'] }}
-            {% endif %}
+            {% for cell in col['value'] %}
+              {% if col['url'][loop.index0] %}
+                <a{% if col['class'] %} class="{{ col['class'][loop.index0] }}"{% endif%}
+                  {% if col['data'] %}{% for data in col['data'][loop.index0] %} data-{{ data[0] }}="{{ data[1] }}"{% endfor %}{% endif %}
+                  href="{{ col['url'][loop.index0] }}">
+                  {{ cell }}
+                </a>
+              {% else %}
+                {{ cell }}
+              {% endif %}
+            {% endfor %}
           </td>
         {% endfor %}
       </tr>
