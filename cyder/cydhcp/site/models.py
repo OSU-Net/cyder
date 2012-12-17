@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 
-
 class Site(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -38,10 +37,10 @@ class Site(models.Model, ObjectUrlMixin):
         return full_name
 
     def get_related_networks(self, related_sites):
+        from cyder.cydhcp.network.models import Network
         networks = set()
         for site in related_sites:
             root_networks = Network.objects.filter(site=site)
-            networks.update(network.get_related_networks())
             for network in root_networks:
                 networks.update(network.get_related_networks())
         return networks
@@ -49,6 +48,7 @@ class Site(models.Model, ObjectUrlMixin):
     def get_related_sites(self):
         related_sites = Site.objects.filter(parent=self)
         sites = set(related_sites)
+        sites.update([self])
         while related_sites:
             sub_sites = set()
             for site in related_sites:

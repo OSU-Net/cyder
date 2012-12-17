@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from cyder.cydhcp.site.models import Site
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
-
 from cyder.cydhcp.keyvalue.models import KeyValue
 
 import pdb
@@ -48,6 +47,7 @@ class Vlan(models.Model, ObjectUrlMixin):
 
         return None
     def get_related_networks(self):
+        from cyder.cydhcp.network.models import Network
         from cyder.cydhcp.network.utils import calc_networks
         related_networks = Network.objects.filter(vlan = self)
         networks = set(related_networks)

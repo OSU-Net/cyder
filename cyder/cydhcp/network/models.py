@@ -157,6 +157,7 @@ class Network(models.Model, ObjectUrlMixin):
         from cyder.cydhcp.network.utils import calc_networks
         _, related_networks = calc_networks(self)
         networks = set(related_networks)
+        networks.update([self])
         while related_networks:
             subnets = set()
             for network in related_networks:
