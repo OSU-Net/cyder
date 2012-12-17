@@ -47,7 +47,21 @@ class Vlan(models.Model, ObjectUrlMixin):
                 return domain.name
 
         return None
+    def get_related_networks(self):
+        from cyder.cydhcp.network.utils import calc_networks
+        related_networks = Network.objects.filter(vlan = self)
+        networks = set(related_networks)
+        while related_networks:
+            subnets = set()
+            for network in related_networks:
+                _, related = calc_networks(network)
+                subnets.update(related)
+            networks.update(subnets)
+            related_networks = subnets
+        return networks
 
+    def get_related_sites(self, related_networks):
+        return set([network.site for network in related_networks])
 
 class VlanKeyValue(KeyValue):
     vlan = models.ForeignKey(Vlan, null=False)
