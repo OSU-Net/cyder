@@ -10,6 +10,11 @@ APPEND_SLASH = True
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
 
+_base = os.path.dirname(__file__)
+site_root = os.path.realpath(os.path.join(_base, '../'))
+sys.path.append(site_root)
+sys.path.append(site_root + '/vendor')
+
 SASS_PREPROCESS = True
 JINGO_MINIFY_USE_STATIC = False
 
