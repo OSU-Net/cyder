@@ -1,5 +1,7 @@
 # This is your project's main settings file that can be committed to your
 # repo. If you need to override a setting locally, use settings_local.py
+import os
+import sys
 
 from funfactory.settings_base import *
 from cyder.settings.dns import *
