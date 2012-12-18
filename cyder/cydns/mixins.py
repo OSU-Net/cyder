@@ -25,16 +25,15 @@ class ObjectUrlMixin(object):
 
     def get_update_url(self):
         """
-        Return the update url of an object (to be posted to). Not class method
-        because object pk needed.
+        Return the update url of an object.
         """
-        return self.get_list_url() + '?action=update&pk=' + str(self.pk)
+        return reverse(self._meta.db_table + '-update', args=[self.pk])
 
     def get_delete_url(self):
         """
-        Return the delete url of an object (to be posted to).
+        Return the delete url of an object.
         """
-        return self.get_list_url() + '?action=delete&pk=' + str(self.pk)
+        return reverse(self._meta.db_table + '-delete', args=[self.pk])
 
     def get_detail_url(self):
         """

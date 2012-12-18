@@ -16,7 +16,6 @@
 
 {% block action_bar %}
     <a class="btn" id="record-create">Create {{ a_or_an(record_type) }} {{ pretty_record_type }}</a>
-    <a class="btn" id="record-search">Update {{ a_or_an(record_type) }} {{ pretty_record_type }}</a>
     <a class="btn" id="record-search-soa">View BIND File</a>
 {% endblock %}
 
@@ -53,7 +52,6 @@
       <div class="form-btns">
         <hr>
         <a class="btn submit c">Submit</a>
-        <a class="btn delete c red hidden">Delete Record</a>
         <a class="btn cancel c" data-formId="cydns-record-form">Cancel</a>
       </div>
     </form>
