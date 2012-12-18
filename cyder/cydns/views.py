@@ -34,13 +34,13 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 
-def cydns_record_view(request, record_type=None):
+def cydns_record_view(request, pk=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
     # Infer record_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
-    record_type = record_type or request.path.split('/')[2]
+    record_type = request.path.split('/')[2]
 
     domains = json.dumps([domain.name for domain in  # TODO: ACLs
                           Domain.objects.filter(is_reverse=False)]),
@@ -50,8 +50,6 @@ def cydns_record_view(request, record_type=None):
 
     # Get the object if updating.
     record = None
-    action = request.GET.get('action', None)
-    pk = request.GET.get('pk', None)
     if pk:
         record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
         form = FQDNFormKlass(instance=record)
@@ -62,10 +60,6 @@ def cydns_record_view(request, record_type=None):
         # May be mutating query dict for FQDN resolution and labels.
         qd = request.POST.copy()
         orig_qd = request.POST.copy()
-
-        if action == 'delete':
-            record.delete()
-            return redirect(record.get_list_url())
 
         # Create initial FQDN form.
         if record:
@@ -132,6 +126,20 @@ def cydns_record_view(request, record_type=None):
         'record_type': record_type,
         'pk': pk,
     })
+
+
+def cydns_delete(request, pk):
+    """Delete view."""
+    # Infer record_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
+    record_type = request.path.split('/')[2]
+
+    # Get the Klass.
+    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+
+    record = get_object_or_404(Klass, pk=pk)
+    record.delete()
+    return redirect(record.get_list_url())
 
 
 def cydns_get_record(request):

@@ -84,8 +84,8 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
 
         # Actions
         row_data.append({'value': ['Update', 'Delete'],
-                         'url': ['#', '#'],
-                         'data': [[('pk', obj.id)], [('pk', obj.id)]],
+                         'url': ['#', obj.get_delete_url()],
+                         'data': [[('pk', obj.id)], None],
                          'class': ['update', 'delete']})
 
         # Build table.

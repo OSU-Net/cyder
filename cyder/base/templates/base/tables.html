@@ -18,7 +18,7 @@
             {% for cell in col['value'] %}
               {% if col['url'][loop.index0] %}
                 <a{% if col['class'] %} class="{{ col['class'][loop.index0] }}"{% endif%}
-                  {% if col['data'] %}{% for data in col['data'][loop.index0] %} data-{{ data[0] }}="{{ data[1] }}"{% endfor %}{% endif %}
+                  {% if col['data'] %}{% if col['data'][loop.index0] %}{% for data in col['data'][loop.index0] %} data-{{ data[0] }}="{{ data[1] }}"{% endfor %}{% endif %}{% endif %}
                   href="{{ col['url'][loop.index0] }}">
                   {{ cell }}
                 </a>
