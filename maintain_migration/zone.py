@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 import chili_manage, fix_maintain, maintain_dump
 from utilities import clean_mac, config, get_cursor, ip2long, long2ip
 
-from cyder.core.systems.models import System
+from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
