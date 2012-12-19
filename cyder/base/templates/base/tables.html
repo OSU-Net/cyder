@@ -1,11 +1,11 @@
-{% macro render_table(object_table, class) %}
+{% macro render_table(request, object_table, class) %}
 {% if object_table %}
 
 <table id="egtable" class="table {{ class }}">
   <thead>
     <tr>
-      {% for header in object_table['headers'] %}
-        <th>{{ header }}</th>
+      {% for header, sort_field in object_table['headers'] %}
+        <th>{{ sort_link(request, header, sort_field)|safe }}</th>
       {% endfor %}
     </tr>
   </thead>

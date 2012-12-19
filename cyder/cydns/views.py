@@ -6,8 +6,8 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.utils import (make_paginator, make_megafilter, qd_to_py_dict,
-                              tablefy)
+from cyder.base.utils import (do_sort, make_paginator,
+                              make_megafilter, qd_to_py_dict, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -115,7 +115,8 @@ def cydns_record_view(request, pk=None):
             return_form._errors = form._errors
             form = return_form
 
-    page_obj = make_paginator(request, Klass.objects.all(), 50)
+    page_obj = make_paginator(
+        request, do_sort(request, Klass.objects.all()), 50)
 
     return render(request, 'cydns/cydns_record_view.html', {
         'form': form,

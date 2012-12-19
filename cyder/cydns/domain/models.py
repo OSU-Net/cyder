@@ -107,10 +107,10 @@ class Domain(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(Domain, self).details()
         data['data'] = [
-            ('Name', self),
-            ('Master Domain', self.master_domain),
-            ('SOA', self.soa),
-            ('Delegated', self.delegated),
+            ('Name', 'name', self),
+            ('Master Domain', 'master_domain', self.master_domain),
+            ('SOA', 'soa', self.soa),
+            ('Delegated', 'delegated', self.delegated),
         ]
         return data
 

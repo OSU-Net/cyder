@@ -1,4 +1,5 @@
 import operator
+import urllib
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
@@ -42,20 +43,20 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     data = []
 
     # Build headers.
-    for title, value in objects[0].details()['data']:
-        headers.append(title)
+    for title, sort_field, value in objects[0].details()['data']:
+        headers.append([title, sort_field])
     if extra_cols:
         for col in extra_cols:
-            headers.append(col['header'])
+            headers.append([col['header'], col['sort_field']])
     if views:
-        headers.append('Views')
-    headers.append('Actions')
+        headers.append(['Views', None])
+    headers.append(['Actions', None])
 
     for i, obj in enumerate(objects):
         row_data = []
 
         # Columns.
-        for title, value in obj.details()['data']:
+        for title, field, value in obj.details()['data']:
             # Build data.
             try:
                 url = value.get_detail_url()
@@ -114,3 +115,54 @@ def qd_to_py_dict(qd):
     for k in qd:
         ret[k] = qd[k]
     return ret
+
+
+def clean_sort_param(request):
+    """
+    Handles empty and invalid values for sort and sort order
+    'id' by ascending is the default ordering.
+    """
+    sort = request.GET.get('sort', 'id')
+    order = request.GET.get('order', 'asc')
+
+    if order not in ('desc', 'asc'):
+        order = 'asc'
+    return sort, order
+
+
+def do_sort(request, qs):
+    """Returns an order_by string based on request GET parameters"""
+    sort, order = clean_sort_param(request)
+
+    if order == 'asc':
+        order_by = sort
+    else:
+        order_by = '-%s' % sort
+    return qs.order_by(order_by)
+
+
+def create_sort_link(pretty_name, sort_field, get_params, sort, order):
+    """Generate table header sort links.
+
+    pretty_name -- name displayed on table header
+    sort_field -- name of the sort_type GET parameter for the column
+    get_params -- additional get_params to include in the sort_link
+    sort -- the current sort type
+    order -- the current sort order
+    """
+    get_params.append(('sort', sort_field))
+
+    if sort == sort_field and order == 'asc':
+        # Have link reverse sort order to desc if already sorting by desc.
+        get_params.append(('order', 'desc'))
+    else:
+        # Default to ascending.
+        get_params.append(('order', 'asc'))
+
+    # Show little sorting sprite if sorting by this field.
+    url_class = ''
+    if sort == sort_field:
+        url_class = ' class="sort-icon ed-sprite-sort-%s"' % order
+
+    return u'<a href="?%s"%s>%s</a>' % (urllib.urlencode(get_params),
+                                        url_class, pretty_name)

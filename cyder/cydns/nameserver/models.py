@@ -30,41 +30,41 @@ class Nameserver(models.Model, ObjectUrlMixin):
         record or b) the glue record the NS has isn't valid.
     """
     id = models.AutoField(primary_key=True)
-    domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
-                               "record is for.")
+    domain = models.ForeignKey(Domain, null=False, help_text='The domain this '
+                               'record is for.')
     server = models.CharField(
         max_length=255, validators=[validate_name],
-        help_text="The name of the server this records points to.")
+        help_text='The name of the server this records points to.')
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
-    # "If nameserver lies within domain, should have corresponding A record."
+    # 'If nameserver lies within domain, should have corresponding A record.'
     addr_glue = models.ForeignKey(AddressRecord, null=True, blank=True,
-                                  related_name="nameserver_set")
+                                  related_name='nameserver_set')
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
-                                  related_name="intrnameserver_set")
+                                  related_name='intrnameserver_set')
     views = models.ManyToManyField(View, blank=True)
     comment = models.CharField(max_length=1000, null=True, blank=True,
-                               help_text="Comments about this record.")
+                               help_text='Comments about this record.')
 
-    search_fields = ("server",)
+    search_fields = ('server',)
 
     class Meta:
-        db_table = "nameserver"
-        unique_together = ("domain", "server")
+        db_table = 'nameserver'
+        unique_together = ('domain', 'server')
 
     def __repr__(self):
         return "<Forward '{0}'>".format(str(self))
 
     def __str__(self):
-        return "{0} {1} {2}".format(self.domain.name, "NS", self.server)
+        return '{0} {1} {2}'.format(self.domain.name, 'NS', self.server)
 
     def details(self):
         """For tables."""
         data = super(Nameserver, self).details()
         data['data'] = [
-            ("Domain", self.domain),
-            ("Server", self.server),
-            ("Glue", self.get_glue()),
+            ('Domain', 'domain', self.domain),
+            ('Server', 'server', self.server),
+            ('Glue', None, self.get_glue()),
         ]
         return data
 
@@ -121,9 +121,9 @@ class Nameserver(models.Model, ObjectUrlMixin):
             self.addr_glue = None
             self.intr_glue = None
         else:
-            raise ValueError("Cannot assing {0}: Nameserver.glue must be of "
-                             "either type AddressRecord or type "
-                             "StaticInterface.".format(glue))
+            raise ValueError('Cannot assing {0}: Nameserver.glue must be of '
+                             'either type AddressRecord or type '
+                             'StaticInterface.'.format(glue))
 
     def del_glue(self):
         if self.addr_glue:

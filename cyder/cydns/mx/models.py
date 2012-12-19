@@ -5,7 +5,6 @@ from cyder.cydns.models import CydnsRecord
 from cyder.cydns.cname.models import CNAME
 
 from cyder.cydns.validation import validate_mx_priority
-from cyder.cydns.validation import validate_ttl
 from cyder.cydns.validation import validate_name
 
 
@@ -37,10 +36,10 @@ class MX(CydnsRecord):
         """For tables."""
         data = super(MX, self).details()
         data['data'] = [
-            ('Domain', self.domain),
-            ('Server', self.server),
-            ('Priority', self.priority),
-            ('TTL', self.ttl)
+            ('Domain', 'domain__name', self.domain),
+            ('Server', 'server', self.server),
+            ('Priority', 'priority', self.priority),
+            ('TTL', 'ttl', self.ttl)
         ]
         return data
 

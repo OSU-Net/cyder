@@ -11,50 +11,50 @@
 {% endblock %}
 
 {% block content %}
-    {{ render_table(domain_table) }}
+    {{ render_table(request, domain_table) }}
 
     {% if address_table %}
         <h3> Address Records </h3>
-        {{ render_table(address_table) }}
+        {{ render_table(request, address_table) }}
     {% endif %}
 
     {% if cname_table %}
         <h3> CNAME Records </h3>
-        {{ render_table(cname_table) }}
+        {{ render_table(request, cname_table) }}
     {% endif %}
 
     {% if intr_table %}
         <h3> Interface Records </h3>
-        {{ render_table(intr_table) }}
+        {{ render_table(request, intr_table) }}
     {% endif %}
 
     {% if mx_table %}
         <h3> MX Records </h3>
-        {{ render_table(mx_table) }}
+        {{ render_table(request, mx_table) }}
     {% endif %}
 
     {% if ns_table %}
         <h3> Nameservers </h3>
-        {{ render_table(ns_table) }}
+        {{ render_table(request, ns_table) }}
     {% endif %}
 
     {% if ptr_table %}
         <h3> PTR Records </h3>
-        {{ render_table(ptr_table) }}
+        {{ render_table(request, ptr_table) }}
     {% endif %}
 
     {% if srv_table %}
         <h3> SRV Records </h3>
-        {{ render_table(srv_table) }}
+        {{ render_table(request, srv_table) }}
     {% endif %}
 
     {% if sshfp_table %}
         <h3> SSHFP Records </h3>
-        {{ render_table(sshfp_table) }}
+        {{ render_table(request, sshfp_table) }}
     {% endif %}
 
     {% if txt_table %}
         <h3> TXT Records </h3>
-        {{ render_table(txt_table) }}
+        {{ render_table(request, txt_table) }}
     {% endif %}
 {% endblock %}

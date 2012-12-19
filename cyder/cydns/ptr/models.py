@@ -6,10 +6,8 @@ from cyder.cydns.domain.models import Domain, _name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.validation import validate_name, validate_ttl
-from cyder.cydns.validation import validate_views
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-
 
 
 class PTR(Ip, ObjectUrlMixin):
@@ -24,8 +22,9 @@ class PTR(Ip, ObjectUrlMixin):
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True)
-    data_domain = models.ForeignKey(Domain, null=True, blank=True,
-                                    related_name='ptrs', on_delete=models.SET_NULL)
+    data_domain = models.ForeignKey(
+        Domain, null=True, blank=True, related_name='ptrs',
+        on_delete=models.SET_NULL)
     views = models.ManyToManyField(View, blank=True)
     comment = models.CharField(max_length=1000, null=True, blank=True)
 
@@ -43,21 +42,10 @@ class PTR(Ip, ObjectUrlMixin):
 
     def details(self):
         """For tables."""
-        return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
-            'data': [
-            ]
-        }
-
-    def details(self):
-        """For tables."""
         data = super(PTR, self).details()
         data['data'] = [
-            ('Name', self),
-            ('IP', str(self.ip_str)),
+            ('Name', 'name', self),
+            ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
 
@@ -109,8 +97,9 @@ class PTR(Ip, ObjectUrlMixin):
         self.data_domain = _name_to_domain(self.name)
         # We need to check if there is an interface using our ip and name
         # because that interface will generate a ptr record.
-        if (StaticInterface.objects.filter(fqdn=self.name,
-                                           ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()):
+        if (StaticInterface.objects.filter(
+              fqdn=self.name, ip_upper=self.ip_upper,
+              ip_lower=self.ip_lower).exists()):
             raise ValidationError("An Interface has already used this IP and "
                                   "Name.")
 
