@@ -4,7 +4,10 @@ import string
 
 from jingo import register
 
-from cyder.base.utils import clean_sort_param, create_sort_link
+from cyder.base.utils import clean_sort_param, create_sort_link, urlparams
+
+
+urlparams = register.filter(urlparams)
 
 
 @register.filter

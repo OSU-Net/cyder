@@ -5,7 +5,7 @@
 
 {% block filter_bar %}
   <form action="." method="get">
-    <input id="search-bar" type="search" name="filter" value="{{ filter }}"></input>
+    <input id="search-bar" type="search" name="filter" value="{{ request.GET['filter'] }}"></input>
     <a class='submit btn'>Filter</a>
     <label for="search-bar"></label>
   </form>
