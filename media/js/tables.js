@@ -12,7 +12,7 @@ function enableEditableGrid() {
 
     // Strip links and paragraph tags, remove table cell markdown until
     // we do CellRenderers.
-    $('#egtable').find('td').each(function (i, td) {
+    $('#egtable').find('td, th').each(function (i, td) {
         var $td = $(td);
         if ($td.children().length) {
             $td.text($td.children()[0].innerHTML);
