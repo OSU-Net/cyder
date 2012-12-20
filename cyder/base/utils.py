@@ -84,7 +84,7 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                 row_data.append({'value': ['None'], 'url': [None]})
 
         # Actions
-        row_data.append({'value': ['Update', 'Delete'],
+        row_data.append({'value': ['U', 'D'],
                          'url': ['#', obj.get_delete_url()],
                          'data': [[('pk', obj.id)], None],
                          'class': ['update', 'delete']})

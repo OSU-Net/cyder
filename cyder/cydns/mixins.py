@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import NoReverseMatch, reverse
 
 
 class ObjectUrlMixin(object):
@@ -39,7 +39,10 @@ class ObjectUrlMixin(object):
         """
         Return the detail url of an object.
         """
-        return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        try:
+            return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        except NoReverseMatch:
+            return ''
 
     def details(self):
         """

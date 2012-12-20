@@ -44,7 +44,7 @@ class PTR(Ip, ObjectUrlMixin):
         """For tables."""
         data = super(PTR, self).details()
         data['data'] = [
-            ('Name', 'name', self),
+            ('Name', 'name', self.name),
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
