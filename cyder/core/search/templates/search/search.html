@@ -1,275 +1,113 @@
 {% extends "base/base.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block head %}
+  {{ css('search') }}
+{% endblock %}
 
 {% block title %}Search{% endblock %}
 
+{% block filter_bar %}
+  <form class="search" action="/search/" method="get">
+    <input type="search" name="search" value="{{ search if search else 'Search...' }}"></input>
+    <a class="btn submit">Search</a>
+  </form>
+  <a class="search-help" href="{{ url('search-help') }}">Search Help</a>
+{% endblock %}
+
 {% block content %}
-
-  <span id="search-bar">
-    <form action="/search/" method="get">
-      <input type="text" name="search" value="{{ search if search else 'Search...' }}"></input>
-    </form>
-  </span>
-  <a href="help/">Help</a>
-
   {% if search %}
-    <div id="search-results-meta">
+    <div id="search-meta">
+      <h2>Results</h2>
       {% if meta.counts.addr %}
-        {{ meta.counts.addr }} <a href="#Address">A/AAAA</a> records |
-      {% else %}
-        zero A/AAAA records |
+        {{ meta.counts.addr }} <a href="#address">Address Records</a> |
       {% endif %}
       {% if meta.counts.cname %}
-        {{ meta.counts.cname }} <a href="#CNAME">CNAME</a> records |
-      {% else %}
-        zero CNAME records |
+        {{ meta.counts.cname }} <a href="#cname">CNAMEs</a> |
       {% endif %}
       {% if meta.counts.domain %}
-        {{ meta.counts.domain }} <a href="#Domain">Domains</a> |
-      {% else %}
-        zero Domains |
+        {{ meta.counts.domain }} <a href="#domain">Domains</a> |
       {% endif %}
       {% if meta.counts.intr %}
-        {{ meta.counts.intr }} <a href="#Interface">INTR</a> records |
-      {% else %}
-        zero INTR records |
+        {{ meta.counts.intr }} <a href="#interface">Interfaces</a> |
+      {% endif %}
+      {% if meta.counts.misc %}
+        {{ meta.counts.misc }} <a href="#misc">Misc. Results</a> |
       {% endif %}
       {% if meta.counts.mx %}
-        {{ meta.counts.mx }} <a href="#MX">MX</a> records |
-      {% else %}
-        zero MX records |
+        {{ meta.counts.mx }} <a href="#mx">MXs</a> |
+      {% endif %}
+      {% if meta.counts.ns %}
+        {{ meta.counts.ns }} <a href="#nameserver">Nameservers</a> |
       {% endif %}
       {% if meta.counts.ptr %}
-        {{ meta.counts.ptr }} <a href="#PTR">PTR</a> records |
-      {% else %}
-        zero PTR records |
+        {{ meta.counts.ptr }} <a href="#ptr">PTRs</a> |
+      {% endif %}
+      {% if meta.counts.srv %}
+        {{ meta.counts.srv }} <a href="#srv">SRVs</a>
       {% endif %}
       {% if meta.counts.txt %}
-        {{ meta.counts.txt }} <a href="#TXT">TXT</a> records
-      {% else %}
-        zero TXT records
+        {{ meta.counts.txt }} <a href="#txt">TXTs</a>
       {% endif %}
     </div>
 
     <div id='search-time'></div>
 
     <div id='search-results'>
-      {% if misc %}
-        <table>
-          <thead>
-          <tr>
-            <th>Networks, Sites, and Vlans</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for object in misc %}
-            <tr>
-              <td><a href="{{ object.get_detail_url() }}">{{ object }}</a></td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if address_table %}
+        <h3 name="address">Address Records</h3>
+        {{ render_table(request, address_table) }}
       {% endif %}
 
-      {% if domains %}
-        <h3><a name="Domains">Domains</a></h3>
-        <table>
-          <thead>
-          <tr>
-            <th>Domain</th>
-            <th>SOA</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for domain in domains %}
-          <tr>
-            <td><a href="{{ domain.get_detail_url() }}">{{ domain.name }}</a></td>
-            <td>
-              {% if domain.soa %}
-              <a href="{{ domain.soa.get_detail_url() }}">{{ domain.soa }}</a>
-              {% endif %}
-            </td>
-          </tr>
-          </tbody>
-          {% endfor %}
-        </table>
+      {% if cname_table %}
+        <h3 name="cname">CNAME Records</h3>
+        {{ render_table(request, cname_table) }}
       {% endif %}
 
-      {% if nss %}
-        <h3><a name="Nameserver">Nameserver</a></h3>
-        <table>
-          <thead>
-          <tr>
-            <th>Domain</th>
-            <th></th>
-            <th>Server</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for ns in nss %}
-          <tr>
-            <td><a href="{{ ns.get_detail_url() }}">{{ ns.domain.name }}</a></td>
-            <td><b>NS</b></td>
-            <td>{{ ns.server }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if domain_table %}
+        <h3 name="domain">Domains</h3>
+        {{ render_table(request, domain_table) }}
       {% endif %}
 
-      {% if mxs %}
-        <h3><a name="MX">MX</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>FQDN</th>
-            <th></th>
-            <th>Server</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for mx in mxs %}
-          <tr>
-            <td><a href="{{ mx.get_detail_url() }}">{{ mx.fqdn }}</a></td>
-            <td><b>MX</b></td>
-            <td>{{ mx.server }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if intr_table %}
+        <h3 name="interface">Interface Records</h3>
+        {{ render_table(request, intr_table) }}
       {% endif %}
 
-      {% if srvs %}
-        <h3><a name="SRV">SRV</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>FQDN</th>
-            <th></th>
-            <th>Target</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for srv in srvs %}
-          <tr>
-            <td><a href="{{ srv.get_detail_url() }}">{{ srv.fqdn }}</a></td>
-            <td><b>SRV</b></td>
-            <td>{{ srv.target }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if misc_table %}
+        <h3 name="misc">Misc</h3>
+        {{ render_table(request, mx_table) }}
       {% endif %}
 
-      {% if txts %}
-        <h3><a name="TXT">TXT</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>FQDN</th>
-            <th></th>
-            <th>Data</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for txt in txts %}
-          <tr>
-            <td><a href="{{ txt.get_detail_url() }}">{{ txt.fqdn }}</a></td>
-            <td><b>TXT</b></td>
-            <td>{{ txt.data_data }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if mx_table %}
+        <h3 name="mx">MX Records</h3>
+        {{ render_table(request, mx_table) }}
       {% endif %}
 
-      {% if cnames %}
-        <h3><a name="CNAME">CNAME</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>FQDN</th>
-            <th></th>
-            <th>Data</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for cname in cnames %}
-          <tr>
-            <td><a href="{{ cname.get_detail_url() }}">{{ cname.fqdn }}</a></td>
-            <td><b>CNAME</b></td>
-            <td>{{ cname.target }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if ns_table %}
+        <h3 name="nameserver">Nameservers</h3>
+        {{ render_table(request, ns_table) }}
       {% endif %}
 
-      {% if intrs %}
-        <h3><a name="Interface">Interface</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>FQDN</th>
-            <th></th>
-            <th>IP</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for intr in intrs %}
-          <tr>
-            <td><a href="{{ intr.get_detail_url() }}">{{ intr.fqdn }}</a></td>
-            <td><b>A/PTR</b></td>
-            <td>{{ intr.ip_str }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if ptr_table %}
+        <h3 name="ptr">PTR Records</h3>
+        {{ render_table(request, ptr_table) }}
       {% endif %}
 
-      {% if addrs %}
-        <h3><a name="Address">Address</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>FQDN</th>
-            <th></th>
-            <th>IP</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for addr in addrs %}
-          <tr>
-            <td><a href="{{ addr.get_update_url() }}">{{ addr.fqdn }}</a></td>
-            <td><b>{{ addr.record_type() }}</b></td>
-            <td>{{ addr.ip_str }}</td>
-          </tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      {% if srv_table %}
+        <h3 name="srv">SRV Records</h3>
+        {{ render_table(request, srv_table) }}
       {% endif %}
 
-      {% if ptrs %}
-        <h3><a name="PTR">PTR</a> Records</h3>
-        <table>
-          <thead>
-          <tr>
-            <th>IP</th>
-            <th></th>
-            <th>FQDN</th>
-          </tr>
-          <thead>
-          <tbody>
-          {% for ptr in ptrs %}
-          <tr>
-            <td><a href="{{ ptr.get_detail_url() }}">{{ ptr.name }}</a></td>
-            <td><b>PTR</b></td>
-            <td>{{ ptr.ip_str }}</td>
-          </tr>
-          {% endfor %}
-          <tbody>
-        </table>
+      {% if sshfp_table %}
+        <h3 name="sshfp">SSHFP Records</h3>
+        {{ render_table(request, sshfp_table) }}
+      {% endif %}
+
+      {% if txt_table %}
+        <h3 name="txt">TXT Records</h3>
+        {{ render_table(request, txt_table) }}
       {% endif %}
     </div>
   {% endif %}
-
 {% endblock %}

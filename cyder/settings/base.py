@@ -34,6 +34,9 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
+        'search': (
+            'css/search.scss',
+        )
     },
     'js': {
         'cyder_js': (
