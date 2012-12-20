@@ -19,95 +19,22 @@
   {% if search %}
     <div id="search-meta">
       <h2>Results</h2>
-      {% if meta.counts.addr %}
-        {{ meta.counts.addr }} <a href="#address">Address Records</a> |
-      {% endif %}
-      {% if meta.counts.cname %}
-        {{ meta.counts.cname }} <a href="#cname">CNAMEs</a> |
-      {% endif %}
-      {% if meta.counts.domain %}
-        {{ meta.counts.domain }} <a href="#domain">Domains</a> |
-      {% endif %}
-      {% if meta.counts.intr %}
-        {{ meta.counts.intr }} <a href="#interface">Interfaces</a> |
-      {% endif %}
-      {% if meta.counts.misc %}
-        {{ meta.counts.misc }} <a href="#misc">Misc. Results</a> |
-      {% endif %}
-      {% if meta.counts.mx %}
-        {{ meta.counts.mx }} <a href="#mx">MXs</a> |
-      {% endif %}
-      {% if meta.counts.ns %}
-        {{ meta.counts.ns }} <a href="#nameserver">Nameservers</a> |
-      {% endif %}
-      {% if meta.counts.ptr %}
-        {{ meta.counts.ptr }} <a href="#ptr">PTRs</a> |
-      {% endif %}
-      {% if meta.counts.srv %}
-        {{ meta.counts.srv }} <a href="#srv">SRVs</a>
-      {% endif %}
-      {% if meta.counts.txt %}
-        {{ meta.counts.txt }} <a href="#txt">TXTs</a>
-      {% endif %}
+      {% for m in meta %}
+        {% if m[0] %}
+          {{ m[0] }} <a href="#{{ m[1] }}">{{ m[2] }}</a> |
+        {% endif %}
+      {% endfor %}
     </div>
 
     <div id='search-time'></div>
 
     <div id='search-results'>
-      {% if address_table %}
-        <h3 name="address">Address Records</h3>
-        {{ render_table(request, address_table) }}
-      {% endif %}
-
-      {% if cname_table %}
-        <h3 name="cname">CNAME Records</h3>
-        {{ render_table(request, cname_table) }}
-      {% endif %}
-
-      {% if domain_table %}
-        <h3 name="domain">Domains</h3>
-        {{ render_table(request, domain_table) }}
-      {% endif %}
-
-      {% if intr_table %}
-        <h3 name="interface">Interface Records</h3>
-        {{ render_table(request, intr_table) }}
-      {% endif %}
-
-      {% if misc_table %}
-        <h3 name="misc">Misc</h3>
-        {{ render_table(request, mx_table) }}
-      {% endif %}
-
-      {% if mx_table %}
-        <h3 name="mx">MX Records</h3>
-        {{ render_table(request, mx_table) }}
-      {% endif %}
-
-      {% if ns_table %}
-        <h3 name="nameserver">Nameservers</h3>
-        {{ render_table(request, ns_table) }}
-      {% endif %}
-
-      {% if ptr_table %}
-        <h3 name="ptr">PTR Records</h3>
-        {{ render_table(request, ptr_table) }}
-      {% endif %}
-
-      {% if srv_table %}
-        <h3 name="srv">SRV Records</h3>
-        {{ render_table(request, srv_table) }}
-      {% endif %}
-
-      {% if sshfp_table %}
-        <h3 name="sshfp">SSHFP Records</h3>
-        {{ render_table(request, sshfp_table) }}
-      {% endif %}
-
-      {% if txt_table %}
-        <h3 name="txt">TXT Records</h3>
-        {{ render_table(request, txt_table) }}
-      {% endif %}
+      {% for table in tables %}
+        {% if table[0] %}
+          <h3 name="{{ table[1] }}">{{ table[2] }}</h3>
+          {{ render_table(request, table[0]) }}
+        {% endif %}
+      {% endfor %}
     </div>
   {% endif %}
 {% endblock %}
