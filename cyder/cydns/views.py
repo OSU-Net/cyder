@@ -115,8 +115,14 @@ def cydns_record_view(request, pk=None):
             return_form._errors = form._errors
             form = return_form
 
+    # Apply filters.
+    object_list = Klass.objects.all()
+    if request.GET.get('filter'):
+        object_list = object_list.filter(
+            make_megafilter(Klass, request.GET.get('filter')))
+
     page_obj = make_paginator(
-        request, do_sort(request, Klass.objects.all()), 50)
+        request, do_sort(request, object_list), 50)
 
     return render(request, 'cydns/cydns_record_view.html', {
         'form': form,
