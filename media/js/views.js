@@ -13,7 +13,6 @@ $(document).ready(function() {
     // Show create form on clicking create button.
     $('#create-obj').click(function() {
         $('#form-title').html('Creating a ' + prettyObjectType);
-        $('.delete').hide();
 
         clear_form_all(form);
         form.action = '?action=create';
@@ -24,7 +23,6 @@ $(document).ready(function() {
         $.get(getUrl, {'object_type': objectType, 'pk': $(this).attr('data-pk')}, function(data) {
             $('#form-title').html('Updating a ' + prettyObjectType);
             $('.inner-form').empty().append(data.form);
-            $('.delete').show();
             initForms();
             form.action = '?action=update&pk=' + data.pk;
             $('#obj-form').slideDown();
