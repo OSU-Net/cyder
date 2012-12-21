@@ -34,7 +34,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 
-def cydns_record_view(request, pk=None):
+def cydns_view(request, pk=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
@@ -78,7 +78,7 @@ def cydns_record_view(request, pk=None):
                 fqdn_form = FQDNFormKlass(orig_qd)
                 fqdn_form._errors = ErrorDict()
                 fqdn_form._errors['__all__'] = ErrorList(e.messages)
-                return render(request, 'cydns/cydns_record_view.html', {
+                return render(request, 'cydns/cydns_view.html', {
                     'domain': domains,
                     'form': fqdn_form,
                     'record_type': record_type,
@@ -124,7 +124,7 @@ def cydns_record_view(request, pk=None):
     page_obj = make_paginator(
         request, do_sort(request, object_list), 50)
 
-    return render(request, 'cydns/cydns_record_view.html', {
+    return render(request, 'cydns/cydns_view.html', {
         'form': form,
         'obj': record,
         'page_obj': page_obj,

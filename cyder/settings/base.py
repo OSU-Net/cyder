@@ -60,13 +60,10 @@ MINIFY_BUNDLES = {
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
+            'js/views.js',
         ),
         'tables': (
             'js/tables.js',
-        ),
-        'cydns': (
-            'js/cydns/cydns_record_form.js',
-            'js/cydns/cydns_record_form_utils.js',
         ),
         'ctnr': (
             'js/ctnr/ctnr.js',
