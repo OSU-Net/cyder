@@ -153,7 +153,7 @@ def cydns_get_record(request):
     """
     Update view called asynchronously from the list_create view
     """
-    record_type = request.GET.get('record_type', '')
+    record_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
     if not (record_type and record_pk):
         raise Http404

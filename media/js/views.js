@@ -1,8 +1,8 @@
 $(document).ready(function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
-    var objectType = metadata.attr('data-objectType');
-    var prettyObjectType = metadata.attr('data-prettyObjType');
+    var objType = metadata.attr('data-objType');
+    var prettyObjType = metadata.attr('data-prettyObjType');
     var searchUrl = metadata.attr('data-searchUrl');
     var getUrl = metadata.attr('data-getUrl');
     var domainsUrl = metadata.attr('data-domainsUrl');
@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     // Show create form on clicking create button.
     $('#create-obj').click(function() {
-        $('#form-title').html('Creating a ' + prettyObjectType);
+        $('#form-title').html('Creating a ' + prettyObjType);
 
         clear_form_all(form);
         form.action = '?action=create';
@@ -20,8 +20,8 @@ $(document).ready(function() {
     });
 
     $('.update').click(function() {
-        $.get(getUrl, {'object_type': objectType, 'pk': $(this).attr('data-pk')}, function(data) {
-            $('#form-title').html('Updating a ' + prettyObjectType);
+        $.get(getUrl, {'object_type': objType, 'pk': $(this).attr('data-pk')}, function(data) {
+            $('#form-title').html('Updating a ' + prettyObjType);
             $('.inner-form').empty().append(data.form);
             initForms();
             form.action = '?action=update&pk=' + data.pk;

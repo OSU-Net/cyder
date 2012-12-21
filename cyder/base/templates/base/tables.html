@@ -5,7 +5,11 @@
   <thead>
     <tr>
       {% for header, sort_field in object_table['headers'] %}
-        <th>{{ sort_link(request, header, sort_field)|safe }}</th>
+        {% if sort_field %}
+          <th>{{ sort_link(request, header, sort_field)|safe }}</th>
+        {% else %}
+          <th>{{ header }}</th>
+        {% endif %}
       {% endfor %}
     </tr>
   </thead>
@@ -20,7 +24,11 @@
                 <a{% if col['class'] %} class="{{ col['class'][loop.index0] }}"{% endif%}
                   {% if col['data'] %}{% if col['data'][loop.index0] %}{% for data in col['data'][loop.index0] %} data-{{ data[0] }}="{{ data[1] }}"{% endfor %}{% endif %}{% endif %}
                   href="{{ col['url'][loop.index0] }}">
-                  {{ cell }}
+                  {% if col['img'] and col['img'][loop.index0] %}
+                    <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}">
+                  {% else %}
+                    {{ cell }}
+                  {% endif %}
                 </a>
               {% else %}
                 {{ cell }}

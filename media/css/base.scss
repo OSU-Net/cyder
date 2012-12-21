@@ -52,6 +52,15 @@ input[type="text"], input[type="search"] {
     }
 }
 
+.delete-sprite:after {
+    background-image: url(../img/delete.png);
+    background-position: -40px 0;
+    display: block;
+    height: 16px;
+    position: relative;
+    width: 16px;
+}
+
 a.btn {
     background: $blue;
     border-radius: 5px;
