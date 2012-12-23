@@ -26,8 +26,8 @@ class Vlan(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(Vlan, self).details()
         data['data'] = [
-            ('Name', self),
-            ('Number', self.number),
+            ('Name', 'name', self),
+            ('Number', 'number', self.number),
         ]
         return data
 

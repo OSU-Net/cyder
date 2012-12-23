@@ -24,8 +24,8 @@ class Site(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(Site, self).details()
         data['data'] = (
-            ('Name', self),
-            ('Parent', self.parent),
+            ('Name', 'name', self),
+            ('Parent', 'parent', self.parent),
         )
         return data
 
