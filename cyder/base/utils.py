@@ -87,10 +87,11 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
 
         # Actions
         row_data.append({'value': ['Update', 'Delete'],
-                         'url': ['#', obj.get_delete_url()],
+                         'url': [obj.get_update_url(), obj.get_delete_url()],
                          'data': [[('pk', obj.id)], None],
                          'class': ['update', 'delete'],
-                         'img': ['/media/img/update.png', '/media/img/delete.png']})
+                         'img': ['/media/img/update.png',
+                                 '/media/img/delete.png']})
 
         # Build table.
         data.append(row_data)

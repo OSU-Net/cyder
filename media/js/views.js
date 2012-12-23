@@ -15,16 +15,16 @@ $(document).ready(function() {
         $('#form-title').html('Creating a ' + prettyObjType);
 
         clear_form_all(form);
-        form.action = '?action=create';
         $('#obj-form').slideDown();
     });
 
-    $('.update').click(function() {
+    $('.update').click(function(e) {
+        e.preventDefault();
+        form.action = this.href;
         $.get(getUrl, {'object_type': objType, 'pk': $(this).attr('data-pk')}, function(data) {
             $('#form-title').html('Updating a ' + prettyObjType);
             $('.inner-form').empty().append(data.form);
             initForms();
-            form.action = '?action=update&pk=' + data.pk;
             $('#obj-form').slideDown();
         }, 'json');
     });

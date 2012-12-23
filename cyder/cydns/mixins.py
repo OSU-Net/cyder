@@ -21,7 +21,7 @@ class ObjectUrlMixin(object):
         """
         Return the create url of the type of object (to be posted to).
         """
-        return cls.get_list_url() + '?action=create'
+        return cls.get_list_url()
 
     def get_update_url(self):
         """
