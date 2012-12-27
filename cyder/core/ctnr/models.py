@@ -4,7 +4,7 @@ from django.db import models
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
-
+from cyder.cydhcp.workgroup.models import Workgroup
 
 class Ctnr(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
@@ -12,6 +12,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
     users = models.ManyToManyField(User, null=False, related_name='users', through='CtnrUser', blank=True)
     domains = models.ManyToManyField(Domain, null=False, blank=True)
     ranges = models.ManyToManyField(Range, null=False, blank=True)
+    workgroups = models.ManyToManyField(Workgroup, null=False, blank=True)
     description = models.CharField(max_length=200, blank=True)
 
     class Meta:

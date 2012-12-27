@@ -138,11 +138,12 @@ class Range(models.Model, ObjectUrlMixin):
                 self.end_lower):
             # start > end
             fail = True
+        """
         if (self.start_upper == self.end_upper and self.start_lower ==
                 self.end_lower):
             # end == start
             fail = True
-
+        """
         if fail:
             raise ValidationError("The start of a range cannot be greater than"
                                   " or equal to the end of the range.")
