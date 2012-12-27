@@ -38,7 +38,6 @@ class DomainDetailView(DomainView, DetailView):
         if not domain:
             return context
 
-        # TODO this process can be generalized. Not very high priority.
         domain_table = tablefy((domain,), views=True)
 
         mx_objects = domain.mx_set.all().order_by('label')

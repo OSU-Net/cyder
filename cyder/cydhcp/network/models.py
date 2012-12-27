@@ -48,9 +48,9 @@ class Network(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(Network, self).details()
         data['data'] = (
-            ('Network', self),
-            ('Site', self.site),
-            ('Vlan', self.vlan),
+            ('Network', 'network', self),
+            ('Site', 'site', self.site),
+            ('Vlan', 'vlan', self.vlan),
         )
         return data
 

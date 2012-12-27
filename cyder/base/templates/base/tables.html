@@ -1,11 +1,15 @@
-{% macro render_table(object_table, class) %}
+{% macro render_table(request, object_table, class) %}
 {% if object_table %}
 
 <table id="egtable" class="table {{ class }}">
   <thead>
     <tr>
-      {% for header in object_table['headers'] %}
-        <th>{{ header }}</th>
+      {% for header, sort_field in object_table['headers'] %}
+        {% if sort_field %}
+          <th>{{ sort_link(request, header, sort_field)|safe }}</th>
+        {% else %}
+          <th>{{ header }}</th>
+        {% endif %}
       {% endfor %}
     </tr>
   </thead>
@@ -15,11 +19,21 @@
       <tr id="{{ R ~ loop.index }}" data-url="{{ object_table['postback_urls'][loop.index0] }}">
         {% for col in row %}
           <td>
-            {% if col['url'] %}
-              <a href="{{ col['url'] }}">{{ col['value'] }}</a>
-            {% else %}
-              {{ col['value'] }}
-            {% endif %}
+            {% for cell in col['value'] %}
+              {% if col['url'][loop.index0] %}
+                <a{% if col['class'] %} class="{{ col['class'][loop.index0] }}"{% endif%}
+                  {% if col['data'] %}{% if col['data'][loop.index0] %}{% for data in col['data'][loop.index0] %} data-{{ data[0] }}="{{ data[1] }}"{% endfor %}{% endif %}{% endif %}
+                  href="{{ col['url'][loop.index0] }}">
+                  {% if col['img'] and col['img'][loop.index0] %}
+                    <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}">
+                  {% else %}
+                    {{ cell }}
+                  {% endif %}
+                </a>
+              {% else %}
+                {{ cell }}
+              {% endif %}
+            {% endfor %}
           </td>
         {% endfor %}
       </tr>

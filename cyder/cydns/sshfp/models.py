@@ -36,10 +36,10 @@ class SSHFP(CydnsRecord):
         """For tables."""
         data = super(SSHFP, self).details()
         data['data'] = [
-            ('Domain', self.fqdn),
-            ('Algorithm', self.algorithm_number),
-            ('Fingerprint Type', self.fingerprint_type),
-            ('Key', self.key),
+            ('Domain', 'fqdn', self.fqdn),
+            ('Algorithm', 'algorithm_number', self.algorithm_number),
+            ('Fingerprint Type', 'fingerprint_type', self.fingerprint_type),
+            ('Key', 'key', self.key),
         ]
         return data
 

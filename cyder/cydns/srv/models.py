@@ -68,11 +68,11 @@ class SRV(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(SRV, self).details()
         data['data'] = [
-            ("Domain", self.domain),
-            ("Target", self.target),
-            ("Port", self.port),
-            ("Priority", self.priority),
-            ("Weight", self.weight),
+            ('Domain', 'domain__name', self.domain),
+            ('Target', 'target', self.target),
+            ('Port', 'port', self.port),
+            ('Priority', 'priority', self.priority),
+            ('Weight', 'weight', self.weight),
         ]
         return data
 

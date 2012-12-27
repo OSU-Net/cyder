@@ -40,8 +40,8 @@ class CNAME(CydnsRecord):
         """For tables."""
         data = super(CNAME, self).details()
         data['data'] = [
-            ('Domain', self.target_domain),
-            ('Target', self.target),
+            ('Domain', 'target_domain__name', self.target_domain),
+            ('Target', 'target', self.target),
         ]
         return data
 

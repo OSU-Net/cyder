@@ -29,13 +29,9 @@ class TXT(CydnsRecord):
     def details(self):
         """For tables."""
         return {
-            'metadata': [
-                ('id', self.id),
-                ('url', ''),
-            ],
             'data': [
-                ("Domain", self.domain),
-                ("Text", self.txt_data)
+                ('Domain', 'domain__name', self.domain),
+                ('Text', 'txt_data', self.txt_data)
             ]
         }
 

@@ -4,9 +4,15 @@ function enableEditableGrid() {
         return;
     }
 
+    // Remove Action column.
+    if ($('th:contains("Actions")')) {
+        $('th:contains("Actions")').remove();
+        $('td:last-child').remove()
+    }
+
     // Strip links and paragraph tags, remove table cell markdown until
     // we do CellRenderers.
-    $('#egtable').find('td').each(function (i, td) {
+    $('#egtable').find('td, th').each(function (i, td) {
         var $td = $(td);
         if ($td.children().length) {
             $td.text($td.children()[0].innerHTML);

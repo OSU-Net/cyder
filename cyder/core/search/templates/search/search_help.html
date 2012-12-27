@@ -1,11 +1,13 @@
 {% extends "base/base.html" %}
 
+{% block head %}{{ css('search') }}{% endblock %}
+
 {% block title %}Search Help{% endblock %}
 
 {% block content %}
-  <div id='help-text'>
+  <div id="search-help">
     <table border="1">
-      <caption>Search Patterns</caption>
+      <h2>Search Patterns</h2>
       <tr>
         <td>
           a-zA-Z0-9.
@@ -45,7 +47,7 @@
       </tr>
     </table>
     <table border="1">
-      <caption>Operators</caption>
+      <h2>Operators</h2>
       <tr>
         <td>
           '-'
@@ -59,7 +61,7 @@
       </tr>
     </table>
     <table border="1">
-      <caption>Directives</caption>
+      <h2>Directives</h2>
       <tr>
         <td>
           type:
@@ -82,7 +84,7 @@
           The 'site' directive can be used to search for objects that have IP addresses that fall
           into one of the networks associated with a site (datacenter or buisness unit). For
           example: To see all A records in scl2, search <code>type:A site:scl2</code>.
-          <a href="{{ url('site-list') }}">A list of all Sites</a>
+          <a href="{{ url('site') }}">A list of all Sites</a>
           </p>
         </td>
       </tr>
@@ -95,7 +97,7 @@
           The 'vlan' directive can be used to search for objects that have IP addresses
           within one of the networks associated with a specif vlan. For example: To see all
           objects that fall into the db vlan, search <code>vlan:db</code>. <i>Note that vlans can
-            exist in multiple data centers</i>. <a href="{{ url('vlan-list') }}">A list of all Vlans</a>
+            exist in multiple data centers</i>. <a href="{{ url('vlan') }}">A list of all Vlans</a>
           </p>
         </td>
       </tr>
@@ -125,7 +127,7 @@
       </tr>
     </table>
     <table border="1">
-      <caption>Examples</caption>
+      <h2>Examples</h2>
       <tr>
         <td>
           <p>

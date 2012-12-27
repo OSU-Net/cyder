@@ -40,13 +40,25 @@ hr {
     color: $white;
 }
 
-input[type="text"], select {
+input[type="text"], input[type="search"], select {
     background: $white;
     border-radius: 2px;
     padding-left: 3px;
 }
-input[type="text"] {
+input[type="text"], input[type="search"] {
     color: $black;
+    &.blur {
+        color: $light-gray;
+    }
+}
+
+.delete-sprite:after {
+    background-image: url(../img/delete.png);
+    background-position: -40px 0;
+    display: block;
+    height: 16px;
+    position: relative;
+    width: 16px;
 }
 
 a.btn {
@@ -363,6 +375,14 @@ div#header {
 }
 .pagination-right {
     text-align: right;
+}
+
+#search-help {
+    display: block;
+    margin: 6px 0 13px;
+}
+#search-meta {
+    margin-bottom: 26px;
 }
 
 #footer {

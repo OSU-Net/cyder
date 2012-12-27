@@ -76,11 +76,13 @@ class System(BaseModel, ObjectUrlMixin, DirtyFieldsMixin):
         db_table = u'system'
 
     def details(self):
-        return (
-            ('Hostname', self.hostname),
-            ('OS', self.operating_system),
-            ('Last Updated', self.updated_on)
-        )
+        data = super(System, self).details()
+        data['data'] = [
+            ('Hostname', 'hostname', self.hostname),
+            ('OS', 'operating_system', self.operating_system),
+            ('Last Updated', 'modified', self.modified)
+        ]
+        return data
 
     @property
     def primary_ip(self):

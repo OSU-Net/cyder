@@ -22,7 +22,7 @@ html, body {
 .main {
     display: block;
     overflow:auto;
-    padding-bottom: 280px;
+    padding-bottom: 560px;
     min-height: 150%;
 }  /* must be same height as the footer */
 

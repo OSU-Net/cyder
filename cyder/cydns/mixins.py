@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import NoReverseMatch, reverse
 
 
 class ObjectUrlMixin(object):
@@ -21,26 +21,28 @@ class ObjectUrlMixin(object):
         """
         Return the create url of the type of object (to be posted to).
         """
-        return cls.get_list_url() + '?action=create'
+        return cls.get_list_url()
 
     def get_update_url(self):
         """
-        Return the update url of an object (to be posted to). Not class method
-        because object pk needed.
+        Return the update url of an object.
         """
-        return self.get_list_url() + '?action=update&pk=' + str(self.pk)
+        return reverse(self._meta.db_table + '-update', args=[self.pk])
 
     def get_delete_url(self):
         """
-        Return the delete url of an object (to be posted to).
+        Return the delete url of an object.
         """
-        return self.get_list_url() + '?action=delete&pk=' + str(self.pk)
+        return reverse(self._meta.db_table + '-delete', args=[self.pk])
 
     def get_detail_url(self):
         """
         Return the detail url of an object.
         """
-        return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        try:
+            return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        except NoReverseMatch:
+            return ''
 
     def details(self):
         """

@@ -54,9 +54,9 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
         """For tables."""
         data = super(BaseAddressRecord, self).details()
         data['data'] = [
-            ('Domain', self.domain),
-            ('Record Type', self.record_type()),
-            ('IP', str(self.ip_str)),
+            ('Domain', 'domain__name', self.domain),
+            ('Record Type', 'record_type', self.record_type()),
+            ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
 

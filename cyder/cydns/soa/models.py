@@ -82,13 +82,13 @@ class SOA(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(SOA, self).details()
         data['data'] = [
-            ('Primary', self.primary),
-            ('Contact', self.contact),
-            ('Serial', self.serial),
-            ('Expire', self.expire),
-            ('Retry', self.retry),
-            ('Refresh', self.refresh),
-            ('Comment', self),
+            ('Primary', 'primary', self.primary),
+            ('Contact', 'contact', self.contact),
+            ('Serial', 'serial', self.serial),
+            ('Expire', 'expire', self.expire),
+            ('Retry', 'retry', self.retry),
+            ('Refresh', 'refresh', self.refresh),
+            ('Comment', 'comment', self.comment),
         ]
         return data
 
@@ -134,11 +134,13 @@ class SOAKeyValue(KeyValue):
         """Filepath - Where should the build scripts put the zone file for this
         zone?"""
         if not os.access(self.value, os.R_OK):
-            raise ValidationError("Couldn't find {0} on the system running "
-                                  "this code. Please create this path.".format(self.value))
+            raise ValidationError(
+                "Couldn't find {0} on the system running "
+                "this code. Please create this path.".format(self.value))
 
     def _aa_disabled(self):
-        """Disabled - The Value of this Key determines whether or not an SOA will
+        """
+        Disabled - The Value of this Key determines whether or not an SOA will
         be asked to build a zone file. Values that represent true are 'True,
         TRUE, true, 1' and 'yes'. Values that represent false are 'False,
         FALSE, false, 0' and 'no'.

@@ -1,5 +1,7 @@
 # This is your project's main settings file that can be committed to your
 # repo. If you need to override a setting locally, use settings_local.py
+import os
+import sys
 
 from funfactory.settings_base import *
 from cyder.settings.dns import *
@@ -9,6 +11,11 @@ ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True
 MEDIA_ROOT = path('media')
 MEDIA_URL = '/media/'
+
+_base = os.path.dirname(__file__)
+site_root = os.path.realpath(os.path.join(_base, '../'))
+sys.path.append(site_root)
+sys.path.append(site_root + '/vendor')
 
 SASS_PREPROCESS = True
 JINGO_MINIFY_USE_STATIC = False
@@ -27,6 +34,9 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
+        'search': (
+            'css/search.scss',
+        )
     },
     'js': {
         'cyder_js': (
@@ -50,13 +60,10 @@ MINIFY_BUNDLES = {
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
+            'js/views.js',
         ),
         'tables': (
             'js/tables.js',
-        ),
-        'cydns': (
-            'js/cydns/cydns_record_form.js',
-            'js/cydns/cydns_record_form_utils.js',
         ),
         'ctnr': (
             'js/ctnr/ctnr.js',
@@ -121,6 +128,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
+    'django.core.context_processors.csrf'
 )
 
 SESSION_COOKIE_NAME = 'cyder'

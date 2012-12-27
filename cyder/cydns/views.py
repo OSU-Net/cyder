@@ -6,8 +6,8 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.utils import (make_paginator, make_megafilter, qd_to_py_dict,
-                              tablefy)
+from cyder.base.utils import (do_sort, make_paginator,
+                              make_megafilter, qd_to_py_dict, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -34,13 +34,13 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 
-def cydns_record_view(request, record_type=None):
+def cydns_view(request, pk=None):
     """
     List, create, update view in one for a flatter heirarchy.
     """
     # Infer record_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
-    record_type = record_type or request.path.split('/')[2]
+    record_type = request.path.split('/')[2]
 
     domains = json.dumps([domain.name for domain in  # TODO: ACLs
                           Domain.objects.filter(is_reverse=False)]),
@@ -49,56 +49,27 @@ def cydns_record_view(request, record_type=None):
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
 
     # Get the object if updating.
-    record = None
-    action = request.GET.get('action', None)
-    pk = request.GET.get('pk', None)
-    if pk:
-        record = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
-        form = FQDNFormKlass(instance=record)
-    else:
-        form = FQDNFormKlass()
+    record = get_object_or_404(Klass, pk=pk) if pk else None
+    form = FQDNFormKlass(instance=record)
 
     if request.method == 'POST':
-        # May be mutating query dict for FQDN resolution and labels.
-        qd = request.POST.copy()
-        orig_qd = request.POST.copy()
-
-        if action == 'delete':
-            record.delete()
-            return redirect(record.get_list_url())
-
         # Create initial FQDN form.
-        if record:
-            form = FQDNFormKlass(qd, instance=record)
+        form = FQDNFormKlass(request.POST, instance=record if record else None)
+
+        qd, error = _fqdn_to_domain(request.POST.copy())
+        if error:
+            fqdn_form = FQDNFormKlass(request.POST)
+            fqdn_form._errors = ErrorDict()
+            fqdn_form._errors['__all__'] = ErrorList(error.messages)
+            return render(request, 'cydns/cydns_view.html', {
+                'domain': domains,
+                'form': fqdn_form,
+                'record_type': record_type,
+                'pk': pk,
+                'obj': record
+            })
         else:
-            form = FQDNFormKlass(qd)
-
-        # Resolve FQDN to domain and attach to record object.
-        domain = None
-        if 'fqdn' in qd:
-            fqdn = qd.pop('fqdn')[0]
-            try:
-                # Call prune tree later if error, else domain leak.
-                label, domain = ensure_label_domain(fqdn)
-            except ValidationError, e:
-                fqdn_form = FQDNFormKlass(orig_qd)
-                fqdn_form._errors = ErrorDict()
-                fqdn_form._errors['__all__'] = ErrorList(e.messages)
-                return render(request, 'cydns/cydns_record_view.html', {
-                    'domain': domains,
-                    'form': fqdn_form,
-                    'record_type': record_type,
-                    'pk': pk,
-                    'obj': record
-                })
-            qd['label'], qd['domain'] = label, str(domain.pk)
-
-            # FQDN form to resolved domain form.
-            if pk:
-                # ACLs here.
-                form = FormKlass(qd, instance=record)
-            else:
-                form = FormKlass(qd)
+            form = FQDNFormKlass(qd, instance=record if record else None)
 
         # Validate form.
         error = False
@@ -108,22 +79,17 @@ def cydns_record_view(request, record_type=None):
                 # If domain, add to current ctnr.
                 if record_type == 'domain':
                     request.session['ctnr'].domains.add(record)
-
                 return redirect(record.get_list_url())
-            except ValidationError as e:
-                error = True
+            except ValidationError:
+                form = _revert(domain, request.POST, FQDNFormKlass)
         else:
-            error = True
-        if error:
-            # Revert domain if not valid.
-            prune_tree(domain)
-            return_form = FQDNFormKlass(orig_qd)
-            return_form._errors = form._errors
-            form = return_form
+            form = _revert(domain, request.POST, FQDNFormKlass)
 
-    page_obj = make_paginator(request, Klass.objects.all(), 50)
+    object_list = _filter(request, Klass)
+    page_obj = make_paginator(
+        request, do_sort(request, object_list), 50)
 
-    return render(request, 'cydns/cydns_record_view.html', {
+    return render(request, 'cydns/cydns_view.html', {
         'form': form,
         'obj': record,
         'page_obj': page_obj,
@@ -134,11 +100,62 @@ def cydns_record_view(request, record_type=None):
     })
 
 
+def _filter(request, Klass):
+    """
+    Apply filters.
+    """
+    if request.GET.get('filter'):
+        return Klass.filter(
+            make_megafilter(Klass, request.GET.get('filter')))
+    return Klass.objects.all()
+
+
+def _revert(domain, orig_qd, FQDNFormKlass):
+    """
+    Revert domain if not valid.
+    """
+    prune_tree(domain)
+    form = FQDNFormKlass(orig_qd)
+    form._errors = form._errors
+    return form
+
+
+def _fqdn_to_domain(qd):
+    """
+    Resolve FQDN to domain and attach to record object.
+    """
+    domain = None
+    if 'fqdn' in qd:
+        fqdn = qd.pop('fqdn')[0]
+        try:
+            # Call prune tree later if error, else domain leak.
+            label, domain = ensure_label_domain(fqdn)
+        except ValidationError, e:
+            return None, e.messages
+
+        qd['label'], qd['domain'] = label, str(domain.pk)
+    return qd, None
+
+
+def cydns_delete(request, pk):
+    """Delete view."""
+    # Infer record_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
+    record_type = request.path.split('/')[2]
+
+    # Get the Klass.
+    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+
+    record = get_object_or_404(Klass, pk=pk)
+    record.delete()
+    return redirect(record.get_list_url())
+
+
 def cydns_get_record(request):
     """
     Update view called asynchronously from the list_create view
     """
-    record_type = request.GET.get('record_type', '')
+    record_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
     if not (record_type and record_pk):
         raise Http404

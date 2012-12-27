@@ -2,7 +2,14 @@
 {% from "base/tables.html" import render_table %}
 
 {% block title %}{{ model_name|humanized_model_name + 's'}}{% endblock %}
-{% block header %}{{ model_name|humanized_model_name + 's'}}{% endblock %}
+
+{% block filter_bar %}
+  <form action="." method="get">
+    <input id="search-bar" type="search" name="filter" value="{{ request.GET['filter'] }}"></input>
+    <a class='submit btn'>Filter</a>
+    <label for="search-bar"></label>
+  </form>
+{% endblock %}
 
 {% block action_bar %}
   <a class="btn" href="{{ Model.get_create_url() }}">
@@ -26,7 +33,7 @@
   {% endif %}
 
   {% if object_table %}
-    {{ render_table(object_table) }}
+    {{ render_table(request, object_table) }}
   {% elif page_obj %}
     {% include "base/includes/object_table.html" %}
   {% endif %}

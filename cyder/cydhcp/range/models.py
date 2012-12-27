@@ -79,11 +79,11 @@ class Range(models.Model, ObjectUrlMixin):
         """For tables."""
         data = super(Range, self).details()
         data['data'] = [
-            ('Site', self.network.site),
-            ('Vlan', self.network.vlan),
-            ('Network', self.network),
-            ('Start', self.start_str),
-            ('End', self.end_str)
+            ('Site', 'network__site', self.network.site),
+            ('Vlan', 'network__vlan', self.network.vlan),
+            ('Network', 'network', self.network),
+            ('Start', 'start_str', self.start_str),
+            ('End', 'end_str', self.end_str)
         ]
         return data
 
