@@ -59,7 +59,6 @@ def cydns_view(request, pk=None):
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:
-            print errors
             fqdn_form = FQDNFormKlass(request.POST)
             fqdn_form._errors = ErrorDict()
             fqdn_form._errors['__all__'] = ErrorList(errors)
@@ -105,7 +104,7 @@ def _filter(request, Klass):
     Apply filters.
     """
     if request.GET.get('filter'):
-        return Klass.filter(
+        return Klass.objects.filter(
             make_megafilter(Klass, request.GET.get('filter')))
     return Klass.objects.all()
 
