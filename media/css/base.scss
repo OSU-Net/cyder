@@ -97,6 +97,15 @@ a.btn {
             background: darken($red, 10%);
         }
     }
+    &.cancel {
+        background: $dark-gray;
+        &:hover {
+            background: lighten($dark-gray, 5%);
+        }
+        &:active {
+            background: darken($dark-gray, 10%);
+        }
+    }
 }
 
 .center {

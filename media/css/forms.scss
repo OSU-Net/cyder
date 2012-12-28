@@ -1,8 +1,10 @@
 @import "globals.scss";
 
 .helptext {
-    font-size: 10px;
+    display: block;
+    font-size: 12px;
     font-style: italic;
+    margin-top: x;
 }
 
 .form {
@@ -41,7 +43,7 @@
         color: $red;
         float: right;
         position: relative;
-        right: 26px;
+        margin: 8px 400px 0 0;
     }
     input[type="text"], select, textarea {
         display: block;

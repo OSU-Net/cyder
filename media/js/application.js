@@ -22,10 +22,15 @@ function initForms() {
     // Form stuff.
     $('.cancel').click(function() {
         var $this = $(this);
-        $('#' + $this.attr('data-formId')).slideUp();
+        $('#' + $this.attr('data-formId')).slideUp('fast', 'easeOutExpo');
     });
     $('.submit').click(function() {
         $(this).closest('form').submit();
+    });
+    $('input').keypress(function(e) {
+        if (e.keypress == 13) {
+            $(this).closest('form').submit();
+        }
     });
     $('.submit-on-change').change(function() {
         this.form.submit();
@@ -41,6 +46,15 @@ function initForms() {
             $(this).val('');
         }
     });
+}
+
+function slideUp($e) {
+    $e.slideUp(200, 'easeOutExpo');
+}
+
+
+function slideDown($e) {
+    $e.slideDown(500, 'easeOutExpo');
 }
 
 $(document).ready(function() {

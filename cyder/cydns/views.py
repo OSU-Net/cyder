@@ -56,12 +56,13 @@ def cydns_view(request, pk=None):
         # Create initial FQDN form.
         form = FQDNFormKlass(request.POST, instance=record if record else None)
 
-        qd, domain, error = _fqdn_to_domain(request.POST.copy())
+        qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
-        if error:
+        if errors:
+            print errors
             fqdn_form = FQDNFormKlass(request.POST)
             fqdn_form._errors = ErrorDict()
-            fqdn_form._errors['__all__'] = ErrorList(error.messages)
+            fqdn_form._errors['__all__'] = ErrorList(errors)
             return render(request, 'cydns/cydns_view.html', {
                 'domain': domains,
                 'form': fqdn_form,
@@ -130,7 +131,7 @@ def _fqdn_to_domain(qd):
             # Call prune tree later if error, else domain leak.
             label, domain = ensure_label_domain(fqdn)
         except ValidationError, e:
-            return None, e.messages
+            return None, None, e.messages
 
         qd['label'], qd['domain'] = label, str(domain.pk)
     return qd, domain, None

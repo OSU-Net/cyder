@@ -54,10 +54,13 @@ def get_clobbered(domain_name):
 
 
 def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
-    """This function will take ``domain_name`` and make sure that that domain with that name
-    exists in the db. If this function creates a domain it will set the domain's purgeable flag
-    to the value of the named arguement ``purgeable``. See the doc page about
-    Labels and Domains for more information about this function"""
+    """
+    This function will take ``domain_name`` and make sure that that domain with
+    that name exists in the db. If this function creates a domain it will set
+    the domain's purgeable flag to the value of the named arguement
+    ``purgeable``. See the doc page about Labels and Domains for more
+    information about this function.
+    """
     try:
         domain = Domain.objects.get(name=name)
         return domain
@@ -83,24 +86,24 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
                 continue
 
         if not leaf_domain:
-            raise ValidationError("Creating this record would cause the "
-                                  "creation of a new TLD. Please contact "
-                                  "http://www.icann.org/ for more information.")
+            raise ValidationError(
+                "Creating this record would cause the creation of a new TLD. "
+                "Please contact http://www.icann.org/ for more information.")
         if leaf_domain.delegated:
-            raise ValidationError("Creating this record would cause the "
-                                  "creation of a domain that would "
-                                  "be a child of a delegated domain.")
+            raise ValidationError(
+                "Creating this record would cause the creation of a domain "
+                "that would be a child of a delegated domain.")
         if not leaf_domain.soa:
-            raise ValidationError("Creating this record would cause the "
-                                  "creation of a domain that would "
-                                  "not be in an existing DNS zone.")
+            raise ValidationError(
+                "Creating this record would cause the creation of a domain "
+                "that would not be in an existing DNS zone.")
 
     domain_name = ''
     for i in range(len(parts)):
         domain_name = parts[i] + '.' + domain_name
         domain_name = domain_name.strip('.')
         clobber_objects = get_clobbered(domain_name)
-        # need to be deleted and then recreated
+        # Need to be deleted and then recreated.
         domain, created = Domain.objects.get_or_create(name=domain_name)
         if purgeable and created:
             domain.purgeable = True
@@ -120,8 +123,8 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
                     object_.views.add(view)
                     object_.save()
             except ValidationError, e:
-                # this is bad
-                pdb.set_trace()
+                # This is bad
+                import pdb; pdb.set_trace()
                 pass
     return domain
 
@@ -130,8 +133,8 @@ def ensure_label_domain(fqdn):
     """
     Returns a label and domain object.
     """
-    if fqdn == '':
-        raise ValidationError("FQDN cannot be the emptry string.")
+    if not fqdn:
+        raise ValidationError("FQDN required.")
 
     if Domain.objects.filter(name=fqdn).exists():
         return '', Domain.objects.get(name=fqdn)
@@ -152,13 +155,13 @@ def prune_tree(domain):
 
 def prune_tree_helper(domain, deleted_domains):
     if not domain:
-        return deleted_domains  # We didn't delete anything
+        return deleted_domains  # Didn't delete anything.
     if domain.domain_set.all():
-        return deleted_domains  # We can't delete this domain. It has children
+        return deleted_domains  # Can't delete domain. Has children.
     if domain.has_record_set():
-        return deleted_domains  # There are records for this domain
+        return deleted_domains  # Records exist for domain.
     elif not domain.purgeable:
-        return deleted_domains  # This domain should not be deleted by a computer.
+        return deleted_domains  # Domain should not be deleted by computer.
     else:
         master_domain = domain.master_domain
         if not master_domain:
