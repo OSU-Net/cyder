@@ -28,12 +28,12 @@ class TXT(CydnsRecord):
 
     def details(self):
         """For tables."""
-        return {
-            'data': [
-                ('Domain', 'domain__name', self.domain),
-                ('Text', 'txt_data', self.txt_data)
-            ]
-        }
+        data = super(TXT, self).details()
+        data['data'] = [
+            ('Domain', 'domain__name', self.domain),
+            ('Text', 'txt_data', self.txt_data)
+        ]
+        return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""

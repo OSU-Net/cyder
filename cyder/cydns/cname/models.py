@@ -88,7 +88,7 @@ class CNAME(CydnsRecord):
         if root_domain is None:
             return
         if self.fqdn == root_domain.name:
-            raise ValidationError("You cannot create a CNAME that points to "
+            raise ValidationError("ou cannot create a CNAME that points to "
                                   "the root of a zone.")
         return
 

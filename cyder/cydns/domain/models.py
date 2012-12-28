@@ -333,6 +333,10 @@ def name_to_master_domain(name):
     :returns: domain -- Domain object
     :raises: ValidationError
     """
+    if name.endswith('arpa'):
+        # TODO: ?
+        return
+
     tokens = name.split('.')
     master_domain = None
     for i in reversed(xrange(len(tokens) - 1)):
@@ -354,7 +358,7 @@ def _check_TLD_condition(record):
     domain = Domain.objects.filter(name=record.fqdn)
     if not domain:
         return
-    if record.label == '' and domain[0] == record.domain:
+    if not record.label and domain[0] == record.domain:
         return  # This is allowed
     else:
         raise ValidationError("You cannot create an record that points "
