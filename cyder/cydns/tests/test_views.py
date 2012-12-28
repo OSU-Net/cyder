@@ -54,10 +54,9 @@ class AddressRecordViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.domain.name,
-            'domain': self.domain.pk,
             'ip_type': '4',
             'ip_str': '196.168.1.2',
-            'ttl': '400',
+            'ttl': 400,
             'comment': 'yo',
         }
 
@@ -75,7 +74,6 @@ class CNAMEViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.subdomain.name,
-            'domain': self.subdomain.pk,
             'label': random_label(),
             'target': random_label()
         }
@@ -93,7 +91,6 @@ class NSViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.domain.name,
-            'domain': self.domain.pk,
             'server': self.domain.name
         }
 
@@ -113,7 +110,6 @@ class MXViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.domain.name,
-            'domain': self.domain.pk,
             'label': random_label(),
             'server': random_label(),
             'priority': 123,
@@ -160,7 +156,6 @@ class SRVViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.domain.name,
-            'domain': self.domain.pk,
             'label': "_" + random_label(),
             'target': random_label(),
             'priority': 2,
@@ -182,7 +177,6 @@ class TXTViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.domain.name,
-            'domain': self.domain.pk,
             'label': random_label(),
             'txt_data': random_label()
         }
@@ -203,7 +197,6 @@ class SSHFPViewTests(cyder.base.tests.TestCase):
     def post_data(self):
         return {
             'fqdn': self.domain.name,
-            'domain': self.domain.pk,
             'label': random_label(),
             'algorithm_number': 1,
             'fingerprint_type': 1,

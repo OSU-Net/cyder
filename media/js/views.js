@@ -17,6 +17,7 @@ $(document).ready(function() {
             $('#form-title').html('Creating ' + prettyObjType);
             clear_form_all(form);
         }, 150);
+        $('.form-btns a.submit').text('Create ' + prettyObjType);
         slideDown($('#obj-form'));
     });
 
@@ -32,6 +33,7 @@ $(document).ready(function() {
                 $('.inner-form').empty().append(data.form);
                 initForms();
             }, 150);
+            $('.form-btns a.submit').text('Update ' + prettyObjType);
             slideDown($('#obj-form'));
         }, 'json');
     });

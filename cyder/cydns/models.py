@@ -4,6 +4,7 @@ from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
 import cydns
+from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain, _check_TLD_condition
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.view.models import View
@@ -11,7 +12,7 @@ from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl, is_rfc1918, is_rfc4193
 
 
-class CydnsRecord(models.Model, ObjectUrlMixin):
+class CydnsRecord(BaseModel, ObjectUrlMixin):
     """
     This class provides common functionality that many DNS record
     classes share.  This includes a foreign key to the ``domain`` table

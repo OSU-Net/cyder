@@ -1,6 +1,8 @@
 import random
 import string
 
+from nose.tools import eq_
+
 
 class GenericViewTests(object):
     """
@@ -72,6 +74,16 @@ class GenericViewTests(object):
                                     self.post_data(),
                                     follow=True)
             self.assertTrue(resp.status_code in (302, 200))
+
+            test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
+            for k, v in self.post_data().items():
+                if k != 'fqdn':
+                    obj_val = getattr(test_obj, k)
+                    if hasattr(obj_val, 'id'):
+                        eq_(obj_val.id, v)
+                    else:
+                        eq_(obj_val, v)
+
         return test_update_post
 
     def delete_post(self):
