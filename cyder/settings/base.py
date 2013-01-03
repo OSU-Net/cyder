@@ -86,6 +86,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydhcp.build',
     'cydhcp.lib',
     'cydhcp.interface',
+    'cydhcp.interface.dynamic_intr',
     'cydhcp.interface.static_intr',
     'cydhcp.bulk_change',
     'cydhcp.workgroup',
