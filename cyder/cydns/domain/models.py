@@ -137,6 +137,12 @@ class Domain(models.Model, ObjectUrlMixin):
             new_domain = True
         else:
             new_domain = False
+
+        if self.pk:  # We need to exist in the db first.
+            db_self = Domain.objects.get(pk=self.pk)
+            if db_self.name != self.name:
+                self.check_for_children()
+
         super(Domain, self).save(*args, **kwargs)
         if not self.is_reverse and new_domain:
             self.look_for_data_domains()  # This needs to come after super's
