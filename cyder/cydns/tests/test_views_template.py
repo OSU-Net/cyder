@@ -70,14 +70,14 @@ class GenericViewTests(object):
         Update view, post.
         """
         def test_update_post(self):
+            post_data = self.post_data()
             resp = self.client.post(self.test_obj.get_update_url(),
-                                    self.post_data(),
-                                    follow=True)
+                                    post_data, follow=True)
             self.assertTrue(resp.status_code in (302, 200))
 
             test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
-            for k, v in self.post_data().items():
-                if k != 'fqdn':
+            for k, v in post_data.items():
+                if k not in ['fqdn', 'label']:
                     obj_val = getattr(test_obj, k)
                     if hasattr(obj_val, 'id'):
                         eq_(obj_val.id, v)
