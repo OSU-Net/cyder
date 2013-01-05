@@ -20,6 +20,7 @@ from cyder.cydns.sshfp.models import SSHFP
 
 def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     self.client = Client()
+    self.client.login(username='development', password='password')
     self.test_class = test_class
 
     # Create domain.

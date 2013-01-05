@@ -1,9 +1,7 @@
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.test import TestCase
-from django.test.client import Client
 
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.views import login_session, become_user, unbecome_user
@@ -11,13 +9,10 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.mx.models import MX
-from cyder.cydns.nameserver.nameserver.models import Nameserver
-from cyder.cydns.nameserver.reverse_nameserver.models import ReverseNameserver
-from cyder.cydns.ptr.models import PTR
+from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.middleware.authentication import AuthenticationMiddleware
 from cyder.middleware.dev_authentication import DevAuthenticationMiddleware
 
 
@@ -43,12 +38,13 @@ class AuthenticationTest(TestCase):
         """
         Test that user profile is created on user creation
         """
-        user = User(username='user_profile_test', password='user_profile_test')
+        user = User(username='user_profile_test')
         user.save()
         try:
             self.assertTrue(user.get_profile())
         except:
-            self.fail("DoesNotExist: user profile was not created on user creation")
+            self.fail("DoesNotExist: user profile was not created on "
+                      "user creation")
 
     def test_session_has_ctnr_dev(self):
         """
@@ -64,12 +60,13 @@ class AuthenticationTest(TestCase):
 
     def test_become_user(self):
         """
-        Tests the functionality to be able to become and unbecome another user if superuser
+        Tests the functionality to be able to become and unbecome another
+        user if superuser
         """
         self.setup_request()
-        request = login_session(self.request, 'development')
+        self.request = login_session(self.request, 'development')
 
-        user = User.objects.get_or_create(username='development2')[0]
+        user = User.objects.create(username='development2')
         user.save()
 
         become_user(self.request, 'development2')
@@ -94,43 +91,48 @@ class AuthenticationTest(TestCase):
 
 
 class PermissionsTest(TestCase):
-    fixtures = ['initial_data.json']
+    fixtures = ['core/users.json']
 
     def setUp(self):
-        self.test_user = User.objects.get_or_create(username='test_user', password='test_user')[0]
+        self.test_user = User.objects.create(username='test_user')
         self.setup_request()
 
         # Superuser.
         self.superuser = User.objects.get(username='development')
 
         # Cyder admin.
-        self.cyder_admin = User.objects.get_or_create(username='cyder_admin', password='cyder_admin')[0]
+        self.cyder_admin = User.objects.create(username='cyder_admin')
         self.ctnr_global = Ctnr.objects.get(id=1)
-        self.ctnr_user_cyder_admin_global = CtnrUser(id=None, ctnr=self.ctnr_global, user=self.cyder_admin, level=2)
+        self.ctnr_user_cyder_admin_global = CtnrUser(
+            id=None, ctnr=self.ctnr_global, user=self.cyder_admin, level=2)
         self.ctnr_user_cyder_admin_global.save()
 
         # Admin.
         self.ctnr_admin = Ctnr(id=None, name="admin")
         self.ctnr_admin.save()
-        self.ctnr_user_admin = CtnrUser(id=None, ctnr=self.ctnr_admin, user=self.test_user, level=2)
+        self.ctnr_user_admin = CtnrUser(id=None, ctnr=self.ctnr_admin,
+                                        user=self.test_user, level=2)
         self.ctnr_user_admin.save()
-        self.ctnr_user_cyder_admin = CtnrUser(id=None, ctnr=self.ctnr_admin, user=self.cyder_admin, level=2)
+        self.ctnr_user_cyder_admin = CtnrUser(id=None, ctnr=self.ctnr_admin,
+                                              user=self.cyder_admin, level=2)
         self.ctnr_user_cyder_admin.save()
 
         # User.
         self.ctnr_user = Ctnr(id=None, name="user")
         self.ctnr_user.save()
-        self.ctnr_user_user = CtnrUser(id=None, ctnr=self.ctnr_user, user=self.test_user, level=1)
+        self.ctnr_user_user = CtnrUser(id=None, ctnr=self.ctnr_user,
+                                       user=self.test_user, level=1)
         self.ctnr_user_user.save()
 
         # Guest.
         self.ctnr_guest = Ctnr(id=None, name="guest")
         self.ctnr_guest.save()
-        self.ctnr_user_guest = CtnrUser(id=None, ctnr=self.ctnr_guest, user=self.test_user, level=0)
+        self.ctnr_user_guest = CtnrUser(id=None, ctnr=self.ctnr_guest,
+                                        user=self.test_user, level=0)
         self.ctnr_user_guest.save()
 
         # Pleb.
-        self.pleb_user = User.objects.get_or_create(username='pleb_user', password='pleb_user')[0]
+        self.pleb_user = User.objects.create(username='pleb_user')
 
     def test_soa_perms(self):
         """
@@ -267,10 +269,14 @@ class PermissionsTest(TestCase):
         Utility function that gets each type of permissions for an object and
         asserts against perm table.
         """
-        create_perm = self.request.user.get_profile().has_perm(self.request, obj, 'create')
-        view_perm = self.request.user.get_profile().has_perm(self.request, obj, 'view')
-        update_perm = self.request.user.get_profile().has_perm(self.request, obj, 'update')
-        delete_perm = self.request.user.get_profile().has_perm(self.request, obj, 'delete')
+        create_perm = self.request.user.get_profile().has_perm(
+            self.request, 'create', obj=obj)
+        view_perm = self.request.user.get_profile().has_perm(
+            self.request, 'view', obj=obj)
+        update_perm = self.request.user.get_profile().has_perm(
+            self.request, 'update', obj=obj)
+        delete_perm = self.request.user.get_profile().has_perm(
+            self.request, 'delete', obj=obj)
 
         actual_perms = {
             'all': create_perm and view_perm and update_perm and delete_perm,
@@ -284,36 +290,36 @@ class PermissionsTest(TestCase):
         actual_perms_list = [create_perm, view_perm, update_perm, delete_perm]
         if user_level == 'superuser':
             for perm in actual_perms_list:
-                self.assertTrue(perm,
-                    "Superuser should automatically have all permissions"
-                )
+                self.assertTrue(
+                    perm,
+                    "Superuser should automatically have all permissions")
             return
 
         # Pleb.
         if not user_level in perm_table:
             for actual_perm in actual_perms_list:
-                self.assertTrue(not actual_perm,
-                    "%s should not have any permissions to %s"
-                        % (user_level, obj.__class__.__name__)
+                self.assertTrue(
+                    not actual_perm, "%s should not have any permissions to %s"
+                    % (user_level, obj.__class__.__name__)
                 )
             return
 
         # Get what permissions should be from permissions table.
         test_perm_list = perm_table[user_level]
 
-        # Generically compare actual perms to what they should be (test_perm_list).
+        # Generically compare actual perms to what they should be
+        # (test_perm_list).
         for perm_type, actual_perm in actual_perms.iteritems():
 
             # If should have perm.
             if perm_type in test_perm_list:
-                self.assertTrue(actual_perm,
-                    "%s should have %s perms to %s"
-                        % (user_level, perm_type, obj.__class__.__name__)
-                )
+                self.assertTrue(
+                    actual_perm, "%s should have %s perms to %s"
+                    % (user_level, perm_type, obj.__class__.__name__))
 
             # If should not have perm.
             elif 'all' not in test_perm_list:
-                self.assertTrue(not actual_perm,
-                    "%s should not have %s perms to %s"
-                        % (user_level, perm_type, obj.__class__.__name__)
+                self.assertTrue(
+                    not actual_perm, "%s should not have %s perms to %s"
+                    % (user_level, perm_type, obj.__class__.__name__)
                 )

@@ -25,7 +25,7 @@
         "last_name": "development",
         "is_superuser": true,
         "email": "development@foo.bar.com",
-        "password": "password"
+        "password": "sha1$cKIenQ5GA8Q5$5be4265dcecc594e60f38bee0e45478cbdc02b3e"
     }
   },
   {

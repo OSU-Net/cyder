@@ -117,7 +117,6 @@ def become_user(request, username=None):
     # Restore user stack.
     if str(request.user) == username:
         request.session['become_user_stack'] = become_user_stack
-        messages.success(request, 'Successfully became %s' % (username))
 
     return redirect(referer)
 
@@ -129,11 +128,10 @@ def unbecome_user(request):
     referer = request.META.get('HTTP_REFERER', '/')
 
     if ('become_user_stack' in request.session and
-          len(request.session['become_user_stack']) > 0):
+        len(request.session['become_user_stack']) > 0):
         become_user_stack = [user for user in
                              request.session['become_user_stack']]
         username = become_user_stack.pop()
-        messages.success(request, 'Successfully rebecame %s' % (username))
     else:
         become_user_stack = []
         username = request.user.username
