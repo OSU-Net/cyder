@@ -119,6 +119,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.admin',
+    'django.contrib.messages',
 ]
 
 MIDDLEWARE_CLASSES = (
@@ -133,7 +134,8 @@ MIDDLEWARE_CLASSES = (
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.request',
-    'django.core.context_processors.csrf'
+    'django.core.context_processors.csrf',
+    'django.contrib.messages.context_processors.messages'
 )
 
 SESSION_COOKIE_NAME = 'cyder'
@@ -174,3 +176,12 @@ LOGGING = dict(loggers=dict(playdoh={'level': logging.INFO}))
 
 BUILD_PATH = 'builds'
 INTERNAL_IPS = ('127.0.0.1', '10.22.74.139', '10.250.2.54')
+
+# Use sha 256 by default but support any other algorithm:
+BASE_PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+)
+from django_sha2 import get_password_hashers
+PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
