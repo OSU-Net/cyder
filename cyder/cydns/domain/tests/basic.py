@@ -10,7 +10,6 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.models import ValidationError, _name_to_domain
 from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
@@ -316,6 +315,30 @@ class DomainTests(TestCase):
         except:
             self.fail("PTR was deleted")
         self.assertTrue(ptr.data_domain == a_dom)
+
+    def test_rename_has_child_domain(self):
+        name = "sucks"
+        a_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        a_dom.save()
+
+        name = "teebow.sucks"
+        b_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        b_dom.save()
+
+        name = "adsfme"
+        c_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        c_dom.save()
+
+        self.assertTrue(b_dom.master_domain == a_dom)
+
+        try:
+            c_dom.name = "asdfme"
+            c_dom.save()
+        except:
+            self.fail("Should be able to rename domain")
+
+        a_dom.name = "sucks2"
+        self.assertRaises(ValidationError, a_dom.save)
 
     def test_look_for_cnames_ptrs(self):
         name = "sucks1"
