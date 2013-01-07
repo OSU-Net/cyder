@@ -1,5 +1,4 @@
 #! /usr/bin/python
-from ConfigParser import ConfigParser
 from optparse import OptionParser
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -16,7 +15,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
-from cyder.cydns.utils import ensure_label_domain, ensure_domain
+from cyder.cydns.utils import ensure_domain
 
 
 BAD_DNAMES = ['', '.', '_']
@@ -49,6 +48,7 @@ class Zone(object):
 
         if record:
             _, _, primary, contact, refresh, retry, expire, minimum, _ = record
+            primary, contact = primary.lower(), contact.lower()
             soa, _ = SOA.objects.get_or_create(
                 primary = primary, contact = contact, refresh = refresh,
                 retry = retry, expire = expire, minimum = minimum,
@@ -76,6 +76,7 @@ class Zone(object):
         cursor.execute("SELECT * FROM zone_mx WHERE domain = '%s';" % self.domain_id)
 
         for _, name, _, server, priority, ttl, _, _ in cursor.fetchall():
+            name, server = name.lower(), server.lower()
             if MX.objects.filter(label = name,
                                  domain = self.domain,
                                  server = server,
@@ -107,6 +108,8 @@ class Zone(object):
                 serial, last_seen, other_id, workgroup, enabled, bandwidth_rate, \
                 expire, ttl, last_update, zone, purchase_date, po_number, \
                 warranty_date, owning_unit, user_id, department in cursor.fetchall():
+
+            name = name.lower()
 
             if ip == 0:
                 continue
@@ -152,6 +155,7 @@ class Zone(object):
         cursor.execute("SELECT * FROM pointer WHERE hostname LIKE '%%.%s';" % name)
         for _, ip, hostname, ptr_type, _, _, enabled in cursor.fetchall():
 
+            hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
             if dname != name:
                 continue
@@ -181,6 +185,7 @@ class Zone(object):
         """
         cursor.execute("SELECT * FROM nameserver WHERE domain='%s';" % self.domain_id)
         for _, name, _, _ in cursor.fetchall():
+            name = name.lower()
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain = self.domain, server = name)
             except ValidationError:
@@ -199,6 +204,7 @@ class Zone(object):
                'master_domain = %s;' % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name, _, _ in cursor.fetchall():
+            child_name = child_name.lower()
             Zone(child_id, child_name, self.domain.soa)
 
 
@@ -208,6 +214,7 @@ class Zone(object):
         """
         cursor.execute('SELECT * FROM domain WHERE id = %s;' % self.domain_id)
         _, dname, _, _ = cursor.fetchone()
+        dname = dname.lower()
         return dname
 
     #TODO: Cleanup functions for leftover objects to migrate (static interfaces and PTRs)
@@ -234,10 +241,12 @@ def gen_CNAME():
     cursor.execute("SELECT * FROM zone_cname;")
 
     for _, server, name, domain_id, ttl, zone, _ in cursor.fetchall():
+        server, name = server.lower(), name.lower()
         cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
         dname, = cursor.fetchone()
         if not dname:
             continue
+        dname = dname.lower()
 
         fqdn = ".".join([name, dname])
         name, dname = fqdn.split(".", 1)
@@ -318,6 +327,7 @@ if __name__ == "__main__":
             Zone(domain_id = domain_id, dname = dname,)
 
     if options.cname:
+        print "Creating CNAMEs."
         gen_CNAME()
 
     print map(lambda x: len(x.objects.all()), [Domain, AddressRecord, PTR, SOA, MX, CNAME, Nameserver, StaticInterface])
