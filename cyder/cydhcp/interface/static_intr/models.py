@@ -10,6 +10,8 @@ from cyder.core.system.models import System
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
+from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.view.models import View
@@ -82,6 +84,10 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     system = models.ForeignKey(
         System, null=True, blank=True,
         help_text="System to associate the interface with")
+
+    vrf = models.ForeignKey(Vrf, null=True, blank=True)
+    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+
     dhcp_enabled = models.BooleanField(
         default=True, help_text="Enable dhcp for this interface?")
     dns_enabled = models.BooleanField(

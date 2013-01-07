@@ -17,7 +17,19 @@ class System(BaseModel, ObjectUrlMixin):
     hostname = models.CharField(unique=True, max_length=255)
     department = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
-
     class Meta:
-        db_table = 'System'
+        db_table = 'system'
         unique_together = ('hostname','location')
+
+    def update_attrs(self):
+        self.attrs = SystemKeyValue.objects.filter(system=self)
+"""
+class SystemKeyValue(CommonOption):
+    system = models.ForiegnKey(System, null=False)
+    aux_attrs = (
+        ('description', 'A description of the Syste'),
+    )
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(SystemKeyValue, self).save(*args, **kwargs)
+"""

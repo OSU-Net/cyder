@@ -52,6 +52,7 @@ class Range(models.Model, ObjectUrlMixin):
     dhcpd_raw_include = models.TextField(null=True, blank=True)
 
     network = models.ForeignKey(Network, null=False)
+    attrs = None
 
     STATIC = "st"
     DYNAMIC = "dy"
@@ -74,6 +75,9 @@ class Range(models.Model, ObjectUrlMixin):
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
+
+    def update_attrs(self):
+        self.attrs = AuxAttr(RangeKeyValue, self , "range")
 
     def details(self):
         """For tables."""

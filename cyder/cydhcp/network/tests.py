@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.site.models import Site
 from cyder.cydns.ip.models import ipv6_to_longs
 
 import random
@@ -31,10 +32,6 @@ class NetworkTests(TestCase):
         return s
 
     def test_bad_site(self):
-        """
-        This test ensures that networks which contain each other
-        share a parent site
-        """
         network = "111.111.111.0"
         prefixlen1 = "24"
         prefixlen2 = "28"

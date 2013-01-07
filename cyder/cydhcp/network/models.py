@@ -8,10 +8,10 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, two_to_four
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
-
 
 class Network(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
@@ -32,9 +32,9 @@ class Network(models.Model, ObjectUrlMixin):
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
 
-    dhcpd_raw_include = models.TextField(null=True, blank=True, help_text="The"
-                                         " config options in this box will be included *as is* in the "
-                                         "dhcpd.conf file for this subnet.")
+    dhcpd_raw_include = models.TextField(null=True, blank=True,
+            help_text="The config options in this box will be included "
+            "*as is* in the dhcpd.conf file for this subnet.")
 
     network = None
 
@@ -43,6 +43,9 @@ class Network(models.Model, ObjectUrlMixin):
 
     def __repr__(self):
         return "<Network {0}>".format(str(self))
+
+    def update_attrs(self):
+        self.attrs = AuxAttr(NetworkKeyValue, self, "network")
 
     def details(self):
         """For tables."""
@@ -81,6 +84,10 @@ class Network(models.Model, ObjectUrlMixin):
             raise ValidationError("Cannot delete this network because it has "
                                   "child ranges")
         super(Network, self).delete(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        self.check_valid_range()
+        super(Network, self).clean(*args, **kwargs)
 
     def check_valid_site(self):
         from cyder.core.network.utils import calc_networks, calc_parent
