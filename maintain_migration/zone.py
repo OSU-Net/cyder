@@ -52,7 +52,7 @@ class Zone(object):
             soa, _ = SOA.objects.get_or_create(
                 primary = primary, contact = contact, refresh = refresh,
                 retry = retry, expire = expire, minimum = minimum,
-                comment = 'SOA for %s zone' % self.dname)
+                description = 'SOA for %s zone' % self.dname)
             return soa
         else:
             return None
@@ -120,7 +120,7 @@ class Zone(object):
             # TODO: Make systems unique by hostname, ip, mac tuple
             # TODO: Add key-value attributes to system objects.
 
-            system, _ = System.objects.get_or_create(hostname = name)
+            system, _ = System.objects.get_or_create(name = name)
 
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))

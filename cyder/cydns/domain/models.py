@@ -173,7 +173,7 @@ class Domain(models.Model, ObjectUrlMixin):
                                       "exist {0}".format(objects))
 
     def check_for_children(self):
-        if self.domain_set.all().exists():
+        if self.domain_set.exists():
             raise ValidationError("Before deleting this domain, please "
                                   "remove it's children.")
     ### Reverse Domain Functions
