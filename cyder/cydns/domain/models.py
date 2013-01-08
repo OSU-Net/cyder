@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-import cydns
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name
@@ -13,14 +12,13 @@ from cyder.cydns.domain.utils import name_to_domain
 
 
 class Domain(models.Model, ObjectUrlMixin):
-    """
-    A Domain is used as a foreign key for most DNS records.
+    """A Domain is used as a foreign key for most DNS records.
 
     A domain's SOA should be shared by only domains within it's zone.
 
     If two domains are part of different zones, they (and their
     subdomains) will need different SOA objects even if the data contained
-    in the SOA is exactly the same. Use the comment field to
+    in the SOA is exactly the same. Use the description field to
     distinguish between similar SOAs. This model enforces these
     requirements and will raise a ``ValidationError`` during
     :func:`clean` if it is violated.
@@ -32,7 +30,7 @@ class Domain(models.Model, ObjectUrlMixin):
     ``foo.com`` domain because it is in the same zone.
 
     Both 'forward' domains under TLD's like 'com', 'edu', and 'org' and
-    'reverse' domains under the TLD's 'in-addr.arpa' and 'ipv6.arpa' are stored
+    'reverse' domains under the TLD's 'in-addr.arpa' and 'ip6.arpa' are stored
     in this table. At first glance it would seem like the two types of domains
     have disjoint data set's; record types that have a Foreign Key back to a
     'reverse' domain would never need to have a Foreign Key back to a 'forward'
@@ -61,7 +59,7 @@ class Domain(models.Model, ObjectUrlMixin):
         *   A 'reverse' domain should have ``is_reverse`` set to True.
 
         *   A 'reverse' domain's name should end in either 'in-addr.arpa' or
-            'ipv6.arpa'
+            'ip6.arpa'
 
         *   When a PTR is added it is pointed back to a 'reverse' domain. This
             is done by converting the IP address to the connonical DNS form and
@@ -79,6 +77,7 @@ class Domain(models.Model, ObjectUrlMixin):
         Deleting a domain will delete all records associated to that domain.
 
     """
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, unique=True,
                             validators=[validate_domain_name])
@@ -127,8 +126,6 @@ class Domain(models.Model, ObjectUrlMixin):
         self.check_for_children()
         if self.is_reverse:
             self.reassign_ptr_delete()
-        else:
-            self.reassign_data_domains()
         super(Domain, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -138,18 +135,14 @@ class Domain(models.Model, ObjectUrlMixin):
         else:
             new_domain = False
         super(Domain, self).save(*args, **kwargs)
-        if not self.is_reverse and new_domain:
-            self.look_for_data_domains()  # This needs to come after super's
-            # save becase when a domain is first created it is not in the db.
-            # look_for_data_domains relies on the domain having a pk.
-        else:
-            # Collect any ptr's that belong to me.
+        if self.is_reverse and new_domain:
+            # Collect any ptr's that belong to this new domain
             reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
 
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
             return '4'
-        elif self.name.endswith('ipv6.arpa'):
+        elif self.name.endswith('ip6.arpa'):
             return '6'
         else:
             return None
@@ -177,47 +170,6 @@ class Domain(models.Model, ObjectUrlMixin):
         if self.domain_set.all().exists():
             raise ValidationError("Before deleting this domain, please "
                                   "remove it's children.")
-
-    def look_for_data_domains(self):
-        """When a domain is created, look for CNAMEs and PTRs that could
-        have data domains in this domain."""
-        if self.master_domain:
-            ptrs = self.master_domain.ptrs.all()
-            cnames = self.master_domain.target_domains.all()
-        else:
-            CNAME = cydns.cname.models.CNAME
-            PTR = cydns.ptr.models.PTR
-            cnames = CNAME.objects.filter(target_domain=None)
-            ptrs = PTR.objects.filter(data_domain=None)
-
-        for ptr in ptrs:
-            ptr.data_domain = _name_to_domain(ptr.name)
-            ptr.save()
-
-        for cname in cnames:
-            cname.target_domain = _name_to_domain(cname.target)
-            cname.save()
-
-    def reassign_data_domains(self):
-        """The :class:`PTR` s and :class:`CNAME` s keep track of which domain
-        their data is pointing to. This function reassign's those data
-        domains to the data_domain's master domain.
-        """
-
-        for ptr in self.ptrs.all():
-            if ptr.data_domain.master_domain:
-                ptr.data_domain = ptr.data_domain.master_domain
-            else:
-                ptr.data_domain = None
-            ptr.save()
-
-        for cname in self.target_domains.all():
-            if cname.target_domain.master_domain:
-                cname.target_domain = cname.target_domain.master_domain
-            else:
-                cname.target_domain = None
-            cname.save()
-
     ### Reverse Domain Functions
 
     def reassign_ptr_delete(self):

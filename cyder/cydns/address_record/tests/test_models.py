@@ -17,7 +17,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -31,7 +31,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
         self.i_arpa.save()
-        self.i6_arpa = self.create_domain(name='ipv6.arpa')
+        self.i6_arpa = self.create_domain(name='ip6.arpa')
         self.i6_arpa.save()
 
         self.osu_block = "633:105:F000:"
@@ -73,7 +73,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             self.g_o_e.save()
         except IntegrityError:
             self.g_o_e = Domain.objects.filter(
-                name='george.oregonstate.edu')[0]
+                                        name='george.oregonstate.edu')[0]
             pass
 
         try:
@@ -144,28 +144,31 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             ip_upper, ip_lower = record.ip_upper, record.ip_lower
 
         if new_name is not None and new_ip is not None:
-            aret = AddressRecord.objects.filter(
-                label=new_name, ip_upper=ip_upper,
-                ip_lower=ip_lower, ip_type=ip_type)[0]
+            aret = AddressRecord.objects.filter(label=new_name,
+                                                ip_upper=ip_upper,
+                                                ip_lower=ip_lower,
+                                                ip_type=ip_type)[0]
         elif new_name is not None:
             # Just new_name
-            aret = AddressRecord.objects.filter(
-                label=new_name, ip_upper=ip_upper,
-                ip_lower=ip_lower, ip_type=ip_type)[0]
+            aret = AddressRecord.objects.filter(label=new_name,
+                                                ip_upper=ip_upper,
+                                                ip_lower=ip_lower,
+                                                ip_type=ip_type)[0]
         else:
             # Just new_ip
-            aret = AddressRecord.objects.filter(
-                label=new_name, ip_upper=ip_upper,
-                ip_lower=ip_lower, ip_type=ip_type)[0]
+            aret = AddressRecord.objects.filter(label=new_name,
+                                                ip_upper=ip_upper,
+                                                ip_lower=ip_lower,
+                                                ip_type=ip_type)[0]
         if new_name:
             self.assertEqual(aret.label, new_name)
         if new_ip:
             if ip_type == '4':
-                self.assertEqual(
-                    aret.ip_str, ipaddr.IPv4Address(new_ip).__str__())
+                self.assertEqual(aret.ip_str,
+                                 ipaddr.IPv4Address(new_ip).__str__())
             else:
-                self.assertEqual(
-                    aret.ip_str, ipaddr.IPv6Address(new_ip).__str__())
+                self.assertEqual(aret.ip_str,
+                                 ipaddr.IPv6Address(new_ip).__str__())
 
     def do_update_A_record(self, record, new_name, new_ip):
         if new_name is not None:
@@ -196,18 +199,21 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                              ip_str="128.193.0.1", ip_type='4')
         rec2.save()
 
-        rec3 = AddressRecord(label='0123456780123456780123456780123456780123456789999901234567891', domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
+        rec3 = AddressRecord(
+                label='0123456780123456780123456780123456780123456789999901'
+                      '234567891',
+                domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
         rec3.save()
 
         self.do_update_A_record(rec0, "whooooop1", "128.193.23.1")
-        self.do_update_A_record(
-            rec1, "whoooasfdasdflasdfjoop3", "128.193.23.2")
-        self.do_update_A_record(
-            rec2, "whsdflhjsafdohaosdfhsadooooop1", "128.193.23.4")
-        self.do_update_A_record(
-            rec3, "wasdflsadhfaoshfuoiwehfjsdkfavbhooooop1", "128.193.23.3")
-        self.do_update_A_record(
-            rec0, "liaslfdjsa8df09823hsdljf-whooooop1", "128.193.25.17")
+        self.do_update_A_record(rec1, "whoooasfdasdflasdfjoop3",
+                                "128.193.23.2")
+        self.do_update_A_record(rec2, "whsdflhjsafdohaosdfhsadooooop1",
+                                "128.193.23.4")
+        self.do_update_A_record(rec3,
+                "wasdflsadhfaoshfuoiwehfjsdkfavbhooooop1", "128.193.23.3")
+        self.do_update_A_record(rec0, "liaslfdjsa8df09823hsdljf-whooooop1",
+                                "128.193.25.17")
         self.do_update_A_record(rec1, "w", "128.193.29.83")
         self.do_update_A_record(rec0, '', "128.193.23.1")
         self.do_update_A_record(rec1, "whoooasfdasdflasdfjoop3", None)
@@ -222,20 +228,20 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         rec2 = AddressRecord(label='bar', domain=self.z_o_e,
                              ip_str=osu_block + ":1", ip_type='6')
 
-        self.do_update_AAAA_record(
-            rec0, "whoooooasfjsp1", osu_block + "0:0:123:321::")
-        self.do_update_AAAA_record(
-            rec1, "wasfasfsafdhooooop1", osu_block + "0:0:123:321::")
-        self.do_update_AAAA_record(
-            rec2, "whoooooasfdisafsap1", osu_block + "0:24:123:322:1")
+        self.do_update_AAAA_record(rec0, "whoooooasfjsp1", osu_block +
+                                   "0:0:123:321::")
+        self.do_update_AAAA_record(rec1, "wasfasfsafdhooooop1", osu_block +
+                                   "0:0:123:321::")
+        self.do_update_AAAA_record(rec2, "whoooooasfdisafsap1", osu_block +
+                                   "0:24:123:322:1")
         self.do_update_AAAA_record(rec0, "whooooop1", osu_block + "0:aaa::1")
-        self.do_update_AAAA_record(
-            rec0, "wasflasksdfhooooop1", osu_block + "0:dead::")
+        self.do_update_AAAA_record(rec0, "wasflasksdfhooooop1", osu_block +
+                                   "0:dead::")
         self.do_update_AAAA_record(rec1, "whooooosf13fp1", osu_block + "0:0::")
-        self.do_update_AAAA_record(
-            rec1, "whooooodfijasf1", osu_block + "0:1:23::")
-        self.do_update_AAAA_record(
-            rec2, "lliasdflsafwhooooop1", osu_block + ":")
+        self.do_update_AAAA_record(rec1, "whooooodfijasf1", osu_block +
+                                   "0:1:23::")
+        self.do_update_AAAA_record(rec2, "lliasdflsafwhooooop1", osu_block +
+                                   ":")
         self.do_update_AAAA_record(rec1, "whooooopsjafasf1", osu_block + "0::")
         self.do_update_AAAA_record(rec1, "", osu_block + "0:0:123:321::")
 
@@ -248,17 +254,27 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         # BAD Names
         self.assertRaises(ValidationError, self.do_update_A_record,
                           **{'record': rec1, 'new_name': ".", "new_ip": None})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': " sdfsa ", "new_ip": None})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': "asdf.", "new_ip": None})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': " sdfsa ", "new_ip": None})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': "asdf.", "new_ip": None})
 
         # BAD IPs
         self.assertRaises(ValidationError, self.do_update_A_record, **{
                           'record': rec0, 'new_name': None, "new_ip": 71134})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': None, "new_ip": "19.193.23.1.2"})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': None, "new_ip": 12314123})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': "narf", "new_ip": 1214123})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': "%asdfsaf", "new_ip": "1928.193.23.1"})
-        self.assertRaises(ValidationError, self.do_update_A_record, **{'record': rec0, 'new_name': None, "new_ip": "1928.193.23.1"})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': None, "new_ip":
+                    "19.193.23.1.2"})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': None, "new_ip": 12314123})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': "narf", "new_ip": 1214123})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': "%asdfsaf", "new_ip":
+                    "1928.193.23.1"})
+        self.assertRaises(ValidationError, self.do_update_A_record,
+                **{'record': rec0, 'new_name': None, "new_ip":
+                    "1928.193.23.1"})
 
     def test_update_invalid_ip_AAAA_record(self):
         osu_block = "7620:105:F000:"
@@ -268,38 +284,48 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         self.assertRaises(ValidationError, self.do_update_AAAA_record, **{
                           'record': rec0, 'new_name': None, 'new_ip': 71134})
-        self.assertRaises(ValidationError, self.do_update_AAAA_record, **{'record': rec0, 'new_name': None, 'new_ip': osu_block + ":::"})
-        self.assertRaises(ValidationError, self.do_update_AAAA_record, **{'record': rec0, 'new_name': "%asdfsaf", 'new_ip': osu_block})
-        self.assertRaises(ValidationError, self.do_update_AAAA_record, **{'record': rec0, 'new_name': "sdfsa", 'new_ip': 1239812472934623847})
-        self.assertRaises(ValidationError, self.do_update_AAAA_record, **{'record': rec0, 'new_name': None, 'new_ip': "128.193.1.1"})
-        self.assertRaises(ValidationError, self.do_update_AAAA_record, **{'record': rec0, 'new_name': "%asdfsaf", 'new_ip': osu_block + ":1"})
-        self.assertRaises(ValidationError, self.do_update_AAAA_record, **{'record': rec0, 'new_name': " sdfsa ", 'new_ip': None})
+        self.assertRaises(ValidationError, self.do_update_AAAA_record,
+                **{'record': rec0, 'new_name': None, 'new_ip': osu_block +
+                    ":::"})
+        self.assertRaises(ValidationError, self.do_update_AAAA_record,
+                **{'record': rec0, 'new_name': "%asdfsaf", 'new_ip':
+                    osu_block})
+        self.assertRaises(ValidationError, self.do_update_AAAA_record,
+                **{'record': rec0, 'new_name': "sdfsa", 'new_ip':
+                    1239812472934623847})
+        self.assertRaises(ValidationError, self.do_update_AAAA_record,
+                **{'record': rec0, 'new_name': None, 'new_ip': "128.193.1.1"})
+        self.assertRaises(ValidationError, self.do_update_AAAA_record,
+                **{'record': rec0, 'new_name': "%asdfsaf",
+                    'new_ip': osu_block + ":1"})
+        self.assertRaises(ValidationError, self.do_update_AAAA_record,
+                **{'record': rec0, 'new_name': " sdfsa ", 'new_ip': None})
 
     ######################
     ### Removing Tests ###
     ######################
     def do_remove_A_record(self, aname, domain, ip):
-        aret = AddressRecord(
-            label=aname, domain=domain, ip_str=ip, ip_type='4')
+        aret = AddressRecord(label=aname, domain=domain, ip_str=ip,
+                             ip_type='4')
         aret.save()
         self.assertTrue(aret)
 
         aret.delete()
 
-        aret = AddressRecord.objects.filter(
-            label=aname, domain=domain, ip_str=ip)
+        aret = AddressRecord.objects.filter(label=aname, domain=domain,
+                                            ip_str=ip)
         self.assertFalse(aret)
 
     def do_remove_AAAA_record(self, aname, domain, ip):
-        aret = AddressRecord(
-            label=aname, domain=domain, ip_str=ip, ip_type='6')
+        aret = AddressRecord(label=aname, domain=domain, ip_str=ip,
+                             ip_type='6')
         aret.save()
         self.assertTrue(aret)
 
         aret.delete()
 
-        nret = AddressRecord.objects.filter(
-            label=aname, domain=domain, ip_str=ip)
+        nret = AddressRecord.objects.filter(label=aname, domain=domain,
+                                            ip_str=ip)
         self.assertFalse(nret)
 
     def test_remove_A_address_records(self):
@@ -344,13 +370,14 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     ### Adding Tests ###
     ####################
     def do_add_record(self, data):
-        rec = AddressRecord(label=data['label'], domain=data[
-                            'domain'], ip_str=data['ip'], ip_type='4')
+        rec = AddressRecord(label=data['label'], domain=data['domain'],
+                            ip_str=data['ip'], ip_type='4')
         rec.save()
         self.assertTrue(rec.__repr__())
         self.assertTrue(rec.details())
 
-        search = AddressRecord.objects.filter(label=data['label'], domain=data['domain'], ip_type='4', ip_str=data['ip'])
+        search = AddressRecord.objects.filter(label=data['label'],
+                    domain=data['domain'], ip_type='4', ip_str=data['ip'])
         found = False
         for record in search:
             if record.ip_str == data['ip']:
@@ -359,8 +386,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         return rec
 
     def do_add_record6(self, data):
-        rec = AddressRecord(label=data['label'], domain=data[
-                            'domain'], ip_str=data['ip'], ip_type='6')
+        rec = AddressRecord(label=data['label'], domain=data['domain'],
+                            ip_str=data['ip'], ip_type='6')
         rec.save()
         self.assertTrue(rec.__repr__())
         self.assertTrue(rec.details())
@@ -393,7 +420,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.do_add_record(data)
 
     # Understore '_' tests
-    def test_add_address_underscydhcp_in_name_domain(self):
+    def test_add_address_underscore_in_name_domain(self):
         d = Domain(name="_mssucks.edu")
         d.save()
         data = {'label': '*', 'domain': d, 'ip': "128.193.0.10"}
@@ -583,7 +610,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.assertRaises(ValidationError, self.do_add_record6, data)
 
     def test_no_update_when_glue(self):
-        """A record shouldn't update it's label or domain when it is a glue record"""
+        """A record shouldn't update it's label or domain when it is a glue
+        record"""
         label = 'ns99'
         glue = AddressRecord(label=label, domain=self.o_e,
                              ip_str='128.193.1.10', ip_type='4')
@@ -612,8 +640,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_delete_with_cname_pointing_to_a(self):
         label = 'foo100'
-        a = AddressRecord(label=label, domain=self.o_e, ip_str=
-                          '128.193.1.10', ip_type='4')
+        a = AddressRecord(label=label, domain=self.o_e,
+                          ip_str='128.193.1.10', ip_type='4')
         a.clean()
         a.save()
         cn = CNAME(label="foomom", domain=self.o_e, target=label + "." +

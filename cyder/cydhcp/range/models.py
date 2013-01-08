@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter
@@ -10,9 +11,9 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
-import ipaddr
+#import reversion
 
-import pdb
+import ipaddr
 
 
 class Range(models.Model, ObjectUrlMixin):
@@ -175,8 +176,8 @@ class Range(models.Model, ObjectUrlMixin):
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
-        self.ipf = IPFilter(self.start_upper, self.start_lower,
-                            self.end_upper, self.end_lower)
+        self.ipf = IPFilter(self.start_str, self.end_str, self.network.ip_type,
+                            object_=self)
 
     def display(self):
         return "Range: {3} to {4}  {0} -- {2} -- {1}  ".format(
@@ -212,6 +213,7 @@ class Range(models.Model, ObjectUrlMixin):
         start = self.start_lower
         end = self.end_lower
         if start >= end - 1:
+            # XXX wth? remove this
             return HttpResponse("Too small of a range.")
         ip = find_free_ip(start, end, ip_type='4')
         if ip:
@@ -261,6 +263,9 @@ def find_free_ip(start, end, ip_type='4'):
         raise NotImplemented
 
 
+##reversion.(Range)
+
+
 class RangeKeyValue(CommonOption):
     range = models.ForeignKey(Range, null=False)
 
@@ -280,3 +285,5 @@ class RangeKeyValue(CommonOption):
 
     def _aa_ntp_servers(self):
         self._ntp_servers(self.range.network.ip_type)
+
+##reversion.(RangeKeyValue)

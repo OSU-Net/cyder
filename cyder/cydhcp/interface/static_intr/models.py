@@ -1,7 +1,12 @@
+from gettext import gettext as _
+import re
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
+
 from cyder.core.system.models import System
+from cyder.cydns.ip.utils import ip_to_dns_form
 
 import cydns
 from cyder.cydhcp.keyvalue.models import KeyValue
@@ -9,15 +14,10 @@ from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.address_record.models import BaseAddressRecord
-from cyder.cydns.models import CydnsRecord
 from cyder.cydns.view.models import View
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ip.models import Ip
-from django.conf import settings
 
-import re
-import pdb
+#import reversion
 
 
 class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
@@ -40,9 +40,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     In terms of DNS, a static interface represents a PTR and A record and must
     adhear to the requirements of those classes. The interface inherits from
-    BaseAddressRecord and will call it's clean method with 'update_reverse_domain'
-    set to True. This will ensure that it's A record is valid *and* that it's
-    PTR record is valid.
+    BaseAddressRecord and will call it's clean method with
+    'update_reverse_domain' set to True. This will ensure that it's A record is
+    valid *and* that it's PTR record is valid.
 
 
     Using the 'attrs' attribute.
@@ -87,11 +87,11 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                                        related_name="staticintrdomain_set")
 
     system = models.ForeignKey(System, null=True, blank=True,
-                               help_text="System to associate the interface with")
+                            help_text="System to associate the interface with")
     dhcp_enabled = models.BooleanField(default=True,
-                                       help_text="Enable dhcp for this interface?")
+                                    help_text="Enable dhcp for this interface?")
     dns_enabled = models.BooleanField(default=True,
-                                      help_text="Enable dns for this interface?")
+                                    help_text="Enable dns for this interface?")
 
     attrs = None
 
@@ -113,8 +113,12 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return super(StaticInterface, cls).get_api_fields() + ['mac',
-                                                               'dhcp_enabled', 'dns_enabled']
+        return super(StaticInterface, cls).get_api_fields(
+                     ) + ['mac', 'dhcp_enabled', 'dns_enabled']
+
+    @property
+    def rdtype(self):
+        return 'INTR'
 
     def get_update_url(self):
         return "/cydhcp/interface/{0}/update/".format(self.pk)
@@ -160,14 +164,16 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
             self.check_glue_status()
 
         super(StaticInterface, self).clean(validate_glue=False,
-                                           update_reverse_domain=True, ignore_interface=True)
+                                           update_reverse_domain=True,
+                                           ignore_interface=True)
 
         if self.pk and self.ip_str.startswith("10."):
             p = View.objects.filter(name="private")
             if p:
                 self.views.add(p[0])
                 super(StaticInterface, self).clean(validate_glue=False,
-                                                   update_reverse_domain=True, ignore_interface=True)
+                                                   update_reverse_domain=True,
+                                                   ignore_interface=True)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
@@ -185,9 +191,23 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         # The label of the domain changed. Make sure it's not a glue record
         Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
-            raise ValidationError("This Interface represents a glue record "
-                                  "for a Nameserver. Change the Nameserver to edit this "
-                                  "record.")
+            raise ValidationError(
+                    "This Interface represents a glue record for a "
+                    "Nameserver. Change the Nameserver to edit this record.")
+
+    a_template = _("{bind_name:$rhs_just} {ttl} {rdclass:$rdclass_just}"
+                   "{rdtype_clob:$rdtype_just} {ip_str:$lhs_just}")
+    ptr_template = _("{dns_ip:$lhs_just} {ttl} {rdclass:$rdclass_just}"
+                     " {rdtype_clob:$rdtype_just} {fqdn:1}.")
+
+    def bind_render_record(self, pk=False, **kwargs):
+        self.rdtype_clob = kwargs.pop('rdtype', 'INTR')
+        if kwargs.pop('reverse', False):
+            self.template = self.ptr_template
+            self.dns_ip = ip_to_dns_form(self.ip_str)
+        else:
+            self.template = self.a_template
+        return super(StaticInterface, self).bind_render_record(pk=pk, **kwargs)
 
     def record_type(self):
         return "A/PTR"
@@ -196,7 +216,8 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         if kwargs.pop("validate_glue", True):
             if self.intrnameserver_set.exists():
                 raise ValidationError("Cannot delete the record {0}. It is a "
-                                      "glue record.".format(self.record_type()))
+                                      "glue record.".format(
+                                       self.record_type()))
         check_cname = kwargs.pop("check_cname", True)
         super(StaticInterface, self).delete(validate_glue=False,
                                             check_cname=check_cname)
@@ -211,6 +232,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                                              self.fqdn)
 
 
+##reversion.(StaticInterface)
+
+
 is_eth = re.compile("^eth$")
 is_mgmt = re.compile("^mgmt$")
 
@@ -223,8 +247,8 @@ class StaticIntrKeyValue(KeyValue):
         unique_together = ("key", "value", "intr")
 
     def _aa_primary(self):
-        """The primary number of this interface (I.E. eth1.0 would have a primary
-        number of '1')"""
+        """The primary number of this interface (I.E. eth1.0 would have a
+        primary number of '1')"""
         if not self.value.isdigit():
             raise ValidationError("The primary number must be a number.")
 
@@ -263,3 +287,5 @@ class StaticIntrKeyValue(KeyValue):
         if not (is_eth.match(self.value) or is_mgmt.match(self.value)):
             raise ValidationError("Interface type must either be 'eth' "
                                   "or 'mgmt'")
+
+##reversion.(StaticIntrKeyValue)

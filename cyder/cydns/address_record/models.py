@@ -1,3 +1,5 @@
+from gettext import gettext as _
+
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
@@ -13,6 +15,8 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.mixins import ObjectUrlMixin
 from cyder.cydns.soa.utils import update_soa
 
+#import reversion
+
 
 class BaseAddressRecord(Ip, ObjectUrlMixin):
     """AddressRecord is the class that generates A and AAAA records
@@ -21,21 +25,21 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
         ... ip_type=ip_type)
 
     """
-    label = models.CharField(
-        max_length=63, blank=True, null=True,
-        validators=[validate_first_label],
-        help_text='The short hostname goes here. If this is a record '
-                  'for the selected domain, leave this field blank')
+    label = models.CharField(max_length=63, blank=True, null=True,
+                        validators=[validate_first_label],
+                        help_text='The short hostname goes here. If this is a '
+                        'record ' 'for the selected domain, leave this field '
+                        'blank')
     domain = models.ForeignKey(Domain, null=False, help_text='FQDN of the '
                                'domain after the short hostname. '
                                '(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)')
     fqdn = models.CharField(max_length=255, blank=True, null=True,
                             validators=[validate_name])
-    ttl = models.PositiveIntegerField(
-        default=3600, blank=True, null=True,
-        validators=[validate_ttl], help_text='Time to Live of the record')
-    comment = models.CharField(max_length=1000, blank=True, null=True,
-                               help_text='Comments about this record.')
+    ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
+                                      validators=[validate_ttl],
+                                      help_text='Time to Live of the record')
+    description = models.CharField(max_length=1000, blank=True, null=True,
+                help_text="A description of this record.")
     views = models.ManyToManyField(View, blank=True)
 
     search_fields = ('fqdn', 'ip_str')
@@ -76,7 +80,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return  ['label', 'ip_str', 'ip_type', 'comment', 'ttl']
+        return  ['fqdn', 'ip_str', 'ip_type', 'description', 'ttl']
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -127,14 +131,13 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
         if kwargs.pop('validate_glue', True):
             if self.nameserver_set.exists():
                 raise ValidationError(
-                    'Cannot delete the record {0}. It is a glue record.'
-                    .format(self.record_type()))
+                        "Cannot delete the record {0}. It is a ' 'glue record."
+                        .format(self.record_type()))
         if kwargs.pop('check_cname', True):
             if CNAME.objects.filter(target=self.fqdn):
-                raise ValidationError(
-                    'A CNAME points to this {0} record. Change the CNAME'
-                    ' before deleting this record.'.
-                    format(self.record_type()))
+                raise ValidationError('A CNAME points to this {0} record. '
+                                      'Change the CNAME before deleting this '
+                                      'record.'.format(self.record_type()))
 
         from cyder.cydns.utils import prune_tree
         objs_domain = self.domain
@@ -151,9 +154,9 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
             return
         else:
             # Confusing error messege?
-            raise ValidationError(
-                'You can only create A records in a delegated domain that have'
-                ' an NS record pointing to them.')
+            raise ValidationError('You can only create A records in a '
+                                  'delegated domain that have an NS record '
+                                  'pointing to them.')
 
     def check_glue_status(self):
         """If this record is a "glue" record for a Nameserver instance,
@@ -171,9 +174,9 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
         # The label of the domain changed. Make sure it's not a glue record
         Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(addr_glue=self).exists():
-            raise ValidationError(
-                'This record is a glue record for a Nameserver. Change '
-                'the Nameserver to edit this record.')
+            raise ValidationError('This record is a glue record for a '
+                                  'Nameserver. Change the Nameserver to '
+                                  'edit this record.')
 
     def record_type(self):
         # If PTR didn't share this field, we would use 'A' and 'AAAA'
@@ -195,7 +198,12 @@ class AddressRecord(BaseAddressRecord):
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='addressrecordomain_set')
 
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} {ip_str:$rhs_just}")
+
     class Meta:
         db_table = 'address_record'
         unique_together = ('label', 'domain', 'fqdn', 'ip_upper', 'ip_lower',
                            'ip_type')
+
+##reversion.(AddressRecord)

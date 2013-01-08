@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.cydns.domain.models import Domain, name_to_domain
+from cyder.cydns.domain.models import name_to_domain
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
@@ -39,8 +39,9 @@ class Ip(models.Model):
     belongs to is done by applying a 'longest prefix match' to all
     reverse domains in the :ref:`domain` table.
 
-    :ref:`address_record` objects need the ip validation that happens in this class
-    but do not need their :class:`Ip`'s to be tied back to a reverse domain.
+    :ref:`address_record` objects need the ip validation that happens in this
+    class but do not need their :class:`Ip`'s to be tied back to a reverse
+    domain.
 
     :ref:`staticinterface` objects need to have their ip tied back to reverse
     domain because they represent a :ref:`PTR` record as well as an
@@ -56,7 +57,7 @@ class Ip(models.Model):
     """
     IP_TYPE_CHOICES = (('4', 'ipv4'), ('6', 'ipv6'))
     ip_str = models.CharField(max_length=39, editable=True, verbose_name='IP',
-                              help_text="IP Address in IPv4 or IPv6 Format")
+                help_text="IP Address in dotted quad or dotted colon format")
     # ip_upper/lower are calculated from ip_str on ip_clean.
     # TODO rename ip_* to ipaddr_*
     ip_upper = models.BigIntegerField(null=True, blank=True)
@@ -73,15 +74,15 @@ class Ip(models.Model):
     # related field 'Domain.addressrecord_set'. Add a related_name argument to
     # the definition for 'domain'.
     # reverse_domain = models.ForeignKey(Domain, null=True, blank=True)
-    ip_type = models.CharField(max_length=1, choices=IP_TYPE_CHOICES,
-                               editable=True, help_text='IPv4 or IPv6 Address type')
+    ip_type = models.CharField(
+                        max_length=1, choices=IP_TYPE_CHOICES, editable=True,
+                        help_text='IPv4 or IPv6 Address type')
 
     class Meta:
         abstract = True
 
     def clean_ip(self, update_reverse_domain=True):
-        """
-        The clean method in Ip is different from the rest. It needs
+        """The clean method in Ip is different from the rest. It needs
         to be called with the update_reverse_domain flag. Sometimes we
         need to not update the reverse domain of an IP (i.e. when we are
         deleting a reverse_domain).
@@ -93,32 +94,24 @@ class Ip(models.Model):
             try:
                 ip = ipaddr.IPv4Address(self.ip_str)
                 self.ip_str = str(ip)
-            except ipaddr.AddressValueError, e:
+            except ipaddr.AddressValueError:
                 raise ValidationError("Invalid Ip address {0}".
                                       format(self.ip_str))
 
             if update_reverse_domain:
-                # Resolve IP to domain name.
-                no_match = False
-                try:
-                    self.reverse_domain = (name_to_domain(
-                                           ip_to_domain_name(self.ip_str,
-                                                             ip_type='4')))
-                except ValueError:
-                    no_match = True
-
-                if (no_match or self.reverse_domain is None or
-                    self.reverse_domain.name in ('arpa', 'in-addr.arpa',
-                                                 'ipv6.arpa')):
+                self.reverse_domain = name_to_domain(ip_to_domain_name(
+                                                    self.ip_str, ip_type='4'))
+                if (self.reverse_domain is None or self.reverse_domain.name in
+                        ('arpa', 'in-addr.arpa', 'ip6.arpa')):
                     raise ValidationError("No reverse Domain found for {0} "
-                                          .format(self.ip_str))
+                            .format(self.ip_str))
             self.ip_upper = 0
             self.ip_lower = int(ip)
         else:
             try:
                 ip = ipaddr.IPv6Address(self.ip_str)
                 self.ip_str = str(ip)
-            except ipaddr.AddressValueError, e:
+            except ipaddr.AddressValueError:
                 raise ValidationError("Invalid ip {0} for IPv6s.".
                                       format(self.ip_str))
 
@@ -127,7 +120,7 @@ class Ip(models.Model):
                 revname = ip_to_domain_name(nibz, ip_type='6')
                 self.reverse_domain = name_to_domain(revname)
                 if (self.reverse_domain is None or self.reverse_domain.name in
-                        ('arpa', 'in-addr.arpa', 'ipv6.arpa')):
+                        ('arpa', 'in-addr.arpa', 'ip6.arpa')):
                     raise ValidationError("No reverse Domain found for {0} "
                                           .format(self.ip_str))
             self.ip_upper, self.ip_lower = ipv6_to_longs(int(ip))
@@ -158,7 +151,7 @@ def ipv6_to_longs(addr):
     """
     try:
         ip = ipaddr.IPv6Address(addr)
-    except ipaddr.AddressValueError, e:
+    except ipaddr.AddressValueError:
         raise ValidationError("AddressValueError: Invalid IPv6 address {0}".
                               format(addr))
     # TODO, use int() instead of _int. Make sure tests pass

@@ -1,23 +1,14 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.test import TestCase
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.mx.models import MX
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import ValidationError, _name_to_domain
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydhcp.site.models import Site
-
-import pdb
 
 
 class FullNameTests(TestCase):
@@ -28,7 +19,7 @@ class FullNameTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.com')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.zfoo.comom")
+                                         description="foo.zfoo.comom")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -42,7 +33,8 @@ class FullNameTests(TestCase):
         self.assertEqual(
             the_domain.master_domain.master_domain.name, "z.foo.com")
         self.assertTrue(the_domain.master_domain.master_domain.purgeable)
-        self.assertEqual(the_domain.master_domain.master_domain.master_domain.name, "foo.com")
+        self.assertEqual(the_domain.master_domain.master_domain.master_domain.name,
+                         "foo.com")
         self.assertFalse(
             the_domain.master_domain.master_domain.master_domain.purgeable)
 
@@ -68,7 +60,7 @@ class FullNameTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.edu')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.edu")
+                                         description="foo.edu")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -82,7 +74,8 @@ class FullNameTests(TestCase):
         self.assertEqual(
             the_domain.master_domain.master_domain.name, "z.foo.edu")
         self.assertTrue(the_domain.master_domain.master_domain.purgeable)
-        self.assertEqual(the_domain.master_domain.master_domain.master_domain.name, "foo.edu")
+        self.assertEqual(the_domain.master_domain.master_domain.master_domain.name,
+                         "foo.edu")
         self.assertFalse(
             the_domain.master_domain.master_domain.master_domain.purgeable)
 
@@ -124,7 +117,7 @@ class FullNameTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.foo')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.foo")
+                                         description="foo.foo")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -153,7 +146,7 @@ class FullNameTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.goo')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.goo")
+                                         description="foo.goo")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -202,7 +195,7 @@ class FullNameTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.foo22')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.foo22")
+                                         description="foo.foo22")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)
@@ -248,7 +241,7 @@ class FullNameTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.foo1')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.foo1")
+                                         description="foo.foo1")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)

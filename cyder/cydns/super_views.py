@@ -1,7 +1,7 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
@@ -13,7 +13,7 @@ import pdb
 
 def cydns_home(request):
     domains = Domain.objects.filter(
-        is_reverse=False).order_by('name').order_by('soa__comment')
+        is_reverse=False).order_by('name').order_by('soa__description')
     return render(request, 'cydns/cydns_index.html', {
         'domains': domains,
     })
@@ -25,7 +25,7 @@ def commit_record(request):
     record_type = commit_data.pop("rtype", None)
     if not record_type:
         commit_data["errors"] = {"__all__": "No record type."}
-        return HttpResponse(return_data)
+        return HttpResponse(commit_data)
     if record_type == "A":
         commit_data = add_ip_type_to_commit(commit_data)
         commit_data = add_domain_to_commit(commit_data)

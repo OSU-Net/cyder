@@ -8,16 +8,14 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.view.models import View
 
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
-
-import pdb
+from cyder.cydns.ip.utils import ip_to_domain_name
 
 
 class StaticInterTests(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -84,13 +82,9 @@ class StaticInterTests(TestCase):
             i.attrs.interface_type = "wee"
         self.assertRaises(ValidationError, bad_assign)
 
-        def bad_assign():
-            i.attrs.primary = "wee"
-        self.assertRaises(ValidationError, bad_assign)
-
-        def bad_assign():
+        def bad_assign2():
             i.attrs.alias = "wee"
-        self.assertRaises(ValidationError, bad_assign)
+        self.assertRaises(ValidationError, bad_assign2)
 
     def test2_create_basic(self):
         mac = "11:22:33:44:55:66"
@@ -138,13 +132,13 @@ class StaticInterTests(TestCase):
         ip_str = "10.0.0.2"
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
-        r = self.do_add(**kwargs)
+        self.do_add(**kwargs)
 
         # Change the mac by one.
         mac = "00:00:00:00:00:01"
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
-        r = self.do_add(**kwargs)
+        self.do_add(**kwargs)
 
     def test1_delete(self):
         mac = "12:22:33:44:55:66"
@@ -220,5 +214,5 @@ class StaticInterTests(TestCase):
         ip_str = "10.0.0.1"
         ip_type = '4'
         r = StaticInterface(label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=None)
+                            ip_type=ip_type, system=None, mac=mac)
         self.assertRaises(ValidationError, r.clean)

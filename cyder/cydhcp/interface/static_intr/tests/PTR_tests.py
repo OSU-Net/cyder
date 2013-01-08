@@ -6,16 +6,14 @@ from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
 
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
-
-import pdb
+from cyder.cydns.ip.utils import ip_to_domain_name
 
 
 class PTRStaticRegTests(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -102,7 +100,7 @@ class PTRStaticRegTests(TestCase):
         ip_str = "10.0.0.2"
         # Add PTR
         kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
-        ptr = self.do_add_ptr(**kwargs)
+        self.do_add_ptr(**kwargs)
 
         # Add Intr with diff IP
         ip_str = "10.0.0.3"

@@ -1,11 +1,15 @@
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
+import cyder
 import cydns
-from cyder.cydns.domain.models import Domain, _name_to_domain
 from cyder.cydns.models import CydnsRecord
 from cyder.cydns.validation import validate_name, find_root_domain
 from cyder.cydns.search_utils import smart_fqdn_exists
+
+#import reversion
+
+from gettext import gettext as _
 
 
 class CNAME(CydnsRecord):
@@ -23,9 +27,8 @@ class CNAME(CydnsRecord):
     id = models.AutoField(primary_key=True)
     target = models.CharField(max_length=100, validators=[validate_name],
                               help_text="CNAME Target")
-    target_domain = models.ForeignKey(
-        Domain, null=True, related_name='target_domains', blank=True,
-        on_delete=models.SET_NULL)
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                "{rdtype:$rdtype_just} {target:$rhs_just}.")
 
     search_fields = ('fqdn', 'target')
 
@@ -36,11 +39,14 @@ class CNAME(CydnsRecord):
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)
 
+    @property
+    def rdtype(self):
+        return 'CNAME'
+
     def details(self):
         """For tables."""
         data = super(CNAME, self).details()
         data['data'] = [
-            ('Domain', self.target_domain),
             ('Target', self.target),
         ]
         return data
@@ -57,21 +63,15 @@ class CNAME(CydnsRecord):
         return super(CNAME, cls).get_api_fields() + ['target']
 
     def save(self, *args, **kwargs):
-        # If label, and domain have not changed, don't mark our domain for
-        # rebuilding.
-        if self.pk:  # We need to exist in the db first.
-            db_self = CNAME.objects.get(pk=self.pk)
-            if db_self.label == self.label and db_self.domain == self.domain:
-                kwargs['no_build'] = True
-                 # Either nothing has changed or just target_domain. We want
-                 # rebuild.
+        self.clean()
         super(CNAME, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
         super(CNAME, self).clean(*args, **kwargs)
         super(CNAME, self).check_for_delegation()
+        if self.fqdn == self.target:
+            raise ValidationError("CNAME loop detected.")
         self.check_SOA_condition()
-        self.target_domain = _name_to_domain(self.target)
         self.existing_node_check()
 
     def check_SOA_condition(self):
@@ -129,4 +129,14 @@ class CNAME(CydnsRecord):
         MX = cydns.mx.models.MX
         if MX.objects.filter(server=self.fqdn):
             raise ValidationError("RFC 2181 says you shouldn't point MX "
-                                  "records at CNAMEs")
+                                  "records at CNAMEs and an MX points to"
+                                  " this name!")
+        PTR = cyder.cydns.ptr.models.PTR
+        if PTR.objects.filter(name=self.fqdn):
+            raise ValidationError("RFC 1034 says you shouldn't point PTR "
+                                  "records at CNAMEs, and a PTR points to"
+                                  " this name!")
+
+        # Should SRV's not be allowed to point to a CNAME? /me looks for an RFC
+
+#reversion.(CNAME)

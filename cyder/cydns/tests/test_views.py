@@ -9,7 +9,8 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.test_views_template import GenericViewTests, random_label
+from cyder.cydns.tests.test_views_template import GenericViewTests
+from cyder.cydns.tests.test_views_template import random_label
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 
@@ -19,11 +20,11 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     self.test_class = test_class
 
     # Create domain.
-    self.soa = SOA.objects.create(primary=random_label(), contact=random_label(),
-                                  comment='test')
+    self.soa = SOA.objects.create(primary=random_label(),
+                                  contact=random_label(), description='test')
     self.domain = Domain.objects.create(name=random_label(), soa=self.soa)
-    self.soa2 = SOA.objects.create(primary=random_label(), contact=random_label(),
-                                   comment='test2')
+    self.soa2 = SOA.objects.create(primary=random_label(),
+                                   contact=random_label(), description='test2')
     self.reverse_domain = Domain.objects.create(name=random_label(),
                                                 is_reverse=True, soa=self.soa2)
 
@@ -54,7 +55,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase):
             'ip_type': '4',
             'ip_str': '196.168.1.2',
             'ttl': '400',
-            'comment': 'yo',
+            'description': 'yo',
         }
 
 
@@ -130,12 +131,11 @@ class PTRViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'data_domain': self.domain.pk,
             'reverse_domain': self.reverse_domain.pk,
             'name': random_label(),
             'ip_type': '4',
             'ip_str': '196.168.1.2',
-            'comment': 'yo',
+            'description': 'yo',
         }
 
 
@@ -207,7 +207,8 @@ class SSHFPViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = [AddressRecordViewTests, CNAMEViewTests, MXViewTests, PTRViewTests, TXTViewTests]
+tests = [AddressRecordViewTests, CNAMEViewTests, MXViewTests, PTRViewTests,
+         TXTViewTests]
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_all_tests():

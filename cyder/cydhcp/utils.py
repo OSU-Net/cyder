@@ -1,19 +1,19 @@
-from django.db.models import Q
-
 import ipaddr
-import pdb
 
-
-def get_interfaces_range(start, stop):
-    intrs = StaticInterface.objects.filter(ip_upper=0, ip_lower__gte=start,
-                                           ip_lower__lte=end)
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 
 class IPFilterSet(object):
-    ipfs = set()
+    """
+    The IPFilterSet expects that all IPFilters added to it are of the same
+    type. This might be useful later.
+    """
+    def __init__(self):
+        self.ipfs = []
 
     def add(self, ipf):
-        self.ipfs.add(ipf)
+        self.ipfs.append(ipf)
 
     def pprint(self):
         for ipf in self.ipfs:
@@ -30,26 +30,14 @@ class IPFilterSet(object):
         new list of IPFilter objects that represent this range.
         """
 
-    def compile_OR(self):
-        mega_filter = Q()
-        for ipf in self.ipfs:
-            mega_filter = mega_filter | ipf.compile_q()
-
-    def compile_AND(self):
-        """Returns a Q object containing the intersections of all ipfs."""
-        if not self.ipfs:
-            return Q()
-        rx = trim(self.ipfs[0], self.ipfs[1:])
-        return rx.compile_q()
-
-    def trim(r, rs, ip_type):
+    def trim(self, r, rs, ip_type):
         if not (rs and r):
             return r
         r1 = rs[0]
-        rx = intersect(r, r1, ip_type)
-        return trim(rx, rs[1:], ip_type)
+        rx = self.intersect(r, r1, ip_type)
+        return self.trim(rx, rs[1:], ip_type)
 
-    def intersect(r1, r2, ip_type):
+    def intersect(self, r1, r2, ip_type):
         """Cases:
             * Subset or equal
             * Left intersect
@@ -79,30 +67,21 @@ class IPFilterSet(object):
             # r2 |---------|
             # rx    |------|
             return IPFilter(None, ip_type, r1.start_upper, r1.start_lower,
-                            r2.end_upper, r2.end_lower)
+                    r2.end_upper, r2.end_lower)
         if r1.start < r2.start and r1.end < r2.end:
             # Low                   High
             # r1 |---------|
             # r2    |---------|
             # rx    |------|
             return IPFilter(None, ip_type, r2.start_upper, r2.start_lower,
-                            r1.end_upper, r1.end_lower)
+                    r1.end_upper, r1.end_lower)
 
 
 class IPFilter(object):
-    def __init__(self, object_, ip_type, start_upper, start_lower, end_upper, end_lower):
-        self.object_ = object_  # The composite object
+    def __init__(self, start, end, ip_type, object_=None):
+        self.object_ = object_  # The composite object (it can be None)
         self.ip_type = ip_type
-        if ip_type == '6':
-            self.IPKlass = ipaddr.IPv6Address
-        elif ip_type == '4':
-            self.IPKlass = ipaddr.IPv4Address
-        self.start = self.IPKlass(two_to_one(start_upper, start_lower))
-        self.end = self.IPKlass(two_to_one(end_upper, end_lower))
-        self.start_upper = start_upper
-        self.start_lower = start_lower
-        self.end_upper = end_upper
-        self.end_lower = end_lower
+        self.start, self.end, self.Q = start_end_filter(start, end, ip_type)
 
     def __str__(self):
         return "{0} -- {1}".format(self.start, self.end)
@@ -110,10 +89,48 @@ class IPFilter(object):
     def __repr__(self):
         return str(self)
 
-    def compile_Q(self):
-        q_filter = Q(ip_upper=start_upper, ip_lower__gte=start_lower,
-                     ip_lower__lte=end_lower)
-        return q_filter
+
+def start_end_filter(start, end, ip_type):
+    if ip_type == '6':
+        IPKlass = ipaddr.IPv6Address
+    elif ip_type == '4':
+        IPKlass = ipaddr.IPv4Address
+
+    istart = IPKlass(start)
+    iend = IPKlass(end)
+
+    if int(istart) == int(iend):
+        raise ValidationError("start and end cannot be equal")
+    elif int(istart) > int(iend):
+        raise ValidationError("start cannot be greater than end")
+
+    start_upper, start_lower = one_to_two(int(istart))
+    end_upper, end_lower = one_to_two(int(iend))
+
+    # Equal uppers. Lower must be within.
+    if start_upper == end_upper:
+        q = Q(ip_upper=start_upper,
+              ip_lower__gte=start_lower,
+              ip_lower__lte=end_lower,
+              ip_type=ip_type)
+    else:
+        q = Q(ip_upper__gt=start_upper, ip_upper__lt=end_upper,
+              ip_type=ip_type)
+
+    return istart, iend, q
+
+
+def networks_to_Q(networks):
+    """
+    Take a list of network objects and compile a Q that matches any object
+    that exists in one of those networks.
+
+    """
+    q = Q()
+    for network in networks:
+        network.update_ipf()
+        q = q | network.ipf.Q
+    return q
 
 
 def two_to_four(start, end):
@@ -124,6 +141,10 @@ def two_to_four(start, end):
     return start_upper, start_lower, end_upper, end_lower
 
 
+def one_to_two(ip):
+    return (ip >> 64, ip & (1 << 64) - 1)
+
+
 def two_to_one(upper, lower):
     return long(upper << 64) + long(lower)
 
@@ -132,3 +153,16 @@ def four_to_two(start_upper, start_lower, end_upper, end_lower):
     start = start_upper << 64 + start_lower
     end = end_upper << 64 + end_lower
     return start, end
+
+
+def int_to_ip(ip, ip_type):
+    """
+    A wrapper that converts a 32 or 128 bit integer into human readable IP
+    format.
+
+    """
+    if ip_type == '6':
+        IPKlass = ipaddr.IPv6Address
+    elif ip_type == '4':
+        IPKlass = ipaddr.IPv4Address
+    return str(IPKlass(ip))

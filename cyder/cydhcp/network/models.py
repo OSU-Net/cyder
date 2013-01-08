@@ -1,18 +1,18 @@
+import ipaddr
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
 
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
-from cyder.cydhcp.utils import IPFilter, two_to_four
+from cyder.cydhcp.utils import IPFilter
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 
-import ipaddr
-import pdb
+#import reversion
 
 
 class Network(models.Model, ObjectUrlMixin):
@@ -30,13 +30,15 @@ class Network(models.Model, ObjectUrlMixin):
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
     network_str = models.CharField(max_length=49, editable=True,
-                                   help_text="The network address of this network.")
+                            help_text="The network address of this network.")
     prefixlen = models.PositiveIntegerField(null=False,
-                                            help_text="The number of binary 1's in the netmask.")
+                            help_text="The number of binary 1's in the "
+                            "netmask.")
 
-    dhcpd_raw_include = models.TextField(null=True, blank=True, help_text="The"
-                                         " config options in this box will be included *as is* in the "
-                                         "dhcpd.conf file for this subnet.")
+    dhcpd_raw_include = models.TextField(null=True, blank=True,
+                            help_text="The config options in this box will be "
+                            "included *as is* in the " "dhcpd.conf file for "
+                            "this subnet.")
 
     network = None
 
@@ -51,19 +53,21 @@ class Network(models.Model, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            add_routers = True
+            #add_routers = True
+            pass
         else:
-            add_routers = False
+            #add_routers = False
+            pass
         self.update_network()
         super(Network, self).save(*args, **kwargs)
 
         self.update_network()  # Gd forbid this hasn't already been called.
-        if add_routers:
-            if self.ip_type == '4':
-                router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
-            else:
-                router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
-            kv = NetworkKeyValue(key="routers", value=router, network=self)
+        #if add_routers:
+            #if self.ip_type == '4':
+            #   router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
+            #else:
+            #   router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
+            #kv = NetworkKeyValue(key="routers", value=router, network=self)
             #kv.clean()
             #kv.save()
 
@@ -90,7 +94,7 @@ class Network(models.Model, ObjectUrlMixin):
                   self.ip_lower):
                 fail = True
             elif (range_.start_upper == self.ip_upper and range_.start_lower
-                    < self.ip_lower):
+                  < self.ip_lower):
                 fail = True
 
             if self.ip_type == '4':
@@ -103,7 +107,7 @@ class Network(models.Model, ObjectUrlMixin):
             if range_.end_upper > brdcst_upper:
                 fail = True
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
-                  brdcst_lower):
+                    brdcst_lower):
                 fail = True
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
@@ -111,15 +115,15 @@ class Network(models.Model, ObjectUrlMixin):
 
             if fail:
                 raise ValidationError("Resizing this subnet to the requested "
-                                      "network prefix would orphan existing ranges.")
+                                      "network prefix would orphan existing "
+                                      "ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
         self.update_network()
-        ip_info = two_to_four(
-            int(self.network.network), int(self.network.broadcast))
-        self.ipf = IPFilter(self, self.ip_type, *ip_info)
+        self.ipf = IPFilter(self.network.network, self.network.broadcast,
+                            self.ip_type, object_=self)
 
     def update_network(self):
         """This function will look at the value of network_str to update other
@@ -136,13 +140,13 @@ class Network(models.Model, ObjectUrlMixin):
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
-        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
+        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError):
             raise ValidationError("Invalid network for ip type of "
                                   "'{0}'.".format(self, self.ip_type))
         # Update fields
         self.ip_upper = int(self.network) >> 64
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
-                                                     # the last sixty-four bits
+                                                    # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
 
     def __str__(self):
@@ -164,7 +168,7 @@ class NetworkKeyValue(CommonOption):
 
     """The NetworkOption Class.
 
-        "DHCP option statements always start with the option keyword, followed
+        DHCP option statements always start with the option keyword, followed
         by an option name, followed by option data." -- The man page for
         dhcpd-options
 

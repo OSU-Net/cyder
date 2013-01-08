@@ -11,14 +11,13 @@ from django.core.exceptions import ValidationError
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.tests.test_views import random_label
 
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
+from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
 import ipaddr
-import pdb
 
 
 class ReverseDomainTests(TestCase):
@@ -39,7 +38,7 @@ class ReverseDomainTests(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -54,7 +53,7 @@ class ReverseDomainTests(TestCase):
         self.i_arpa = self.create_domain(name='in-addr.arpa')
         self.i_arpa.save()
 
-        self.i6_arpa = self.create_domain(name='ipv6.arpa')
+        self.i6_arpa = self.create_domain(name='ip6.arpa')
         self.i6_arpa.save()
 
     # Reverse Domain test functions
@@ -71,7 +70,7 @@ class ReverseDomainTests(TestCase):
         b_m = self.create_domain(name='8.3')
         b_m.save()
 
-        s = SOA(primary="ns1.foo.com", contact="asdf", comment="test")
+        s = SOA(primary="ns1.foo.com", contact="asdf", description="test")
         s.save()
 
         f_m.soa = s
@@ -94,14 +93,14 @@ class ReverseDomainTests(TestCase):
         m.soa = None
         self.assertRaises(ValidationError, m.save)
 
-        s2 = SOA(primary="ns1.foo.com", contact="asdf", comment="test2")
+        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2")
         s2.save()
 
         m.soa = s2
         self.assertRaises(ValidationError, m.save)
 
     def test_2_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz", contact="hostmaster.foo", comment="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz", contact="hostmaster.foo", description="foo.gaz2")
         d, _ = Domain.objects.get_or_create(name="11.in-addr.arpa")
         d.soa = None
         d.save()
@@ -110,7 +109,7 @@ class ReverseDomainTests(TestCase):
         d1.save()
 
     def test_3_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz", contact="hostmaster.foo", comment="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz", contact="hostmaster.foo", description="foo.gaz2")
 
         d, _ = Domain.objects.get_or_create(name="gaz")
         d.soa = s1
@@ -119,6 +118,8 @@ class ReverseDomainTests(TestCase):
         r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
         r.soa = s1
         self.assertRaises(ValidationError, r.save)
+
+
 
     def test_remove_reverse_domain(self):
         self.create_domain(name='127', ip_type='4').save()
@@ -196,6 +197,8 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(rd2.master_domain, rd1)
         self.assertEqual(rd1.master_domain, self.i_arpa)
 
+
+
     def test_add_reverse_domains(self):
         try:
             self.create_domain(name='192.168', ip_type='4').save()
@@ -214,7 +217,7 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ValidationError, type(e))
         e = None
 
-        rd = self.create_domain(name='128', ip_type='4').save()
+        self.create_domain(name='128', ip_type='4').save()
         rd0 = self.create_domain(name='128.193', ip_type='4')
         rd0.save()
         ip1 = self.add_ptr_ipv4('128.193.8.1')
@@ -314,7 +317,7 @@ class ReverseDomainTests(TestCase):
             pass
         self.assertEqual(ValidationError, type(e))
         e = None
-        rd0 = boot_strap_ipv6_reverse_domain("2.0.0.1")
+        boot_strap_ipv6_reverse_domain("2.0.0.1")
         try:
             self.create_domain(name='2.0.0.1', ip_type='6').save()
         except ValidationError, e:
@@ -356,7 +359,7 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ip2.reverse_domain, rd0)
         ip3 = self.add_ptr_ipv6(osu_block + ":8000::3")
         self.assertEqual(ip3.reverse_domain, rd0)
-        ip4 = self.add_ptr_ipv6(osu_block + ":8000::4")
+        self.add_ptr_ipv6(osu_block + ":8000::4")
 
         rd1 = self.create_domain(name="2.6.2.0.0.1.0.5.f.0.0.0.8", ip_type='6')
         rd1.save()
@@ -395,6 +398,7 @@ class ReverseDomainTests(TestCase):
         ptr4 = PTR.objects.filter(
             ip_upper=ip_upper, ip_lower=ip_lower, ip_type='6')[0]
         self.assertEqual(ptr4.reverse_domain, rd0)
+
 
     def test_master_reverse_ipv6_domains(self):
         rds = []
@@ -450,53 +454,43 @@ class ReverseDomainTests(TestCase):
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0.0', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0.0.0', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
-        rd = self.create_domain(
-            name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0.0.0.0', ip_type='6')
+        rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 

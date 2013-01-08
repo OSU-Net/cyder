@@ -1,5 +1,27 @@
-from django.conf import settings
 from django.core.urlresolvers import reverse
+from string import Template
+
+
+class DisplayMixin(object):
+    # Knobs
+    justs = {
+        'pk_just': 10,
+        'rhs_just': 1,
+        'ttl_just': 1,
+        'rdtype_just': 4,
+        'rdclass_just': 3,
+        'prio_just': 1,
+        'lhs_just': 40,
+        'extra_just': 1
+    }
+
+    def bind_render_record(self, pk=False):
+        template = Template(self.template).substitute(**self.justs)
+        bind_name = self.fqdn + "."
+        if not self.ttl:
+            self.ttl = 3600
+        return template.format(bind_name=bind_name, rdtype=self.rdtype,
+                               rdclass='IN', **vars(self))
 
 
 class ObjectUrlMixin(object):

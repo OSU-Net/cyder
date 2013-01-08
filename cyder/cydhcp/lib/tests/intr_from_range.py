@@ -1,21 +1,16 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.lib.utils import *
+from cyder.cydhcp.lib.utils import create_ipv4_intr_from_range
 
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.models import SOA
 
 from cyder.core.system.models import System
-
-import random
-import ipaddr
-import pdb
 
 
 class LibTestsRange(TestCase):
@@ -25,7 +20,7 @@ class LibTestsRange(TestCase):
         d1, _ = Domain.objects.get_or_create(name="mozilla.com")
         soa, _ = SOA.objects.get_or_create(
             primary="fo.bar", contact="foo.bar.com",
-            comment="foo bar")
+            description="foo bar")
         self.s = soa
         d1.soa = soa
         d1.save()
