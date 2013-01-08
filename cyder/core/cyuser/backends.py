@@ -1,7 +1,10 @@
-from cyder.core.ctnr.models import CtnrUser
+from django.conf import settings
+from django.contrib.auth.models import User
+
+from cyder.core.ctnr.models import Ctnr, CtnrUser
 
 
-def has_perm(self, request, action, obj=None, obj_class=None):
+def has_perm(self, request, obj, action):
     """
     Checks whether a user (``request.user``) has permission to act on a
     given object (``obj``) within the current session CTNR. Permissions will
@@ -41,10 +44,8 @@ def has_perm(self, request, action, obj=None, obj_class=None):
 
     An example of checking whether a user has 'create' permission on a
         :class:`Domain` object.
-        >>> perm = request.user.get_profile().has_perm(request, \'create\',
-        ... obj_class=Domain)
-        >>> perm = request.user.get_profile().has_perm(request, \'update\',
-        ... obj=domain)
+        >>> perm = request.user.get_profile().has_perm(request, domain,
+        ... \'create\')
     """
     user_level = None
     user = request.user
@@ -82,12 +83,7 @@ def has_perm(self, request, action, obj=None, obj_class=None):
         user_level = 'pleb'
 
     # Dispatch to appropriate permissions handler.
-    if obj:
-        obj_type = obj.__class__.__name__
-    elif obj_class:
-        obj_type = obj_class.__name__
-    else:
-        return False
+    obj_type = obj.__class__.__name__
     handling_function = {
         # Administrative.
         'Ctnr': has_administrative_perm,
@@ -134,8 +130,8 @@ def has_administrative_perm(user_level, obj, ctnr, action):
     Not related to DNS or DHCP objects
     """
     return {
-        'cyder_admin': action == 'view' or action == 'update',
-        'admin': action == 'view' or action == 'update',
+        'cyder_admin': action == 'view' or action =='update',
+        'admin': action == 'view' or action =='update',
         'user': action == 'view',
         'guest': action == 'view',
     }.get(user_level, False)
@@ -147,7 +143,7 @@ def has_soa_perm(user_level, obj, ctnr, action):
     SOAs are global, related to domains and reverse domains
     """
     return {
-        'cyder_admin': True,  # ?
+        'cyder_admin': True, #?
         'ctnr_admin': action == 'view',
         'user': action == 'view',
         'guest': action == 'view',
@@ -159,11 +155,11 @@ def has_domain_perm(user_level, obj, ctnr, action):
     Permissions for domains
     Ctnrs have domains
     """
-    if obj and not obj in ctnr.domains.all():
+    if not obj in ctnr.domains.all():
         return False
 
     return {
-        'cyder_admin': action == 'view' or action == 'update',  # ?
+        'cyder_admin': action == 'view' or action =='update', #?
         'ctnr_admin': action == 'view' or action == 'update',
         'user': action == 'view' or action == 'update',
         'guest': action == 'view',
@@ -175,7 +171,7 @@ def has_domain_record_perm(user_level, obj, ctnr, action):
     Permissions for domain records (or objects linked to a domain)
     Domain records are assigned a domain
     """
-    if obj and obj.domain not in ctnr.domains.all():
+    if obj.domain not in ctnr.domains.all():
         return False
 
     return {
@@ -188,10 +184,10 @@ def has_domain_record_perm(user_level, obj, ctnr, action):
 
 def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
     """
-    Permissions for reverse domain records (or objects linked to a reverse
-    domain). Reverse domain records are assigned a reverse domain
+    Permissions for reverse domain records (or objects linked to a reverse domain)
+    Reverse domain records are assigned a reverse domain
     """
-    if obj and obj.reverse_domain not in ctnr.domains.all():
+    if obj.reverse_domain not in ctnr.domains.all():
         return False
 
     return {
@@ -207,11 +203,11 @@ def has_subnet_perm(user_level, obj, ctnr, action):
     Permissions for subnet
     Ranges have subnets
     """
-    if obj and not obj in [ip_range.subnet for ip_range in ctnr.ranges.all()]:
+    if not obj in [ip_range.subnet for ip_range in ctnr.ranges.all()]:
         return False
 
     return {
-        'cyder_admin': True,  # ?
+        'cyder_admin': True, #?
         'ctnr_admin': action == 'view',
         'user': action == 'view',
         'guest': action == 'view',
@@ -223,11 +219,11 @@ def has_range_perm(user_level, obj, ctnr, action):
     Permissions for ranges
     Ctnrs have ranges
     """
-    if obj and not obj in ctnr.ranges.all():
+    if not obj in ctnr.ranges.all():
         return False
 
     return {
-        'cyder_admin': True,  # ?
+        'cyder_admin': True, #?
         'ctnr_admin': action == 'view',
         'user': action == 'view',
         'guest': action == 'view',
@@ -239,14 +235,13 @@ def has_group_perm(user_level, obj, ctnr, action):
     Permissions for groups
     Groups are assigned a subnet
     """
-    if obj and not obj.subnet in [ip_range.subnet for ip_range in
-                                  ctnr.ranges.all()]:
+    if not obj.subnet in [ip_range.subnet for ip_range in ctnr.ranges.all()]:
         return False
 
     return {
-        'cyder_admin': True,  # ?
-        'ctnr_admin': action == 'view',  # ?
-        'user': action == 'view',  # ?
+        'cyder_admin': True, #?
+        'ctnr_admin': action == 'view', #?
+        'user': action == 'view', #?
         'guest': action == 'view',
     }.get(user_level, False)
 
@@ -256,7 +251,7 @@ def has_node_perm(user_level, obj, ctnr, action):
     Permissions for nodes
     Nodes are assigned a ctnr
     """
-    if obj and obj.ctnr != ctnr:
+    if obj.ctnr != ctnr:
         return False
 
     return {
@@ -285,9 +280,9 @@ def has_static_registration_perm(user_level, obj, ctnr, action):
     Permissions for static registrations
     """
     return {
-        'cyder_admin': True,  # ?
-        'ctnr_admin': True,  # ?
-        'user': True,  # ?
+        'cyder_admin': True, #?
+        'ctnr_admin': True, #?
+        'user': True, #?
         'guest': action == 'view',
     }.get(user_level, False)
 
