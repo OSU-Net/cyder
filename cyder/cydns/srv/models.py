@@ -1,3 +1,5 @@
+from gettext import gettext as _
+
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
@@ -11,6 +13,7 @@ from cyder.cydns.validation import (validate_srv_label, validate_srv_port,
                                     validate_srv_target)
 from cyder.cydns.view.models import View
 
+#import reversion
 
 # Rhetorical Question: Why is SRV not a common record?  SRV records have
 # a '_' in their label. Most domain names do not allow this.  Cydns
@@ -48,7 +51,11 @@ class SRV(models.Model, ObjectUrlMixin):
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
                                       help_text="Time to Live of this record")
-    comment = models.CharField(max_length=1000, blank=True, null=True)
+    description = models.CharField(max_length=1000, blank=True, null=True)
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} {priority:$prio_just} "
+                 "{weight:$extra_just} {port:$extra_just} "
+                 "{target:$extra_just}.")
 
     search_fields = ("fqdn", "target")
 
@@ -88,8 +95,12 @@ class SRV(models.Model, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return ['label', 'port', 'ttl', 'weight', 'priority', 'target',
-                'comment']
+        return ['label', 'fqdn', 'domain', 'views', 'port', 'ttl', 'weight',
+                'priority', 'target', 'description']
+
+    @property
+    def rdtype(self):
+        return 'SRV'
 
     def delete(self, *args, **kwargs):
         from cyder.cydns.utils import prune_tree
@@ -152,3 +163,5 @@ class SRV(models.Model, ObjectUrlMixin):
         CNAME = cydns.cname.models.CNAME
         if CNAME.objects.filter(fqdn=self.fqdn).exists():
             raise ValidationError("A CNAME with this name already exists.")
+
+#reversion.(SRV)

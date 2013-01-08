@@ -1,6 +1,10 @@
+from gettext import gettext as _
+
 from django.db import models
 
 from cyder.cydns.models import CydnsRecord
+
+#import reversion
 
 
 class TXT(CydnsRecord):
@@ -11,6 +15,9 @@ class TXT(CydnsRecord):
     txt_data = models.TextField(help_text="The text data for this record.")
 
     search_fields = ("fqdn", "txt_data")
+
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} \"{txt_data:$rhs_just}\"")
 
     class Meta:
         db_table = "txt"
@@ -47,6 +54,10 @@ class TXT(CydnsRecord):
         data = super(TXT, cls).get_api_fields() + ['txt_data']
         return data
 
+    @property
+    def rdtype(self):
+        return 'TXT'
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super(TXT, self).save(*args, **kwargs)
@@ -55,3 +66,6 @@ class TXT(CydnsRecord):
         super(TXT, self).clean()
         super(TXT, self).check_for_delegation()
         super(TXT, self).check_for_cname()
+
+
+#reversion.(TXT)

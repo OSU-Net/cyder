@@ -13,7 +13,7 @@ class SimpleTest(TestCase):
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
         self.i_arpa.save()
-        self.i6_arpa = self.create_domain(name='ipv6.arpa')
+        self.i6_arpa = self.create_domain(name='ip6.arpa')
         self.i6_arpa.save()
 
         rd = self.create_domain(name='66', ip_type='4')
@@ -22,7 +22,7 @@ class SimpleTest(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -35,13 +35,13 @@ class SimpleTest(TestCase):
         rd = self.create_domain(name='192', ip_type='4')
         rd.save()
         ip_str = '192.168.1.1'
-        ip = ipaddr.IPv4Address(ip_str)
+        ipaddr.IPv4Address(ip_str)
         Ip(ip_str=ip_str, ip_type='4').clean_ip()
 
         rd = self.create_domain(name='128', ip_type='4')
         rd.save()
         ip_str = '128.168.1.1'
-        ip = ipaddr.IPv4Address(ip_str)
+        ipaddr.IPv4Address(ip_str)
         Ip(ip_str=ip_str, ip_type='4').clean_ip()
 
     def test_update_ipv4_str(self):
@@ -61,7 +61,7 @@ class SimpleTest(TestCase):
         self.assertEqual(ip.ip_lower, int(v_ip))
 
     def test_ipv6_str(self):
-        rd = boot_strap_ipv6_reverse_domain('1.2.3.4')
+        boot_strap_ipv6_reverse_domain('1.2.3.4')
 
         ip_str = '1234:1234:1243:1243:1243::'
         new_ip = Ip(ip_str=ip_str, ip_type='6')
@@ -83,7 +83,7 @@ class SimpleTest(TestCase):
         try:
             rd = boot_strap_ipv6_reverse_domain('f')
             rd.save()
-        except ValidationError, e:
+        except ValidationError:
             pass
         ip_str = 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
         ip = ipaddr.IPv6Address(ip_str)
@@ -156,7 +156,7 @@ class SimpleTest(TestCase):
         self.assertEqual(hex(ip_lower).lower(), "0x%sl" % (ip_lower_str.lower()
             .replace(':', '')))
 
-    def test2_ipv6_to_longs(self):
+    def test3_ipv6_to_longs(self):
         ip_upper_str = "aFFF:FaFF:FFaF:FFFa"
         ip_lower_str = "0000:0000:0000:0000"
         ip_upper, ip_lower = ipv6_to_longs(ip_upper_str + ":" + ip_lower_str)

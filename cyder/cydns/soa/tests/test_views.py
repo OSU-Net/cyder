@@ -1,5 +1,4 @@
 from django.core.urlresolvers import reverse
-from django.test.client import Client
 
 import cyder.base.tests
 from cyder.cydns.soa.models import SOA
@@ -9,7 +8,7 @@ from cyder.cydns.tests.test_views import random_label
 class SOAViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.test_obj = SOA(primary=random_label(
-        ), contact=random_label(), comment=random_label())
+        ), contact=random_label(), description=random_label())
         self.test_obj.save()
 
     def test_base_cydns_app_soa(self):
@@ -46,5 +45,5 @@ class SOAViewTests(cyder.base.tests.TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def post_data(self):
-        return {'primary': random_label(), 'contact': random_label(),
-                'retry': '123', 'refresh': '123', 'comment': random_label()}
+        return {'primary': random_label(), 'contact': random_label(), 'retry':
+                '123', 'refresh': '123', 'description': random_label()}

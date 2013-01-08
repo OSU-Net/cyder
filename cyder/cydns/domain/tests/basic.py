@@ -1,20 +1,11 @@
-import ipaddr
-
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import ValidationError, _name_to_domain
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydhcp.site.models import Site
-
 
 
 class DomainTests(TestCase):
@@ -42,9 +33,6 @@ class DomainTests(TestCase):
         f_c.save()
         f_c.save()
         f_c.details()
-        self.assertTrue(f_c.get_detail_url())
-        self.assertTrue(f_c.get_update_url())
-        self.assertTrue(f_c.get_delete_url())
         self.assertTrue(f_c.master_domain == c)
 
         b_c = Domain(name='bar.com')
@@ -78,7 +66,7 @@ class DomainTests(TestCase):
         b_m = Domain(name='baz.moo')
         b_m.save()
 
-        s = SOA(primary="ns1.foo.com", contact="asdf", comment="test")
+        s = SOA(primary="ns1.foo.com", contact="asdf", description="test")
         s.save()
 
         f_m.soa = s
@@ -100,14 +88,15 @@ class DomainTests(TestCase):
         m.soa = None
         self.assertRaises(ValidationError, m.save)
 
-        s2 = SOA(primary="ns1.foo.com", contact="asdf", comment="test2")
+        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2")
         s2.save()
 
         m.soa = s2
         self.assertRaises(ValidationError, m.save)
 
     def test_2_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz", contact="hostmaster.foo", comment="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
+                            contact="hostmaster.foo", description="foo.gaz2")
         d, _ = Domain.objects.get_or_create(name="gaz")
         d.soa = None
         d.save()
@@ -116,7 +105,8 @@ class DomainTests(TestCase):
         d1.save()
 
     def test_3_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz", contact="hostmaster.foo", comment="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
+                            contact="hostmaster.foo", description="foo.gaz2")
 
         r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
         r.soa = s1
@@ -142,8 +132,6 @@ class DomainTests(TestCase):
         self.assertRaises(ValidationError, d.save)
 
     def test_create_domain(self):
-        edu = Domain(name='edu')
-        Domain(name='oregonstate.edu')
         try:
             Domain(name='foo.bar.oregonstate.edu').save()
         except ValidationError, e:

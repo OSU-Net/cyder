@@ -1,3 +1,6 @@
+from string import Template
+from gettext import gettext as _
+
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
@@ -11,10 +14,11 @@ from cyder.cydns.validation import validate_ttl
 from cyder.cydns.models import check_for_cname
 from cyder.cydns.soa.utils import update_soa
 
+#import reversion
+
 
 class Nameserver(models.Model, ObjectUrlMixin):
-    """
-    Name server for forward domains::
+    """Name server for forward domains::
 
         >>> Nameserver(domain = domain, server = server)
 
@@ -30,11 +34,10 @@ class Nameserver(models.Model, ObjectUrlMixin):
         record or b) the glue record the NS has isn't valid.
     """
     id = models.AutoField(primary_key=True)
-    domain = models.ForeignKey(Domain, null=False, help_text='The domain this '
-                               'record is for.')
-    server = models.CharField(
-        max_length=255, validators=[validate_name],
-        help_text='The name of the server this records points to.')
+    domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
+                               "record is for.")
+    server = models.CharField(max_length=255, validators=[validate_name],
+        help_text="The name of the server this records points to.")
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
     # 'If nameserver lies within domain, should have corresponding A record.'
@@ -43,14 +46,32 @@ class Nameserver(models.Model, ObjectUrlMixin):
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
                                   related_name='intrnameserver_set')
     views = models.ManyToManyField(View, blank=True)
-    comment = models.CharField(max_length=1000, null=True, blank=True,
-                               help_text='Comments about this record.')
+    description = models.CharField(max_length=1000, null=True, blank=True,
+                                   help_text="A description of this record.")
 
-    search_fields = ('server',)
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} {server:$rhs_just}.")
+
+    search_fields = ("server", "domain__name")
 
     class Meta:
         db_table = 'nameserver'
         unique_together = ('domain', 'server')
+
+    @classmethod
+    def get_api_fields(cls):
+        return ['ttl', 'description', 'server', 'domain', 'views']
+
+    @property
+    def rdtype(self):
+        return 'NS'
+
+    def bind_render_record(self, pk=False, **kwargs):
+        # We need to override this because fqdn is actually self.domain.name
+        template = Template(self.template).substitute(**self.justs)
+        return template.format(rdtype=self.rdtype, rdclass='IN',
+                                bind_name=self.domain.name + '.',
+                                **self.__dict__)
 
     def __repr__(self):
         return "<Forward '{0}'>".format(str(self))
@@ -75,10 +96,6 @@ class Nameserver(models.Model, ObjectUrlMixin):
             {'name': 'server', 'datatype': 'string', 'editable': True},
             {'name': 'glue', 'datatype': 'string', 'editable': True},
         ]}
-
-    @classmethod
-    def get_api_fields(cls):
-        return ['ttl', 'comment', 'server']
 
     def delete(self, *args, **kwargs):
         from cyder.cydns.utils import prune_tree
@@ -186,3 +203,5 @@ class Nameserver(models.Model, ObjectUrlMixin):
             # It's not a valid label
             return False
         return True
+
+#reversion.(Nameserver)

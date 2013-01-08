@@ -1,8 +1,8 @@
 {% extends "cydns/cydns_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% block title %}SOA {{ object.comment }}{% endblock %}
-{% block header %}SOA {{ object.comment }}{% endblock %}
+{% block title %}SOA {{ object.description }}{% endblock %}
+{% block header %}SOA {{ object.description }}{% endblock %}
 
 {% block extra_action_bar %}
   <a class="btn" href='/cydns/bind/build_debug/{{ object.pk }}/'>View BIND file</a>

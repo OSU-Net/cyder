@@ -4,3 +4,4 @@ File that we'll add all of the unit tests we want run before every deploy
 """
 from cyder.cydns.tests.all import *
 from cyder.cydhcp.tests.all import *
+from cyder.search.compiler.parser_tests import *

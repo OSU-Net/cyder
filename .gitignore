@@ -29,3 +29,6 @@ local.py
 .sass-cache
 *.css
 database.cfg
+parser.out
+parsetab.py
+cyder/working_tests.py

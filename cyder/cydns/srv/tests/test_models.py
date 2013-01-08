@@ -19,9 +19,6 @@ class SRVTests(TestCase):
         srv.__repr__()
         srv.save()
         self.assertTrue(srv.details())
-        self.assertTrue(srv.get_detail_url())
-        self.assertTrue(srv.get_update_url())
-        self.assertTrue(srv.get_delete_url())
         rsrv = SRV.objects.filter(**data)
         self.assertTrue(len(rsrv) == 1)
         return srv

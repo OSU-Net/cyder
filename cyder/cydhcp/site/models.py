@@ -1,8 +1,8 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
+from cyder.cydhcp.utils import networks_to_Q
 
 
 class Site(models.Model, ObjectUrlMixin):
@@ -50,6 +50,14 @@ class Site(models.Model, ObjectUrlMixin):
                 full_name = target.name + '.' + target.parent.name
                 target = target.parent
         return full_name
+
+    def compile_Q(self):
+        """Compile a Django Q that will match any IP inside this site."""
+        return networks_to_Q(self.network_set.all())
+
+    class Meta:
+        db_table = 'site'
+        unique_together = ('name', 'parent')
 
 
 class SiteKeyValue(KeyValue):
