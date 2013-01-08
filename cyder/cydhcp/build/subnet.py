@@ -125,6 +125,21 @@ def build_group(workgroup):
     return build_str + "}\n"
 
 
+def build_vrf(vrf):
+    build_str = "# {0} for range {1}:{2}\n".format(vrf.ctnr.name,
+            vrf.range.start_str, vrf.range.end_str)
+    build_str = "\nclass \"{0}:{1}:{2}\";\n".format(vrf.ctnr.name,
+            vrf.range.start_str, vrf.range.end_str)
+    build_str += "\tmatch hardware;\n"
+    build_str += "}\n"
+    dyn_intrs = DynamicInterface.objects.filter(vrf=vrf)
+    build_str += "# Hosts for {0}\n".format(vrf.name)
+    for dyn_intr in dyn_intrs:
+        build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(vrf.ctnr.name,
+                vrf.range.start_str, vrf.range.end_str, dyn_intr.mac)
+
+
+
 def main():
     build_str = "# DHCP Generated from cyder."
     networks = Network.objects.all()

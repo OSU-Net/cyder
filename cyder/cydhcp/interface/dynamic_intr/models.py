@@ -9,6 +9,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     Ctnr = models.ForeignKey(Ctnr, null=False)
     range = models.ForeignKey(Range, null=False)
     workgroup = models.ForeignKey(Workgroup, null=True)
-    vrf = models.ForeignKey(Vrf, null=True)
+    vrf = models.ForeignKey(Vrf, null=True, blank=True)
     class Meta:
         db_table = 'dynamic_interface'

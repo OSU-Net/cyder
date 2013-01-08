@@ -273,6 +273,7 @@ def maintain_workgroup_find(workgroup_id):
 
 migrate_vlans()
 migrate_workgroups()
+migrate_vrfs()
 migrate_subnets()
 migrate_ranges()
 migrate_zones()
