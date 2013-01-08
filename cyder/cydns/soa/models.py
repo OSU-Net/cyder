@@ -121,7 +121,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
             ('Expire', 'expire', self.expire),
             ('Retry', 'retry', self.retry),
             ('Refresh', 'refresh', self.refresh),
-            ('Description', 'description', self.comment),
+            ('Description', 'description', self.description),
         ]
         return data
 
