@@ -1,23 +1,15 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.range.models import Range
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.models import ipv6_to_longs
-
-import random
-import ipaddr
-import pdb
 
 
 class SiteTests(TestCase):
-    def do_basic_add_network(self, network, prefixlen, ip_type, name=None, number=None, site=None):
-        if site:
-            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=site)
-        else:
-            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
+
+    def do_basic_add_network(self, network, prefixlen, ip_type,
+                             name=None, number=None, site=None):
+        s = Network(network_str=network + "/" + prefixlen,
+                        ip_type=ip_type, site=site)
         s.clean()
         s.save()
         self.assertTrue(s)
@@ -42,7 +34,8 @@ class SiteTests(TestCase):
         s9 = self.do_basic_add_site(name="Site 9", parent=s7)
         s10 = self.do_basic_add_site(name="Site 10", parent=s7)
         related_sites = s1.get_related_sites()
-        self.assertEqual(set([s1, s2, s3, s4, s5, s6, s7, s8, s9, s10]), related_sites)
+        self.assertEqual(set([s1, s2, s3, s4, s5, s6, s7, s8, s9, s10]),
+                         related_sites)
         related_sites = s2.get_related_sites()
         self.assertEqual(set([s2, s4, s5]), related_sites)
         related_sites = s3.get_related_sites()
@@ -66,72 +59,105 @@ class SiteTests(TestCase):
 
         network = "123.0.0.0"
         prefixlen = "10"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s1}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s1}
         n1 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.10.0"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s3}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s3}
         n2 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.10.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s7}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s7}
         n3 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.16.0"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n4 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.16.0"
         prefixlen = "21"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s10}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s10}
         n5 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.17.0"
         prefixlen = "26"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n6 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.18.0"
         prefixlen = "26"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n7 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.0.0"
         prefixlen = "10"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s1}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s1}
         n8 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.10.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n9 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.32.0"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s2}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s2}
         n10 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.32.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n11 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.33.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s4}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s4}
         n12 = self.do_basic_add_network(**kwargs)
         related_sites = s1.get_related_sites()
         related_networks = s1.get_related_networks(related_sites)
-        self.assertEqual(set([n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12]), related_networks)
+        self.assertEqual(
+                set([n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12]),
+                related_networks)
         related_sites = s3.get_related_sites()
         related_networks = s3.get_related_networks(related_sites)
         self.assertEqual(set([n2, n3, n5, n6, n7]), related_networks)
         related_sites = s10.get_related_sites()
         related_networks = s10.get_related_networks(related_sites)
-        self.assertEqual(set([n5,n6,n7]), related_networks)
+        self.assertEqual(set([n5, n6, n7]), related_networks)
         related_sites = s2.get_related_sites()
         related_networks = s2.get_related_networks(related_sites)
         self.assertEqual(set([n10, n11, n12]), related_networks)

@@ -1,14 +1,15 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
-
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vlan.models import Vlan
 
+
 class VlanTests(TestCase):
 
-    def do_basic_add_network(self, network, prefixlen, ip_type, name=None, vlan=None, site=None):
-        n = Network(network_str= network + "/" +prefixlen, ip_type=ip_type, site=site, vlan=vlan)
+    def do_basic_add_network(self, network, prefixlen, ip_type, name=None,
+                             vlan=None, site=None):
+        n = Network(network_str=network + "/" + prefixlen, ip_type=ip_type,
+                    site=site, vlan=vlan)
         n.clean()
         n.save()
         return n
@@ -24,7 +25,6 @@ class VlanTests(TestCase):
         vlan.clean()
         vlan.save()
         return vlan
-
 
     def test_related_networks(self):
         s1 = self.do_basic_add_site(name="Site 1")
@@ -46,67 +46,99 @@ class VlanTests(TestCase):
 
         network = "123.0.0.0"
         prefixlen = "10"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s1}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s1}
         n1 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.10.0"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s3, 'vlan': v3}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s3,
+                  'vlan': v3}
         n2 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.10.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s7}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s7}
         n3 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.16.0"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'vlan': v4}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'vlan': v4}
         n4 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.16.0"
         prefixlen = "21"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s10}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s10}
         n5 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.17.0"
         prefixlen = "26"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n6 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.18.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n7 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.0.0"
         prefixlen = "10"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s1}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4', 'site': s1}
         n8 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.10.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'vlan': v1}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'vlan': v1}
         n9 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.32.0"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s2, 'vlan':v2}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s2,
+                  'vlan': v2}
         n10 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.32.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n11 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.33.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s4}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s4}
         n12 = self.do_basic_add_network(**kwargs)
 
         self.assertEqual(v1.get_related_networks(), set([n9]))
         self.assertEqual(v2.get_related_networks(), set([n10, n11, n12]))
         self.assertEqual(v3.get_related_networks(), set([n2, n3]))
-        # need to write a better test case as many of these networks are contained in each other
         self.assertEqual(v4.get_related_networks(), set([n4, n5, n6, n7]))
-

@@ -1,8 +1,8 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
+
 
 class Site(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
@@ -71,24 +71,18 @@ class Site(models.Model, ObjectUrlMixin):
             sites.update(set(related_sites))
         return sites
 
-    def get_related_vlans(self,related_networks):
+    def get_related_vlans(self, related_networks):
         return set([network.vlan for network in related_networks])
 
     def get_related(self):
         related_sites = self.get_related_sites()
-        related_networks =  self.get_related_networks(related_sites)
-        related_vlans = self.get_related_vlans(realted_networks)
+        related_networks = self.get_related_networks(related_sites)
+        related_vlans = self.get_related_vlans(related_networks)
         return [related_sites, related_networks, related_vlans]
 
     class Meta:
         db_table = 'site'
         unique_together = ('name', 'parent')
-
-    def __str__(self):
-        return "{0}".format(self.get_full_name())
-
-    def __repr__(self):
-        return "<Site {0}>".format(str(self))
 
 
 class SiteKeyValue(KeyValue):

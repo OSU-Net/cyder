@@ -12,7 +12,8 @@ class NetworkTests(TestCase):
 
     def do_basic_add(self, network, prefixlen, ip_type,
                      ame=None, number=None, site=None):
-        s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=site)
+        s = Network(network_str=network + "/" + prefixlen,
+                    ip_type=ip_type, site=site)
         s.clean()
         s.save()
         self.assertTrue(s)
@@ -28,7 +29,9 @@ class NetworkTests(TestCase):
     def test1_create_ipv6(self):
         network = "f::"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '6'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '6'}
         s = self.do_basic_add(**kwargs)
         str(s)
         s.__repr__()
@@ -37,7 +40,9 @@ class NetworkTests(TestCase):
     def test2_create_ipv6(self):
         network = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '6'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '6'}
         s = self.do_basic_add(**kwargs)
         str(s)
         s.__repr__()
@@ -49,7 +54,9 @@ class NetworkTests(TestCase):
     def test_bad_resize(self):
         network = "129.0.0.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         s = self.do_basic_add(**kwargs)
         self.assertTrue(s)
 
@@ -72,7 +79,9 @@ class NetworkTests(TestCase):
     def test_bad_delete(self):
         network = "129.0.0.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         s = self.do_basic_add(**kwargs)
         s_pk = s.pk
         self.assertTrue(s)
@@ -101,26 +110,34 @@ class NetworkTests(TestCase):
     def test_get_related_networks(self):
         network = "129.0.0.1"
         prefixlen = "20"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         s1 = self.do_basic_add(**kwargs)
 
         network = "129.0.2.1"
         prefixlen = "25"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         s2 = self.do_basic_add(**kwargs)
 
         network = "129.0.4.1"
         prefixlen = "29"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         s3 = self.do_basic_add(**kwargs)
 
         network = "129.0.2.1"
         prefixlen = "29"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         s4 = self.do_basic_add(**kwargs)
 
         related = s1.get_related_networks()
-        self.assertEqual(set([s1, s2,s3,s4]), set(related))
+        self.assertEqual(set([s1, s2, s3, s4]), set(related))
 
     def test_get_related_sites(self):
         s1 = self.do_basic_add_site("Kerr")
@@ -129,22 +146,33 @@ class NetworkTests(TestCase):
 
         network = "129.0.0.0"
         prefixlen = "19"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site':s1}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s1}
         n1 = self.do_basic_add(**kwargs)
 
         network = "129.0.1.0"
         prefixlen = "24"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site':s2}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s2}
         n2 = self.do_basic_add(**kwargs)
 
         network = "129.0.1.0"
         prefixlen = "22"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s3}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4',
+                  'site': s3}
         n3 = self.do_basic_add(**kwargs)
 
         network = "129.0.1.0"
         prefixlen = "25"
-        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        kwargs = {'network': network,
+                  'prefixlen': prefixlen,
+                  'ip_type': '4'}
         n4 = self.do_basic_add(**kwargs)
 
         networks_related = n1.get_related_networks()
@@ -158,6 +186,3 @@ class NetworkTests(TestCase):
 
         if we choose
         """
-
-
-

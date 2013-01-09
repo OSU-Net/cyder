@@ -13,6 +13,7 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
 
+
 class Network(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     vlan = models.ForeignKey(Vlan, null=True,
@@ -32,7 +33,7 @@ class Network(models.Model, ObjectUrlMixin):
                     help_text="The number of binary 1's in the netmask.")
 
     dhcpd_raw_include = models.TextField(null=True, blank=True,
-                help_text = "The config options in this box will be included "
+                  help_text="The config options in this box will be included "
                             "*as is* in the dhcpd.conf file for this subnet.")
 
     network = None
@@ -61,17 +62,11 @@ class Network(models.Model, ObjectUrlMixin):
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            add_routers = True
-        else:
-            add_routers = False
+        add_routers = True if not self.pk else False
         self.update_network()
         super(Network, self).save(*args, **kwargs)
 
         self.update_network()  # Gd forbid this hasn't already been called.
-        """
-        Must fix the key value section of this code as it breaks a number of
-        tests
         if add_routers:
             if self.ip_type == '4':
                 router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
@@ -81,7 +76,6 @@ class Network(models.Model, ObjectUrlMixin):
             kv = NetworkKeyValue(key="routers", value=router, network=self)
             kv.clean()
             kv.save()
-        """
 
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
@@ -135,10 +129,10 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
         if fail:
-            raise ValidationError("Resizing this subnet to the requested "
-                                  "network prefix would orphan existing ranges.")
+            raise ValidationError(
+                    "Resizing this subnet to the requested "
+                    "network prefix would orphan existing ranges.")
         return
-
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
