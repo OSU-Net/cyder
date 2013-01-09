@@ -7,16 +7,15 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.ip.models import ipv6_to_longs
 
-import random
-import ipaddr
-
 
 class NetworkTests(TestCase):
 
-    def do_basic_add(self, network, prefixlen, ip_type, name=None, number=None, site=None):
+    def do_basic_add(self, network, prefixlen, ip_type,
+                     ame=None, number=None, site=None):
         if site:
-            parent = Site.objects.get(id = site)
-            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=parent)
+            parent = Site.objects.get(id=site)
+            s = Network(network_str=network + "/" + prefixlen,
+                        ip_type=ip_type, site=parent)
         else:
             s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
         s.clean()
@@ -30,7 +29,8 @@ class NetworkTests(TestCase):
         s.save()
         self.assertTrue(s)
         return s
-
+    """
+    Not sure if we are going to continue to use this
     def test_bad_site(self):
         network = "111.111.111.0"
         prefixlen1 = "24"
@@ -39,11 +39,14 @@ class NetworkTests(TestCase):
         site2 = "Newport"
         s1 = self.do_basic_add_site({'name': site1})
         s2 = self.do_basic_add_site({'name': site2})
-        kwargs = {'network': network, 'prefixlen': prefixlen1, 'ip_type': '4', 'site': s1.id}
+        kwargs = {'network': network, 'prefixlen': prefixlen1,
+                  'ip_type': '4', 'site': s1.id}
         n1 = self.do_basic_add(**kwargs)
-        kwargs = {'network_str': network + '/' + prefixlen2, 'ip_type': '4', 'site': s2}
+        kwargs = {'network_str': network + '/' + prefixlen2,
+                  'ip_type': '4', 'site': s2}
         n2 = Network(**kwargs)
         self.assertRaises(ValidationError, n2.clean)
+    """
 
     def test1_create_ipv6(self):
         network = "f::"
@@ -78,10 +81,7 @@ class NetworkTests(TestCase):
 
         start_str = "129.0.0.1"
         end_str = "129.0.0.255"
-        default_domain = d
         network = s
-        rtype = 's'
-        ip_type = '4'
 
         r = Range(start_str=start_str, end_str=end_str, network=network)
         r.save()
@@ -105,10 +105,7 @@ class NetworkTests(TestCase):
 
         start_str = "129.0.0.1"
         end_str = "129.0.0.255"
-        default_domain = d
         network = s
-        rtype = 's'
-        ip_type = '4'
 
         r = Range(start_str=start_str, end_str=end_str, network=network)
         r.clean()
