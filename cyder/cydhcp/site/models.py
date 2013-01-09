@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 
-
 class Site(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -50,6 +49,46 @@ class Site(models.Model, ObjectUrlMixin):
                 full_name = target.name + '.' + target.parent.name
                 target = target.parent
         return full_name
+
+    def get_related_networks(self, related_sites):
+        from cyder.cydhcp.network.models import Network
+        networks = set()
+        for site in related_sites:
+            root_networks = Network.objects.filter(site=site)
+            for network in root_networks:
+                networks.update(network.get_related_networks())
+        return networks
+
+    def get_related_sites(self):
+        related_sites = Site.objects.filter(parent=self)
+        sites = set(related_sites)
+        sites.update([self])
+        while related_sites:
+            sub_sites = set()
+            for site in related_sites:
+                sub_sites.update(Site.objects.filter(parent=site))
+            related_sites = sub_sites
+            sites.update(set(related_sites))
+        return sites
+
+    def get_related_vlans(self,related_networks):
+        return set([network.vlan for network in related_networks])
+
+    def get_related(self):
+        related_sites = self.get_related_sites()
+        related_networks =  self.get_related_networks(related_sites)
+        related_vlans = self.get_related_vlans(realted_networks)
+        return [related_sites, related_networks, related_vlans]
+
+    class Meta:
+        db_table = 'site'
+        unique_together = ('name', 'parent')
+
+    def __str__(self):
+        return "{0}".format(self.get_full_name())
+
+    def __repr__(self):
+        return "<Site {0}>".format(str(self))
 
 
 class SiteKeyValue(KeyValue):

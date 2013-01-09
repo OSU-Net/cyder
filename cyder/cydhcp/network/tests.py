@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.site.models import Site
 from cyder.cydns.ip.models import ipv6_to_longs
 
 
@@ -12,41 +12,18 @@ class NetworkTests(TestCase):
 
     def do_basic_add(self, network, prefixlen, ip_type,
                      ame=None, number=None, site=None):
-        if site:
-            parent = Site.objects.get(id=site)
-            s = Network(network_str=network + "/" + prefixlen,
-                        ip_type=ip_type, site=parent)
-        else:
-            s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type)
+        s = Network(network_str=network + "/" + prefixlen, ip_type=ip_type, site=site)
         s.clean()
         s.save()
         self.assertTrue(s)
         return s
 
-    def do_basic_add_site(self, name):
-        s = Site(name=name)
+    def do_basic_add_site(self, name, parent=None):
+        s = Site(name=name, parent=parent)
         s.clean()
         s.save()
         self.assertTrue(s)
         return s
-    """
-    Not sure if we are going to continue to use this
-    def test_bad_site(self):
-        network = "111.111.111.0"
-        prefixlen1 = "24"
-        prefixlen2 = "28"
-        site1 = "Kerr"
-        site2 = "Newport"
-        s1 = self.do_basic_add_site({'name': site1})
-        s2 = self.do_basic_add_site({'name': site2})
-        kwargs = {'network': network, 'prefixlen': prefixlen1,
-                  'ip_type': '4', 'site': s1.id}
-        n1 = self.do_basic_add(**kwargs)
-        kwargs = {'network_str': network + '/' + prefixlen2,
-                  'ip_type': '4', 'site': s2}
-        n2 = Network(**kwargs)
-        self.assertRaises(ValidationError, n2.clean)
-    """
 
     def test1_create_ipv6(self):
         network = "f::"
@@ -120,3 +97,67 @@ class NetworkTests(TestCase):
         r.delete()
         s.delete()
         self.assertEqual(len(Network.objects.filter(pk=s_pk)), 0)
+
+    def test_get_related_networks(self):
+        network = "129.0.0.1"
+        prefixlen = "20"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s1 = self.do_basic_add(**kwargs)
+
+        network = "129.0.2.1"
+        prefixlen = "25"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s2 = self.do_basic_add(**kwargs)
+
+        network = "129.0.4.1"
+        prefixlen = "29"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s3 = self.do_basic_add(**kwargs)
+
+        network = "129.0.2.1"
+        prefixlen = "29"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        s4 = self.do_basic_add(**kwargs)
+
+        related = s1.get_related_networks()
+        self.assertEqual(set([s1, s2,s3,s4]), set(related))
+
+    def test_get_related_sites(self):
+        s1 = self.do_basic_add_site("Kerr")
+        s2 = self.do_basic_add_site("Business", parent=s1)
+        s3 = self.do_basic_add_site("Registration", parent=s1)
+
+        network = "129.0.0.0"
+        prefixlen = "19"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site':s1}
+        n1 = self.do_basic_add(**kwargs)
+
+        network = "129.0.1.0"
+        prefixlen = "24"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site':s2}
+        n2 = self.do_basic_add(**kwargs)
+
+        network = "129.0.1.0"
+        prefixlen = "22"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4', 'site': s3}
+        n3 = self.do_basic_add(**kwargs)
+
+        network = "129.0.1.0"
+        prefixlen = "25"
+        kwargs = {'network': network, 'prefixlen': prefixlen, 'ip_type': '4'}
+        n4 = self.do_basic_add(**kwargs)
+
+        networks_related = n1.get_related_networks()
+        self.assertEqual(networks_related, set([n1, n2, n3, n4]))
+        """            a
+        if we choose s1 as a site then s2, s3, n1, n2, n3, and n4 are returned
+
+        if we choose n2 then n3 and n4 should be returned
+
+        if we choose s3 then n2, n3, and n4 s
+
+        if we choose
+        """
+
+
+

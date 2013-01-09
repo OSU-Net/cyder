@@ -26,15 +26,14 @@ class Network(models.Model, ObjectUrlMixin):
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
-    network_str = models.CharField(
-        max_length=49, editable=True,
-        help_text="The network address of this network.")
-    prefixlen = models.PositiveIntegerField(
-        null=False, help_text="The number of binary 1's in the netmask.")
+    network_str = models.CharField(max_length=49, editable=True,
+                    help_text="The network address of this network.")
+    prefixlen = models.PositiveIntegerField(null=False,
+                    help_text="The number of binary 1's in the netmask.")
 
     dhcpd_raw_include = models.TextField(null=True, blank=True,
-            help_text="The config options in this box will be included "
-            "*as is* in the dhcpd.conf file for this subnet.")
+                help_text = "The config options in this box will be included "
+                            "*as is* in the dhcpd.conf file for this subnet.")
 
     network = None
 
@@ -70,14 +69,19 @@ class Network(models.Model, ObjectUrlMixin):
         super(Network, self).save(*args, **kwargs)
 
         self.update_network()  # Gd forbid this hasn't already been called.
+        """
+        Must fix the key value section of this code as it breaks a number of
+        tests
         if add_routers:
             if self.ip_type == '4':
                 router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
             else:
                 router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
+
             kv = NetworkKeyValue(key="routers", value=router, network=self)
-            #kv.clean()
-            #kv.save()
+            kv.clean()
+            kv.save()
+        """
 
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
@@ -88,26 +92,6 @@ class Network(models.Model, ObjectUrlMixin):
     def clean(self, *args, **kwargs):
         self.check_valid_range()
         super(Network, self).clean(*args, **kwargs)
-
-    def check_valid_site(self):
-        from cyder.core.network.utils import calc_networks, calc_parent
-        self.update_network()
-        # If the network contains or is contained in another network make sure
-        # that they share a parent
-        fail = False
-        child_networks , parent_networks = calc_networks(self)
-        for parent_network in parent_networks:
-            if calc_parent(parent_network) != calc_parent(self):
-                fail = True
-                break
-        for child_network in child_networks:
-            if calc_parent(child_network) != calc_parent(self):
-                fail = True
-                break
-        if fail:
-            raise ValidationError("This network has child or parent networks"
-                                  "which have different parent sites")
-        return
 
     def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
@@ -151,9 +135,10 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
         if fail:
-            raise ValidationError(
-                "Resizing this subnet to the requested "
-                "network prefix would orphan existing ranges.")
+            raise ValidationError("Resizing this subnet to the requested "
+                                  "network prefix would orphan existing ranges.")
+        return
+
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
@@ -162,6 +147,31 @@ class Network(models.Model, ObjectUrlMixin):
         ip_info = two_to_four(
             int(self.network.network), int(self.network.broadcast))
         self.ipf = IPFilter(self, self.ip_type, *ip_info)
+
+    def get_related_vlans(self, related_networks):
+        return set([network.vlan for network in related_networks])
+
+    def get_related_networks(self):
+        from cyder.cydhcp.network.utils import calc_networks
+        _, related_networks = calc_networks(self)
+        networks = set(related_networks)
+        networks.update([self])
+        while related_networks:
+            subnets = set()
+            for network in related_networks:
+                _, sub_networks = calc_networks(network)
+                subnets.update(set(sub_networks))
+            networks.update(subnets)
+            related_networks = subnets
+        return networks
+
+    def get_related_sites(self, related_networks):
+        return set([network.site for network in related_networks])
+
+    def get_related(self):
+        related_networks = self.get_related_networks()
+        related_sites = self.get_related_sites(related_networks)
+        return [related_sites, related_networks]
 
     def update_network(self):
         """This function will look at the value of network_str to update other
