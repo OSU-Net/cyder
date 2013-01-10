@@ -1,0 +1,117 @@
+from utilities import get_cursor, ip2long, long2ip, clean_mac, config
+from ConfigParser import ConfigParser
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+import chili_manage, fix_maintain, maintain_dump
+from cyder.core.ctnr.models import Ctnr
+from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.vrf.models import Vrf
+import ipaddr
+
+def calc_prefixlen(netmask):
+    bits = 0
+    while netmask:
+        bits += netmask & 1
+        netmask >>= 1
+    return bits
+
+cursor = get_cursor('maintain_sb')
+
+def create_subnet(id, name, subnet, netmask, status, vlan):
+    """
+    Takes a row from the Maintain subnet table
+    returns a new network object and creates the vlan it is associated with
+    """
+    cursor.execute("SELECT * FROM vlan WHERE id = %s"%vlan)
+    try:
+        id, name, vlan_id = cursor.fetchone()
+    except:
+        print "Unable to create vlan {0} with id {1} as none exists".format(name,id)
+        return
+    v, _ = Vlan.objects.get_or_create(name=name, number=id)
+    s, _ = Site.objects.get_or_create(name='Campus')
+    network = long2ip(subnet)
+    prefixlen = str(calc_prefixlen(netmask))
+    n = Network.objects.get_or_create(network_str = network + '/' + prefixlen,
+            ip_type='4', site=s, vlan=v)
+    return n
+
+def create_range(id, start, end, type, subnet_id, comment, enabled, parent, allow_all_hosts):
+    """
+    Takes a row form the Maintain range table
+    returns a range which is saved in cyder
+    """
+    cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id))
+    try:
+        id, name, subnet, netmask, status, vlan = cursor.fetchone()
+    except:
+        print ("Unable to find subnet with id {0}\n"
+              "associated with range from {1} to {2}".format(subnet_id, start, end))
+        return
+    r_type = 'st' if type == 'static' else 'dy'
+    n = Network.objects.get(ip_lower = subnet, prefixlen=str(calc_prefixlen(netmask)))
+    r = Range(start_lower=start, start_str = ipaddr.IPv4Address(start),
+              end_lower=end, end_str=ipaddr.IPv4Address(end), network=n,
+              range_type=r_type)
+    try:
+        r.save()
+    except:
+        print "cant create range {0} to {1} in {2}".format(r.start_str, r.end_str, n.network_str)
+        return
+
+def create_zone(id, name, description, comment, purgeable, support_mail, notify, allow_blank):
+    """
+    Takes a row from the Maintain zone table
+    returns a newly made container and creates the many to many relatiosnhip
+    between the new ctnr and it's associated range
+    """
+    comment = comment if not description else description
+    c = Ctnr(name=name, description=comment)
+    c.save()
+    """
+    We need to also create the workgroups and related them to containers
+    """
+    try:
+        cursor.execute("SELECT `zone_range.range` "
+                       "FROM zone_range "
+                       "WHERE zone = {0}".format(id))
+    except:
+        raise Exception("Unable to find any ranges associated with "
+                        "{0} {1}".format(id, name))
+    for row in cursor.fetchall():
+        cursor.execute("SELECT * FROM ranges WHERE id={0}".format(row))
+        try:
+            _, start, end, _, _, _, _, _, _ = cursor.fetchone()
+        except:
+            print "Can't find range {0} to {1}".format(start,end)
+            return
+        r = Range.objects.get(start_lower=start, end_lower=end)
+        c.ranges.add(r)
+
+def migrate_subnets():
+    cursor.execute("SELECT * FROM subnet")
+    for row in cursor.fetchall():
+        create_subnet(*row)
+
+def migrate_ranges():
+    cursor.execute("SELECT * FROM ranges")
+    for row in cursor.fetchall():
+        create_range(*row)
+
+def migrate_vrfs():
+    cursor.execute("SELECT * FROM workgroup")
+    for row in cursor.fetchall():
+        id, name = row
+        vrf, _ = Vrf.objects.get_or_create(name=name)
+
+def migrate_zones():
+    cursor.execute("SELECT * FROM zone")
+    for row in cursor.fetchall():
+        create_zone(*row)
+
+#$migrate_subnets()
+migrate_ranges()
+migrate_vrfs()
+migrate_zones()
