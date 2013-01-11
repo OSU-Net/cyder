@@ -1,6 +1,5 @@
-from cyder.cydns.cybind.build import *
+from cydns.cybind.build import *
 from django.core.management.base import BaseCommand, CommandError
-
 
 class Command(BaseCommand):
 
