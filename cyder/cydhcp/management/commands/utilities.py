@@ -1,16 +1,12 @@
-from ConfigParser import ConfigParser
 import MySQLdb
+from django.conf import settings
 
 
 def get_cursor(name):
-    CONFIG_FILE = "database.cfg"
-    config = ConfigParser()
-    config.read(CONFIG_FILE)
-    print vars(config)
-    connection = MySQLdb.connect(host=config.get(name, 'host'),
-                                 user=config.get(name, 'user'),
-                                 passwd=config.get(name, 'passwd'),
-                                 db=config.get(name, 'db'))
+    connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
+                                 user=settings.MIGRATION_USER,
+                                 passwd=settings.MIGRATION_PASSWD,
+                                 db=settings.MIGRATION_DB)
 
     cursor = connection.cursor()
     return cursor

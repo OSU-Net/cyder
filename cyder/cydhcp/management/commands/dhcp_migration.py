@@ -41,11 +41,30 @@ def create_subnet(id, name, subnet, netmask, status, vlan):
         id, vlan_name, vlan_id = cursor.fetchone()
         v = Vlan.objects.get(name=vlan_name, number=vlan_id)
     except:
-        print "vlan does not exist {0}".format(vlan)
+        #print "vlan does not exist {0}".format(vlan)
+        pass
     network = str(ipaddr.IPv4Address(subnet))
     prefixlen = str(calc_prefixlen(netmask))
-    n = Network.objects.get_or_create(network_str=network + '/' + prefixlen,
+    n, _ = Network.objects.get_or_create(network_str=network + '/' + prefixlen,
             ip_type='4', site=s, vlan=v)
+    """
+    cursor.execute("SELECT dhcp_option, value "
+                   "FROM object_option "
+                   "WHERE object_id = {0} AND type = 'subnet'".format(id))
+    results = cursor.fetchall()
+    for dhcp_option, value in results:
+        cursor.execute("SELECT name, type "
+                       "FROM dhcp_options "
+                       "WHERE id = {0}".format(dhcp_option))
+        name, type = cursor.fetchone()
+        if type == 'quoted-option':
+            kv = NetworkKeyValue(value="{0} \"{1}\"".format(name, value),
+                    is_option=True, network=n)
+        else:
+            kv = NetworkKeyValue(value="{0} {1}".format(name, value),
+                    is_option=True, network=n)
+        kv.save()
+    """
     return n
 
 
@@ -58,9 +77,9 @@ def create_range(id, start, end, type, subnet_id, comment, en, parent, allow):
     try:
         id, name, subnet, netmask, status, vlan = cursor.fetchone()
     except:
-        print ("Unable to find subnet with id {0}\n"
-               "associated with range from {1} to {2}".format(
-               subnet_id, ipaddr.IPv4Address(start), ipaddr.IPv4Address(end)))
+        #print ("Unable to find subnet with id {0}\n"
+        #       "associated with range from {1} to {2}".format(
+        #       subnet_id, ipaddr.IPv4Address(start), ipaddr.IPv4Address(end)))
         return
     r_type = 'st' if type == 'static' else 'dy'
     n = Network.objects.get(ip_lower=subnet,
@@ -70,11 +89,10 @@ def create_range(id, start, end, type, subnet_id, comment, en, parent, allow):
               range_type=r_type)
     try:
         r.save()
-        return r
     except:
-        print "cant create range {0} to {1} in {2}".format(
-                ipaddr.IPv4Address(start), ipaddr.IPv4Address(end),
-                n.network_str)
+        #print "cant create range {0} to {1} in {2}".format(
+        #        ipaddr.IPv4Address(start), ipaddr.IPv4Address(end),
+        #        n.network_str)
         return None
 
 
@@ -84,7 +102,7 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
     returns a newly made container and creates the many to many relatiosnhip
     between the new ctnr and it's associated range
     """
-    c = Ctnr.objects.get_or_create(name=name,
+    c, _ = Ctnr.objects.get_or_create(name=name,
             description=comment or description)
     c.save()
     """
@@ -95,8 +113,8 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
                        "FROM zone_range "
                        "WHERE zone = {0}".format(id))
     except:
-        print ("Unable to find any ranges associated with "
-                        "{0} {1}".format(id, name))
+        #print ("Unable to find any ranges associated with "
+        #                "{0} {1}".format(id, name))
         return
     for row in cursor.fetchall():
         cursor.execute("SELECT * FROM `ranges` WHERE id={0}".format(row[0]))
@@ -132,7 +150,26 @@ def migrate_workgroups():
     cursor.execute("SELECT * FROM workgroup")
     for row in cursor.fetchall():
         id, name = row
-        vrf, _ = Workgroup.objects.get_or_create(name=name)
+        w, _ = Workgroup.objects.get_or_create(name=name)
+        """
+        cursor.execute("SELECT dhcp_option, value "
+                       "FROM object_option "
+                       "WHERE object_id = {0} "
+                       "AND type = 'workgroup'".format(id))
+        results = cursor.fetchall()
+        for dhcp_option, value in results:
+            cursor.execute("SELECT name, type "
+                           "FROM dhcp_options "
+                           "WHERE id = {0}".format(dhcp_option))
+            name, type = cursor.fetchone()
+            if type == 'quoted-option':
+                kv = WorkgroupKeyValue(value="{0} \"{1}\"".format(name, value),
+                        is_option=True, workgroup=w)
+            else:
+                kv = WorkgroupKeyValue(value="{0} {1}".format(name, value),
+                        is_option=True, workgroup=w)
+            kv.save()
+        """
 
 
 def create_ctnr(id):
@@ -177,7 +214,7 @@ def migrate_zone_range():
             if not zone_name:
                 continue
         except:
-            print "zone with id {0} does not exist".format(zone_id[0])
+            # print "zone with id {0} does not exist".format(zone_id[0])
             continue
         cursor.execute("SELECT start, end "
                        "FROM `ranges` "
@@ -185,19 +222,19 @@ def migrate_zone_range():
         try:
             r_start, r_end = cursor.fetchone()
         except:
-            print "range with id {0} does not exist".format(range_id)
+            # print "range with id {0} does not exist".format(range_id)
             continue
         try:
             c = Ctnr.objects.get(name=zone_name[0])
         except:
-            print "can't find container named {0}".format(zone_name[0])
+            # print "can't find container named {0}".format(zone_name[0])
             continue
         try:
             r = Range.objects.get(start_lower=r_start, end_lower=r_end)
         except:
-            print ("can't find range with "
-                   "start_lower = {0} and end_lower = {1}". format(
-                       r_start, r_end))
+            # print ("can't find range with "
+            #       "start_lower = {0} and end_lower = {1}". format(
+            #           r_start, r_end))
             continue
         c.ranges.add(r)
 
@@ -212,23 +249,23 @@ def migrate_zone_workgroup():
             if not zone_name:
                 continue
         except:
-            print "zone with id {0} does not exist".format(zone_id)
+            # print "zone with id {0} does not exist".format(zone_id)
             continue
         cursor.execute("SELECT * FROM workgroup WHERE id={0}".format(zone_id))
         try:
             _, w_name = cursor.fetchone()
         except:
-            print "workgroup with id {0} does not exist".format(zone_id)
+            # print "workgroup with id {0} does not exist".format(zone_id)
             continue
         try:
             c = Ctnr.objects.get(name=zone_name[0])
         except:
-            print "can't find container named {0}".format(zone_name[0])
+            # print "can't find container named {0}".format(zone_name[0])
             continue
         try:
             w = Workgroup.objects.get(name=w_name)
         except:
-            print "can't find workgroup named {0}". format(w_name)
+            # print "can't find workgroup named {0}". format(w_name)
             continue
         c.workgroups.add(w)
 
@@ -241,7 +278,7 @@ def maintain_find_range(range_id):
         start, end = cursor.fetchone()
         return Range.objects.get(start=start, end=end)
     except:
-        print "Can't find range with an id of {0}".format(range_id)
+        # print "Can't find range with an id of {0}".format(range_id)
         return None
 
 
@@ -253,7 +290,7 @@ def maintain_find_domain(domain_id):
         name = cursor.fetchone()[0]
         return Domain.objects.get(name=name)
     except:
-        print "Can't find domain with an id of {0}".format(domain_id)
+        # print "Can't find domain with an id of {0}".format(domain_id)
         return None
 
 
@@ -263,7 +300,7 @@ def maintain_find_zone(zone_id):
         name = cursor.fetchone()[0]
         return Ctnr.objects.get(name=name)
     except:
-        print "Can't find zone with id of {0}".format(zone_id)
+        # print "Can't find zone with id of {0}".format(zone_id)
         return None
 
 
@@ -275,7 +312,7 @@ def maintain_find_workgroup(workgroup_id):
         name = cursor.fetchone()[0]
         return Workgroup.objects.get(name=name)
     except:
-        print "Can't find workgroup with id {0}".format(workgroup_id)
+        # print "Can't find workgroup with id {0}".format(workgroup_id)
         return None
 
 
