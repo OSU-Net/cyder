@@ -4,7 +4,7 @@ from gettext import gettext as _
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
@@ -17,7 +17,7 @@ from cyder.cydns.soa.utils import update_soa
 #import reversion
 
 
-class Nameserver(models.Model, ObjectUrlMixin):
+class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
     """Name server for forward domains::
 
         >>> Nameserver(domain = domain, server = server)

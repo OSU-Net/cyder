@@ -6,13 +6,14 @@ from cyder.cydns.cname.models import CNAME
 
 from cyder.cydns.validation import validate_mx_priority
 from cyder.cydns.validation import validate_name
+from cyder.cydns.mixins import DisplayMixin
 
 #import reversion
 
 from gettext import gettext as _
 
 
-class MX(CydnsRecord):
+class MX(CydnsRecord, DisplayMixin):
     """
     >>> MX(label=label, domain=domain, server=server, priority=prio,
     ...     ttl=tll)
