@@ -12,13 +12,13 @@ from cyder.cydns.models import check_TLD_condition
 from cyder.cydns.validation import (validate_first_label, validate_name,
                                     validate_ttl)
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.soa.utils import update_soa
 
 #import reversion
 
 
-class BaseAddressRecord(Ip, ObjectUrlMixin):
+class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
     """AddressRecord is the class that generates A and AAAA records
 
         >>> AddressRecord(label=label, domain=domain_object, ip_str=ip_str,

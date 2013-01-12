@@ -10,7 +10,7 @@ from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl
 
 
-class CydnsRecord(BaseModel, ObjectUrlMixin):
+class CydnsRecord(BaseModel, ObjectUrlMixin, DisplayMixin):
     """
     This class provides common functionality that many DNS record
     classes share.  This includes a foreign key to the ``domain`` table
