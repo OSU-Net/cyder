@@ -1,15 +1,19 @@
 #!/usr/bin/python
 import argparse
-from gettext import gettext as _
 import sys
 import os
-import pdb
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
-#import manage
-from mozdns.mozbind.builder import DNSBuilder, BuildError
-from core.utils import fail_mail
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                os.pardir, os.pardir, os.pardir, os.pardir)))
+
+import manage
+
+manage
+#os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
+
+from cyder.cydns.cybind.builder import DNSBuilder, BuildError
+#from core.utils import fail_mail  # TODO, write this function
 
 
 def main():
@@ -46,10 +50,10 @@ def main():
         b.build_dns()
     except BuildError as why:
         b.log('LOG_ERR', why)
-        fail_mail(message.format(why))
+        #fail_mail(message.format(why))
     except Exception as err:
         # Make some noise
-        fail_mail(message.format(err))
+        #fail_mail(message.format(err))
         b.log('LOG_CRIT', err)
         raise
 

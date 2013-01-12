@@ -25,7 +25,8 @@ class BuildError(Exception):
 
 class SVNBuilderMixin(object):
     svn_ignore = [re.compile("---\s.+\s+\(revision\s\d+\)"),
-                  re.compile("\+\+\+\s.+\s+\(working copy\)")]
+                  re.compile("\+\+\+\s.+\s+\(working copy\)"),
+                  re.compile("\+\+\+\s.+\s+\(revision \d+\)")]
 
     vcs_type = 'svn'
 
