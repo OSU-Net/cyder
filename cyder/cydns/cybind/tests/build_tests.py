@@ -1,9 +1,8 @@
 # These tests are similar to the ones in the scripts directory. They do not ran on
 # real data so the testing db needs to be filled with info.
 import os
-from django.test.client import Client
+from django.test.client import RequestFactory
 from django.test import TestCase
-from django.core.urlresolvers import reverse
 
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
@@ -12,6 +11,7 @@ from cyder.cydns.tests.test_views_template import  random_label, random_byte
 from cyder.cydns.cybind.builder import DNSBuilder
 
 from cyder.cydns.cybind.dnsbuilds.tests.build_tests import BuildScriptTests
+from cyder.cydns.cybind.tests.helpers import create_zone_ajax
 
 
 class MockBuildScriptTests(BuildScriptTests, TestCase):
@@ -21,7 +21,7 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
         self.r1, _ = Domain.objects.get_or_create(name="10.in-addr.arpa")
         Domain.objects.get_or_create(name="com")
         Domain.objects.get_or_create(name="test.com")
-        self.client = Client()
+        self.factory = RequestFactory()
         super(MockBuildScriptTests, self).setUp()
 
     def get_post_data(self, random_str):
@@ -43,7 +43,8 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
         # Let's use the view that should be used by a user who is creating a
         # zone. Assume it works.
         post_data = self.get_post_data(random_str)
-        self.client.post(reverse('create-zone-ajax'), post_data)
+        request = self.factory.post("/herp/derp/doesnt/matter", post_data)
+        create_zone_ajax(request)
         return post_data
 
     def test_build_zone(self):
