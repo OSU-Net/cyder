@@ -16,10 +16,12 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.utils import ensure_domain
+from cyder.cydns.models import View
 
 
 BAD_DNAMES = ['', '.', '_']
 cursor = get_cursor('maintain_sb')
+public = View.objects.get(name="public")
 
 
 class Zone(object):
@@ -89,6 +91,8 @@ class Zone(object):
                                                  server = server,
                                                  priority = priority,
                                                  ttl = ttl)
+                mx.save()
+                mx.views.add(public)
             except ValidationError:
                  print "Error generating MX."
 
@@ -133,6 +137,7 @@ class Zone(object):
                 # (no get_or_create)
                 static.full_clean()
                 static.save()
+                static.views.add(public)
 
     def gen_AR(self):
         """
@@ -168,6 +173,8 @@ class Zone(object):
                                                               domain = self.domain,
                                                               ip_str = long2ip(ip),
                                                               ip_type = '4')
+                arec.save()
+                arec.views.add(public)
 
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(name = name, ip_str = long2ip(ip)).exists():
@@ -176,6 +183,7 @@ class Zone(object):
                     # PTRs need to be cleaned independently of saving (no get_or_create)
                     ptr.full_clean()
                     ptr.save()
+                    ptr.views.add(public)
 
     def gen_NS(self):
         """
@@ -188,6 +196,8 @@ class Zone(object):
             name = name.lower()
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain = self.domain, server = name)
+                ns.save()
+                ns.views.add(public)
             except ValidationError:
                 print "Error generating NS."
 
@@ -263,6 +273,7 @@ def gen_CNAME():
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
         cn.save()
+        cn.views.add(public)
 
 
 if __name__ == "__main__":
@@ -277,6 +288,8 @@ if __name__ == "__main__":
             action="store_true", help="Migrate CNAMEs.")
     parser.add_option("-X", "--delete", dest="delete", default=False,
             action="store_true", help="Delete old objects.")
+    parser.add_option("-s", "--skip", dest="skip", default=False,
+            action="store_true", help="Skip edu zone.")
     (options, args) = parser.parse_args()
 
     if options.dump:
@@ -323,6 +336,8 @@ if __name__ == "__main__":
 
         cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
         for domain_id, dname, _, _ in cursor.fetchall():
+            if "edu" in dname and options.skip:
+                continue
             print "Creating %s zone." % dname
             Zone(domain_id = domain_id, dname = dname,)
 
