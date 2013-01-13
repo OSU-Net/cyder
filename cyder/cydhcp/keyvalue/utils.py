@@ -157,6 +157,7 @@ class AuxAttr(object):
         return self._get_aa(attr)
 
     def __setattr__(self, attr, value):
+
         try:
             if super(AuxAttr, self).__getattribute__(attr):
                 return super(AuxAttr, self).__setattr__(attr, value)

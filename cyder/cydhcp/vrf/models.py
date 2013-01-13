@@ -8,7 +8,7 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 class Vrf(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
-    network = models.ForeignKey(Network, null=False)
+    network = models.ForeignKey(Network, null=True)
 
     class Meta:
         db_table = 'vrf'

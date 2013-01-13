@@ -14,12 +14,12 @@ class System(BaseModel, ObjectUrlMixin):
         (0, 'No'),
         (1, 'Yes'),
     )
-    hostname = models.CharField(unique=True, max_length=255)
-    department = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
+    hostname = models.CharField(max_length=255, unique=False)
+    department = models.CharField(max_length=255, unique=False)
+    location = models.CharField(max_length=255, unique=False)
     class Meta:
         db_table = 'system'
-        unique_together = ('hostname','location')
+        unique_together = ('hostname', 'location', 'department')
 
     def update_attrs(self):
         self.attrs = SystemKeyValue.objects.filter(system=self)

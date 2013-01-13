@@ -2,12 +2,16 @@
 import chili_manage
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+#from cyder.cydhcp.interface.dynamic_intr.models import DynamicIntrfKeyValue
 from cyder.cydhcp.network.utils import calc_networks
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
 
 
@@ -40,17 +44,19 @@ def build_subnet(network, raw=False):
     ranges = network.range_set.all()
 
     # Let's assume all options need a ';' appended.
-    build_str = "\nsubnet {0} netmask {1} {{\n".format(network.network.network,
-                 network.network.netmask)
+    build_str = "\nsubnet {0} netmask {1} {{\n".format(
+            network.network.network, network.network.netmask)
     build_str += "\n"
     if not raw:
         build_str += "\t# Network Statements\n"
         for statement in network_statements:
-            build_str += "\t{0:20} {1};\n".format(statement.key, statement.value)
+            build_str += "\t{0:20} {1};\n".format(
+                    statement.key, statement.value)
         build_str += "\n"
         build_str += "\t# Network Options\n"
         for option in network_options:
-            build_str += "\toption {0:20} {1};\n".format(option.key, option.value)
+            build_str += "\toption {0:20} {1};\n".format(
+                    option.key, option.value)
         build_str += "\n"
 
         if network_raw_include:
@@ -68,9 +74,10 @@ def build_subnet(network, raw=False):
 
 
 def build_pool(mrange):
-    mrange_options = mrange.rangekeyvalue_set.filter(is_option=True)
-    mrange_statements = mrange.rangekeyvalue_set.filter(is_statement=True)
+    mrange_options = RangeKeyValue.objects.filter(range=mrange, is_option=True)
+    mrange_statements = RangeKeyValue.objects.filter(range=mrange, is_statement=True)
     mrange_raw_include = mrange.dhcpd_raw_include
+    allow = Vrf.objects.filter(network=mrange.network)
     build_str = "\tpool {\n"
     build_str += "\t\t# Pool Statements\n"
     for statement in mrange_statements:
@@ -87,6 +94,8 @@ def build_pool(mrange):
         build_str += "\n\t\t{0}\n".format(mrange_raw_include)
     build_str += "\t\trange {0} {1};\n".format(mrange.start_str,
                                                mrange.end_str)
+    for vrf in allow:
+        build_str += "\t\tallow {0}\n".format(vrf.name)
     build_str += "\t}\n\n"
     return build_str
 
@@ -126,18 +135,21 @@ def build_group(workgroup):
 
 
 def build_vrf(vrf):
-    build_str = "# {0} for range {1}:{2}\n".format(vrf.ctnr.name,
-            vrf.range.start_str, vrf.range.end_str)
-    build_str = "\nclass \"{0}:{1}:{2}\";\n".format(vrf.ctnr.name,
-            vrf.range.start_str, vrf.range.end_str)
-    build_str += "\tmatch hardware;\n"
-    build_str += "}\n"
-    dyn_intrs = DynamicInterface.objects.filter(vrf=vrf)
-    build_str += "# Hosts for {0}\n".format(vrf.name)
-    for dyn_intr in dyn_intrs:
-        build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(vrf.ctnr.name,
-                vrf.range.start_str, vrf.range.end_str, dyn_intr.mac)
-
+    build_str = ""
+    ranges = Range.objects.filter(network=vrf.network)
+    for range in ranges:
+        build_str += "# {0} for range {1}:{2}\n".format(
+                vrf.name, range.start_str, range.end_str)
+        build_str += "\nclass \"{0}:{1}:{2}\";\n".format(
+                vrf.name, range.start_str, range.end_str)
+        build_str += "\tmatch hardware;\n"
+        build_str += "}\n"
+        dyn_intrs = DynamicInterface.objects.filter(vrf=vrf)
+        build_str += "# Hosts for {0}\n".format(vrf.name)
+        for dyn_intr in dyn_intrs:
+            build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(vrf.name,
+                    range.start_str, range.end_str, dyn_intr.mac)
+    return build_str
 
 
 def main():
@@ -153,6 +165,8 @@ def main():
 
     for workgroup in Workgroup.objects.all():
         build_str += build_group(workgroup)
+    for vrf in Vrf.objects.all():
+        build_str += build_vrf(vrf)
 
     f = open("test.conf", 'w')
     f.write(build_str)

@@ -46,6 +46,7 @@ def create_subnet(id, name, subnet, netmask, status, vlan):
     prefixlen = str(calc_prefixlen(netmask))
     n = Network.objects.get_or_create(network_str=network + '/' + prefixlen,
             ip_type='4', site=s, vlan=v)
+
     return n
 
 
@@ -132,7 +133,8 @@ def migrate_workgroups():
     cursor.execute("SELECT * FROM workgroup")
     for row in cursor.fetchall():
         id, name = row
-        vrf, _ = Workgroup.objects.get_or_create(name=name)
+        w, _ = Workgroup.objects.get_or_create(name=name)
+        v, _ = Vrf.objects.get_or_create(name="{0}-vrf".format(name))
 
 
 def create_ctnr(id):
@@ -162,7 +164,7 @@ def migrate_dynamic_hosts():
         c = maintain_find_zone(zone_id)
         d = maintain_find_domain(domain_id)
         w = maintain_find_workgroup(workgroup_id)
-        v = Vrf.objects.get(name=w.name)
+        v = Vrf.objects.get(name="{0}-vrf".format(w.name))
         intr, _ = DynamicInterface.objects.get_or_create(range=r, workgroup=w,
                 ctnr=c, domain=d, vrf=v)
 
