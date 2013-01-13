@@ -34,9 +34,7 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
-        'search': (
-            'css/search.scss',
-        )
+        'search': ('css/search.scss')
     },
     'js': {
         'cyder_js': (
@@ -135,8 +133,7 @@ MIDDLEWARE_CLASSES = (
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.request',
-    'django.core.context_processors.csrf'
-)
+    'django.core.context_processors.csrf')
 
 SESSION_COOKIE_NAME = 'cyder'
 SESSION_COOKIE_SECURE = False

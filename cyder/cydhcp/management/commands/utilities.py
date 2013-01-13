@@ -1,4 +1,3 @@
-from ConfigParser import ConfigParser
 import MySQLdb
 from django.conf import settings
 

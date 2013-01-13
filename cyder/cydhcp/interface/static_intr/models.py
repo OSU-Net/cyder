@@ -1,13 +1,12 @@
 import re
 
-
 from django.db import models
 from django.core.exceptions import ValidationError
 
 import cydns
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.core.system.models import System
-from cyder.cydhcp.keyvalue.models import KeyValue
+from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
@@ -151,8 +150,8 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                                   "system.")
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError("A PTR already uses this Name and IP")
-        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
-                                        ).exists():
+        if AddressRecord.objects.filter(
+                ip_str=self.ip_str, fqdn=self.fqdn).exists():
             raise ValidationError("An A record already uses this Name and IP")
 
         if kwargs.pop("validate_glue", True):
@@ -214,7 +213,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                                              self.fqdn)
 
 
-class StaticIntrKeyValue(KeyValue):
+class StaticIntrKeyValue(CommonOption):
     intr = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
