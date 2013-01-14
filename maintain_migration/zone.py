@@ -269,7 +269,11 @@ def gen_CNAME():
         else:
             continue
 
+        if server == ".".join([name, domain.name]):
+            # In maintain, at least one CNAME is a loop: biosys.bioe.orst.edu
+            continue
         cn = CNAME(label = name, domain = domain, target = server)
+
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
         cn.save()
