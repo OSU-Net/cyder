@@ -59,6 +59,7 @@ def cydns_view(request, pk=None):
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:
+            print errors
             fqdn_form = FQDNFormKlass(request.POST)
             fqdn_form._errors = ErrorDict()
             fqdn_form._errors['__all__'] = ErrorList(errors)
@@ -73,17 +74,18 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=record if record else None)
 
         try:
-            if request.user.get_profile().has_perm(request, record, 'create',
-                                                   obj_class=Klass):
-                record = form.save()
-            else:
-                raise ValidationError
+            record = form.save()
             # If domain, add to current ctnr.
             if record_type == 'domain':
                 request.session['ctnr'].domains.add(record)
             return redirect(record.get_list_url())
-        except (ValidationError, ValueError) as e:
-            form = _revert(domain, request.POST, form, FQDNFormKlass)
+        except Exception as e:
+            print str(e)
+            if type(e) in (ValidationError, ValueError):
+                form = _revert(domain, request.POST, form, FQDNFormKlass)
+                print form._errors
+            else:
+                raise e
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(

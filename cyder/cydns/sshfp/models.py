@@ -1,7 +1,11 @@
+from gettext import gettext as _
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.cydns.models import CydnsRecord
+
+#import reversion
 
 
 def validate_algorithm(number):
@@ -29,6 +33,10 @@ class SSHFP(CydnsRecord):
     fingerprint_type = models.PositiveIntegerField(
         null=False, blank=False, validators=[validate_fingerprint],
         help_text='Fingerprint type must be 1 (SHA-1)')
+
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} {algorithm_number} {fingerprint_type} "
+                 "{key:$rhs_just}.")
 
     search_fields = ("fqdn", "key")
 
@@ -58,6 +66,10 @@ class SSHFP(CydnsRecord):
         return super(SSHFP, cls).get_api_fields() + ['fingerprint_type',
                                                      'algorithm_number', 'key']
 
+    @property
+    def rdtype(self):
+        return 'SSHFP'
+
     def save(self, *args, **kwargs):
         super(SSHFP, self).save(*args, **kwargs)
 
@@ -73,3 +85,6 @@ class SSHFP(CydnsRecord):
         # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
         # 'txt_data' used in key specification without a key length")
         # Fix that ^
+
+
+#reversion.(SSHFP)

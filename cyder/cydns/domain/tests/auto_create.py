@@ -1,22 +1,9 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.txt.models import TXT
-from cyder.cydns.mx.models import MX
-from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import ValidationError, _name_to_domain
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.utils import ensure_label_domain, prune_tree
+from cyder.cydns.utils import ensure_label_domain
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydhcp.site.models import Site
-
 
 
 class AutoCreateTests(TestCase):
@@ -26,7 +13,7 @@ class AutoCreateTests(TestCase):
 
     def test_delegation_block(self):
         s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                                         comment="foo")
+                                         description="foo")
         c = Domain(name='com')
         c.soa = s
         c.save()
@@ -53,3 +40,15 @@ class AutoCreateTests(TestCase):
         # Even with domains there, they aren't part of a zone and should so
         # creation should fail.
         self.assertRaises(ValidationError, ensure_label_domain, fqdn)
+
+    def test_no_soa_block2(self):
+        c = Domain(name='moo')
+        c.save()
+        f_c = Domain(name='foo.moo')
+        f_c.save()
+        s, _ = SOA.objects.get_or_create(primary="bar23", contact="Foo",
+                                         description="bar")
+        f_c.soa = s
+        f_c.save()
+
+        self.assertRaises(ValidationError, ensure_label_domain, "baz.moo")

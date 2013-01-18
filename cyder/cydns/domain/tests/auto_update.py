@@ -1,22 +1,14 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.test import TestCase
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.mx.models import MX
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import ValidationError, _name_to_domain
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.utils import ensure_label_domain, prune_tree
+from cyder.cydns.utils import ensure_label_domain
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydhcp.site.models import Site
-
 
 
 class UpdateRecordDeleteDomainTests(TestCase):
@@ -27,7 +19,7 @@ class UpdateRecordDeleteDomainTests(TestCase):
         self.assertFalse(c.purgeable)
         f_c, _ = Domain.objects.get_or_create(name='foo.foo22')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         comment="foo.foo22")
+                                         description="foo.foo22")
         f_c.soa = s
         f_c.save()
         self.assertFalse(f_c.purgeable)

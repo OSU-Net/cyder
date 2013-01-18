@@ -9,7 +9,7 @@ from cyder.cydns.tests.test_views import random_label
 class DomainViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         soa = SOA(primary=random_label(
-        ), contact=random_label(), comment=random_label())
+        ), contact=random_label(), description=random_label())
         self.test_obj = Domain(name=random_label())
         self.test_obj.save()
         self.test_obj.soa = soa

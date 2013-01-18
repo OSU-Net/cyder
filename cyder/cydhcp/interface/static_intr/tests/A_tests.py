@@ -5,17 +5,15 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
 
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
-
+from cyder.cydns.ip.utils import ip_to_domain_name
 
 
 class AStaticRegTests(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -102,14 +100,15 @@ class AStaticRegTests(TestCase):
         self.assertRaises(ValidationError, a.save)
 
     def test2_conflict_add_A_first(self):
-        # Add an A and update and existing intr to conflict. Test for exception.
+        # Add an A and update and existing intr to conflict. Test for
+        # exception.
         mac = "11:22:33:44:55:66"
         label = "foo98"
         domain = self.f_c
         ip_str = "10.0.0.2"
         # Add A
         kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
-        a = self.do_add_a(**kwargs)
+        self.do_add_a(**kwargs)
 
         # Add Intr with diff IP
         ip_str = "10.0.0.3"

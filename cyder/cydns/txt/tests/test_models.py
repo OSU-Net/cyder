@@ -23,10 +23,6 @@ class TXTTests(TestCase):
         txt = TXT(**data)
         txt.__repr__()
         txt.save()
-        self.assertTrue(txt.details())
-        self.assertTrue(txt.get_detail_url())
-        self.assertTrue(txt.get_update_url())
-        self.assertTrue(txt.get_delete_url())
         rtxt = TXT.objects.filter(**data)
         self.assertTrue(len(rtxt) == 1)
         return txt

@@ -1,21 +1,11 @@
-import ipaddr
-
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import ValidationError, _name_to_domain
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydhcp.site.models import Site
-
 
 
 class DomainTests(TestCase):
@@ -43,9 +33,6 @@ class DomainTests(TestCase):
         f_c.save()
         f_c.save()
         f_c.details()
-        self.assertTrue(f_c.get_detail_url())
-        self.assertTrue(f_c.get_update_url())
-        self.assertTrue(f_c.get_delete_url())
         self.assertTrue(f_c.master_domain == c)
 
         b_c = Domain(name='bar.com')
@@ -79,7 +66,7 @@ class DomainTests(TestCase):
         b_m = Domain(name='baz.moo')
         b_m.save()
 
-        s = SOA(primary="ns1.foo.com", contact="asdf", comment="test")
+        s = SOA(primary="ns1.foo.com", contact="asdf", description="test")
         s.save()
 
         f_m.soa = s
@@ -101,14 +88,15 @@ class DomainTests(TestCase):
         m.soa = None
         self.assertRaises(ValidationError, m.save)
 
-        s2 = SOA(primary="ns1.foo.com", contact="asdf", comment="test2")
+        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2")
         s2.save()
 
         m.soa = s2
         self.assertRaises(ValidationError, m.save)
 
     def test_2_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz", contact="hostmaster.foo", comment="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
+                            contact="hostmaster.foo", description="foo.gaz2")
         d, _ = Domain.objects.get_or_create(name="gaz")
         d.soa = None
         d.save()
@@ -117,7 +105,8 @@ class DomainTests(TestCase):
         d1.save()
 
     def test_3_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz", contact="hostmaster.foo", comment="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
+                            contact="hostmaster.foo", description="foo.gaz2")
 
         r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
         r.soa = s1
@@ -143,8 +132,6 @@ class DomainTests(TestCase):
         self.assertRaises(ValidationError, d.save)
 
     def test_create_domain(self):
-        edu = Domain(name='edu')
-        Domain(name='oregonstate.edu')
         try:
             Domain(name='foo.bar.oregonstate.edu').save()
         except ValidationError, e:
@@ -272,10 +259,7 @@ class DomainTests(TestCase):
         n_dom = Domain(name=name, delegated=False)
         self.assertRaises(ValidationError, n_dom.save)
 
-    def test_remove_domain_with_child_objects(self):
-        """Removing a domain should remove CNAMES and PTR records that
-        have data in that domain."""
-
+    def test_rename_has_child_domain(self):
         name = "sucks"
         a_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
         a_dom.save()
@@ -288,64 +272,13 @@ class DomainTests(TestCase):
         c_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
         c_dom.save()
 
-        cn, _ = CNAME.objects.get_or_create(domain=c_dom, label="nddo",
-                                            target="really.teebow.sucks")
-        cn.full_clean()
-        cn.save()
-
-        ptr = PTR(
-            ip_str="128.193.2.1", name="seriously.teebow.sucks", ip_type='4')
-        ptr.full_clean()
-        ptr.save()
-
-        self.assertTrue(cn.target_domain == b_dom)
-        self.assertTrue(ptr.data_domain == b_dom)
-
-        b_dom, _ = Domain.objects.get_or_create(
-            name="teebow.sucks", delegated=False)
-        b_dom.delete()
+        self.assertTrue(b_dom.master_domain == a_dom)
 
         try:
-            cn = CNAME.objects.get(pk=cn.pk)
+            c_dom.name = "asdfme"
+            c_dom.save()
         except:
-            self.fail("CNAME was deleted.")
-        self.assertTrue(cn.target_domain == a_dom)
+            self.fail("Should be able to rename domain")
 
-        try:
-            ptr = PTR.objects.get(pk=ptr.pk)
-        except:
-            self.fail("PTR was deleted")
-        self.assertTrue(ptr.data_domain == a_dom)
-
-    def test_look_for_cnames_ptrs(self):
-        name = "sucks1"
-        a_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
-        a_dom.save()
-
-        name = "adsfme1"
-        c_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
-        c_dom.save()
-
-        cn, _ = CNAME.objects.get_or_create(domain=c_dom, label="nddo",
-                                            target="really.teebow.sucks1")
-        cn.full_clean()
-        cn.save()
-
-        ptr = PTR(
-            ip_str="128.193.2.1", name="seriously.teebow.sucks1", ip_type='4')
-        ptr.full_clean()
-        ptr.save()
-
-        name = "teebow.sucks1"
-        b_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
-        b_dom.save()
-
-        cn = CNAME.objects.get(pk=cn.pk)
-        ptr = PTR.objects.get(pk=ptr.pk)
-        self.assertTrue(cn.target_domain == b_dom)
-        self.assertTrue(ptr.data_domain == b_dom)
-        cn.label = "fooooobar"
-        cn.full_clean()
-        cn.save()
-
-        # This is to hit some LOC for coverage purposes.
+        a_dom.name = "sucks2"
+        self.assertRaises(ValidationError, a_dom.save)

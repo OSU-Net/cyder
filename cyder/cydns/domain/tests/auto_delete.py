@@ -1,31 +1,23 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.test import TestCase
 
 from cyder.core.system.models import System
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.mx.models import MX
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.models import ValidationError, _name_to_domain
-from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydhcp.site.models import Site
-
 
 
 class AutoDeleteTests(TestCase):
 
     def setUp(self):
         s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                                         comment="foo")
+                                         description="foo")
         self.c = Domain(name='poo')
         self.c.save()
         self.assertFalse(self.c.purgeable)
@@ -116,8 +108,7 @@ class AutoDeleteTests(TestCase):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
-        srv = SRV(
-            label='_' + label, domain=the_domain, target="foo", priority=4,
+        srv = SRV(label='_' + label, domain=the_domain, target="foo", priority=4,
             weight=4, port=34)
         srv.save()
         self.assertFalse(prune_tree(the_domain))
@@ -134,7 +125,7 @@ class AutoDeleteTests(TestCase):
         c.save()
         self.assertFalse(c.purgeable)
         s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                                         comment="dddfoo")
+                                         description="dddfoo")
         f_c = Domain(name='foo.foo1')
         f_c.soa = s
         f_c.save()

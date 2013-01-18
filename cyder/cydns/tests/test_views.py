@@ -12,15 +12,14 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.test_views_template import (GenericViewTests,
-                                                   random_label)
+from cyder.cydns.tests.test_views_template import GenericViewTests
+from cyder.cydns.tests.test_views_template import random_label
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 
 
 def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     self.client = Client()
-    self.client.login(username='development', password='password')
     self.test_class = test_class
 
     # Create domain.
@@ -59,8 +58,8 @@ class AddressRecordViewTests(cyder.base.tests.TestCase):
             'fqdn': self.domain.name,
             'ip_type': '4',
             'ip_str': '196.168.1.2',
-            'ttl': 400,
-            'comment': 'yo',
+            'ttl': '400',
+            'description': 'yo',
         }
 
 
@@ -133,14 +132,13 @@ class PTRViewTests(cyder.base.tests.TestCase):
         do_setUp(self, PTR, test_data, use_domain=False, use_rdomain=True)
 
     def post_data(self):
-        post_data = {
+        return {
+            'reverse_domain': self.reverse_domain.pk,
             'name': random_label(),
             'ip_type': '4',
-            'ip_str': '196.168.1.3',
-            'comment': 'yo',
+            'ip_str': '196.168.1.2',
+            'description': 'yo',
         }
-        Domain.objects.create(name=ip_to_domain_name(post_data['ip_str']))
-        return post_data
 
     def test_update_reverse_domain(self):
         eq_(self.test_obj.reverse_domain.name, '2.1.168.196.in-addr.arpa')

@@ -30,7 +30,6 @@ def do_zone_validation(domain):
         >>> do_zone_validation(self, self.master_reverse_domain)
 
     """
-    from cyder.cydns.domain.models import Domain
 
     check_for_master_delegation(domain, domain.master_domain)
     validate_zone_soa(domain, domain.master_domain)
@@ -157,13 +156,12 @@ def check_for_soa_partition(domain, child_domains):
             if i_domain == j_domain:
                 continue
             if i_domain.soa == j_domain.soa and i_domain.soa is not None:
-                raise ValidationError("Changing the SOA for the {0} "
-                                      "domain would cause the child domains {1} and {2} to "
-                                      "become two zones that share the same SOA. Change "
-                                      "{3} or {4}'s SOA before changing this  SOA".
-                                      format(
-                                          domain.name, i_domain.name, j_domain.name,
-                                          i_domain.name, j_domain.name))
+                raise ValidationError(
+                        "Changing the SOA for the {0} domain would cause the "
+                        "child domains {1} and {2} to become two zones that "
+                        "share the same SOA. Change {3} or {4}'s SOA before "
+                        "changing this SOA.".format(domain.name, i_domain.name,
+                        j_domain.name, i_domain.name, j_domain.name))
 
 
 def find_root_domain(soa):
@@ -249,7 +247,7 @@ def validate_label(label, valid_chars=None):
         -- `RFC <http://tools.ietf.org/html/rfc1912>`__
 
         "[T]he following characters are recommended for use in a host
-        name: "A-Z", "a-z", "0-9", dash and underscydhcp"
+        name: "A-Z", "a-z", "0-9", dash and underscore"
 
         -- `RFC <http://tools.ietf.org/html/rfc1033>`__
 
@@ -260,7 +258,7 @@ def validate_label(label, valid_chars=None):
         # "Allowable characters in a label for a host name are only
         # ASCII letters, digits, and the `-' character." "[T]he
         # following characters are recommended for use in a host name:
-        # "A-Z", "a-z", "0-9", dash and underscydhcp"
+        # "A-Z", "a-z", "0-9", dash and underscore"
         valid_chars = string.ascii_letters + "0123456789" + "-" + "_"
 
     # Labels may not be all numbers, but may have a leading digit TODO
@@ -490,7 +488,7 @@ def is_rfc1918(ip_str):
     private_networks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
     try:
         ip_str_network = ipaddr.IPv4Network(ip_str)
-    except ipaddr.AddressValueError, e:
+    except ipaddr.AddressValueError:
         raise ValidationError("{0} is not a valid IPv4 address".format(ip_str))
     for network in private_networks:
         if ipaddr.IPv4Network(network).overlaps(ip_str_network):
@@ -505,7 +503,7 @@ def is_rfc4193(ip_str):
     private_networks = ["fc00::/7"]
     try:
         ip_str_network = ipaddr.IPv6Network(ip_str)
-    except ipaddr.AddressValueError, e:
+    except ipaddr.AddressValueError:
         raise ValidationError("{0} is not a valid IPv6 address".format(ip_str))
     for network in private_networks:
         if ipaddr.IPv6Network(network).overlaps(ip_str_network):
@@ -519,13 +517,13 @@ def validate_views(views, ip_str, ip_type):
     """
     if views.filter(name="public").exists():
         if ip_type == '4' and is_rfc1918(ip_str):
-            raise ValidationError("{0} is a private IP address. You"
-                                  "cannot put a record that contains private data into"
-                                  "a public view.")
+            raise ValidationError(
+                    "{0} is a private IP address. You cannot put a record "
+                    "that contains private data into a public view.")
         if ip_type == '6' and is_rfc4193(ip_str):
-            raise ValidationError("{0} is a private IP address. You"
-                                  "cannot put a record that contains private data into"
-                                  "a public view.")
+            raise ValidationError(
+                    "{0} is a private IP address. You cannot put a record "
+                    "that contains private data into a public view.")
 
 
 def validate_view(view, ip_str, ip_type):
@@ -533,10 +531,10 @@ def validate_view(view, ip_str, ip_type):
     in one of the RFC 1918 networks, raise a :class:`ValidationError`.
     """
     if ip_type == '4' and is_rfc1918(ip_str):
-        raise ValidationError("{0} is a private IP address. You"
-                              "cannot put a record that contains private data into"
-                              "a public view.")
+        raise ValidationError(
+                "{0} is a private IP address. You cannot put a record that "
+                "contains private data into a public view.")
     if ip_type == '6' and is_rfc4193(ip_str):
-        raise ValidationError("{0} is a private IP address. You"
-                              "cannot put a record that contains private data into"
-                              "a public view.")
+        raise ValidationError(
+                "{0} is a private IP address. You cannot put a record that "
+                "contains private data into a public view.")

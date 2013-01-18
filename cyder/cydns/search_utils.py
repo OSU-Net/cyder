@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 
 import cydns
 import cydhcp
@@ -20,7 +20,8 @@ def fqdn_search(fqdn, *args, **kwargs):
 
 
 def smart_fqdn_exists(fqdn, *args, **kwargs):
-    """Searching for a fqdn by actually looking at a fqdn is very inefficient.
+    """
+    Searching for a fqdn by actually looking at a fqdn is very inefficient.
     Instead we should:
         1) Look for a domain with the name of fqdn.
         2) Look for a label = fqdn.split('.')[0]
@@ -30,10 +31,11 @@ def smart_fqdn_exists(fqdn, *args, **kwargs):
     try:
         search_domain = cydns.domain.models.Domain.objects.get(name=fqdn)
         label = ''
-    except ObjectDoesNotExist, e:
+    except ObjectDoesNotExist:
         search_domain = None
     if search_domain:
-        for type_, qset in _build_label_domain_queries(label, search_domain, **kwargs):
+        for type_, qset in _build_label_domain_queries(
+                                            label, search_domain, **kwargs):
             if qset.exists():
                 return qset
 
@@ -45,11 +47,12 @@ def smart_fqdn_exists(fqdn, *args, **kwargs):
         label = fqdn.split('.')[0]
         domain_name = '.'.join(fqdn.split('.')[1:])
         search_domain = cydns.domain.models.Domain.objects.get(
-            name=domain_name)
-    except ObjectDoesNotExist, e:
+                            name=domain_name)
+    except ObjectDoesNotExist:
         search_domain = None
     if search_domain:
-        for type_, qset in _build_label_domain_queries(label, search_domain, **kwargs):
+        for type_, qset in _build_label_domain_queries(
+                                            label, search_domain, **kwargs):
             if qset.exists():
                 return qset
 
