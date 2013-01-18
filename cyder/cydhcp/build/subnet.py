@@ -2,21 +2,19 @@
 import chili_manage
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 #from cyder.cydhcp.interface.dynamic_intr.models import DynamicIntrfKeyValue
 from cyder.cydhcp.network.utils import calc_networks
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+#from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.vlan.models import Vlan
+#from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
 
 
-
 # This doesn't work for IPv6
+
 
 def build_subnet(network, raw=False):
     """The cydhcp function of building DHCP files.
@@ -74,8 +72,10 @@ def build_subnet(network, raw=False):
 
 
 def build_pool(mrange):
-    mrange_options = RangeKeyValue.objects.filter(range=mrange, is_option=True)
-    mrange_statements = RangeKeyValue.objects.filter(range=mrange, is_statement=True)
+    mrange_options = RangeKeyValue.objects.filter(
+                     range=mrange, is_option=True)
+    mrange_statements = RangeKeyValue.objects.filter(
+                        range=mrange, is_statement=True)
     mrange_raw_include = mrange.dhcpd_raw_include
     allow = Vrf.objects.filter(network=mrange.network)
     build_str = "\tpool {\n"
@@ -103,7 +103,7 @@ def build_pool(mrange):
 def build_host(intr):
     build_str = "\thost {0} {{\n".format(intr.fqdn)
     build_str += "\t\thardware ethernet {0};\n".format(intr.mac)
-    if hasattr(intr,'ip_str'):
+    if hasattr(intr, 'ip_str'):
         build_str += "\t\tfixed-address {0};\n".format(intr.ip_str)
     if hasattr(intr.attrs, 'hostname'):
         build_str += "\t\toption host-name \"{0}\";\n".format(
@@ -121,13 +121,15 @@ def build_host(intr):
 
 def build_group(workgroup):
     static_intrs = StaticInterface.objects.filter(workgroup=workgroup)
-    workgroup_statements = WorkgroupKeyValue.objects.filter(workgroup=workgroup, is_statement=True)
-    workgroup_options = WorkgroupKeyValue.objects.filter(workgroup=workgroup, is_option=True)
+    workgroup_statements = WorkgroupKeyValue.objects.filter(
+                           workgroup=workgroup, is_statement=True)
+    workgroup_options = WorkgroupKeyValue.objects.filter(
+                        workgroup=workgroup, is_option=True)
     build_str = "group {\n"
     for statement in workgroup_statements:
-        build_str += "\t{0};\n".format(statement)
+        build_str += "\t{0} {1};\n".format(statement.key, statement.value)
     for option in workgroup_options:
-        build_str += "\toption {0};\n".format(statement)
+        build_str += "\toption {0} {1};\n".format(option.key, option.value)
     build_str += "\t# Hosts in group {0}\n".format(workgroup.name)
     for intr in static_intrs:
         build_str += build_host(intr)
@@ -144,12 +146,26 @@ def build_vrf(vrf):
                 vrf.name, range.start_str, range.end_str)
         build_str += "\tmatch hardware;\n"
         build_str += "}\n"
-        dyn_intrs = DynamicInterface.objects.filter(vrf=vrf)
+        intrs = DynamicInterface.objects.filter(vrf=vrf)
         build_str += "# Hosts for {0}\n".format(vrf.name)
-        for dyn_intr in dyn_intrs:
+        for intr in intrs:
             build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(vrf.name,
-                    range.start_str, range.end_str, dyn_intr.mac)
+                    range.start_str, range.end_str, intr.mac)
     return build_str
+
+
+def build_legacy_class(ctnr):
+    ranges = ctnr.ranges.all()
+    build_str = ""
+    for range in ranges:
+        build_str += "class \"{0}:{1}:{2} {\n".format(
+                ctnr.name, range.start_str, range.end_str)
+        build_str += "\tmatch hardware;\n"
+        build_str += "}\n"
+        intrs = DynamicInterface.objects.filter(ctnr=ctnr, range=range)
+        for intr in intrs:
+            build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(
+                    ctnr.name, range.start_str, range.end_str, intr.mac)
 
 
 def main():
@@ -167,6 +183,8 @@ def main():
         build_str += build_group(workgroup)
     for vrf in Vrf.objects.all():
         build_str += build_vrf(vrf)
+    for ctnr in Ctnr.objects.all():
+        build_str += build_legacy_class()
 
     f = open("test.conf", 'w')
     f.write(build_str)

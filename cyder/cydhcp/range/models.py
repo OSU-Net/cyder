@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from django.http import HttpResponse
 
@@ -7,8 +7,9 @@ import ipaddr
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter
+from cyder.cydhcp.utils import IPFilter, AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -52,6 +53,19 @@ class Range(models.Model, ObjectUrlMixin):
     dhcpd_raw_include = models.TextField(null=True, blank=True)
 
     network = models.ForeignKey(Network, null=False)
+
+    ALLOW_OPTIONS = (
+            ('vrf', 'allow members of'),
+            ('known-client', 'known-clients'),
+            ('legacy', 'ctnr-range'),
+        )
+
+    DENY_OPTIONS = (
+            ('deny-bootp', 'deny dynamic bootp clients'),
+        )
+
+    allow = models.CharField(max_length=15, choices=ALLOW_OPTIONS)
+    deny = models.CharField(max_length=15, choices=DENY_OPTIONS)
     attrs = None
 
     STATIC = "st"
@@ -60,13 +74,38 @@ class Range(models.Model, ObjectUrlMixin):
         (STATIC, 'Static'),
         (DYNAMIC, 'Dynamic'),
     )
-    range_type = models.CharField(max_length=2, choices=RANGE_TYPE, default=STATIC,
-                     editable=False)
+    range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
+                    default=STATIC, editable=False)
 
     class Meta:
         db_table = 'range'
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
+
+    def get_allow(self):
+        from cyder.core.ctnr.models import Ctnr
+        if self.allow == 'vrf':
+            try:
+                vrf = Vrf.objects.get(network=self.network)
+                return ["allow members of vrf-{0}".format(vrf.name)]
+
+            except ObjectDoesNotExist:
+                raise Exception("Vrf for {0} does not exist".format(
+                                self.network.network_str))
+
+        if self.allow == 'known-clients':
+            return ["allow known clients"]
+        if self.allo == 'legacy':
+            ctnrs = Ctnr.objects.filter(ranges=self)
+            return ["allow members of " +
+                    ":".join([ctnr.name, self.start_str, self.end_str])
+                    for ctnr in ctnrs]
+        return None
+
+    def get_deny(self):
+        if self.deny == "deny-bootp":
+            return "deny dynamic bootp clients"
+        return None
 
     def __str__(self):
         x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End -  {4}"
@@ -77,7 +116,7 @@ class Range(models.Model, ObjectUrlMixin):
         return "<Range: {0}>".format(str(self))
 
     def update_attrs(self):
-        self.attrs = AuxAttr(RangeKeyValue, self , "range")
+        self.attrs = AuxAttr(RangeKeyValue, self, "range")
 
     def details(self):
         """For tables."""
@@ -87,8 +126,7 @@ class Range(models.Model, ObjectUrlMixin):
             ('Vlan', 'network__vlan', self.network.vlan),
             ('Network', 'network', self.network),
             ('Start', 'start_str', self.start_str),
-            ('End', 'end_str', self.end_str)
-        ]
+            ('End', 'end_str', self.end_str)]
         return data
 
     def save(self, *args, **kwargs):

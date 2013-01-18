@@ -257,9 +257,3 @@ class NetworkKeyValue(CommonOption):
         self.is_statement = False
         self.is_option = False
         self._ip_list(self.network.ip_type)
-
-    def _aa_routers(self):
-        self._routers(self.network.ip_type)
-
-    def _aa_ntp_servers(self):
-        self._ntp_servers(self.network.ip_type)

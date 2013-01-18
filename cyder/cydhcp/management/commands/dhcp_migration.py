@@ -4,12 +4,12 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
-from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
 import ipaddr
 import MySQLdb
 
@@ -56,13 +56,12 @@ def create_subnet(id, name, subnet, netmask, status, vlan):
                        "FROM dhcp_options "
                        "WHERE id = {0}".format(dhcp_option))
         name, type = cursor.fetchone()
-        if type == 'quoted-option':
-            kv = NetworkKeyValue(value="{0} \"{1}\"".format(name, value),
-                    is_option=True, network=n)
-        else:
-            kv = NetworkKeyValue(value="{0} {1}".format(name, value),
-                    is_option=True, network=n)
-        kv.save()
+        try:
+            kv = NetworkKeyValue(value=value, key=name, network=n)
+            kv.clean()
+            kv.save()
+        except:
+            print "Unable to store {0} {1}".format(name, value)
     return n
 
 
@@ -160,13 +159,8 @@ def migrate_workgroups():
                            "FROM dhcp_options "
                            "WHERE id = {0}".format(dhcp_option))
             name, type = cursor.fetchone()
-            if type == 'quoted-option':
-                kv = WorkgroupKeyValue(value="{0} \"{1}\"".format(name, value),
-                        is_option=True, workgroup=w)
-            else:
-                kv = WorkgroupKeyValue(value="{0} {1}".format(name, value),
-                        is_option=True, workgroup=w)
-            kv.save()
+            kv, _ = WorkgroupKeyValue.objects.get_or_create(
+                        value=value, key=name, workgroup=w)
 
 
 def create_ctnr(id):
@@ -183,7 +177,6 @@ def migrate_zones():
     for _, name, desc, comment, _, _, _, _ in result:
         c, _ = Ctnr.objects.get_or_create(name=name,
                 description=comment or desc)
-        c.save()
 
 
 def migrate_dynamic_hosts():
@@ -317,9 +310,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         migrate_vlans()
+        migrate_zones()
+        migrate_dynamic_hosts()
         migrate_workgroups()
         migrate_subnets()
         migrate_ranges()
-        migrate_zones()
         migrate_zone_range()
         migrate_zone_workgroup()

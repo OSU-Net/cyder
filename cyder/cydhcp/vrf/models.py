@@ -11,7 +11,7 @@ class Vrf(models.Model, ObjectUrlMixin):
     network = models.ForeignKey(Network, null=True)
 
     class Meta:
-        db_table = 'vrf'
+        db_table = 'vrf_class'
 
 
 class VrfKeyValue(KeyValue):
