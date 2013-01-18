@@ -18,8 +18,8 @@ def main():
         table = "`%s`" % table
         sql = "CREATE TABLE maintain_sb.{0} LIKE maintain.{0}".format(table)
         msb.execute(sql)
-        sql = "INSERT INTO maintain_sb.{0} SELECT * FROM maintain.{0}".format(table)
-        msb.execute(sql)
+        msb.execute("INSERT INTO maintain_sb.{0} "
+                    "SELECT * FROM maintain.{0}".format(table))
 
 
 if __name__ == "__main__":

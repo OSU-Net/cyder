@@ -11,14 +11,15 @@ def find_or_insert_dname(dname):
         domain_id, = cursor.fetchone()
         return domain_id
 
-    sql = "INSERT INTO domain (name, master_domain, enabled) VALUES ('%s', %s, %s)" % (dname, 0, 1)
-    status = cursor.execute(sql)
+    cursor.execute("INSERT INTO domain (name, master_domain, enabled) "
+                   "VALUES ('%s', %s, %s)" % (dname, 0, 1))
     return cursor.lastrowid
 
 
 def update_master_domain(domain_id, parent_id):
-    sql = "UPDATE domain SET master_domain = '%s' WHERE id = '%s'" % (parent_id, domain_id)
-    cursor.execute(sql)
+    cursor.execute("UPDATE domain "
+                   "SET master_domain = '%s' "
+                   "WHERE id = '%s'" % (parent_id, domain_id))
     return cursor.lastrowid
 
 

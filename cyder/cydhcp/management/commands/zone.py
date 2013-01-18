@@ -54,7 +54,8 @@ class Zone(object):
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
         """
-        cursor.execute("SELECT primary_master, hostmaster, refresh, retry, expire, ttl "
+        cursor.execute("SELECT primary_master, hostmaster, refresh, "
+                       "retry, expire, ttl "
                        "FROM soa "
                        "WHERE domain = %s" % self.domain_id)
         record = cursor.fetchone()
