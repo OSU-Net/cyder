@@ -7,7 +7,7 @@ function enableEditableGrid() {
     // Remove Action column.
     if ($('th:contains("Actions")')) {
         $('th:contains("Actions")').remove();
-        $('td:last-child').remove()
+        $('td:last-child').remove();
     }
 
     // Strip links and paragraph tags, remove table cell markdown until
@@ -31,7 +31,7 @@ function enableEditableGrid() {
         postData[editableGrid.getColumnName(columnIndex)] = newValue;
 
         $.post($(row).attr('data-url'), postData, function(resp) {
-            if (resp.error) {
+            if (resp && resp.error) {
                 $(row).after($('<tr></tr>').html(resp.error[0]));
             }
         }, 'json');
