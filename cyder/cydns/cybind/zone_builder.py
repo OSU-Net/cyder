@@ -58,8 +58,8 @@ def render_forward_zone(view, mega_filter):
             nameserver_set=Nameserver.objects.filter(mega_filter
                 ).filter(views__name=view.name).order_by('server'),
 
-            mx_set=MX.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('server'),
+            mx_set=MX.objects.filter(mega_filter, enabled = True).filter(
+                views__name=view.name).order_by('server'),
 
             addressrecord_set=AddressRecord.objects.filter(mega_filter).filter(
                 views__name=view.name).order_by('ip_type', 'label', 'ip_upper',
