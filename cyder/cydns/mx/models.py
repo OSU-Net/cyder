@@ -29,6 +29,8 @@ class MX(CydnsRecord, DisplayMixin):
                  "{rdtype:$rdtype_just}{priority:$prio_just} "
                  "{server:$rhs_just}.")
     search_fields = ('fqdn', 'server')
+    enabled = models.BooleanField(default=True,
+                help_text="Enable this MX record?")
 
     class Meta:
         db_table = 'mx'
