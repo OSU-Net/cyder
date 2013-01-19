@@ -21,7 +21,7 @@ from cyder.cydns.models import View
 
 BAD_DNAMES = ['', '.', '_']
 cursor = get_cursor('maintain_sb')
-public = View.objects.get(name="public")
+public, _ = View.objects.get_or_create(name="public")
 
 
 class Zone(object):
@@ -77,8 +77,10 @@ class Zone(object):
         """
         cursor.execute("SELECT * FROM zone_mx WHERE domain = '%s';" % self.domain_id)
 
-        for _, name, _, server, priority, ttl, _, _ in cursor.fetchall():
+        for _, name, _, server, priority, ttl, _, enabled in cursor.fetchall():
             name, server = name.lower(), server.lower()
+            enabled = bool(enabled)
+
             if MX.objects.filter(label = name,
                                  domain = self.domain,
                                  server = server,
@@ -90,7 +92,8 @@ class Zone(object):
                                                  domain = self.domain,
                                                  server = server,
                                                  priority = priority,
-                                                 ttl = ttl)
+                                                 ttl = ttl,
+                                                 enabled = enabled)
                 mx.save()
                 mx.views.add(public)
             except ValidationError:
@@ -114,6 +117,7 @@ class Zone(object):
                 warranty_date, owning_unit, user_id, department in cursor.fetchall():
 
             name = name.lower()
+            enabled = bool(enabled)
 
             if ip == 0:
                 continue
@@ -131,7 +135,8 @@ class Zone(object):
                     .exists()):
                 static = StaticInterface(label=name,
                     domain=self.domain, mac=clean_mac(ha), system=system,
-                    ip_str=long2ip(ip), ip_type='4')
+                    ip_str=long2ip(ip), ip_type='4', dns_enabled = enabled,
+                    dhcp_enabled = enabled)
 
                 # Static Interfaces need to be cleaned independently of saving.
                 # (no get_or_create)
