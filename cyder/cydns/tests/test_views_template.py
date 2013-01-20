@@ -82,7 +82,7 @@ class GenericViewTests(object):
                     if hasattr(obj_val, 'id'):
                         eq_(obj_val.id, v)
                     else:
-                        eq_(obj_val, v)
+                        eq_(str(obj_val), str(v))
 
         return test_update_post
 
