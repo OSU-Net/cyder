@@ -8,17 +8,17 @@ config.read(CONFIG_FILE)
 
 
 def get_cursor(name):
-    connection = MySQLdb.connect(host = config.get(name, 'host'),
-                                 user = config.get(name, 'user'),
-                                 passwd = config.get(name, 'passwd'),
-                                 db = config.get(name, 'db'))
+    connection = MySQLdb.connect(host=config.get(name, 'host'),
+                                 user=config.get(name, 'user'),
+                                 passwd=config.get(name, 'passwd'),
+                                 db=config.get(name, 'db'))
 
     cursor = connection.cursor()
     return cursor
 
 
 def long2ip(ip):
-    return ".".join(map(lambda x: str((ip >> x) & 255), range(24,-1,-8)))
+    return ".".join(map(lambda x: str((ip >> x) & 255), range(24, -1, -8)))
 
 
 def ip2long(ip):
@@ -26,4 +26,4 @@ def ip2long(ip):
 
 
 def clean_mac(mac):
-    return ":".join([mac[x:x+2] for x in range(0,11,2)])
+    return ":".join([mac[x:x+2] for x in range(0, 11, 2)])
