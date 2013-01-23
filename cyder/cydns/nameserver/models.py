@@ -36,7 +36,8 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
     id = models.AutoField(primary_key=True)
     domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
                                "record is for.")
-    server = models.CharField(max_length=255, validators=[validate_name],
+    server = models.CharField(
+        max_length=255, validators=[validate_name],
         help_text="The name of the server this records points to.")
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
@@ -70,8 +71,8 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
         # We need to override this because fqdn is actually self.domain.name
         template = Template(self.template).substitute(**self.justs)
         return template.format(rdtype=self.rdtype, rdclass='IN',
-                                bind_name=self.domain.name + '.',
-                                **self.__dict__)
+                               bind_name=self.domain.name + '.',
+                               **self.__dict__)
 
     def __repr__(self):
         return "<Forward '{0}'>".format(str(self))

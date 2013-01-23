@@ -46,7 +46,6 @@ class CNAME(CydnsRecord):
         """For tables."""
         data = super(CNAME, self).details()
         data['data'] = [
-            ('Alias', 'fqdn', self.fqdn),
             ('Target', 'target', self.target)
         ]
         return data
