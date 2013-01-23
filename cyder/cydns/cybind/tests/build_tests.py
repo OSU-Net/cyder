@@ -1,5 +1,5 @@
-# These tests are similar to the ones in the scripts directory. They do not ran on
-# real data so the testing db needs to be filled with info.
+# These tests are similar to the ones in the scripts directory. They do not
+# run on real data so the testing db needs to be filled with info.
 import os
 from django.test.client import RequestFactory
 from django.test import TestCase
@@ -7,7 +7,7 @@ from django.test import TestCase
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.view.models import View
-from cyder.cydns.tests.test_views_template import  random_label, random_byte
+from cyder.cydns.tests.test_views_template import random_label, random_byte
 from cyder.cydns.cybind.builder import DNSBuilder
 
 from cyder.cydns.cybind.dnsbuilds.tests.build_tests import BuildScriptTests
@@ -27,8 +27,8 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
     def get_post_data(self, random_str):
         """Return a valid set of data"""
         return {
-            'root_domain': '{0}.{0}.test.com'.format(
-                                            random_label()+random_str),
+            'root_domain': '{0}.{0}.test.com'
+                           .format(random_label()+random_str),
             'soa_primary': 'ns1.test.com',
             'soa_contact': 'noc.test.com',
             'nameserver_1': 'ns1.test.com',
@@ -72,9 +72,10 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
         b.build_dns()
 
         # Now add a record.
-        a, c = AddressRecord.objects.get_or_create(label='',
-                        domain=Domain.objects.get(name=post_data['root_domain']),
-                        ip_str="10.0.0.1", ip_type='4')
+        a, c = AddressRecord.objects.get_or_create(
+            label='',
+            domain=Domain.objects.get(name=post_data['root_domain']),
+            ip_str="10.0.0.1", ip_type='4')
         a.views.add(View.objects.get_or_create(name='private')[0])
         if not c:
             a.ttl = 8

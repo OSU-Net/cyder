@@ -1,14 +1,14 @@
 from django.db.models import Q
 
-from cydns.address_record.models import AddressRecord
-from cydns.cname.models import CNAME
-from cydns.mx.models import MX
-from cydns.nameserver.models import Nameserver
-from cydns.ptr.models import PTR
-from cydns.srv.models import SRV
-from cydns.txt.models import TXT
-from cydns.sshfp.models import SSHFP
-from cydns.view.models import View
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.mx.models import MX
+from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.srv.models import SRV
+from cyder.cydns.txt.models import TXT
+from cyder.cydns.sshfp.models import SSHFP
+from cyder.cydns.view.models import View
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from gettext import gettext as _
@@ -37,8 +37,8 @@ def render_rdtype(rdtype_set, **kwargs):
 
 
 def _render_forward_zone(default_ttl, nameserver_set, mx_set,
-        addressrecord_set, interface_set, cname_set, srv_set, txt_set,
-        sshfp_set):
+                         addressrecord_set, interface_set, cname_set, srv_set,
+                         txt_set, sshfp_set):
     BUILD_STR = ""
     BUILD_STR += render_rdtype(nameserver_set)
     BUILD_STR += render_rdtype(mx_set)
@@ -53,34 +53,45 @@ def _render_forward_zone(default_ttl, nameserver_set, mx_set,
 
 def render_forward_zone(view, mega_filter):
     data = _render_forward_zone(
-            default_ttl=DEFAULT_TTL,
+        default_ttl=DEFAULT_TTL,
 
-            nameserver_set=Nameserver.objects.filter(mega_filter
-                ).filter(views__name=view.name).order_by('server'),
+        nameserver_set=Nameserver.objects.filter(mega_filter)
+                                         .filter(views__name=view.name)
+                                         .order_by('server'),
 
-            mx_set=MX.objects.filter(mega_filter, enabled = True).filter(
-                views__name=view.name).order_by('server'),
+        mx_set=MX.objects.filter(mega_filter, enabled=True)
+                         .filter(views__name=view.name)
+                         .order_by('server'),
 
-            addressrecord_set=AddressRecord.objects.filter(mega_filter).filter(
-                views__name=view.name).order_by('ip_type', 'label', 'ip_upper',
-                    'ip_lower'),
+        addressrecord_set=AddressRecord.objects
+                                       .filter(mega_filter)
+                                       .filter(views__name=view.name)
+                                       .order_by('ip_type', 'label',
+                                                 'ip_upper', 'ip_lower'),
 
-            interface_set=StaticInterface.objects.filter(mega_filter,
-                dns_enabled=True).filter(views__name=view.name).order_by(
-                    'ip_type', 'label', 'ip_upper', 'ip_lower'),
+        interface_set=StaticInterface.objects
+                                     .filter(mega_filter, dns_enabled=True)
+                                     .filter(views__name=view.name)
+                                     .order_by('ip_type', 'label',
+                                               'ip_upper', 'ip_lower'),
 
-            cname_set=CNAME.objects.filter(mega_filter).filter(
-                views__name=view.name).order_by('label'),
+        cname_set=CNAME.objects
+                       .filter(mega_filter)
+                       .filter(views__name=view.name)
+                       .order_by('label'),
 
-            srv_set=SRV.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('label'),
+        srv_set=SRV.objects.filter(mega_filter)
+                           .filter(views__name=view.name)
+                           .order_by('label'),
 
-            txt_set=TXT.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('label'),
+        txt_set=TXT.objects.filter(mega_filter)
+                           .filter(views__name=view.name)
+                           .order_by('label'),
 
-            sshfp_set=SSHFP.objects.filter(mega_filter).filter(views__name=view.name
-                ).order_by('label'),
-        )
+        sshfp_set=SSHFP.objects.filter(mega_filter)
+                               .filter(views__name=view.name)
+                               .order_by('label'),
+    )
     return data
 
 
@@ -94,20 +105,22 @@ def _render_reverse_zone(default_ttl, nameserver_set, interface_set, ptr_set):
 
 def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter):
     data = _render_reverse_zone(
-            default_ttl=DEFAULT_TTL,
+        default_ttl=DEFAULT_TTL,
+        nameserver_set=Nameserver.objects.filter(domain_mega_filter)
+                                         .filter(views__name=view.name)
+                                         .order_by('server'),
 
-            nameserver_set=Nameserver.objects.filter(domain_mega_filter
-                ).filter(views__name=view.name).order_by('server'),
+        interface_set=StaticInterface.objects
+                                     .filter(rdomain_mega_filter,
+                                             dns_enabled=True)
+                                     .filter(views__name=view.name)
+                                     .order_by('ip_type', 'label',
+                                               'ip_upper', 'ip_lower'),
 
-            interface_set=StaticInterface.objects.filter(rdomain_mega_filter,
-                dns_enabled=True).filter(views__name=view.name).order_by(
-                    'ip_type', 'label', 'ip_upper', 'ip_lower'),
+        ptr_set=PTR.objects.filter(rdomain_mega_filter).filter(
+            views__name=view.name).order_by('pk', 'ip_upper', 'ip_lower'),
 
-            ptr_set=PTR.objects.filter(rdomain_mega_filter).filter(
-                    views__name=view.name).order_by('ip_upper'
-                    ).order_by('ip_lower'),
-
-        )
+    )
     return data
 
 
@@ -142,8 +155,8 @@ def build_zone_data(root_domain, soa):
         domain_mega_filter = domain_mega_filter | Q(domain=domain)
     rdomain_mega_filter = Q(reverse_domain=root_domain)
     for reverse_domain in domains:
-        rdomain_mega_filter = rdomain_mega_filter | Q(
-                                            reverse_domain=reverse_domain)
+        rdomain_mega_filter = (rdomain_mega_filter |
+                               Q(reverse_domain=reverse_domain))
 
     soa_data = render_soa_only(soa=soa, root_domain=root_domain)
     try:

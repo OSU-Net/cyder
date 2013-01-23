@@ -45,7 +45,6 @@ def main():
                         "all change delta thresholds.")
     nas = parser.parse_args(sys.argv[1:])
     b = DNSBuilder(**dict(nas._get_kwargs()))
-    message = "DNS Build Error. Error: '{0}'. The build was unsuccessful."
     try:
         b.build_dns()
     except BuildError as why:
@@ -59,4 +58,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
