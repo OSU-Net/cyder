@@ -22,7 +22,7 @@ class DNSBuildRun(models.Model):
         self.stats_json[k] = v
 
     def get_manifests(self, **kwargs):
-       return BuildManifest.objects.filter(build_run=self, **kwargs)
+        return BuildManifest.objects.filter(build_run=self, **kwargs)
 
 
 class BuildManifest(models.Model):
