@@ -25,11 +25,12 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
         ... ip_type=ip_type)
 
     """
-    label = models.CharField(max_length=63, blank=True, null=True,
-                        validators=[validate_first_label],
-                        help_text='The short hostname goes here. If this is a '
-                        'record ' 'for the selected domain, leave this field '
-                        'blank')
+    label = models.CharField(
+        max_length=63, blank=True, null=True,
+        validators=[validate_first_label],
+        help_text='The short hostname goes here. If this is a '
+        'record ' 'for the selected domain, leave this field '
+        'blank')
     domain = models.ForeignKey(Domain, null=False, help_text='FQDN of the '
                                'domain after the short hostname. '
                                '(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)')
@@ -39,7 +40,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
                                       validators=[validate_ttl],
                                       help_text='Time to Live of the record')
     description = models.CharField(max_length=1000, blank=True, null=True,
-                help_text="A description of this record.")
+                                   help_text="A description of this record.")
     views = models.ManyToManyField(View, blank=True)
 
     search_fields = ('fqdn', 'ip_str')
@@ -80,7 +81,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return  ['fqdn', 'ip_str', 'ip_type', 'description', 'ttl']
+        return ['fqdn', 'ip_str', 'ip_type', 'description', 'ttl']
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -131,8 +132,8 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
         if kwargs.pop('validate_glue', True):
             if self.nameserver_set.exists():
                 raise ValidationError(
-                        "Cannot delete the record {0}. It is a ' 'glue record."
-                        .format(self.record_type()))
+                    "Cannot delete the record {0}. It is a ' 'glue record."
+                    .format(self.record_type()))
         if kwargs.pop('check_cname', True):
             if CNAME.objects.filter(target=self.fqdn):
                 raise ValidationError('A CNAME points to this {0} record. '
