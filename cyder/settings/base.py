@@ -71,10 +71,10 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'base',
+    'search',
     'core',
     'core.ctnr',
     'core.cyuser',
-    'core.search',
     'core.system',
     'cydhcp',
     'cydhcp.site',
@@ -114,6 +114,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'jingo_minify',
     'tastypie',
     'tastytools',
+    'reversion',
 
     # Django contrib apps
     'django.contrib.sessions',
@@ -127,6 +128,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'reversion.middleware.RevisionMiddleware',
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
 )
 

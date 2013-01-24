@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.utils import networks_to_Q
 from cyder.cydhcp.keyvalue.models import KeyValue
 
 
@@ -30,6 +31,10 @@ class Vlan(models.Model, ObjectUrlMixin):
         ]
         return data
 
+    def compile_Q(self):
+        """Compile a Django Q that will match any IP inside this vlan."""
+        return networks_to_Q(self.network_set.all())
+
     def find_domain(self):
         """
         This memeber function will look at all the Domain objects and attempt
@@ -37,8 +42,8 @@ class Vlan(models.Model, ObjectUrlMixin):
         """
         for network in self.network_set.all():
             if network.site:
-                expected_name = "{0}.{1}.mozilla.com".format(
-                    self.name, network.site.get_site_path())
+                expected_name = "{0}.{1}.mozilla.com".format(self.name,
+                                                network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist:

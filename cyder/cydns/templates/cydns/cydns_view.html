@@ -23,13 +23,13 @@
 
   <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">
     <form class="form" method="POST">
-      <h2 id="form-title">{{ 'Update' if obj else 'Create' }}</h2>
+      <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_record_type }}</h2>
       <div class="inner-form">
         {{ form.as_p() }}
       </div>
       <div class="form-btns">
         <hr>
-        <a class="btn submit c">Submit</a>
+        <a class="btn submit c">{{ 'Update' if obj else 'Create ' + pretty_record_type }}</a>
         <a class="btn cancel c" data-formId="obj-form">Cancel</a>
       </div>
     </form>

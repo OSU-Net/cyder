@@ -9,6 +9,7 @@ from cyder.base.models import BaseModel
 
 import ipaddr
 
+
 class System(BaseModel, ObjectUrlMixin):
     YES_NO_CHOICES = (
         (0, 'No'),
@@ -17,12 +18,11 @@ class System(BaseModel, ObjectUrlMixin):
     hostname = models.CharField(max_length=255, unique=False)
     department = models.CharField(max_length=255, unique=False)
     location = models.CharField(max_length=255, unique=False)
+
     class Meta:
         db_table = 'system'
         unique_together = ('hostname', 'location', 'department')
 
-    def update_attrs(self):
-        self.attrs = SystemKeyValue.objects.filter(system=self)
 """
 class SystemKeyValue(CommonOption):
     system = models.ForiegnKey(System, null=False)

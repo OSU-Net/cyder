@@ -1,4 +1,3 @@
-
 import chili_manage
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -36,36 +35,31 @@ def build_subnet(network, raw=False):
     network.update_attrs()
     ip_lower_start = int(network.network.network)
     ip_lower_end = int(network.network.broadcast) - 1
+    # TODO deal with ipv6 eventaully
     intrs = StaticInterface.objects.filter(ip_upper=0,
             ip_lower__gte=ip_lower_start, ip_lower__lte=ip_lower_end,
             dhcp_enabled=True, ip_type='4')
     ranges = network.range_set.all()
-
     # Let's assume all options need a ';' appended.
     build_str = "\nsubnet {0} netmask {1} {{\n".format(
             network.network.network, network.network.netmask)
-    build_str += "\n"
     if not raw:
         build_str += "\t# Network Statements\n"
         for statement in network_statements:
-            build_str += "\t{0:20} {1};\n".format(
-                    statement.key, statement.value)
+            build_str += "\t{0};\n".format(statement)
         build_str += "\n"
         build_str += "\t# Network Options\n"
         for option in network_options:
-            build_str += "\toption {0:20} {1};\n".format(
-                    option.key, option.value)
+            build_str += "\t{0};\n".format(option)
         build_str += "\n"
-
+        # This needs to be documented and may have bugs
         if network_raw_include:
+            build_str += "\t# Raw Network Options\n"
             for line in network_raw_include.split('\n'):
-                build_str += "\t{0}\n".format(line)
+                build_str += "\t{0};\n".format(line)
         build_str += "\n"
-
     for mrange in ranges:
         build_str += build_pool(mrange)
-
-
     for intr in intrs:
         build_str += build_host(intr)
     return build_str + "}\n"
@@ -77,25 +71,34 @@ def build_pool(mrange):
     mrange_statements = RangeKeyValue.objects.filter(
                         range=mrange, is_statement=True)
     mrange_raw_include = mrange.dhcpd_raw_include
-    allow = Vrf.objects.filter(network=mrange.network)
+    allow = []
+    if mrange.allow == 'vrf':
+        vrf = Vrf.objects.get(network=mrange.network)
+        allow = ["allow members of {0}".format(vrf.name)]
+    if mrange.allow == 'known-client':
+        allow = ['allow known clients']
+    if mrange.allow == 'legacy':
+        allow = ["allow members of \"{0}:{1}:{2}\"".format(
+            ctnr.name, mrange.start_str, mrange.end_str)
+            for ctnr in Ctnr.objects.filter(ranges=mrange)]
     build_str = "\tpool {\n"
     build_str += "\t\t# Pool Statements\n"
+    build_str += "\t\tfailover peer \"dhcp\";\n"
+    build_str += "\t\tdeny dynamic bootp clients;\n"
     for statement in mrange_statements:
-        build_str += "\t\t{0:20} {1};\n".format(statement.key,
-                                                statement.value)
+        build_str += "\t\t{0};\n".format(statement)
     build_str += "\n"
     build_str += "\t\t# Pool Options\n"
     for option in mrange_options:
-        build_str += "\t\toption {0:20} {1};\n".format(option.key,
-                                                       option.value)
+        build_str += "\t\t{0};\n".format(option)
     build_str += "\n"
-
     if mrange_raw_include:
-        build_str += "\n\t\t{0}\n".format(mrange_raw_include)
+        build_str += "\t\t# Raw pool includes\n"
+        build_str += "\t\t{0};\n".format(mrange_raw_include)
     build_str += "\t\trange {0} {1};\n".format(mrange.start_str,
                                                mrange.end_str)
-    for vrf in allow:
-        build_str += "\t\tallow {0}\n".format(vrf.name)
+    for dhcp_class in allow:
+        build_str += "\t\t{0};\n".format(dhcp_class)
     build_str += "\t}\n\n"
     return build_str
 
@@ -127,9 +130,9 @@ def build_group(workgroup):
                         workgroup=workgroup, is_option=True)
     build_str = "group {\n"
     for statement in workgroup_statements:
-        build_str += "\t{0} {1};\n".format(statement.key, statement.value)
+        build_str += "\t{0};\n".format(statement)
     for option in workgroup_options:
-        build_str += "\toption {0} {1};\n".format(option.key, option.value)
+        build_str += "\t{0};\n".format(option)
     build_str += "\t# Hosts in group {0}\n".format(workgroup.name)
     for intr in static_intrs:
         build_str += build_host(intr)
@@ -142,14 +145,14 @@ def build_vrf(vrf):
     for range in ranges:
         build_str += "# {0} for range {1}:{2}\n".format(
                 vrf.name, range.start_str, range.end_str)
-        build_str += "\nclass \"{0}:{1}:{2}\";\n".format(
+        build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(
                 vrf.name, range.start_str, range.end_str)
         build_str += "\tmatch hardware;\n"
         build_str += "}\n"
         intrs = DynamicInterface.objects.filter(vrf=vrf)
         build_str += "# Hosts for {0}\n".format(vrf.name)
         for intr in intrs:
-            build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(vrf.name,
+            build_str += "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(vrf.name,
                     range.start_str, range.end_str, intr.mac)
     return build_str
 
@@ -158,14 +161,15 @@ def build_legacy_class(ctnr):
     ranges = ctnr.ranges.all()
     build_str = ""
     for range in ranges:
-        build_str += "class \"{0}:{1}:{2} {\n".format(
+        build_str += "class \"{0}:{1}:{2} {{\n".format(
                 ctnr.name, range.start_str, range.end_str)
         build_str += "\tmatch hardware;\n"
         build_str += "}\n"
         intrs = DynamicInterface.objects.filter(ctnr=ctnr, range=range)
         for intr in intrs:
-            build_str += "subclass \"{0}:{1}:{2}\" {3};\n".format(
+            build_str += "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
                     ctnr.name, range.start_str, range.end_str, intr.mac)
+    return build_str
 
 
 def main():
@@ -178,13 +182,12 @@ def main():
             children.append(network)
     for network in children:
         build_str += build_subnet(network)
-
     for workgroup in Workgroup.objects.all():
         build_str += build_group(workgroup)
     for vrf in Vrf.objects.all():
         build_str += build_vrf(vrf)
     for ctnr in Ctnr.objects.all():
-        build_str += build_legacy_class()
+        build_str += build_legacy_class(ctnr)
 
     f = open("test.conf", 'w')
     f.write(build_str)

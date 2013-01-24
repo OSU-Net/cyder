@@ -2,6 +2,7 @@ from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
+from cyder.cydhcp.utils import networks_to_Q
 
 
 class Site(models.Model, ObjectUrlMixin):
@@ -79,6 +80,10 @@ class Site(models.Model, ObjectUrlMixin):
         related_networks = self.get_related_networks(related_sites)
         related_vlans = self.get_related_vlans(related_networks)
         return [related_sites, related_networks, related_vlans]
+
+    def compile_Q(self):
+        """Compile a Django Q that will match any IP inside this site."""
+        return networks_to_Q(self.network_set.all())
 
     class Meta:
         db_table = 'site'

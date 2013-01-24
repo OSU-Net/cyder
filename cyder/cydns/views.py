@@ -56,11 +56,13 @@ def cydns_view(request, pk=None):
         # Create initial FQDN form.
         form = FQDNFormKlass(request.POST, instance=record if record else None)
 
-        qd, error = _fqdn_to_domain(request.POST.copy())
-        if error:
+        qd, domain, errors = _fqdn_to_domain(request.POST.copy())
+        # Validate form.
+        if errors:
+            print errors
             fqdn_form = FQDNFormKlass(request.POST)
             fqdn_form._errors = ErrorDict()
-            fqdn_form._errors['__all__'] = ErrorList(error.messages)
+            fqdn_form._errors['__all__'] = ErrorList(errors)
             return render(request, 'cydns/cydns_view.html', {
                 'domain': domains,
                 'form': fqdn_form,
@@ -69,21 +71,21 @@ def cydns_view(request, pk=None):
                 'obj': record
             })
         else:
-            form = FQDNFormKlass(qd, instance=record if record else None)
+            form = FormKlass(qd, instance=record if record else None)
 
-        # Validate form.
-        error = False
-        if form.is_valid():
-            try:
-                record = form.save()
-                # If domain, add to current ctnr.
-                if record_type == 'domain':
-                    request.session['ctnr'].domains.add(record)
-                return redirect(record.get_list_url())
-            except ValidationError:
-                form = _revert(domain, request.POST, FQDNFormKlass)
-        else:
-            form = _revert(domain, request.POST, FQDNFormKlass)
+        try:
+            record = form.save()
+            # If domain, add to current ctnr.
+            if record_type == 'domain':
+                request.session['ctnr'].domains.add(record)
+            return redirect(record.get_list_url())
+        except Exception as e:
+            print str(e)
+            if type(e) in (ValidationError, ValueError):
+                form = _revert(domain, request.POST, form, FQDNFormKlass)
+                print form._errors
+            else:
+                raise e
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
@@ -105,18 +107,18 @@ def _filter(request, Klass):
     Apply filters.
     """
     if request.GET.get('filter'):
-        return Klass.filter(
+        return Klass.objects.filter(
             make_megafilter(Klass, request.GET.get('filter')))
     return Klass.objects.all()
 
 
-def _revert(domain, orig_qd, FQDNFormKlass):
+def _revert(domain, orig_qd, orig_form, FQDNFormKlass):
     """
     Revert domain if not valid.
     """
     prune_tree(domain)
     form = FQDNFormKlass(orig_qd)
-    form._errors = form._errors
+    form._errors = orig_form._errors
     return form
 
 
@@ -131,10 +133,10 @@ def _fqdn_to_domain(qd):
             # Call prune tree later if error, else domain leak.
             label, domain = ensure_label_domain(fqdn)
         except ValidationError, e:
-            return None, e.messages
+            return None, None, e.messages
 
         qd['label'], qd['domain'] = label, str(domain.pk)
-    return qd, None
+    return qd, domain, None
 
 
 def cydns_delete(request, pk):

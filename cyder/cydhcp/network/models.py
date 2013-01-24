@@ -1,7 +1,7 @@
+import ipaddr
+
 from django.db import models
 from django.core.exceptions import ValidationError
-
-import ipaddr
 
 from cyder.base.constants import IP_TYPES
 from cyder.base.mixins import ObjectUrlMixin
@@ -12,6 +12,8 @@ from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
+
+#import reversion
 
 
 class Network(models.Model, ObjectUrlMixin):
@@ -35,7 +37,6 @@ class Network(models.Model, ObjectUrlMixin):
     dhcpd_raw_include = models.TextField(null=True, blank=True,
                   help_text="The config options in this box will be included "
                             "*as is* in the dhcpd.conf file for this subnet.")
-
     network = None
 
     def __str__(self):
@@ -66,7 +67,6 @@ class Network(models.Model, ObjectUrlMixin):
         self.update_network()
         super(Network, self).save(*args, **kwargs)
 
-        self.update_network()  # Gd forbid this hasn't already been called.
         if add_routers:
             if self.ip_type == '4':
                 router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
@@ -106,7 +106,7 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
             elif (range_.start_upper == self.ip_upper and range_.start_lower
-                    < self.ip_lower):
+                  < self.ip_lower):
                 fail = True
                 break
 
@@ -121,26 +121,24 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
-                  brdcst_lower):
+                    brdcst_lower):
                 fail = True
                 break
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
                 fail = True
-                break
-        if fail:
-            raise ValidationError(
-                    "Resizing this subnet to the requested "
-                    "network prefix would orphan existing ranges.")
-        return
+
+            if fail:
+                raise ValidationError("Resizing this subnet to the requested "
+                                      "network prefix would orphan existing "
+                                      "ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
         self.update_network()
-        ip_info = two_to_four(
-            int(self.network.network), int(self.network.broadcast))
-        self.ipf = IPFilter(self, self.ip_type, *ip_info)
+        self.ipf = IPFilter(self.network.network, self.network.broadcast,
+                            self.ip_type, object_=self)
 
     def get_related_vlans(self, related_networks):
         return set([network.vlan for network in related_networks])
@@ -188,14 +186,14 @@ class Network(models.Model, ObjectUrlMixin):
         # Update fields
         self.ip_upper = int(self.network) >> 64
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
-                                                     # the last sixty-four bits
+                                                    # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
 
 
 class NetworkKeyValue(CommonOption):
     network = models.ForeignKey(Network, null=False)
     aux_attrs = (
-        ('description', 'A description of the site'),
+        ('description', 'A description of the network'),
     )
 
     class Meta:
@@ -204,7 +202,7 @@ class NetworkKeyValue(CommonOption):
 
     """The NetworkOption Class.
 
-        "DHCP option statements always start with the option keyword, followed
+        DHCP option statements always start with the option keyword, followed
         by an option name, followed by option data." -- The man page for
         dhcpd-options
 

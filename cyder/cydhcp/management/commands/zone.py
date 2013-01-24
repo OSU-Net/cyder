@@ -13,8 +13,8 @@ from utilities import clean_mac, ip2long, long2ip
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
-from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
-from cyder.cydhcp.vrf.models import Vrf, VrfKeyValue
+from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -65,7 +65,7 @@ class Zone(object):
             soa, _ = SOA.objects.get_or_create(
                 primary=primary, contact=contact, refresh=refresh,
                 retry=retry, expire=expire, minimum=minimum,
-                comment='SOA for %s zone' % self.dname)
+                description='SOA for %s zone' % self.dname)
             return soa
         else:
             return None
@@ -118,11 +118,15 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        cursor.execute("SELECT id, ip, name, workgroup, ha, location, "
-                       "department "
+        cursor.execute("SELECT id, ip, name, workgroup, enabled, ha, "
+                       "type, os, location, department , serial, other_id, "
+                       "purchase_date, po_number, warranty_date, owning_unit, "
+                       "user_id "
                        "FROM host "
                        "WHERE ip != 0 AND domain = '%s';" % self.domain_id)
-        for id, ip, name, workgroup, ha, location, dept in cursor.fetchall():
+        for id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
+                serial, other_id, purchase_date, po_number, warranty_date, \
+                owning_unit, user_id in cursor.fetchall():
             if ip == 0:
                 continue
 
@@ -148,27 +152,30 @@ class Zone(object):
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
                     .exists()):
-                static = StaticInterface(label=name, domain=self.domain,
-                        mac=clean_mac(ha), system=system, ip_str=long2ip(ip),
-                        ip_type='4', vrf=v, workgroup=w)
+                try:
+                    static = StaticInterface(label=name, domain=self.domain,
+                            mac=clean_mac(ha), system=system, ip_str=long2ip(ip),
+                            ip_type='4', vrf=v, workgroup=w)
 
-                # Static Interfaces need to be cleaned independently of saving.
-                # (no get_or_create)
-                static.full_clean()
-                static.save()
-                cursor.execute("SELECT dhcp_option, value "
-                               "FROM object_option "
-                               "WHERE object_id = {0} "
-                               "AND type = 'host'".format(id))
-                results = cursor.fetchall()
-                for dhcp_option, value in results:
-                    cursor.execute("SELECT name, type "
-                                   "FROM dhcp_options "
-                                   "WHERE id = {0}".format(dhcp_option))
-                    name, type = cursor.fetchone()
-                    kv = StaticIntrKeyValue(intr=static, key=name, value=value)
-                    kv.clean()
-                    kv.save()
+                    # Static Interfaces need to be cleaned independently of saving.
+                    # (no get_or_create)
+                    static.full_clean()
+                    static.save()
+                    cursor.execute("SELECT dhcp_option, value "
+                                   "FROM object_option "
+                                   "WHERE object_id = {0} "
+                                   "AND type = 'host'".format(id))
+                    results = cursor.fetchall()
+                    for dhcp_option, value in results:
+                        cursor.execute("SELECT name, type "
+                                       "FROM dhcp_options "
+                                       "WHERE id = {0}".format(dhcp_option))
+                        name, type = cursor.fetchone()
+                        kv = StaticIntrKeyValue(intr=static, key=name, value=value)
+                        kv.clean()
+                        kv.save()
+                except  ValidationError, e:
+                    print str(e)
 
     def gen_AR(self):
         """
@@ -290,6 +297,7 @@ def gen_CNAME():
         dname, = cursor.fetchone()
         if not dname:
             continue
+        dname = dname.lower()
 
         fqdn = ".".join([name, dname])
         name, dname = fqdn.split(".", 1)
@@ -300,6 +308,10 @@ def gen_CNAME():
         elif Domain.objects.filter(name=dname).exists():
             domain = Domain.objects.get(name=dname)
         else:
+            continue
+
+        if server == ".".join([name, domain.name]):
+            # In maintain, at least one CNAME is a loop: biosys.bioe.orst.edu
             continue
 
         cn = CNAME(label=name, domain=domain, target=server)
@@ -337,12 +349,12 @@ class Command(BaseCommand):
                 default=False,
                 help='Delete old objects'))
 
-    def handle(self, *args, **options):
+    def handle(self, **options):
         if options['dump']:
             maintain_dump.main()
-            options = settings.POINTERS
-            for option in options:
-                (ip, hn, ptype) = option
+            opts = settings.POINTERS
+            for opt in opts:
+                (ip, hn, ptype) = opt
                 x = (ip2long(ip), hn, ptype)
                 sql = ('INSERT INTO pointer (ip, hostname, type) '
                        'VALUES (%s, "%s", "%s")' % x)

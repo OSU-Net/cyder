@@ -1,19 +1,27 @@
+from gettext import gettext as _
 import re
 
 from django.db import models
 from django.core.exceptions import ValidationError
 
+
+from cyder.core.system.models import System
+from cyder.cydns.ip.utils import ip_to_dns_form
+
 import cydns
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.core.system.models import System
 from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.view.models import View
+from cyder.cydns.domain.models import Domain
+
+#import reversion
 
 
 class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
@@ -111,8 +119,12 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return (super(StaticInterface, cls).get_api_fields() +
-                ['mac', 'dhcp_enabled', 'dns_enabled'])
+        return super(StaticInterface, cls).get_api_fields(
+                     ) + ['mac', 'dhcp_enabled', 'dns_enabled']
+
+    @property
+    def rdtype(self):
+        return 'INTR'
 
     def get_update_url(self):
         return "/cydhcp/interface/{0}/update/".format(self.pk)
@@ -157,17 +169,17 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         if kwargs.pop("validate_glue", True):
             self.check_glue_status()
 
-        super(StaticInterface, self).clean(
-            validate_glue=False, update_reverse_domain=True,
-            ignore_interface=True)
+        super(StaticInterface, self).clean(validate_glue=False,
+                                           update_reverse_domain=True,
+                                           ignore_interface=True)
 
         if self.pk and self.ip_str.startswith("10."):
             p = View.objects.filter(name="private")
             if p:
                 self.views.add(p[0])
-                super(StaticInterface, self).clean(
-                    validate_glue=False, update_reverse_domain=True,
-                    ignore_interface=True)
+                super(StaticInterface, self).clean(validate_glue=False,
+                                                   update_reverse_domain=True,
+                                                   ignore_interface=True)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
@@ -186,9 +198,22 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
             raise ValidationError(
-                'This Interface represents a glue record '
-                'for a Nameserver. Change the Nameserver to edit this '
-                'record.')
+                    "This Interface represents a glue record for a "
+                    "Nameserver. Change the Nameserver to edit this record.")
+
+    a_template = _("{bind_name:$rhs_just} {ttl} {rdclass:$rdclass_just}"
+                   "{rdtype_clob:$rdtype_just} {ip_str:$lhs_just}")
+    ptr_template = _("{dns_ip:$lhs_just} {ttl} {rdclass:$rdclass_just}"
+                     " {rdtype_clob:$rdtype_just} {fqdn:1}.")
+
+    def bind_render_record(self, pk=False, **kwargs):
+        self.rdtype_clob = kwargs.pop('rdtype', 'INTR')
+        if kwargs.pop('reverse', False):
+            self.template = self.ptr_template
+            self.dns_ip = ip_to_dns_form(self.ip_str)
+        else:
+            self.template = self.a_template
+        return super(StaticInterface, self).bind_render_record(pk=pk, **kwargs)
 
     def record_type(self):
         return "A/PTR"
@@ -196,9 +221,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         if kwargs.pop("validate_glue", True):
             if self.intrnameserver_set.exists():
-                raise ValidationError(
-                    "Cannot delete the record {0}. It is a "
-                    "glue record.".format(self.record_type()))
+                raise ValidationError("Cannot delete the record {0}. It is a "
+                                      "glue record.".format(
+                                       self.record_type()))
         check_cname = kwargs.pop("check_cname", True)
         super(StaticInterface, self).delete(validate_glue=False,
                                             check_cname=check_cname)
@@ -213,7 +238,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
                                              self.fqdn)
 
 
-class StaticIntrKeyValue(CommonOption):
+class StaticIntrKeyValue(KeyValue):
     intr = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
@@ -221,10 +246,8 @@ class StaticIntrKeyValue(CommonOption):
         unique_together = ("key", "value", "intr")
 
     def _aa_primary(self):
-        """
-        The primary number of this interface (I.E. eth1.0 would have a primary
-        number of '1').
-        """
+        """The primary number of this interface (I.E. eth1.0 would have a
+        primary number of '1')"""
         if not self.value.isdigit():
             raise ValidationError("The primary number must be a number.")
 

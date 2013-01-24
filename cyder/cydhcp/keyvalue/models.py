@@ -38,6 +38,7 @@ class KeyValue(models.Model):
     key = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     force_validation = False
+    is_quoted = models.BooleanField(default=False)
 
     class Meta:
         abstract = True

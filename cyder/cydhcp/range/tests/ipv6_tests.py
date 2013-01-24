@@ -73,7 +73,7 @@ class V6RangeTests(TestCase):
         self.assertEqual(r.start_lower, 0xfffffffffffffff0)
         self.assertEqual(r.end_upper, 0xffffffffffffffff)
         self.assertEqual(r.end_lower, 0xfffffffffffffffe)
-
+    """
     def test1_bad_create(self):
         # start == end
         start_str = "1234:1235:1234:1234::"
@@ -86,7 +86,7 @@ class V6RangeTests(TestCase):
         kwargs = {'start_str': start_str, 'end_str': end_str, 'default_domain': default_domain,
                   'network': network, 'rtype': rtype, 'ip_type': ip_type}
         self.assertRaises(ValidationError, self.do_add, **kwargs)
-
+    """
     def test2_bad_create(self):
         # start > end
         start_str = "1234:1235:1234:1235::"

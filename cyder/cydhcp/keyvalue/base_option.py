@@ -15,6 +15,16 @@ class CommonOption(KeyValue):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        if self.is_option:
+            if self.is_quoted:
+                return "option {0} \"{1}\"".format(self.key, self.value)
+            return "option {0} {1}".format(self.key, self.value)
+        elif self.is_statement:
+            if self.is_quoted:
+                return "{0} \"{1}\"".format(self.key, self.value)
+            return "{0} {1}".format(self.key, self.value)
+
     def _get_value(self):
         value = self.value.strip('\'" ')
         value = value.strip(';')
@@ -168,7 +178,7 @@ class CommonOption(KeyValue):
                                       "domain name surrounded by \"\"")
             validate_name(name.strip('"'))
 
-    def _ip_list_validator(self):
+    def _ip_list(self):
         #ip_list = self._get_value()
         """
         try:
@@ -266,7 +276,7 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = False
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()
 
     def _aa_subnet_mask(self):
         """
@@ -316,7 +326,7 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = False
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()
 
     def _aa_always_reply_rfc1048(self):
         """
@@ -353,7 +363,7 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = False
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()
 
     def _aa_next_server(self):
         """
@@ -560,7 +570,7 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = True
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()
 
     def _aa_finger_server(self):
         """
@@ -574,7 +584,7 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = False
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()
 
     def _aa_font_server(self):
         """
@@ -589,7 +599,7 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = False
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()
 
     def _aa_impress_server(self):
         """
@@ -604,4 +614,4 @@ class CommonOption(KeyValue):
         self.is_option = True
         self.is_statement = False
         self.has_validator = True
-        self._ip_list_validator()
+        self._ip_list()

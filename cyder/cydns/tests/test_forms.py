@@ -5,15 +5,7 @@ from django.http import Http404
 from cyder.cydns.tests.test_views_template import random_label
 from cyder.cydns.tests.test_views_template import random_byte
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.txt.models import TXT
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.mx.models import MX
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.master_form.views import commit_record
-from cyder.cydns.view.models import View
 
 import simplejson as json
 
@@ -48,10 +40,10 @@ class MasterFormTests(TestCase):
         data = {field: random_label() + "." + random_label()}
         return data
 
-    def craft_ttl_and_comment(self):
+    def craft_ttl_and_description(self):
         data = {
             'ttl': random_byte(),
-            'comment': random_label()
+            'description': random_label()
         }
         return data
 
@@ -59,7 +51,7 @@ class MasterFormTests(TestCase):
         data = {'rtype': 'A'}
         data.update(self.craft_label_domain())
         data.update(self.craft_ip_str())
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.assertFalse('errors' in response.content)
@@ -81,7 +73,7 @@ class MasterFormTests(TestCase):
         data = {'rtype': 'A'}
         data.update(self.craft_label_domain())
         data.update(self.craft_ip_str())
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.assertFalse('errors' in response.content)
@@ -103,7 +95,7 @@ class MasterFormTests(TestCase):
         data = {'rtype': 'CNAME'}
         data.update(self.craft_label_domain())
         data.update({'target': random_label()})
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.assertFalse('errors' in response.content)
@@ -125,7 +117,7 @@ class MasterFormTests(TestCase):
         data = {'rtype': 'PTR'}
         data.update({'name': random_label()})
         data.update(self.craft_ip_str())
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)
         self.assertFalse('errors' in response.content)
@@ -146,7 +138,7 @@ class MasterFormTests(TestCase):
     def test_MX(self):
         data = {'rtype': 'MX'}
         data.update(self.craft_label_domain())
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         data.update(self.craft_number_dict('priority'))
         data.update(self.craft_name_dict('server'))
         request = FakeRequest(json.dumps(data))
@@ -171,7 +163,7 @@ class MasterFormTests(TestCase):
         data.update({'target': random_label()})
         data.update(self.craft_label_domain())
         data['label'] = "_" + random_label()
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         data.update(self.craft_number_dict('priority'))
         data.update(self.craft_number_dict('weight'))
         data.update(self.craft_number_dict('port'))
@@ -197,7 +189,7 @@ class MasterFormTests(TestCase):
     def test_NS(self):
         data = {'rtype': 'NS'}
         data['domain'] = self.d.name
-        data.update(self.craft_ttl_and_comment())
+        data.update(self.craft_ttl_and_description())
         data.update(self.craft_name_dict('server'))
         request = FakeRequest(json.dumps(data))
         response = commit_record(request)

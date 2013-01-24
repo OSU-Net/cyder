@@ -1,7 +1,7 @@
 {% if page_obj.paginator.num_pages > 1 %}
   {% set page_url = request.get_full_path() %}
   {% set num_pages = page_obj.paginator.num_pages %}
-  {% set num_page_links = 10 if num_pages > 20 else 5 %}
+  {% set num_page_links = 8 if num_pages > 16 else 5 %}
   {% set page_interval = (page_obj.paginator.num_pages / num_page_links)|int %}
   <div class="pagination">
     <ul>

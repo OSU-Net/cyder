@@ -1,13 +1,18 @@
+from gettext import gettext as _
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.cydns.view.models import View
-from cyder.cydns.domain.models import Domain, _name_to_domain
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.validation import validate_name, validate_ttl
 from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.cydns.cname.models import CNAME
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+
+#import reversion
 
 
 class PTR(Ip, ObjectUrlMixin):
@@ -22,13 +27,23 @@ class PTR(Ip, ObjectUrlMixin):
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl])
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True)
-    data_domain = models.ForeignKey(
-        Domain, null=True, blank=True, related_name='ptrs',
-        on_delete=models.SET_NULL)
     views = models.ManyToManyField(View, blank=True)
-    comment = models.CharField(max_length=1000, null=True, blank=True)
-
+    description = models.CharField(max_length=1000, null=True, blank=True)
+    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} {name:1}.")
     search_fields = ('ip_str', 'name')
+
+    @classmethod
+    def get_api_fields(cls):
+        return ['ip_str', 'ip_type', 'name', 'ttl', 'description']
+
+    @property
+    def rdtype(self):
+        return 'PTR'
+
+    def bind_render_record(self, pk=False, **kwargs):
+        self.fqdn = self.dns_name().strip('.')
+        return super(PTR, self).bind_render_record(pk=pk, **kwargs)
 
     class Meta:
         db_table = 'ptr'
@@ -56,15 +71,13 @@ class PTR(Ip, ObjectUrlMixin):
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['ip_str', 'ip_type', 'name', 'ttl', 'comment']
-
     def save(self, *args, **kwargs):
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.dirty = True
             self.reverse_domain.soa.save()
             # The reverse_domain field is in the Ip class.
+        self.clean_ip(update_reverse_domain=kwargs.pop('update_reverse_domain',
+                                                       True))
         super(PTR, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -88,13 +101,15 @@ class PTR(Ip, ObjectUrlMixin):
             1.1.193.128     PTR         FOO.BAR.COM
             ^-- PTR's shouldn't point to CNAMES
         """
-        pass
-        #TODO, impliment this function and call it in clean()
+        if CNAME.objects.filter(fqdn=self.name).exists():
+            raise ValidationError("PTR records must point back to a valid A "
+                                  "record, not a alias defined by a CNAME."
+                                  " -- RFC 1034")
 
     def clean(self, *args, **kwargs):
         urd = kwargs.pop('update_reverse_domain', True)
+        self.validate_no_cname()
         self.clean_ip(update_reverse_domain=urd)
-        self.data_domain = _name_to_domain(self.name)
         # We need to check if there is an interface using our ip and name
         # because that interface will generate a ptr record.
         if (StaticInterface.objects.filter(
@@ -107,3 +122,5 @@ class PTR(Ip, ObjectUrlMixin):
         """Return the cononical name of this ptr that can be placed in a
         reverse zone file."""
         return ip_to_dns_form(self.ip_str, ip_type=self.ip_type)
+
+#reversion.(PTR)

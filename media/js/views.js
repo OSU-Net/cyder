@@ -10,22 +10,31 @@ $(document).ready(function() {
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
 
-    // Show create form on clicking create button.
     $('#create-obj').click(function() {
-        $('#form-title').html('Creating a ' + prettyObjType);
-
-        clear_form_all(form);
-        $('#obj-form').slideDown();
+        // Show create form on clicking create button.
+        slideUp($('#obj-form'));
+        setTimeout(function() {
+            $('#form-title').html('Creating ' + prettyObjType);
+            clear_form_all(form);
+        }, 150);
+        $('.form-btns a.submit').text('Create ' + prettyObjType);
+        slideDown($('#obj-form'));
     });
 
     $('.update').click(function(e) {
+        // Show update form on clicking update icon.
+        slideUp($('#obj-form'));
+
         e.preventDefault();
         form.action = this.href;
         $.get(getUrl, {'object_type': objType, 'pk': $(this).attr('data-pk')}, function(data) {
-            $('#form-title').html('Updating a ' + prettyObjType);
-            $('.inner-form').empty().append(data.form);
-            initForms();
-            $('#obj-form').slideDown();
+            setTimeout(function() {
+                $('#form-title').html('Updating ' + prettyObjType);
+                $('.inner-form').empty().append(data.form);
+                initForms();
+            }, 150);
+            $('.form-btns a.submit').text('Update ' + prettyObjType);
+            slideDown($('#obj-form'));
         }, 'json');
     });
 });

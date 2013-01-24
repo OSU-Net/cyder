@@ -47,8 +47,11 @@ def fix_domain(dname):
         return domain_id
 
 
+
 def main():
-    # Get all domains
+    # Fix invalid ranges
+    # This is a temporary fix for the wireless range
+    # These should be resized in maintain before migration
     print 'Fixing domains...'
     cursor.execute("SELECT * FROM domain")
 

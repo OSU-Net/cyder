@@ -1,18 +1,13 @@
 import random
 import string
 
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-from django.test.client import Client
-
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.nameserver.models import Nameserver
+from nose.tools import eq_
 
 
 class GenericViewTests(object):
     """
-    An object that builds test funtions. It's super generic and quite a huge
-    hack. You need to define a setUp function like this.
+    An object that builds test funtions.
+    You need to define a setUp function like this.
     def setUp(self):
         # A name of domain to use when creating records
         dname = "food"
@@ -38,92 +33,80 @@ class GenericViewTests(object):
             server = random_label()
             return {'server': server, 'domain':self.domain.pk}
     """
-    def build_all_tests(self):
+    def build_tests(self):
         return (
-            self.build_base_cydns_app(),
-            self.build_get_create(),
-            self.build_post_create(),
-            self.build_post_object_update(),
-            self.build_get_object_update(),
-            self.build_get_object_delete(),
-            self.build_get_object_details(),
+            self.list_get(),
+            self.create_post(),
+            self.update_post(),
+            self.delete_post(),
+            self.detail_get(),
             lambda junk: True
         )
 
-    def build_base_cydns_app(self):
+    def list_get(self):
         """
         List view.
         """
-        def test_base_cydns_app(self):
+        def test_list_get(self):
             resp = self.client.get(self.test_class.get_list_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
-        return test_base_cydns_app
+        return test_list_get
 
-    def build_get_create(self):
+    def create_post(self):
         """
-        Create view, get.
+        Create view.
         """
-        def test_get_create(self):
-            resp = self.client.get(self.test_class.get_create_url(),
-                                   follow=True)
-            self.assertEqual(resp.status_code, 200)
-        return test_get_create
-
-    def build_post_create(self):
-        """
-        Create view, post.
-        """
-        def test_post_create(self):
+        def test_create_post(self):
             count = self.test_class.objects.count()
             resp = self.client.post(self.test_class.get_create_url(),
                                     self.post_data(), follow=True)
             self.assertTrue(resp.status_code in (302, 200))
             self.assertTrue(self.test_class.objects.count() > count)
-        return test_post_create
+        return test_create_post
 
-    def build_get_object_update(self):
-        """
-        Update view, get. DEPRECATED.
-        """
-        def test_get_object_update(self):
-            resp = self.client.get(self.test_obj.get_update_url(),
-                                   follow=True)
-            self.assertEqual(resp.status_code, 200)
-        return test_get_object_update
-
-    def build_post_object_update(self):
+    def update_post(self):
         """
         Update view, post.
         """
-        def test_post_object_update(self):
+        def test_update_post(self):
+            post_data = self.post_data()
             resp = self.client.post(self.test_obj.get_update_url(),
-                                    self.post_data(),
-                                    follow=True)
+                                    post_data, follow=True)
             self.assertTrue(resp.status_code in (302, 200))
-        return test_post_object_update
 
-    def build_get_object_delete(self):
+            test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
+            for k, v in post_data.items():
+                if k not in ['fqdn', 'label']:
+                    obj_val = getattr(test_obj, k)
+                    if hasattr(obj_val, 'id'):
+                        eq_(obj_val.id, v)
+                    else:
+                        eq_(obj_val, v)
+
+        return test_update_post
+
+    def delete_post(self):
         """
         Delete view.
         """
-        def test_get_object_delete(self):
+        def test_delete_post(self):
             count = self.test_class.objects.count()
             resp = self.client.post(self.test_obj.get_delete_url(),
                                     follow=True)
             self.assertEqual(resp.status_code, 200)
             self.assertTrue(self.test_class.objects.count() < count)
-        return test_get_object_delete
+        return test_delete_post
 
-    def build_get_object_details(self):
+    def detail_get(self):
         """
         Detail view.
         """
-        def test_get_object_details(self):
+        def test_detail_get(self):
             resp = self.client.get(self.test_obj.get_detail_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
-        return test_get_object_details
+        return test_detail_get
 
 
 def random_label():

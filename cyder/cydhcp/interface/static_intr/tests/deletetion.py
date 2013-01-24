@@ -1,22 +1,19 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
 from cyder.cydns.view.models import View
 
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
-
+from cyder.cydns.ip.utils import ip_to_domain_name
 
 
 class DeleteStaticInterTests(TestCase):
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ipv6.arpa'):
+        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
@@ -62,12 +59,11 @@ class DeleteStaticInterTests(TestCase):
         label = "foo"
         domain = self.f_c
         ip_str = "10.0.0.2"
-        system = System(hostname="foo")
+        system = System()
         system.save()
-        kwargs = {'mac': mac, 'label': label, 'domain': domain, 'ip_str': ip_str,
-                  'system': system}
-        i = self.do_add(**kwargs)
-        intr_pk = i.pk
+        kwargs = {'mac': mac, 'label': label, 'domain': domain, 'ip_str':
+                  ip_str, 'system': system}
+        self.do_add(**kwargs)
         self.assertTrue(StaticInterface.objects.filter(**kwargs))
         system.delete()
         self.assertFalse(StaticInterface.objects.filter(**kwargs))

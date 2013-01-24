@@ -2,17 +2,20 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from django.http import HttpResponse
 
-import ipaddr
-
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter, AuxAttr
+from cyder.cydhcp.utils import IPFilter
+from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
+
+#import reversion
+
+import ipaddr
 
 
 class Range(models.Model, ObjectUrlMixin):
@@ -50,22 +53,23 @@ class Range(models.Model, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True)
     end_str = models.CharField(max_length=39, editable=True)
 
-    dhcpd_raw_include = models.TextField(null=True, blank=True)
-
     network = models.ForeignKey(Network, null=False)
 
     ALLOW_OPTIONS = (
-            ('vrf', 'allow members of'),
-            ('known-client', 'known-clients'),
+            ('vrf', 'allow members of vrf'),
+            ('known-client', 'allow known-clients'),
             ('legacy', 'ctnr-range'),
         )
 
     DENY_OPTIONS = (
-            ('deny-bootp', 'deny dynamic bootp clients'),
+            ('deny-unknown', 'deny dynamic unknown-clients'),
         )
-
-    allow = models.CharField(max_length=15, choices=ALLOW_OPTIONS)
-    deny = models.CharField(max_length=15, choices=DENY_OPTIONS)
+    # Some ranges have no allow statements so this option should be able to be
+    # null. There are a collection of such subnets documented in the migration
+    allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS, null=True,
+            blank=True)
+    deny = models.CharField(max_length=20, choices=DENY_OPTIONS)
+    dhcpd_raw_include = models.TextField(null=True, blank=True)
     attrs = None
 
     STATIC = "st"
@@ -82,31 +86,6 @@ class Range(models.Model, ObjectUrlMixin):
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
 
-    def get_allow(self):
-        from cyder.core.ctnr.models import Ctnr
-        if self.allow == 'vrf':
-            try:
-                vrf = Vrf.objects.get(network=self.network)
-                return ["allow members of vrf-{0}".format(vrf.name)]
-
-            except ObjectDoesNotExist:
-                raise Exception("Vrf for {0} does not exist".format(
-                                self.network.network_str))
-
-        if self.allow == 'known-clients':
-            return ["allow known clients"]
-        if self.allo == 'legacy':
-            ctnrs = Ctnr.objects.filter(ranges=self)
-            return ["allow members of " +
-                    ":".join([ctnr.name, self.start_str, self.end_str])
-                    for ctnr in ctnrs]
-        return None
-
-    def get_deny(self):
-        if self.deny == "deny-bootp":
-            return "deny dynamic bootp clients"
-        return None
-
     def __str__(self):
         x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End -  {4}"
         return x.format(self.network.site, self.network.vlan, self.network,
@@ -117,6 +96,7 @@ class Range(models.Model, ObjectUrlMixin):
 
     def update_attrs(self):
         self.attrs = AuxAttr(RangeKeyValue, self, "range")
+
 
     def details(self):
         """For tables."""
@@ -180,16 +160,10 @@ class Range(models.Model, ObjectUrlMixin):
                 self.end_lower):
             # start > end
             fail = True
-        """
-        if (self.start_upper == self.end_upper and self.start_lower ==
-                self.end_lower):
-            # end == start
-            fail = True
-        """
+        # TODO fix this logic and consider postgres
         if fail:
             raise ValidationError("The start of a range cannot be greater than"
                                   " or equal to the end of the range.")
-
         self.network.update_network()
         if self.network.ip_type == '4':
             IPClass = ipaddr.IPv4Address
@@ -210,6 +184,7 @@ class Range(models.Model, ObjectUrlMixin):
         """This function will look at all the other ranges and make sure we
         don't overlap with any of them.
         """
+
         for range_ in self.network.range_set.all():
             if range_.pk == self.pk:
                 continue
@@ -226,14 +201,13 @@ class Range(models.Model, ObjectUrlMixin):
             if (self.end_upper == range_.start_upper and self.end_lower <
                     range_.start_lower):
                 continue
-            raise ValidationError("Ranges cannot exist inside of other "
-                                  "ranges.")
+            raise ValidationError("Ranges cannot exist inside of other ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
-        self.ipf = IPFilter(self.start_upper, self.start_lower,
-                            self.end_upper, self.end_lower)
+        self.ipf = IPFilter(self.start_str, self.end_str, self.network.ip_type,
+                            object_=self)
 
     def display(self):
         return "Range: {3} to {4}  {0} -- {2} -- {1}  ".format(
@@ -266,6 +240,7 @@ class Range(models.Model, ObjectUrlMixin):
         start = self.start_lower
         end = self.end_lower
         if start >= end - 1:
+            # XXX wth? remove this
             return HttpResponse("Too small of a range.")
         ip = find_free_ip(start, end, ip_type='4')
         if ip:
@@ -315,6 +290,9 @@ def find_free_ip(start, end, ip_type='4'):
         raise NotImplemented
 
 
+##reversion.(Range)
+
+
 class RangeKeyValue(CommonOption):
     range = models.ForeignKey(Range, null=False)
 
@@ -334,3 +312,5 @@ class RangeKeyValue(CommonOption):
 
     def _aa_ntp_servers(self):
         self._ntp_servers(self.range.network.ip_type)
+
+##reversion.(RangeKeyValue)

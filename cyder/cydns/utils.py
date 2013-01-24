@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import Http404
+from django.db.models import Q, F
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
@@ -54,10 +55,13 @@ def get_clobbered(domain_name):
 
 
 def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
-    """This function will take ``domain_name`` and make sure that that domain with that name
-    exists in the db. If this function creates a domain it will set the domain's purgeable flag
-    to the value of the named arguement ``purgeable``. See the doc page about
-    Labels and Domains for more information about this function"""
+    """
+    This function will take ``domain_name`` and make sure that that domain
+    with that name exists in the db. If this function creates a domain it will
+    set the domain's purgeable flag to the value of the named arguement
+    ``purgeable``. See the doc page about Labels and Domains for more
+    information about this function
+    """
     try:
         domain = Domain.objects.get(name=name)
         return domain
@@ -83,24 +87,25 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
                 continue
 
         if not leaf_domain:
-            raise ValidationError("Creating this record would cause the "
-                                  "creation of a new TLD. Please contact "
-                                  "http://www.icann.org/ for more information.")
+            raise ValidationError(
+                    "Creating this record would cause the creation of a new "
+                    "TLD. Please contact http://www.icann.org/ for more "
+                    "information.")
         if leaf_domain.delegated:
-            raise ValidationError("Creating this record would cause the "
-                                  "creation of a domain that would "
-                                  "be a child of a delegated domain.")
+            raise ValidationError(
+                "Creating this record would cause the creation of a domain "
+                "that would be a child of a delegated domain.")
         if not leaf_domain.soa:
-            raise ValidationError("Creating this record would cause the "
-                                  "creation of a domain that would "
-                                  "not be in an existing DNS zone.")
+            raise ValidationError(
+                "Creating this record would cause the creation of a domain "
+                "that would not be in an existing DNS zone.")
 
     domain_name = ''
     for i in range(len(parts)):
         domain_name = parts[i] + '.' + domain_name
         domain_name = domain_name.strip('.')
         clobber_objects = get_clobbered(domain_name)
-        # need to be deleted and then recreated
+        # Need to be deleted and then recreated.
         domain, created = Domain.objects.get_or_create(name=domain_name)
         if purgeable and created:
             domain.purgeable = True
@@ -119,23 +124,26 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
                     view = View.objects.get(name=view_name)
                     object_.views.add(view)
                     object_.save()
-            except ValidationError, e:
+            except ValidationError:
                 # this is bad
+                import pdb
                 pdb.set_trace()
-                pass
+                raise
     return domain
 
 
-def ensure_label_domain(fqdn):
-    """
-    Returns a label and domain object.
-    """
+def ensure_label_domain(fqdn, force=False):
+    """Returns a label and domain object."""
     if fqdn == '':
         raise ValidationError("FQDN cannot be the emptry string.")
-
-    if Domain.objects.filter(name=fqdn).exists():
-        return '', Domain.objects.get(name=fqdn)
-
+    try:
+        domain = Domain.objects.get(name=fqdn)
+        if not domain.soa and not force:
+            raise ValidationError("You must create a record inside an "
+                                  "existing zones.")
+        return '', domain
+    except ObjectDoesNotExist:
+        pass
     fqdn_partition = fqdn.split('.')
     if len(fqdn_partition) == 1:
         raise ValidationError("Creating this record would force the creation "
@@ -143,6 +151,9 @@ def ensure_label_domain(fqdn):
     else:
         label, domain_name = fqdn_partition[0], '.'.join(fqdn_partition[1:])
         domain = ensure_domain(domain_name, purgeable=True, inherit_soa=True)
+        if not domain.soa and not force:
+            raise ValidationError("You must create a record inside an "
+                                  "existing zones.")
         return label, domain
 
 
@@ -152,13 +163,14 @@ def prune_tree(domain):
 
 def prune_tree_helper(domain, deleted_domains):
     if not domain:
-        return deleted_domains  # We didn't delete anything
+        return deleted_domains  # Didn't delete anything.
     if domain.domain_set.all():
-        return deleted_domains  # We can't delete this domain. It has children
+        return deleted_domains  # Can't delete domain. Has children.
     if domain.has_record_set():
-        return deleted_domains  # There are records for this domain
+        return deleted_domains  # Records exist for domain.
     elif not domain.purgeable:
-        return deleted_domains  # This domain should not be deleted by a computer.
+        # This domain should not be deleted by a computer.
+        return deleted_domains
     else:
         master_domain = domain.master_domain
         if not master_domain:
@@ -168,3 +180,10 @@ def prune_tree_helper(domain, deleted_domains):
         deleted_domains.append(purged_domain)
         domain.delete()
         return prune_tree_helper(master_domain, deleted_domains)
+
+
+def get_zones():
+    """This function returns a list of domains that are at the root of their
+    respective zones."""
+    return Domain.objects.filter(~Q(master_domain__soa=F('soa')),
+                            soa__isnull=False)

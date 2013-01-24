@@ -1,13 +1,6 @@
-from django.test import TestCase
-from django.test.client import Client, FakePayload, MULTIPART_CONTENT, encode_multipart, BOUNDARY
-from django.utils.encoding import smart_str
-
 from tastypie.test import ResourceTestCase
 
-from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.tests.test_views_template import GenericViewTests, random_label
+from cyder.cydns.tests.test_views_template import random_label
 from cyder.cydns.tests.test_views_template import random_byte
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
@@ -22,7 +15,6 @@ from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
 
 import simplejson as json
-from urlparse import urlparse, urlsplit
 
 API_VERSION = '1'
 
@@ -32,7 +24,7 @@ def build_sample_domain():
     for i in range(2):
         domain_name = random_label()
         domain = Domain(name=domain_name)
-    soa = SOA(primary=random_label(), contact="asf", comment=random_label())
+    soa = SOA(primary=random_label(), contact="asf", description=random_label())
     soa.save()
     domain.soa = soa
     domain.save()
@@ -51,7 +43,7 @@ class CydnsAPITests(object):
 
     def test_create(self):
         resp, post_data = self.generic_create(self.post_data())
-        _, (_, new_object_url) = resp.items()
+        new_object_url = resp.items()[2][1]
         new_resp = self.api_client.get(new_object_url, format='json')
         self.assertValidJSONResponse(new_resp)
         new_obj_data = json.loads(new_resp.content)
@@ -80,8 +72,10 @@ class CydnsAPITests(object):
         #  if authentication is not None:
         #     kwargs['HTTP_AUTHORIZATION'] = authentication
 
-        resp, post_data = self.generic_create(self.post_data())
-        _, (_, new_object_url) = resp.items()
+        post_data = self.post_data()
+        resp, post_data = self.generic_create(post_data)
+        new_object_url = resp.items()[2][1]
+        patch_data = self.post_data()
         update_resp, patch_data = self.generic_update(new_object_url,
                                                       self.post_data())
 
@@ -94,24 +88,11 @@ class CydnsAPITests(object):
     def test_delete(self):
         obj_count = self.test_type.objects.count()
         resp, post_data = self.generic_create(self.post_data())
-        _, (_, new_object_url) = resp.items()
+        new_object_url = resp.items()[2][1]
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
         resp = self.api_client.delete(new_object_url, format='json')
         self.assertHttpAccepted(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
-
-    def test_fqdn_create(self):
-        obj_data = self.post_data()
-        label = obj_data.pop('label')
-        domain = random_label() + '.' + str(self.test_type.__name__) + '.' + random_label() + '.' + random_label() + '.' + obj_data.pop('domain')
-        obj_data['fqdn'] = label + '.' + domain
-        resp, post_data = self.generic_create(obj_data)
-        _, (_, new_object_url) = resp.items()
-        new_resp = self.api_client.get(new_object_url, format='json')
-        self.assertValidJSONResponse(new_resp)
-        new_obj_data = json.loads(new_resp.content)
-        self.assertEqual(label, new_obj_data['label'])
-        self.assertEqual(domain, new_obj_data['domain'])
 
     def generic_update(self, patch_url, patch_data):
         obj_count = self.test_type.objects.count()
@@ -135,12 +116,12 @@ class CydnsAPITests(object):
 
     def test_changing_only_one_field(self):
         resp, post_data = self.generic_create(self.post_data())
-        _, (_, new_object_url) = resp.items()
+        new_object_url = resp.items()[2][1]
         change_post_data = {}
-        change_post_data['comment'] = "==DIFFERENT=="
-        post_data['comment'] = "==DIFFERENT=="
-        resp, patch_data = self.generic_update(
-            new_object_url, change_post_data)
+        change_post_data['description'] = "==DIFFERENT=="
+        post_data['description'] = "==DIFFERENT=="
+        resp, patch_data = self.generic_update(new_object_url,
+                                                change_post_data)
         new_resp = self.api_client.get(new_object_url, format='json')
         updated_obj_data = json.loads(new_resp.content)
         self.compare_data(post_data, updated_obj_data)
@@ -155,7 +136,7 @@ class CydnsAPITests(object):
         self.assertHttpCreated(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
         # Get the object and check it's views
-        _, (_, new_object_url) = resp.items()
+        new_object_url = resp.items()[2][1]
         new_resp = self.api_client.get(new_object_url, format='json')
         self.assertValidJSONResponse(new_resp)
         new_obj_data = json.loads(new_resp.content)
@@ -175,7 +156,7 @@ class CydnsAPITests(object):
 
         # Now try deleteing a view.
         views = ['private']
-        post_data = {'views': views}
+        post_data = {'views': ['no-public']}  # This should delete public
         obj_count = self.test_type.objects.count()
         resp, patch_data = self.generic_update(new_object_url, post_data)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -199,7 +180,7 @@ class MangleTests(ResourceTestCase):
 
     def test_missing_key(self):
         post_data = self.post_data()
-        post_data.pop('label')
+        post_data.pop('fqdn')
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
                                                  str(self.test_type.__name__).lower())
@@ -209,7 +190,7 @@ class MangleTests(ResourceTestCase):
 
     def test_mangled_key(self):
         post_data = self.post_data()
-        post_data['label'] = post_data['label'] + '.'
+        post_data['fqdn'] = post_data['fqdn'] + '.'
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
                                                  str(self.test_type.__name__).lower())
@@ -217,9 +198,9 @@ class MangleTests(ResourceTestCase):
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
 
-    def test_bad_domain(self):
+    def test_bad_fqdn(self):
         post_data = self.post_data()
-        post_data['domain'] = ''
+        post_data['fqdn'] = ''
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
                                                  str(self.test_type.__name__).lower())
@@ -227,37 +208,14 @@ class MangleTests(ResourceTestCase):
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
 
-    def test_label_domain_fqdn(self):
-        # Make sure posting with label, domain, and fqdn causes a 500
-        post_data = self.post_data()
-        post_data['fqdn'] = post_data['label'] + '.' + post_data['domain']
-        obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
-        resp = self.api_client.post(create_url, format='json', data=post_data)
-        self.assertHttpBadRequest(resp)
-        self.assertEqual(self.test_type.objects.count(), obj_count)
 
     def test_ensure_label_domain_fail(self):
         # MAke ensure_label_domain fail
         post_data = self.post_data()
         Domain.objects.get_or_create(name="asdf")
         Domain.objects.get_or_create(name="foo.asdf")
-        domain, _ = Domain.objects.get_or_create(name="bar.foo.asdf")
-        fqdn = post_data['label'] + '.' + domain.name
-        post_data.pop('label')
-        post_data.pop('domain')
-        post_data['fqdn'] = 'secondbar.x.y.' + fqdn
-        obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
-        resp = self.api_client.post(create_url, format='json', data=post_data)
-        self.assertHttpBadRequest(resp)
-        self.assertEqual(self.test_type.objects.count(), obj_count)
-
-    def test_bad_view(self):
-        post_data = self.post_data()
-        post_data['views'] = ['foobar']
+        domain , _= Domain.objects.get_or_create(name="bar.foo.asdf")
+        post_data['fqdn'] = 'secondbar.x.y.' + domain.name
         obj_count = self.test_type.objects.count()
         create_url = self.object_list_url.format(API_VERSION,
                                                  str(self.test_type.__name__).lower())
@@ -267,10 +225,9 @@ class MangleTests(ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'b' + random_label(),
-            'domain': self.domain.name,
+            'fqdn': 'b' + random_label() + "." + self.domain.name,
             'target': random_label()
         }
 
@@ -310,10 +267,9 @@ class CNAMEAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'd' + random_label(),
-            'domain': self.domain.name,
+            'fqdn': 'd' + random_label() + "." + self.domain.name,
             'target': random_label()
         }
 
@@ -323,10 +279,9 @@ class MXAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'e' + random_label(),
-            'domain': self.domain.name,
+            'fqdn':  'e' + random_label() + "." + self.domain.name,
             'server': random_label(),
             'priority': 123,
             'ttl': 213
@@ -338,10 +293,9 @@ class SRVAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': "_" + random_label(),
-            'domain': self.domain.name,
+            'fqdn':"_"+random_label() + "." + self.domain.name,
             'target': random_label(),
             'priority': 2,
             'weight': 2222,
@@ -354,10 +308,9 @@ class TXTAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'f' + random_label(),
-            'domain': self.domain.name,
+            'fqdn': 'f' + random_label() + "." + self.domain.name,
             'txt_data': random_label()
         }
 
@@ -371,7 +324,7 @@ class NameserverAPITests(CydnsAPITests, ResourceTestCase):
     def post_data(self):
         return {
             'server': 'g' + random_label(),
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
             'domain': self.domain.name,
         }
@@ -382,10 +335,9 @@ class SSHFPAPITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'h' + random_label(),
-            'domain': self.domain.name,
+            'fqdn': 'h' + random_label() + "." + self.domain.name,
             'algorithm_number': 1,
             'fingerprint_type': 1,
             'key': random_label()
@@ -400,10 +352,9 @@ class AdderessRecordV4APITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'i' + random_label(),
-            'domain': self.domain.name,
+            'fqdn': 'i' + random_label() + "." + self.domain.name,
             'ip_str': "11.{0}.{1}.{2}".format(random_byte(), random_byte(), random_byte()),
             'ip_type': '4'
         }
@@ -420,10 +371,9 @@ class AdderessRecordV6APITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'j' + random_label(),
-            'domain': self.domain.name,
+            'fqdn': 'j' + random_label() + "." + self.domain.name,
             'ip_str': "1000:{0}:{1}:{2}::".format(random_byte(), random_byte(),
                                                   random_byte()),
             'ip_type': '6'
@@ -435,8 +385,8 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
-        Domain.objects.get_or_create(name='ipv6.arpa')
-        Domain.objects.get_or_create(name='1.ipv6.arpa')
+        Domain.objects.get_or_create(name='ip6.arpa')
+        Domain.objects.get_or_create(name='1.ip6.arpa')
         super(PTRV6APITests, self).setUp()
 
     def test_fqdn_create(self):
@@ -444,12 +394,11 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': 'k' + random_label(),
+            'description': 'k' + random_label(),
             'ttl': random_byte(),
             'ip_str': "1000:{0}:{1}:{2}:{3}:{4}::".format(random_byte(), random_byte(),
-                                                          random_byte(
-                                                          ), random_byte(
-                                                          ), random_byte()),
+                                                          random_byte(), random_byte(),
+                                                          random_byte()),
             'ip_type': '6',
             'name': random_label()
         }
@@ -469,7 +418,7 @@ class PTRV4APITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
             'ip_str': "11.{0}.{1}.{2}".format(random_byte(), random_byte(), random_byte()),
             'ip_type': '4',
@@ -477,6 +426,8 @@ class PTRV4APITests(CydnsAPITests, ResourceTestCase):
         }
 
 
+"""
+Need to hook up system resource before this will work.
 class StaticIntrV4APITests(CydnsAPITests, ResourceTestCase):
     test_type = StaticInterface
 
@@ -491,8 +442,7 @@ class StaticIntrV4APITests(CydnsAPITests, ResourceTestCase):
     def compare_data(self, old_data, new_obj_data):
         for key in old_data.keys():
             if key == 'system_hostname':
-                self.assertEqual(
-                    old_data[key], new_obj_data['system']['hostname'])
+                self.assertEqual(old_data[key], new_obj_data['system']['hostname'])
                 continue
             if key in ('iname', 'system'):
                 continue  # StaticInterface needs this done. Too lazy to factor
@@ -504,7 +454,7 @@ class StaticIntrV4APITests(CydnsAPITests, ResourceTestCase):
         del post_data['system']
         post_data['system_hostname'] = self.s.hostname
         resp, post_data = self.generic_create(post_data)
-        _, (_, new_object_url) = resp.items()
+        new_object_url = resp.items()[2][1]
         new_resp = self.api_client.get(new_object_url, format='json')
         self.assertValidJSONResponse(new_resp)
         new_obj_data = json.loads(new_resp.content)
@@ -512,15 +462,14 @@ class StaticIntrV4APITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': 'm' + random_label(),
+            'description': 'm' + random_label(),
             'ttl': random_byte(),
             'mac': '11:22:33:44:55:00',
             'system': '/tasty/systems/system/{0}/'.format(self.s.pk),
-            'label': 'a' + random_label(),
+            'fqdn': 'a' + random_label() + "." + self.domain.name,
             'iname': 'eth2.4',
             'dhcp_enabled': False,
             'dns_enabled': True,
-            'domain': self.domain.name,
             'ip_str': "11.255.{0}.{1}".format(random_byte(), random_byte()),
             'ip_type': '4'
         }
@@ -531,8 +480,8 @@ class StaticIntrV6APITests(CydnsAPITests, ResourceTestCase):
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
-        Domain.objects.get_or_create(name='ipv6.arpa')
-        Domain.objects.get_or_create(name='2.ipv6.arpa')
+        Domain.objects.get_or_create(name='ip6.arpa')
+        Domain.objects.get_or_create(name='2.ip6.arpa')
         super(StaticIntrV6APITests, self).setUp()
         self.s = System(hostname="foobar")
         self.s.save()
@@ -546,16 +495,16 @@ class StaticIntrV6APITests(CydnsAPITests, ResourceTestCase):
 
     def post_data(self):
         return {
-            'comment': random_label(),
+            'description': random_label(),
             'ttl': random_byte(),
-            'label': 'p' + random_label(),
+            'fqdn': 'p' + random_label() + "." + self.domain.name,
             'iname': 'mgmt4',
             'dhcp_enabled': True,
             'dns_enabled': True,
             'mac': '11:22:33:44:55:00',
             'system': '/tasty/systems/system/{0}/'.format(self.s.pk),
-            'domain': self.domain.name,
             'ip_str': "2000:a{0}:a{1}:a{2}::".format(random_byte(), random_byte(),
                                                      random_byte()),
             'ip_type': '6'
         }
+"""
