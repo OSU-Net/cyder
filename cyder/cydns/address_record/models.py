@@ -12,24 +12,25 @@ from cyder.cydns.models import check_TLD_condition
 from cyder.cydns.validation import (validate_first_label, validate_name,
                                     validate_ttl)
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.cydns.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.soa.utils import update_soa
 
 #import reversion
 
 
-class BaseAddressRecord(Ip, ObjectUrlMixin):
+class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
     """AddressRecord is the class that generates A and AAAA records
 
         >>> AddressRecord(label=label, domain=domain_object, ip_str=ip_str,
         ... ip_type=ip_type)
 
     """
-    label = models.CharField(max_length=63, blank=True, null=True,
-                        validators=[validate_first_label],
-                        help_text='The short hostname goes here. If this is a '
-                        'record ' 'for the selected domain, leave this field '
-                        'blank')
+    label = models.CharField(
+        max_length=63, blank=True, null=True,
+        validators=[validate_first_label],
+        help_text='The short hostname goes here. If this is a '
+        'record ' 'for the selected domain, leave this field '
+        'blank')
     domain = models.ForeignKey(Domain, null=False, help_text='FQDN of the '
                                'domain after the short hostname. '
                                '(Ex: <i>Vlan</i>.<i>DC</i>.mozilla.com)')
@@ -39,7 +40,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
                                       validators=[validate_ttl],
                                       help_text='Time to Live of the record')
     description = models.CharField(max_length=1000, blank=True, null=True,
-                help_text="A description of this record.")
+                                   help_text="A description of this record.")
     views = models.ManyToManyField(View, blank=True)
 
     search_fields = ('fqdn', 'ip_str')
@@ -80,7 +81,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return  ['fqdn', 'ip_str', 'ip_type', 'description', 'ttl']
+        return ['fqdn', 'ip_str', 'ip_type', 'description', 'ttl']
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -131,8 +132,8 @@ class BaseAddressRecord(Ip, ObjectUrlMixin):
         if kwargs.pop('validate_glue', True):
             if self.nameserver_set.exists():
                 raise ValidationError(
-                        "Cannot delete the record {0}. It is a ' 'glue record."
-                        .format(self.record_type()))
+                    "Cannot delete the record {0}. It is a ' 'glue record."
+                    .format(self.record_type()))
         if kwargs.pop('check_cname', True):
             if CNAME.objects.filter(target=self.fqdn):
                 raise ValidationError('A CNAME points to this {0} record. '

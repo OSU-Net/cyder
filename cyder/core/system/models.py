@@ -3,10 +3,8 @@ from django.conf import settings
 from django.db import models, IntegrityError
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
-
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-
 import ipaddr
 
 
@@ -23,13 +21,9 @@ class System(BaseModel, ObjectUrlMixin):
         db_table = 'system'
         unique_together = ('hostname', 'location', 'department')
 
-"""
-class SystemKeyValue(CommonOption):
-    system = models.ForiegnKey(System, null=False)
-    aux_attrs = (
-        ('description', 'A description of the Syste'),
-    )
-    def save(self, *args, **kwargs):
-        self.clean()
-        super(SystemKeyValue, self).save(*args, **kwargs)
-"""
+    def details(self):
+        data = super(System, self).details()
+        data['data'] = [
+            ('Name', 'name', self.name),
+        ]
+        return data

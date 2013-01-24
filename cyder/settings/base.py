@@ -128,8 +128,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'reversion.middleware.RevisionMiddleware',
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
+    'reversion.middleware.RevisionMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS += (

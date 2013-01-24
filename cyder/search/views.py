@@ -14,6 +14,15 @@ from search.compiler.django_compile import compile_to_django
 env = Environment(loader=PackageLoader('search', 'templates'))
 
 
+def search(request):
+    """Search page."""
+    search = request.GET.get('search', '')
+    return render(request, "search/search.html", {
+        "search": search,
+        "zones": [z.name for z in get_zones()]
+    })
+
+
 def resource_for_request(resource_name, filters, request):
     resource = v1_dns_api.canonical_resource_for(resource_name)
     objects = resource.get_object_list(request).filter(filters)
@@ -37,11 +46,9 @@ def request_to_search(request):
 def handle_shady_search(search):
     if not search:
         return HttpResponse("What do you want?!?")
-    dos_terms = ["10", "com", "mozilla.com", "mozilla",  "network:10/8",
-                "network:10.0.0.0/8"]
+    dos_terms = ["10", "com", "network:10/8", "network:10.0.0.0/8"]
     if search in dos_terms:
-        return HttpResponse("Denial of Service attack prevented. The search "
-                "term '{0}' is to general".format(search))
+        return HttpResponse("Search term '{0}' is too general".format(search))
     return None
 
 
@@ -84,7 +91,7 @@ def _search(request, response):
     if not objs:
         return HttpResponse(json.dumps({'error_messages': error_resp}))
     (addrs, cnames, domains, mxs, nss, ptrs, soas, srvs, sshfps, intrs, sys,
-            txts, misc) = objs
+     txts, misc) = objs
     meta = {
         'counts': {
             'addr': addrs.count() if addrs else 0,
@@ -118,15 +125,6 @@ def _search(request, response):
             'search': search
         }
     ))
-
-
-def search(request):
-    """Search page"""
-    search = request.GET.get('search', '')
-    return render(request, "search/search.html", {
-        "search": search,
-        "zones": [z.name for z in get_zones()]
-    })
 
 
 def get_zones_json(request):

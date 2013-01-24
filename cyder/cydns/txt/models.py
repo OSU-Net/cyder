@@ -46,7 +46,7 @@ class TXT(CydnsRecord):
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'fqdn', 'datatype': 'string', 'editable': True},
-            {'name': 'text', 'datatype': 'string', 'editable': True},
+            {'name': 'txt_data', 'datatype': 'string', 'editable': True},
         ]}
 
     @classmethod

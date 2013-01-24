@@ -1,11 +1,10 @@
-from django.conf.urls.defaults import *
+import django.conf.urls.defaults as defaults
 from django.views.decorators.csrf import csrf_exempt
 
-from cyder.cydns.cybind.views import *
+import cydns.cybind.views as views
 
-urlpatterns = patterns('',
-   url(r'^build_debug/(?P<soa_pk>[\w-]+)/$',
-       csrf_exempt(build_debug_soa), name='build-debug'),
-   url(r'^build/(?P<soa_pk>[\w-]+)/$',
-       csrf_exempt(build_soa), name='buid-soa'),
+urlpatterns = defaults.patterns(
+    '',
+    defaults.url(r'^build_debug/(?P<soa_pk>[\w-]+)/$',
+    csrf_exempt(views.build_debug_soa)),
 )
