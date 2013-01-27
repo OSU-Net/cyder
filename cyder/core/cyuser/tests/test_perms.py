@@ -3,6 +3,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.test import TestCase
 
+import cyder as cy
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.views import login_session, become_user, unbecome_user
 from cyder.cydns.address_record.models import AddressRecord
@@ -142,9 +143,9 @@ class PermissionsTest(TestCase):
 
         perm_table = {
             'cyder_admin': ['all'],
-            'admin': ['view'],
-            'user': ['view'],
-            'guest': ['view'],
+            'admin': [cy.ACTION_VIEW],
+            'user': [cy.ACTION_VIEW],
+            'guest': [cy.ACTION_VIEW],
         }
 
         # initialize obj into ctnrs
@@ -169,10 +170,10 @@ class PermissionsTest(TestCase):
         self.setup_request()
 
         perm_table = {
-            'cyder_admin': ['view', 'update'],
-            'admin': ['view', 'update'],
-            'user': ['view', 'update'],
-            'guest': ['view'],
+            'cyder_admin': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+            'admin': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+            'user': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+            'guest': [cy.ACTION_VIEW],
         }
 
         # Initialize obj into ctnrs.
@@ -195,7 +196,7 @@ class PermissionsTest(TestCase):
             'cyder_admin': ['all'],
             'admin': ['all'],
             'user': ['all'],
-            'guest': ['view'],
+            'guest': [cy.ACTION_VIEW],
         }
 
         # Initialize objs into ctnrs.
@@ -270,29 +271,27 @@ class PermissionsTest(TestCase):
         asserts against perm table.
         """
         create_perm = self.request.user.get_profile().has_perm(
-            self.request, 'create', obj=obj)
+            self.request, cy.ACTION_CREATE, obj=obj)
         view_perm = self.request.user.get_profile().has_perm(
-            self.request, 'view', obj=obj)
+            self.request, cy.ACTION_VIEW, obj=obj)
         update_perm = self.request.user.get_profile().has_perm(
-            self.request, 'update', obj=obj)
+            self.request, cy.ACTION_UPDATE, obj=obj)
         delete_perm = self.request.user.get_profile().has_perm(
-            self.request, 'delete', obj=obj)
+            self.request, cy.ACTION_DELETE, obj=obj)
 
         actual_perms = {
             'all': create_perm and view_perm and update_perm and delete_perm,
-            'create': create_perm,
-            'view': view_perm,
-            'update': update_perm,
-            'delete': delete_perm,
+            cy.ACTION_CREATE: create_perm,
+            cy.ACTION_VIEW: view_perm,
+            cy.ACTION_UPDATE: update_perm,
+            cy.ACTION_DELETE: delete_perm,
         }
 
         # Superuser.
         actual_perms_list = [create_perm, view_perm, update_perm, delete_perm]
         if user_level == 'superuser':
             for perm in actual_perms_list:
-                self.assertTrue(
-                    perm,
-                    "Superuser should automatically have all permissions")
+                self.assertTrue(perm, "Superuser should have all permissions")
             return
 
         # Pleb.

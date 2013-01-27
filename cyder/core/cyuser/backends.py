@@ -1,3 +1,4 @@
+import cyder as cy
 from cyder.core.ctnr.models import CtnrUser
 
 
@@ -52,17 +53,19 @@ def has_perm(self, request, action, obj=None, obj_class=None):
 
     # Get user level.
     try:
-        is_ctnr_admin = CtnrUser.objects.get(ctnr=ctnr, user=user).level == 2
-        is_ctnr_user = CtnrUser.objects.get(ctnr=ctnr, user=user).level == 1
-        is_ctnr_guest = CtnrUser.objects.get(ctnr=ctnr, user=user).level == 0
+        ctnr_level = CtnrUser.objects.get(ctnr=ctnr, user=user).level
+        is_ctnr_admin = ctnr_level == cy.LEVEL_ADMIN
+        is_ctnr_user = ctnr_level == cy.LEVEL_USER
+        is_ctnr_guest = ctnr_level == cy.LEVEL_GUEST
     except CtnrUser.DoesNotExist:
         is_ctnr_admin = False
         is_ctnr_user = False
         is_ctnr_guest = False
     try:
-        is_cyder_admin = CtnrUser.objects.get(ctnr=1, user=user).level == 2
-        is_cyder_user = CtnrUser.objects.get(ctnr=1, user=user).level == 1
-        is_cyder_guest = CtnrUser.objects.get(ctnr=1, user=user).level == 0
+        cyder_level = CtnrUser.objects.get(ctnr=1, user=user).level
+        is_cyder_admin = cyder_level == cy.LEVEL_ADMIN
+        is_cyder_user = cyder_level == cy.LEVEL_USER
+        is_cyder_guest = cyder_level == cy.LEVEL_GUEST
     except CtnrUser.DoesNotExist:
         is_cyder_admin = False
         is_cyder_user = False
@@ -129,51 +132,46 @@ def has_perm(self, request, action, obj=None, obj_class=None):
 
 
 def has_administrative_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for ctnrs or users
-    Not related to DNS or DHCP objects
-    """
+    """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
     return {
-        'cyder_admin': action == 'view' or action == 'update',
-        'admin': action == 'view' or action == 'update',
-        'user': action == 'view',
-        'guest': action == 'view',
+        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_soa_perm(user_level, obj, ctnr, action):
     """
-    Permissions for SOAs
-    SOAs are global, related to domains and reverse domains
+    Permissions for SOAs.
+    SOAs are global, related to domains and reverse domains.
     """
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action == 'view',
-        'user': action == 'view',
-        'guest': action == 'view',
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_domain_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for domains
-    Ctnrs have domains
-    """
+    """Permissions for domains. Ctnrs have domains."""
+    # TODO: can have create permissions for subdomains.
     if obj and not obj in ctnr.domains.all():
         return False
 
     return {
-        'cyder_admin': action == 'view' or action == 'update',  # ?
-        'ctnr_admin': action == 'view' or action == 'update',
-        'user': action == 'view' or action == 'update',
-        'guest': action == 'view',
+        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],  # ?
+        'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'user': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_domain_record_perm(user_level, obj, ctnr, action):
     """
-    Permissions for domain records (or objects linked to a domain)
-    Domain records are assigned a domain
+    Permissions for domain records (or objects linked to a domain).
+    Domain records are assigned a domain.
     """
     if obj and obj.domain not in ctnr.domains.all():
         return False
@@ -182,14 +180,14 @@ def has_domain_record_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action == 'view',
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
     """
     Permissions for reverse domain records (or objects linked to a reverse
-    domain). Reverse domain records are assigned a reverse domain
+    domain). Reverse domain records are assigned a reverse domain.
     """
     if obj and obj.reverse_domain not in ctnr.domains.all():
         return False
@@ -198,64 +196,52 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action == 'view',
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_subnet_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for subnet
-    Ranges have subnets
-    """
+    """Permissions for subnet. Ranges have subnets."""
     if obj and not obj in [ip_range.subnet for ip_range in ctnr.ranges.all()]:
         return False
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action == 'view',
-        'user': action == 'view',
-        'guest': action == 'view',
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_range_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for ranges
-    Ctnrs have ranges
-    """
+    """Permissions for ranges. Ctnrs have ranges."""
     if obj and not obj in ctnr.ranges.all():
         return False
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action == 'view',
-        'user': action == 'view',
-        'guest': action == 'view',
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_group_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for groups
-    Groups are assigned a subnet
-    """
+    """Permissions for groups. Groups are assigned a subnet."""
     if obj and not obj.subnet in [ip_range.subnet for ip_range in
                                   ctnr.ranges.all()]:
         return False
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action == 'view',  # ?
-        'user': action == 'view',  # ?
-        'guest': action == 'view',
+        'ctnr_admin': action in [cy.ACTION_VIEW],  # ?
+        'user': action in [cy.ACTION_VIEW],  # ?
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_node_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for nodes
-    Nodes are assigned a ctnr
-    """
+    """Permissions for nodes. Nodes are assigned a ctnr."""
     if obj and obj.ctnr != ctnr:
         return False
 
@@ -263,37 +249,33 @@ def has_node_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action == 'view',
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_dhcp_option_perm(user_level, obj, ctnr, action):
     """
-    Permissions for dhcp-related options
-    DHCP options are global like SOAs, related to subnets and ranges
+    Permissions for dhcp-related options.
+    DHCP options are global like SOAs, related to subnets and ranges.
     """
     return {
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action == 'view',
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_static_registration_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for static registrations
-    """
+    """Permissions for static registrations."""
     return {
         'cyder_admin': True,  # ?
         'ctnr_admin': True,  # ?
         'user': True,  # ?
-        'guest': action == 'view',
+        'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
 
 def has_dynamic_registration_perm(user_level, obj, ctnr, action):
-    """
-    Permissions for static registrations
-    """
+    """Permissions for static registrations."""
     return True

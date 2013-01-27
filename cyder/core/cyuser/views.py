@@ -11,26 +11,10 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
 
 
-def cylogin(request):
-    """
-    Not implemented.
-    """
-    return redirect('/')
-
-
-def cylogout(request):
-    """
-    Not implemented.
-    """
-    return redirect('/')
-
-
 def login_session(request, username):
-    """
-    Logs in a user and sets up the session.
-    """
-    # Authenticate / login.
+    """Logs in a user and sets up the session."""
     try:
+        # Authenticate / login.
         user = User.objects.get(username=username)
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
@@ -38,15 +22,15 @@ def login_session(request, username):
         messages.error(request, "User %s does not exist" % (username))
         return request
 
-    # Create user profile if needed.
     try:
+        # Create user profile if needed.
         request.user.get_profile()
     except UserProfile.DoesNotExist:
         profile = UserProfile(user=user)
         profile.save()
 
-    # Assign user to default ctnr if needed.
     try:
+        # Assign user to default ctnr if needed.
         CtnrUser.objects.get(user=request.user,
                              ctnr_id=request.user.get_profile().default_ctnr)
     except CtnrUser.DoesNotExist:
@@ -81,9 +65,7 @@ def login_session(request, username):
 
 
 def search(request):
-    """
-    Returns a list of users matching 'term'.
-    """
+    """Returns a list of users matching 'term'."""
     term = request.GET.get('term', '')
     if not term:
         raise Http404
@@ -94,9 +76,7 @@ def search(request):
 
 
 def become_user(request, username=None):
-    """
-    Become another user with their permissions, be able to change back
-    """
+    """Become another user with their permissions, be able to change back."""
     referer = request.META.get('HTTP_REFERER', '/')
     current_user = request.user.username
 
@@ -122,9 +102,7 @@ def become_user(request, username=None):
 
 
 def unbecome_user(request):
-    """
-    If user became another user, unbecome by popping become_user_stack
-    """
+    """If user became another user, unbecome by popping become_user_stack."""
     referer = request.META.get('HTTP_REFERER', '/')
 
     if ('become_user_stack' in request.session and
@@ -142,3 +120,13 @@ def unbecome_user(request):
         request.session['become_user_stack'] = become_user_stack
 
     return redirect(referer)
+
+
+def cylogin(request):
+    """Not implemented."""
+    return redirect('/')
+
+
+def cylogout(request):
+    """Not implemented. """
+    return redirect('/')
