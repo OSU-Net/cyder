@@ -7,7 +7,7 @@ class DevAuthenticationMiddleware(object):
 
     def process_request(self, request):
         # Log in as development user.
-        if request.user.is_anonymous():
+        if 'ctnr' not in request.session:
             request = login_session(request, 'development')
 
         if request.path == '/logout/':

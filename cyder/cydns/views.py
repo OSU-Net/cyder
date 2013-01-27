@@ -1,6 +1,6 @@
 import simplejson as json
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse
@@ -77,12 +77,12 @@ def cydns_view(request, pk=None):
                                                    obj_class=Klass):
                 record = form.save()
             else:
-                raise ValidationError
+                raise PermissionDenied
             # If domain, add to current ctnr.
             if record_type == 'domain':
                 request.session['ctnr'].domains.add(record)
             return redirect(record.get_list_url())
-        except (ValidationError, ValueError) as e:
+        except (ValidationError, ValueError):
             form = _revert(domain, request.POST, form, FQDNFormKlass)
 
     object_list = _filter(request, Klass)
