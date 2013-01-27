@@ -1,10 +1,13 @@
 from django.shortcuts import redirect
 
+from cyder.core.ctnr.models import Ctnr
+
 
 class AuthenticationMiddleware(object):
 
     def process_request(self, request):
-        if request.user.is_authenticated() or request.path in (u'/login/', u'/logout/'):
+        if request.user.is_authenticated() or request.path in (u'/login/',
+                                                               u'/logout/'):
             pass
         else:
             return redirect('/login/')

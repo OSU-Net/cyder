@@ -20,6 +20,7 @@ from cyder.cydns.sshfp.models import SSHFP
 
 def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     self.client = Client()
+    self.client.login(username='development', password='password')
     self.test_class = test_class
 
     # Create domain.
@@ -44,6 +45,7 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
 
 
 class AddressRecordViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'address_record'
 
     def setUp(self):
@@ -65,6 +67,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase):
 
 
 class CNAMEViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'cname'
 
     def setUp(self):
@@ -83,6 +86,7 @@ class CNAMEViewTests(cyder.base.tests.TestCase):
 
 
 class NSViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'nameserver'
 
     def setUp(self):
@@ -99,6 +103,7 @@ class NSViewTests(cyder.base.tests.TestCase):
 
 
 class MXViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'mx'
 
     def setUp(self):
@@ -121,6 +126,7 @@ class MXViewTests(cyder.base.tests.TestCase):
 
 
 class PTRViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'ptr'
 
     def setUp(self):
@@ -157,6 +163,7 @@ class PTRViewTests(cyder.base.tests.TestCase):
 
 
 class SRVViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'srv'
 
     def setUp(self):
@@ -181,6 +188,7 @@ class SRVViewTests(cyder.base.tests.TestCase):
 
 
 class TXTViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'txt'
 
     def setUp(self):
@@ -199,6 +207,7 @@ class TXTViewTests(cyder.base.tests.TestCase):
 
 
 class SSHFPViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
     name = 'sshfp'
 
     def setUp(self):

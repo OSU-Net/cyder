@@ -6,10 +6,12 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+import cyder as cy
 from cyder.base.utils import (do_sort, make_paginator,
                               make_megafilter, qd_to_py_dict, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
+from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
 from cyder.cydns.address_record.models import AddressRecord
@@ -35,15 +37,15 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 
 def cydns_view(request, pk=None):
-    """
-    List, create, update view in one for a flatter heirarchy.
-    """
+    """List, create, update view in one for a flatter heirarchy. """
     # Infer record_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
     record_type = request.path.split('/')[2]
 
-    domains = json.dumps([domain.name for domain in  # TODO: ACLs
-                          Domain.objects.filter(is_reverse=False)]),
+    domains = json.dumps([domain.name for domain in
+                          Domain.objects.filter(is_reverse=False)
+                          if perm_soft(request, cy.ACTION_UPDATE,
+                                       obj=domain)]),
 
     # Get the record form.
     Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
@@ -73,16 +75,15 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=record if record else None)
 
         try:
-            record = form.save()
+            if perm(request, cy.ACTION_CREATE, obj=record):
+                record = form.save()
+                request.session['ctnr'].domains.add(record)
             # If domain, add to current ctnr.
             if record_type == 'domain':
                 request.session['ctnr'].domains.add(record)
-            return redirect(record.get_list_url())
-        except Exception as e:
-            if type(e) in (ValidationError, ValueError):
-                form = _revert(domain, request.POST, form, FQDNFormKlass)
-            else:
-                raise e
+                return redirect(record.get_list_url())
+        except (ValidationError, ValueError):
+            form = _revert(domain, request.POST, form, FQDNFormKlass)
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
@@ -100,9 +101,7 @@ def cydns_view(request, pk=None):
 
 
 def _filter(request, Klass):
-    """
-    Apply filters.
-    """
+    """Apply filters."""
     if request.GET.get('filter'):
         return Klass.objects.filter(
             make_megafilter(Klass, request.GET.get('filter')))
@@ -110,9 +109,7 @@ def _filter(request, Klass):
 
 
 def _revert(domain, orig_qd, orig_form, FQDNFormKlass):
-    """
-    Revert domain if not valid.
-    """
+    """Revert domain if not valid."""
     prune_tree(domain)
     form = FQDNFormKlass(orig_qd)
     form._errors = orig_form._errors
@@ -120,9 +117,7 @@ def _revert(domain, orig_qd, orig_form, FQDNFormKlass):
 
 
 def _fqdn_to_domain(qd):
-    """
-    Resolve FQDN to domain and attach to record object.
-    """
+    """Resolve FQDN to domain and attach to record object. """
     domain = None
     if 'fqdn' in qd:
         fqdn = qd.pop('fqdn')[0]
@@ -163,9 +158,9 @@ def cydns_get_record(request):
 
     # Get the object if updating.
     try:
-        # ACLs should be applied here.
         record = Klass.objects.get(pk=record_pk)
-        form = FQDNFormKlass(instance=record)
+        if perm(request, cy.ACTION_UPDATE, obj=record):
+            form = FQDNFormKlass(instance=record)
     except ObjectDoesNotExist:
         raise Http404
 
@@ -199,7 +194,11 @@ def table_update(request, pk, object_type=None):
     object_type = object_type or request.path.split('/')[2]
 
     Klass, FormKlass, FQDNFormKlass = get_klasses(object_type)
-    obj = get_object_or_404(Klass, pk=pk)  # TODO: ACLs
+    obj = get_object_or_404(Klass, pk=pk)
+
+    if not perm_soft(request, cy.ACTION_UPDATE, obj=obj):
+        return HttpResponse(json.dumps({'error': 'You do not have appropriate'
+                                                 ' permissions.'}))
 
     # Put updated object into form.
     form = FQDNFormKlass(instance=obj)
