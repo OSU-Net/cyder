@@ -45,6 +45,21 @@ class Network(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Network {0}>".format(str(self))
 
+    def __contains__(self, other):
+        if self.ip_type is not other.ip_type:
+            raise Exception("__contains__ is not defined for "
+                            "ip type {0} and ip type {1}".format(
+                            self.ip_type, other.ip_type))
+        self.update_network()
+        if type(other) is type(self):
+            other.update_network()
+            return self.network.network < other.network.network < \
+                   self.other.network.broadcast < self.network.broadcast
+        else:
+            other._range_ips()
+            return self.network.network < other.network_address < \
+                    other.broadcast_address < self.broadcast_address
+
     def update_attrs(self):
         self.attrs = AuxAttr(NetworkKeyValue, self, "network")
 
@@ -105,8 +120,8 @@ class Network(models.Model, ObjectUrlMixin):
                   self.ip_lower):
                 fail = True
                 break
-            elif (range_.start_upper == self.ip_upper and range_.start_lower
-                  < self.ip_lower):
+            elif (range_.start_upper == self.ip_upper and range_.start_lower <
+                    self.ip_lower):
                 fail = True
                 break
 
@@ -217,41 +232,3 @@ class NetworkKeyValue(CommonOption):
     def _aa_description(self):
         """A descrition of this network"""
         pass
-
-    def _aa_filename(self):
-        """
-        filename filename;
-
-            The filename statement can be used to specify the name of the
-            initial boot file which is to be loaded by a client. The filename
-            should be a filename recognizable to whatever file transfer
-            protocol the client can be expected to use to load the file.
-        """
-        self.is_statement = True
-        self.is_option = False
-        self.has_validator = True
-        # Anything else?
-
-    def _aa_next_server(self):
-        """
-        The next-server statement
-
-            next-server server-name;
-
-            The next-server statement is used to specify the host address
-            of the server from which the initial boot file (specified in
-            the filename statement) is to be loaded. Server-name should be
-            a numeric IP address or a domain name. If no next-server
-            parameter applies to a given client, the DHCP server's IP
-            address is used.
-        """
-        self.has_validator = True
-        self.is_statement = True
-        self.is_option = False
-        self._single_ip(self.network.ip_type)
-
-    def _aa_dns_servers(self):
-        """A list of DNS servers for this network."""
-        self.is_statement = False
-        self.is_option = False
-        self._ip_list(self.network.ip_type)

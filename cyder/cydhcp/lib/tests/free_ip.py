@@ -14,6 +14,7 @@ from cyder.core.system.models import System
 
 
 class LibTestsFreeIP(TestCase):
+
     def setUp(self):
         self.system = System()
         Domain.objects.get_or_create(name="com")
@@ -51,7 +52,7 @@ class LibTestsFreeIP(TestCase):
         n.save()
 
         r = Range(start_str="15.0.0.0", end_str="15.0.0.10",
-                  network=n)
+                  network=n, ip_type='4')
         r.clean()
         r.save()
 

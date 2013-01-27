@@ -5,7 +5,6 @@ from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-import ipaddr
 
 
 class System(BaseModel, ObjectUrlMixin):
@@ -15,7 +14,8 @@ class System(BaseModel, ObjectUrlMixin):
     )
     hostname = models.CharField(max_length=255, unique=False)
     department = models.CharField(max_length=255, unique=False)
-    location = models.CharField(max_length=255, unique=False)
+    location = models.CharField(max_length=255, unique=False,
+                                blank=True, null=True)
 
     class Meta:
         db_table = 'system'

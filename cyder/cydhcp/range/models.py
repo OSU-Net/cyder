@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter
+from cyder.cydhcp.utils import IPFilter, two_to_one, four_to_two
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.vrf.models import Vrf
@@ -18,12 +18,15 @@ from cyder.cydns.ptr.models import PTR
 import ipaddr
 
 
+class RangeOverflowError(ValidationError):
+    pass
+
+
 class Range(models.Model, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
         >>>         defualt_domain=domain, network=network)
-
 
     Ranges live inside networks; their start ip address is greater than or
     equal to the the start of their network and their end ip address is less
@@ -43,8 +46,28 @@ class Range(models.Model, ObjectUrlMixin):
             existing range's `start` and `end` values to make sure that the new
             range does not overlap.
     """
-    id = models.AutoField(primary_key=True)
+    IP_TYPES = (
+            ('4', 'IPv4'),
+            ('6', 'IPv6'),)
 
+    ALLOW_OPTIONS = (
+            ('vrf', 'allow members of vrf'),
+            ('known-client', 'allow known-clients'),
+            ('legacy', 'ctnr-range'),)
+
+    DENY_OPTIONS = (
+            ('deny-unknown', 'deny dynamic unknown-clients'),)
+    # Some ranges have no allow statements so this option should be able to be
+    # null. There are a collection of such subnets documented in the migration
+
+    STATIC = "st"
+    DYNAMIC = "dy"
+    RANGE_TYPE = (
+        (STATIC, 'Static'),
+        (DYNAMIC, 'Dynamic'),
+    )
+
+    id = models.AutoField(primary_key=True)
     start_upper = models.BigIntegerField(null=True)
     start_lower = models.BigIntegerField(null=True)
     start_str = models.CharField(max_length=39, editable=True)
@@ -53,33 +76,19 @@ class Range(models.Model, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True)
     end_str = models.CharField(max_length=39, editable=True)
 
-    network = models.ForeignKey(Network, null=False)
+    network = models.ForeignKey(Network, null=True, blank=True)
+    is_reserved = models.BooleanField(default=False, blank=False)
 
-    ALLOW_OPTIONS = (
-            ('vrf', 'allow members of vrf'),
-            ('known-client', 'allow known-clients'),
-            ('legacy', 'ctnr-range'),
-        )
-
-    DENY_OPTIONS = (
-            ('deny-unknown', 'deny dynamic unknown-clients'),
-        )
-    # Some ranges have no allow statements so this option should be able to be
-    # null. There are a collection of such subnets documented in the migration
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS, null=True,
             blank=True)
     deny = models.CharField(max_length=20, choices=DENY_OPTIONS)
     dhcpd_raw_include = models.TextField(null=True, blank=True)
     attrs = None
 
-    STATIC = "st"
-    DYNAMIC = "dy"
-    RANGE_TYPE = (
-        (STATIC, 'Static'),
-        (DYNAMIC, 'Dynamic'),
-    )
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
                     default=STATIC, editable=False)
+    ip_type = models.CharField(max_length=1,
+            choices=IP_TYPES)
 
     class Meta:
         db_table = 'range'
@@ -87,7 +96,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End -  {4}"
+        x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End - {4}"
         return x.format(self.network.site, self.network.vlan, self.network,
                         self.start_str, self.end_str)
 
@@ -97,6 +106,12 @@ class Range(models.Model, ObjectUrlMixin):
     def update_attrs(self):
         self.attrs = AuxAttr(RangeKeyValue, self, "range")
 
+    def _range_ips(self):
+        self._start, self._end = four_to_two(
+                self.start_upper,
+                self.start_lower,
+                self.end_upper,
+                self.end_lower)
 
     def details(self):
         """For tables."""
@@ -114,15 +129,17 @@ class Range(models.Model, ObjectUrlMixin):
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
-        if not self.network:
-            raise ValidationError("ERROR: No network found")
+        if self.network == None and not self.is_reserved:
+            raise ValidationError("ERROR: Range {0}-{1} is not associated "
+                                  "with a network and is not reserved".format(
+                                  self.start_str, self.end_str))
         try:
-            if self.network.ip_type == '4':
+            if self.ip_type == '4':
                 self.start_upper, self.start_lower = 0, int(
                     ipaddr.IPv4Address(self.start_str))
                 self.end_upper, self.end_lower = 0, int(
                     ipaddr.IPv4Address(self.end_str))
-            elif self.network.ip_type == '6':
+            elif self.ip_type == '6':
                 self.start_upper, self.start_lower = ipv6_to_longs(
                     self.start_str)
                 self.end_upper, self.end_lower = ipv6_to_longs(self.end_str)
@@ -130,7 +147,6 @@ class Range(models.Model, ObjectUrlMixin):
                 raise ValidationError("ERROR: could not determine the ip type")
         except ipaddr.AddressValueError, e:
             raise ValidationError(str(e))
-
         """
         Some notes:
         start = s1 s2
@@ -152,56 +168,48 @@ class Range(models.Model, ObjectUrlMixin):
             end == start
             # Bad
         """
-        fail = False
-        if self.start_upper > self.end_upper:
-            # start > end
-            fail = True
-        if (self.start_upper == self.end_upper and self.start_lower >
-                self.end_lower):
-            # start > end
-            fail = True
-        # TODO fix this logic and consider postgres
-        if fail:
+        start, end = four_to_two(
+            self.start_upper, self.start_lower, self.end_upper, self.end_lower)
+        if start > end:
             raise ValidationError("The start of a range cannot be greater than"
                                   " or equal to the end of the range.")
-        self.network.update_network()
-        if self.network.ip_type == '4':
-            IPClass = ipaddr.IPv4Address
-        else:
-            IPClass = ipaddr.IPv6Address
+        if not self.is_reserved:
+            self.network.update_network()
+            if self.network.ip_type == '4':
+                IPClass = ipaddr.IPv4Address
+            else:
+                IPClass = ipaddr.IPv6Address
 
-        if IPClass(self.start_str) < self.network.network.network:
-            #lol, network.network.network.network.network....
-            raise ValidationError("The start of a range cannot be less than "
-                                  "it's network's network address.")
-        if IPClass(self.end_str) > self.network.network.broadcast:
-            raise ValidationError("The end of a range cannot be more than "
-                                  "it's network's broadcast address.")
-
+            if IPClass(self.start_str) < self.network.network.network or \
+                        IPClass(self.end_str) > self.network.network.broadcast:
+                raise RangeOverflowError("Range {0}-{1} doesn't fit "
+                                      "in {2}".format(self.start_lower,
+                                          self.end_lower,
+                                          self.network.network))
         self.check_for_overlaps()
 
     def check_for_overlaps(self):
         """This function will look at all the other ranges and make sure we
         don't overlap with any of them.
         """
-
-        for range_ in self.network.range_set.all():
-            if range_.pk == self.pk:
+        self._range_ips()
+        Ip = ipaddr.IPv4Address if self.ip_type == '4' else ipaddr.IPv6Address
+        for range in Range.objects.all():
+            if range.pk == self.pk:
                 continue
-
+            range._range_ips()
+            #the range being tested is above this range
+            if self._start > range._end:
+                continue
             # start > end
-            if self.start_upper > range_.end_upper:
+            if self._end < range._start:
                 continue
-            if (self.start_upper == range_.end_upper and self.start_lower >
-                    range_.end_lower):
-                continue
-            # end < start
-            if self.end_upper < range_.start_upper:
-                continue
-            if (self.end_upper == range_.start_upper and self.end_lower <
-                    range_.start_lower):
-                continue
-            raise ValidationError("Ranges cannot exist inside of other ranges.")
+            raise ValidationError("Stored range {0} - {1} would contain "
+                                  "{2} - {3}".format(
+                                      Ip(range._start),
+                                      Ip(range._end),
+                                      Ip(self._start),
+                                      Ip(self._end)))
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
@@ -210,7 +218,7 @@ class Range(models.Model, ObjectUrlMixin):
                             object_=self)
 
     def display(self):
-        return "Range: {3} to {4}  {0} -- {2} -- {1}  ".format(
+        return "Range: {3} to {4} {0} -- {2} -- {1}".format(
             self.network.site, self.network.vlan, self.network,
             self.start_str, self.end_str)
 
@@ -235,12 +243,11 @@ class Range(models.Model, ObjectUrlMixin):
 
             :returns: ipaddr.IPv4Address
         """
-        if self.network.ip_type != '4':
+        if self.network.ip_type is not '4':
             return None
         start = self.start_lower
         end = self.end_lower
         if start >= end - 1:
-            # XXX wth? remove this
             return HttpResponse("Too small of a range.")
         ip = find_free_ip(start, end, ip_type='4')
         if ip:

@@ -479,6 +479,12 @@ class CommonOption(KeyValue):
         self.has_validator = True
         self._int_list_validator(16)
 
+    def _aa_dns_servers(self):
+        """A list of DNS servers for this network."""
+        self.is_statement = False
+        self.is_option = False
+        self._ip_list(self.network.ip_type)
+
     def _aa_filename(self):
         """
         The filename statement

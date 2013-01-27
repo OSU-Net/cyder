@@ -1,5 +1,5 @@
 import ipaddr
-
+from itertools import imap
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
@@ -149,9 +149,8 @@ def two_to_one(upper, lower):
 
 
 def four_to_two(start_upper, start_lower, end_upper, end_lower):
-    start = start_upper << 64 + start_lower
-    end = end_upper << 64 + end_lower
-    return start, end
+    return (two_to_one(start_upper, start_lower),
+            two_to_one(end_upper, end_lower))
 
 
 def int_to_ip(ip, ip_type):
@@ -165,3 +164,13 @@ def int_to_ip(ip, ip_type):
     elif ip_type == '4':
         IPKlass = ipaddr.IPv4Address
     return str(IPKlass(ip))
+
+
+def find_network_for_range(start, end,):
+    from cyder.cydhcp.network.models import Network
+    for network in Network.objects.all():
+        network.update_network()
+        if int(network.network.network) < start < end < \
+                        int(network.network.broadcast):
+            return network
+    return None

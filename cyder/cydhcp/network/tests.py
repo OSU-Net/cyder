@@ -67,7 +67,8 @@ class NetworkTests(TestCase):
         end_str = "129.0.0.255"
         network = s
 
-        r = Range(start_str=start_str, end_str=end_str, network=network)
+        r = Range(start_str=start_str, end_str=end_str, network=network,
+                ip_type='4')
         r.save()
 
         self.assertEqual(r.network, s)
@@ -93,7 +94,8 @@ class NetworkTests(TestCase):
         end_str = "129.0.0.255"
         network = s
 
-        r = Range(start_str=start_str, end_str=end_str, network=network)
+        r = Range(start_str=start_str, end_str=end_str, network=network,
+                ip_type='4')
         r.clean()
         r.save()
 

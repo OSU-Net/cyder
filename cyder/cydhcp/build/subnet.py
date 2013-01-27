@@ -28,10 +28,10 @@ def build_subnet(network, raw=False):
         raise NotImplemented()
     network.update_network()
     network_raw_include = network.dhcpd_raw_include
-    network_statements = NetworkKeyValue.objects.filter(network=network,
-                                                        is_statement=True)
-    network_options = NetworkKeyValue.objects.filter(network=network,
-                                                        is_option=True)
+    network_statements = NetworkKeyValue.objects.filter(
+                                network=network, is_statement=True)
+    network_options = NetworkKeyValue.objects.filter(
+                                network=network, is_option=True)
     network.update_attrs()
     ip_lower_start = int(network.network.network)
     ip_lower_end = int(network.network.broadcast) - 1
@@ -40,7 +40,6 @@ def build_subnet(network, raw=False):
             ip_lower__gte=ip_lower_start, ip_lower__lte=ip_lower_end,
             dhcp_enabled=True, ip_type='4')
     ranges = network.range_set.all()
-    # Let's assume all options need a ';' appended.
     build_str = "\nsubnet {0} netmask {1} {{\n".format(
             network.network.network, network.network.netmask)
     if not raw:
