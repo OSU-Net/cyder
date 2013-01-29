@@ -116,12 +116,19 @@ class Range(models.Model, ObjectUrlMixin):
     def details(self):
         """For tables."""
         data = super(Range, self).details()
-        data['data'] = [
-            ('Site', 'network__site', self.network.site),
-            ('Vlan', 'network__vlan', self.network.vlan),
+        if self.is_reserved:
+            network_details = [
+            ('Network', 'network', ""),
+            ('Site', 'network__site', ""),
+            ('Vlan', 'network__vlan', ""),]
+        else:
+            network_details = [
             ('Network', 'network', self.network),
+            ('Site', 'network__site', self.network.site),
+            ('Vlan', 'network__vlan', self.network.vlan)]
+        data['data'] = [
             ('Start', 'start_str', self.start_str),
-            ('End', 'end_str', self.end_str)]
+            ('End', 'end_str', self.end_str)] + network_details
         return data
 
     def save(self, *args, **kwargs):

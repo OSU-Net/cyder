@@ -97,5 +97,5 @@ def site_detail(request, site_pk):
             "vlans": vlans,
             "no_vlan_networks": no_vlan_networks,
             "child_sites": child_sites,
-            "attrs": attrs
+            "attrs": attrs or [""]
         })

@@ -24,6 +24,8 @@ class System(BaseModel, ObjectUrlMixin):
     def details(self):
         data = super(System, self).details()
         data['data'] = [
-            ('Name', 'name', self.name),
+            ('Host Name', 'hostname', self.hostname),
+            ('Department', 'department', self.department),
+            ('Location', 'location', self.location),
         ]
         return data

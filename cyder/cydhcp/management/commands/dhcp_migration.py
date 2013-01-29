@@ -215,6 +215,7 @@ def migrate_workgroups():
                len(migrated),
                len([y for x, y in migrated if y])))
 
+
 def create_ctnr(id):
     cursor.execute("SELECT * FROM zone WHERE id={0}".format(id))
     _, name, desc, comment, _, _, _, _ = cursor.fetchone()
@@ -301,6 +302,7 @@ def maintain_find_range(range_id):
         return Range.objects.get(start_lower=start, end_lower=end)
     return None
 
+
 def maintain_find_domain(domain_id):
     if cursor.execute("SELECT name "
                        "FROM `domain` "
@@ -309,11 +311,13 @@ def maintain_find_domain(domain_id):
         return Domain.objects.get(name=name)
     return None
 
+
 def maintain_find_zone(zone_id):
     if cursor.execute("SELECT name FROM zone where id = {0}".format(zone_id)):
         name = cursor.fetchone()[0]
         return Ctnr.objects.get(name=name) if name else None
     return None
+
 
 def maintain_find_workgroup(workgroup_id):
     if cursor.execute("SELECT name "
@@ -322,6 +326,7 @@ def maintain_find_workgroup(workgroup_id):
         name = cursor.fetchone()[0]
         return Workgroup.objects.get(name=name)
     return None
+
 
 class Command(BaseCommand):
 
@@ -370,7 +375,12 @@ class Command(BaseCommand):
                 action='store_true',
                 dest='delete',
                 default=False,
-                help='Fuck it we will do it live'))
+                help='Fuck it we will do it live'),
+            make_option('-a', '--all',
+                action='store_true',
+                dest='all',
+                default=False,
+                help='Migrate everything'))
 
     def handle(self, **options):
         if options['vlan']:
@@ -395,3 +405,12 @@ class Command(BaseCommand):
             Ctnr.objects.all().delete()
             DynamicInterface.objects.all().delete()
             Workgroup.objects.all().delete()
+        if options['all']:
+            migrate_vlans()
+            migrate_zones()
+            migrate_workgroups()
+            migrate_subnets()
+            migrate_ranges()
+            migrate_dynamic_hosts()
+            migrate_zone_range()
+            migrate_zone_workgroup()
