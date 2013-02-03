@@ -96,9 +96,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        x = "Site: {0} Vlan: {1} Network: {2} Range: Start - {3} End - {4}"
-        return x.format(self.network.site, self.network.vlan, self.network,
-                        self.start_str, self.end_str)
+        return "{0}  -  {1}".format(self.start_str, self.end_str)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -116,19 +114,12 @@ class Range(models.Model, ObjectUrlMixin):
     def details(self):
         """For tables."""
         data = super(Range, self).details()
-        if self.is_reserved:
-            network_details = [
-            ('Network', 'network', ""),
-            ('Site', 'network__site', ""),
-            ('Vlan', 'network__vlan', ""),]
-        else:
-            network_details = [
-            ('Network', 'network', self.network),
-            ('Site', 'network__site', self.network.site),
-            ('Vlan', 'network__vlan', self.network.vlan)]
+        has_net = self.network is not None
         data['data'] = [
-            ('Start', 'start_str', self.start_str),
-            ('End', 'end_str', self.end_str)] + network_details
+            ('Range', 'start_str', self),
+            ('Network', 'network', self.network if has_net else ""),
+            ('Site', 'network__site', self.network.site if has_net else ""),
+            ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
         return data
 
     def save(self, *args, **kwargs):

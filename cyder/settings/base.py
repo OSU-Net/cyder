@@ -114,7 +114,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'jingo_minify',
     'tastypie',
     'tastytools',
-    'reversion',
+    #'reversion',
 
     # Django contrib apps
     'django.contrib.sessions',

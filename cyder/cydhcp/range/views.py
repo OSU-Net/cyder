@@ -2,6 +2,7 @@ import json
 
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -101,8 +102,16 @@ def range_detail(request, range_pk):
         if not taken:
             range_data.append((None, ip_str))
 
+    paginator = Paginator(range_data, 20)
+    page = request.GET.get('page')
+    try:
+        range_data = paginator.page(page)
+    except PageNotAnInteger:
+        range_data = paginator.page(1)
+    except EmptyPage:
+        range_data = paginator.page(num_pages)
     return render(request, 'range/range_detail.html', {
-        'range': mrange,
+        'range_': mrange,
         'attrs': attrs,
         'range_data': range_data
     })
