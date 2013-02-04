@@ -13,6 +13,8 @@ class Vrf(models.Model, ObjectUrlMixin):
     class Meta:
         db_table = 'vrf_class'
 
+    def __str__(self):
+        return "Vrf {0} for {1}".format(self.name, self.network)
 
 class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)
