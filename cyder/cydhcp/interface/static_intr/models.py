@@ -107,11 +107,13 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         self.attrs = AuxAttr(StaticIntrKeyValue, self, "intr")
 
     def details(self):
-        return (
+        data = super(StaticInterface, self).details()
+        data['data'] = (
             ("Name", self.fqdn),
             ("DNS Type", "A/PTR"),
             ("IP", self.ip_str),
         )
+        return data
 
     class Meta:
         db_table = "static_interface"
@@ -127,13 +129,14 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         return 'INTR'
 
     def get_update_url(self):
-        return "/cydhcp/interface/{0}/update/".format(self.pk)
+        return "/cydhcp/interface/static/update{0}".format(self.pk)
+
 
     def get_delete_url(self):
-        return "/cydhcp/interface/{0}/delete/".format(self.pk)
+        return "/cydhcp/interface/static/delete/{0}".format(self.pk)
 
     def get_detail_url(self):
-        return "/systems/show/{0}/".format(self.system.pk)
+        return "/interface/static/{0}".format(self.system.pk)
 
     def interface_name(self):
         self.update_attrs()

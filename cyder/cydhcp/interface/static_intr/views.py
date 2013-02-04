@@ -7,13 +7,42 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.core.system.models import System
+from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
                                          get_docstrings, dict_to_kv)
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.views import (CydhcpListView, CydhcpDetailView,
+                                CydhcpDeleteView, CydhcpUpdateView,
+                                CydhcpCreateView)
 
+
+class StaticInterfaceView(object):
+    model = StaticInterface
+    form_class = StaticInterfaceForm
+    queryset = StaticInterface.objects.all()
+
+
+class StaticInterfaceListView(StaticInterfaceView, CydhcpListView):
+    """"""
+
+
+class StaticInterfaceUpdateView(StaticInterfaceView, CydhcpListView):
+    """"""
+
+
+class StaticInterfaceDeleteView(StaticInterfaceView, CydhcpDeleteView):
+    """"""
+
+
+class StaticInterfaceDetailView(StaticInterfaceView, CydhcpDetailView):
+    """"""
+
+
+class StaticInterfaceCreateView(StaticInterfaceView, CydhcpCreateView):
+    """"""
 
 
 def detail_static_interface(reqeust, intr_pk):

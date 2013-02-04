@@ -22,3 +22,14 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     class Meta:
         db_table = 'dynamic_interface'
+
+    def details(self):
+        data = super(DynamicInterface, self).details()
+        data['data'] = [
+                ('System', 'system', self.system),
+                ('Mac', 'mac', self.mac),
+                ('Range', 'range', self.range),
+                ('Workgroup', 'workgroup', self.workgroup),
+                ('Vrf', 'vrf', self.vrf),
+                ('Domain', 'domain', self.domain),]
+        return data

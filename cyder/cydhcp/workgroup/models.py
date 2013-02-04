@@ -12,6 +12,9 @@ class Workgroup(models.Model, ObjectUrlMixin):
     class Meta:
         db_table = 'workgroup'
 
+    def __str__(self):
+        return self.name
+
 
 class WorkgroupKeyValue(CommonOption):
     workgroup = models.ForeignKey(Workgroup, null=False)
