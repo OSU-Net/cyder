@@ -136,7 +136,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         return "/cydhcp/interface/static/delete/{0}".format(self.pk)
 
     def get_detail_url(self):
-        return "/interface/static/{0}".format(self.system.pk)
+        return "cydhcp/interface/static/{0}".format(self.system.pk)
 
     def interface_name(self):
         self.update_attrs()
