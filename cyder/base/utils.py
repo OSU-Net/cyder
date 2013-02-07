@@ -113,11 +113,30 @@ def make_megafilter(Klass, term):
     return reduce(operator.or_, megafilter)
 
 
+def _filter(request, Klass):
+    if request.GET.get('filter'):
+        return Klass.objects.filter(make_megafilter(Klass,
+                                    request.GET.get('filter')))
+    return Klass.objects.all()
+
+
 def qd_to_py_dict(qd):
     """Django QueryDict to Python dict."""
     ret = {}
     for k in qd:
         ret[k] = qd[k]
+    return ret
+
+
+def model_to_post(post, obj):
+    """
+    Updates requests's POST dictionary with values from object, for update
+    purposes.
+    """
+    ret = qd_to_py_dct(post)
+    for k, v in model_to_dict(obj).iteritems():
+        if k not in post:
+            ret[k] = v
     return ret
 
 

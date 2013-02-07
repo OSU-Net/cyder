@@ -160,6 +160,7 @@ class CommonOption(KeyValue):
             option domain-search "example.com", "sales.example.com";
         """
         self.is_option = True
+        self.is_quoted = True
         self.is_statement = False
         self.has_validator = True
         self._domain_list_validator()

@@ -7,8 +7,8 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 import cyder as cy
-from cyder.base.utils import (do_sort, make_paginator,
-                              make_megafilter, qd_to_py_dict, tablefy)
+from cyder.base.utils import (do_sort, make_paginator, _filter,
+                              make_megafilter, model_to_post, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView)
 from cyder.core.cyuser.utils import perm, perm_soft
@@ -56,7 +56,7 @@ def cydns_view(request, pk=None):
 
     if request.method == 'POST':
         # Create initial FQDN form.
-        form = FQDNFormKlass(request.POST, instance=record if record else None)
+        form = FQDNFormKlass(request.POST, instance=record)
 
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
@@ -72,7 +72,7 @@ def cydns_view(request, pk=None):
                 'obj': record
             })
         else:
-            form = FormKlass(qd, instance=record if record else None)
+            form = FormKlass(qd, instance=record)
 
         try:
             if perm(request, cy.ACTION_CREATE, obj=record):
@@ -98,14 +98,6 @@ def cydns_view(request, pk=None):
         'record_type': record_type,
         'pk': pk,
     })
-
-
-def _filter(request, Klass):
-    """Apply filters."""
-    if request.GET.get('filter'):
-        return Klass.objects.filter(
-            make_megafilter(Klass, request.GET.get('filter')))
-    return Klass.objects.all()
 
 
 def _revert(domain, orig_qd, orig_form, FQDNFormKlass):
@@ -217,21 +209,7 @@ def table_update(request, pk, object_type=None):
     if form.is_valid():
         form.save()
         return HttpResponse()
-    else:
-        return HttpResponse(json.dumps({'error': form.errors}))
-
-
-def model_to_post(post, obj):
-    """
-    Updates request's POST dictionary with values from object, for update
-    purposes.
-    """
-    ret = qd_to_py_dict(post)
-    # Copy model values to dict.
-    for k, v in model_to_dict(obj).iteritems():
-        if k not in post:
-            ret[k] = v
-    return ret
+    return HttpResponse(json.dumps({'error': form.errors}))
 
 
 def get_klasses(record_type):

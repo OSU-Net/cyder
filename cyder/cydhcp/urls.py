@@ -9,7 +9,8 @@ urlpatterns = patterns('',
    url(r'^range/', include('cyder.cydhcp.range.urls')),
    url(r'^site/', include('cyder.cydhcp.site.urls')),
    url(r'^vlan/', include('cyder.cydhcp.vlan.urls')),
-   url(r'^interface/', include('cyder.cydhcp.interface.urls')),
-   url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
+   url(r'^statc/', include('cyder.cydhcp.interface.static_intr.urls')),
+   #url(r'^dynamic/', include('cyder.cydhcp.interface.dynamic_intr.urls'))
+   #url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
 
 )
