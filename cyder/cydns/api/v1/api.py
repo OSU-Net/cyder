@@ -1,5 +1,5 @@
 from gettext import gettext as _
-import simplejson as json
+import json as json
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 

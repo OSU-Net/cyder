@@ -1,4 +1,4 @@
-import simplejson as json
+import json as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib import messages

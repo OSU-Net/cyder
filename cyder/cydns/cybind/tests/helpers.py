@@ -1,5 +1,5 @@
 from gettext import gettext as gt
-import simplejson as json
+import json as json
 import time
 
 from django.core.exceptions import ValidationError

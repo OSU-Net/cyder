@@ -1,6 +1,6 @@
 from gettext import gettext as _
 from jinja2 import Environment, PackageLoader
-import simplejson as json
+import json as json
 
 from django.shortcuts import render
 from django.http import HttpResponse

@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.cybind.zone_builder import build_zone_data
 
-import simplejson as json
+import json as json
 
 
 def build_debug_soa(request, soa_pk):

@@ -1,4 +1,4 @@
-import simplejson as json
+import json as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.models import model_to_dict

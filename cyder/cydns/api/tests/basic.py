@@ -14,7 +14,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
 
-import simplejson as json
+import json as json
 
 API_VERSION = '1'
 

@@ -27,17 +27,17 @@
 
   {% if user_table %}
     <h3>Users</h3>
-    {{ render_table(user_table, 'user-table') }}
+    {{ render_table(request, user_table, 'user-table') }}
   {% endif %}
 
   {% if domain_table %}
     <h3>Domains</h3>
-    {{ render_table(domain_table) }}
+    {{ render_table(request, domain_table) }}
   {% endif %}
 
   {% if rdomain_table %}
     <h3>Reverse Domains</h3>
-    {{ render_table(rdomain_table) }}
+    {{ render_table(request, rdomain_table) }}
   {% endif %}
 
   {{ js('ctnr') }}
