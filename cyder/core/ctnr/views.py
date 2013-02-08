@@ -34,7 +34,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
 
         # Add user levels of ctnr to user table.
         users = ctnr.users.all()
-        extra_cols = [{'header': 'Level to %s' % ctnr.name}]
+        extra_cols = [{'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'}]
         extra_cols[0]['data'] = [
             {'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level],
              'url': ''} for user in users]

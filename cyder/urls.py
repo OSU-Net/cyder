@@ -25,8 +25,9 @@ urlpatterns = patterns('',
    (r'^api/', include(v1_dns_api.urls)),
    (r'^ctnr/', include('cyder.core.ctnr.urls')),
    (r'^search/', include('cyder.search.urls')),
-   url(r'^login/$', cyuser_views.cylogin, name='login'),
-   url(r'^logout/$', cyuser_views.cylogout, name='logout'),
+
+   url(r'^accounts/login/$', 'django_cas.views.login', name='login'),
+   url(r'^accounts/logout/$', 'django_cas.views.logout', name='logout'),
 )
 
 if settings.DEBUG:

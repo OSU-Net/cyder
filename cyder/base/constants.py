@@ -12,10 +12,12 @@ ACTIONS = {
 LEVEL_GUEST = 0
 LEVEL_USER = 1
 LEVEL_ADMIN = 2
+LEVEL_SUPERUSER = 3
 LEVELS = {
     LEVEL_GUEST: 'Guest',
     LEVEL_USER: 'User',
     LEVEL_ADMIN: 'Admin',
+    LEVEL_SUPERUSER: 'Superuser',
 }
 
 IP_TYPE_4 = '4'

@@ -2,11 +2,12 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import signals
 
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.core.cyuser import backends
 from cyder.core.ctnr.models import Ctnr
 
 
-class UserProfile(models.Model):
+class UserProfile(models.Model, ObjectUrlMixin):
     user = models.OneToOneField(User)
     default_ctnr = models.ForeignKey(Ctnr, default=2)
     phone_number = models.IntegerField(null=True)
@@ -23,15 +24,14 @@ class UserProfile(models.Model):
 
     def details(self):
         """For tables."""
-        return {
-            'url': '',
-            'data': [
-                ('Username', self.user.username),
-                ('First Name', self.user.first_name),
-                ('Last Name', self.user.last_name),
-                ('Email', self.user.email),
-            ]
-        }
+        data = super(UserProfile, self).details()
+        data['data'] = [
+            ('Username', 'user__username', self.user.username),
+            ('First Name', 'user__firstname', self.user.first_name),
+            ('Last Name', 'user__lastname', self.user.last_name),
+            ('Email', 'user__email', self.user.email),
+        ]
+        return data
 
     def save(self, *args, **kwargs):
         if not self.pk:
