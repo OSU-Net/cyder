@@ -109,9 +109,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def details(self):
         data = super(StaticInterface, self).details()
         data['data'] = (
-            ("Name", self.fqdn),
-            ("DNS Type", "A/PTR"),
-            ("IP", self.ip_str),
+            ("Name", 'fqdn', self),
+            ("IP", 'ip_str', str(self.ip_str)),
+            ("DNS Type", '', "A/PTR"),
         )
         return data
 
@@ -127,7 +127,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     @property
     def rdtype(self):
         return 'INTR'
-
+    """
     def get_update_url(self):
         return "/cydhcp/interface/static/update{0}".format(self.pk)
 
@@ -137,6 +137,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     def get_detail_url(self):
         return "cydhcp/interface/static/{0}".format(self.system.pk)
+    """
 
     def interface_name(self):
         self.update_attrs()
@@ -237,8 +238,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def __str__(self):
         #return "IP:{0} Full Name:{1} Mac:{2}".format(self.ip_str,
         #        self.fqdn, self.mac)
-        return "IP:{0} Full Name:{1}".format(self.ip_str,
-                                             self.fqdn)
+        return self.fqdn
 
 
 class StaticIntrKeyValue(KeyValue):

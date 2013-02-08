@@ -1,11 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList, ErrorDict
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from cyder.base.views import (BaseListView, BaseDetailView, BaseCreateView,
                               BaseUpdateView, BaseDeleteView)
 from cyder.base.utils import (do_sort, make_paginator, model_to_post,
                               make_megafilter, tablefy, _filter)
+from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydhcp.forms import IpSearchForm
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
@@ -25,14 +27,15 @@ from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cyhdcp.workgroup.forms import WorkgroupForm
+from cyder.cydhcp.workgroup.forms import WorkgroupForm
 import ipaddr
-
+import simplejson as json
 
 def cydhcp_view(request, pk=None):
     obj_type = request.path.split('/')[2]
     Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
+    form = FormKlass(instance=obj)
     if request.method == 'POST':
         form = FormKlass(request.POST, instance=obj)
         if not form.is_valid():
@@ -44,8 +47,8 @@ def cydhcp_view(request, pk=None):
         'form': form,
         'obj': obj,
         'page_obj': page_obj,
-        'object_table': tablefy(page_obj, view=True),
-        'record_type': record_type,
+        'object_table': tablefy(page_obj, views=True),
+        'record_type': obj_type,
         'pk': pk,
     })
 
@@ -90,9 +93,9 @@ def table_update(request, pk, obj_type=None):
     obj_type = obj_type or request.path.split('/')[2]
     Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk)
-    if not perm_soft(request, ct.ACTION_UPDATE, obj=obj)
-        return HttpResponse(json.dumps('error': "You do not have the "
-                                                "appropriate permissions"))
+    if not perm_soft(request, ct.ACTION_UPDATE, obj=obj):
+        return HttpResponse(json.dumps({'error': "You do not have the "
+                                                 "appropriate permissions"}))
     form = FormKlass(instance=obj)
     if form.is_valid():
         form.save()
@@ -102,12 +105,12 @@ def table_update(request, pk, obj_type=None):
 
 def get_klasses(record_type):
     return {
-        'network': (Netowork, NetworkForm),
+        'network': (Network, NetworkForm),
         'range': (Range, RangeForm),
         'site': (Site, SiteForm),
         'vlan': (Vlan, VlanForm),
-        'static_intr': (StaticInterface, StaticInterfaceForm),
-        'dynamic_intr': (DynamicInterface, DynamicInterfaceForm),
+        'static_interface': (StaticInterface, StaticInterfaceForm),
+        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
         'workgroup': (Workgroup, WorkgroupForm),
         }.get(record_type, (None, None))
 

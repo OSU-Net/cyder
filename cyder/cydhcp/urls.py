@@ -1,5 +1,18 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
+from cyder.cydhcp.views import cydhcp_view, cydhcp_delete, table_update
+
+def cydhcp_urls(object_type):
+    """Url generator for DHCP views"""
+    return patterns('',
+        url(r'^$', cydhcp_view, name=object_type),
+        url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
+            name=object_type + '-update'),
+        url(r'^(?P<pk>[\w-]+)/delete/$', cydhcp_delete,
+            name=object_type + '-delete'),
+        url(r'^(?P<pk>[\w-]+)/tableupdate/$', table_update,
+            name=object_type + '-table-update'),
+    )
 
 
 urlpatterns = patterns('',
@@ -9,8 +22,8 @@ urlpatterns = patterns('',
    url(r'^range/', include('cyder.cydhcp.range.urls')),
    url(r'^site/', include('cyder.cydhcp.site.urls')),
    url(r'^vlan/', include('cyder.cydhcp.vlan.urls')),
-   url(r'^statc/', include('cyder.cydhcp.interface.static_intr.urls')),
-   #url(r'^dynamic/', include('cyder.cydhcp.interface.dynamic_intr.urls'))
-   #url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
+   url(r'^static_interface/', include('cyder.cydhcp.interface.static_intr.urls')),
+   url(r'^dynamic/', include('cyder.cydhcp.interface.dynamic_intr.urls')),
+   url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
 
 )

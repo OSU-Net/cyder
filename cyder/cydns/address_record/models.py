@@ -62,6 +62,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
             ('Domain', 'domain__name', self.domain),
             ('Record Type', 'record_type', self.record_type()),
             ('IP', 'ip_str', str(self.ip_str)),
+            ('Name', 'fqdn', self.fqdn),
         ]
         return data
 
