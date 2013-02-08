@@ -2,5 +2,7 @@ django-tastypie
 ipaddr
 mimeparse
 python-ldap
+django-reversion
+ply
 
 -r ../vendor/src/funfactory/funfactory/requirements/prod.txt
