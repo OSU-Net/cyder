@@ -75,7 +75,8 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=record if record else None)
 
         try:
-            if perm(request, cy.ACTION_CREATE, obj=record):
+            if (perm(request, cy.ACTION_CREATE, obj=record) and
+                record_type != 'soa'):
                 record = form.save()
                 request.session['ctnr'].domains.add(record)
             # If domain, add to current ctnr.

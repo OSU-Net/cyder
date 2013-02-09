@@ -2,10 +2,9 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from django_cas.models import SessionServiceTicket
-import requests
+# from django_cas.models import SessionServiceTicket
+# import requests
 
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.cyuser.views import login_session
 
 
