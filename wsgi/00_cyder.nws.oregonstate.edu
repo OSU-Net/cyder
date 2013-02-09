@@ -2,14 +2,19 @@ MaxRequestsPerChild 1
 
 WSGISocketPrefix /var/run/wsgi
 
-<VirtualHost *:80>
-    DirectoryIndex index.html
-    Options -Indexes
-
-    RewriteEngine On
-
+<VirtualHost *:443>
+    ServerName cyder.nws.oregonstate.edu 
     DocumentRoot "/home/ngoke/chili/"
     
+    DirectoryIndex index.html
+    Options -Indexes
+    RewriteEngine On
+
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/star_nws.oregonstate.edu/star_nws.oregonstate.edu.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/star_nws.oregonstate.edu/star_nws.oregonstate.edu.key
+    SSLCertificateChainFile /etc/apache2/ssl/star_nws.oregonstate.edu/gd_bundle.crt
+
     Alias /media /home/ngoke/chili/media
     Alias /home/ngoke/ /home/ngoke/chili/media
     Alias /docs/ /home/ngoke/chili/docs/_build/html/
@@ -46,9 +51,11 @@ WSGISocketPrefix /var/run/wsgi
     </Proxy>
 </VirtualHost>
 
-<VirtualHost *:443>
-    SSLEngine on
-    SSLCertificateFile /etc/apache2/ssl/star_nws.oregonstate.edu/star_nws.oregonstate.edu.crt
-    SSLCertificateKeyFile /etc/apache2/ssl/star_nws.oregonstate.edu/star_nws.oregonstate.edu.key
-    SSLCertificateChainFile /etc/apache2/ssl/star_nws.oregonstate.edu/gd_bundle.crt
+<VirtualHost *:80>
+    ServerName cyder.nws.oregonstate.edu 
+
+    RewriteEngine   on  
+    RewriteCond     %{SERVER_PORT} ^80$
+    RewriteRule     ^(.*)$ https://%{SERVER_NAME}$1 [L,R]
+    RewriteLogLevel 2
 </VirtualHost>

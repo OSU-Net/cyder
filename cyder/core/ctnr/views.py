@@ -38,7 +38,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         extra_cols[0]['data'] = [
             {'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level],
              'url': ''} for user in users]
-        user_table = tablefy(users, users=True, extra_cols=extra_cols)
+        user_table = tablefy(users, extra_cols=extra_cols, users=True)
 
         domains = ctnr.domains.filter(is_reverse=False)
         domain_table = tablefy(domains)

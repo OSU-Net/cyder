@@ -31,18 +31,10 @@ class AuthenticationMiddleware(object):
                 session_key=request.session.session_key).service_ticket
 
             url = 'https://cyder.nws.oregonstate.edu'
-            headers = {
-                'soapaction': 'http://www.oasis-open.org/committees/security',
-                'cache-control': 'no-cache',
-                'pragma': 'no-cache',
-                'accept': 'text/xml',
-                'connection': 'keep-alive',
-                'content-type': 'text/xml'
-            }
             res = requests.post(
                 'https://login.oregonstate.edu/cas/samlValidate?TARGET=%s' % url,
-                data=get_saml_assertion(ticket), headers=headers),
+                data=get_saml_assertion(ticket))
 
             # from django.http import HttpResponse
             # import cgi
-            # return HttpResponse(str(res[0].text))
+            # return HttpResponse(str(res.text) + str(res.url) + str(dir(res)))

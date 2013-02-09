@@ -30,9 +30,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     :param  objects: A list of objects to make table from.
     :type   objects: Generic object.
     :param  extra_cols: Extra columns to add outside of objects' .details()
-    :type  extra_cols: [{'col_header': '',
-                         'col_data': [{'value': '',
-                                       'url': ''}]
+    :type  extra_cols: [{'header': '',
+                         'data': [{'value': '',
+                                   'url': ''}]
                        },]
     """
     if not objects:
