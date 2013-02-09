@@ -1,0 +1,54 @@
+MaxRequestsPerChild 1
+
+WSGISocketPrefix /var/run/wsgi
+
+<VirtualHost *:80>
+    DirectoryIndex index.html
+    Options -Indexes
+
+    RewriteEngine On
+
+    DocumentRoot "/home/ngoke/chili/"
+    
+    Alias /media /home/ngoke/chili/media
+    Alias /home/ngoke/ /home/ngoke/chili/media
+    Alias /docs/ /home/ngoke/chili/docs/_build/html/
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel debug
+
+    CustomLog /var/log/apache2/access.log combined
+    ErrorLog /var/log/apache2/error.log
+
+    <Directory "/home/ngoke/chili/docs/_build/html/">
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    WSGIDaemonProcess playdoh user=www-data group=www-data processes=2 threads=15 maximum-requests=4
+    WSGIProcessGroup playdoh
+    WSGIScriptAlias / /home/ngoke/chili/wsgi/chili.wsgi
+
+    <Directory "/home/ngoke/chili">
+        AllowOverride none
+        AuthType Basic
+        AuthName "Cyder Bros"
+        AuthUserFile "/etc/apache2/.htpasswd"
+        require valid-user
+    </Directory>
+
+    <Proxy *>
+        AddDefaultCharset off
+        Order deny,allow
+        Deny from all
+        Allow from all
+    </Proxy>
+</VirtualHost>
+
+<VirtualHost *:443>
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/ssl/star_nws.oregonstate.edu/star_nws.oregonstate.edu.crt
+    SSLCertificateKeyFile /etc/apache2/ssl/star_nws.oregonstate.edu/star_nws.oregonstate.edu.key
+    SSLCertificateChainFile /etc/apache2/ssl/star_nws.oregonstate.edu/gd_bundle.crt
+</VirtualHost>
