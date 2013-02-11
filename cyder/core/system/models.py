@@ -6,24 +6,24 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 
 
 class System(BaseModel, ObjectUrlMixin):
-    hostname = models.CharField(max_length=255, unique=False)
+    name = models.CharField(max_length=255, unique=False)
     department = models.CharField(max_length=255, unique=False)
     location = models.CharField(max_length=255, unique=False,
                                 blank=True, null=True)
 
-    search_fields = ('hostname',)
+    search_fields = ('name',)
 
     def __str__(self):
-        return self.hostname
+        return self.name
 
     class Meta:
         db_table = 'system'
-        unique_together = ('hostname', 'location', 'department')
+        unique_together = ('name', 'location', 'department')
 
     def details(self):
         data = super(System, self).details()
         data['data'] = [
-            ('Host Name', 'hostname', self),
+            ('Name', 'name', self),
             ('Department', 'department', self.department),
             ('Location', 'location', self.location),
         ]
