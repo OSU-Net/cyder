@@ -15,7 +15,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
     domains = models.ManyToManyField(Domain, null=False, blank=True)
     ranges = models.ManyToManyField(Range, null=False, blank=True)
     workgroups = models.ManyToManyField(Workgroup, null=False, blank=True)
-    description = models.CharField(max_length=200, blank=True)
+    description = models.CharField(max_length=510, blank=True)
 
     class Meta:
         db_table = 'ctnr'
