@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from utilities import get_cursor
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
@@ -49,8 +49,11 @@ def create_subnet(id, name, subnet, netmask, status, vlan):
         print "vlan does not exist {0}".format(vlan)
     network = ipaddr.IPv4Address(subnet)
     prefixlen = str(calc_prefixlen(netmask))
-    n = Network.objects.get_or_create(network_str=network + '/' + prefixlen,
-            ip_type='4', site=s, vlan=v)
+    n = Network.objects.get_or_create(
+        network_str=network + '/' + prefixlen,
+        ip_type='4',
+        site=s,
+        vlan=v)
     return n
 
 
@@ -69,7 +72,7 @@ def create_range(id, start, end, type, subnet_id, comment, en, parent, allow):
         return
     r_type = 'st' if type == 'static' else 'dy'
     n = Network.objects.get(ip_lower=subnet,
-            prefixlen=str(calc_prefixlen(netmask)))
+                            prefixlen=str(calc_prefixlen(netmask)))
     r = Range(start_lower=start, start_str=ipaddr.IPv4Address(start),
               end_lower=end, end_str=ipaddr.IPv4Address(end), network=n,
               range_type=r_type)
@@ -78,8 +81,8 @@ def create_range(id, start, end, type, subnet_id, comment, en, parent, allow):
         return r
     except:
         print "cant create range {0} to {1} in {2}".format(
-                ipaddr.IPv4Address(start), ipaddr.IPv4Address(end),
-                n.network_str)
+            ipaddr.IPv4Address(start), ipaddr.IPv4Address(end),
+            n.network_str)
         return None
 
 
@@ -89,8 +92,9 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
     returns a newly made container and creates the many to many relatiosnhip
     between the new ctnr and it's associated range
     """
-    c = Ctnr.objects.get_or_create(name=name,
-            description=comment or description)
+    c = Ctnr.objects.get_or_create(
+        name=name,
+        description=comment or description)
     c.save()
     """
     We need to also create the workgroups and related them to containers
@@ -101,7 +105,7 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
                        "WHERE zone = {0}".format(id))
     except:
         print ("Unable to find any ranges associated with "
-                        "{0} {1}".format(id, name))
+               "{0} {1}".format(id, name))
         return
     for row in cursor.fetchall():
         cursor.execute("SELECT * FROM `ranges` WHERE id={0}".format(row[0]))
@@ -154,7 +158,7 @@ def migrate_zones():
     result = cursor.fetchall()
     for _, name, desc, comment, _, _, _, _ in result:
         c, _ = Ctnr.objects.get_or_create(name=name,
-                description=comment or desc)
+                                          description=comment or desc)
         c.save()
 
 
@@ -169,8 +173,9 @@ def migrate_dynamic_hosts():
         d = maintain_find_domain(domain_id)
         w = maintain_find_workgroup(workgroup_id)
         v = Vrf.objects.get(name=w.name)
-        intr, _ = DynamicInterface.objects.get_or_create(range=r, workgroup=w,
-                ctnr=c, domain=d, vrf=v)
+        intr, _ = DynamicInterface.objects.get_or_create(
+            range=r, workgroup=w,
+            ctnr=c, domain=d, vrf=v)
 
 
 def migrate_zone_range():
@@ -283,5 +288,3 @@ def maintain_find_workgroup(workgroup_id):
     except:
         print "Can't find workgroup with id {0}".format(workgroup_id)
         return None
-
-

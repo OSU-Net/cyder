@@ -1,15 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.forms.models import model_to_dict
-from django.forms.util import ErrorList, ErrorDict
+from django.forms.util import ErrorList
 from django.http import Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from cyder.base.views import (BaseListView, BaseDetailView, BaseCreateView,
                               BaseUpdateView, BaseDeleteView)
-from cyder.base.utils import (do_sort, make_paginator, model_to_post,
-                              make_megafilter, tablefy, _filter)
+from cyder.base.utils import (do_sort, make_paginator, make_megafilter,
+                              tablefy, _filter)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydhcp.forms import IpSearchForm
-from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -28,72 +26,18 @@ from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydhcp.workgroup.forms import WorkgroupForm
+
+import cyder as cy
+
 import ipaddr
 import simplejson as json
 
-def cydhcp_view(request, pk=None):
-    obj_type = request.path.split('/')[2]
-    Klass, FormKlass = get_klasses(obj_type)
-    obj = get_object_or_404(Klass, pk=pk) if pk else None
-    form = FormKlass(instance=obj)
-    if request.method == 'POST':
-        form = FormKlass(request.POST, instance=obj)
-        if not form.is_valid():
-            form._errors = ErrorDict()
-            form._errors['all'] = ErrorList(errors)
-    object_list = _filter(request, Klass)
-    page_obj = make_paginator(request, do_sort(request, object_list), 50)
-    return render(request, 'cydhcp/cydhcp_view.html', {
-        'form': form,
-        'obj': obj,
-        'page_obj': page_obj,
-        'object_table': tablefy(page_obj, views=True),
-        'record_type': obj_type,
-        'pk': pk,
-    })
 
-
-def cydhcp_delete(request, pk):
-    obj_type = request.path.split('/')[2]
-    Klass, FormKlass = get_klasses(obj_type)
-    obj = get_object_or_404(Klass, pk=pk)
-    obj.delete()
-    return redirect(obj.get_list_url())
-
-
-def cydhcp_get_record(request):
-    obj_type = request.Get.get('object_type', '')
-    obj_pk = request.Get.get('pk', '')
-    if not (record_type and obj_pk):
-        raise Http404
-
-    Klass, FormKlass = get_klass(model_type)
-
-    try:
-        obj = Klass.objects.get(pk=obj_pk)
-        if perm(request, cy.ACTION_UPDATE, obj=obj):
-            form = FormKlass(instance=obj)
-    except ObjectDoesNotExist:
-        raise Http404
-    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': obj.pk}))
-
-
-def cydhcp_search_record(request):
-    obj_type = request.GEt.get('record_type', '')
-    term = request.Get.get('term', '')
-    if not (record_type and term):
-        raise Http404
-    Klass, FormKlass = get_klasses(obj_type)
-    objs = Klass.objects.filter(make_megafilter(Klass, term))[:15]
-    objs = [{'label': str(obj), 'pk': obj.pk} for obj in objs]
-    return HttpResponse(json.dumps(objs))
-
-
-def table_update(request, pk, obj_type=None):
-    obj_type = obj_type or request.path.split('/')[2]
-    Klass, FormKlass = get_klasses(obj_type)
+def table_update(request, pk, record_type=None):
+    record_type = record_type or request.path.split('/')[2]
+    Klass, FormKlass = get_klasses(record_type)
     obj = get_object_or_404(Klass, pk)
-    if not perm_soft(request, ct.ACTION_UPDATE, obj=obj):
+    if not perm_soft(request, cy.ACTION_UPDATE, obj=obj):
         return HttpResponse(json.dumps({'error': "You do not have the "
                                                  "appropriate permissions"}))
     form = FormKlass(instance=obj)
@@ -112,7 +56,70 @@ def get_klasses(record_type):
         'static_interface': (StaticInterface, StaticInterfaceForm),
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
         'workgroup': (Workgroup, WorkgroupForm),
-        }.get(record_type, (None, None))
+    }.get(record_type, (None, None))
+
+
+def cydhcp_view(request, pk=None):
+    record_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses(record_type)
+    obj = get_object_or_404(Klass, pk=pk) if pk else None
+    form = FormKlass(instance=obj)
+    if request.method == 'POST':
+        form = FormKlass(request.POST, instance=obj)
+        if form.is_valid():
+            try:
+                if perm(request, cy.ACTION_CREATE, obj=obj):
+                    obj = form.save()
+                    return redirect(obj.get_list_url())
+            except (ValidationError, ValueError):
+                    # TODO handle errors better
+                    pass
+    object_list = _filter(request, Klass)
+    page_obj = make_paginator(request, do_sort(request, object_list), 50)
+    return render(request, 'cydhcp/cydhcp_view.html', {
+        'form': form,
+        'obj': obj,
+        'page_obj': page_obj,
+        'object_table': tablefy(page_obj, views=True),
+        'record_type': record_type,
+        'pk': pk,
+    })
+
+
+def cydhcp_delete(request, pk):
+    record_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses(record_type)
+    obj = get_object_or_404(Klass, pk=pk)
+    obj.delete()
+    return redirect(obj.get_list_url())
+
+
+def cydhcp_get_record(request):
+    record_type = request.Get.get('object_type', '')
+    obj_pk = request.Get.get('pk', '')
+    if not (record_type and obj_pk):
+        raise Http404
+
+    Klass, FormKlass = get_klasses(record_type)
+
+    try:
+        obj = Klass.objects.get(pk=obj_pk)
+        if perm(request, cy.ACTION_UPDATE, obj=obj):
+            form = FormKlass(instance=obj)
+    except ObjectDoesNotExist:
+        raise Http404
+    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': obj.pk}))
+
+
+def cydhcp_search_record(request):
+    record_type = request.GEt.get('record_type', '')
+    term = request.Get.get('term', '')
+    if not (record_type and term):
+        raise Http404
+    Klass, FormKlass = get_klasses(record_type)
+    objs = Klass.objects.filter(make_megafilter(Klass, term))[:15]
+    objs = [{'label': str(obj), 'pk': obj.pk} for obj in objs]
+    return HttpResponse(json.dumps(objs))
 
 
 class CydhcpListView(BaseListView):

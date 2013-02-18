@@ -16,6 +16,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
     ranges = models.ManyToManyField(Range, null=False, blank=True)
     workgroups = models.ManyToManyField(Workgroup, null=False, blank=True)
     description = models.CharField(max_length=200, blank=True)
+    email_contact = models.EmailField(blank=True, null=True)
 
     class Meta:
         db_table = 'ctnr'

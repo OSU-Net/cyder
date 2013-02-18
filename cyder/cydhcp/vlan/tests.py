@@ -1,7 +1,7 @@
 from django.test import TestCase
-from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.site.models import Site
 
 
 class VlanTests(TestCase):
@@ -31,11 +31,7 @@ class VlanTests(TestCase):
         s2 = self.do_basic_add_site(name="Site 2", parent=s1)
         s3 = self.do_basic_add_site(name="Site 3", parent=s1)
         s4 = self.do_basic_add_site(name="Site 4", parent=s2)
-        s5 = self.do_basic_add_site(name="Site 5", parent=s4)
-        s6 = self.do_basic_add_site(name="Site 6", parent=s3)
         s7 = self.do_basic_add_site(name="Site 7", parent=s3)
-        s8 = self.do_basic_add_site(name="Site 8", parent=s7)
-        s9 = self.do_basic_add_site(name="Site 9", parent=s7)
         s10 = self.do_basic_add_site(name="Site 10", parent=s7)
 
         v1 = self.do_basic_add_vlan(name="Vlan 1", number=1)
@@ -43,22 +39,13 @@ class VlanTests(TestCase):
         v3 = self.do_basic_add_vlan(name="Vlan 3", number=3)
         v4 = self.do_basic_add_vlan(name="Vlan 4", number=4)
 
-
         network = "123.0.0.0"
         prefixlen = "10"
         kwargs = {'network': network,
                   'prefixlen': prefixlen,
                   'ip_type': '4',
                   'site': s1}
-        n1 = self.do_basic_add_network(**kwargs)
 
-        network = "123.0.10.0"
-        prefixlen = "20"
-        kwargs = {'network': network,
-                  'prefixlen': prefixlen,
-                  'ip_type': '4',
-                  'site': s3,
-                  'vlan': v3}
         n2 = self.do_basic_add_network(**kwargs)
 
         network = "123.0.10.0"
@@ -104,14 +91,6 @@ class VlanTests(TestCase):
         kwargs = {'network': network,
                   'prefixlen': prefixlen,
                   'ip_type': '4', 'site': s1}
-        n8 = self.do_basic_add_network(**kwargs)
-
-        network = "223.0.10.0"
-        prefixlen = "24"
-        kwargs = {'network': network,
-                  'prefixlen': prefixlen,
-                  'ip_type': '4',
-                  'vlan': v1}
         n9 = self.do_basic_add_network(**kwargs)
 
         network = "223.0.32.0"

@@ -1,5 +1,4 @@
 import ipaddr
-from itertools import imap
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
@@ -68,14 +67,14 @@ class IPFilterSet(object):
             # r2 |---------|
             # rx    |------|
             return IPFilter(None, ip_type, r1.start_upper, r1.start_lower,
-                    r2.end_upper, r2.end_lower)
+                            r2.end_upper, r2.end_lower)
         if r1.start < r2.start and r1.end < r2.end:
             # Low                   High
             # r1 |---------|
             # r2    |---------|
             # rx    |------|
             return IPFilter(None, ip_type, r2.start_upper, r2.start_lower,
-                    r1.end_upper, r1.end_lower)
+                            r1.end_upper, r1.end_lower)
 
 
 class IPFilter(object):
@@ -171,6 +170,6 @@ def find_network_for_range(start, end,):
     for network in Network.objects.all():
         network.update_network()
         if int(network.network.network) < start < end < \
-                        int(network.network.broadcast):
+                int(network.network.broadcast):
             return network
     return None

@@ -1,14 +1,12 @@
 from django.core.management.base import BaseCommand
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
-from cyder.cydhcp.range.models import Range, RangeKeyValue, RangeOverflowError
+from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.utils import find_network_for_range, four_to_two
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
@@ -17,12 +15,17 @@ import MySQLdb
 from optparse import make_option
 
 
-allow_all_subnets = ['10.192.76.2', '10.192.103.150', '10.192.15.2',
-'10.197.32.0', '10.192.148.32', '10.192.144.32', '10.192.140.32',
-'10.196.0.32', '10.196.4.32', '10.192.136.63', '10.196.8.8', '10.196.16.8',
-'10.196.24.8', '10.196.32.8', '10.196.40.8', '10.162.128.32', '10.162.136.32',
-'10.162.144.32', '10.198.0.80', '10.198.0.140', '10.192.131.9',
-'10.255.255.255']
+allow_all_subnets = [
+    '10.192.76.2', '10.192.103.150', '10.192.15.2',
+    '10.197.32.0', '10.192.148.32', '10.192.144.32',  '10.192.140.32',
+    '10.196.0.32', '10.196.4.32', '10.192.136.63', '10.196.8.8',
+    '10.196.16.8', '10.196.24.8', '10.196.32.8', '10.196.40.8',
+    '10.162.128.32', '10.162.136.32', '10.162.144.32', '10.198.0.80',
+    '10.198.0.140', '10.192.131.9', '10.255.255.255']
+
+
+class NotInMaintain(Exception):
+    """"""
 
 
 def calc_prefixlen(netmask):
@@ -33,9 +36,9 @@ def calc_prefixlen(netmask):
     return bits
 
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
-                         user=settings.MIGRATION_USER,
-                         passwd=settings.MIGRATION_PASSWD,
-                         db=settings.MIGRATION_DB)
+                             user=settings.MIGRATION_USER,
+                             passwd=settings.MIGRATION_PASSWD,
+                             db=settings.MIGRATION_DB)
 
 cursor = connection.cursor()
 
@@ -55,8 +58,8 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
         vlan_id, vlan_name, vlan_number = cursor.fetchone()
         v = Vlan.objects.get(name=vlan_name)
     n, created = Network.objects.get_or_create(
-                network_str=network + '/' + prefixlen, ip_type='4',
-                site=s, vlan=v)
+        network_str=network + '/' + prefixlen, ip_type='4',
+        site=s, vlan=v)
     cursor.execute("SELECT dhcp_option, value "
                    "FROM object_option "
                    "WHERE object_id = {0} "
@@ -68,7 +71,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
                        "WHERE id = {0}".format(dhcp_option))
         name, type = cursor.fetchone()
         kv, _ = NetworkKeyValue.objects.get_or_create(
-                        value=str(value), key=name, network=n)
+            value=str(value), key=name, network=n)
     return (n, created)
 
 
@@ -85,7 +88,7 @@ def create_range(range_id, start, end, type, subnet_id, comment, en, known):
     if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
         id, name, subnet, netmask, status, vlan = cursor.fetchone()
         n = Network.objects.get(ip_lower=subnet,
-                prefixlen=str(calc_prefixlen(netmask)))
+                                prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
         if str(ipaddr.IPv4Address(start)) in allow_all_subnets:
             allow = None
@@ -100,19 +103,19 @@ def create_range(range_id, start, end, type, subnet_id, comment, en, known):
 
         if int(n.network.network) < start < end < int(n.network.broadcast):
             r, created = Range.objects.get_or_create(
-                        start_lower=start, start_str=ipaddr.IPv4Address(start),
-                        end_lower=end, end_str=ipaddr.IPv4Address(end),
-                        range_type=r_type, allow=allow, ip_type='4',
-                        network=n)
-    if not r:
-        r, created = Range.objects.get_or_create(
                 start_lower=start, start_str=ipaddr.IPv4Address(start),
                 end_lower=end, end_str=ipaddr.IPv4Address(end),
-                is_reserved=True, range_type=r_type, allow=allow, ip_type='4')
+                range_type=r_type, allow=allow, ip_type='4',
+                network=n)
+    if not r:
+        r, created = Range.objects.get_or_create(
+            start_lower=start, start_str=ipaddr.IPv4Address(start),
+            end_lower=end, end_str=ipaddr.IPv4Address(end),
+            is_reserved=True, range_type=r_type, allow=allow, ip_type='4')
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-        rk, _ = RangeKeyValue.objects.get_or_create(range=r,
-                value='L2Q=1,L2QVLAN=503', key='ipphone242',
-                is_option=True, is_quoted=True)
+        rk, _ = RangeKeyValue.objects.get_or_create(
+            range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
+            is_option=True, is_quoted=True)
     return (r, created)
 
 
@@ -123,7 +126,7 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
     between the new ctnr and it's associated range
     """
     c, created = Ctnr.objects.get_or_create(name=name,
-            description=comment or description)
+                                            description=comment or description)
     """
     We need to also create the workgroups and related them to containers
     """
@@ -206,7 +209,7 @@ def migrate_workgroups():
                            "WHERE id = {0}".format(dhcp_option))
             name, type = cursor.fetchone()
             kv, _ = WorkgroupKeyValue.objects.get_or_create(
-                        value=value, key=name, workgroup=w)
+                value=value, key=name, workgroup=w)
         migrated.append((w, created))
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
@@ -224,12 +227,17 @@ def create_ctnr(id):
 
 
 def migrate_zones():
-    cursor.execute("SELECT name, description, comment FROM zone")
+    cursor.execute("SELECT name, description, comment, "
+                   "support_mail, allow_blank_ha "
+                   "FROM zone")
     migrated = []
     results = cursor.fetchall()
-    for name, desc, comment in results:
-        migrated.append(Ctnr.objects.get_or_create(name=name,
-                description=comment or desc))
+    for name, desc, comment, email_contact, allow_blank_mac in results:
+        migrated.append(
+            Ctnr.objects.get_or_create(
+                name=name,
+                description=comment or desc,
+                email_contact=email_contact))
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
            "Records created {2}".format(
@@ -251,11 +259,11 @@ def migrate_dynamic_hosts():
         if r.allow == 'vrf':
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
-                            range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                            mac=mac, system=s)
+                range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
+                mac=mac, system=s)
             continue
-        intr, _ = DynamicInterface.objects.get_or_create(system=s,
-                            range=r, workgroup=w, ctnr=c, domain=d, mac=mac)
+        intr, _ = DynamicInterface.objects.get_or_create(
+            system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac)
 
 
 def migrate_zone_range():
@@ -278,6 +286,21 @@ def migrate_zone_range():
         c.ranges.add(r)
 
 
+def migrate_zone_domain():
+    cursor.execute("SELECT zone, domain FROM zone_domain")
+    results = cursor.fetchall()
+    for zone_id, domain_id in results:
+        ctnr = maintain_find_zone(zone_id)
+        domain = maintain_find_domain(domain_id)
+        try:
+            ctnr.domains.add(domain)
+            ctnr.save()
+        except:
+            raise NotInMaintain("Unable to migrate relation between "
+                                "domain_id {0} and "
+                                "zone_id {1}".format(zone_id, domain_id))
+
+
 def migrate_zone_workgroup():
     cursor.execute("SELECT * FROM zone_workgroup")
     result = cursor.fetchall()
@@ -296,8 +319,8 @@ def migrate_zone_workgroup():
 
 def maintain_find_range(range_id):
     if cursor.execute("SELECT start, end "
-                       "FROM `ranges` "
-                       "WHERE id = {0}".format(range_id)):
+                      "FROM `ranges` "
+                      "WHERE id = {0}".format(range_id)):
         start, end = cursor.fetchone()
         return Range.objects.get(start_lower=start, end_lower=end)
     return None
@@ -305,8 +328,8 @@ def maintain_find_range(range_id):
 
 def maintain_find_domain(domain_id):
     if cursor.execute("SELECT name "
-                       "FROM `domain` "
-                       "WHERE id = {0}".format(domain_id)):
+                      "FROM `domain` "
+                      "WHERE id = {0}".format(domain_id)):
         name = cursor.fetchone()[0]
         return Domain.objects.get(name=name)
     return None
@@ -321,8 +344,8 @@ def maintain_find_zone(zone_id):
 
 def maintain_find_workgroup(workgroup_id):
     if cursor.execute("SELECT name "
-                       "FROM workgroup "
-                       "WHERE id = {0}".format(workgroup_id)):
+                      "FROM workgroup "
+                      "WHERE id = {0}".format(workgroup_id)):
         name = cursor.fetchone()[0]
         return Workgroup.objects.get(name=name)
     return None
@@ -331,56 +354,61 @@ def maintain_find_workgroup(workgroup_id):
 class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
-            make_option( '--vlan',
-                action='store_true',
-                dest='vlan',
-                default=False,
-                help='Migrate vlans'),
-            make_option('-Z', '--zone',
-                action='store_true',
-                dest='zone',
-                default=False,
-                help='Migrate zones to ctnrs'),
-            make_option('-w', '--workgroup',
-                action='store_true',
-                dest='workgroup',
-                default=False,
-                help='Migrate workgroups'),
-            make_option('-s', '--subnet',
-                action='store_true',
-                dest='subnet',
-                default=False,
-                help='Migrate subnets'),
-            make_option('-r', '--range',
-                action='store_true',
-                dest='range',
-                default=False,
-                help='Migrate ranges'),
-            make_option('-d', '--dynamic',
-                action='store_true',
-                dest='dynamic',
-                default=False,
-                help='Migrate dynamic interfaces'),
-            make_option('-R', '--zone-range',
-                action='store_true',
-                dest='zone-range',
-                default=False,
-                help='Migrate zone range relationship'),
-            make_option('-W', '--zone-workgroup',
-                action='store_true',
-                dest='zone-workgroup',
-                default=False,
-                help='MIgrate zone workgroup relationship'),
-            make_option('-D', '--delete',
-                action='store_true',
-                dest='delete',
-                default=False,
-                help='Fuck it we will do it live'),
-            make_option('-a', '--all',
-                action='store_true',
-                dest='all',
-                default=False,
-                help='Migrate everything'))
+        make_option('--vlan',
+                    action='store_true',
+                    dest='vlan',
+                    default=False,
+                    help='Migrate vlans'),
+        make_option('-Z', '--zone',
+                    action='store_true',
+                    dest='zone',
+                    default=False,
+                    help='Migrate zones to ctnrs'),
+        make_option('-w', '--workgroup',
+                    action='store_true',
+                    dest='workgroup',
+                    default=False,
+                    help='Migrate workgroups'),
+        make_option('-s', '--subnet',
+                    action='store_true',
+                    dest='subnet',
+                    default=False,
+                    help='Migrate subnets'),
+        make_option('-r', '--range',
+                    action='store_true',
+                    dest='range',
+                    default=False,
+                    help='Migrate ranges'),
+        make_option('-d', '--dynamic',
+                    action='store_true',
+                    dest='dynamic',
+                    default=False,
+                    help='Migrate dynamic interfaces'),
+        make_option('-R', '--zone-range',
+                    action='store_true',
+                    dest='zone-range',
+                    default=False,
+                    help='Migrate zone range relationship'),
+        make_option('-W', '--zone-workgroup',
+                    action='store_true',
+                    dest='zone-workgroup',
+                    default=False,
+                    help='Migrate zone workgroup relationship'),
+        make_option('-D', '--delete',
+                    action='store_true',
+                    dest='delete',
+                    default=False,
+                    help='Delete things'),
+        make_option('-z', '--zone-domain',
+                    action='store_true',
+                    dest='zone-domain',
+                    default=False,
+                    help='GIMME IT ALL!!!11!!'),
+        make_option('-a', '--all',
+                    action='store_true',
+                    dest='all',
+                    default=False,
+                    help='Migrate everything'))
 
     def handle(self, **options):
         if options['vlan']:
@@ -399,6 +427,8 @@ class Command(BaseCommand):
             migrate_zone_range()
         if options['zone-workgroup']:
             migrate_zone_workgroup()
+        if options['zone-domain']:
+            migrate_zone_domain()
         if options['delete']:
             Range.objects.all().delete()
             Network.objects.all().delete()

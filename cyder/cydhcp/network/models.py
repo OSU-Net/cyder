@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from cyder.base.constants import IP_TYPES
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.utils import IPFilter, two_to_four
+from cyder.cydhcp.utils import IPFilter
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
@@ -29,14 +29,16 @@ class Network(models.Model, ObjectUrlMixin):
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
-    network_str = models.CharField(max_length=49, editable=True,
-                    help_text="The network address of this network.")
-    prefixlen = models.PositiveIntegerField(null=False,
-                    help_text="The number of binary 1's in the netmask.")
+    network_str = models.CharField(
+        max_length=49, editable=True,
+        help_text="The network address of this network.")
+    prefixlen = models.PositiveIntegerField(
+        null=False, help_text="The number of binary 1's in the netmask.")
 
-    dhcpd_raw_include = models.TextField(null=True, blank=True,
-                  help_text="The config options in this box will be included "
-                            "*as is* in the dhcpd.conf file for this subnet.")
+    dhcpd_raw_include = models.TextField(
+        null=True, blank=True,
+        help_text="The config options in this box will be included "
+                  "*as is* in the dhcpd.conf file for this subnet.")
     network = None
 
     def __str__(self):
@@ -54,11 +56,11 @@ class Network(models.Model, ObjectUrlMixin):
         if type(other) is type(self):
             other.update_network()
             return self.network.network < other.network.network < \
-                   self.other.network.broadcast < self.network.broadcast
+                self.other.network.broadcast < self.network.broadcast
         else:
             other._range_ips()
             return self.network.network < other.network_address < \
-                    other.broadcast_address < self.broadcast_address
+                other.broadcast_address < self.broadcast_address
 
     def update_attrs(self):
         self.attrs = AuxAttr(NetworkKeyValue, self, "network")
@@ -108,6 +110,7 @@ class Network(models.Model, ObjectUrlMixin):
         self.update_network()
         fail = False
         for range_ in self.range_set.all():
+            # TODO
             """
                 I was writing checks to make sure that subnets wouldn't orphan
                 ranges. IPv6 needs support.

@@ -1,4 +1,3 @@
-import ipaddr
 from cyder.cydhcp.network.models import Network
 
 

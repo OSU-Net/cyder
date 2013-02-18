@@ -1,12 +1,12 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import url, patterns
+from cyder.cydhcp.vlan.views import VlanCreateView, vlan_detail
+from cyder.cydhcp.urls import cydhcp_urls
 
-from cyder.cydhcp.vlan.views import *
 
 urlpatterns = patterns('',
-   url(r'^$', VlanListView.as_view(), name='vlan'),
-   url(r'^create/$', VlanCreateView.as_view(), name='vlan-create'),
-   url(r'^(?P<vlan_pk>[\w-]+)/$', vlan_detail, name='vlan-detail'),
-   url(r'^(?P<vlan_pk>[\w-]+)/update/$', update_vlan, name='vlan-update'),
-   url(r'^(?P<pk>[\w-]+)/delete/$',
-       VlanDeleteView.as_view(), name='vlan-delete'),
-)
+                       url(r'^create/$', VlanCreateView.as_view(),
+                           name='vlan-create'),
+                       url(r'^(?P<vlan_pk>[\w-]+)/$', vlan_detail,
+                           name='vlan-detail'),)
+
+urlpatterns += cydhcp_urls('vlan')

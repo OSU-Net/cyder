@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
@@ -12,9 +11,6 @@ from cyder.cydns.domain.models import Domain
 
 from cyder.core.system.models import System
 
-import random
-import ipaddr
-
 
 class LibTestsDomain(TestCase):
 
@@ -25,26 +21,26 @@ class LibTestsDomain(TestCase):
 
     def test0_create_ipv4_interface(self):
         intr, errors = create_ipv4_interface(
-                label="", vlan_str="db", site_str="scl3",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="", vlan_str="db", site_str="scl3",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(intr, None)
         self.assertTrue("label" in errors)
 
     def test1_create_ipv4_interface(self):
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="db", site_str="scl3",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="db", site_str="scl3",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(intr, None)
         self.assertTrue("site" in errors)
 
     def test2_create_ipv4_interface(self):
         s, _ = Site.objects.get_or_create(name="scl3")
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="db", site_str="scl3",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="db", site_str="scl3",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(intr, None)
         self.assertTrue("site" not in errors)
         self.assertTrue("vlan" in errors)
@@ -53,9 +49,9 @@ class LibTestsDomain(TestCase):
         v, _ = Vlan.objects.get_or_create(name="db3", number=3)
         s, _ = Site.objects.get_or_create(name="scl33")
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="db3", site_str="scl33",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="db3", site_str="scl33",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -67,9 +63,9 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="scl34.mozilla.com")
         d, _ = Domain.objects.get_or_create(name="db4.scl34.mozilla.com")
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="db4", site_str="scl34",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="db4", site_str="scl34",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -87,9 +83,9 @@ class LibTestsDomain(TestCase):
         n.vlan = v
         n.save()
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="5db", site_str="5scl3",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="5db", site_str="5scl3",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -166,9 +162,9 @@ class LibTestsDomain(TestCase):
         r.save()
 
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="7db", site_str="7scl3",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="7db", site_str="7scl3",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 
@@ -195,9 +191,9 @@ class LibTestsDomain(TestCase):
         r.save()
 
         intr, errors = create_ipv4_interface(
-                label="foo", vlan_str="8db", site_str="8dmz.8scl3",
-                system=self.system, mac="11:22:33:44:55:66",
-                domain_suffix="mozilla.com")
+            label="foo", vlan_str="8db", site_str="8dmz.8scl3",
+            system=self.system, mac="11:22:33:44:55:66",
+            domain_suffix="mozilla.com")
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 
@@ -223,8 +219,8 @@ class LibTestsDomain(TestCase):
         r.save()
 
         intr, errors = create_ipv4_intr_from_domain(
-                label="foo", domain_name="private.phx1", system=self.system,
-                mac="11:22:33:44:55:66")
+            label="foo", domain_name="private.phx1", system=self.system,
+            mac="11:22:33:44:55:66")
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 

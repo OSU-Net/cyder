@@ -9,7 +9,7 @@ class SiteTests(TestCase):
     def do_basic_add_network(self, network, prefixlen, ip_type,
                              name=None, number=None, site=None):
         s = Network(network_str=network + "/" + prefixlen,
-                        ip_type=ip_type, site=site)
+                    ip_type=ip_type, site=site)
         s.clean()
         s.save()
         self.assertTrue(s)
@@ -50,11 +50,7 @@ class SiteTests(TestCase):
         s2 = self.do_basic_add_site(name="Site 2", parent=s1)
         s3 = self.do_basic_add_site(name="Site 3", parent=s1)
         s4 = self.do_basic_add_site(name="Site 4", parent=s2)
-        s5 = self.do_basic_add_site(name="Site 5", parent=s4)
-        s6 = self.do_basic_add_site(name="Site 6", parent=s3)
         s7 = self.do_basic_add_site(name="Site 7", parent=s3)
-        s8 = self.do_basic_add_site(name="Site 8", parent=s7)
-        s9 = self.do_basic_add_site(name="Site 9", parent=s7)
         s10 = self.do_basic_add_site(name="Site 10", parent=s7)
 
         network = "123.0.0.0"
@@ -149,9 +145,9 @@ class SiteTests(TestCase):
         n12 = self.do_basic_add_network(**kwargs)
         related_sites = s1.get_related_sites()
         related_networks = s1.get_related_networks(related_sites)
-        self.assertEqual(
-                set([n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12]),
-                related_networks)
+        self.assertEqual(set([n1, n2, n3, n4, n5, n6,
+                         n7, n8, n9, n10, n11, n12]),
+                         related_networks)
         related_sites = s3.get_related_sites()
         related_networks = s3.get_related_networks(related_sites)
         self.assertEqual(set([n2, n3, n5, n6, n7]), related_networks)

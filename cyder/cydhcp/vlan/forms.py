@@ -1,6 +1,5 @@
 from django import forms
 
-from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 
 

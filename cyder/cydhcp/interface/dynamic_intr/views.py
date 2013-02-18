@@ -1,6 +1,3 @@
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-import ipaddr
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpUpdateView,
