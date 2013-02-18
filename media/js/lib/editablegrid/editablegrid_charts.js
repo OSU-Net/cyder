@@ -8,7 +8,7 @@ function EditableGrid_loadChart(divId)
 	else setTimeout("EditableGrid_loadChart('"+divId+"');", 100);
 }
 
-function EditableGrid_get_chart_data(divId) 
+function EditableGrid_get_chart_data(divId)
 {
 	setTimeout("EditableGrid_loadChart('"+divId+"');", 100);
 	return JSON.stringify(EditableGrid_pending_charts[divId]);
@@ -30,7 +30,7 @@ EditableGrid.prototype.checkChartLib = function()
  * @param divId
  * @param title
  * @param labelColumnIndexOrName
- * @param options: legend (label of labelColumnIndexOrName), bgColor (#ffffff), alpha (0.9), limit (0), bar3d (true), rotateXLabels (0) 
+ * @param options: legend (label of labelColumnIndexOrName), bgColor (#ffffff), alpha (0.9), limit (0), bar3d (true), rotateXLabels (0)
  * @return
  */
 EditableGrid.prototype.renderBarChart = function(divId, title, labelColumnIndexOrName, options)
@@ -46,21 +46,21 @@ EditableGrid.prototype.renderBarChart = function(divId, title, labelColumnIndexO
 		this.limit = 0;
 		this.bar3d = true;
 		this.rotateXLabels = 0;
-		
+
 		// override default options with the ones given
 		if (options) for (var p in options) this[p] = options[p];
-		
+
 		labelColumnIndexOrName = labelColumnIndexOrName || 0;
 		var cLabel = getColumnIndex(labelColumnIndexOrName);
 
 		var chart = new ofc_chart();
 		chart.bg_colour = bgColor;
 		chart.set_title({text: title || '', style: "{font-size: 20px; color:#0000ff; font-family: Verdana; text-align: center;}"});
-	
+
 		var columnCount = getColumnCount();
 		var rowCount = getRowCount() - (ignoreLastRow ? 1 : 0);
 		if (limit > 0 && rowCount > limit) rowCount = limit;
-	
+
 		var maxvalue = 0;
 		for (var c = 0; c < columnCount; c++) {
 			if (!isColumnBar(c)) continue;
@@ -72,25 +72,25 @@ EditableGrid.prototype.renderBarChart = function(divId, title, labelColumnIndexO
 			for (var r = 0; r < rowCount; r++) {
 				if (getRowAttribute(r, "skip") == "1") continue;
 				var value = getValueAt(r,c);
-				if (value > maxvalue) maxvalue = value; 
+				if (value > maxvalue) maxvalue = value;
 				bar.values.push(value);
 			}
 			chart.add_element(bar);
 		}
-		
+
 		// round the y max value
 		var ymax = 10;
 		while (ymax < maxvalue) ymax *= 10;
 		var dec_step = ymax / 10;
 		while (ymax - dec_step > maxvalue) ymax -= dec_step;
-		
+
 		var xLabels = [];
 		for (var r = 0; r < rowCount; r++) {
 			if (getRowAttribute(r, "skip") == "1") continue;
 			var label = getRowAttribute(r, "barlabel"); // if there is a barlabel attribute, use it and ignore labelColumn
 			xLabels.push(label ? label : getValueAt(r,cLabel));
 		}
-	
+
 		chart.x_axis = {
 		    stroke: 1,
 		    tick_height:  10,
@@ -109,9 +109,9 @@ EditableGrid.prototype.renderBarChart = function(divId, title, labelColumnIndexO
 			 steps: ymax / 10.0,
 			 max: ymax
 		};
-			
+
 		// chart.num_decimals = 0;
-		
+
 		chart.x_legend = {
 			text: legend || getColumnLabel(labelColumnIndexOrName),
 			style: "{font-size: 11px; color: #000033}"
@@ -132,7 +132,7 @@ EditableGrid.prototype.renderBarChart = function(divId, title, labelColumnIndexO
  * @param divId
  * @param title
  * @param labelColumnIndexOrName
- * @param options: legend (label of labelColumnIndexOrName), bgColor (#ffffff), alpha (0.8), limit (0), rotateXLabels (0) 
+ * @param options: legend (label of labelColumnIndexOrName), bgColor (#ffffff), alpha (0.8), limit (0), rotateXLabels (0)
  * @return
  */
 EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColumnIndexOrName, options)
@@ -147,7 +147,7 @@ EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColum
 		this.alpha = 0.8;
 		this.limit = 0;
 		this.rotateXLabels = 0;
-		
+
 		// override default options with the ones given
 		if (options) for (var p in options) this[p] = options[p];
 
@@ -157,11 +157,11 @@ EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColum
 		var chart = new ofc_chart();
 		chart.bg_colour = bgColor;
 		chart.set_title({text: title || '', style: "{font-size: 20px; color:#0000ff; font-family: Verdana; text-align: center;}"});
-	
+
 		var columnCount = getColumnCount();
 		var rowCount = getRowCount() - (ignoreLastRow ? 1 : 0);
 		if (limit > 0 && rowCount > limit) rowCount = limit;
-	
+
 		var maxvalue = 0;
 		var bar = new ofc_element("bar_stack");
 		bar.alpha = alpha;
@@ -173,7 +173,7 @@ EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColum
 			if (!isColumnBar(c)) continue;
 			bar.keys.push({ colour: smartColorsBar[bar.keys.length % smartColorsBar.length], text: getColumnLabel(c), "font-size": '13' });
 		}
-		
+
 		for (var r = 0; r < rowCount; r++) {
 			var valueRow = [];
 			var valueStack = 0;
@@ -184,21 +184,21 @@ EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColum
 				valueStack += value;
 				valueRow.push(value);
 			}
-			if (valueStack > maxvalue) maxvalue = valueStack; 
+			if (valueStack > maxvalue) maxvalue = valueStack;
 			bar.values.push(valueRow);
 		}
-		
+
 		chart.add_element(bar);
-		
+
 		// round the y max value
 		var ymax = 10;
 		while (ymax < maxvalue) ymax *= 10;
 		var dec_step = ymax / 10;
 		while (ymax - dec_step > maxvalue) ymax -= dec_step;
-		
+
 		var xLabels = [];
 		for (var r = 0; r < rowCount; r++) xLabels.push(getValueAt(r,cLabel));
-	
+
 		chart.x_axis = {
 		    stroke: 1,
 		    tick_height:  10,
@@ -217,9 +217,9 @@ EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColum
 			 steps: ymax / 10.0,
 			 max: ymax
 		};
-			
+
 		// chart.num_decimals = 0;
-		
+
 		chart.x_legend = {
 			text: legend || getColumnLabel(labelColumnIndexOrName),
 			style: "{font-size: 11px; color: #000033}"
@@ -239,11 +239,11 @@ EditableGrid.prototype.renderStackedBarChart = function(divId, title, labelColum
  * @param divId
  * @param title
  * @param valueColumnIndexOrName
- * @param labelColumnIndexOrName: if same as valueColumnIndexOrName, the chart will display the frequency of values in this column 
- * @param options: startAngle (0), bgColor (#ffffff), alpha (0.5), limit (0), gradientFill (true) 
+ * @param labelColumnIndexOrName: if same as valueColumnIndexOrName, the chart will display the frequency of values in this column
+ * @param options: startAngle (0), bgColor (#ffffff), alpha (0.5), limit (0), gradientFill (true)
  * @return
  */
-EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexOrName, labelColumnIndexOrName, options) 
+EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexOrName, labelColumnIndexOrName, options)
 {
 	with (this) {
 
@@ -255,7 +255,7 @@ EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexO
 		this.alpha = 0.5;
 		this.limit = 0;
 		this.gradientFill = true;
-		
+
 		// override default options with the ones given
 		if (options) for (var p in options) this[p] = options[p];
 
@@ -264,34 +264,34 @@ EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexO
 
 		labelColumnIndexOrName = labelColumnIndexOrName || 0;
 		title = (typeof title == 'undefined' || title === null) ? getColumnLabel(valueColumnIndexOrName) : title;
-		
+
 		var cValue = getColumnIndex(valueColumnIndexOrName);
 		var cLabel = getColumnIndex(labelColumnIndexOrName);
-		
+
 		var chart = new ofc_chart();
 		chart.bg_colour = bgColor;
 		chart.set_title({text: title, style: "{font-size: 20px; color:#0000ff; font-family: Verdana; text-align: center;}"});
-	
+
 		var rowCount = getRowCount() - (ignoreLastRow ? 1 : 0);
 		if (limit > 0 && rowCount > limit) rowCount = limit;
-	
+
 		var pie = new ofc_element("pie");
 		pie.colours = smartColorsPie;
 		pie.alpha = alpha;
 		pie['gradient-fill'] = gradientFill;
-		
+
 		if (typeof startAngle != 'undefined' && startAngle !== null) pie['start-angle'] = startAngle;
 
 		if (valueColumnIndexOrName == labelColumnIndexOrName) {
-			
+
 			// frequency pie chart
-			var distinctValues = {}; 
+			var distinctValues = {};
 			for (var r = 0; r < rowCount; r++) {
 				var rowValue = getValueAt(r,cValue);
 				if (rowValue in distinctValues) distinctValues[rowValue]++;
 				else distinctValues[rowValue] = 1;
 			}
-			
+
 			for (var value in distinctValues) {
 				var occurences = distinctValues[value];
 				pie.values.push({value : occurences, label: value + ' (' + (100 * (occurences / rowCount)).toFixed(1) + '%)'});
@@ -299,7 +299,7 @@ EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexO
 		}
 		else {
 
-			var total = 0; 
+			var total = 0;
 			for (var r = 0; r < rowCount; r++) {
 				var rowValue = getValueAt(r,cValue);
 				total += isNaN(rowValue) ? 0 : rowValue;
@@ -313,7 +313,7 @@ EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexO
 		}
 
 		chart.add_element(pie);
-		
+
 		if (pie.values.length > 0) updateChart(divId, chart);
 		return pie.values.length;
 	}
@@ -325,7 +325,7 @@ EditableGrid.prototype.renderPieChart = function(divId, title, valueColumnIndexO
  * @param chart
  * @return
  */
-EditableGrid.prototype.updateChart = function(divId, chart) 
+EditableGrid.prototype.updateChart = function(divId, chart)
 {
 	if (typeof this.ofcSwf == 'undefined' || !this.ofcSwf) {
 
@@ -340,7 +340,7 @@ EditableGrid.prototype.updateChart = function(divId, chart)
 			}
 		};
 	}
-	
+
 	with (this) {
 
 		// reload or create new swf chart
@@ -349,22 +349,22 @@ EditableGrid.prototype.updateChart = function(divId, chart)
 		else {
 			var div = _$(divId);
 			EditableGrid_pending_charts[divId] = chart;
-			
+
 			// get chart dimensions
 			var w = parseInt(getStyle(div, 'width'));
 			var h = parseInt(getStyle(div, 'height'));
 			w = Math.max(isNaN(w)?0:w, div.offsetWidth);
 			h = Math.max(isNaN(h)?0:h, div.offsetHeight);
-			
-			swfobject.embedSWF(this.ofcSwf, 
-					divId, 
-					"" + (w || 500), 
-					"" + (h || 200), 
-					"9.0.0", "expressInstall.swf", { "get-data": "EditableGrid_get_chart_data", "id": divId }, null, 
+
+			swfobject.embedSWF(this.ofcSwf,
+					divId,
+					"" + (w || 500),
+					"" + (h || 200),
+					"9.0.0", "expressInstall.swf", { "get-data": "EditableGrid_get_chart_data", "id": divId }, null,
 					{ wmode: "Opaque", salign: "l", AllowScriptAccess:"always"}
 			);
 		}
-		
+
 		chartRendered();
 	}
 };
@@ -374,7 +374,7 @@ EditableGrid.prototype.updateChart = function(divId, chart)
  * @param divId
  * @return
  */
-EditableGrid.prototype.clearChart = function(divId) 
+EditableGrid.prototype.clearChart = function(divId)
 {
 	// how ?
 };

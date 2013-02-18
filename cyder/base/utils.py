@@ -4,6 +4,7 @@ import urlparse
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
 
@@ -30,9 +31,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     :param  objects: A list of objects to make table from.
     :type   objects: Generic object.
     :param  extra_cols: Extra columns to add outside of objects' .details()
-    :type  extra_cols: [{'col_header': '',
-                         'col_data': [{'value': '',
-                                       'url': ''}]
+    :type  extra_cols: [{'header': '',
+                         'data': [{'value': '',
+                                   'url': ''}]
                        },]
     """
     if not objects:
@@ -133,7 +134,7 @@ def model_to_post(post, obj):
     Updates requests's POST dictionary with values from object, for update
     purposes.
     """
-    ret = qd_to_py_dct(post)
+    ret = qd_to_py_dict(post)
     for k, v in model_to_dict(obj).iteritems():
         if k not in post:
             ret[k] = v

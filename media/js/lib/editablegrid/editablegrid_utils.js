@@ -19,45 +19,45 @@ EditableGrid.prototype.getCookie = function(c_name)
 	return null;
 };
 
-EditableGrid.prototype.has_local_storage = function() 
+EditableGrid.prototype.has_local_storage = function()
 {
 	try { return 'localStorage' in window && window['localStorage'] !== null; } catch(e) { return false; }
 };
 
-EditableGrid.prototype._localset = function(key, value) 
+EditableGrid.prototype._localset = function(key, value)
 {
 	if (this.has_local_storage()) localStorage.setItem(key, value);
 	else this.setCookie(key, value, null);
 };
 
-EditableGrid.prototype._localget = function(key) 
+EditableGrid.prototype._localget = function(key)
 {
 	if (this.has_local_storage()) return localStorage.getItem(key);
 	return this.getCookie(key);
 };
 
-EditableGrid.prototype._localisset = function(key) 
+EditableGrid.prototype._localisset = function(key)
 {
 	if (this.has_local_storage()) return localStorage.getItem(key) !== null;
 	return this.getCookie(key) !== null;
 };
 
-EditableGrid.prototype.localset = function(key, value) 
+EditableGrid.prototype.localset = function(key, value)
 {
 	if (this.enableStore) return this._localset(this.name + '_' + key, value);
 };
 
-EditableGrid.prototype.localget = function(key) 
+EditableGrid.prototype.localget = function(key)
 {
 	return this.enableStore ? this._localget(this.name + '_' + key) : null;
 };
 
-EditableGrid.prototype.localisset = function(key) 
+EditableGrid.prototype.localisset = function(key)
 {
 	return this.enableStore ? this._localget(this.name + '_' + key) !== null : false;
 };
 
-EditableGrid.prototype.unsort = function(a,b) 
+EditableGrid.prototype.unsort = function(a,b)
 {
 	// at index 2 we have the originalIndex
 	aa = isNaN(a[2]) ? 0 : parseFloat(a[2]);
@@ -65,27 +65,27 @@ EditableGrid.prototype.unsort = function(a,b)
 	return aa-bb;
 };
 
-EditableGrid.prototype.sort_numeric = function(a,b) 
+EditableGrid.prototype.sort_numeric = function(a,b)
 {
 	aa = isNaN(a[0]) ? 0 : parseFloat(a[0]);
 	bb = isNaN(b[0]) ? 0 : parseFloat(b[0]);
 	return aa-bb;
 };
 
-EditableGrid.prototype.sort_boolean = function(a,b) 
+EditableGrid.prototype.sort_boolean = function(a,b)
 {
 	aa = !a[0] || a[0] == "false" ? 0 : 1;
 	bb = !b[0] || b[0] == "false" ? 0 : 1;
 	return aa-bb;
 };
 
-EditableGrid.prototype.sort_alpha = function(a,b) 
+EditableGrid.prototype.sort_alpha = function(a,b)
 {
 	if (a[0].toLowerCase()==b[0].toLowerCase()) return 0;
 	return a[0].toLowerCase().localeCompare(b[0].toLowerCase());
 };
 
-EditableGrid.prototype.sort_date = function(a,b) 
+EditableGrid.prototype.sort_date = function(a,b)
 {
 	date = EditableGrid.prototype.checkDate(a[0]);
 	aa = typeof date == "object" ? date.sortDate : 0;
@@ -110,42 +110,42 @@ EditableGrid.prototype.getStyle = function(element, stylePropCamelStyle, stylePr
  * Returns true if the element has a static positioning
  * @private
  */
-EditableGrid.prototype.isStatic = function (element) 
+EditableGrid.prototype.isStatic = function (element)
 {
 	var position = this.getStyle(element, 'position');
 	return (!position || position == "static");
 };
 
-EditableGrid.prototype.verticalAlign = function (element) 
+EditableGrid.prototype.verticalAlign = function (element)
 {
 	return this.getStyle(element, "verticalAlign", "vertical-align");
 };
 
-EditableGrid.prototype.paddingLeft = function (element) 
+EditableGrid.prototype.paddingLeft = function (element)
 {
 	var padding = parseInt(this.getStyle(element, "paddingLeft", "padding-left"));
 	return isNaN(padding) ? 0 : Math.max(0, padding);
 };
 
-EditableGrid.prototype.paddingRight = function (element) 
+EditableGrid.prototype.paddingRight = function (element)
 {
 	var padding = parseInt(this.getStyle(element, "paddingRight", "padding-right"));
 	return isNaN(padding) ? 0 : Math.max(0, padding);
 };
 
-EditableGrid.prototype.paddingTop = function (element) 
+EditableGrid.prototype.paddingTop = function (element)
 {
 	var padding = parseInt(this.getStyle(element, "paddingTop", "padding-top"));
 	return isNaN(padding) ? 0 : Math.max(0, padding);
 };
 
-EditableGrid.prototype.paddingBottom = function (element) 
+EditableGrid.prototype.paddingBottom = function (element)
 {
 	var padding = parseInt(this.getStyle(element, "paddingBottom", "padding-bottom"));
 	return isNaN(padding) ? 0 : Math.max(0, padding);
 };
 
-EditableGrid.prototype.borderLeft = function (element) 
+EditableGrid.prototype.borderLeft = function (element)
 {
 	var border_l = parseInt(this.getStyle(element, "borderRightWidth", "border-right-width"));
 	var border_r = parseInt(this.getStyle(element, "borderLeftWidth", "border-left-width"));
@@ -154,12 +154,12 @@ EditableGrid.prototype.borderLeft = function (element)
 	return Math.max(border_l, border_r);
 };
 
-EditableGrid.prototype.borderRight = function (element) 
+EditableGrid.prototype.borderRight = function (element)
 {
 	return this.borderLeft(element);
 };
 
-EditableGrid.prototype.borderTop = function (element) 
+EditableGrid.prototype.borderTop = function (element)
 {
 	var border_t = parseInt(this.getStyle(element, "borderTopWidth", "border-top-width"));
 	var border_b = parseInt(this.getStyle(element, "borderBottomWidth", "border-bottom-width"));
@@ -168,7 +168,7 @@ EditableGrid.prototype.borderTop = function (element)
 	return Math.max(border_t, border_b);
 };
 
-EditableGrid.prototype.borderBottom = function (element) 
+EditableGrid.prototype.borderBottom = function (element)
 {
 	return this.borderTop(element);
 };
@@ -177,7 +177,7 @@ EditableGrid.prototype.borderBottom = function (element)
  * Returns auto width for editor
  * @private
  */
-EditableGrid.prototype.autoWidth = function (element) 
+EditableGrid.prototype.autoWidth = function (element)
 {
 	return element.offsetWidth - this.paddingLeft(element) - this.paddingRight(element) - this.borderLeft(element) - this.borderRight(element);
 };
@@ -186,7 +186,7 @@ EditableGrid.prototype.autoWidth = function (element)
  * Returns auto height for editor
  * @private
  */
-EditableGrid.prototype.autoHeight = function (element) 
+EditableGrid.prototype.autoHeight = function (element)
 {
 	return element.offsetHeight - this.paddingTop(element) - this.paddingBottom(element) - this.borderTop(element) - this.borderBottom(element);
 };
@@ -195,7 +195,7 @@ EditableGrid.prototype.autoHeight = function (element)
  * Detects the directory when the js sources can be found
  * @private
  */
-EditableGrid.prototype.detectDir = function() 
+EditableGrid.prototype.detectDir = function()
 {
 	var base = location.href;
 	var e = document.getElementsByTagName('base');
@@ -213,7 +213,7 @@ EditableGrid.prototype.detectDir = function()
 			return srcAbs.toString();
 		}
 	}
-	
+
 	return false;
 };
 
@@ -223,8 +223,8 @@ EditableGrid.prototype.detectDir = function()
  * @param v2
  * @return boolean
  */
-EditableGrid.prototype.isSame = function(v1, v2) 
-{ 
+EditableGrid.prototype.isSame = function(v1, v2)
+{
 	if (v1 === v2) return true;
 	if (typeof v1 == 'number' && isNaN(v1) && typeof v2 == 'number' && isNaN(v2)) return true;
 	return false;
@@ -240,14 +240,14 @@ EditableGrid.prototype.addClassName = function(element, className) { if (!this.h
 EditableGrid.prototype.removeClassName = function(element, className) { element.className = this.strip(element.className.replace(new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ')); };
 
 /**
- * Useful string methods 
+ * Useful string methods
  * @private
  */
 String.prototype.trim = function() { return (this.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, "")); };
 String.prototype.contains = function(str) { return (this.match(str)==str); };
 String.prototype.startsWith = function(str) { return (this.match("^"+str)==str); };
 String.prototype.endsWith = function(str) { return (this.match(str+"$")==str); };
-	
+
 // Accepted formats: (for EU just switch month and day)
 //
 // mm-dd-yyyy
@@ -267,17 +267,17 @@ String.prototype.endsWith = function(str) { return (this.match(str+"$")==str); }
 // // m/d/yy
 // // m.d.yy
 // // m d yy,
-// // mmm d yy (yy is 20yy) 
+// // mmm d yy (yy is 20yy)
 
 /**
- * Checks validity of a date string 
+ * Checks validity of a date string
  * @private
  */
-EditableGrid.prototype.checkDate = function(strDate, strDatestyle) 
+EditableGrid.prototype.checkDate = function(strDate, strDatestyle)
 {
 	strDatestyle = strDatestyle || this.dateFormat;
 	strDatestyle = strDatestyle || "EU";
-	
+
 	var strDate;
 	var strDateArray;
 	var strDay;
@@ -290,10 +290,10 @@ EditableGrid.prototype.checkDate = function(strDate, strDatestyle)
 	var strSeparatorArray = new Array("-"," ","/",".");
 	var intElementNr;
 	var err = 0;
-	
+
 	var strMonthArray = this.shortMonthNames;
 	strMonthArray = strMonthArray || ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-	
+
 	if (!strDate || strDate.length < 1) return 0;
 
 	for (intElementNr = 0; intElementNr < strSeparatorArray.length; intElementNr++) {
@@ -308,7 +308,7 @@ EditableGrid.prototype.checkDate = function(strDate, strDatestyle)
 			booFound = true;
 		}
 	}
-	
+
 	if (booFound == false) {
 		if (strDate.length <= 5) return 1;
 		strDay = strDate.substr(0, 2);
@@ -324,7 +324,7 @@ EditableGrid.prototype.checkDate = function(strDate, strDatestyle)
 		strDay = strMonth;
 		strMonth = strTemp;
 	}
-	
+
 	// get and check day
 	intday = parseInt(strDay, 10);
 	if (isNaN(intday)) return 2;
@@ -349,7 +349,7 @@ EditableGrid.prototype.checkDate = function(strDate, strDatestyle)
 	if (intYear < 70) { intYear = 2000 + intYear; strYear = '' + intYear; } // 70 become 1970, 69 becomes 1969, as with PHP's date_parse_from_format
 	if (intYear < 100) { intYear = 1900 + intYear; strYear = '' + intYear; }
 	if (intYear < 1900 || intYear > 2100) return 11;
-	
+
 	// check day in month
 	if ((intMonth == 1 || intMonth == 3 || intMonth == 5 || intMonth == 7 || intMonth == 8 || intMonth == 10 || intMonth == 12) && (intday > 31 || intday < 1)) return 6;
 	if ((intMonth == 4 || intMonth == 6 || intMonth == 9 || intMonth == 11) && (intday > 30 || intday < 1)) return 7;
@@ -360,14 +360,14 @@ EditableGrid.prototype.checkDate = function(strDate, strDatestyle)
 	}
 
 	// return formatted date
-	return { 
+	return {
 		formattedDate: (strDatestyle == "US" ? strMonthArray[intMonth-1] + " " + intday+" " + strYear : intday + " " + strMonthArray[intMonth-1]/*.toLowerCase()*/ + " " + strYear),
 		sortDate: Date.parse(intMonth + "/" + intday + "/" + intYear),
-		dbDate: intYear + "-" + intMonth + "-" + intday 
+		dbDate: intYear + "-" + intMonth + "-" + intday
 	};
 };
 
-function LeapYear(intYear) 
+function LeapYear(intYear)
 {
 	if (intYear % 100 == 0) { if (intYear % 400 == 0) return true; }
 	else if ((intYear % 4) == 0) return true;
@@ -375,8 +375,8 @@ function LeapYear(intYear)
 }
 
 // See RFC3986
-URI = function(uri) 
-{ 
+URI = function(uri)
+{
 	this.scheme = null;
 	this.authority = null;
 	this.path = '';
@@ -500,11 +500,11 @@ function get_html_translation_table (table, quote_style) {
     // %          note: chooses to create the constants themselves.
     // *     example 1: get_html_translation_table('HTML_SPECIALCHARS');
     // *     returns 1: {'"': '&quot;', '&': '&amp;', '<': '&lt;', '>': '&gt;'}
-    
+
     var entities = {}, hash_map = {}, decimal = 0, symbol = '';
     var constMappingTable = {}, constMappingQuoteStyle = {};
     var useTable = {}, useQuoteStyle = {};
-    
+
     // Translate arguments
     constMappingTable[0]      = 'HTML_SPECIALCHARS';
     constMappingTable[1]      = 'HTML_ENTITIES';
@@ -635,11 +635,11 @@ function get_html_translation_table (table, quote_style) {
         symbol = String.fromCharCode(decimal);
         hash_map[symbol] = entities[decimal];
     }
-    
+
     return hash_map;
 }
 
-function htmlentities(string, quote_style) 
+function htmlentities(string, quote_style)
 {
     var hash_map = {}, symbol = '', tmp_str = '';
     tmp_str = string.toString();
@@ -649,7 +649,7 @@ function htmlentities(string, quote_style)
     return tmp_str;
 }
 
-function htmlspecialchars(string, quote_style) 
+function htmlspecialchars(string, quote_style)
 {
     var hash_map = {}, symbol = '', tmp_str = '';
     tmp_str = string.toString();

@@ -29,7 +29,7 @@ from cyder.cydns.utils import prune_tree
 import operator
 
 from gettext import gettext as _, ngettext
-import simplejson as json
+import json as json
 
 
 def zone_creation(request):

@@ -7,7 +7,7 @@ from cyder.cydns.tests.test_views_template import random_byte
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.master_form.views import commit_record
 
-import simplejson as json
+import json as json
 
 
 class MasterFormTests(TestCase):

@@ -30,7 +30,7 @@
             input_regex_array.push(new RegExp(/^dhcp\.scope\.start$/));
             output_regex_array.push(new RegExp(ipv4_regex));
             validation_error_array.push('Requires IP Address');
-            
+
             input_regex_array.push(new RegExp(/^dhcp\.scope\.end$/));
             output_regex_array.push(new RegExp(ipv4_regex));
             validation_error_array.push('Requires IP Address');
@@ -62,7 +62,7 @@
             input_regex_array.push(new RegExp(/^dhcp\.pool\.allow_booting\.\d+$/));
             output_regex_array.push(new RegExp(true_false_regex));
             validation_error_array.push('Requires True|False');
-            
+
             input_regex_array.push(new RegExp(/^dhcp\.pool\.allow_bootp\.\d+$/));
             output_regex_array.push(new RegExp(true_false_regex));
             validation_error_array.push('Requires True|False');
@@ -100,7 +100,7 @@
             if(validation_regex[0] != false){
                 if(validation_regex[0].test($(value_field_name).val()) == false){
                 //if($(value_field_name).val().test(validation_regex) == false){
-                    //console.log('Validation Failed'); 
+                    //console.log('Validation Failed');
                     the_return[0] = false;
                     the_return[1] = validation_regex[1];
                 } else {

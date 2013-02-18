@@ -1,4 +1,4 @@
-import simplejson as json
+import json as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.models import model_to_dict
@@ -75,7 +75,8 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=record)
 
         try:
-            if perm(request, cy.ACTION_CREATE, obj=record):
+            if (perm(request, cy.ACTION_CREATE, obj=record) and
+                    record_type != 'soa'):
                 record = form.save()
                 request.session['ctnr'].domains.add(record)
             # If domain, add to current ctnr.

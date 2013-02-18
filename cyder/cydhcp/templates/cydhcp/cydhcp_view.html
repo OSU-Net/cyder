@@ -1,0 +1,37 @@
+{% extends "base/list.html" %}
+
+{% set pretty_record_type = record_type|prettify_record_type %}
+
+{% block title %} {{ pretty_record_type + "s" }} {% endblock %}
+
+{% block sidebar %}
+    {% include "cydhcp/includes/cydhcp_sidebar.html" %}
+{% endblock %}
+
+{% block action_bar %}
+    <a class="btn" id="create-obj">Create {{ a_or_an(record_type) }} {{ pretty_record_type }}</a>
+{% endblock %}
+
+{% block form %}
+  <span id="view-metadata"
+        data-objType="{{ record_type }}"
+        data-prettyObjType="{{ pretty_record_type }}"
+        data-searchUrl="{{ url('cydns-search-record') }}"
+        data-getUrl="{{ url('cydns-get-record') }}"
+        data-domainsUrl="{{ url('get-all-domains') }}">
+  </span>
+
+  <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">
+    <form class="form" method="POST">
+      <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_record_type }}</h2>
+      <div class="inner-form">
+        {{ form.as_p() }}
+      </div>
+      <div class="form-btns">
+        <hr>
+        <a class="btn submit c">{{ 'Update' if obj else 'Create ' + pretty_record_type }}</a>
+        <a class="btn cancel c" data-formId="obj-form">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

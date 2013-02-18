@@ -13,5 +13,3 @@ class DevAuthenticationMiddleware(object):
         if request.path == '/logout/':
             request.session.flush()
             return redirect('/')
-
-        return None

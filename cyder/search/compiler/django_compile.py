@@ -1,9 +1,8 @@
 from itertools import izip
 
 from search.compiler.invparse import build_parser
-from search.compiler.invfilter import BadDirective
+from search.compiler.invfilter import BadDirective, get_managers
 from search.compiler.utils import make_stack, istype
-from search.compiler.invfilter import get_managers
 
 
 def compile_to_django(search):

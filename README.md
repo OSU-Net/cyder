@@ -8,6 +8,7 @@ Installation
 
 ```
 git submodule update --init --recursive
+sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev
 pip install requirements/dev.txt
 pip install -e git+git://github.com/uberj/dnspython.git#egg=dnspython
 python manage.py syncdb

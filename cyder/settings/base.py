@@ -17,6 +17,10 @@ site_root = os.path.realpath(os.path.join(_base, '../'))
 sys.path.append(site_root)
 sys.path.append(site_root + '/vendor')
 
+EMAIL_SUFFIX = '@onid.oregonstate.edu'
+CAS_SERVER_URL = 'https://login.oregonstate.edu/cas/login'
+CAS_AUTO_CREATE_USERS = True  # Not to be used in production.
+
 SASS_PREPROCESS = True
 JINGO_MINIFY_USE_STATIC = False
 
@@ -86,7 +90,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydhcp.interface',
     'cydhcp.interface.dynamic_intr',
     'cydhcp.interface.static_intr',
-    #'cydhcp.bulk_change',
+    'cydhcp.bulk_change',
     'cydhcp.vrf',
     'cydhcp.workgroup',
     'cydns',
@@ -108,6 +112,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydns.cybind',
 
     # Third party apps
+    'django_cas',
     'djcelery',
     'django_extensions',
     'django_nose',
@@ -129,7 +134,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
+    'django_cas.middleware.CASMiddleware',
+    'cyder.middleware.authentication.AuthenticationMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
 
@@ -143,10 +149,10 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 SESSION_COOKIE_NAME = 'cyder'
 SESSION_COOKIE_SECURE = False
 
-
 AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
+    'django_cas.backends.CASBackend',
 )
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated

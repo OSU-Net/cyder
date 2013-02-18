@@ -2,5 +2,8 @@ django-tastypie
 ipaddr
 mimeparse
 python-ldap
+django-reversion
+ply
 
+-e git://github.com/KTHse/django-cas2#egg=django-cas2
 -r ../vendor/src/funfactory/funfactory/requirements/prod.txt

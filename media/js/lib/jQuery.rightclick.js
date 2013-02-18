@@ -14,20 +14,20 @@
 //      $("#selector").rightClick( function(e) {
 //          // Do something
 //      });
-//      
+//
 //      // Capture right mouse down
 //      $("#selector").rightMouseDown( function(e) {
 //          // Do something
 //      });
-//      
+//
 //      // Capture right mouseup
 //      $("#selector").rightMouseUp( function(e) {
 //          // Do something
 //      });
-//      
+//
 //      // Disable context menu on an element
 //      $("#selector").noContext();
-// 
+//
 // History:
 //
 //      1.01 - Updated (20 December 2008)
@@ -39,14 +39,14 @@
 //      1.00 - Released (13 May 2008)
 //
 // License:
-// 
+//
 // This plugin is dual-licensed under the GNU General Public License and the MIT License
-// and is copyright 2008 A Beautiful Site, LLC. 
+// and is copyright 2008 A Beautiful Site, LLC.
 //
 if(jQuery) (function(){
-    
+
     $.extend($.fn, {
-        
+
         rightClick: function(handler) {
             $(this).each( function() {
                 $(this).mousedown( function(e) {
@@ -66,8 +66,8 @@ if(jQuery) (function(){
                 }
             });
             return $(this);
-        },      
-        
+        },
+
         rightMouseDown: function(handler) {
             $(this).each( function() {
                 $(this).mousedown( function(e) {
@@ -84,7 +84,7 @@ if(jQuery) (function(){
             });
             return $(this);
         },
-        
+
         rightMouseUp: function(handler) {
             $(this).each( function() {
                 $(this).mouseup( function(e) {
@@ -101,7 +101,7 @@ if(jQuery) (function(){
             });
             return $(this);
         },
-        
+
         noContext: function() {
             $(this).each( function() {
                 $(this)[0].oncontextmenu = function() {
@@ -110,7 +110,7 @@ if(jQuery) (function(){
             });
             return $(this);
         }
-        
+
     });
-    
-})(jQuery); 
+
+})(jQuery);

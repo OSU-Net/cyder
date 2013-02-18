@@ -1,10 +1,17 @@
 import operator
 import ipaddr
+import re
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
+from cyder.core.system.models import System
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.utils import IPFilter
+from cyder.cydhcp.utils import start_end_filter
+from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -17,41 +24,27 @@ from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.view.models import View
 
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.utils import IPFilter
-from cyder.cydhcp.utils import start_end_filter
-
-from cyder.cydhcp.vlan.models import Vlan
-
-#from cyder.core.system.models import System
-import re
-
 
 searchables = (
-        ('A', AddressRecord),
-        ('CNAME', CNAME),
-        ('DOMAIN', Domain),
-        ('MX', MX),
-        ('NS', Nameserver),
-        ('PTR', PTR),
-        ('SOA', SOA),
-        ('SRV', SRV),
-        ('SSHFP', SSHFP),
-        ('INTR', StaticInterface),
-        #('SYSTEM', System),
-        ('TXT', TXT),
+    ('A', AddressRecord),
+    ('CNAME', CNAME),
+    ('DOMAIN', Domain),
+    ('INTR', StaticInterface),
+    ('MX', MX),
+    ('NS', Nameserver),
+    ('PTR', PTR),
+    ('SOA', SOA),
+    ('SRV', SRV),
+    ('SSHFP', SSHFP),
+    ('SYSTEM', System),
+    ('TXT', TXT),
 )
 
 
 def get_managers():
     managers = []
     for name, Klass in searchables:
-        if name == 'System':
-            managers.append(Klass.objectsselect_related('server_model',
-                            'system_rack__location'))
-        else:
-            managers.append(Klass.objects)
+        managers.append(Klass.objects)
     return managers
 
 
@@ -75,8 +68,8 @@ def build_filter(filter_, fields, filter_type):
     # rtucker++
     final_filter = Q()
     for t in fields:
-        final_filter = final_filter | Q(**{"{0}__{1}".format(t,
-            filter_type): filter_})
+        final_filter = final_filter | Q(**{"{0}__{1}".format(
+            t, filter_type): filter_})
 
     return final_filter
 
@@ -241,7 +234,7 @@ def build_network_qsets(network_str):
         ipf = IPFilter(network.network, network.broadcast, ip_type)
     except (ipaddr.AddressValueError, ipaddr.NetmaskValueError):
         raise BadDirective("{0} isn't a valid "
-                "network.".format(network_str))
+                           "network.".format(network_str))
     return build_ipf_qsets(ipf.Q)
 
 
@@ -250,7 +243,7 @@ def build_site_qsets(site_name):
         site = Site.objects.get(name=site_name)
     except ObjectDoesNotExist:
         raise BadDirective("{0} isn't a valid "
-                "site.".format(site_name))
+                           "site.".format(site_name))
     return build_ipf_qsets(site.compile_Q())
 
 
@@ -262,10 +255,10 @@ def build_vlan_qsets(vlan_name):
             vlan = Vlan.objects.get(name=vlan_name)
     except ObjectDoesNotExist:
         raise BadDirective("{0} isn't a valid "
-                "vlan identifier.".format(vlan_name))
+                           "vlan identifier.".format(vlan_name))
     except MultipleObjectsReturned:
         raise BadDirective("{0} doesn't uniquely identify"
-                "a vlan.".format(vlan_name))
+                           "a vlan.".format(vlan_name))
     return build_ipf_qsets(vlan.compile_Q())
 
 

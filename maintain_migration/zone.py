@@ -104,7 +104,8 @@ class Zone(object):
                                                  ttl=ttl,
                                                  enabled=enabled)
                 mx.save()
-                mx.views.add(public)
+                if enabled:
+                    mx.views.add(public)
             except ValidationError:
                 print "Error generating MX."
 
@@ -158,7 +159,8 @@ class Zone(object):
                     import pdb
                     pdb.set_trace()
                 static.save()
-                static.views.add(public)
+                if enabled:
+                    static.views.add(public)
 
     def gen_AR(self):
         """
@@ -199,7 +201,8 @@ class Zone(object):
                     ip_str=long2ip(ip),
                     ip_type='4')
                 arec.save()
-                arec.views.add(public)
+                if enabled:
+                    arec.views.add(public)
 
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(name=name,
@@ -210,7 +213,8 @@ class Zone(object):
                     # PTRs need to be cleaned before saving (no get_or_create)
                     ptr.full_clean()
                     ptr.save()
-                    ptr.views.add(public)
+                    if enabled:
+                        ptr.views.add(public)
 
     def gen_NS(self):
         """
@@ -277,7 +281,7 @@ def gen_CNAME():
     """
     cursor.execute("SELECT * FROM zone_cname;")
 
-    for _, server, name, domain_id, ttl, zone, _ in cursor.fetchall():
+    for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
         server, name = server.lower(), name.lower()
         cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
         dname, = cursor.fetchone()
@@ -304,7 +308,8 @@ def gen_CNAME():
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
         cn.save()
-        cn.views.add(public)
+        if enabled:
+            cn.views.add(public)
 
 
 if __name__ == "__main__":
@@ -379,5 +384,3 @@ if __name__ == "__main__":
     print map(lambda x: len(x.objects.all()),
               [Domain, AddressRecord, PTR, SOA, MX, CNAME, Nameserver,
               StaticInterface])
-    import pdb
-    pdb.set_trace()

@@ -7,7 +7,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.domain.models import Domain
 
-import simplejson as json
+import json as json
 
 
 def cydns_home(request):
@@ -19,7 +19,6 @@ def cydns_home(request):
 
 
 def commit_record(request):
-    pdb.set_trace()
     commit_data = json.loads(request.raw_post_data)
     record_type = commit_data.pop("rtype", None)
     if not record_type:

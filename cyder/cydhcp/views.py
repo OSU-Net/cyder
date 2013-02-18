@@ -76,7 +76,8 @@ def cydhcp_view(request, pk=None):
                     pass
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
-    return render(request, 'cydhcp/cydhcp_view.html', {
+    return render(
+        request, 'cydhcp/cydhcp_view.html', {
         'form': form,
         'obj': obj,
         'page_obj': page_obj,

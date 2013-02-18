@@ -1,28 +1,8 @@
-from django.test import TestCase
-from django.test.client import Client, FakePayload, MULTIPART_CONTENT, encode_multipart, BOUNDARY
-from django.utils.encoding import smart_str
-
 from tastypie.test import ResourceTestCase
-
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
-from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.tests.test_views_template import GenericViewTests, random_label
-from cyder.cydns.tests.test_views_template import random_byte
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.mx.models import MX
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.soa.models import SOA
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.txt.models import TXT
-from cyder.cydns.sshfp.models import SSHFP
-from cyder.cydns.view.models import View
+from cyder.cydns.tests.test_views_template import random_label
 
-import simplejson as json
-from urlparse import urlparse, urlsplit
+import json as json
 
 API_VERSION = '1'
 
@@ -35,7 +15,6 @@ class KVAPITests(object):
         super(KVAPITests, self).setUp()
 
     def test_create(self):
-        pdb.set_trace()
         resp, post_data = self.generic_create(self.post_data())
         _, _, (_, new_object_url) = resp.items()
         new_resp = self.api_client.get(new_object_url, format='json')
@@ -107,8 +86,8 @@ class KVAPITests(object):
     def test_bad_value_create(self):
         post_data = self.bad_post_data()
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)

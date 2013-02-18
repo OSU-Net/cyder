@@ -1,4 +1,4 @@
-import simplejson as json
+import json as json
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib import messages
@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
+from cyder.cydhcp.interface.static_intr.forms import (
+    StaticInterfaceForm, StaticInterfaceQuickForm)
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
@@ -15,8 +16,7 @@ from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.views import (CydhcpListView, CydhcpDetailView,
-                                CydhcpDeleteView, CydhcpUpdateView,
-                                CydhcpCreateView)
+                                CydhcpDeleteView, CydhcpCreateView)
 
 
 class StaticInterfaceView(object):

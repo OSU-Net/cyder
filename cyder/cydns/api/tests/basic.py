@@ -14,7 +14,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
 
-import simplejson as json
+import json as json
 
 API_VERSION = '1'
 
@@ -24,7 +24,8 @@ def build_sample_domain():
     for i in range(2):
         domain_name = random_label()
         domain = Domain(name=domain_name)
-    soa = SOA(primary=random_label(), contact="asf", description=random_label())
+    soa = SOA(primary=random_label(), contact="asf",
+              description=random_label())
     soa.save()
     domain.soa = soa
     domain.save()
@@ -106,8 +107,8 @@ class CydnsAPITests(object):
     def generic_create(self, post_data):
         # Check how many are there first.
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         # Verify a new one has been added.
@@ -121,7 +122,7 @@ class CydnsAPITests(object):
         change_post_data['description'] = "==DIFFERENT=="
         post_data['description'] = "==DIFFERENT=="
         resp, patch_data = self.generic_update(new_object_url,
-                                                change_post_data)
+                                               change_post_data)
         new_resp = self.api_client.get(new_object_url, format='json')
         updated_obj_data = json.loads(new_resp.content)
         self.compare_data(post_data, updated_obj_data)
@@ -130,8 +131,8 @@ class CydnsAPITests(object):
         post_data = self.post_data()
         post_data['views'] = ['public']
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count + 1)
@@ -182,8 +183,8 @@ class MangleTests(ResourceTestCase):
         post_data = self.post_data()
         post_data.pop('fqdn')
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -192,8 +193,8 @@ class MangleTests(ResourceTestCase):
         post_data = self.post_data()
         post_data['fqdn'] = post_data['fqdn'] + '.'
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -202,23 +203,22 @@ class MangleTests(ResourceTestCase):
         post_data = self.post_data()
         post_data['fqdn'] = ''
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
-
 
     def test_ensure_label_domain_fail(self):
         # MAke ensure_label_domain fail
         post_data = self.post_data()
         Domain.objects.get_or_create(name="asdf")
         Domain.objects.get_or_create(name="foo.asdf")
-        domain , _= Domain.objects.get_or_create(name="bar.foo.asdf")
+        domain, _ = Domain.objects.get_or_create(name="bar.foo.asdf")
         post_data['fqdn'] = 'secondbar.x.y.' + domain.name
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
         self.assertEqual(self.test_type.objects.count(), obj_count)
@@ -244,8 +244,8 @@ class DomainLeakTests(ResourceTestCase):
     def test_leak1(self):
         # Check how many are there first.
         domain_count = Domain.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         post_data = self.post_data()
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpBadRequest(resp)
@@ -258,7 +258,8 @@ class DomainLeakTests(ResourceTestCase):
         return {
             # We are fucking this up on purpose.
             'fuckinup': random_label(),
-            'fqdn': 'c' + random_label() + '.' + random_label() + '.' + self.domain.name,
+            'fqdn': "c{0}.{1}.{2)}".format(random_label(), random_label(),
+                                           self.domain.name),
         }
 
 
@@ -295,7 +296,7 @@ class SRVAPITests(CydnsAPITests, ResourceTestCase):
         return {
             'description': random_label(),
             'ttl': random_byte(),
-            'fqdn':"_"+random_label() + "." + self.domain.name,
+            'fqdn': "_" + random_label() + "." + self.domain.name,
             'target': random_label(),
             'priority': 2,
             'weight': 2222,
@@ -355,7 +356,8 @@ class AdderessRecordV4APITests(CydnsAPITests, ResourceTestCase):
             'description': random_label(),
             'ttl': random_byte(),
             'fqdn': 'i' + random_label() + "." + self.domain.name,
-            'ip_str': "11.{0}.{1}.{2}".format(random_byte(), random_byte(), random_byte()),
+            'ip_str': "11.{0}.{1}.{2}".format(
+                random_byte(), random_byte(), random_byte()),
             'ip_type': '4'
         }
 
@@ -396,9 +398,9 @@ class PTRV6APITests(CydnsAPITests, ResourceTestCase):
         return {
             'description': 'k' + random_label(),
             'ttl': random_byte(),
-            'ip_str': "1000:{0}:{1}:{2}:{3}:{4}::".format(random_byte(), random_byte(),
-                                                          random_byte(), random_byte(),
-                                                          random_byte()),
+            'ip_str': "1000:{0}:{1}:{2}:{3}:{4}::".format(
+                random_byte(), random_byte(), random_byte(), random_byte(),
+                random_byte()),
             'ip_type': '6',
             'name': random_label()
         }
@@ -420,7 +422,8 @@ class PTRV4APITests(CydnsAPITests, ResourceTestCase):
         return {
             'description': random_label(),
             'ttl': random_byte(),
-            'ip_str': "11.{0}.{1}.{2}".format(random_byte(), random_byte(), random_byte()),
+            'ip_str': "11.{0}.{1}.{2}".format(
+                random_byte(), random_byte(), random_byte()),
             'ip_type': '4',
             'name': random_label()
         }

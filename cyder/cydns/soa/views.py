@@ -15,7 +15,7 @@ from cyder.cydns.views import CydnsUpdateView
 
 from cyder.cydhcp.keyvalue.utils import get_aa, get_docstrings, get_attrs
 from cyder.cydhcp.keyvalue.utils import update_attrs, dict_to_kv
-import simplejson as json
+import json as json
 
 
 class SOAView(object):

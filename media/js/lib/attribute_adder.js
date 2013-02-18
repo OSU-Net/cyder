@@ -1,11 +1,11 @@
 // This code is from here: http://www.openjs.com/scripts/examples/addfield.php
-// 
+//
 /*
 function addField(area, field, limit) {
     if(!document.getElementById) return; //Prevent older browsers from getting any further.
     var field_area = document.getElementById(area);
     var all_inputs = field_area.getElementsByTagName("input"); //Get all the input fields in the given area.
-    //Find the count of the last element of the list. It will be in the format '<field><number>'. If the 
+    //Find the count of the last element of the list. It will be in the format '<field><number>'. If the
     //      field given in the argument is 'friend_' the last id will be 'friend_4'.
     if(all_inputs.length > 0){
         var last_item = all_inputs.length - 1;

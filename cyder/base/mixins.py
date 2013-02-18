@@ -14,33 +14,48 @@ class ObjectUrlMixin(object):
         Return the 'list' url of an object. Class method since don't
         need specific instance of object.
         """
-        return reverse(cls._meta.db_table)
+        try:
+            return reverse(cls._meta.db_table)
+        except NoReverseMatch:
+            return ''
 
     @classmethod
     def get_create_url(cls):
         """
         Return the create url of the type of object (to be posted to).
         """
-        return reverse(cls._meta.db_table + '-create')
+        try:
+            return reverse(cls._meta.db_table + '-create')
+        except NoReverseMatch:
+            return ''
 
     def get_update_url(self):
         """
         Return the update url of an object (to be posted to). Not class method
         because object pk needed.
         """
-        return reverse(self._meta.db_table + '-update', args=[self.pk])
+        try:
+            return reverse(self._meta.db_table + '-update', args=[self.pk])
+        except NoReverseMatch:
+            return ''
 
     def get_delete_url(self):
         """
         Return the delete url of an object (to be posted to).
         """
-        return reverse(self._meta.db_table + '-delete', args=[self.pk])
+        try:
+            return reverse(self._meta.db_table + '-delete', args=[self.pk])
+        except NoReverseMatch:
+            return ''
 
     def get_detail_url(self):
         """
         Return the detail url of an object.
         """
-        return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        try:
+            return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        except NoReverseMatch:
+            return ''
 
     def details(self):
         """
