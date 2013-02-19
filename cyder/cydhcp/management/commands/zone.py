@@ -360,7 +360,12 @@ class Command(BaseCommand):
                 dest='delete',
                 action='store_true',
                 default=False,
-                help='Delete old objects'))
+                help='Delete old objects'),
+            make_option('-s', '--skip',
+                dest='skip',
+                action='store_true',
+                default=False,
+                help='Skip edu zone.'))
 
     def handle(self, **options):
         if options['dump']:
@@ -408,6 +413,8 @@ class Command(BaseCommand):
 
             cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
             for domain_id, dname, _, _ in cursor.fetchall():
+                if "edu" in dname and options['skip']:
+                    continue
                 print "Creating %s zone." % dname
                 Zone(domain_id=domain_id, dname=dname,)
 
