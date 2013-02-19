@@ -25,10 +25,12 @@ class Ctnr(models.Model, ObjectUrlMixin):
         return self.name
 
     def details(self):
-        return (
-            ('Name', self.name),
-            ('Description', self.description),
+        data = super(Ctnr, self).details()
+        data['data'] = (
+            ('Name', 'name', self.name),
+            ('Description', 'description', self.description),
         )
+        return data
 
 
 class CtnrUser(models.Model):
