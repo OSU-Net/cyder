@@ -137,7 +137,7 @@ class Zone(object):
             # TODO: Add key-value attributes to system objects.
 
             system, _ = System.objects.get_or_create(
-                    hostname=name, location=location, department=dept)
+                    name=name, location=location, department=dept)
             try:
                 cursor.execute("SELECT name "
                                "FROM workgroup"
