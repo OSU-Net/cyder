@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.forms.util import ErrorList
+from django.forms.util import ErrorList, ErrorDict
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from cyder.base.views import (BaseListView, BaseDetailView, BaseCreateView,
@@ -71,9 +71,17 @@ def cydhcp_view(request, pk=None):
                 if perm(request, cy.ACTION_CREATE, obj=obj):
                     obj = form.save()
                     return redirect(obj.get_list_url())
-            except (ValidationError, ValueError):
+            except (ValidationError, ValueError, e):
                     # TODO handle errors better
-                    pass
+                    if form._errors is None:
+                        form._errors = ErrorDict()
+                    form._errors["__all__"] = ErrorList(e.messages)
+                    return render(request, "cydhcp/cydhcp_view.html", {
+                        'form': form,
+                        'obj': obj,
+                        'record_type': record_type,
+                        'pk': pk,
+                    })
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
     return render(
@@ -113,8 +121,8 @@ def cydhcp_get_record(request):
 
 
 def cydhcp_search_record(request):
-    record_type = request.GEt.get('record_type', '')
-    term = request.Get.get('term', '')
+    record_type = request.GET.get('record_type', '')
+    term = request.GET.get('term', '')
     if not (record_type and term):
         raise Http404
     Klass, FormKlass = get_klasses(record_type)
