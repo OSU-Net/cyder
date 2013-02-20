@@ -4,25 +4,12 @@
 {% block content %}
   <div class='dns-title'>{{ network }}</div>
 
-  {% block action_bar %}
-    {% if network.get_update_url %}
-      <a class="btn btn-primary" href="{{ network.get_update_url() }}">Edit</a>
-    {% endif %}
-
-    {% block mid_action_bar %}
-    {% endblock %}
-
-    {% if network.get_delete_url %}
-      <a class="btn btn-danger" href="{{ network.get_delete_url() }}">Delete</a>
-    {% endif %}
-  {% endblock %}
-
   <br>
   <span>See <a href="/cydhcp/build/{{network.pk}}/">DHCP Build Output</a>.</span>
-
+  <h3>Network Details</h3> 
     <table class="table">
       <thead>
-        {% for item, value in network.details() %}
+        {% for item, _, value in network.details()['data'] %}
           <th>{{ item }}</th>
         {% endfor %}
         <th>Vlan</th>
@@ -33,7 +20,7 @@
 
       <tbody>
         <tr>
-        {% for item, value in network.details() %}
+        {% for item, _, value in network.details()['data'] %}
           <td>{{ value }}</td>
         {% endfor %}
         {% if network.vlan %}
@@ -47,7 +34,7 @@
         </tr>
       </tbody>
     </table>
-
+    <h3>Network Options</h3>
     <table class="table">
       <thead>
         {% for attr in attrs %}
@@ -63,27 +50,29 @@
         </tr>
       </tbody>
     </table>
-
+    {% if eldars %}
     <h3>Parent Networks</h3>
     {% from 'cydhcp/cydhcp_macros.html' import display_networks %}
     {{ display_networks(eldars) }}
-
+    {% endif %}
+    {% if sub_networks %}
     <h3>Sub Networks.</h3>
     {{ display_networks(sub_networks) }}
-
+    {% endif %}
 
     <h3>Ranges</h3>
     <table class="table">
       <thead>
-          <th>Info</th>
+            <th>Start</th>
+            <th>End</th>
       </thead>
-
       <tbody>
-        <tr>
         {% for range in ranges %}
-        <td>Start: <a href='{{range.get_detail_url()}}'>{{ range.start_str }}</a> End: <a href='{{range.get_detail_url()}}'>{{ range.end_str }}</a></td>
-        {% endfor %}
+        <tr>
+            <td>Start: <a href='{{range.get_detail_url()}}'>{{ range.start_str }}</a></td>
+            <td>End: <a href='{{range.get_detail_url()}}'>{{ range.end_str }}</a></td>
         </tr>
+        {% endfor %}
       </tbody>
     </table>
 {% endblock %}

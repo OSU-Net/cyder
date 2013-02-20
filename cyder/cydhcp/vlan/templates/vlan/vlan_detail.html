@@ -4,30 +4,16 @@
 {% block content %}
     <div class='dns-title'>{{ vlan }}</div>
 
-    {% block action_bar %}
-        {% if vlan.get_update_url %}
-            <a class="btn btn-primary" href="{{ vlan.get_update_url() }}">Edit</a>
-        {% endif %}
-
-        {% block mid_action_bar %}
-        {% endblock %}
-
-        {% if vlan.get_delete_url %}
-            <a class="btn btn-danger" href="{{ vlan.get_delete_url() }}">Delete</a>
-        {% endif %}
-    {% endblock %}
-
-
         <table class="table">
             <thead>
-                {% for item, value in vlan.details() %}
+                {% for item, _, value in vlan.details()['data'] %}
                     <th>{{ item }}</th>
                 {% endfor %}
             </thead>
 
             <tbody>
                 <tr>
-                {% for item, value in vlan.details() %}
+                {% for item, _, value in vlan.details()['data'] %}
                     <td>{{ value }}</td>
                 {% endfor %}
                 </tr>
