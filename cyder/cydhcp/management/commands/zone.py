@@ -23,7 +23,9 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.utils import ensure_domain
+from cyder.cydns.models import View
 
+public, _ = View.objects.get_or_create(name="public")
 
 BAD_DNAMES = ['', '.', '_']
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
@@ -87,11 +89,11 @@ class Zone(object):
 
         :uniqueness: label, domain, server, priority
         """
-        cursor.execute("SELECT name, server, priority, ttl "
+        cursor.execute("SELECT name, server, priority, ttl, enabled "
                        "FROM zone_mx "
                        "WHERE domain = '%s';" % self.domain_id)
 
-        for name, server, priority, ttl in cursor.fetchall():
+        for name, server, priority, ttl, enabled in cursor.fetchall():
             if MX.objects.filter(label=name,
                                  domain=self.domain,
                                  server=server,
@@ -104,6 +106,8 @@ class Zone(object):
                                                  server=server,
                                                  priority=priority,
                                                  ttl=ttl)
+                if enabled:
+                    mx.views.add(public)
             except ValidationError:
                 print "Error generating MX."
 
@@ -161,6 +165,8 @@ class Zone(object):
                     # (no get_or_create)
                     static.full_clean()
                     static.save()
+                    if enabled:
+                        static.views.add(public)
                     cursor.execute("SELECT dhcp_option, value "
                                    "FROM object_option "
                                    "WHERE object_id = {0} "
@@ -199,10 +205,10 @@ class Zone(object):
         :PTR uniqueness: name, ip_str, ip_type
         """
         name = self.domain.name
-        cursor.execute("SELECT ip, hostname, type "
+        cursor.execute("SELECT ip, hostname, type, enabled "
                        "FROM pointer "
                        "WHERE hostname LIKE '%%.%s';" % name)
-        for ip, hostname, ptr_type, in cursor.fetchall():
+        for ip, hostname, ptr_type, enabled, in cursor.fetchall():
 
             label, dname = hostname.split('.', 1)
             if dname != name:
@@ -215,6 +221,8 @@ class Zone(object):
                 arec, _ = AddressRecord.objects.get_or_create(
                             label=label, domain=self.domain,
                             ip_str=long2ip(ip), ip_type='4')
+                if enabled:
+                    arec.views.add(public)
 
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(
@@ -225,6 +233,8 @@ class Zone(object):
                     # (no get_or_create)
                     ptr.full_clean()
                     ptr.save()
+                    if enabled:
+                        ptr.views.add(public)
 
     def gen_NS(self):
         """
@@ -239,6 +249,7 @@ class Zone(object):
             try:
                 ns, _ = Nameserver.objects.get_or_create(
                         domain=self.domain, server=name)
+                ns.views.add(public)
             except ValidationError:
                 print "Error generating NS."
 
@@ -292,7 +303,7 @@ def gen_CNAME():
     """
     cursor.execute("SELECT * FROM zone_cname")
 
-    for _, server, name, domain_id, ttl, zone, _ in cursor.fetchall():
+    for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
         cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
         dname, = cursor.fetchone()
         if not dname:
@@ -318,6 +329,8 @@ def gen_CNAME():
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
         cn.save()
+        if enabled:
+            cn.views.add(public)
 
 
 class Command(BaseCommand):
@@ -347,7 +360,12 @@ class Command(BaseCommand):
                 dest='delete',
                 action='store_true',
                 default=False,
-                help='Delete old objects'))
+                help='Delete old objects'),
+            make_option('-s', '--skip',
+                dest='skip',
+                action='store_true',
+                default=False,
+                help='Skip edu zone.'))
 
     def handle(self, **options):
         if options['dump']:
@@ -395,6 +413,8 @@ class Command(BaseCommand):
 
             cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
             for domain_id, dname, _, _ in cursor.fetchall():
+                if "edu" in dname and options['skip']:
+                    continue
                 print "Creating %s zone." % dname
                 Zone(domain_id=domain_id, dname=dname,)
 
