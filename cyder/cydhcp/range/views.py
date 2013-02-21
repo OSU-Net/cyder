@@ -58,7 +58,6 @@ def range_detail(request, range_pk):
         allow = ["Known client"]
     elif mrange.allow == "legacy":
         allow = [ctnr for ctnr in Ctnr.objects.filter(ranges=mrange)]
-    print allow
     start_upper, start_lower = mrange.start_upper, mrange.start_lower
     end_upper, end_lower = mrange.end_upper, mrange.end_lower
 
@@ -116,7 +115,6 @@ def range_detail(request, range_pk):
             range_data.append((None, ip_str))
         else:
             ips_used += 1
-    print ips_total, ips_used
     paginator = Paginator(range_data, 20)
     page = request.GET.get('page')
     try:
