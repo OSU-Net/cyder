@@ -10,6 +10,8 @@ class Site(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=255)
     parent = models.ForeignKey("self", null=True, blank=True)
 
+    search_fields = ('name', 'parent__name')
+
     class Meta:
         db_table = 'site'
         unique_together = ('name', 'parent')

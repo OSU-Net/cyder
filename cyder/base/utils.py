@@ -109,15 +109,19 @@ def make_megafilter(Klass, term):
     Builds a query string that searches over fields in model's
     search_fields.
     """
-    megafilter = [Q(**{"{0}__icontains".format(field): term}) for field in
-                  Klass.search_fields]
+    megafilter = []
+    for field in Klass.search_fields:
+            megafilter.append(Q(**{"{0}__icontains".format(field): term}))
     return reduce(operator.or_, megafilter)
 
 
 def _filter(request, Klass):
     if request.GET.get('filter'):
-        return Klass.objects.filter(make_megafilter(Klass,
-                                    request.GET.get('filter')))
+        try:
+            return Klass.objects.filter(make_megafilter(Klass,
+                                        request.GET.get('filter')))
+        except TypeError:
+            pass
     return Klass.objects.all()
 
 

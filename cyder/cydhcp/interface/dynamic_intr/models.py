@@ -20,6 +20,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     vrf = models.ForeignKey(Vrf, null=True)
     domain = models.ForeignKey(Domain, null=True)
 
+    search_fields = ('mac')
+
     class Meta:
         db_table = 'dynamic_interface'
 

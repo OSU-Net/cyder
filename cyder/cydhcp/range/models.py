@@ -51,9 +51,9 @@ class Range(models.Model, ObjectUrlMixin):
             ('6', 'IPv6'),)
 
     ALLOW_OPTIONS = (
-            ('vrf', 'allow members of vrf'),
-            ('known-client', 'allow known-clients'),
-            ('legacy', 'ctnr-range'),)
+            ('vrf', 'Allow members of VRF'),
+            ('known-client', 'Allow known-clients'),
+            ('legacy', 'Allow Ctnr: Legacy Option'),)
 
     DENY_OPTIONS = (
             ('deny-unknown', 'deny dynamic unknown-clients'),)
@@ -87,8 +87,10 @@ class Range(models.Model, ObjectUrlMixin):
 
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
                     default=STATIC, editable=False)
-    ip_type = models.CharField(max_length=1,
-            choices=IP_TYPES)
+    ip_type = models.CharField(max_length=1, choices=IP_TYPES)
+
+    search_fields = ('start_str', 'end_str')
+
 
     class Meta:
         db_table = 'range'

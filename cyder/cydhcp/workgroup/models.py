@@ -9,6 +9,8 @@ class Workgroup(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
+    search_fields = ('name')
+
     class Meta:
         db_table = 'workgroup'
 

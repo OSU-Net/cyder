@@ -255,7 +255,7 @@ def migrate_dynamic_hosts():
         c = maintain_find_zone(zone_id) if zone_id else None
         d = maintain_find_domain(domain_id) if domain_id else None
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
-        s, _ = System.objects.get_or_create(hostname=name, location=loc)
+        s, _ = System.objects.get_or_create(name=name, location=loc)
         if r.allow == 'vrf':
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
