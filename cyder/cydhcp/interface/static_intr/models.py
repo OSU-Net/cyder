@@ -111,8 +111,16 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         data['data'] = (
             ("Name", 'fqdn', self),
             ("IP", 'ip_str', str(self.ip_str)),
+            ("MAC", 'mac', self.mac),
+            ("Vrf", 'vrf', self.vrf),
+            ("Workgroup", 'workgroup', self.workgroup),
+            ("DHCP Enabled", "dhcp_enabled", \
+                    "True" if self.dhcp_enabled else "False"),
+            ("DNS Enabled", "dns_enabled", \
+                    "True" if self.dns_enabled else "False"),
             ("DNS Type", '', "A/PTR"),
         )
+        print data
         return data
 
     class Meta:
