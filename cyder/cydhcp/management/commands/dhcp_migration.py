@@ -284,6 +284,7 @@ def migrate_zone_range():
         c = Ctnr.objects.get(name=zone_name)
         r = Range.objects.get(start_lower=r_start, end_lower=r_end)
         c.ranges.add(r)
+        c.save()
 
 
 def migrate_zone_domain():

@@ -39,6 +39,18 @@
     {% else %}
     <span>See <a href="{{ url('network-create') }}">Create Network</a>.</span>
     {% endif %}
+    <p>This range allows {{ range_.allow }}</p>
+    <table class="table">
+        <thead>
+            <th>Allowed</th>
+        </thead>
+        <tbody>
+            {% for allow in allow_list %}
+                <tr><td>{{ allow }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     {% if attrs %}
     <table class="table">
         <thead>
@@ -58,6 +70,7 @@
     {% endif %}
 
     {% if range_data %}
+        <p>Range Usage: {{ range_used }}</p>
         {% set page_obj = range_data %}
         {% include "base/includes/pagination.html" %}
         <table class="table">
@@ -92,12 +105,12 @@
                             <td>
                                 A <a href="{{ object[2].get_detail_url() }}">{{ object[2].fqdn }}</a>
                             </td>
+                            <td></td>
                         {% elif object[0] == "PTR" %}
                             <td>
                                 PTR <a href="{{ object[2].get_detail_url() }}">{{ object[2].name }}</a>
-                            <td>
-                        <td>
-                        </td>
+                            </td>
+                            <td></td>
                         {% else %}
                         <td>
                             <b>Free</b>
