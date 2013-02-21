@@ -9,12 +9,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 import ipaddr
 
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpDetailView,
                                 CydhcpCreateView, CydhcpUpdateView,
                                 CydhcpListView)
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
                                          get_docstrings, dict_to_kv)
 from cyder.cydns.address_record.models import AddressRecord
@@ -49,6 +51,14 @@ def range_detail(request, range_pk):
     mrange = get_object_or_404(Range, pk=range_pk)
     attrs = mrange.rangekeyvalue_set.all()
 
+    allow = None
+    if mrange.allow == "vrf":
+        allow = [Vrf.objects.get(network=mrange.network)]
+    elif mrange.allow == "known-client":
+        allow = ["Known client"]
+    elif mrange.allow == "legacy":
+        allow = [ctnr for ctnr in Ctnr.objects.filter(ranges=mrange)]
+    print allow
     start_upper, start_lower = mrange.start_upper, mrange.start_lower
     end_upper, end_lower = mrange.end_upper, mrange.end_lower
 
@@ -63,6 +73,9 @@ def range_detail(request, range_pk):
     intrs = StaticInterface.objects.filter(gt_start, lt_end)
 
     range_data = []
+    ips_total = ((end_upper << 64) + end_lower - 1) - \
+                ((start_upper << 64) + start_lower)
+    ips_used = 0
     for i in range((start_upper << 64) + start_lower, (end_upper << 64) +
                    end_lower - 1):
         taken = False
@@ -101,7 +114,9 @@ def range_detail(request, range_pk):
 
         if not taken:
             range_data.append((None, ip_str))
-
+        else:
+            ips_used += 1
+    print ips_total, ips_used
     paginator = Paginator(range_data, 20)
     page = request.GET.get('page')
     try:
@@ -109,11 +124,13 @@ def range_detail(request, range_pk):
     except PageNotAnInteger:
         range_data = paginator.page(1)
     except EmptyPage:
-        range_data = paginator.page(num_pages)
+        range_data = paginator.page(paginator.num_pages)
     return render(request, 'range/range_detail.html', {
         'range_': mrange,
+        'allow_list': allow,
         'attrs': attrs,
-        'range_data': range_data
+        'range_data': range_data,
+        'range_used': "{0}%".format(int(100*float(ips_used)/ips_total))
     })
 
 
@@ -132,7 +149,6 @@ def update_range(request, range_pk):
             if not form.is_valid():
                 if form._errors is None:
                     form._errors = ErrorDict()
-                form._errors['__all__'] = ErrorList(e.messages)
                 return render(request, 'range/range_edit.html', {
                     'range': mrange,
                     'form': form,
