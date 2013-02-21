@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from cyder.core.ctnr.models import Ctnr
+from django.contrib.auth.models import User
+from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -266,6 +267,31 @@ def migrate_dynamic_hosts():
             system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac)
 
 
+def migrate_user():
+    print "migrate_user"
+    cursor.execute("SELECT username FROM user")
+    result = cursor.fetchall()
+    for username, in result:
+        username = username.lower()
+        user, _ = User.objects.get_or_create(username=username)
+
+
+def migrate_zone_user():
+    print "migrate_zone_user"
+    NEW_LEVEL = {5: 0, 25: 1, 50: 2, 100: 3}
+    cursor.execute("SELECT * FROM zone_user")
+    result = cursor.fetchall()
+    for _, username, zone_id, level in result:
+        username = username.lower()
+        level = NEW_LEVEL[level]
+        user, _ = User.objects.get_or_create(username=username)
+        if zone_id == 0:
+            ctnr = Ctnr.objects.get(1)
+        else:
+            ctnr = maintain_find_zone(zone_id)
+        CtnrUser.objects.get_or_create(user=user, ctnr=ctnr, level=level)
+
+
 def migrate_zone_range():
     cursor.execute("SELECT * FROM zone_range")
     result = cursor.fetchall()
@@ -405,6 +431,16 @@ class Command(BaseCommand):
                     dest='zone-domain',
                     default=False,
                     help='GIMME IT ALL!!!11!!'),
+        make_option('-u', '--user',
+                    action='store_true',
+                    dest='user',
+                    default=False,
+                    help='Migrate users'),
+        make_option('-U', '--zone-user',
+                    action='store_true',
+                    dest='zone-user',
+                    default=False,
+                    help='Migrate zone user relationship'),
         make_option('-a', '--all',
                     action='store_true',
                     dest='all',
@@ -412,6 +448,14 @@ class Command(BaseCommand):
                     help='Migrate everything'))
 
     def handle(self, **options):
+        if options['delete']:
+            Range.objects.all().delete()
+            Network.objects.all().delete()
+            Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
+            DynamicInterface.objects.all().delete()
+            Workgroup.objects.all().delete()
+            User.objects.filter(id__gt=1).delete()  # First user is a fixture
+            CtnrUser.objects.filter(id__gt=2).delete()  # First 2 are fixtures
         if options['vlan']:
             migrate_vlans()
         if options['zone']:
@@ -430,12 +474,10 @@ class Command(BaseCommand):
             migrate_zone_workgroup()
         if options['zone-domain']:
             migrate_zone_domain()
-        if options['delete']:
-            Range.objects.all().delete()
-            Network.objects.all().delete()
-            Ctnr.objects.all().delete()
-            DynamicInterface.objects.all().delete()
-            Workgroup.objects.all().delete()
+        if options['user']:
+            migrate_user()
+        if options['zone-user']:
+            migrate_zone_user()
         if options['all']:
             migrate_vlans()
             migrate_zones()
@@ -445,3 +487,5 @@ class Command(BaseCommand):
             migrate_dynamic_hosts()
             migrate_zone_range()
             migrate_zone_workgroup()
+            migrate_user()
+            migrate_zone_user()
