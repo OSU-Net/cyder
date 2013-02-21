@@ -268,6 +268,7 @@ def migrate_dynamic_hosts():
 
 
 def migrate_user():
+    print "migrate_user"
     cursor.execute("SELECT username FROM user")
     result = cursor.fetchall()
     for username, in result:
@@ -276,15 +277,19 @@ def migrate_user():
 
 
 def migrate_zone_user():
+    print "migrate_zone_user"
     NEW_LEVEL = {5: 0, 25: 1, 50: 2, 100: 3}
     cursor.execute("SELECT * FROM zone_user")
     result = cursor.fetchall()
     for _, username, zone_id, level in result:
         username = username.lower()
         level = NEW_LEVEL[level]
-        ctnr = maintain_find_zone(zone_id)
         user, _ = User.objects.get_or_create(username=username)
-        CtnrUser.get_or_create(user=user, ctnr=ctnr, level=level)
+        if zone_id == 0:
+            ctnr = Ctnr.objects.get(1)
+        else:
+            ctnr = maintain_find_zone(zone_id)
+        CtnrUser.objects.get_or_create(user=user, ctnr=ctnr, level=level)
 
 
 def migrate_zone_range():
