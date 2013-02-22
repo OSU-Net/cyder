@@ -4,6 +4,8 @@ mimeparse
 python-ldap
 django-reversion
 ply
+simplejson
 
 -e git://github.com/KTHse/django-cas2#egg=django-cas2
+-e git://github.com/uberj/dnspython.git#egg=dnspython
 -r ../vendor/src/funfactory/funfactory/requirements/prod.txt
