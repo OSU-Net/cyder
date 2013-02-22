@@ -202,16 +202,16 @@ class CommonOption(KeyValue):
     def _int_size_validator(self, bits):
         value = int(self._get_value())
         if value > 2 ** bits or value < 0:
-                raise ValidationError(
-                        "{0} is more than {1} allowed bits for {2}".format(
-                            value, bits, self.key))
+                raise ValidationError("{0} is more than "
+                                      "{1} allowed bits for {2}".format(
+                                      value, bits, self.key))
 
     def _int_list_validator(self, bits):
         value = self._get_value()
         bad = [x for x in value.split(',') if int(x) < 0 or int(x) > 2 ** bits]
         if bad:
             raise ValidationError(
-                    "{0} contains invalid ints".format(", ".join(bad)))
+                "{0} contains invalid ints".format(", ".join(bad)))
 
     def _boolean_validator(self):
         value = self._get_value()

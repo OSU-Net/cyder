@@ -18,6 +18,8 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vlan.forms import VlanForm
+from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydhcp.vrf.forms import VrfForm
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.site.forms import SiteForm
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -55,6 +57,7 @@ def get_klasses(record_type):
         'vlan': (Vlan, VlanForm),
         'static_interface': (StaticInterface, StaticInterfaceForm),
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
+        'vrf': (Vrf, VrfForm),
         'workgroup': (Workgroup, WorkgroupForm),
     }.get(record_type, (None, None))
 
@@ -85,14 +88,14 @@ def cydhcp_view(request, pk=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
     return render(
-        request, 'cydhcp/cydhcp_view.html', {
-        'form': form,
-        'obj': obj,
-        'page_obj': page_obj,
-        'object_table': tablefy(page_obj, views=True),
-        'record_type': record_type,
-        'pk': pk,
-    })
+        request, 'cydhcp/cydhcp_view.html',
+        {'form': form,
+         'obj': obj,
+         'page_obj': page_obj,
+         'object_table': tablefy(page_obj, views=True),
+         'record_type': record_type,
+         'pk': pk,
+         })
 
 
 def cydhcp_delete(request, pk):

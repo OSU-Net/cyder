@@ -5,7 +5,8 @@ from cyder.cydhcp.views import cydhcp_view, cydhcp_delete, table_update
 
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
-    return patterns('',
+    return patterns(
+        '',
         url(r'^$', cydhcp_view, name=object_type),
         url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
             name=object_type + '-update'),
@@ -16,14 +17,19 @@ def cydhcp_urls(object_type):
     )
 
 
-urlpatterns = patterns('',
-   url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_base.html'},
-       name='cydhcp-index'),
-   url(r'^network/', include('cyder.cydhcp.network.urls')),
-   url(r'^range/', include('cyder.cydhcp.range.urls')),
-   url(r'^site/', include('cyder.cydhcp.site.urls')),
-   url(r'^vlan/', include('cyder.cydhcp.vlan.urls')),
-   url(r'^static_interface/', include('cyder.cydhcp.interface.static_intr.urls')),
-   url(r'^dynamic_interface/', include('cyder.cydhcp.interface.dynamic_intr.urls')),
-   url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
+urlpatterns = patterns(
+    '',
+    url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_base.html'},
+        name='cydhcp-index'),
+    url(r'^build/', include('cyder.cydhcp.build.urls')),
+    url(r'^network/', include('cyder.cydhcp.network.urls')),
+    url(r'^range/', include('cyder.cydhcp.range.urls')),
+    url(r'^site/', include('cyder.cydhcp.site.urls')),
+    url(r'^vlan/', include('cyder.cydhcp.vlan.urls')),
+    url(r'^static_interface/',
+        include('cyder.cydhcp.interface.static_intr.urls')),
+    url(r'^dynamic_interface/',
+        include('cyder.cydhcp.interface.dynamic_intr.urls')),
+    url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
+    url(r'^vrf/', include('cyder.cydhcp.vrf.urls')),
 )

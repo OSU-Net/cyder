@@ -23,7 +23,7 @@ def humanized_class_name(obj, *args, **kwargs):
         humanized += class_name[i]
         # Insert space between every camel hump.
         if (i + 1 < len(class_name) and class_name[i].islower()
-            and class_name[i + 1].isupper()):
+                and class_name[i + 1].isupper()):
             humanized += ' '
 
     return humanized
