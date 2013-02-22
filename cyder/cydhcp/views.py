@@ -18,6 +18,8 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vlan.forms import VlanForm
+from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydhcp.vrf.forms import VrfForm
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.site.forms import SiteForm
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -55,6 +57,7 @@ def get_klasses(record_type):
         'vlan': (Vlan, VlanForm),
         'static_interface': (StaticInterface, StaticInterfaceForm),
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
+        'vrf': (Vrf, VrfForm),
         'workgroup': (Workgroup, WorkgroupForm),
     }.get(record_type, (None, None))
 

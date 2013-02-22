@@ -16,7 +16,16 @@ class Vrf(models.Model, ObjectUrlMixin):
         db_table = 'vrf_class'
 
     def __str__(self):
-        return "Vrf {0} for {1}".format(self.name, self.network)
+        return self.name
+
+    def details(self):
+        data = super(Vrf, self).details()
+        data['data'] = (
+            ('Name', 'name', self),
+            ('Network', 'network', self.network),
+        )
+        return data
+
 
 class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)
