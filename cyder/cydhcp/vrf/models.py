@@ -10,6 +10,8 @@ class Vrf(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
     network = models.ForeignKey(Network, null=True)
 
+    search_fields = ('name')
+
     class Meta:
         db_table = 'vrf_class'
 

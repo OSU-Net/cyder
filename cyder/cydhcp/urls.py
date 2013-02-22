@@ -2,6 +2,7 @@ from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
 from cyder.cydhcp.views import cydhcp_view, cydhcp_delete, table_update
 
+
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
     return patterns('',
@@ -23,7 +24,6 @@ urlpatterns = patterns('',
    url(r'^site/', include('cyder.cydhcp.site.urls')),
    url(r'^vlan/', include('cyder.cydhcp.vlan.urls')),
    url(r'^static_interface/', include('cyder.cydhcp.interface.static_intr.urls')),
-   url(r'^dynamic/', include('cyder.cydhcp.interface.dynamic_intr.urls')),
+   url(r'^dynamic_interface/', include('cyder.cydhcp.interface.dynamic_intr.urls')),
    url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
-
 )
