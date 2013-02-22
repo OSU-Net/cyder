@@ -88,14 +88,14 @@ def cydhcp_view(request, pk=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
     return render(
-        request, 'cydhcp/cydhcp_view.html', {
-        'form': form,
-        'obj': obj,
-        'page_obj': page_obj,
-        'object_table': tablefy(page_obj, views=True),
-        'record_type': record_type,
-        'pk': pk,
-    })
+        request, 'cydhcp/cydhcp_view.html',
+        {'form': form,
+         'obj': obj,
+         'page_obj': page_obj,
+         'object_table': tablefy(page_obj, views=True),
+         'record_type': record_type,
+         'pk': pk,
+         })
 
 
 def cydhcp_delete(request, pk):

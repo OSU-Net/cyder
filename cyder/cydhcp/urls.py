@@ -21,6 +21,7 @@ urlpatterns = patterns(
     '',
     url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_base.html'},
         name='cydhcp-index'),
+    url(r'^build/', include('cyder.cydhcp.build.urls')),
     url(r'^network/', include('cyder.cydhcp.network.urls')),
     url(r'^range/', include('cyder.cydhcp.range.urls')),
     url(r'^site/', include('cyder.cydhcp.site.urls')),
