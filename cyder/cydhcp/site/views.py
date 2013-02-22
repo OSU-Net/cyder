@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
@@ -89,13 +90,18 @@ def site_detail(request, site_pk):
     vlans = get_vlans(site)
     child_sites = site.site_set.all()
     no_vlan_networks = Network.objects.filter(site=site, vlan=None)
-    if request.method == "POST":
-        pass
-    else:
-        return render(request, "site/site_detail.html", {
-            "site": site,
-            "vlans": vlans,
-            "no_vlan_networks": no_vlan_networks,
-            "child_sites": child_sites,
-            "attrs": attrs or [""]
-        })
+    paginator = Paginator(no_vlan_networks, 20)
+    page = request.GET.get('page')
+    try:
+        no_vlan_networks = paginator.page(page)
+    except PageNotAnInteger:
+        no_vlan_networks = paginator.page(1)
+    except EmptyPage:
+        no_vlan_networks = paginator.page(paginator.num_pages)
+    return render(request, "site/site_detail.html", {
+        "site": site,
+        "vlans": vlans,
+        "no_vlan_networks": no_vlan_networks,
+        "child_sites": child_sites,
+        "attrs": attrs,
+    })
