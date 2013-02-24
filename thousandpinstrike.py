@@ -67,6 +67,7 @@ def main(args):
         status = attempt_pin(str(pin))
         if status == 'SUCCESS':
             print "THOUSANDPINSTRIKE COMPLETE: " + pin
+            return
         elif status == 'FAIL':
             print "Pin attempt failed."
             return
