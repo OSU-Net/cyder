@@ -60,7 +60,8 @@ def main(args):
             print "[ERR] Could not select term."
             return
     print "INITIATE THOUSANDPINSTRIKE"
-    for pin in range(20000, 1000000):
+    print "Starting: {0} End: {1}".format(args.start, args.end)
+    for pin in range(args.start, args.end):
         attempt_pin(str(pin))
 
 
@@ -68,5 +69,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Striker On.')
     parser.add_argument('-u', '--username')
     parser.add_argument('-p', '--password')
+    parser.add_argument('-s', '--start', default=0, type=int)
+    parser.add_argument('-e', '--end', default=999999, type=int)
     args = parser.parse_args()
     main(args)
