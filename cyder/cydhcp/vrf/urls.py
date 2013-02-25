@@ -8,4 +8,3 @@ urlpatterns = patterns(
     url(r'^create/$', VrfCreateView.as_view(),
         name='vrf-create'),
 ) + cydhcp_urls('vrf')
-

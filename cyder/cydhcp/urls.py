@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
-from cyder.cydhcp.views import cydhcp_view, cydhcp_delete, table_update
+from cyder.cydhcp.views import (cydhcp_view, cydhcp_delete, table_update,
+                                cydhcp_get_record, cydhcp_search_record)
 
 
 def cydhcp_urls(object_type):
@@ -19,6 +20,9 @@ def cydhcp_urls(object_type):
 
 urlpatterns = patterns(
     '',
+    url(r'^record/get/', cydhcp_get_record, name='cydhcp-get-record'),
+    url(r'^record/search/', cydhcp_search_record, name='cydhcp-search-record'),
+
     url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_base.html'},
         name='cydhcp-index'),
     url(r'^build/', include('cyder.cydhcp.build.urls')),
@@ -30,6 +34,6 @@ urlpatterns = patterns(
         include('cyder.cydhcp.interface.static_intr.urls')),
     url(r'^dynamic_interface/',
         include('cyder.cydhcp.interface.dynamic_intr.urls')),
-    url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
     url(r'^vrf/', include('cyder.cydhcp.vrf.urls')),
+    url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
 )

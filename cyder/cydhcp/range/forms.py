@@ -1,8 +1,6 @@
 from django import forms
-from django.db.models.query import EmptyQuerySet
 
 from cyder.cydhcp.range.models import Range
-
 
 
 class RangeForm(forms.ModelForm):

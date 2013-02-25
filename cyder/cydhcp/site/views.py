@@ -6,7 +6,6 @@ from django.forms.util import ErrorList, ErrorDict
 
 from cyder.cydhcp.site.models import Site, SiteKeyValue
 from cyder.cydhcp.site.forms import SiteForm
-from cyder.cydhcp.site.utils import get_vlans
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs

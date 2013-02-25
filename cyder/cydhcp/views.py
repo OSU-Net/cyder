@@ -75,27 +75,29 @@ def cydhcp_view(request, pk=None):
                     obj = form.save()
                     return redirect(obj.get_list_url())
             except (ValidationError, ValueError, e):
-                    # TODO handle errors better
+                    print "lolllllll"
+
                     if form._errors is None:
                         form._errors = ErrorDict()
                     form._errors["__all__"] = ErrorList(e.messages)
-                    return render(request, "cydhcp/cydhcp_view.html", {
-                        'form': form,
-                        'obj': obj,
-                        'record_type': record_type,
-                        'pk': pk,
-                    })
+                    return render(request, "cydhcp/cydhcp_view.html",
+                                  {
+                                      'form': form,
+                                      'obj': obj,
+                                      'record_type': record_type,
+                                      'pk': pk,
+                                  })
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
-    return render(
-        request, 'cydhcp/cydhcp_view.html',
-        {'form': form,
-         'obj': obj,
-         'page_obj': page_obj,
-         'object_table': tablefy(page_obj, views=True),
-         'record_type': record_type,
-         'pk': pk,
-         })
+    return render(request, 'cydhcp/cydhcp_view.html',
+                  {
+                      'form': form,
+                      'obj': obj,
+                      'page_obj': page_obj,
+                      'object_table': tablefy(page_obj, views=True),
+                      'record_type': record_type,
+                      'pk': pk,
+                  })
 
 
 def cydhcp_delete(request, pk):
@@ -107,8 +109,9 @@ def cydhcp_delete(request, pk):
 
 
 def cydhcp_get_record(request):
-    record_type = request.Get.get('object_type', '')
-    obj_pk = request.Get.get('pk', '')
+    record_type = request.GET.get('object_type', '')
+    obj_pk = request.GET.get('pk', '')
+    print record_type, obj_pk
     if not (record_type and obj_pk):
         raise Http404
 

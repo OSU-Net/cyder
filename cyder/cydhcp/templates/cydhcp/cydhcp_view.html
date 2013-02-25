@@ -16,9 +16,8 @@
   <span id="view-metadata"
         data-objType="{{ record_type }}"
         data-prettyObjType="{{ pretty_record_type }}"
-        data-searchUrl="{{ url('cydns-search-record') }}"
-        data-getUrl="{{ url('cydns-get-record') }}"
-        data-domainsUrl="{{ url('get-all-domains') }}">
+        data-searchUrl="{{ url('cydhcp-search-record') }}"
+        data-getUrl="{{ url('cydhcp-get-record') }}"
   </span>
 
   <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">
