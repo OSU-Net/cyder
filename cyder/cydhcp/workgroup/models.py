@@ -17,6 +17,13 @@ class Workgroup(models.Model, ObjectUrlMixin):
     def __str__(self):
         return self.name
 
+    def details(self):
+        data = super(Workgroup, self).details()
+        data['data'] = [
+            ('Name', 'name', self),
+        ]
+        return data
+
 
 class WorkgroupKeyValue(CommonOption):
     workgroup = models.ForeignKey(Workgroup, null=False)
