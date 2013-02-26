@@ -1,0 +1,53 @@
+{% extends "cydhcp/cydhcp_base.html" %}
+
+{% block content %}
+
+    <h3>{{ vrf.name }}</h3>
+    <!--
+    {% block action_bar %}
+        {% if range_.get_update_url %}
+            <a class="btn btn-primary" href="{{ range_.get_update_url() }}">Edit</a>
+        {% endif %}
+
+        {% block mid_action_bar %}
+        {% endblock %}
+
+        {% if range_.get_delete_url %}
+            <a class="btn btn-danger" href="{{ range_.get_delete_url() }}">Delete</a>
+        {% endif %}
+    {% endblock %} -->
+    <br>
+    <h3>Vrf Details</h3>
+    <table class="table">
+        <thead>
+            {% for item, value in vrf.details() %}
+                <th>{{ item }}</th>
+            {% endfor %}
+        </thead>
+        <tbody>
+            <tr>
+            {% for item, value in vrf.details() %}
+                <td>{{ value }}</td>
+            {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+    {% if attrs %}
+        <h3>Vrf Attributes</h4>
+        <table class="table">
+            <thead>
+                {% for attr in attrs %}
+                    <th>{{ attr.key }}</th>
+                {% endfor %}
+            </thead>
+
+            <tbody>
+                <tr>
+                {% for attr in attrs %}
+                    <td>{{ attr.value }}</td>
+                {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
