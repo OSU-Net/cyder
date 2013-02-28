@@ -10,7 +10,7 @@
         <div class='dns-title'>{{ site.get_full_name() }}</div>
     {% endif %}
 
-
+    <!--
     {% block action_bar %}
         {% if site.get_update_url %}
             <a class="btn btn-primary" href="{{ site.get_update_url() }}">Edit</a>
@@ -22,44 +22,45 @@
         {% if site.get_delete_url %}
             <a class="btn btn-danger" href="{{ site.get_delete_url() }}">Delete</a>
         {% endif %}
-    {% endblock %}
-
+        {% endblock %}-->
 
         <table class="table">
             <thead>
-                {% for item, value in site.details().items() %}
+                {% for item, _, value in site.details()['data'] %}
                     <th>{{ item }}</th>
                 {% endfor %}
             </thead>
-
             <tbody>
                 <tr>
-                {% for item, value in site.details().items() %}
-                    <td>{{ value }}</td>
-                {% endfor %}
+                    {% for item, _, value in site.details()['data'] %}
+                        {% if value %}
+                            <td><a href="{{ value.get_detail_url() }}">{{ value }}</a></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    {% endfor %}
                 </tr>
             </tbody>
         </table>
 
         {% if attrs %}
-        <table class="table">
-            <thead>
-                {% for attr in attrs %}
-                    <th>{{ attr.key }}</th>
-                {% endfor %}
-            </thead>
-
-            <tbody>
-                <tr>
-                {% for attr in attrs %}
-                    <td>{{ attr.value }}</td>
-                {% endfor %}
-                </tr>
-            </tbody>
-        </table>
+            <table class="table">
+                <thead>
+                    {% for attr in attrs %}
+                        <th>{{ attr.key }}</th>
+                    {% endfor %}
+                </thead>
+                <tbody>
+                    <tr>
+                    {% for attr in attrs %}
+                        <td>{{ attr.value }}</td>
+                    {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
         {% endif %}
         {% if child_sites %}
-        <h3>Child sites</h3>
+            <h3>Child sites</h3>
             <table class="table">
                 <thead>
                         <th>Site</th>
@@ -73,8 +74,9 @@
             </table>
         {% endif %}
 
-
         <h3>Networks</h3>
+        {% set page_obj = no_vlan_networks %}
+        {% include "base/includes/pagination.html" %}
         <table class="table">
             <thead>
                     <th>Vlan</th>

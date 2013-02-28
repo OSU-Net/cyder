@@ -9,11 +9,20 @@ class Workgroup(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
+    search_fields = ('name',)
+
     class Meta:
         db_table = 'workgroup'
 
     def __str__(self):
         return self.name
+
+    def details(self):
+        data = super(Workgroup, self).details()
+        data['data'] = [
+            ('Name', 'name', self),
+        ]
+        return data
 
 
 class WorkgroupKeyValue(CommonOption):

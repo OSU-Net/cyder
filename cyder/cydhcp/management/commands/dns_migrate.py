@@ -38,8 +38,8 @@ cursor = connection.cursor()
 class Zone(object):
 
     def __init__(self, domain_id=None, dname=None, soa=None):
-        self.domain_id = 541 if domain_id == None else domain_id
-        self.dname = self.get_dname() if dname == None else dname
+        self.domain_id = 541 if domain_id is None else domain_id
+        self.dname = self.get_dname() if dname is None else dname
 
         self.domain = self.gen_domain()
         if self.domain:
@@ -64,6 +64,8 @@ class Zone(object):
 
         if record:
             primary, contact, refresh, retry, expire, minimum = record
+            primary, contact = primary.lower(), contact.lower()
+
             soa, _ = SOA.objects.get_or_create(
                 primary=primary, contact=contact, refresh=refresh,
                 retry=retry, expire=expire, minimum=minimum,
@@ -94,6 +96,7 @@ class Zone(object):
                        "WHERE domain = '%s';" % self.domain_id)
 
         for name, server, priority, ttl, enabled in cursor.fetchall():
+            name, server = name.lower(), server.lower()
             if MX.objects.filter(label=name,
                                  domain=self.domain,
                                  server=server,
@@ -131,6 +134,8 @@ class Zone(object):
         for id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
                 serial, other_id, purchase_date, po_number, warranty_date, \
                 owning_unit, user_id in cursor.fetchall():
+            name = name.lower()
+            enabled = bool(enabled)
             if ip == 0:
                 continue
 
@@ -140,8 +145,9 @@ class Zone(object):
             # TODO: Make systems unique by hostname, ip, mac tuple
             # TODO: Add key-value attributes to system objects.
 
-            system, _ = System.objects.get_or_create(
-                    name=name, location=location, department=dept)
+            system, _ = System.objects.get_or_create(name=name,
+                                                     location=location,
+                                                     department=dept)
             try:
                 cursor.execute("SELECT name "
                                "FROM workgroup"
@@ -158,10 +164,11 @@ class Zone(object):
                     .exists()):
                 try:
                     static = StaticInterface(label=name, domain=self.domain,
-                            mac=clean_mac(ha), system=system, ip_str=long2ip(ip),
-                            ip_type='4', vrf=v, workgroup=w)
+                                             mac=clean_mac(ha), system=system,
+                                             ip_str=long2ip(ip), ip_type='4',
+                                             vrf=v, workgroup=w)
 
-                    # Static Interfaces need to be cleaned independently of saving.
+                    # Static Interfaces need to be cleaned independently.
                     # (no get_or_create)
                     static.full_clean()
                     static.save()
@@ -177,10 +184,11 @@ class Zone(object):
                                        "FROM dhcp_options "
                                        "WHERE id = {0}".format(dhcp_option))
                         name, type = cursor.fetchone()
-                        kv = StaticIntrKeyValue(intr=static, key=name, value=value)
+                        kv = StaticIntrKeyValue(intr=static, key=name,
+                                                value=value)
                         kv.clean()
                         kv.save()
-                except  ValidationError, e:
+                except ValidationError, e:
                     print str(e)
 
     def gen_AR(self):
@@ -209,7 +217,7 @@ class Zone(object):
                        "FROM pointer "
                        "WHERE hostname LIKE '%%.%s';" % name)
         for ip, hostname, ptr_type, enabled, in cursor.fetchall():
-
+            hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
             if dname != name:
                 continue
@@ -219,8 +227,8 @@ class Zone(object):
 
             if ptr_type == 'forward':
                 arec, _ = AddressRecord.objects.get_or_create(
-                            label=label, domain=self.domain,
-                            ip_str=long2ip(ip), ip_type='4')
+                    label=label, domain=self.domain,
+                    ip_str=long2ip(ip), ip_type='4')
                 if enabled:
                     arec.views.add(public)
 
@@ -246,9 +254,10 @@ class Zone(object):
                        "FROM nameserver "
                        "WHERE domain='%s';" % self.domain_id)
         for _, name, _, _ in cursor.fetchall():
+            name = name.lower()
             try:
-                ns, _ = Nameserver.objects.get_or_create(
-                        domain=self.domain, server=name)
+                ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
+                                                         server=name)
                 ns.views.add(public)
             except ValidationError:
                 print "Error generating NS."
@@ -268,6 +277,7 @@ class Zone(object):
                "AND master_domain = %s;" % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
+            child_name = child_name.lower()
             Zone(child_id, child_name, self.domain.soa)
 
     def get_dname(self):
@@ -276,6 +286,7 @@ class Zone(object):
         """
         cursor.execute('SELECT * FROM domain WHERE id = %s;' % self.domain_id)
         _, dname, _, _ = cursor.fetchone()
+        dname = dname.lower()
         return dname
 
     #TODO: Cleanup functions for leftover objects to migrate
@@ -304,6 +315,7 @@ def gen_CNAME():
     cursor.execute("SELECT * FROM zone_cname")
 
     for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
+        server, name = server.lower(), name.lower()
         cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
         dname, = cursor.fetchone()
         if not dname:
@@ -336,36 +348,36 @@ def gen_CNAME():
 class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
-            make_option('-D', '--dump',
-                action='store_true',
-                dest='dump',
-                default=False,
-                help='Get a fresh dump of MAINTAIN'),
-            make_option('-f', '--fix',
-                action='store_true',
-                dest='fix',
-                default=False,
-                help='Fix MAINTAIN'),
-            make_option('-d', '--dns',
-                dest='dns',
-                default=False,
-                action='store_true',
-                help='Migrate DNS objects'),
-            make_option('-c', '--cname',
-                action='store_true',
-                dest='cname',
-                default=False,
-                help='Migrate CNAMEs'),
-            make_option('-X', '--delete',
-                dest='delete',
-                action='store_true',
-                default=False,
-                help='Delete old objects'),
-            make_option('-s', '--skip',
-                dest='skip',
-                action='store_true',
-                default=False,
-                help='Skip edu zone.'))
+        make_option('-D', '--dump',
+                    action='store_true',
+                    dest='dump',
+                    default=False,
+                    help='Get a fresh dump of MAINTAIN'),
+        make_option('-f', '--fix',
+                    action='store_true',
+                    dest='fix',
+                    default=False,
+                    help='Fix MAINTAIN'),
+        make_option('-d', '--dns',
+                    dest='dns',
+                    default=False,
+                    action='store_true',
+                    help='Migrate DNS objects'),
+        make_option('-c', '--cname',
+                    action='store_true',
+                    dest='cname',
+                    default=False,
+                    help='Migrate CNAMEs'),
+        make_option('-X', '--delete',
+                    dest='delete',
+                    action='store_true',
+                    default=False,
+                    help='Delete old objects'),
+        make_option('-s', '--skip',
+                    dest='skip',
+                    action='store_true',
+                    default=False,
+                    help='Skip edu zone.'))
 
     def handle(self, **options):
         if options['dump']:
@@ -421,6 +433,6 @@ class Command(BaseCommand):
         if options['cname']:
             gen_CNAME()
 
-        print map(lambda x: len(x.objects.all()), \
-                [Domain, AddressRecord, PTR, SOA, MX, \
-                CNAME, Nameserver, StaticInterface])
+        print map(lambda x: len(x.objects.all()),
+                  [Domain, AddressRecord, PTR, SOA, MX,
+                  CNAME, Nameserver, StaticInterface])

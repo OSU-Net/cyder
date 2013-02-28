@@ -10,11 +10,22 @@ class Vrf(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
     network = models.ForeignKey(Network, null=True)
 
+    search_fields = ('name',)
+
     class Meta:
         db_table = 'vrf_class'
 
     def __str__(self):
-        return "Vrf {0} for {1}".format(self.name, self.network)
+        return self.name
+
+    def details(self):
+        data = super(Vrf, self).details()
+        data['data'] = (
+            ('Name', 'name', self),
+            ('Network', 'network', self.network),
+        )
+        return data
+
 
 class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)

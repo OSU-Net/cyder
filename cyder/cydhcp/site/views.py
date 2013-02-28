@@ -1,11 +1,11 @@
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
 
 from cyder.cydhcp.site.models import Site, SiteKeyValue
 from cyder.cydhcp.site.forms import SiteForm
-from cyder.cydhcp.site.utils import get_vlans
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
@@ -86,16 +86,19 @@ def update_site(request, site_pk):
 def site_detail(request, site_pk):
     site = get_object_or_404(Site, pk=site_pk)
     attrs = site.sitekeyvalue_set.all()
-    vlans = get_vlans(site)
     child_sites = site.site_set.all()
-    no_vlan_networks = Network.objects.filter(site=site, vlan=None)
-    if request.method == "POST":
-        pass
-    else:
-        return render(request, "site/site_detail.html", {
-            "site": site,
-            "vlans": vlans,
-            "no_vlan_networks": no_vlan_networks,
-            "child_sites": child_sites,
-            "attrs": attrs or [""]
-        })
+    networks = Network.objects.filter(site=site)
+    paginator = Paginator(networks, 20)
+    page = request.GET.get('page')
+    try:
+        networks = paginator.page(page)
+    except PageNotAnInteger:
+        networks = paginator.page(1)
+    except EmptyPage:
+        networks = paginator.page(paginator.num_pages)
+    return render(request, "site/site_detail.html", {
+        "site": site,
+        "networks": networks,
+        "child_sites": child_sites,
+        "attrs": attrs,
+    })

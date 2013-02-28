@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class='dns-title'>{{ object }}</div>
-
+    <!--
     {% block action_bar %}
         {% if object.get_update_url %}
             <a class="btn btn-primary" href="{{ object.get_update_url() }}">Edit</a>
@@ -15,20 +15,20 @@
         {% if object.get_delete_url %}
             <a class="btn btn-danger" href="{{ object.get_delete_url() }}">Delete</a>
         {% endif %}
-    {% endblock %}
+        {% endblock %} -->
 
-        {% from "cydhcp/tables.html" import render_table %}
+        {% from "base/tables.html" import render_table %}
 
         <table class="table">
             <thead>
-                {% for item, value in object.details() %}
+                {% for item, _, value in object.details()['data'] %}
                     <th>{{ item }}</th>
                 {% endfor %}
             </thead>
 
             <tbody>
                 <tr>
-                {% for item, value in object.details() %}
+                {% for item, _, value in object.details()['data'] %}
                     <td>{{ value }}</td>
                 {% endfor %}
                 </tr>

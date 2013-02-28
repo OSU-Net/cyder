@@ -14,11 +14,14 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     range = models.ForeignKey(Range, null=False)
     workgroup = models.ForeignKey(Workgroup, null=True)
     mac = models.CharField(max_length=19,
-                help_text="Mac address in format XX:XX:XX:XX:XX:XX")
+                           help_text="Mac address in format XX:XX:XX:XX:XX:XX")
     system = models.ForeignKey(System, null=True, blank=True,
-                help_text="System to associate the interface with")
+                               help_text="System to associate "
+                                         "the interface with")
     vrf = models.ForeignKey(Vrf, null=True)
     domain = models.ForeignKey(Domain, null=True)
+
+    search_fields = ('mac')
 
     class Meta:
         db_table = 'dynamic_interface'
@@ -26,10 +29,10 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     def details(self):
         data = super(DynamicInterface, self).details()
         data['data'] = [
-                ('System', 'system', self.system),
-                ('Mac', 'mac', self.mac),
-                ('Range', 'range', self.range),
-                ('Workgroup', 'workgroup', self.workgroup),
-                ('Vrf', 'vrf', self.vrf),
-                ('Domain', 'domain', self.domain),]
+            ('System', 'system', self.system),
+            ('Mac', 'mac', self.mac),
+            ('Range', 'range', self.range),
+            ('Workgroup', 'workgroup', self.workgroup),
+            ('Vrf', 'vrf', self.vrf),
+            ('Domain', 'domain', self.domain)]
         return data

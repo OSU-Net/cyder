@@ -10,5 +10,5 @@ urlpatterns = patterns('',
     # TODO:
     url(r'^(?P<pk>\d+)$', SystemListView.as_view(), name='system-update'),
     url(r'^(?P<pk>\d+)$', SystemListView.as_view(), name='system-delete'),
-    url(r'^(?P<pk>\d+)$', SystemListView.as_view(), name='system-detail'),
+    url(r'^(?P<pk>\d+)$', system_detail, name='system-detail'),
 )

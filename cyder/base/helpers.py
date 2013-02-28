@@ -23,7 +23,7 @@ def humanized_class_name(obj, *args, **kwargs):
         humanized += class_name[i]
         # Insert space between every camel hump.
         if (i + 1 < len(class_name) and class_name[i].islower()
-            and class_name[i + 1].isupper()):
+                and class_name[i + 1].isupper()):
             humanized += ' '
 
     return humanized
@@ -50,11 +50,9 @@ def prettify_record_type(record_type, *args, **kwargs):
         return
 
     prettified = ''
-
-    if record_type == 'domain':
-        return 'Domain'
-    elif record_type == 'nameserver':
-        return 'Nameserver'
+    if record_type in ['range', 'network', 'site', 'domain', 'nameserver',
+                       'workgroup']:
+        return record_type[0].upper() + record_type[1:]
     elif '_' in record_type:
         capitalize = True
         for i in range(len(record_type)):

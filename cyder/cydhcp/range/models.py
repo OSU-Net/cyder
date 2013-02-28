@@ -1,14 +1,13 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponse
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter, two_to_one, four_to_two
+from cyder.cydhcp.utils import IPFilter, four_to_two
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -47,16 +46,16 @@ class Range(models.Model, ObjectUrlMixin):
             range does not overlap.
     """
     IP_TYPES = (
-            ('4', 'IPv4'),
-            ('6', 'IPv6'),)
+        ('4', 'IPv4'),
+        ('6', 'IPv6'),)
 
     ALLOW_OPTIONS = (
-            ('vrf', 'allow members of vrf'),
-            ('known-client', 'allow known-clients'),
-            ('legacy', 'ctnr-range'),)
+        ('vrf', 'Allow members of VRF'),
+        ('known-client', 'Allow known-clients'),
+        ('legacy', 'Allow Ctnr: Legacy Option'),)
 
     DENY_OPTIONS = (
-            ('deny-unknown', 'deny dynamic unknown-clients'),)
+        ('deny-unknown', 'deny dynamic unknown-clients'),)
     # Some ranges have no allow statements so this option should be able to be
     # null. There are a collection of such subnets documented in the migration
 
@@ -80,15 +79,16 @@ class Range(models.Model, ObjectUrlMixin):
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS, null=True,
-            blank=True)
+                             blank=True)
     deny = models.CharField(max_length=20, choices=DENY_OPTIONS)
     dhcpd_raw_include = models.TextField(null=True, blank=True)
     attrs = None
 
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
-                    default=STATIC, editable=False)
-    ip_type = models.CharField(max_length=1,
-            choices=IP_TYPES)
+                                  default=STATIC, editable=False)
+    ip_type = models.CharField(max_length=1, choices=IP_TYPES)
+
+    search_fields = ('start_str', 'end_str')
 
     class Meta:
         db_table = 'range'
@@ -106,10 +106,10 @@ class Range(models.Model, ObjectUrlMixin):
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
-                self.start_upper,
-                self.start_lower,
-                self.end_upper,
-                self.end_lower)
+            self.start_upper,
+            self.start_lower,
+            self.end_upper,
+            self.end_lower)
 
     def details(self):
         """For tables."""
@@ -127,7 +127,7 @@ class Range(models.Model, ObjectUrlMixin):
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.network == None and not self.is_reserved:
+        if self.network is None and not self.is_reserved:
             raise ValidationError("ERROR: Range {0}-{1} is not associated "
                                   "with a network and is not reserved".format(
                                   self.start_str, self.end_str))
@@ -179,11 +179,11 @@ class Range(models.Model, ObjectUrlMixin):
                 IPClass = ipaddr.IPv6Address
 
             if IPClass(self.start_str) < self.network.network.network or \
-                        IPClass(self.end_str) > self.network.network.broadcast:
+                    IPClass(self.end_str) > self.network.network.broadcast:
                 raise RangeOverflowError("Range {0}-{1} doesn't fit "
-                                      "in {2}".format(self.start_lower,
-                                          self.end_lower,
-                                          self.network.network))
+                                         "in {2}".format(self.start_lower,
+                                                         self.end_lower,
+                                                         self.network.network))
         self.check_for_overlaps()
 
     def check_for_overlaps(self):

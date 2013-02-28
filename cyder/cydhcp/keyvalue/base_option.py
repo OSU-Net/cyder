@@ -51,8 +51,9 @@ class CommonOption(KeyValue):
 
     def _aa_allow(self):
         """
-        The following usages of allow and deny will work in any scope, although
-        it is not recommended that they be used in pool declarations.
+        The following usages of allow and deny will work in any scope,
+        although it is not recommended that they be used in pool
+        declarations.
 
             allow unknown-clients;
             deny unknown-clients;
@@ -201,16 +202,16 @@ class CommonOption(KeyValue):
     def _int_size_validator(self, bits):
         value = int(self._get_value())
         if value > 2 ** bits or value < 0:
-                raise ValidationError(
-                        "{0} is more than {1} allowed bits for {2}".format(
-                            value, bits, self.key))
+                raise ValidationError("{0} is more than "
+                                      "{1} allowed bits for {2}".format(
+                                      value, bits, self.key))
 
     def _int_list_validator(self, bits):
         value = self._get_value()
         bad = [x for x in value.split(',') if int(x) < 0 or int(x) > 2 ** bits]
         if bad:
             raise ValidationError(
-                    "{0} contains invalid ints".format(", ".join(bad)))
+                "{0} contains invalid ints".format(", ".join(bad)))
 
     def _boolean_validator(self):
         value = self._get_value()
@@ -336,16 +337,15 @@ class CommonOption(KeyValue):
             always-reply-rfc1048 boolean;
 
             Some BOOTP clients expect RFC1048-style responses, but do not
-            follow RFC1048 when sending their requests. You can tell that a
-            client is having this problem if it is not getting the options you
-            have configured for it and if you see in the server log the message
-            "(non-rfc1048)" printed with each BOOTREQUEST that is logged.
-
-            If you want to send rfc1048 options to such a client, you can set
-            the always-reply-rfc1048 option in that client's host declaration,
-            and the DHCP server will respond with an RFC-1048-style vendor
-            options field. This flag can be set in any scope, and will affect
-            all clients covered by that scope.
+            follow RFC1048 when sending their requests. You can tell that
+            a client is having this problem if it is not getting the
+            options you have configured for it and if you see in the server
+            log the message "(non-rfc1048)" printed with each BOOTREQUEST
+            that is logged.  If you want to send rfc1048 options to such a
+            client, you can set the always-reply-rfc1048 option in that
+            client's host declaration, and the DHCP server will respond with
+            an RFC-1048-style vendor options field. This flag can be set in
+            any scope, and will affect all clients covered by that scope.
         """
         self.is_option = False
         self.is_statement = True

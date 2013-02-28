@@ -4,20 +4,19 @@ import re
 from django.db import models
 from django.core.exceptions import ValidationError
 
-
-from cyder.core.system.models import System
-from cyder.cydns.ip.utils import ip_to_dns_form
-
 import cydns
-from cyder.base.mixins import ObjectUrlMixin
+
 from cyder.core.system.models import System
-from cyder.cydhcp.keyvalue.base_option import CommonOption
+
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
+
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
+from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.view.models import View
 from cyder.cydns.domain.models import Domain
 
@@ -111,6 +110,13 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         data['data'] = (
             ("Name", 'fqdn', self),
             ("IP", 'ip_str', str(self.ip_str)),
+            ("MAC", 'mac', self.mac),
+            ("Vrf", 'vrf', self.vrf),
+            ("Workgroup", 'workgroup', self.workgroup),
+            ("DHCP Enabled", "dhcp_enabled",
+                "True" if self.dhcp_enabled else "False"),
+            ("DNS Enabled", "dns_enabled",
+                "True" if self.dns_enabled else "False"),
             ("DNS Type", '', "A/PTR"),
         )
         return data
@@ -121,8 +127,8 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     @classmethod
     def get_api_fields(cls):
-        return super(StaticInterface, cls).get_api_fields(
-                     ) + ['mac', 'dhcp_enabled', 'dns_enabled']
+        return super(StaticInterface, cls).get_api_fields() + \
+            ['mac', 'dhcp_enabled', 'dns_enabled']
 
     @property
     def rdtype(self):
@@ -202,8 +208,8 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
             raise ValidationError(
-                    "This Interface represents a glue record for a "
-                    "Nameserver. Change the Nameserver to edit this record.")
+                "This Interface represents a glue record for a "
+                "Nameserver. Change the Nameserver to edit this record.")
 
     a_template = _("{bind_name:$rhs_just} {ttl} {rdclass:$rdclass_just}"
                    "{rdtype_clob:$rdtype_just} {ip_str:$lhs_just}")
@@ -225,9 +231,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         if kwargs.pop("validate_glue", True):
             if self.intrnameserver_set.exists():
-                raise ValidationError("Cannot delete the record {0}. It is a "
-                                      "glue record.".format(
-                                       self.record_type()))
+                raise ValidationError("Cannot delete the record {0}. "
+                                      "It is a glue record.".format(
+                                      self.record_type()))
         check_cname = kwargs.pop("check_cname", True)
         super(StaticInterface, self).delete(validate_glue=False,
                                             check_cname=check_cname)

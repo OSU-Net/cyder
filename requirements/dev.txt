@@ -5,5 +5,5 @@
 django-debug-toolbar
 django-extensions
 
+-r prod.txt
 -r ../vendor/src/funfactory/funfactory/requirements/compiled.txt
--r ../vendor/src/funfactory/funfactory/requirements/prod.txt
