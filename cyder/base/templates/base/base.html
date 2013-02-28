@@ -41,7 +41,7 @@
             <span>Container</span>
             <select name="ctnr_name" class="submit-on-change">
               {% for ctnr in request.session.ctnrs %}
-                {% if ctnr==request.session.ctnr %}
+                {% if ctnr == request.session.ctnr %}
                     <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
                 {% else %}
                     <option value="{{ ctnr }}">{{ ctnr.name }}</option>
