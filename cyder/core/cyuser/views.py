@@ -5,6 +5,7 @@ from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
+from django.db.models import Q
 
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
@@ -52,7 +53,9 @@ def login_session(request, username):
         # Set ctnr list (to switch between).
         global_ctnr = CtnrUser.objects.get(user=request.user, ctnr=1)
         if global_ctnr:
-            request.session['ctnrs'] = list(Ctnr.objects.all())
+            request.session['ctnrs'] = (list(Ctnr.objects.filter(Q(id=1) \
+            | Q(id=2))) + list(Ctnr.objects.exclude(Q(id=1) \
+            | Q(id=2)).order_by("name")))
 
     except CtnrUser.DoesNotExist:
         # Set ctnr list (to switch between).

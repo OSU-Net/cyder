@@ -40,9 +40,12 @@
           <form action="{{ url('ctnr-change') }}" method="post">
             <span>Container</span>
             <select name="ctnr_name" class="submit-on-change">
-              <option value="{{ request.session.ctnr }}">{{ request.session.ctnr.name }}</option>
               {% for ctnr in request.session.ctnrs %}
-                <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+                {% if ctnr == request.session.ctnr %}
+                    <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
+                {% else %}
+                    <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+                {% endif %}
               {% endfor %}
             </select>
           </form>
