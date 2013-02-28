@@ -136,55 +136,6 @@ class RangeCreateView(RangeView, CydhcpCreateView):
     """"""
 
 
-def update_range(request, range_pk):
-    mrange = get_object_or_404(Range, pk=range_pk)
-    attrs = mrange.rangekeyvalue_set.all()
-    docs = get_docstrings(RangeKeyValue())
-    aa = get_aa(RangeKeyValue())
-    if request.method == 'POST':
-        form = RangeForm(request.POST, instance=mrange)
-        try:
-            if not form.is_valid():
-                if form._errors is None:
-                    form._errors = ErrorDict()
-                return render(request, 'range/range_edit.html', {
-                    'range': mrange,
-                    'form': form,
-                    'attrs': attrs,
-                    'docs': docs,
-                    'aa': json.dumps(aa)
-                })
-            else:
-                # Handle key value stuff.
-                kv = None
-                kv = get_attrs(request.POST)
-                update_attrs(kv, attrs, RangeKeyValue, mrange, 'range')
-                mrange = form.save()
-                return redirect(mrange.get_update_url())
-        except ValidationError, e:
-            if form._errors is None:
-                form._errors = ErrorDict()
-            if kv:
-                attrs = dict_to_kv(kv, RangeKeyValue)
-            form._errors['__all__'] = ErrorList(e.messages)
-            return render(request, 'range/range_edit.html', {
-                'range': mrange,
-                'form': form,
-                'attrs': attrs,
-                'docs': docs,
-                'aa': json.dumps(aa)
-            })
-    else:
-        form = RangeForm(instance=mrange)
-        return render(request, 'range/range_edit.html', {
-            'range': mrange,
-            'form': form,
-            'attrs': attrs,
-            'docs': docs,
-            'aa': json.dumps(aa)
-        })
-
-
 def redirect_to_range_from_ip(request):
     ip_str = request.GET.get('ip_str')
     ip_type = request.GET.get('ip_type')

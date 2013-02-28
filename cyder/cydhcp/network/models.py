@@ -41,6 +41,8 @@ class Network(models.Model, ObjectUrlMixin):
                   "*as is* in the dhcpd.conf file for this subnet.")
     network = None
 
+    search_fields = ('vlan__name', 'site__name', 'network_str')
+
     def __str__(self):
         return self.network_str
 

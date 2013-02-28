@@ -12,6 +12,8 @@ class Vlan(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=255)
     number = models.PositiveIntegerField()
 
+    search_fields = ('name', 'number',)
+
     class Meta:
         db_table = "vlan"
         unique_together = ("name", "number")
