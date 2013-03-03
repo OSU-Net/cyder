@@ -1,10 +1,24 @@
 {% extends "base/base.html" %}
 
-{% block title %}DNS{% endblock %}
+{% block title %}
+  DNS for Container {{ request.session.ctnr.name }}
+{% endblock %}
 
 {% block sidebar %}
   {% include "cydns/includes/cydns_sidebar.html" %}
 {% endblock %}
 
 {% block content %}
+  <table class="table">
+    <thead>
+      <tr><th>Container DNS Statistics</th></tr>
+    </thead>
+    <tbody>
+      {% for count in counts %}
+        <tr>
+          <td>{{ count[1] }} {{ count[0] }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}

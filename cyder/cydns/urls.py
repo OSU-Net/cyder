@@ -19,8 +19,7 @@ def cydns_urls(record_type):
 
 
 urlpatterns = patterns('',
-   url(r'^$', direct_to_template, {'template': 'cydns/cydns_index.html'},
-       name='cydns-index'),
+   url(r'^$', cydns_index, name='cydns-index'),
 
    url(r'^record/get/', cydns_get_record, name='cydns-get-record'),
    url(r'^record/search/', cydns_search_record, name='cydns-search-record'),
