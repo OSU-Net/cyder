@@ -21,7 +21,8 @@
       <h2>Results</h2>
       {% for m in meta %}
         {% if m[0] %}
-          {{ m[0] }} <a href="#{{ m[1] }}">{{ m[2] }}</a> |
+          <a href="#{{ m[1] }}">{{ m[0] }} {{ m[2] }}</a>
+          <span class="after-separator">|</span>
         {% endif %}
       {% endfor %}
     </div>
