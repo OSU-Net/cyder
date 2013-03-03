@@ -5,6 +5,7 @@ python-ldap
 django-reversion
 ply
 simplejson
+south
 
 -e git://github.com/KTHse/django-cas2#egg=django-cas2
 -e git://github.com/uberj/dnspython.git#egg=dnspython
