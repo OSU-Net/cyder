@@ -3,9 +3,8 @@ import json
 from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 
 import ipaddr
 
@@ -17,8 +16,6 @@ from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpDetailView,
                                 CydhcpCreateView, CydhcpUpdateView,
                                 CydhcpListView)
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
-                                         get_docstrings, dict_to_kv)
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
