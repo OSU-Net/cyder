@@ -180,10 +180,11 @@ class Range(models.Model, ObjectUrlMixin):
 
             if IPClass(self.start_str) < self.network.network.network or \
                     IPClass(self.end_str) > self.network.network.broadcast:
-                raise RangeOverflowError("Range {0}-{1} doesn't fit "
-                                         "in {2}".format(self.start_lower,
-                                                         self.end_lower,
-                                                         self.network.network))
+                raise RangeOverflowError(
+                    "Range {0} to {1} doesn't fit in {2}".format(
+                        IPClass(self.start_lower),
+                        IPClass(self.end_lower),
+                        self.network.network))
         self.check_for_overlaps()
 
     def check_for_overlaps(self):
