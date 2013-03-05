@@ -1,4 +1,7 @@
 import chili_manage
+
+from django.core.exceptions import ObjectDoesNotExist
+
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -28,20 +31,21 @@ def build_subnet(network, raw=False):
         raise NotImplemented()
     network.update_network()
     network_raw_include = network.dhcpd_raw_include
-    network_statements = NetworkKeyValue.objects.filter(
-                                network=network, is_statement=True)
-    network_options = NetworkKeyValue.objects.filter(
-                                network=network, is_option=True)
+    network_statements = NetworkKeyValue.objects.filter(network=network,
+                                                        is_statement=True)
+    network_options = NetworkKeyValue.objects.filter(network=network,
+                                                     is_option=True)
     network.update_attrs()
     ip_lower_start = int(network.network.network)
     ip_lower_end = int(network.network.broadcast) - 1
     # TODO deal with ipv6 eventaully
     intrs = StaticInterface.objects.filter(ip_upper=0,
-            ip_lower__gte=ip_lower_start, ip_lower__lte=ip_lower_end,
-            dhcp_enabled=True, ip_type='4')
+                                           ip_lower__gte=ip_lower_start,
+                                           ip_lower__lte=ip_lower_end,
+                                           dhcp_enabled=True, ip_type='4')
     ranges = network.range_set.all()
     build_str = "\nsubnet {0} netmask {1} {{\n".format(
-            network.network.network, network.network.netmask)
+        network.network.network, network.network.netmask)
     if not raw:
         build_str += "\t# Network Statements\n"
         for statement in network_statements:
@@ -65,15 +69,17 @@ def build_subnet(network, raw=False):
 
 
 def build_pool(mrange):
-    mrange_options = RangeKeyValue.objects.filter(
-                     range=mrange, is_option=True)
-    mrange_statements = RangeKeyValue.objects.filter(
-                        range=mrange, is_statement=True)
+    mrange_options = RangeKeyValue.objects.filter(range=mrange, is_option=True)
+    mrange_statements = RangeKeyValue.objects.filter(range=mrange,
+                                                     is_statement=True)
     mrange_raw_include = mrange.dhcpd_raw_include
     allow = []
     if mrange.allow == 'vrf':
-        vrf = Vrf.objects.get(network=mrange.network)
-        allow = ["allow members of {0}".format(vrf.name)]
+        try:
+            vrf = Vrf.objects.get(network=mrange.network)
+            allow = ["allow members of {0}".format(vrf.name)]
+        except ObjectDoesNotExist:
+            allow = []
     if mrange.allow == 'known-client':
         allow = ['allow known clients']
     if mrange.allow == 'legacy':
@@ -124,9 +130,9 @@ def build_host(intr):
 def build_group(workgroup):
     static_intrs = StaticInterface.objects.filter(workgroup=workgroup)
     workgroup_statements = WorkgroupKeyValue.objects.filter(
-                           workgroup=workgroup, is_statement=True)
+        workgroup=workgroup, is_statement=True)
     workgroup_options = WorkgroupKeyValue.objects.filter(
-                        workgroup=workgroup, is_option=True)
+        workgroup=workgroup, is_option=True)
     build_str = "group {\n"
     for statement in workgroup_statements:
         build_str += "\t{0};\n".format(statement)
@@ -143,16 +149,16 @@ def build_vrf(vrf):
     ranges = Range.objects.filter(network=vrf.network)
     for range in ranges:
         build_str += "# {0} for range {1}:{2}\n".format(
-                vrf.name, range.start_str, range.end_str)
+            vrf.name, range.start_str, range.end_str)
         build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(
-                vrf.name, range.start_str, range.end_str)
+            vrf.name, range.start_str, range.end_str)
         build_str += "\tmatch hardware;\n"
         build_str += "}\n"
         intrs = DynamicInterface.objects.filter(vrf=vrf)
         build_str += "# Hosts for {0}\n".format(vrf.name)
         for intr in intrs:
-            build_str += "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(vrf.name,
-                    range.start_str, range.end_str, intr.mac)
+            build_str += "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
+                vrf.name, range.start_str, range.end_str, intr.mac)
     return build_str
 
 
@@ -161,13 +167,13 @@ def build_legacy_class(ctnr):
     build_str = ""
     for range in ranges:
         build_str += "class \"{0}:{1}:{2} {{\n".format(
-                ctnr.name, range.start_str, range.end_str)
+            ctnr.name, range.start_str, range.end_str)
         build_str += "\tmatch hardware;\n"
         build_str += "}\n"
         intrs = DynamicInterface.objects.filter(ctnr=ctnr, range=range)
         for intr in intrs:
             build_str += "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-                    ctnr.name, range.start_str, range.end_str, intr.mac)
+                ctnr.name, range.start_str, range.end_str, intr.mac)
     return build_str
 
 
