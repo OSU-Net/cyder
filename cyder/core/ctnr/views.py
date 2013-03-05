@@ -150,6 +150,7 @@ def change_ctnr(request, pk=None):
 
     if ctnr_user or global_ctnr_user:
         # Set session ctnr and level.
+        prev = request.session['ctnr']
         request.session['ctnr'] = ctnr
 
         # Higher level overrides.
@@ -166,7 +167,7 @@ def change_ctnr(request, pk=None):
     else:
         messages.error(request, "You do not have access to this container.")
 
-    if 'ctnr' in referer.split('/'):
+    if referer[-8:] == reverse('ctnr-detail', kwargs={'pk': prev.id}):
         referer = reverse('ctnr-detail', kwargs={'pk': ctnr.id})
 
     return redirect(referer)
