@@ -80,7 +80,8 @@ class Range(models.Model, ObjectUrlMixin):
 
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS, null=True,
                              blank=True)
-    deny = models.CharField(max_length=20, choices=DENY_OPTIONS)
+    deny = models.CharField(max_length=20, choices=DENY_OPTIONS, null=True,
+                            blank=True)
     dhcpd_raw_include = models.TextField(null=True, blank=True)
     attrs = None
 

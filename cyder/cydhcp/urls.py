@@ -1,13 +1,15 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
 from cyder.cydhcp.views import (cydhcp_view, cydhcp_delete, table_update,
-                                cydhcp_get_record, cydhcp_search_record)
+                                cydhcp_get_record, cydhcp_search_record,
+                                cydhcp_create)
 
 
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
     return patterns(
         '',
+        url(r'^create/$', cydhcp_create, name=object_type + '-create'),
         url(r'^$', cydhcp_view, name=object_type),
         url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
             name=object_type + '-update'),
@@ -18,10 +20,10 @@ def cydhcp_urls(object_type):
     )
 
 
-urlpatterns = patterns( '',
+urlpatterns = patterns(
+    '',
     url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_index.html'},
         name='cydhcp-index'),
-
     url(r'^record/get/', cydhcp_get_record, name='cydhcp-get-record'),
     url(r'^record/search/', cydhcp_search_record, name='cydhcp-search-record'),
     url(r'^build/', include('cyder.cydhcp.build.urls')),

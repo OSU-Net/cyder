@@ -1,7 +1,7 @@
 import json
 
 from django.db.models import Q
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -50,7 +50,10 @@ def range_detail(request, range_pk):
 
     allow = None
     if mrange.allow == "vrf":
-        allow = [Vrf.objects.get(network=mrange.network)]
+        try:
+            allow = [Vrf.objects.get(network=mrange.network)]
+        except ObjectDoesNotExist:
+            allow = []
     elif mrange.allow == "known-client":
         allow = ["Known client"]
     elif mrange.allow == "legacy":
@@ -125,7 +128,8 @@ def range_detail(request, range_pk):
         'allow_list': allow,
         'attrs': attrs,
         'range_data': range_data,
-        'range_used': "{0}%".format(int(100*float(ips_used)/ips_total))
+        'range_used': "{0}%".format(
+            int(100*float(ips_used)/ips_total) if ips_total else "N/A")
     })
 
 

@@ -106,6 +106,20 @@ def cydhcp_delete(request, pk):
     return redirect(obj.get_list_url())
 
 
+def cydhcp_create(request):
+    record_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses(record_type)
+    if request.method == 'POST':
+        form = FormKlass(request)
+        if form.is_valid():
+            obj = form.instance
+            obj.save()
+            return redirect(obj.get_list_url())
+        else:
+            return HttpResponse(json.dumps({'form': form}))
+    return render(request, 'cydhcp/cydhcp_form.html', {'form': form})
+
+
 def cydhcp_get_record(request):
     record_type = request.GET.get('object_type', '')
     obj_pk = request.GET.get('pk', '')
