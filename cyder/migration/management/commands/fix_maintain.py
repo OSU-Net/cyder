@@ -41,11 +41,10 @@ def fix_domain(dname):
         _, parent = dname.split('.', 1)
 
         # Make sure my parent exists and is correct
-        master_domain_id = fix_domain(parent) # Make sure I'm correct
+        master_domain_id = fix_domain(parent)  # Make sure I'm correct
         update_master_domain(domain_id, master_domain_id)
 
         return domain_id
-
 
 
 def main():

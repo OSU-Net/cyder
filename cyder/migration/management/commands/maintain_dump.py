@@ -13,6 +13,8 @@ def main():
     msb.execute("SHOW TABLES IN maintain")
 
     for table, in msb.fetchall():
+        if table in ["bandwidth_usage", "session", "host_history"]:
+            continue
         print "Creating %s..." % table
 
         table = "`%s`" % table

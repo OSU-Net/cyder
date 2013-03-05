@@ -109,6 +109,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydns.txt',
     'cydns.view',
     'cydns.cybind',
+    'migration',
 
     # Third party apps
     'django_cas',

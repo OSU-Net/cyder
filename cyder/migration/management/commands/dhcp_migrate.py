@@ -378,6 +378,19 @@ def maintain_find_workgroup(workgroup_id):
     return None
 
 
+def migrate_all():
+            migrate_vlans()
+            migrate_zones()
+            migrate_workgroups()
+            migrate_subnets()
+            migrate_ranges()
+            migrate_dynamic_hosts()
+            migrate_zone_range()
+            migrate_zone_workgroup()
+            migrate_user()
+            migrate_zone_user()
+
+
 class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
@@ -479,13 +492,4 @@ class Command(BaseCommand):
         if options['zone-user']:
             migrate_zone_user()
         if options['all']:
-            migrate_vlans()
-            migrate_zones()
-            migrate_workgroups()
-            migrate_subnets()
-            migrate_ranges()
-            migrate_dynamic_hosts()
-            migrate_zone_range()
-            migrate_zone_workgroup()
-            migrate_user()
-            migrate_zone_user()
+            migrate_all()

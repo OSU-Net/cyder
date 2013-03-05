@@ -111,8 +111,9 @@ class Zone(object):
                                                  ttl=ttl)
                 if enabled:
                     mx.views.add(public)
-            except ValidationError:
-                print "Error generating MX."
+            except ValidationError, e:
+                print "Error generating MX. %s" % e
+                exit(1)
 
     def gen_static(self):
         """
@@ -189,7 +190,8 @@ class Zone(object):
                         kv.clean()
                         kv.save()
                 except ValidationError, e:
-                    print str(e)
+                    print "Error generating static interface. %s" % e
+                    exit(1)
 
     def gen_AR(self):
         """
@@ -259,8 +261,9 @@ class Zone(object):
                 ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
                                                          server=name)
                 ns.views.add(public)
-            except ValidationError:
-                print "Error generating NS."
+            except ValidationError, e:
+                print "Error generating NS. %s" % e
+                exit(1)
 
     def walk_zone(self):
         """
@@ -345,6 +348,31 @@ def gen_CNAME():
             cn.views.add(public)
 
 
+def gen_DNS(skip_edu = False):
+    Domain.objects.get_or_create(name='arpa', is_reverse=True)
+    Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
+
+    reverses = settings.REVERSE_DOMAINS
+
+    for i in reverses:
+        if '.' in i:
+            reverses.append(i.split('.', 1)[1])
+
+    reverses.reverse()
+
+    for i in reverses:
+        print "%s.in-addr.arpa" % i
+        Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
+                                     is_reverse=True)
+
+    cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
+    for domain_id, dname, _, _ in cursor.fetchall():
+        if "edu" in dname and skip_edu:
+            continue
+        print "Creating %s zone." % dname
+        Zone(domain_id=domain_id, dname=dname,)
+
+
 class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
@@ -407,28 +435,7 @@ class Command(BaseCommand):
             fix_maintain.main()
 
         if options['dns']:
-            Domain.objects.get_or_create(name='arpa', is_reverse=True)
-            Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
-
-            reverses = settings.REVERSE_DOMAINS
-
-            for i in reverses:
-                if '.' in i:
-                    reverses.append(i.split('.', 1)[1])
-
-            reverses.reverse()
-
-            for i in reverses:
-                print "%s.in-addr.arpa" % i
-                Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
-                                             is_reverse=True)
-
-            cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
-            for domain_id, dname, _, _ in cursor.fetchall():
-                if "edu" in dname and options['skip']:
-                    continue
-                print "Creating %s zone." % dname
-                Zone(domain_id=domain_id, dname=dname,)
+            gen_DNS(options['skip'])
 
         if options['cname']:
             gen_CNAME()
