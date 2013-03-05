@@ -13,7 +13,7 @@ class Vrf(models.Model, ObjectUrlMixin):
     search_fields = ('name',)
 
     class Meta:
-        db_table = 'vrf_class'
+        db_table = 'vrf'
 
     def __str__(self):
         return self.name

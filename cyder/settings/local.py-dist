@@ -49,6 +49,11 @@ DATABASES = {
     # },
 }
 
+MIGRATION_HOST=''
+MIGRATION_USER=''
+MIGRATION_PASSWD=''
+MIGRATION_DB=''
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ''
 
@@ -130,3 +135,15 @@ DEBUG_TOOLBAR_CONFIG = {
     'TAG': 'div',
     'ENABLE_STACKTRACES' : True,
 }
+
+MIGRATION_USER = ''
+MIGRATION_PASSWD = ''
+MIGRATION_DB = ''
+MIGRATION_HOST = ''
+
+
+POINTERS = [('128.193.76.253', 'cob-dc81.bus.oregonstate.edu', 'forward'),
+            ('128.193.76.254', 'cob-dc82.bus.oregonstate.edu', 'forward')]
+REVERSE_DOMAINS = ['50.209.59.69', '193.128', '10', '211.140', '201.199', '32.198', '232.111',
+                   '127', '131.80.252.131', '5.68.98.207']
+

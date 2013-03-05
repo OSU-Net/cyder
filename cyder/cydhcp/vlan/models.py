@@ -12,6 +12,8 @@ class Vlan(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=255)
     number = models.PositiveIntegerField()
 
+    search_fields = ('name', 'number',)
+
     class Meta:
         db_table = "vlan"
         unique_together = ("name", "number")
@@ -42,8 +44,8 @@ class Vlan(models.Model, ObjectUrlMixin):
         """
         for network in self.network_set.all():
             if network.site:
-                expected_name = "{0}.{1}.mozilla.com".format(self.name,
-                                                network.site.get_site_path())
+                expected_name = "{0}.{1}.mozilla.com".format(
+                    self.name, network.site.get_site_path())
                 try:
                     domain = Domain.objects.get(name=expected_name)
                 except ObjectDoesNotExist:

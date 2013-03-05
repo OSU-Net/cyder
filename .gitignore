@@ -32,3 +32,4 @@ database.cfg
 parser.out
 parsetab.py
 cyder/working_tests.py
+test.conf

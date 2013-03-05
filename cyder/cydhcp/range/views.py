@@ -1,11 +1,10 @@
 import json
 
 from django.db.models import Q
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 
 import ipaddr
 
@@ -17,8 +16,6 @@ from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpDetailView,
                                 CydhcpCreateView, CydhcpUpdateView,
                                 CydhcpListView)
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
-                                         get_docstrings, dict_to_kv)
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -53,7 +50,10 @@ def range_detail(request, range_pk):
 
     allow = None
     if mrange.allow == "vrf":
-        allow = [Vrf.objects.get(network=mrange.network)]
+        try:
+            allow = [Vrf.objects.get(network=mrange.network)]
+        except ObjectDoesNotExist:
+            allow = []
     elif mrange.allow == "known-client":
         allow = ["Known client"]
     elif mrange.allow == "legacy":
@@ -128,61 +128,13 @@ def range_detail(request, range_pk):
         'allow_list': allow,
         'attrs': attrs,
         'range_data': range_data,
-        'range_used': "{0}%".format(int(100*float(ips_used)/ips_total))
+        'range_used': "{0}%".format(
+            int(100*float(ips_used)/ips_total) if ips_total else "N/A")
     })
 
 
 class RangeCreateView(RangeView, CydhcpCreateView):
     """"""
-
-
-def update_range(request, range_pk):
-    mrange = get_object_or_404(Range, pk=range_pk)
-    attrs = mrange.rangekeyvalue_set.all()
-    docs = get_docstrings(RangeKeyValue())
-    aa = get_aa(RangeKeyValue())
-    if request.method == 'POST':
-        form = RangeForm(request.POST, instance=mrange)
-        try:
-            if not form.is_valid():
-                if form._errors is None:
-                    form._errors = ErrorDict()
-                return render(request, 'range/range_edit.html', {
-                    'range': mrange,
-                    'form': form,
-                    'attrs': attrs,
-                    'docs': docs,
-                    'aa': json.dumps(aa)
-                })
-            else:
-                # Handle key value stuff.
-                kv = None
-                kv = get_attrs(request.POST)
-                update_attrs(kv, attrs, RangeKeyValue, mrange, 'range')
-                mrange = form.save()
-                return redirect(mrange.get_update_url())
-        except ValidationError, e:
-            if form._errors is None:
-                form._errors = ErrorDict()
-            if kv:
-                attrs = dict_to_kv(kv, RangeKeyValue)
-            form._errors['__all__'] = ErrorList(e.messages)
-            return render(request, 'range/range_edit.html', {
-                'range': mrange,
-                'form': form,
-                'attrs': attrs,
-                'docs': docs,
-                'aa': json.dumps(aa)
-            })
-    else:
-        form = RangeForm(instance=mrange)
-        return render(request, 'range/range_edit.html', {
-            'range': mrange,
-            'form': form,
-            'attrs': attrs,
-            'docs': docs,
-            'aa': json.dumps(aa)
-        })
 
 
 def redirect_to_range_from_ip(request):

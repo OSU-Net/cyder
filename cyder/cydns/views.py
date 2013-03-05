@@ -75,14 +75,12 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=record)
 
         try:
-            if (perm(request, cy.ACTION_CREATE, obj=record) and
-                    record_type != 'soa'):
+            if perm(request, cy.ACTION_CREATE, obj=record):
                 record = form.save()
-                request.session['ctnr'].domains.add(record)
-            # If domain, add to current ctnr.
-            if record_type == 'domain':
-                request.session['ctnr'].domains.add(record)
-                return redirect(record.get_list_url())
+                # If domain, add to current ctnr.
+                if record_type == 'domain':
+                    request.session['ctnr'].domains.add(record)
+                    return redirect(record.get_list_url())
         except (ValidationError, ValueError):
             form = _revert(domain, request.POST, form, FQDNFormKlass)
 
@@ -230,6 +228,49 @@ def get_klasses(record_type):
         'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
     }.get(record_type, (None, None, None))
+
+
+def cydns_index(request):
+    domains = request.session['ctnr'].domains.all()
+
+    addressrecord_count = 0
+    cname_count = 0
+    mx_count = 0
+    ns_count = 0
+    ptr_count = 0
+    srv_count = 0
+    sshfp_count = 0
+    txt_count = 0
+
+    soa_list = []
+    for domain in domains:
+        addressrecord_count += domain.addressrecord_set.count()
+        cname_count += domain.cname_set.count()
+        mx_count += domain.mx_set.count()
+        ns_count += domain.nameserver_set.count()
+        ptr_count += domain.ptr_set.count()
+        srv_count += domain.srv_set.count()
+        sshfp_count += domain.sshfp_set.count()
+        txt_count += domain.txt_set.count()
+
+        if domain.soa not in soa_list:
+            soa_list.append(domain.soa)
+
+    counts = [
+        ('Domains', domains.filter(is_reverse=False).count()),
+        ('Reverse Domains', domains.filter(is_reverse=True).count()),
+        ('Address Records', addressrecord_count),
+        ('CNAMEs', cname_count),
+        ('MXs', mx_count),
+        ('PTRs', ptr_count),
+        ('SRVs', srv_count),
+        ('SSHFPs', sshfp_count),
+        ('TXTs', txt_count),
+        ('SOAs', len(soa_list)),
+        ('Nameservers', ns_count),
+    ]
+
+    return render(request, 'cydns/cydns_index.html', {'counts': counts})
 
 
 class CydnsListView(BaseListView):
