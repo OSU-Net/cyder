@@ -10,7 +10,7 @@ import itertools
 
 def resolve(name, ns, rdclass="all"):
     proc = subprocess.Popen(["dig", "@{0}".format(ns), name, rdclass,
-        "+short", "+norecurse"], stdout=subprocess.PIPE)
+                            "+short", "+norecurse"], stdout=subprocess.PIPE)
     x = proc.communicate()[0].lower()
     x = x.split('\n')
     x = '\n'.join(sorted(x))
@@ -70,7 +70,7 @@ def handle_zone(nss, zone_name, zone_meta, zone_path):
     return diff_nameservers(nss, zone_name, mzone)
 
 
-def diff_zones(ns1, ns2, zone_file, skip_edu = False):
+def diff_zones(ns1, ns2, zone_file, skip_edu=False):
     zones = MakeNamedDict(open(zone_file).read())
     r = {}
     for zone_name, zone_meta in zones['orphan_zones'].iteritems():
@@ -79,7 +79,7 @@ def diff_zones(ns1, ns2, zone_file, skip_edu = False):
             print "Skipping %s" % zone_name
             continue
         temp = (handle_zone([ns1, ns2], zone_name, zone_meta,
-                             settings.ZONE_PATH))
+                            settings.ZONE_PATH))
         if temp:
             for rdtype in temp:
                 if rdtype not in r:

@@ -19,7 +19,8 @@ def checkone(name, A, B, rdtype, exceptions):
         if rdtype == 'NS' and name == dname:
             if nsname in B:
                 B.remove(nsname)
-                if "cob-dc82" in nsname and 'cob-dc83.bus.oregonstate.edu' in B:
+                if "cob-dc82" in nsname and \
+                        'cob-dc83.bus.oregonstate.edu' in B:
                     B.remove('cob-dc83.bus.oregonstate.edu')
 
                 for ns in ['ns1.oregonstate.edu', 'ns2.oregonstate.edu']:

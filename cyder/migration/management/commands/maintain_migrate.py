@@ -4,7 +4,8 @@ from django.conf import settings
 from cyder.cydns.cybind.builder import DNSBuilder, BuildError
 
 import subprocess
-import dns_migrate, dhcp_migrate
+import dns_migrate
+#import dhcp_migrate
 from lib.diffdns import diff_zones
 from lib.checkexcept import checkexcept
 
