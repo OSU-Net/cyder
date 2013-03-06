@@ -167,7 +167,8 @@ def change_ctnr(request, pk=None):
     else:
         messages.error(request, "You do not have access to this container.")
 
-    if referer[-8:] == reverse('ctnr-detail', kwargs={'pk': prev.id}):
+    if ('/'+('/').join(referer.split('/')[3:]))\
+    == reverse('ctnr-detail', kwargs={'pk': prev.id}):
         referer = reverse('ctnr-detail', kwargs={'pk': ctnr.id})
 
     return redirect(referer)
