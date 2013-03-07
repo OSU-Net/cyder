@@ -23,7 +23,7 @@ def build_dns():
     b = DNSBuilder(**args)
 
     try:
-        b
+        b.build_dns()
     except BuildError as why:
         b.log('LOG_ERR', why)
     except Exception as err:
@@ -34,11 +34,15 @@ def build_dns():
 class Command(BaseCommand):
 
     def handle(self, **options):
+        '''
         print "Migrating DNS objects."
-        dns_migrate.do_everything(skip_edu=True)
+        dns_migrate.do_everything(skip_edu=False)
+        '''
 
         print "Building zone files."
         build_dns()
+
+        '''
         p = subprocess.Popen(["rndc", "reload"], stdout=subprocess.PIPE)
         if "successful" in p.stdout.read():
             print "rndc reloaded successfully"
@@ -49,7 +53,7 @@ class Command(BaseCommand):
 
         print "Comparing localhost to %s." % settings.VERIFICATION_SERVER
         diffs = diff_zones("localhost", settings.VERIFICATION_SERVER,
-                           settings.ZONES_FILE, skip_edu=True)
+                           settings.ZONES_FILE, skip_edu=False)
 
         print "Removing excusable differences."
         checked, unexcused = checkexcept(diffs)
@@ -61,5 +65,6 @@ class Command(BaseCommand):
             print "localhost", A
             print settings.VERIFICATION_SERVER, B
             print
+        '''
 
         #dhcp_migrate.migrate_all()
