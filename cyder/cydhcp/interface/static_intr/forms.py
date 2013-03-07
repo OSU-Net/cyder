@@ -59,7 +59,7 @@ class StaticInterfaceQuickForm(forms.Form):
     range_choices = []
     ranges = Range.objects.all().select_related(depth=4).filter(
         network__vlan__id__isnull=False)
-    ranges = sorted(ranges, key = lambda a: a.network.site is not None and \
+    ranges = sorted(ranges, key=lambda a: a.network.site is not None and
                     (a.network.site.get_full_name(), a.start_str))
     for r in ranges:
         range_choices.append((str(r.pk), r.display()))
