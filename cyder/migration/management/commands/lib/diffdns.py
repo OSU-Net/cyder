@@ -19,7 +19,8 @@ def resolve(name, ns, rdclass="all"):
 
 def check_rdtype(zone, nss, rdtype):
     r = {}
-    for (name, ttl, rdata) in zone.iterate_rdatas(rdtype):
+    names = [name for name, ttl, rdata in zone.iterate_rdatas(rdtype)]
+    for name in sorted(list(set(names))):
         name = name.to_text()
         results = []
         for ns in nss:
@@ -28,19 +29,22 @@ def check_rdtype(zone, nss, rdtype):
                 continue
             results.append(res)
         if len(set(results)) > 1:  # set() removes duplicates
+            print "!! Found differences for {0} {1}".format(rdtype, name)
             r[name] = {}
 
             for ns, result in itertools.izip(nss, results):
-                r[name][ns] = [i for i in result.strip().split('\n') if i]
+                result = result.strip().split('\n')
+                # print "   ", ns, result
+                r[name][ns] = [i for i in result if i]
 
-            if r[name] == {}:
-                del(r[name])
+    if len(r):
+        print "!! %s differences found." % len(r)
 
     return r
 
 
-def diff_nameservers(nss, zone_name, mzone):
-    if zone_name.endswith('in-addr.arpa'):
+def diff_nameservers(nss, z_name, mzone):
+    if z_name.endswith('in-addr.arpa'):
         # Don't check for MX's
         rdtypes = ["A", "AAAA", "CNAME", "NS", "SRV", "TXT", "PTR"]
     else:
@@ -53,32 +57,32 @@ def diff_nameservers(nss, zone_name, mzone):
     return r
 
 
-def get_zone_data(zone_name, filepath, dirpath):
+def get_z_data(z_name, filepath, dirpath):
     cwd = os.getcwd()
     os.chdir(dirpath)
-    mzone = zone.from_file(filepath, zone_name, relativize=False)
+    mzone = zone.from_file(filepath, z_name, relativize=False)
     os.chdir(cwd)
     return mzone
 
 
-def handle_zone(nss, zone_name, zone_meta, zone_path):
-    if not zone_meta['file']:
-        print "No zone file for {0}".format(zone_name)
+def handle_zone(nss, z_name, z_meta, z_path):
+    if not z_meta['file']:
+        print "No zone file for {0}".format(z_name)
         return
-    print "== Diffing {0}. ({1})".format(zone_name, zone_meta['file'])
-    mzone = get_zone_data(zone_name, zone_meta['file'], zone_path)
-    return diff_nameservers(nss, zone_name, mzone)
+    print "== Diffing {0} ({1})".format(z_name, z_meta['file'])
+    mzone = get_z_data(z_name, z_meta['file'], z_path)
+    return diff_nameservers(nss, z_name, mzone)
 
 
-def diff_zones(ns1, ns2, zone_file, skip_edu=False):
-    zones = MakeNamedDict(open(zone_file).read())
+def diff_zones(ns1, ns2, z_file, skip_edu=False):
+    zones = MakeNamedDict(open(z_file).read())
     r = {}
-    for zone_name, zone_meta in zones['orphan_zones'].iteritems():
-        if zone_name in settings.ZONE_BLACKLIST or \
-                (skip_edu and zone_name[-4:] == ".edu"):
-            print "Skipping %s" % zone_name
+    for z_name, z_meta in sorted(list(zones['orphan_zones'].iteritems())):
+        if z_name in settings.ZONE_BLACKLIST or \
+                (skip_edu and z_name[-4:] == ".edu"):
+            print "Skipping %s" % z_name
             continue
-        temp = (handle_zone([ns1, ns2], zone_name, zone_meta,
+        temp = (handle_zone([ns1, ns2], z_name, z_meta,
                             settings.ZONE_PATH))
         if temp:
             for rdtype in temp:
