@@ -34,15 +34,12 @@ def build_dns():
 class Command(BaseCommand):
 
     def handle(self, **options):
-        '''
         print "Migrating DNS objects."
         dns_migrate.do_everything(skip_edu=False)
-        '''
 
         print "Building zone files."
         build_dns()
 
-        '''
         p = subprocess.Popen(["rndc", "reload"], stdout=subprocess.PIPE)
         if "successful" in p.stdout.read():
             print "rndc reloaded successfully"
@@ -65,6 +62,5 @@ class Command(BaseCommand):
             print "localhost", A
             print settings.VERIFICATION_SERVER, B
             print
-        '''
 
         #dhcp_migrate.migrate_all()
