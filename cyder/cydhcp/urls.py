@@ -7,10 +7,9 @@ from cyder.cydhcp.views import (cydhcp_view, cydhcp_delete, table_update,
 
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
-    return patterns(
-        '',
-        url(r'^create/$', cydhcp_create, name=object_type + '-create'),
+    return patterns('',
         url(r'^$', cydhcp_view, name=object_type),
+        url(r'^create/$', cydhcp_create, name=object_type + '-create'),
         url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
             name=object_type + '-update'),
         url(r'^(?P<pk>[\w-]+)/delete/$', cydhcp_delete,

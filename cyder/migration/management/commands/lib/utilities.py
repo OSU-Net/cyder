@@ -1,6 +1,7 @@
 import MySQLdb
 from django.conf import settings
 
+
 def get_cursor(name):
     connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
                                  user=settings.MIGRATION_USER,

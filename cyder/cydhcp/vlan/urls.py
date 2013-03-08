@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import url, patterns
-from cyder.cydhcp.vlan.views import VlanCreateView, vlan_detail
+from cyder.cydhcp.vlan.views import vlan_detail
 from cyder.cydhcp.urls import cydhcp_urls
 
 

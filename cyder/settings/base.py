@@ -109,6 +109,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydns.txt',
     'cydns.view',
     'cydns.cybind',
+    'migration',
 
     # Third party apps
     'django_cas',
@@ -193,3 +194,14 @@ BASE_PASSWORD_HASHERS = (
 )
 from django_sha2 import get_password_hashers
 PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
+
+# Migration settings
+POINTERS = [('128.193.76.253', 'cob-dc81.bus.oregonstate.edu', 'forward'),
+            ('128.193.76.254', 'cob-dc82.bus.oregonstate.edu', 'forward')]
+REVERSE_DOMAINS = ['50.209.59.69', '193.128', '10', '211.140', '201.199', '32.198', '232.111',
+                   '127', '131.80.252.131', '5.68.98.207']
+
+VERIFICATION_SERVER = "ns1.oregonstate.edu"
+ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
+ZONE_PATH = "cyder/migration/management/commands/lib/zones"
+ZONE_BLACKLIST = []

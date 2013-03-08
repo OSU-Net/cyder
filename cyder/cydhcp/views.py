@@ -92,7 +92,7 @@ def cydhcp_view(request, pk=None):
                       'form': form,
                       'obj': obj,
                       'page_obj': page_obj,
-                      'object_table': tablefy(page_obj, views=True),
+                      'object_table': tablefy(page_obj),
                       'record_type': record_type,
                       'pk': pk,
                   })
@@ -118,6 +118,19 @@ def cydhcp_create(request):
         else:
             return HttpResponse(json.dumps({'form': form}))
     return render(request, 'cydhcp/cydhcp_form.html', {'form': form})
+
+
+def cydhcp_detail(request, pk):
+    record_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses(record_type)
+    obj = get_object_or_404(Klass, pk=pk)
+    attr_getter = getattr(obj, "{0}keyvalue_set".format(record_type))
+    return render(request,"{0}/{0}_detail.html".format(record_type),
+        {
+            record_type: obj,
+            'attrs': attr_getter.all()
+        }
+    )
 
 
 def cydhcp_get_record(request):

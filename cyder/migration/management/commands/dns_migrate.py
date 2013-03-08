@@ -1,14 +1,7 @@
 #! /usr/bin/python
-from optparse import make_option
-
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
-
-import fix_maintain
-import maintain_dump
-import MySQLdb
-from utilities import clean_mac, ip2long, long2ip
 
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -24,6 +17,11 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.utils import ensure_domain
 from cyder.cydns.models import View
+
+import MySQLdb
+from optparse import make_option
+from lib import maintain_dump, fix_maintain
+from lib.utilities import clean_mac, ip2long, long2ip
 
 public, _ = View.objects.get_or_create(name="public")
 
@@ -111,8 +109,9 @@ class Zone(object):
                                                  ttl=ttl)
                 if enabled:
                     mx.views.add(public)
-            except ValidationError:
-                print "Error generating MX."
+            except ValidationError, e:
+                print "Error generating MX. %s" % e
+                exit(1)
 
     def gen_static(self):
         """
@@ -189,7 +188,8 @@ class Zone(object):
                         kv.clean()
                         kv.save()
                 except ValidationError, e:
-                    print str(e)
+                    print "Error generating static interface. %s" % e
+                    exit(1)
 
     def gen_AR(self):
         """
@@ -259,8 +259,9 @@ class Zone(object):
                 ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
                                                          server=name)
                 ns.views.add(public)
-            except ValidationError:
-                print "Error generating NS."
+            except ValidationError, e:
+                print "Error generating NS. %s" % e
+                exit(1)
 
     def walk_zone(self):
         """
@@ -312,6 +313,7 @@ def gen_CNAME():
 
     :uniqueness: label, domain, target
     """
+    print "Creating CNAMEs."
     cursor.execute("SELECT * FROM zone_cname")
 
     for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
@@ -343,6 +345,61 @@ def gen_CNAME():
         cn.save()
         if enabled:
             cn.views.add(public)
+
+
+def gen_DNS(skip_edu=False):
+    Domain.objects.get_or_create(name='arpa', is_reverse=True)
+    Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
+
+    reverses = settings.REVERSE_DOMAINS
+
+    for i in reverses:
+        if '.' in i:
+            reverses.append(i.split('.', 1)[1])
+
+    reverses.reverse()
+
+    for i in reverses:
+        print "%s.in-addr.arpa" % i
+        Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
+                                     is_reverse=True)
+
+    cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
+    for domain_id, dname, _, _ in cursor.fetchall():
+        if "edu" in dname and skip_edu:
+            continue
+        print "Creating %s zone." % dname
+        Zone(domain_id=domain_id, dname=dname,)
+
+
+def dump_maintain():
+    maintain_dump.main()
+    opts = settings.POINTERS
+    for opt in opts:
+        (ip, hn, ptype) = opt
+        x = (ip2long(ip), hn, ptype)
+        sql = ('INSERT INTO pointer (ip, hostname, type) '
+               'VALUES (%s, "%s", "%s")' % x)
+        cursor.execute(sql)
+
+
+def delete_dns():
+    for thing in [Domain, AddressRecord, PTR, SOA, MX,
+                  CNAME, Nameserver, StaticInterface]:
+        thing.objects.all().delete()
+
+
+def delete_CNAME():
+    CNAME.objects.all().delete()
+
+
+def do_everything(skip_edu=False):
+    dump_maintain()
+    delete_dns()
+    delete_CNAME()
+    fix_maintain.main()
+    gen_DNS(skip_edu)
+    gen_CNAME()
 
 
 class Command(BaseCommand):
@@ -381,54 +438,19 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         if options['dump']:
-            maintain_dump.main()
-            opts = settings.POINTERS
-            for opt in opts:
-                (ip, hn, ptype) = opt
-                x = (ip2long(ip), hn, ptype)
-                sql = ('INSERT INTO pointer (ip, hostname, type) '
-                       'VALUES (%s, "%s", "%s")' % x)
-                cursor.execute(sql)
+            dump_maintain()
 
         if options['delete']:
             if options['dns']:
-                AddressRecord.objects.all().delete()
-                Domain.objects.all().delete()
-                MX.objects.all().delete()
-                Nameserver.objects.all().delete()
-                PTR.objects.all().delete()
-                SOA.objects.all().delete()
-                StaticInterface.objects.all().delete()
-                System.objects.all().delete()
+                delete_dns()
             if options['cname']:
-                CNAME.objects.all().delete()
+                delete_CNAME()
 
         if options['fix']:
             fix_maintain.main()
 
         if options['dns']:
-            Domain.objects.get_or_create(name='arpa', is_reverse=True)
-            Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
-
-            reverses = settings.REVERSE_DOMAINS
-
-            for i in reverses:
-                if '.' in i:
-                    reverses.append(i.split('.', 1)[1])
-
-            reverses.reverse()
-
-            for i in reverses:
-                print "%s.in-addr.arpa" % i
-                Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
-                                             is_reverse=True)
-
-            cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
-            for domain_id, dname, _, _ in cursor.fetchall():
-                if "edu" in dname and options['skip']:
-                    continue
-                print "Creating %s zone." % dname
-                Zone(domain_id=domain_id, dname=dname,)
+            gen_DNS(options['skip'])
 
         if options['cname']:
             gen_CNAME()

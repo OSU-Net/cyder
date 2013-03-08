@@ -59,9 +59,8 @@ class StaticInterfaceQuickForm(forms.Form):
     range_choices = []
     ranges = Range.objects.all().select_related(depth=4).filter(
         network__vlan__id__isnull=False)
-    ranges = sorted(ranges, cmp=lambda a, b: 1 if
-                    str(a.network.site.get_full_name()) >
-                    str(b.network.site.get_full_name()) else -1)
+    ranges = sorted(ranges, key=lambda a: a.network.site is not None and
+                    (a.network.site.get_full_name(), a.start_str))
     for r in ranges:
         range_choices.append((str(r.pk), r.display()))
     range = forms.ChoiceField(choices=range_choices)
