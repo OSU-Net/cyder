@@ -69,7 +69,7 @@ def cy_delete(request, pk, get_klasses_fn):
     """Delete view."""
     # DELETE. DELETE. DELETE.
     record_type = request.path.split('/')[2]
-    Klass, FormKlass = get_klasses_fn(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
     obj = get_object_or_404(Klass, pk=pk)
     obj.delete()
     return redirect(obj.get_list_url())
