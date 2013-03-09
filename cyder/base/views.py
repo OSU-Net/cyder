@@ -13,8 +13,9 @@ from django.views.generic import (CreateView, DeleteView, DetailView,
 
 import cyder as cy
 from cyder.base.utils import (_filter, do_sort, make_megafilter,
-                              make_paginator, tablefy)
+                              make_paginator, model_to_post, tablefy)
 from cyder.core.cyuser.utils import perm, perm_soft
+from cyder.cydns.utils import ensure_label_domain
 
 
 def home(request):
@@ -28,7 +29,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
     # Infer record_type from URL, saves trouble of having to specify
     record_type = record_type or request.path.split('/')[2]
 
-    Klass, FormKlass = get_klasses_fn(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     form = FormKlass(instance=obj)
 
@@ -89,7 +90,10 @@ def get_update_form(request, get_klasses_fn):
     try:
         record = Klass.objects.get(pk=record_pk)
         if perm(request, cy.ACTION_UPDATE, obj=record):
-            form = FQDNFormKlass(instance=record)
+            if FQDNFormKlass:
+                form = FQDNFormKlass(instance=record)
+            else:
+                form = FormKlass(instance=record)
     except ObjectDoesNotExist:
         raise Http404
 
@@ -128,9 +132,6 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
     if not perm_soft(request, cy.ACTION_UPDATE, obj=obj):
         return HttpResponse(json.dumps({'error': 'You do not have appropriate'
                                                  ' permissions.'}))
-
-    # Put updated object into form.
-    form = FQDNFormKlass(instance=obj)
 
     qd = request.POST.copy()
     if 'fqdn' in qd:

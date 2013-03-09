@@ -73,9 +73,6 @@ def cydns_view(request, pk=None):
     form = FQDNFormKlass(instance=record)
 
     if request.method == 'POST':
-        # Create initial FQDN form.
-        form = FQDNFormKlass(request.POST, instance=record)
-
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:

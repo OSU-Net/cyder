@@ -8,7 +8,9 @@ $(document).ready(function() {
     var domainsUrl = metadata.attr('data-domainsUrl');
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
-    make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
+    if (domainsUrl) {
+        make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
+    }
 
     $('#create-obj').click(function() {
         // Show create form on clicking create button.

@@ -35,14 +35,14 @@ import simplejson as json
 
 def get_klasses(record_type):
     return {
-        'network': (Network, NetworkForm),
-        'range': (Range, RangeForm),
-        'site': (Site, SiteForm),
-        'vlan': (Vlan, VlanForm),
-        'static_interface': (StaticInterface, StaticInterfaceForm),
-        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
-        'vrf': (Vrf, VrfForm),
-        'workgroup': (Workgroup, WorkgroupForm),
+        'network': (Network, NetworkForm, None),
+        'range': (Range, RangeForm, None),
+        'site': (Site, SiteForm, None),
+        'vlan': (Vlan, VlanForm. None),
+        'static_interface': (StaticInterface, StaticInterfaceForm. None),
+        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
+        'vrf': (Vrf, VrfForm, None),
+        'workgroup': (Workgroup, WorkgroupForm. None),
     }.get(record_type, (None, None))
 
 

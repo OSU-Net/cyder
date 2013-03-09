@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, render
 
 
 def get_klasses(itdoesntmatterwhatyoupass):
-    return (System, SystemForm)
+    return (System, SystemForm, None)
 
 
 def system_view(request, pk=None):
