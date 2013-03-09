@@ -51,7 +51,7 @@ def prettify_record_type(record_type, *args, **kwargs):
 
     prettified = ''
     if record_type in ['range', 'network', 'site', 'domain', 'nameserver',
-                       'workgroup']:
+                       'workgroup', 'system']:
         return record_type[0].upper() + record_type[1:]
     elif '_' in record_type:
         capitalize = True

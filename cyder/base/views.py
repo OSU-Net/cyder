@@ -23,13 +23,18 @@ def home(request):
     })
 
 
-def cy_view(request, get_klasses_fn, template, pk=None):
-    record_type = request.path.split('/')[2]
+def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
+    """List, create, update view in one for a flatter heirarchy. """
+    # Infer record_type from URL, saves trouble of having to specify
+    record_type = record_type or request.path.split('/')[2]
+
     Klass, FormKlass = get_klasses_fn(record_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     form = FormKlass(instance=obj)
+
     if request.method == 'POST':
         form = FormKlass(request.POST, instance=obj)
+
         if form.is_valid():
             try:
                 if perm(request, cy.ACTION_CREATE, obj=obj):
@@ -45,9 +50,11 @@ def cy_view(request, get_klasses_fn, template, pk=None):
                                     'record_type': record_type,
                                     'pk': pk,
                                   })
+
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
-    return render(request, 'cydhcp/cydhcp_view.html', {
+
+    return render(request, template, {
                     'form': form,
                     'obj': obj,
                     'page_obj': page_obj,
