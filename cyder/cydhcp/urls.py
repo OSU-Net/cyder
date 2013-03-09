@@ -1,8 +1,9 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
-from cyder.cydhcp.views import (cydhcp_view, cydhcp_delete, table_update,
-                                cydhcp_get_record, cydhcp_search_record,
-                                cydhcp_create)
+
+from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
+                                cydhcp_get_update_form, cydhcp_search_obj,
+                                cydhcp_create, cydhcp_delete)
 
 
 def cydhcp_urls(object_type):
@@ -14,17 +15,16 @@ def cydhcp_urls(object_type):
             name=object_type + '-update'),
         url(r'^(?P<pk>[\w-]+)/delete/$', cydhcp_delete,
             name=object_type + '-delete'),
-        url(r'^(?P<pk>[\w-]+)/tableupdate/$', table_update,
+        url(r'^(?P<pk>[\w-]+)/tableupdate/$', cydhcp_table_update,
             name=object_type + '-table-update'),
     )
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = patterns('',
     url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_index.html'},
         name='cydhcp-index'),
-    url(r'^record/get/', cydhcp_get_record, name='cydhcp-get-record'),
-    url(r'^record/search/', cydhcp_search_record, name='cydhcp-search-record'),
+    url(r'^record/get/', cydhcp_get_update_form, name='cydhcp-get-record'),
+    url(r'^record/search/', cydhcp_search_obj, name='cydhcp-search-record'),
     url(r'^build/', include('cyder.cydhcp.build.urls')),
     url(r'^network/', include('cyder.cydhcp.network.urls')),
     url(r'^range/', include('cyder.cydhcp.range.urls')),

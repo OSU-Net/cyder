@@ -1,18 +1,145 @@
+import json
+
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, HttpResponse
 from django.forms import ValidationError
+from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
 
-from cyder.base.utils import tablefy
+import cyder as cy
+from cyder.base.utils import (_filter, do_sort, make_megafilter,
+                              make_paginator, tablefy)
+from cyder.core.cyuser.utils import perm, perm_soft
 
 
 def home(request):
     return render_to_response('base/index.html', {
         'read_only': getattr(request, 'read_only', False),
     })
+
+
+def cy_view(request, get_klasses_fn, template, pk=None):
+    record_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses_fn(record_type)
+    obj = get_object_or_404(Klass, pk=pk) if pk else None
+    form = FormKlass(instance=obj)
+    if request.method == 'POST':
+        form = FormKlass(request.POST, instance=obj)
+        if form.is_valid():
+            try:
+                if perm(request, cy.ACTION_CREATE, obj=obj):
+                    obj = form.save()
+                    return redirect(obj.get_list_url())
+            except (ValidationError, ValueError) as e:
+                    if form._errors is None:
+                        form._errors = ErrorDict()
+                    form._errors["__all__"] = ErrorList(e.messages)
+                    return render(request, template, {
+                                    'form': form,
+                                    'obj': obj,
+                                    'record_type': record_type,
+                                    'pk': pk,
+                                  })
+    object_list = _filter(request, Klass)
+    page_obj = make_paginator(request, do_sort(request, object_list), 50)
+    return render(request, 'cydhcp/cydhcp_view.html', {
+                    'form': form,
+                    'obj': obj,
+                    'page_obj': page_obj,
+                    'object_table': tablefy(page_obj),
+                    'record_type': record_type,
+                    'pk': pk,
+                  })
+
+
+def cy_delete(request, pk, get_klasses_fn):
+    """Delete view."""
+    # DELETE. DELETE. DELETE.
+    record_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses_fn(record_type)
+    obj = get_object_or_404(Klass, pk=pk)
+    obj.delete()
+    return redirect(obj.get_list_url())
+
+
+def get_update_form(request, get_klasses_fn):
+    """
+    Update view called asynchronously from the list_create view
+    """
+    record_type = request.GET.get('object_type', '')
+    record_pk = request.GET.get('pk', '')
+    if not (record_type and record_pk):
+        raise Http404
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
+
+    # Get the object if updating.
+    try:
+        record = Klass.objects.get(pk=record_pk)
+        if perm(request, cy.ACTION_UPDATE, obj=record):
+            form = FQDNFormKlass(instance=record)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': record.pk}))
+
+
+def search_obj(request, get_klasses_fn):
+    """
+    Returns a list of objects of 'record_type' matching 'term'.
+    """
+    record_type = request.GET.get('record_type', '')
+    term = request.GET.get('term', '')
+    if not (record_type and term):
+        raise Http404
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
+
+    records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
+    records = [{'label': str(record), 'pk': record.pk} for record in records]
+
+    return HttpResponse(json.dumps(records))
+
+
+def table_update(request, pk, get_klasses_fn, object_type=None):
+    """
+    Called from editableGrid tables when updating a field. Try to update
+    an object specified by pk with the post data.
+    """
+    # Infer object_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
+    object_type = object_type or request.path.split('/')[2]
+
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(object_type)
+    obj = get_object_or_404(Klass, pk=pk)
+
+    if not perm_soft(request, cy.ACTION_UPDATE, obj=obj):
+        return HttpResponse(json.dumps({'error': 'You do not have appropriate'
+                                                 ' permissions.'}))
+
+    # Put updated object into form.
+    form = FQDNFormKlass(instance=obj)
+
+    qd = request.POST.copy()
+    if 'fqdn' in qd:
+        fqdn = qd.pop('fqdn')[0]
+        try:
+            # Call prune tree later if error, else domain leak.
+            label, domain = ensure_label_domain(fqdn)
+        except ValidationError, e:
+            return HttpResponse(json.dumps({'error': e.messages}))
+        qd['label'], qd['domain'] = label, str(domain.pk)
+
+    form = FormKlass(model_to_post(qd, obj), instance=obj)
+    if form.is_valid():
+        form.save()
+        return HttpResponse()
+    return HttpResponse(json.dumps({'error': form.errors}))
 
 
 class BaseListView(ListView):

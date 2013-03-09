@@ -1,16 +1,15 @@
 import json as json
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.forms.models import model_to_dict
+from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
-from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 import cyder as cy
-from cyder.base.utils import (do_sort, make_paginator, _filter,
-                              make_megafilter, model_to_post, tablefy)
-from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
-                              BaseListView, BaseUpdateView)
+from cyder.base.utils import (do_sort, make_paginator, _filter, tablefy)
+from cyder.base.views import (BaseCreateView, BaseDeleteView,
+                              BaseDetailView, BaseListView, BaseUpdateView,
+                              cy_delete, get_update_form, search_obj,
+                              table_update)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
@@ -34,6 +33,25 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
+
+
+def get_klasses(record_type):
+    """
+    Given record type string, grab its class and forms.
+    """
+    return {
+        'address_record': (AddressRecord, AddressRecordForm,
+                           AddressRecordFQDNForm),
+        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
+        'domain': (Domain, DomainForm, DomainForm),
+        'mx': (MX, MXForm, FQDNMXForm),
+        'nameserver': (Nameserver, NameserverForm, NameserverForm),
+        'ptr': (PTR, PTRForm, PTRForm),
+        'soa': (SOA, SOAForm, SOAForm),
+        'srv': (SRV, SRVForm, SRVForm),
+        'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
+        'txt': (TXT, TXTForm, FQDNTXTForm),
+    }.get(record_type, (None, None, None))
 
 
 def cydns_view(request, pk=None):
@@ -123,111 +141,19 @@ def _fqdn_to_domain(qd):
 
 
 def cydns_delete(request, pk):
-    """Delete view."""
-    # Infer record_type from URL, saves trouble of having to specify
-    # kwargs everywhere in the dispatchers.
-    record_type = request.path.split('/')[2]
-
-    # Get the Klass.
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
-
-    record = get_object_or_404(Klass, pk=pk)
-    record.delete()
-    return redirect(record.get_list_url())
+    return cy_delete(request, pk, get_klasses)
 
 
-def cydns_get_record(request):
-    """
-    Update view called asynchronously from the list_create view
-    """
-    record_type = request.GET.get('object_type', '')
-    record_pk = request.GET.get('pk', '')
-    if not (record_type and record_pk):
-        raise Http404
-
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
-
-    # Get the object if updating.
-    try:
-        record = Klass.objects.get(pk=record_pk)
-        if perm(request, cy.ACTION_UPDATE, obj=record):
-            form = FQDNFormKlass(instance=record)
-    except ObjectDoesNotExist:
-        raise Http404
-
-    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': record.pk}))
+def cydns_get_update_form(request):
+    return get_update_form(request, get_klasses)
 
 
-def cydns_search_record(request):
-    """
-    Returns a list of records of 'record_type' matching 'term'.
-    """
-    record_type = request.GET.get('record_type', '')
-    term = request.GET.get('term', '')
-    if not (record_type and term):
-        raise Http404
-
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
-
-    records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
-    records = [{'label': str(record), 'pk': record.pk} for record in records]
-
-    return HttpResponse(json.dumps(records))
+def cydns_table_update(request, pk, object_type=None):
+    return table_update(request, pk, get_klasses, object_type)
 
 
-def table_update(request, pk, object_type=None):
-    """
-    Called from editableGrid tables when updating a field. Try to update
-    an object specified by pk with the post data.
-    """
-    # Infer object_type from URL, saves trouble of having to specify
-    # kwargs everywhere in the dispatchers.
-    object_type = object_type or request.path.split('/')[2]
-
-    Klass, FormKlass, FQDNFormKlass = get_klasses(object_type)
-    obj = get_object_or_404(Klass, pk=pk)
-
-    if not perm_soft(request, cy.ACTION_UPDATE, obj=obj):
-        return HttpResponse(json.dumps({'error': 'You do not have appropriate'
-                                                 ' permissions.'}))
-
-    # Put updated object into form.
-    form = FQDNFormKlass(instance=obj)
-
-    qd = request.POST.copy()
-    if 'fqdn' in qd:
-        fqdn = qd.pop('fqdn')[0]
-        try:
-            # Call prune tree later if error, else domain leak.
-            label, domain = ensure_label_domain(fqdn)
-        except ValidationError, e:
-            return HttpResponse(json.dumps({'error': e.messages}))
-        qd['label'], qd['domain'] = label, str(domain.pk)
-
-    form = FormKlass(model_to_post(qd, obj), instance=obj)
-    if form.is_valid():
-        form.save()
-        return HttpResponse()
-    return HttpResponse(json.dumps({'error': form.errors}))
-
-
-def get_klasses(record_type):
-    """
-    Given record type string, grab its class and forms.
-    """
-    return {
-        'address_record': (AddressRecord, AddressRecordForm,
-                           AddressRecordFQDNForm),
-        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
-        'domain': (Domain, DomainForm, DomainForm),
-        'mx': (MX, MXForm, FQDNMXForm),
-        'nameserver': (Nameserver, NameserverForm, NameserverForm),
-        'ptr': (PTR, PTRForm, PTRForm),
-        'soa': (SOA, SOAForm, SOAForm),
-        'srv': (SRV, SRVForm, SRVForm),
-        'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
-        'txt': (TXT, TXTForm, FQDNTXTForm),
-    }.get(record_type, (None, None, None))
+def cydns_search_obj(request):
+    return search_obj(request, get_klasses)
 
 
 def cydns_index(request):
