@@ -38,11 +38,11 @@ def get_klasses(record_type):
         'network': (Network, NetworkForm, None),
         'range': (Range, RangeForm, None),
         'site': (Site, SiteForm, None),
-        'vlan': (Vlan, VlanForm. None),
-        'static_interface': (StaticInterface, StaticInterfaceForm. None),
+        'vlan': (Vlan, VlanForm, None),
+        'static_interface': (StaticInterface, StaticInterfaceForm, None),
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
         'vrf': (Vrf, VrfForm, None),
-        'workgroup': (Workgroup, WorkgroupForm. None),
+        'workgroup': (Workgroup, WorkgroupForm, None),
     }.get(record_type, (None, None))
 
 
