@@ -11,7 +11,7 @@ class System(BaseModel, ObjectUrlMixin):
     location = models.CharField(max_length=255, unique=False,
                                 blank=True, null=True)
 
-    search_fields = ('name',)
+    search_fields = ('name', 'department', 'location')
 
     def __str__(self):
         return self.name
