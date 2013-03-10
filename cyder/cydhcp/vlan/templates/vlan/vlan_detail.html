@@ -5,11 +5,11 @@
 {% block title %}VLAN {{ vlan.name }}{% endblock %}
 
 {% block content %}
-  {{ render_table([vlan]) }}
+  {{ render_table(request, [vlan]) }}
 
   {% if attrs %}
     <h3>VLAN Attributes</h3>
-    {{ render_table(attrs) }}
+    {{ render_table(request, attrs) }}
   {% endif %}
 
   <h3>Networks</h3>

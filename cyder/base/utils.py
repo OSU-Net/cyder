@@ -39,6 +39,12 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     if not objects:
         return None
 
+    try:
+        can_update = True
+        objects[0].get_update_url()
+    except:
+        can_update = False
+
     if users:
         objects = [user.get_profile() for user in objects]
 
@@ -53,7 +59,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
             headers.append([col['header'], col['sort_field']])
     if views:
         headers.append(['Views', None])
-    headers.append(['Actions', None])
+
+    if can_update:
+        headers.append(['Actions', None])
 
     for i, obj in enumerate(objects):
         row_data = []
@@ -87,12 +95,14 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                 row_data.append({'value': ['None'], 'url': [None]})
 
         # Actions
-        row_data.append({'value': ['Update', 'Delete'],
-                         'url': [obj.get_update_url(), obj.get_delete_url()],
-                         'data': [[('pk', obj.id)], None],
-                         'class': ['update', 'delete'],
-                         'img': ['/media/img/update.png',
-                                 '/media/img/delete.png']})
+        if can_update:
+            row_data.append({'value': ['Update', 'Delete'],
+                             'url': [obj.get_update_url(),
+                                     obj.get_delete_url()],
+                             'data': [[('pk', obj.id)], None],
+                             'class': ['update', 'delete'],
+                             'img': ['/media/img/update.png',
+                                     '/media/img/delete.png']})
 
         # Build table.
         data.append(row_data)

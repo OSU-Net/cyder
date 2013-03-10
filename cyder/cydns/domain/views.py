@@ -64,7 +64,6 @@ class DomainDetailView(DomainView, DetailView):
         ptr_table = tablefy(ptr_objects, views=True)
 
         # TODO, include Static Registrations
-        all_static_intr = StaticInterface.objects.all()
         intr_objects = domain.staticinterface_set.all().order_by(
             'name').order_by('ip_str')
         intr_table = tablefy(intr_objects, views=True)

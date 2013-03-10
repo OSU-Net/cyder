@@ -210,25 +210,34 @@ class Network(models.Model, ObjectUrlMixin):
         self.prefixlen = self.network.prefixlen
 
 
-class NetworkKeyValue(CommonOption):
+class NetworkKeyValue(CommonOption, ObjectUrlMixin):
+    """
+    The NetworkOption Class.
+
+    DHCP option statements always start with the option keyword, followed
+    by an option name, followed by option data." -- The man page for
+    dhcpd-options
+
+    In this class, options are stored without the 'option' keyword. If it
+    is an option, is option should be set.
+    """
     network = models.ForeignKey(Network, null=False)
     aux_attrs = (
         ('description', 'A description of the network'),
     )
 
+    def details(self):
+        """For tables."""
+        data = {'url': ''}
+        data['data'] = [
+            ('Key', 'key', self.key),
+            ('Value', 'value', self.value),
+        ]
+        return data
+
     class Meta:
         db_table = 'network_key_value'
         unique_together = ('key', 'value', 'network')
-
-    """The NetworkOption Class.
-
-        DHCP option statements always start with the option keyword, followed
-        by an option name, followed by option data." -- The man page for
-        dhcpd-options
-
-        In this class, options are stored without the 'option' keyword. If it
-        is an option, is option should be set.
-    """
 
     def save(self, *args, **kwargs):
         self.clean()

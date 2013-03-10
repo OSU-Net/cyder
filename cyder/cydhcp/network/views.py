@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 
+from cyder.base.utils import tablefy
 from cyder.cydhcp.network.forms import *
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.network.utils import calc_networks
@@ -27,6 +28,7 @@ class NetworkDeleteView(NetworkView, CydhcpDeleteView):
 class NetworkListView(NetworkView, CydhcpListView):
     """"""
     template_name = 'network/network_list.html'
+
 
 def delete_network_attr(request, attr_pk):
     """
@@ -109,15 +111,16 @@ def update_network(request, network_pk):
 
 
 def network_detail(request, network_pk):
+    """Network detail view. Shows related ranges, networks, attributes."""
     network = get_object_or_404(Network, pk=network_pk)
     network.update_network()
-    attrs = network.networkkeyvalue_set.all()
-    eldars, sub_networks = calc_networks(network)
-    ranges = network.range_set.all()
+    parent_networks , sub_networks = calc_networks(network)
+
     return render(request, 'network/network_detail.html', {
         'network': network,
-        'ranges': ranges,
-        'eldars': eldars,
-        'sub_networks': sub_networks,
-        'attrs': attrs,
+        'network_table': tablefy((network,)),
+        'ranges_table': tablefy(network.range_set.all()),
+        'parent_networks_table': tablefy(parent_networks),
+        'sub_networks_table': tablefy(sub_networks),
+        'attrs_table': tablefy(network.networkkeyvalue_set.all()),
     })

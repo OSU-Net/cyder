@@ -1,77 +1,33 @@
 {% extends "cydhcp/cydhcp_base.html" %}
 {% from "base/tables.html" import render_table %}
 
+
 {% block title %}Network {{ network.network_str }}{% endblock %}
 
+{% block action_bar %}
+  <a href="{{ url('build-network', network.pk) }}">DHCP Build Output</a>
+{% endblock %}
+
 {% block content %}
-  <span>See <a href="/cydhcp/build/{{network.pk}}/">DHCP Build Output</a>.</span>
+  {{ render_table(request, network_table) }}
 
-  <h3>Network Details</h3>
-    <table class="table">
-      <thead>
-        {% for item, _, value in network.details()['data'] %}
-          <th>{{ item }}</th>
-        {% endfor %}
-        <th>Vlan</th>
-        {% if network.site %}
-          <th>Site</th>
-        {% endif %}
-      </thead>
-
-      <tbody>
-        <tr>
-        {% for item, _, value in network.details()['data'] %}
-          <td>{{ value }}</td>
-        {% endfor %}
-        {% if network.vlan %}
-          <td><a href='{{ network.vlan.get_detail_url() }}'>{{ network.vlan }}</a></td>
-        {% else %}
-          <td>None</td>
-        {% endif %}
-        {% if network.site %}
-          <td><a href='{{ network.site.get_detail_url() }}'>{{ network.site }}</a></td>
-        {% endif %}
-        </tr>
-      </tbody>
-    </table>
+  {% if attrs_table %}
     <h3>Network Options</h3>
-    <table class="table">
-      <thead>
-        {% for attr in attrs %}
-          <th>{{ attr.key }}</th>
-        {% endfor %}
-      </thead>
+    {{ render_table(request, attrs_table) }}
+  {% endif %}
 
-      <tbody>
-        <tr>
-        {% for attr in attrs %}
-          <td>{{ attr.value }}</td>
-        {% endfor %}
-        </tr>
-      </tbody>
-    </table>
-    {% if eldars %}
+  {% if parent_networks_table %}
     <h3>Parent Networks</h3>
-    {{ render_table(eldars) }}
-    {% endif %}
-    {% if sub_networks %}
-    <h3>Sub Networks.</h3>
-    {{ render_table(sub_networks) }}
-    {% endif %}
+      {{ render_table(request, parent_networks) }}
+  {% endif %}
 
+  {% if sub_networks_table %}
+    <h3>Sub Networks</h3>
+    {{ render_table(request, sub_networks) }}
+  {% endif %}
+
+  {% if ranges_table %}
     <h3>Ranges</h3>
-    <table class="table">
-      <thead>
-            <th>Start</th>
-            <th>End</th>
-      </thead>
-      <tbody>
-        {% for range in ranges %}
-        <tr>
-            <td>Start: <a href='{{range.get_detail_url()}}'>{{ range.start_str }}</a></td>
-            <td>End: <a href='{{range.get_detail_url()}}'>{{ range.end_str }}</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {{ render_table(request, ranges) }}
+  {% endif %}
 {% endblock %}
