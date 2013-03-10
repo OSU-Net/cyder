@@ -8,7 +8,7 @@ from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
 
-def make_paginator(request, qs, num):
+def make_paginator(request, qs, num=20):
     """
     Paginator, returns object_list.
     """

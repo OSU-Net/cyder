@@ -1,5 +1,8 @@
 {% extends "cydhcp/cydhcp_base.html" %}
+{% from "base/tables.html" import render_table %}
+{% from 'cydhcp/cydhcp_macros.html' import display_networks %}
 
+{% block title %}{{ 'Site ' + site.get_full_name() }}{% endblock %}
 
 <!--
 {% block action_bar %}
@@ -16,94 +19,37 @@
 {% endblock %}
 -->
 
-
 {% block content %}
   {% if site.parent %}
-    <div class='dns-title'>{{ site.get_full_name() }}</div>
-    Parent site: <a href='{{ site.parent.get_detail_url() }}'>{{ site.parent.get_full_name() }}</a>
-    </br>
-  {% else %}
-    <div class='dns-title'>{{ site.get_full_name() }}</div>
+    Parent:
+    <a href='{{ site.parent.get_detail_url() }}'>
+      {{ site.parent.get_full_name() }}
+    </a>
   {% endif %}
 
+  {{ render_table(request, site_table) }}
 
-    <table class="table">
-      <thead>
-        {% for item, _, value in site.details()['data'] %}
-          <th>{{ item }}</th>
-        {% endfor %}
-      </thead>
-      <tbody>
-        <tr>
-          {% for item, _, value in site.details()['data'] %}
-            {% if value %}
-              <td><a href="{{ value.get_detail_url() }}">{{ value }}</a></td>
-            {% else %}
-              <td></td>
-            {% endif %}
-          {% endfor %}
-        </tr>
-      </tbody>
-    </table>
+  {% if attrs_table %}
+    <h3>Site Attributes</h3>
+    {{ render_table(request, attrs_table) }}
+  {% endif %}
 
-    {% if attrs %}
-      <table class="table">
-        <thead>
-          {% for attr in attrs %}
-            <th>{{ attr.key }}</th>
-          {% endfor %}
-        </thead>
-        <tbody>
-          <tr>
-          {% for attr in attrs %}
-            <td>{{ attr.value }}</td>
-          {% endfor %}
-          </tr>
-        </tbody>
-      </table>
-    {% endif %}
-    {% if child_sites %}
-      <h3>Child sites</h3>
-      <table class="table">
-        <thead>
-            <th>Site</th>
-        </thead>
+  {% if child_sites_table %}
+    <h3>Child Sites</h3>
+    {{ render_table(request, child_sites_table) }}
+  {% endif %}
 
-        <tbody>
-          {% for child_site in child_sites %}
-            <td><a href='{{ child_site.get_detail_url() }}'>{{ child_site.get_full_name() }}</a></td>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% endif %}
-
+  {% if networks_table %}
     <h3>Networks</h3>
-    {% set page_obj = no_vlan_networks %}
-    {% include "base/includes/pagination.html" %}
-    <table class="table">
-      <thead>
-          <th>Vlan</th>
-          <th>Network(s)</th>
-      </thead>
+    {% include "base/includes/object_table.html" %}
+    {{ render_table(networks_table) }}
+  {% endif %}
 
-      <tbody>
-        {% for vlan in vlans %}
-          {% for net in vlan.network_set.filter(site=site) %}
-          <tr>
-          {% if loop.first %}
-            <td><a href='{{ vlan.get_detail_url() }}'>{{ vlan }}</a></td>
-          {% else %}
-            <td> </td>
-          {% endif %}
-          <td><a href='{{ net.get_detail_url() }}'>{{ net }}</a></td>
-          </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if no_vlan_networks %}
-      <h3>Networks with no Vlan</h3>
-    {% from 'cydhcp/cydhcp_macros.html' import display_networks %}
-    {{ display_networks(no_vlan_networks) }}
-    {% endif %}
+  {% if vlanless_networks_page_obj %}
+    <h3>Vlan-less Networks</h3>
+    {% set page_obj = vlanless_networks_page_obj %}
+    {% include "base/includes/pagination.html" %}
+    {{ render_table(no_vlan_networks) }}
+  {% endif %}
+
 {% endblock %}
