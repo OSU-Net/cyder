@@ -56,6 +56,23 @@ class RangeViewTests(cyder.base.tests.TestCase):
         }
 
 
+class SiteViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
+    name = 'site'
+
+    def setUp(self):
+        test_data = {
+            'name': 'test_site',
+        }
+        do_setUp(self, Site, test_data)
+
+    def post_data(self):
+        return {
+            'name': 'post_site',
+        }
+
+
+
 class VlanViewTests(cyder.base.tests.TestCase):
     fixtures = ['core/users.json']
     name = 'vlan'
@@ -75,7 +92,7 @@ class VlanViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = (RangeViewTests, VlanViewTests)
+tests = (RangeViewTests, SiteViewTests, VlanViewTests)
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_tests():
