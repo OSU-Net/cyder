@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q, F
 from django.db import models
 
-from cyder.cydns.mixins import ObjectUrlMixin, DisplayMixin
+from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import validate_name, validate_ttl

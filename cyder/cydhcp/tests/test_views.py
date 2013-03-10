@@ -56,6 +56,24 @@ class RangeViewTests(cyder.base.tests.TestCase):
         }
 
 
+class NetworkViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
+    name = 'network'
+
+    def setUp(self):
+        test_data = {
+            'ip_type': IP_TYPE_4,
+            'network_str': '192.168.1.100',
+        }
+        do_setUp(self, Network, test_data)
+
+    def post_data(self):
+        return {
+            'ip_type': IP_TYPE_4,
+            'network_str': '192.168.2.100',
+        }
+
+
 class SiteViewTests(cyder.base.tests.TestCase):
     fixtures = ['core/users.json']
     name = 'site'
@@ -70,7 +88,6 @@ class SiteViewTests(cyder.base.tests.TestCase):
         return {
             'name': 'post_site',
         }
-
 
 
 class VlanViewTests(cyder.base.tests.TestCase):
@@ -92,7 +109,7 @@ class VlanViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = (RangeViewTests, SiteViewTests, VlanViewTests)
+tests = (RangeViewTests, NetworkViewTests, SiteViewTests, VlanViewTests)
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_tests():

@@ -1,7 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.util import ErrorList
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
@@ -30,7 +29,6 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydhcp.workgroup.forms import WorkgroupForm
 
 import ipaddr
-import simplejson as json
 
 
 def get_klasses(record_type):
@@ -64,20 +62,6 @@ def cydhcp_delete(request, pk):
 
 def cydhcp_table_update(request, pk, record_type=None):
     return table_update(request, pk, get_klasses, record_type)
-
-
-def cydhcp_create(request):
-    record_type = request.path.split('/')[2]
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
-    if request.method == 'POST':
-        form = FormKlass(request.POST)
-        if form.is_valid():
-            obj = form.instance
-            obj.save()
-            return redirect(obj.get_list_url())
-        else:
-            return HttpResponse(json.dumps({'form': form}))
-    return render(request, 'cydhcp/cydhcp_form.html', {'form': form})
 
 
 def cydhcp_detail(request, pk):

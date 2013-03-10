@@ -12,7 +12,7 @@ from cyder.cydns.models import check_TLD_condition
 from cyder.cydns.validation import (validate_first_label, validate_name,
                                     validate_ttl)
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.mixins import ObjectUrlMixin, DisplayMixin
+from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.soa.utils import update_soa
 
 #import reversion

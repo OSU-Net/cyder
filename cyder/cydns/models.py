@@ -4,7 +4,7 @@ from django.db import models
 import cydns
 from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain, _check_TLD_condition
-from cyder.cydns.mixins import ObjectUrlMixin, DisplayMixin
+from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_first_label, validate_name
 from cyder.cydns.validation import validate_ttl

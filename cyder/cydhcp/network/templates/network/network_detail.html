@@ -1,7 +1,7 @@
 {% extends "cydhcp/cydhcp_base.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% block title %}{{ 'Network ' + network }}{% endblock %}
+{% block title %}Network {{ network.network_str }}{% endblock %}
 
 {% block content %}
   <span>See <a href="/cydhcp/build/{{network.pk}}/">DHCP Build Output</a>.</span>

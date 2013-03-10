@@ -1,6 +1,6 @@
 from django.db import models
 
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 
 
 class View(models.Model, ObjectUrlMixin):

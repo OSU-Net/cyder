@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
 import cydns
-from cyder.cydns.mixins import ObjectUrlMixin
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.utils import update_soa
 from cyder.cydns.validation import (validate_srv_label, validate_srv_port,

@@ -1,8 +1,7 @@
 {% extends "cydhcp/cydhcp_base.html" %}
 {% from "base/tables.html" import render_table %}
-{% from 'cydhcp/cydhcp_macros.html' import display_networks %}
 
-{% block title %}{{ 'Site ' + site.get_full_name() }}{% endblock %}
+{% block title %}Site {{ site.get_full_name() }}{% endblock %}
 
 <!--
 {% block action_bar %}

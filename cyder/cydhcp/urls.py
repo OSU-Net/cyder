@@ -3,14 +3,13 @@ from django.views.generic.simple import direct_to_template
 
 from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
                                 cydhcp_get_update_form, cydhcp_search_obj,
-                                cydhcp_create, cydhcp_delete)
+                                cydhcp_delete)
 
 
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
     return patterns('',
         url(r'^$', cydhcp_view, name=object_type),
-        url(r'^create/$', cydhcp_create, name=object_type + '-create'),
         url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
             name=object_type + '-update'),
         url(r'^(?P<pk>[\w-]+)/delete/$', cydhcp_delete,

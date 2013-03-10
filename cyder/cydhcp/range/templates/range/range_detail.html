@@ -37,7 +37,7 @@
     {% if range_.netwok %}
     <span>See <a href="{{ url('build-network', range_.network.pk) }}">DHCP Build Output</a>.</span>
     {% else %}
-    <span>See <a href="{{ url('network-create') }}">Create Network</a>.</span>
+    <span>See <a href="{{ url('network') }}">Create Network</a>.</span>
     {% endif %}
     <p>This range allows {{ range_.allow }}</p>
     <table class="table">
