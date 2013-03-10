@@ -210,7 +210,7 @@ class Network(models.Model, ObjectUrlMixin):
         self.prefixlen = self.network.prefixlen
 
 
-class NetworkKeyValue(CommonOption, ObjectUrlMixin):
+class NetworkKeyValue(CommonOption):
     """
     The NetworkOption Class.
 
@@ -225,15 +225,6 @@ class NetworkKeyValue(CommonOption, ObjectUrlMixin):
     aux_attrs = (
         ('description', 'A description of the network'),
     )
-
-    def details(self):
-        """For tables."""
-        data = {'url': ''}
-        data['data'] = [
-            ('Key', 'key', self.key),
-            ('Value', 'value', self.value),
-        ]
-        return data
 
     class Meta:
         db_table = 'network_key_value'

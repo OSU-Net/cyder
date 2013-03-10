@@ -8,7 +8,9 @@ from django.shortcuts import get_object_or_404, render
 
 import ipaddr
 
+from cyder.base.utils import make_paginator, tablefy
 from cyder.core.ctnr.models import Ctnr
+from cyder.cydhcp.constants import *
 from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -46,18 +48,18 @@ def delete_range_attr(request, attr_pk):
 
 def range_detail(request, range_pk):
     mrange = get_object_or_404(Range, pk=range_pk)
-    attrs = mrange.rangekeyvalue_set.all()
 
     allow = None
-    if mrange.allow == "vrf":
+    if mrange.allow == ALLOW_OPTION_VRF:
         try:
             allow = [Vrf.objects.get(network=mrange.network)]
         except ObjectDoesNotExist:
             allow = []
-    elif mrange.allow == "known-client":
-        allow = ["Known client"]
-    elif mrange.allow == "legacy":
+    elif mrange.allow == ALLOW_OPTION_KNOWN:
+        allow = [ALLOW_OPTION_KNOWN]
+    elif mrange.allow == ALLOW_OPTION_LEGACY:
         allow = [ctnr for ctnr in Ctnr.objects.filter(ranges=mrange)]
+
     start_upper, start_lower = mrange.start_upper, mrange.start_lower
     end_upper, end_lower = mrange.end_upper, mrange.end_lower
 
@@ -72,9 +74,10 @@ def range_detail(request, range_pk):
     intrs = StaticInterface.objects.filter(gt_start, lt_end)
 
     range_data = []
-    ips_total = ((end_upper << 64) + end_lower - 1) - \
-                ((start_upper << 64) + start_lower)
+    ips_total = (((end_upper << 64) + end_lower - 1) -
+                  ((start_upper << 64) + start_lower))
     ips_used = 0
+
     for i in range((start_upper << 64) + start_lower, (end_upper << 64) +
                    end_lower - 1):
         taken = False
@@ -115,21 +118,15 @@ def range_detail(request, range_pk):
             range_data.append((None, ip_str))
         else:
             ips_used += 1
-    paginator = Paginator(range_data, 20)
-    page = request.GET.get('page')
-    try:
-        range_data = paginator.page(page)
-    except PageNotAnInteger:
-        range_data = paginator.page(1)
-    except EmptyPage:
-        range_data = paginator.page(paginator.num_pages)
+
     return render(request, 'range/range_detail.html', {
         'range_': mrange,
+        'range_table': tablefy([mrange]),
+        'range_data': make_paginator(request, range_data, 50),
+        'attrs_table': tablefy(mrange.rangekeyvalue_set.all()),
         'allow_list': allow,
-        'attrs': attrs,
-        'range_data': range_data,
         'range_used': "{0}%".format(
-            int(100*float(ips_used)/ips_total) if ips_total else "N/A")
+            int(100 * float(ips_used) / ips_total) if ips_total else "N/A")
     })
 
 

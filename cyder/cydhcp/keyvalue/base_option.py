@@ -1,13 +1,14 @@
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.validation import validate_name
 from cyder.cydhcp.keyvalue.models import KeyValue
 
 import ipaddr
 
 
-class CommonOption(KeyValue):
+class CommonOption(KeyValue, ObjectUrlMixin):
     is_option = models.BooleanField(default=False)
     is_statement = models.BooleanField(default=False)
     has_validator = models.BooleanField(default=False)
@@ -24,6 +25,15 @@ class CommonOption(KeyValue):
             if self.is_quoted:
                 return "{0} \"{1}\"".format(self.key, self.value)
             return "{0} {1}".format(self.key, self.value)
+
+    def details(self):
+        """For tables."""
+        data = {'url': ''}
+        data['data'] = [
+            ('Key', 'key', self.key),
+            ('Value', 'value', self.value),
+        ]
+        return data
 
     def _get_value(self):
         value = self.value.strip('\'" ')
