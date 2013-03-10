@@ -3,6 +3,8 @@ from django.test.client import Client
 from nose.tools import eq_
 
 import cyder.base.tests
+from cyder.base.tests.test_views_template import GenericViewTests
+from cyder.base.tests.test_views_template import random_label
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -12,8 +14,6 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.test_views_template import GenericViewTests
-from cyder.cydns.tests.test_views_template import random_label
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 
@@ -230,8 +230,8 @@ class SSHFPViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = [AddressRecordViewTests, CNAMEViewTests, MXViewTests, PTRViewTests,
-         TXTViewTests]
+tests = (AddressRecordViewTests, CNAMEViewTests, MXViewTests, PTRViewTests,
+         TXTViewTests)
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_tests():

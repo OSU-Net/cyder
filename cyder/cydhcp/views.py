@@ -68,9 +68,9 @@ def cydhcp_table_update(request, pk, record_type=None):
 
 def cydhcp_create(request):
     record_type = request.path.split('/')[2]
-    Klass, FormKlass = get_klasses(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
     if request.method == 'POST':
-        form = FormKlass(request)
+        form = FormKlass(request.POST)
         if form.is_valid():
             obj = form.instance
             obj.save()

@@ -3,6 +3,8 @@ from django.db import models
 from django.http import HttpResponse
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.constants import IP_TYPES
+from cyder.cydhcp.constants import *
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two
@@ -12,13 +14,8 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
 
-#import reversion
-
 import ipaddr
-
-
-class RangeOverflowError(ValidationError):
-    pass
+#import reversion
 
 
 class Range(models.Model, ObjectUrlMixin):
@@ -35,7 +32,7 @@ class Range(models.Model, ObjectUrlMixin):
     the broadcast address of their network; the Range and Network classes do
     not enforce this.
 
-    Chaning a Range
+    Changing a Range
 
     Things that happen when a static range is changed:
 
@@ -45,28 +42,9 @@ class Range(models.Model, ObjectUrlMixin):
             existing range's `start` and `end` values to make sure that the new
             range does not overlap.
     """
-    IP_TYPES = (
-        ('4', 'IPv4'),
-        ('6', 'IPv6'),)
-
-    ALLOW_OPTIONS = (
-        ('vrf', 'Allow members of VRF'),
-        ('known-client', 'Allow known-clients'),
-        ('legacy', 'Allow Ctnr: Legacy Option'),)
-
-    DENY_OPTIONS = (
-        ('deny-unknown', 'deny dynamic unknown-clients'),)
-    # Some ranges have no allow statements so this option should be able to be
-    # null. There are a collection of such subnets documented in the migration
-
-    STATIC = "st"
-    DYNAMIC = "dy"
-    RANGE_TYPE = (
-        (STATIC, 'Static'),
-        (DYNAMIC, 'Dynamic'),
-    )
-
     id = models.AutoField(primary_key=True)
+
+    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items())
     start_upper = models.BigIntegerField(null=True)
     start_lower = models.BigIntegerField(null=True)
     start_str = models.CharField(max_length=39, editable=True)
@@ -78,16 +56,16 @@ class Range(models.Model, ObjectUrlMixin):
     network = models.ForeignKey(Network, null=True, blank=True)
     is_reserved = models.BooleanField(default=False, blank=False)
 
-    allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS, null=True,
-                             blank=True)
-    deny = models.CharField(max_length=20, choices=DENY_OPTIONS, null=True,
-                            blank=True)
-    dhcpd_raw_include = models.TextField(null=True, blank=True)
-    attrs = None
+    allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS.items(),
+                             null=True, blank=True)
+    deny = models.CharField(max_length=20, choices=DENY_OPTIONS.items(),
+                            null=True, blank=True)
 
-    range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
+    attrs = None
+    dhcpd_raw_include = models.TextField(null=True, blank=True)
+
+    range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
                                   default=STATIC, editable=False)
-    ip_type = models.CharField(max_length=1, choices=IP_TYPES)
 
     search_fields = ('start_str', 'end_str')
 
@@ -321,3 +299,7 @@ class RangeKeyValue(CommonOption):
         self._ntp_servers(self.range.network.ip_type)
 
 ##reversion.(RangeKeyValue)
+
+
+class RangeOverflowError(ValidationError):
+    pass
