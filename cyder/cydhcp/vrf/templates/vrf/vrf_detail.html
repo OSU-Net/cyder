@@ -1,22 +1,13 @@
 {% extends "cydhcp/cydhcp_base.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block title %}{{ 'Vrf' + vrf.name }}{% endblock %}
 
 {% block content %}
-
-    <h3>{{ vrf.name }}</h3>
-    <br>
-    {% if attrs %}
+  {% if attrs %}
     <h3>Vrf Attributes</h4>
-    {% for attr in attrs %}
-        <table class="table">
-            <thead>
-                <th>{{ attr.key }}</th>
-            </thead>
-            <tbody>
-                <tr><td>{{ attr.value }}</td></tr>
-            </tbody>
-        </table>
-        {% endfor %}
-        {% endif %}
-        {% from 'cydhcp/cydhcp_macros.html' import display_networks %}
-        {{ display_networks([vrf.network], vlan=True) }}
+    {{ render_table(attrs) }}
+  {% endif %}
+
+  {{ render_table([vrf.network], vlan=True) }}
 {% endblock %}

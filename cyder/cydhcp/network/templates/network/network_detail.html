@@ -1,11 +1,11 @@
 {% extends "cydhcp/cydhcp_base.html" %}
+{% from "base/tables.html" import render_table %}
 
+{% block title %}{{ 'Network ' + network }}{% endblock %}
 
 {% block content %}
-  <div class='dns-title'>{{ network }}</div>
-
-  <br>
   <span>See <a href="/cydhcp/build/{{network.pk}}/">DHCP Build Output</a>.</span>
+
   <h3>Network Details</h3>
     <table class="table">
       <thead>
@@ -52,12 +52,11 @@
     </table>
     {% if eldars %}
     <h3>Parent Networks</h3>
-    {% from 'cydhcp/cydhcp_macros.html' import display_networks %}
-    {{ display_networks(eldars) }}
+    {{ render_table(eldars) }}
     {% endif %}
     {% if sub_networks %}
     <h3>Sub Networks.</h3>
-    {{ display_networks(sub_networks) }}
+    {{ render_table(sub_networks) }}
     {% endif %}
 
     <h3>Ranges</h3>
