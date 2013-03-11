@@ -18,7 +18,6 @@ def test_wizard(request):
     vlan_form = NetworkForm_vlan()
     if request.method == 'POST':
         confirmed = dict([(key, str(val)) for key, val in request.POST.items()])
-        print confirmed
         action = confirmed['action']
         if action == "#network_form":
             form = NetworkForm_network(confirmed)

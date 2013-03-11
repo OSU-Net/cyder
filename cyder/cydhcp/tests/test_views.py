@@ -28,6 +28,24 @@ def do_setUp(self, test_class, test_data):
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
 
 
+class NetworkViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
+    name = 'network'
+
+    def setUp(self):
+        test_data = {
+            'ip_type': IP_TYPE_4,
+            'network_str': '192.168.1.100',
+        }
+        do_setUp(self, Network, test_data)
+
+    def post_data(self):
+        return {
+            'ip_type': IP_TYPE_4,
+            'network_str': '192.168.2.100',
+        }
+
+
 class RangeViewTests(cyder.base.tests.TestCase):
     fixtures = ['core/users.json']
     name = 'range'
@@ -53,24 +71,6 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'allow': ALLOW_OPTION_VRF,
             'deny': DENY_OPTION_UNKNOWN,
             'range_type': STATIC,
-        }
-
-
-class NetworkViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
-    name = 'network'
-
-    def setUp(self):
-        test_data = {
-            'ip_type': IP_TYPE_4,
-            'network_str': '192.168.1.100',
-        }
-        do_setUp(self, Network, test_data)
-
-    def post_data(self):
-        return {
-            'ip_type': IP_TYPE_4,
-            'network_str': '192.168.2.100',
         }
 
 
@@ -108,8 +108,32 @@ class VlanViewTests(cyder.base.tests.TestCase):
         }
 
 
+class VrfViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
+    name = 'vrf'
+
+    def setUp(self):
+        self.test_nw = Network.objects.create(ip_type=IP_TYPE_4,
+                                              network_str='192.168.1.100')
+        self.post_nw = Network.objects.create(ip_type=IP_TYPE_4,
+                                              network_str='192.168.2.100')
+
+        test_data = {
+            'name': 'test_vrf',
+            'network': self.test_nw
+        }
+        do_setUp(self, Vrf, test_data)
+
+    def post_data(self):
+        return {
+            'name': 'post_vrf',
+            'network': self.post_nw.pk,
+        }
+
+
 # Build the tests.
-tests = (RangeViewTests, NetworkViewTests, SiteViewTests, VlanViewTests)
+tests = (RangeViewTests, NetworkViewTests, SiteViewTests, VlanViewTests,
+         VrfViewTests)
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_tests():

@@ -52,7 +52,6 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     data = []
 
     # Build headers.
-    print objects[0]
     for title, sort_field, value in objects[0].details()['data']:
         headers.append([title, sort_field])
     if extra_cols:

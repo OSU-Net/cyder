@@ -42,15 +42,15 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
                     obj = form.save()
                     return redirect(obj.get_list_url())
             except (ValidationError, ValueError) as e:
-                    if form._errors is None:
-                        form._errors = ErrorDict()
-                    form._errors["__all__"] = ErrorList(e.messages)
-                    return render(request, template, {
-                                    'form': form,
-                                    'obj': obj,
-                                    'record_type': record_type,
-                                    'pk': pk,
-                                  })
+                if form._errors is None:
+                    form._errors = ErrorDict()
+                form._errors["__all__"] = ErrorList(e.messages)
+                return render(request, template, {
+                                'form': form,
+                                'obj': obj,
+                                'record_type': record_type,
+                                'pk': pk,
+                              })
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)

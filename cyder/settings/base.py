@@ -112,6 +112,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'migration',
 
     # Third party apps
+    'south',
     'django_cas',
     'djcelery',
     'django_extensions',
@@ -119,7 +120,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'jingo_minify',
     'tastypie',
     'tastytools',
-    'south',
     #'reversion',
 
     # Django contrib apps
