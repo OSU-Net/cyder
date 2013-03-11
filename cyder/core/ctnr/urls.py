@@ -4,7 +4,7 @@ from cyder.core.ctnr.views import *
 
 
 urlpatterns = patterns('cyder.core.ctnr.views',
-    url(r'^$', CtnrListView.as_view(), name='ctnr-list'),
+    url(r'^$', CtnrListView.as_view(), name='ctnr'),
     url(r'create/$', CtnrCreateView.as_view(), name='ctnr-create'),
     url(r'(?P<pk>[\w-]+)/update/$', CtnrUpdateView.as_view(),
         name='ctnr-update'),
@@ -13,4 +13,6 @@ urlpatterns = patterns('cyder.core.ctnr.views',
     url(r'(?P<pk>[\w-]+)/add_user/$', 'add_user', name='ctnr-add-user'),
     url(r'(?P<pk>[\w-]+)?/?change/$', 'change_ctnr', name='ctnr-change'),
     url(r'(?P<pk>[\w-]+)/$', CtnrDetailView.as_view(), name='ctnr-detail'),
+    url(r'(?P<pk>[\w-]+)/tableupdate$', CtnrUpdateView.as_view(),
+        name='ctnr-table-update'),
 )

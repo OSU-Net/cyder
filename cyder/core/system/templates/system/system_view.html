@@ -1,8 +1,12 @@
-{% extends "base/list.html" %}
+{% extends "core/core_list.html" %}
 
 {% set pretty_record_type = record_type|prettify_record_type %}
 
 {% block title %} {{ pretty_record_type + "s" }} {% endblock %}
+
+{% block sidebar %}
+    {% include "core/includes/core_sidebar.html" %}
+{% endblock %}
 
 {% block action_bar %}
     <a class="btn" id="create-obj">Create {{ a_or_an(record_type) }} {{ pretty_record_type }}</a>

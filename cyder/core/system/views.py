@@ -1,9 +1,10 @@
+from cyder.base.utils import tablefy
 from cyder.base.views import (cy_view, cy_delete, get_update_form, search_obj,
                               table_update)
 from cyder.core.system.forms import SystemForm
 from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from django.shortcuts import get_object_or_404, render
 
@@ -33,15 +34,17 @@ def system_table_update(request, pk, record_type=None):
     return table_update(request, pk, get_klasses, record_type)
 
 
-def system_detail(request, system_pk):
-    system = get_object_or_404(System, pk=system_pk)
-    attrs = system.systemkeyvalue.all()
-    dynamic = DynamicInterface.objects.filter(system=system)
+def system_detail(request, pk):
+    system = get_object_or_404(System, pk=pk)
+    attrs = system.systemkeyvalue_set.all()
+
     static = StaticInterface.objects.filter(system=system)
-    return render(request, "site/site_details.html",
-                  {
-                      "system": system,
-                      "attrs": attrs,
-                      "dynamic_intrs": dynamic,
-                      "static_intrs": static,
-                  })
+    dynamic = DynamicInterface.objects.filter(system=system)
+
+    return render(request, 'system/system_detail.html', {
+      'system': system,
+      'system_table': tablefy([system]),
+      'attrs_table': tablefy(attrs),
+      'static_intrs_table': tablefy(static),
+      'dynamic_intrs_table': tablefy(dynamic),
+    })

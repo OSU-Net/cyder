@@ -1,0 +1,24 @@
+{% extends "core/core_base.html" %}
+{% from "base/tables.html" import render_table %}
+
+
+{% block title %}System {{ system.name }}{% endblock %}
+
+{% block content %}
+  {{ render_table(request, system_table) }}
+
+  {% if attrs_table %}
+    <h3>System Attributes</h3>
+    {{ render_table(request, attrs_table) }}
+  {% endif %}
+
+  {% if static_intrs_table %}
+    <h3>Static Interfaces</h3>
+    {{ render_table(request, static_intrs_table) }}
+  {% endif %}
+
+  {% if dynamic_intrs_table %}
+    <h3>Dynamic Interfaces</h3>
+    {{ render_table(request, dynamic_intrs_table) }}
+  {% endif %}
+{% endblock %}

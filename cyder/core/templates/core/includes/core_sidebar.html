@@ -1,0 +1,7 @@
+{% from 'base/includes/sidebars.html' import render_sidebar %}
+
+<!-- CORE NAV -->
+{{ render_sidebar(request, [
+  ('system', 'System'),
+  ('ctnr', 'Containers'),
+]) }}
