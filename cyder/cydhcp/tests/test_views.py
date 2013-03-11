@@ -1,11 +1,8 @@
 from django.test.client import Client
 
-from nose.tools import eq_
-
 from cyder.base.constants import IP_TYPE_4
 import cyder.base.tests
 from cyder.base.tests.test_views_template import GenericViewTests
-from cyder.base.tests.test_views_template import random_label
 from cyder.cydhcp.constants import (ALLOW_OPTION_VRF, DENY_OPTION_UNKNOWN,
                                     STATIC)
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -90,6 +87,22 @@ class SiteViewTests(cyder.base.tests.TestCase):
         }
 
 
+class WorkgroupViewTests(cyder.base.tests.TestCase):
+    fixtures = ['core/users.json']
+    name = 'workgroup'
+
+    def setUp(self):
+        test_data = {
+            'name': 'test_workgroup',
+        }
+        do_setUp(self, Workgroup, test_data)
+
+    def post_data(self):
+        return {
+            'name': 'post_workgroup',
+        }
+
+
 class VlanViewTests(cyder.base.tests.TestCase):
     fixtures = ['core/users.json']
     name = 'vlan'
@@ -132,8 +145,8 @@ class VrfViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = (RangeViewTests, NetworkViewTests, SiteViewTests, VlanViewTests,
-         VrfViewTests)
+tests = (RangeViewTests, NetworkViewTests, SiteViewTests, WorkgroupViewTests,
+         VlanViewTests, VrfViewTests)
 for view_test in tests:
     builder = GenericViewTests()
     for test in builder.build_tests():

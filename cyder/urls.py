@@ -21,7 +21,6 @@ urlpatterns = patterns(
     (r'^dhcp/', include('cyder.cydhcp.urls')),
     (r'^dns/', include('cyder.cydns.urls')),
     (r'^ctnr/', include('cyder.core.ctnr.urls')),
-    #(r'^search/', include('cyder.core.search.urls')),
     (r'^user/', include('cyder.core.cyuser.urls')),
     (r'^api/', include(v1_dns_api.urls)),
     (r'^ctnr/', include('cyder.core.ctnr.urls')),
