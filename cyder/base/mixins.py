@@ -72,5 +72,8 @@ class ObjectUrlMixin(object):
         """
         Return base details with generic postback URL for editable tables.
         """
-        return {'url': reverse(self._meta.db_table + '-table-update',
+        try:
+            return {'url': reverse(self._meta.db_table + '-table-update',
                                args=[self.pk])}
+        except NoReverseMatch:
+            return {'url': ''}
