@@ -3,17 +3,18 @@ Cyder
 
 Django DNS/DHCP web manager.
 
-It is meant as a ground-up rewrite of Oregon State University's DNS/DHCP
-network web manager, Maintain, which was previously built with PHP. This would
-be the fifth coming of Maintain.
+Meant as a ground-up rewrite of Oregon State University's DNS/DHCP network web
+manager, Maintain, which was previously built with PHP, this would be the fifth
+coming of Maintain.
 
-Cyder provides a web frontend designed with user experience and visual design
-in mind. It provides an easy-to-use and attractive interface for network administrators
-to create, viw, delete, and update DNS records and DHCP objects.
+Cyder provides a web frontend built with user experience and visual design in
+mind. It provides an easy-to-use and attractive interface for network
+administrators to create, view, delete, and update DNS records and DHCP
+objects.
 
 On the backend are build scripts that generate DNS BIND files and DHCP builds
 directly from the database backing Cyder. The database schema and backend
-validations have been designed using the appropriate RFCs.
+data models have been designed-to-spec using the RFCs.
 
 ![Cyder](http://imgur.com/yN7wTP4.jpg)
 
