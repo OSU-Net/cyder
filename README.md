@@ -15,7 +15,7 @@ On the backend are build scripts that generate DNS BIND files and DHCP builds
 directly from the database backing Cyder. The database schema and backend
 validations have been designed using the appropriate RFCs.
 
-![Cyder](http://imgur.com/TiFvTnU.jpg)
+![Cyder](http://imgur.com/yN7wTP4.jpg)
 
 
 Installation
