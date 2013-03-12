@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.cydns.models import CydnsRecord
 
-#import reversion
+# import reversion
 
 
 def validate_algorithm(number):
@@ -87,4 +87,4 @@ class SSHFP(CydnsRecord):
         # Fix that ^
 
 
-#reversion.(SSHFP)
+# reversion.(SSHFP)

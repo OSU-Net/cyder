@@ -8,7 +8,7 @@ from cyder.cydns.validation import validate_mx_priority
 from cyder.cydns.validation import validate_name
 from cyder.base.mixins import DisplayMixin
 
-#import reversion
+# import reversion
 
 from gettext import gettext as _
 
@@ -87,4 +87,4 @@ class MX(CydnsRecord, DisplayMixin):
         if CNAME.objects.filter(fqdn=self.server):
             raise ValidationError("MX records should not point to CNAMES.")
 
-#reversion.(MX)
+# reversion.(MX)

@@ -13,7 +13,7 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
 
-#import reversion
+# import reversion
 
 
 class Network(models.Model, ObjectUrlMixin):

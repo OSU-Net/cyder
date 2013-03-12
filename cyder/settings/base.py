@@ -120,7 +120,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'jingo_minify',
     'tastypie',
     'tastytools',
-    #'reversion',
+    # 'reversion',
 
     # Django contrib apps
     'django.contrib.sessions',
@@ -137,7 +137,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_cas.middleware.CASMiddleware',
     'cyder.middleware.authentication.AuthenticationMiddleware',
-    'reversion.middleware.RevisionMiddleware',
+    # 'reversion.middleware.RevisionMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS += (

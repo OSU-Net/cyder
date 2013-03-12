@@ -13,7 +13,7 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import validate_name, validate_ttl
 
-#import reversion
+# import reversion
 
 
 #TODO, put these defaults in a config file.
@@ -158,7 +158,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         super(SOA, self).save(*args, **kwargs)
 
 
-#reversion.(SOA)
+# reversion.(SOA)
 
 class SOAKeyValue(KeyValue):
     soa = models.ForeignKey(SOA, null=False)
@@ -189,4 +189,4 @@ class SOAKeyValue(KeyValue):
                                   "{1}".format(", ".join(true_values),
                                                ", ".join(false_values)))
 
-#reversion.(SOAKeyValue)
+# reversion.(SOAKeyValue)

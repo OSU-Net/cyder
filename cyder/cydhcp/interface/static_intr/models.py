@@ -20,7 +20,7 @@ from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.view.models import View
 from cyder.cydns.domain.models import Domain
 
-#import reversion
+# import reversion
 
 
 class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):

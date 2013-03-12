@@ -15,7 +15,7 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
 
 import ipaddr
-#import reversion
+# import reversion
 
 
 class Range(models.Model, ObjectUrlMixin):
@@ -275,7 +275,7 @@ def find_free_ip(start, end, ip_type='4'):
         raise NotImplemented
 
 
-##reversion.(Range)
+# reversion.(Range)
 
 
 class RangeKeyValue(CommonOption):
@@ -298,7 +298,7 @@ class RangeKeyValue(CommonOption):
     def _aa_ntp_servers(self):
         self._ntp_servers(self.range.network.ip_type)
 
-##reversion.(RangeKeyValue)
+# reversion.(RangeKeyValue)
 
 
 class RangeOverflowError(ValidationError):

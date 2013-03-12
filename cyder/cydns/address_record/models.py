@@ -15,7 +15,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.soa.utils import update_soa
 
-#import reversion
+# import reversion
 
 
 class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
@@ -208,4 +208,4 @@ class AddressRecord(BaseAddressRecord):
         unique_together = ('label', 'domain', 'fqdn', 'ip_upper', 'ip_lower',
                            'ip_type')
 
-##reversion.(AddressRecord)
+## reversion.(AddressRecord)
