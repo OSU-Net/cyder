@@ -18,7 +18,7 @@
         <ul class="nav">
           <li class="userinfo">
             <span>
-              <a href="#">{{ request.user.username }}</a>
+                <a href="{{ request.user.get_profile().get_detail_url() }}">{{ request.user.username }}</a>
               <p>on</p>
               <a href="{{ request.session.ctnr.get_detail_url() }}">{{ request.session.ctnr.name }}</a>
             </span>
