@@ -2,7 +2,7 @@ django-tastypie
 ipaddr
 mimeparse
 python-ldap
-django-reversion
+django-reversion==1.5
 ply
 simplejson
 south

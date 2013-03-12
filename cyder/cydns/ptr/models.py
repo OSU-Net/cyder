@@ -12,7 +12,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.cname.models import CNAME
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
-#import reversion
+# import reversion
 
 
 class PTR(Ip, ObjectUrlMixin):
@@ -123,4 +123,4 @@ class PTR(Ip, ObjectUrlMixin):
         reverse zone file."""
         return ip_to_dns_form(self.ip_str, ip_type=self.ip_type)
 
-#reversion.(PTR)
+# reversion.(PTR)

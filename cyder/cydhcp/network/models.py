@@ -13,7 +13,7 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
 
-#import reversion
+# import reversion
 
 
 class Network(models.Model, ObjectUrlMixin):
@@ -30,8 +30,7 @@ class Network(models.Model, ObjectUrlMixin):
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
     network_str = models.CharField(
-        max_length=49, editable=True,
-        help_text="The network address of this network.")
+        max_length=49, editable=True, help_text="The network address of this network.")
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
 
@@ -43,11 +42,33 @@ class Network(models.Model, ObjectUrlMixin):
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
 
+    class Meta:
+        db_table = 'network'
+        unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
+
     def __str__(self):
         return self.network_str
 
     def __repr__(self):
         return "<Network {0}>".format(str(self))
+
+    def details(self):
+        """For tables."""
+        data = super(Network, self).details()
+        data['data'] = (
+            ('Network', 'network_str', self),
+            ('Site', 'site', self.site),
+            ('Vlan', 'vlan', self.vlan),
+        )
+        return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'network_str', 'datatype': 'string', 'editable': True},
+            {'name': 'site', 'datatype': 'string', 'editable': False},
+            {'name': 'vlan', 'datatype': 'string', 'editable': False},
+        ]}
 
     def __contains__(self, other):
         if self.ip_type is not other.ip_type:
@@ -66,20 +87,6 @@ class Network(models.Model, ObjectUrlMixin):
 
     def update_attrs(self):
         self.attrs = AuxAttr(NetworkKeyValue, self, "network")
-
-    def details(self):
-        """For tables."""
-        data = super(Network, self).details()
-        data['data'] = (
-            ('Network', 'network_str', self),
-            ('Site', 'site', self.site),
-            ('Vlan', 'vlan', self.vlan),
-        )
-        return data
-
-    class Meta:
-        db_table = 'network'
-        unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
     def save(self, *args, **kwargs):
         add_routers = True if not self.pk else False

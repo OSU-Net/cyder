@@ -15,7 +15,7 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
 
 import ipaddr
-#import reversion
+# import reversion
 
 
 class Range(models.Model, ObjectUrlMixin):
@@ -100,6 +100,15 @@ class Range(models.Model, ObjectUrlMixin):
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
         return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'start_str', 'datatype': 'string', 'editable': False},
+            {'name': 'network', 'datatype': 'string', 'editable': False},
+            {'name': 'site', 'datatype': 'string', 'editable': False},
+            {'name': 'vlan', 'datatype': 'string', 'editable': False},
+        ]}
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -275,7 +284,7 @@ def find_free_ip(start, end, ip_type='4'):
         raise NotImplemented
 
 
-##reversion.(Range)
+# reversion.(Range)
 
 
 class RangeKeyValue(CommonOption):
@@ -298,7 +307,7 @@ class RangeKeyValue(CommonOption):
     def _aa_ntp_servers(self):
         self._ntp_servers(self.range.network.ip_type)
 
-##reversion.(RangeKeyValue)
+# reversion.(RangeKeyValue)
 
 
 class RangeOverflowError(ValidationError):

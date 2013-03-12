@@ -14,7 +14,7 @@ from cyder.cydns.validation import validate_ttl
 from cyder.cydns.models import check_for_cname
 from cyder.cydns.soa.utils import update_soa
 
-#import reversion
+# import reversion
 
 
 class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
@@ -204,4 +204,4 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
             return False
         return True
 
-#reversion.(Nameserver)
+# reversion.(Nameserver)

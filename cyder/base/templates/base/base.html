@@ -23,7 +23,7 @@
               <a href="{{ request.session.ctnr.get_detail_url() }}">{{ request.session.ctnr.name }}</a>
             </span>
           </li>
-          <li class="{{ 'selected' if url('system') == request.path }}"><a class="navlink" href="{{ url('system') }}">Systems</a></li>
+          <li class="{{ 'selected' if url('system') == request.path }}"><a class="navlink" href="{{ url('system') }}">System</a></li>
           <li class="{{ 'selected' if url('cydns-index') in request.path }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
           <li class="{{ 'selected' if url('cydhcp-index') in request.path }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
         </ul>

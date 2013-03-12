@@ -23,7 +23,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
-    'reversion.middleware.RevisionMiddleware',
+    # 'reversion.middleware.RevisionMiddleware',
 )
 
 MANAGERS = ADMINS

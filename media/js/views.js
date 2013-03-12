@@ -14,13 +14,12 @@ $(document).ready(function() {
 
     $('#create-obj').click(function() {
         // Show create form on clicking create button.
-        slideUp($('#obj-form'));
         setTimeout(function() {
             $('#form-title').html('Creating ' + prettyObjType);
             clear_form_all(form);
         }, 150);
         $('.form-btns a.submit').text('Create ' + prettyObjType);
-        slideDown($('#obj-form'));
+        $('#obj-form').slideToggle();
     });
 
     $('.update').click(function(e) {
@@ -36,7 +35,7 @@ $(document).ready(function() {
                 initForms();
             }, 150);
             $('.form-btns a.submit').text('Update ' + prettyObjType);
-            slideDown($('#obj-form'));
+            $('#obj-form').slideDown();
         }, 'json');
     });
 });

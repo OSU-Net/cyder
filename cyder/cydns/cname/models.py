@@ -7,7 +7,7 @@ from cyder.cydns.models import CydnsRecord
 from cyder.cydns.validation import validate_name, find_root_domain
 from cyder.cydns.search_utils import smart_fqdn_exists
 
-#import reversion
+# import reversion
 
 from gettext import gettext as _
 
@@ -139,4 +139,4 @@ class CNAME(CydnsRecord):
 
         # Should SRV's not be allowed to point to a CNAME? /me looks for an RFC
 
-#reversion.(CNAME)
+# reversion.(CNAME)

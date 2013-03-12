@@ -4,7 +4,7 @@ from django.db import models
 
 from cyder.cydns.models import CydnsRecord
 
-#import reversion
+# import reversion
 
 
 class TXT(CydnsRecord):
@@ -68,4 +68,4 @@ class TXT(CydnsRecord):
         super(TXT, self).check_for_cname()
 
 
-#reversion.(TXT)
+# reversion.(TXT)

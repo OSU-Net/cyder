@@ -42,29 +42,29 @@ class ObjectUrlMixin(object):
 
     @classmethod
     def get_create_url(cls):
-        """
-        Return the create url of the type of object (to be posted to).
-        """
+        """Return the create url of the type of object (to be posted to)."""
         return cls.get_list_url()
 
     def get_update_url(self):
-        """
-        Return the update url of an object.
-        """
+        """Return the update url of an object."""
         return reverse(self._meta.db_table + '-update', args=[self.pk])
 
     def get_delete_url(self):
-        """
-        Return the delete url of an object.
-        """
+        """Return the delete url of an object."""
         return reverse(self._meta.db_table + '-delete', args=[self.pk])
 
     def get_detail_url(self):
-        """
-        Return the detail url of an object.
-        """
+        """Return the detail url of an object."""
         try:
             return reverse(self._meta.db_table + '-detail', args=[self.pk])
+        except NoReverseMatch:
+            return ''
+
+    def get_table_update_url(self):
+        """Return the editableGrid update url of an object."""
+        try:
+            return reverse(self._meta.db_table + '-table-update',
+                           args=[self.pk])
         except NoReverseMatch:
             return ''
 
@@ -72,8 +72,4 @@ class ObjectUrlMixin(object):
         """
         Return base details with generic postback URL for editable tables.
         """
-        try:
-            return {'url': reverse(self._meta.db_table + '-table-update',
-                               args=[self.pk])}
-        except NoReverseMatch:
-            return {'url': ''}
+        return {'url': self.get_table_update_url()}

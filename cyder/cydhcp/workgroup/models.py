@@ -24,6 +24,11 @@ class Workgroup(models.Model, ObjectUrlMixin):
         ]
         return data
 
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+        ]}
 
 class WorkgroupKeyValue(CommonOption):
     workgroup = models.ForeignKey(Workgroup, null=False)

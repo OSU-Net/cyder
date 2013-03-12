@@ -25,11 +25,19 @@
   {% endif %}
 
   {% if page_obj and has_attr(page_obj[0], 'eg_metadata') %}
-    <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
-    <form id="enable-eg">
-      <input type="checkbox" name="eg" id="enable-eg-check">
-      <label for="enable-eg-check"> Enable spreadsheet view</label>
-    </form>
+    <div class="editable-grid">
+      <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
+      <form id="enable-eg">
+        <input type="checkbox" name="eg" id="enable-eg-check">
+        <label for="enable-eg-check">Enter spreadsheet mode</label>
+      </form>
+      <div class="spreadsheet-mode hidden">
+        Click table cells below to directly modify data |
+        <a href="{{ request.path }}" class="exit-spreadsheet">
+          Exit spreadsheet mode
+        </a>
+      </div>
+    </div>
   {% endif %}
 
   {% if object_table %}

@@ -31,6 +31,13 @@ class Site(models.Model, ObjectUrlMixin):
         )
         return data
 
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'parent', 'datatype': 'string', 'editable': False},
+        ]}
+
     def get_full_name(self):
         full_name = self.name
         target = self

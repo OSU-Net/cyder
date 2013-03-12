@@ -16,8 +16,8 @@
   <span id="view-metadata"
         data-objType="{{ record_type }}"
         data-prettyObjType="{{ pretty_record_type }}"
-        data-searchUrl="{{ url('system-search') }}"
-        data-getUrl="{{ url('system-get-update-form') }}">
+        data-searchUrl="{{ url('core-search') }}"
+        data-getUrl="{{ url('core-get-update-form') }}">
   </span>
 
   <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">

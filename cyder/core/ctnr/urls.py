@@ -1,18 +1,10 @@
 from django.conf.urls.defaults import *
 
 from cyder.core.ctnr.views import *
+from cyder.core.urls import core_urls
 
 
-urlpatterns = patterns('cyder.core.ctnr.views',
-    url(r'^$', CtnrListView.as_view(), name='ctnr'),
-    url(r'create/$', CtnrCreateView.as_view(), name='ctnr-create'),
-    url(r'(?P<pk>[\w-]+)/update/$', CtnrUpdateView.as_view(),
-        name='ctnr-update'),
-    url(r'(?P<pk>[\w-]+)/delete/$', CtnrDeleteView.as_view(),
-        name='ctnr-delete'),
+urlpatterns = core_urls('ctnr') + patterns('',
     url(r'(?P<pk>[\w-]+)/add_user/$', 'add_user', name='ctnr-add-user'),
     url(r'(?P<pk>[\w-]+)?/?change/$', 'change_ctnr', name='ctnr-change'),
-    url(r'(?P<pk>[\w-]+)/$', CtnrDetailView.as_view(), name='ctnr-detail'),
-    url(r'(?P<pk>[\w-]+)/tableupdate$', CtnrUpdateView.as_view(),
-        name='ctnr-table-update'),
 )
