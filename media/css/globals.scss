@@ -41,3 +41,33 @@ $green: #00C90D;
     background: -o-radial-gradient($color1, $color2);
     background: radial-gradient($color1, $color2);
 }
+
+@mixin transition($transition) {
+    -moz-transition: $transition;
+    -ms-transition: $transition;
+    -o-transition: $transition;
+    -webkit-transition: $transition;
+    transition: $transition;
+}
+
+@mixin transition($t1, $t2) {
+    -moz-transition: $t1, $t2;
+    -ms-transition: $t1, $t2;
+    -o-transition: $t1, $t2;
+    -webkit-transition: $t1, $t2;
+    transition: $t1, $t2;
+}
+
+@mixin transition-delay($delay) {
+   -moz-transition-delay: $delay;
+   -ms-transition-delay: $delay;
+   -o-transition-delay: $delay;
+   -webkit-transition-delay: $delay;
+}
+
+@mixin transform($transform) {
+    -moz-transform: $transform;
+   -ms-transform: $transform;
+   -o-transform: $transform;
+   -webkit-transform: $transform;
+}

@@ -40,6 +40,10 @@ hr {
     color: $white;
 }
 
+a, tr, li, div, span, h1, h2, h3 {
+    @include transition(background .15s, color .25s);
+}
+
 input[type="text"], input[type="search"], select {
     background: $white;
     border-radius: 2px;

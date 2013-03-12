@@ -53,6 +53,9 @@ $(document).ready(function() {
                 enableEditableGrid();
                 $this.attr('disabled', true);
             }
+
+            $('#enable-eg').remove();
+            $('.spreadsheet-mode').show();
         });
     }
 });

@@ -21,6 +21,7 @@ class System(BaseModel, ObjectUrlMixin):
         unique_together = ('name', 'location', 'department')
 
     def details(self):
+        """For tables."""
         data = super(System, self).details()
         data['data'] = [
             ('Name', 'name', self),
@@ -28,6 +29,14 @@ class System(BaseModel, ObjectUrlMixin):
             ('Location', 'location', self.location),
         ]
         return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'department', 'datatype': 'string', 'editable': True},
+            {'name': 'location', 'datatype': 'string', 'editable': True},
+        ]}
 
 
 class SystemKeyValue(KeyValue):
