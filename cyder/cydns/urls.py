@@ -12,7 +12,7 @@ def cydns_urls(record_type):
             name=record_type + '-update'),
         url(r'(?P<pk>[\w-]+)/delete/$', cydns_delete,
             name=record_type + '-delete'),
-        url(r'(?P<pk>[\w-]+)/tableupdate/$', table_update,
+        url(r'(?P<pk>[\w-]+)/tableupdate/$', cydns_table_update,
             name=record_type + '-table-update'),
     )
 

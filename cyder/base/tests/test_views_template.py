@@ -40,13 +40,12 @@ class GenericViewTests(object):
             self.update_post(),
             self.delete_post(),
             self.detail_get(),
+            self.table_update_post(),
             lambda junk: True
         )
 
     def list_get(self):
-        """
-        List view.
-        """
+        """List view."""
         def test_list_get(self):
             resp = self.client.get(self.test_class.get_list_url(),
                                    follow=True)
@@ -54,9 +53,7 @@ class GenericViewTests(object):
         return test_list_get
 
     def create_post(self):
-        """
-        Create view.
-        """
+        """Create view."""
         def test_create_post(self):
             count = self.test_class.objects.count()
             resp = self.client.post(self.test_class.get_create_url(),
@@ -66,15 +63,14 @@ class GenericViewTests(object):
         return test_create_post
 
     def update_post(self):
-        """
-        Update view, post.
-        """
+        """Update view, post."""
         def test_update_post(self):
             post_data = self.post_data()
             resp = self.client.post(self.test_obj.get_update_url(),
                                     post_data, follow=True)
             self.assertTrue(resp.status_code in (302, 200))
 
+            # Check that the attributes we posted updated the object.
             test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
             for k, v in post_data.items():
                 if k not in ['fqdn', 'label']:
@@ -87,9 +83,7 @@ class GenericViewTests(object):
         return test_update_post
 
     def delete_post(self):
-        """
-        Delete view.
-        """
+        """Delete view."""
         def test_delete_post(self):
             count = self.test_class.objects.count()
             resp = self.client.post(self.test_obj.get_delete_url(),
@@ -99,14 +93,35 @@ class GenericViewTests(object):
         return test_delete_post
 
     def detail_get(self):
-        """
-        Detail view.
-        """
+        """Detail view."""
         def test_detail_get(self):
             resp = self.client.get(self.test_obj.get_detail_url(),
                                    follow=True)
             self.assertEqual(resp.status_code, 200)
         return test_detail_get
+
+    def table_update_post(self):
+        """Table update view, post."""
+        def test_table_update_post(self):
+            post_data = self.post_data()
+            resp = self.client.post(self.test_obj.get_table_update_url(),
+                                    post_data, follow=True)
+            eq_(resp.status_code, 200)
+
+            # Check that the attributes we posted updated the object, if they
+            # were set to be editable.
+            editable_attrs = [md['name'] for md in
+                              self.test_obj.eg_metadata()['metadata']
+                              if md['editable']]
+            test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
+            for k, v in post_data.items():
+                if k in editable_attrs and k not in ['fqdn', 'label']:
+                    obj_val = getattr(test_obj, k)
+                    if hasattr(obj_val, 'id'):
+                        eq_(obj_val.id, v)
+                    else:
+                        eq_(str(obj_val), str(v))
+        return test_table_update_post
 
 
 def random_label():

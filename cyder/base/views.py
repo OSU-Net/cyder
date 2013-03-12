@@ -17,7 +17,6 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
 
-
 def home(request):
     return render_to_response('base/index.html', {
         'read_only': getattr(request, 'read_only', False),
@@ -133,6 +132,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
         return HttpResponse(json.dumps({'error': 'You do not have appropriate'
                                                  ' permissions.'}))
 
+    # DNS specific.
     qd = request.POST.copy()
     if 'fqdn' in qd:
         fqdn = qd.pop('fqdn')[0]
