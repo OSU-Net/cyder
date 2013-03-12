@@ -33,6 +33,13 @@ class Vlan(models.Model, ObjectUrlMixin):
         ]
         return data
 
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'number', 'datatype': 'string', 'editable': True},
+        ]}
+
     def compile_Q(self):
         """Compile a Django Q that will match any IP inside this vlan."""
         return networks_to_Q(self.network_set.all())

@@ -26,6 +26,13 @@ class Vrf(models.Model, ObjectUrlMixin):
         )
         return data
 
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'network', 'datatype': 'string', 'editable': False},
+        ]}
+
 
 class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)

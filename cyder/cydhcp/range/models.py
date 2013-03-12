@@ -101,6 +101,15 @@ class Range(models.Model, ObjectUrlMixin):
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
         return data
 
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'start_str', 'datatype': 'string', 'editable': False},
+            {'name': 'network', 'datatype': 'string', 'editable': False},
+            {'name': 'site', 'datatype': 'string', 'editable': False},
+            {'name': 'vlan', 'datatype': 'string', 'editable': False},
+        ]}
+
     def save(self, *args, **kwargs):
         self.clean()
         super(Range, self).save(*args, **kwargs)
