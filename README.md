@@ -31,7 +31,6 @@ binary.
 sudo apt-get install rubygems
 sudo gem install sass
 sed -i 's/SASS_BIN = \'.*\'/SASS_BIN = \'$(echo which sass)\'/' cyder/settings/local.py
-cd vendor/src/jingo-minify && git remote add ngokevin git@github.com:ngokevin/jingo-minify.git && git pull ngokevin master
 ```
 
 Install a PEP8 linter as a git pre-commit hook.
