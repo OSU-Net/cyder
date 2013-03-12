@@ -1,5 +1,6 @@
 import json
 
+from django.shortcuts import get_object_or_404,  render
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -7,6 +8,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.db.models import Q
 
+from cyder.base.utils import tablefy
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
@@ -133,3 +135,11 @@ def cylogin(request):
 def cylogout(request):
     """Not implemented. """
     return redirect('/')
+
+
+def UserDetailView(request, username):
+    user = User.objects.get(id=username)
+    users = [user]
+    user_table = tablefy(users, users=True)
+    return render(request, 'cyuser/user_detail.html',
+                  {'user': user, 'user_table': user_table})
