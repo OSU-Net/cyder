@@ -41,7 +41,7 @@ def get_klasses(record_type):
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
         'vrf': (Vrf, VrfForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
-    }.get(record_type, (None, None))
+    }.get(record_type, (None, None, None))
 
 
 def cydhcp_view(request, pk=None):

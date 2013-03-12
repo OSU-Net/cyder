@@ -6,6 +6,7 @@ from funfactory.monkeypatches import patch
 patch()
 
 from cyder.cydns.api.v1.api import v1_dns_api
+from cyder.core.views import core_index
 from cyder.core.cyuser import views as cyuser_views
 
 
@@ -13,18 +14,14 @@ from cyder.core.cyuser import views as cyuser_views
 # from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns(
-    '',
-    (r'^$', include('cyder.core.system.urls')),
-    (r'^system/', include('cyder.core.system.urls')),
-    (r'^admin/', include(admin.site.urls)),
-    (r'^dhcp/', include('cyder.cydhcp.urls')),
-    (r'^dns/', include('cyder.cydns.urls')),
-    (r'^ctnr/', include('cyder.core.ctnr.urls')),
-    (r'^user/', include('cyder.core.cyuser.urls')),
-    (r'^api/', include(v1_dns_api.urls)),
-    (r'^ctnr/', include('cyder.core.ctnr.urls')),
-    (r'^search/', include('cyder.search.urls')),
+urlpatterns = patterns('',
+    url(r'^$', core_index, name='core-index'),
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^core/', include('cyder.core.urls')),
+    url(r'^dhcp/', include('cyder.cydhcp.urls')),
+    url(r'^dns/', include('cyder.cydns.urls')),
+    url(r'^api/', include(v1_dns_api.urls)),
+    url(r'^search/', include('cyder.search.urls')),
 
     url(r'^accounts/login/$', 'django_cas.views.login', name='login'),
     url(r'^accounts/logout/$', 'django_cas.views.logout', name='logout'),

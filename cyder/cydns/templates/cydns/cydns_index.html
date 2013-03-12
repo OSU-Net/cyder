@@ -1,11 +1,7 @@
-{% extends "base/base.html" %}
+{% extends "cydns/cydns_base.html" %}
 
 {% block title %}
   DNS on {{ request.session.ctnr.name }}
-{% endblock %}
-
-{% block sidebar %}
-  {% include "cydns/includes/cydns_sidebar.html" %}
 {% endblock %}
 
 {% block content %}
