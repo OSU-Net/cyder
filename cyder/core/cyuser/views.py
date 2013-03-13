@@ -12,6 +12,7 @@ from cyder.base.utils import tablefy
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
+from cyder.base.constants import LEVELS
 
 
 def login_session(request, username):
@@ -55,8 +56,8 @@ def login_session(request, username):
         # Set ctnr list (to switch between).
         global_ctnr = CtnrUser.objects.get(user=request.user, ctnr=1)
         if global_ctnr:
-            request.session['ctnrs'] = (list(Ctnr.objects.filter(Q(id=1) \
-            | Q(id=2))) + list(Ctnr.objects.exclude(Q(id=1) \
+            request.session['ctnrs'] = (list(Ctnr.objects.filter(Q(id=1)
+            | Q(id=2))) + list(Ctnr.objects.exclude(Q(id=1)
             | Q(id=2)).order_by("name")))
 
     except CtnrUser.DoesNotExist:
@@ -139,7 +140,15 @@ def cylogout(request):
 
 def UserDetailView(request, username):
     user = User.objects.get(id=username)
-    users = [user]
-    user_table = tablefy(users, users=True)
+    user_table = tablefy([user], users=True)
+
+    ctnrs = list(Ctnr.objects.filter(users=user))
+    extra_cols = [{'header': 'Permission', 'sort_field': 'user'}]
+    extra_cols[0]['data'] = [
+            {'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level],
+             'url': ''} for ctnr in ctnrs]
+    ctnr_table = tablefy(ctnrs, extra_cols=extra_cols)
+
     return render(request, 'cyuser/user_detail.html',
-                  {'user': user, 'user_table': user_table})
+                  {'user': user, 'user_table': user_table,
+                  'ctnr_table': ctnr_table})
