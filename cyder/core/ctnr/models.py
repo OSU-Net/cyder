@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.range.models import Range
@@ -33,7 +34,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
         return data
 
 
-class CtnrUser(models.Model):
+class CtnrUser(models.Model, ObjectUrlMixin):
     user = models.ForeignKey(User)
     ctnr = models.ForeignKey(Ctnr)
     level = models.IntegerField()
@@ -43,4 +44,13 @@ class CtnrUser(models.Model):
         unique_together = ('ctnr', 'user')
 
     def get_detail_url(self):
-        return '/ctnr/%s/' % (self.ctnr.id)
+        return self.ctnr.get_detail_url()
+
+    def details(self):
+        data = super(CtnrUser, self).details()
+        data['data'] = (
+            ('Container', 'ctnr', self.ctnr),
+            ('User', 'user', self.user),
+            ('Level', 'level', LEVELS[self.level]),
+        )
+        return data

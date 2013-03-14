@@ -1,6 +1,6 @@
 import json
 
-from django.shortcuts import get_object_or_404,  render
+from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -12,7 +12,6 @@ from cyder.base.utils import tablefy
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
-from cyder.base.constants import LEVELS
 
 
 def login_session(request, username):
@@ -138,16 +137,10 @@ def cylogout(request):
     return redirect('/')
 
 
-def UserDetailView(request, username):
-    user = User.objects.get(id=username)
+def UserDetailView(request, pk):
+    user = User.objects.get(id=pk)
     user_table = tablefy([user], users=True)
-
-    ctnrs = list(Ctnr.objects.filter(users=user))
-    extra_cols = [{'header': 'Permission', 'sort_field': 'user'}]
-    extra_cols[0]['data'] = [
-            {'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level],
-             'url': ''} for ctnr in ctnrs]
-    ctnr_table = tablefy(ctnrs, extra_cols=extra_cols)
+    ctnr_table = tablefy(CtnrUser.objects.filter(id=pk))
 
     return render(request, 'cyuser/user_detail.html',
                   {'user': user, 'user_table': user_table,
