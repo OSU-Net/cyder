@@ -1,0 +1,41 @@
+[
+  {
+    "model": "ctnr.ctnr",
+    "pk": 9999,
+    "fields": {
+      "description": "Restrictive Ctnr",
+      "name": "restrictive"
+    }
+  },
+
+  {
+    "model": "auth.user",
+    "pk": 9999,
+    "fields": {
+        "username": "test_user",
+        "first_name": "test_user",
+        "last_name": "test_user",
+        "is_superuser": false,
+        "email": "test_user@foo.bar.com",
+        "password": "sha1$cKIenQ5GA8Q5$5be4265dcecc594e60f38bee0e45478cbdc02b3e"
+    }
+  },
+  {
+    "model": "cyuser.userprofile",
+    "pk": 9999,
+    "fields": {
+      "user": 9999,
+      "default_ctnr": 9999,
+      "phone_number": 1234567890 }
+  },
+
+  {
+    "model": "ctnr.ctnruser",
+    "pk": 9999,
+    "fields": {
+        "user": 9999,
+        "ctnr": 9999,
+        "level": 1
+    }
+  }
+]
