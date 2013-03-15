@@ -28,9 +28,7 @@ html, body {
 
 #footer {
     clear: both;
-    margin-top: -140px; /* negative value of footer height */
     height: 140px;
-    position: relative;
 }
 
 /*Opera Fix*/
