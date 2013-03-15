@@ -22,16 +22,11 @@ html, body {
 .main {
     display: block;
     overflow:auto;
-    padding-bottom: 650px;
-    min-height: 150%;
 }  /* must be same height as the footer */
 
 #footer {
-    clear: both;
-    position: relative;
-    margin-top: -140px; /* negative value of footer height */
-    height: 140px;
     clear:both;
+    height: 100px;
 }
 
 /*Opera Fix*/
