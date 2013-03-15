@@ -1,4 +1,4 @@
-{% extends "base/base.html" %}
+{% extends "core/core_base.html" %}
 {% from "base/tables.html" import render_table %}
 
 {% block title %} User  {{ user.username }} {% endblock %}
@@ -6,7 +6,7 @@
 
 {% block content %}
     {{ render_table(request, user_table, 'user-table') }}
-    <h1>  Ctnrs </h1>
+    <h3>Containers</h3>
     {{ render_table(request, ctnr_table, 'ctnr-table') }}
 {% endblock %}
 
