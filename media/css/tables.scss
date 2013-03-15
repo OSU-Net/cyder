@@ -1,8 +1,9 @@
 @import "globals.scss";
 
 table.table {
-    padding: 13px 0;
+    clear: both;
     margin-bottom: 13px;
+    padding: 13px 0;
     width: 100%;
     td, th {
         padding: 5px 0;
