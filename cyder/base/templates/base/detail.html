@@ -3,20 +3,20 @@
 {% block content %}
   <div>{{ object }}</div>
 
-  {% block action_bar %}
-    {% if object.get_update_url %}
-      <a class="btn btn-primary" href="{{ object.get_update_url() }}">Edit</a>
-    {% endif %}
+{% block action_bar %}
+  {% if object.get_update_url %}
+    <a class="btn btn-primary" href="{{ object.get_update_url() }}">Edit</a>
+  {% endif %}
 
-    {% block action_bar_extra %}
-    {% endblock %}
-
-    {% if object.get_delete_url %}
-      <a class="btn btn-danger" href="{{ object.get_delete_url() }}">Delete</a>
-    {% endif %}
+  {% block action_bar_extra %}
   {% endblock %}
 
-  {% from "base/tables.html" import render_table %}
+  {% if object.get_delete_url %}
+    <a class="btn btn-danger" href="{{ object.get_delete_url() }}">Delete</a>
+  {% endif %}
+{% endblock %}
+
+{% from "base/tables.html" import render_table %}
 
   <table class="table">
     <thead>

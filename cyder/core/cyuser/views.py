@@ -103,6 +103,7 @@ def become_user(request, username=None):
     if str(request.user) == username:
         request.session['become_user_stack'] = become_user_stack
 
+    messages.error(request, "You are now logged in as %s" % username)
     return redirect(referer)
 
 

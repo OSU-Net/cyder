@@ -2,6 +2,22 @@
 {% from "base/tables.html" import render_table %}
 
 {% block title %} User  {{ user.username }} {% endblock %}
+{% block header %} User {{ user.username }} {% endblock %}
+
+{% block action_bar %}
+  {% if request.user.is_superuser and request.user.username != user.username %}
+    <a class="btn btn-primary" href="{{ url('become-user',
+                                            username=user.username) }}">
+      Become User
+    </a>
+  {% else %}
+    {% if request.session.become_user_stack and request.user.username == user.username %}
+      <a class="btn btn-primary" href="{{ url('unbecome-user') }}">
+      Unbecome User
+      </a>
+    {% endif %}
+  {% endif %}
+{% endblock %}
 
 {% block content %}
     {{ render_table(request, user_table, 'user-table') }}
