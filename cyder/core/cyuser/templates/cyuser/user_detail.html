@@ -2,7 +2,6 @@
 {% from "base/tables.html" import render_table %}
 
 {% block title %} User  {{ user.username }} {% endblock %}
-{% block header %} User {{ user.username }} {% endblock %}
 
 {% block content %}
     {{ render_table(request, user_table, 'user-table') }}

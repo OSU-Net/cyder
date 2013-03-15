@@ -6,6 +6,6 @@ urlpatterns = patterns('cyder.core.cyuser.views',
     url(r'unbecome_user/', 'unbecome_user', name='unbecome-user'),
     url(r'(?P<username>[\w\d-]+)?/?become_user/', 'become_user',
         name='become-user'),
-   url(r'(?P<username>[\w\d-]+)?/$', 'UserDetailView',
+   url(r'(?P<pk>[\w\d-]+)?/$', 'UserDetailView',
        name='auth_user_profile-detail'),
 )
