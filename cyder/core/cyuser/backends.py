@@ -114,16 +114,18 @@ def has_perm(self, request, action, obj=None, obj_class=None):
         'ReverseNameserver': has_reverse_domain_record_perm,
 
         # DHCP.
-        'Subnet': has_subnet_perm,
         'Range': has_range_perm,
-        'Group': has_group_perm,
-        'Node': has_node_perm,
+        'Site': has_generic_dhcp_perm,
+        'Subnet': has_subnet_perm,
+        'System': has_system_perm,
+        'Vlan': has_generic_dhcp_perm,
+        'Workgroup': has_workgroup_perm,
 
         # Options.
-        'SubnetOption': has_dhcp_option_perm,
-        'ClassOption': has_dhcp_option_perm,
-        'PoolOption': has_dhcp_option_perm,
-        'GroupOption': has_dhcp_option_perm,
+        'SubnetOption': has_generic_dhcp_perm,
+        'ClassOption': has_generic_dhcp_perm,
+        'PoolOption': has_generic_dhcp_perm,
+        'GroupOption': has_generic_dhcp_perm,
 
         'StaticRegistration': has_static_registration_perm,
         'DynamicRegistration': has_dynamic_registration_perm,
@@ -226,7 +228,7 @@ def has_range_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_group_perm(user_level, obj, ctnr, action):
+def has_workgroup_perm(user_level, obj, ctnr, action):
     """Permissions for groups. Groups are assigned a subnet."""
     if obj and not obj.subnet in [ip_range.subnet for ip_range in
                                   ctnr.ranges.all()]:
@@ -240,8 +242,8 @@ def has_group_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_node_perm(user_level, obj, ctnr, action):
-    """Permissions for nodes. Nodes are assigned a ctnr."""
+def has_system_perm(user_level, obj, ctnr, action):
+    """Permissions for systems. Systems are assigned a ctnr."""
     if obj and obj.ctnr != ctnr:
         return False
 
@@ -253,10 +255,9 @@ def has_node_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_dhcp_option_perm(user_level, obj, ctnr, action):
+def has_generic_dhcp_perm(user_level, obj, ctnr, action):
     """
-    Permissions for dhcp-related options.
-    DHCP options are global like SOAs, related to subnets and ranges.
+    Generic DHCP perm where users can do anything and guests can only view.
     """
     return {
         'cyder_admin': True,
