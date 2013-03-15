@@ -56,6 +56,20 @@ input[type="text"], input[type="search"] {
     }
 }
 
+.messages {
+    background: $light-gray;
+    border-radius: 0 0 2px 2px;
+    float: right;
+    padding: 13px;
+    text-align: center;
+    li {
+        color: $black;
+        &.error {
+            color: $red;
+        }
+    }
+}
+
 .delete-sprite:after {
     background-image: url(../img/delete.png);
     background-position: -40px 0;
@@ -67,7 +81,7 @@ input[type="text"], input[type="search"] {
 
 a.btn {
     background: $blue;
-    border-radius: 5px;
+    border-radius: 2px;
     bottom: 0;
     color: $white;
     font-weight: normal;
@@ -334,7 +348,7 @@ div#header {
       *zoom: 1;
       margin-left: 0;
       margin-bottom: 0;
-      border-radius: 3px;
+      border-radius: 2px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
     li {
@@ -376,10 +390,10 @@ div#header {
     li {
       &:first-child a {
         border-left-width: 1px;
-        border-radius: 3px 0 0 3px;
+        border-radius: 2px 0 0 2px;
       }
       &:last-child a {
-        border-radius: 0 3px 3px 0;
+        border-radius: 0 2px 2px 0;
       }
     }
 }

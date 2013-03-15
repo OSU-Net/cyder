@@ -17,6 +17,7 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
 
+
 def home(request):
     return render_to_response('base/index.html', {
         'read_only': getattr(request, 'read_only', False),
@@ -65,13 +66,17 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
 
 
 def cy_delete(request, pk, get_klasses_fn):
-    """Delete view."""
-    # DELETE. DELETE. DELETE.
+    """DELETE. DELETE. DELETE."""
     record_type = request.path.split('/')[2]
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
     obj = get_object_or_404(Klass, pk=pk)
-    obj.delete()
-    return redirect(obj.get_list_url())
+
+    try:
+        obj.delete()
+    except ValidationError as e:
+        messages.error(request, ', '.join(e.messages))
+
+    return redirect(request.META.get('HTTP_REFERER', obj.get_list_url()))
 
 
 def get_update_form(request, get_klasses_fn):

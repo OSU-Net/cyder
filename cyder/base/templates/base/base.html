@@ -50,19 +50,23 @@
             </select>
           </form>
         </span>
-        {% if messages %}
-          <ul class="messages">
-            {% for message in messages %}
-              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
+
         <span id="search">
           <form action="{{ url('search') }}" method="get">
             <input type="search" name="search" value="Search..."></input>
           </form>
         </span>
       </div>
+    </div>
+
+    <div class="container">
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
     </div>
 
     <div class="main wrap container">
