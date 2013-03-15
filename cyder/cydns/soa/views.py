@@ -46,14 +46,13 @@ class SOADetailView(SOAView, CydnsDetailView):
         if not soa:
             return soa
 
-        dom_objects = soa.domain_set.all().order_by('master_domain'
-                                                    ).select_related()
-        dom_headers, dom_matrix, dom_urls = tablefy(dom_objects, views=True)
-
         context = dict({
-            "dom_headers": dom_headers,
-            "dom_matrix": dom_matrix,
-            "dom_urls": dom_urls,
+            'domain_table': tablefy(soa.domain_set.filter(is_reverse=False)
+                                    .order_by('master_domain')
+                                    .select_related()),
+            'rdomain_table': tablefy(soa.domain_set.filter(is_reverse=True)
+                                     .order_by('master_domain')
+                                     .select_related())
         }.items() + context.items())
 
         return context
