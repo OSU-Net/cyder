@@ -28,7 +28,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
     def details(self):
         data = super(Ctnr, self).details()
         data['data'] = (
-            ('Name', 'name', self.name),
+            ('Name', 'name', self),
             ('Description', 'description', self.description),
         )
         return data
