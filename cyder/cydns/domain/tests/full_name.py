@@ -10,6 +10,8 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
 
+from cyder.cydns.tests.utils import create_fake_zone
+
 
 class FullNameTests(TestCase):
 
@@ -33,8 +35,10 @@ class FullNameTests(TestCase):
         self.assertEqual(
             the_domain.master_domain.master_domain.name, "z.foo.com")
         self.assertTrue(the_domain.master_domain.master_domain.purgeable)
-        self.assertEqual(the_domain.master_domain.master_domain.master_domain.name,
-                         "foo.com")
+        self.assertEqual(
+            the_domain.master_domain.master_domain.master_domain.name,
+            "foo.com"
+        )
         self.assertFalse(
             the_domain.master_domain.master_domain.master_domain.purgeable)
 
@@ -74,8 +78,10 @@ class FullNameTests(TestCase):
         self.assertEqual(
             the_domain.master_domain.master_domain.name, "z.foo.edu")
         self.assertTrue(the_domain.master_domain.master_domain.purgeable)
-        self.assertEqual(the_domain.master_domain.master_domain.master_domain.name,
-                         "foo.edu")
+        self.assertEqual(
+            the_domain.master_domain.master_domain.master_domain.name,
+            "foo.edu"
+        )
         self.assertFalse(
             the_domain.master_domain.master_domain.master_domain.purgeable)
 
@@ -112,14 +118,7 @@ class FullNameTests(TestCase):
     def test_basic_add_remove3(self):
         # MAke sure that if a domain is set to not purgeable the prune stops at
         # that domain when a record exists in a domain
-        c = Domain(name='foo')
-        c.save()
-        self.assertFalse(c.purgeable)
-        f_c = Domain(name='foo.foo')
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         description="foo.foo")
-        f_c.soa = s
-        f_c.save()
+        f_c = create_fake_zone("foo.foo", suffix="")
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo"
         label, the_domain = ensure_label_domain(fqdn)
@@ -141,14 +140,7 @@ class FullNameTests(TestCase):
     def test_basic_add_remove4(self):
         # Move a record down the tree testing prune's ability to not delete
         # stuff.
-        c = Domain(name='goo')
-        c.save()
-        self.assertFalse(c.purgeable)
-        f_c = Domain(name='foo.goo')
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         description="foo.goo")
-        f_c.soa = s
-        f_c.save()
+        f_c = create_fake_zone("foo.goo", suffix="")
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.goo"
         label, the_domain = ensure_label_domain(fqdn)
@@ -190,14 +182,7 @@ class FullNameTests(TestCase):
 
     def test_basic_add_remove5(self):
         # Make sure all record types block
-        c = Domain(name='foo22')
-        c.save()
-        self.assertFalse(c.purgeable)
-        f_c = Domain(name='foo.foo22')
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         description="foo.foo22")
-        f_c.soa = s
-        f_c.save()
+        f_c = create_fake_zone("foo.foo22", suffix="")
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo22"
         label, the_domain = ensure_label_domain(fqdn)
@@ -236,13 +221,7 @@ class FullNameTests(TestCase):
 
     def test_basic_add_remove6(self):
         # Make sure CNAME record block
-        c = Domain(name='foo1')
-        c.save()
-        self.assertFalse(c.purgeable)
-        f_c = Domain(name='foo.foo1')
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         description="foo.foo1")
-        f_c.soa = s
+        f_c = create_fake_zone("foo.foo1", suffix="")
         f_c.save()
         self.assertFalse(f_c.purgeable)
         fqdn = "cname.x.y.z.foo.foo1"
@@ -252,3 +231,53 @@ class FullNameTests(TestCase):
         cname.save()
         self.assertFalse(prune_tree(the_domain))
         cname.delete()
+
+    def test_basic_add_remove7(self):
+        # try a star record
+        f_c = create_fake_zone("foo.foo2", suffix="")
+        f_c.save()
+        self.assertFalse(f_c.purgeable)
+        fqdn = "*.x.y.z.foo.foo2"
+        label, the_domain = ensure_label_domain(fqdn)
+        self.assertEqual('*', label)
+
+        cname = CNAME(label=label, domain=the_domain, target="foo")
+        cname.save()
+        self.assertFalse(prune_tree(the_domain))
+        cname.delete()
+
+    def test_basic_add_remove8(self):
+        # Make sure a record's label is changed to '' when a domain with the
+        # same name as it's fqdn is created.
+        f_c = create_fake_zone("foo.foo3", suffix="")
+        f_c.save()
+        self.assertFalse(f_c.purgeable)
+        fqdn = "www.x.y.z.foo.foo3"
+        label, the_domain = ensure_label_domain(fqdn)
+        self.assertEqual('www', label)
+        self.assertEqual('x.y.z.foo.foo3', the_domain.name)
+        self.assertTrue(the_domain.pk)
+
+        cname = CNAME(label=label, domain=the_domain, target="foo")
+        cname.save()
+        fqdn = "*.www.x.y.z.foo.foo3"
+        label2, the_domain2 = ensure_label_domain(fqdn)
+        cname = CNAME.objects.get(fqdn=cname.fqdn)
+        self.assertEqual('', cname.label)
+        self.assertEqual('www.x.y.z.foo.foo3', cname.domain.name)
+        self.assertEqual('*', label2)
+        self.assertEqual('www.x.y.z.foo.foo3', the_domain2.name)
+
+    def test_basic_add_remove9(self):
+        # Make sure all record types block
+        f_c = create_fake_zone("foo.foo22", suffix="")
+        self.assertFalse(f_c.purgeable)
+        fqdn = "y.z.foo.foo22"
+        label, the_domain = ensure_label_domain(fqdn)
+        addr = AddressRecord(label=label, domain=the_domain,
+                             ip_type='4', ip_str="10.2.3.4")
+        addr.save()
+        self.assertFalse(prune_tree(the_domain))
+
+        f_c = create_fake_zone("y.z.foo.foo22", suffix="")
+        self.assertFalse(f_c.purgeable)

@@ -1,9 +1,8 @@
-import os
 import time
 from gettext import gettext as _
 from string import Template
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q, F
 from django.db import models
@@ -12,6 +11,7 @@ from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import validate_name, validate_ttl
+from cyder.core.task.models import Task
 
 # import reversion
 
@@ -68,6 +68,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     description = models.CharField(max_length=200, null=True, blank=True)
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
+    is_signed = models.BooleanField(default=False)
     search_fields = ('primary', 'contact', 'description')
     template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
@@ -108,7 +109,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         try:
             return self.domain_set.get(~Q(master_domain__soa=F('soa')),
                     soa__isnull=False)
-        except SOA.DoesNotExist:
+        except ObjectDoesNotExist:
             return None
 
     def details(self):
@@ -141,35 +142,54 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         return reverse('build-debug', args=[self.pk])
 
     def delete(self, *args, **kwargs):
+        if self.domain_set.exists():
+            raise ValidationError(
+                "Domains exist in this SOA's zone. Delete "
+                "those domains or remove them from this zone before "
+                "deleting this SOA.")
         super(SOA, self).delete(*args, **kwargs)
 
+    def has_record_set(self, view=None, exclude_ns=False):
+        for domain in self.domain_set.all():
+            if domain.has_record_set(view=view, exclude_ns=exclude_ns):
+                return True
+        return False
+
+    def schedule_rebuild(self, commit=True):
+        Task.schedule_zone_rebuild(self)
+        self.dirty = True
+        if commit:
+            self.save()
+
     def save(self, *args, **kwargs):
-        # Look a the value of this object in the db. Did anything change? If
-        # yes, mark yourself as 'dirty'.
         self.full_clean()
-        if self.pk:
+        if not self.pk:
+            new = True
+            self.dirty = True
+        elif self.dirty:
+            new = False
+        else:
+            new = False
             db_self = SOA.objects.get(pk=self.pk)
-            fields = ['primary', 'contact', 'expire', 'retry',
-                      'refresh', 'description']
-            # Leave out serial for obvious reasons
+            fields = [
+                'primary', 'contact', 'expire', 'retry', 'refresh',
+                'description'
+            ]
+            # Leave out serial and dirty so rebuilds don't cause a never ending
+            # build cycle
             for field in fields:
                 if getattr(db_self, field) != getattr(self, field):
-                    self.dirty = True
+                    self.schedule_rebuild(commit=False)
+
         super(SOA, self).save(*args, **kwargs)
 
+        if new:
+            # Need to call this after save because new objects won't have a pk
+            self.schedule_rebuild(commit=False)
 
-# reversion.(SOA)
 
 class SOAKeyValue(KeyValue):
-    soa = models.ForeignKey(SOA, null=False)
-
-    def _aa_dir_path(self):
-        """Filepath - Where should the build scripts put the zone file for this
-        zone?"""
-        if not os.access(self.value, os.R_OK):
-            raise ValidationError("Couldn't find {0} on the system running "
-                                  "this code. Please create this path.".
-                                  format(self.value))
+    obj = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
 
     def _aa_disabled(self):
         """
@@ -185,8 +205,8 @@ class SOAKeyValue(KeyValue):
         elif self.value.lower() in false_values:
             self.value = "False"
         else:
-            raise ValidationError("Disabled should be set to either {0} OR "
-                                  "{1}".format(", ".join(true_values),
-                                               ", ".join(false_values)))
-
-# reversion.(SOAKeyValue)
+            raise ValidationError(
+                "Disabled should be set to either {0} OR {1}".format(
+                    ", ".join(true_values), ", ".join(false_values)
+                )
+            )

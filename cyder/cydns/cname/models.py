@@ -2,18 +2,16 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 import cyder
-import cydns
-from cyder.cydns.models import CydnsRecord
-from cyder.cydns.validation import validate_name, find_root_domain
+from cyder.cydns.models import CydnsRecord, LabelDomainMixin
+from cyder.cydns.validation import validate_name
 from cyder.cydns.search_utils import smart_fqdn_exists
-
-# import reversion
 
 from gettext import gettext as _
 
 
-class CNAME(CydnsRecord):
-    """CNAMES can't point to an any other records. Said another way,
+class CNAME(CydnsRecord, LabelDomainMixin):
+    """
+    CNAMES can't point to an any other records. Said another way,
     CNAMES can't be at the samle level as any other record. This means
     that when you are creating a CNAME every other record type must be
     checked to make sure that the name about to be taken by the CNAME
@@ -29,6 +27,7 @@ class CNAME(CydnsRecord):
                               help_text="CNAME Target")
     template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {target:$rhs_just}.")
+
     search_fields = ('fqdn', 'target')
 
     class Meta:
@@ -37,10 +36,6 @@ class CNAME(CydnsRecord):
 
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)
-
-    @property
-    def rdtype(self):
-        return 'CNAME'
 
     def details(self):
         """For tables."""
@@ -58,6 +53,10 @@ class CNAME(CydnsRecord):
             {'name': 'target', 'datatype': 'string', 'editable': True},
         ]}
 
+    @property
+    def rdtype(self):
+        return 'CNAME'
+
     @classmethod
     def get_api_fields(cls):
         return super(CNAME, cls).get_api_fields() + ['target']
@@ -68,14 +67,14 @@ class CNAME(CydnsRecord):
 
     def clean(self, *args, **kwargs):
         super(CNAME, self).clean(*args, **kwargs)
-        super(CNAME, self).check_for_delegation()
         if self.fqdn == self.target:
             raise ValidationError("CNAME loop detected.")
         self.check_SOA_condition()
         self.existing_node_check()
 
     def check_SOA_condition(self):
-        """We need to check if the domain is the root domain in a zone.
+        """
+        We need to check if the domain is the root domain in a zone.
         If the domain is the root domain, it will have an soa, but the
         master domain will have no soa (or it will have a a different
         soa).
@@ -84,16 +83,20 @@ class CNAME(CydnsRecord):
             self.domain
         except ObjectDoesNotExist:
             return  # Validation will fail eventually
-        root_domain = find_root_domain(self.domain.soa)
+        if not self.domain.soa:
+            return
+        root_domain = self.domain.soa.root_domain
         if root_domain is None:
             return
         if self.fqdn == root_domain.name:
-            raise ValidationError("ou cannot create a CNAME that points to "
-                                  "the root of a zone.")
-        return
+            raise ValidationError(
+                "You cannot create a CNAME who's left hand side is at the "
+                "same level as an SOA"
+            )
 
     def existing_node_check(self):
-        """Make sure no other nodes exist at the level of this CNAME.
+        """
+        Make sure no other nodes exist at the level of this CNAME.
 
             "If a CNAME RR is present at a node, no other data should be
             present; this ensures that the data for
@@ -124,19 +127,21 @@ class CNAME(CydnsRecord):
         qset = smart_fqdn_exists(self.fqdn, cn=False)
         if qset:
             objects = qset.all()
-            raise ValidationError("Objects with this name already exist: {0}".
-                                  format(objects))
-        MX = cydns.mx.models.MX
+            raise ValidationError(
+                "Objects with this name already exist: {0}".format(objects)
+            )
+        MX = cyder.cydns.mx.models.MX
         if MX.objects.filter(server=self.fqdn):
-            raise ValidationError("RFC 2181 says you shouldn't point MX "
-                                  "records at CNAMEs and an MX points to"
-                                  " this name!")
-        PTR = cyder.cydns.ptr.models.PTR
-        if PTR.objects.filter(name=self.fqdn):
-            raise ValidationError("RFC 1034 says you shouldn't point PTR "
-                                  "records at CNAMEs, and a PTR points to"
-                                  " this name!")
+            raise ValidationError(
+                "RFC 2181 says you shouldn't point MX records at CNAMEs and "
+                "an MX points to this name!"
+            )
+        # There are preexisting records that break this rule. We can't support
+        # this requirement until those records are fixed
+        # PTR = cydns.ptr.models.PTR
+        # if PTR.objects.filter(name=self.fqdn):
+        #    raise ValidationError("RFC 1034 says you shouldn't point PTR "
+        #                          "records at CNAMEs, and a PTR points to"
+        #                          " this name!")
 
         # Should SRV's not be allowed to point to a CNAME? /me looks for an RFC
-
-# reversion.(CNAME)

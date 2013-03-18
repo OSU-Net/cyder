@@ -17,10 +17,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.ip.utils import ip_to_dns_form
-from cyder.cydns.view.models import View
 from cyder.cydns.domain.models import Domain
-
-# import reversion
 
 
 class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
@@ -84,46 +81,54 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     """
     id = models.AutoField(primary_key=True)
     mac = models.CharField(max_length=17, validators=[validate_mac],
-                           help_text="Mac address in format XX:XX:XX:XX:XX:XX")
+                           help_text='Mac address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
-                                       related_name="staticintrdomain_set")
+                                       related_name='staticintrdomain_set')
     system = models.ForeignKey(
         System, null=True, blank=True,
-        help_text="System to associate the interface with")
+        help_text='System to associate the interface with')
 
     vrf = models.ForeignKey(Vrf, null=True, blank=True)
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
-        default=True, help_text="Enable dhcp for this interface?")
+        default=True, help_text='Enable dhcp for this interface?')
     dns_enabled = models.BooleanField(
-        default=True, help_text="Enable dns for this interface?")
+        default=True, help_text='Enable dns for this interface?')
 
     attrs = None
-    search_fields = ("mac", "ip_str", "fqdn")
+    search_fields = ('mac', 'ip_str', 'fqdn')
+
+    class Meta:
+        db_table = 'static_interface'
+        unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
+
+    def __repr__(self):
+        return '<StaticInterface: {0}>'.format(str(self))
+
+    def __str__(self):
+        #return 'IP:{0} Full Name:{1} Mac:{2}'.format(self.ip_str,
+        #        self.fqdn, self.mac)
+        return self.fqdn
 
     def update_attrs(self):
-        self.attrs = AuxAttr(StaticIntrKeyValue, self, "intr")
+        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'intr')
 
     def details(self):
         data = super(StaticInterface, self).details()
         data['data'] = (
-            ("Name", 'fqdn', self),
-            ("IP", 'ip_str', str(self.ip_str)),
-            ("MAC", 'mac', self.mac),
-            ("Vrf", 'vrf', self.vrf),
-            ("Workgroup", 'workgroup', self.workgroup),
-            ("DHCP Enabled", "dhcp_enabled",
-                "True" if self.dhcp_enabled else "False"),
-            ("DNS Enabled", "dns_enabled",
-                "True" if self.dns_enabled else "False"),
-            ("DNS Type", '', "A/PTR"),
+            ('Name', 'fqdn', self),
+            ('IP', 'ip_str', str(self.ip_str)),
+            ('MAC', 'mac', self.mac),
+            ('Vrf', 'vrf', self.vrf),
+            ('Workgroup', 'workgroup', self.workgroup),
+            ('DHCP Enabled', 'dhcp_enabled',
+                'True' if self.dhcp_enabled else 'False'),
+            ('DNS Enabled', 'dns_enabled',
+                'True' if self.dns_enabled else 'False'),
+            ('DNS Type', '', 'A/PTR'),
         )
         return data
-
-    class Meta:
-        db_table = "static_interface"
-        unique_together = ("ip_upper", "ip_lower", "label", "domain", "mac")
 
     @classmethod
     def get_api_fields(cls):
@@ -144,25 +149,24 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         except AttributeError:
             pass
         if itype == '' or primary == '':
-            return "None"
+            return 'None'
         elif alias == '':
-            return "{0}{1}".format(itype, primary)
+            return '{0}{1}'.format(itype, primary)
         else:
-            return "{0}{1}.{2}".format(itype, primary, alias)
-
+            return '{0}{1}.{2}'.format(itype, primary, alias)
 
     def build_host(self):
-        join_args = lambda x: "\n".join(map(lambda y: "\t\t{0};".format(y)))
-        build_str = "\thost {0} {{\n".format(self.fqdn)
-        build_str += "\t\thardware ethernet {0};\n".format(self.mac)
-        build_str += "\t\tfixed-address {0};\n".format(self.ip_str)
+        join_args = lambda x: '\n'.join(map(lambda y: '\t\t{0};'.format(y)))
+        build_str = '\thost {0} {{\n'.format(self.fqdn)
+        build_str += '\t\thardware ethernet {0};\n'.format(self.mac)
+        build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
         options = self.static_intr_key_value_set.filter(is_option=True)
         statements = self.statc_intr_key_value_set.filter(is_statement=True)
-        build_str += "\t\t# Host Options\n"
+        build_str += '\t\t# Host Options\n'
         build_str += join_args(options)
-        build_str += "\t\t# Host Statements\n"
+        build_str += '\t\t# Host Statements\n'
         build_str += join_args(statements)
-        build_str += "\t}\n\n"
+        build_str += '\t}\n\n'
         return build_str
 
 
@@ -172,34 +176,27 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
 
     def clean(self, *args, **kwargs):
-        #if not isinstance(self.mac, basestring):
-        #    raise ValidationError("Mac Address not of valid type.")
-        #self.mac = self.mac.lower()
+        self.mac = self.mac.lower()
+        if not self.system:
+            raise ValidationError(
+                "An interface means nothing without it's system."
+            )
+
         from cyder.cydns.ptr.models import PTR
 
-        if not self.system:
-            raise ValidationError("An interface means nothing without it's "
-                                  "system.")
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
-            raise ValidationError("A PTR already uses this Name and IP")
-        if AddressRecord.objects.filter(
-                ip_str=self.ip_str, fqdn=self.fqdn).exists():
-            raise ValidationError("An A record already uses this Name and IP")
+            raise ValidationError('A PTR already uses this Name and IP')
+        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
+                                        ).exists():
+            raise ValidationError('An A record already uses this Name and IP')
 
-        if kwargs.pop("validate_glue", True):
+        if kwargs.pop('validate_glue', True):
             self.check_glue_status()
 
+        self.update_reverse_domain()
+        self.check_no_ns_soa_condition(self.reverse_domain)
         super(StaticInterface, self).clean(validate_glue=False,
-                                           update_reverse_domain=True,
                                            ignore_interface=True)
-
-        if self.pk and self.ip_str.startswith("10."):
-            p = View.objects.filter(name="private")
-            if p:
-                self.views.add(p[0])
-                super(StaticInterface, self).clean(validate_glue=False,
-                                                   update_reverse_domain=True,
-                                                   ignore_interface=True)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
@@ -236,30 +233,22 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         return super(StaticInterface, self).bind_render_record(pk=pk, **kwargs)
 
     def obj_type(self):
-        return "A/PTR"
+        return 'A/PTR'
 
     def delete(self, *args, **kwargs):
-        if kwargs.pop("validate_glue", True):
+        if kwargs.pop('validate_glue', True):
             if self.intrnameserver_set.exists():
                 raise ValidationError("Cannot delete the record {0}. "
                                       "It is a glue record.".format(
                                       self.obj_type()))
-        check_cname = kwargs.pop("check_cname", True)
+        check_cname = kwargs.pop('check_cname', True)
         super(StaticInterface, self).delete(validate_glue=False,
                                             check_cname=check_cname)
-
-    def __repr__(self):
-        return "<StaticInterface: {0}>".format(str(self))
-
-    def __str__(self):
-        #return "IP:{0} Full Name:{1} Mac:{2}".format(self.ip_str,
-        #        self.fqdn, self.mac)
-        return self.fqdn
 
 
 class StaticIntrKeyValue(CommonOption):
     intr = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
-        db_table = "static_intr_key_value"
-        unique_together = ("key", "value", "intr")
+        db_table = 'static_intr_key_value'
+        unique_together = ('key', 'value', 'intr')

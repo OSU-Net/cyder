@@ -2,15 +2,16 @@ from gettext import gettext as _
 
 from django.db import models
 
-from cyder.cydns.models import CydnsRecord
+from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 
 # import reversion
 
 
-class TXT(CydnsRecord):
+class TXT(CydnsRecord, LabelDomainMixin):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
+
     id = models.AutoField(primary_key=True)
     txt_data = models.TextField(help_text="The text data for this record.")
 
@@ -20,18 +21,12 @@ class TXT(CydnsRecord):
                  "{rdtype:$rdtype_just} \"{txt_data:$rhs_just}\"")
 
     class Meta:
-        db_table = "txt"
+        db_table = 'txt'
         # unique_together = ("domain", "label", "txt_data")
         # TODO
         # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
         # "txt_data" used in key specification without a key length")
         # Fix that ^
-
-    def __str__(self):
-        return "{0} TXT {1}".format(self.fqdn, self.txt_data)
-
-    def __repr__(self):
-        return "<TXT {0}>".format(self)
 
     def details(self):
         """For tables."""
@@ -57,15 +52,3 @@ class TXT(CydnsRecord):
     @property
     def rdtype(self):
         return 'TXT'
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super(TXT, self).save(*args, **kwargs)
-
-    def clean(self):
-        super(TXT, self).clean()
-        super(TXT, self).check_for_delegation()
-        super(TXT, self).check_for_cname()
-
-
-# reversion.(TXT)

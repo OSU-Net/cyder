@@ -4,21 +4,17 @@ from gettext import gettext as _
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
-from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.validation import validate_label, validate_name
 from cyder.cydns.view.models import View
-from cyder.cydns.validation import validate_ttl
-from cyder.cydns.models import check_for_cname
-from cyder.cydns.soa.utils import update_soa
-
-# import reversion
+from cyder.cydns.models import CydnsRecord
 
 
-class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
-    """Name server for forward domains::
+class Nameserver(CydnsRecord):
+    """
+    Name server for forward domains::
 
         >>> Nameserver(domain = domain, server = server)
 
@@ -36,19 +32,15 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
     id = models.AutoField(primary_key=True)
     domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
                                "record is for.")
-    server = models.CharField(
-        max_length=255, validators=[validate_name],
-        help_text="The name of the server this records points to.")
-    ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
-                                      validators=[validate_ttl])
-    # 'If nameserver lies within domain, should have corresponding A record.'
+    server = models.CharField(max_length=255, validators=[validate_name],
+                              help_text="The name of the server this records "
+                              "points to.")
+    # "If the name server does lie within the domain it should have a
+    # corresponding A record."
     addr_glue = models.ForeignKey(AddressRecord, null=True, blank=True,
-                                  related_name='nameserver_set')
+                                  related_name="nameserver_set")
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
-                                  related_name='intrnameserver_set')
-    views = models.ManyToManyField(View, blank=True)
-    description = models.CharField(max_length=1000, null=True, blank=True,
-                                   help_text="A description of this record.")
+                                  related_name="intrnameserver_set")
 
     template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {server:$rhs_just}.")
@@ -56,8 +48,11 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
     search_fields = ("server", "domain__name")
 
     class Meta:
-        db_table = 'nameserver'
-        unique_together = ('domain', 'server')
+        db_table = "nameserver"
+        unique_together = ("domain", "server")
+
+    def __str__(self):
+        return self.bind_render_record()
 
     @classmethod
     def get_api_fields(cls):
@@ -70,15 +65,10 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
     def bind_render_record(self, pk=False, **kwargs):
         # We need to override this because fqdn is actually self.domain.name
         template = Template(self.template).substitute(**self.justs)
-        return template.format(rdtype=self.rdtype, rdclass='IN',
-                               bind_name=self.domain.name + '.',
-                               **self.__dict__)
-
-    def __repr__(self):
-        return "<Forward '{0}'>".format(str(self))
-
-    def __str__(self):
-        return '{0} {1} {2}'.format(self.domain.name, 'NS', self.server)
+        return template.format(
+            rdtype=self.rdtype, rdclass='IN', bind_name=self.domain.name + '.',
+            **self.__dict__
+        )
 
     def details(self):
         """For tables."""
@@ -98,28 +88,7 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
             {'name': 'glue', 'datatype': 'string', 'editable': True},
         ]}
 
-    def delete(self, *args, **kwargs):
-        from cyder.cydns.utils import prune_tree
-        objs_domain = self.domain
-        super(Nameserver, self).delete(*args, **kwargs)
-        prune_tree(objs_domain)
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        update_soa(self)
-        if self.pk:
-            # We need to get the domain from the db. If it's not our current
-            # domain, call prune_tree on the domain in the db later.
-            db_domain = self.__class__.objects.get(pk=self.pk).domain
-            if self.domain == db_domain:
-                db_domain = None
-        else:
-            db_domain = None
-        super(Nameserver, self).save(*args, **kwargs)
-        if db_domain:
-            from cyder.cydns.utils import prune_tree
-            prune_tree(db_domain)
-
+    # TODO, make this a property
     def get_glue(self):
         if self.addr_glue:
             return self.addr_glue
@@ -139,9 +108,9 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
             self.addr_glue = None
             self.intr_glue = None
         else:
-            raise ValueError('Cannot assing {0}: Nameserver.glue must be of '
-                             'either type AddressRecord or type '
-                             'StaticInterface.'.format(glue))
+            raise ValueError("Cannot assing {0}: Nameserver.glue must be of "
+                             "either type AddressRecord or type "
+                             "StaticInterface.".format(glue))
 
     def del_glue(self):
         if self.addr_glue:
@@ -153,10 +122,15 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
 
     glue = property(get_glue, set_glue, del_glue, "The Glue property.")
 
-    def clean(self):
-        check_for_cname(self)
+    def delete(self, *args, **kwargs):
+        self.check_no_ns_soa_condition(self.domain)
+        super(Nameserver, self).delete(*args, **kwargs)
 
-        if not self._needs_glue():
+    def clean(self):
+        # We are a CydnsRecord, our clean method is called during save()!
+        self.check_for_cname()
+
+        if not self.needs_glue():
             self.glue = None
         else:
             # Try to find any glue record. It will be the first elligible
@@ -179,14 +153,44 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
                     raise ValidationError(
                         "This NS needs a glue record. Create a glue "
                         "record for the server before creating "
-                        "the NS record.")
+                        "the NS record."
+                    )
                 else:
                     if addr_glue:
                         self.glue = addr_glue[0]
                     else:
                         self.glue = intr_glue[0]
 
-    def _needs_glue(self):
+    def clean_views(self, views):
+        # Forms will call this function with the set of views it is about to
+        # set on this object. Make sure we aren't serving as the NS for a view
+        # that we are about to remove.
+        removed_views = set(View.objects.all()) - set(views)
+        for view in removed_views:
+            if (self.domain.soa and
+                self.domain.soa.root_domain == self.domain and
+                self.domain.nameserver_set.filter(views=view).count() == 1 and
+                # We are it!
+                    self.domain.soa.has_record_set(exclude_ns=True,
+                                                   view=view)):
+                raise ValidationError(
+                    "Other records in this nameserver's zone are "
+                    "relying on it's existance in the {0} view. You can't "
+                    "remove it's memebership of the {0} view.".format(view)
+                )
+
+    def check_no_ns_soa_condition(self, domain):
+        if (domain.soa and
+            domain.soa.root_domain == domain and
+            domain.nameserver_set.count() == 1 and  # We are it!
+                domain.soa.has_record_set(exclude_ns=True)):
+            raise ValidationError(
+                "Other records in this nameserver's zone are "
+                "relying on it's existance as it is the only nameserver "
+                "at the root of the zone."
+            )
+
+    def needs_glue(self):
         # Replace the domain portion of the server with "".
         # if domain == foo.com and server == ns1.foo.com.
         #       ns1.foo.com --> ns1
@@ -203,5 +207,3 @@ class Nameserver(models.Model, ObjectUrlMixin, DisplayMixin):
             # It's not a valid label
             return False
         return True
-
-# reversion.(Nameserver)

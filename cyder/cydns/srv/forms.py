@@ -1,17 +1,17 @@
 from django import forms
-from django.forms import ModelForm
 
+from cyder.cydns.forms import DNSForm
 from cyder.cydns.srv.models import SRV
 
 
-class SRVForm(ModelForm):
+class SRVForm(DNSForm):
     class Meta:
         model = SRV
         exclude = ('fqdn',)
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 
-class FQDNSRVForm(ModelForm):
+class FQDNSRVForm(DNSForm):
     class Meta:
         model = SRV
         exclude = ('label', 'domain')

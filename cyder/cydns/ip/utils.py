@@ -3,18 +3,20 @@ from django.core.exceptions import ValidationError
 from cyder.cydns.validation import validate_ip_type
 
 
-def ip_to_dns_form(ip, ip_type='4', uppercase=False):
-    """Convert an ip to dns zone form. The ip is assumed to be in valid
-    format."""
+def ip_to_dns_form(ip, uppercase=False):
+    """
+    Convert an ip to dns zone form. The ip is assumed to be in valid
+    format.
+    """
     if not isinstance(ip, basestring):
         raise ValidationError("Ip is not of type string.")
-    validate_ip_type(ip_type)
-    if ip_type == '4':
-        octets = ip.split('.')
-        name = '.in-addr.arpa'
-    if ip_type == '6':
+    if ip.find(':') > -1:
         octets = nibbilize(ip).split('.')
         name = '.ip6.arpa'
+    else:
+        octets = ip.split('.')
+        name = '.in-addr.arpa'
+
     if uppercase:
         name = name.uppercase
 

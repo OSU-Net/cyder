@@ -1,6 +1,4 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
-
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.domain.models import Domain
 
@@ -18,7 +16,7 @@ class SSHFPTests(TestCase):
         sshfp.save()
         self.assertTrue(sshfp.details())
         rsshfp = SSHFP.objects.filter(**data)
-        self.assertTrue(len(rsshfp) == 1)
+        self.assertEqual(len(rsshfp), 1)
         return sshfp
 
     def do_remove(self, data):
@@ -29,33 +27,33 @@ class SSHFPTests(TestCase):
 
     def test_add_remove_sshfp(self):
         label = "asdf"
-        data = "asdf"
+        key = "7d97e98f8af710c7e7fe703abc8f639e0ee507c4"
         s_type = 1
         a_type = 1
-        data = {'label': label, 'key': data, 'domain': self.o_e,
+        data = {'label': label, 'key': key, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        sshfp1 = self.do_generic_add(data)
+        self.do_generic_add(data)
 
         label = "asdf"
-        data = "asdfasfd"
+        key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
         s_type = 1
         a_type = 1
-        data = {'label': label, 'key': data, 'domain': self.o_e,
+        data = {'label': label, 'key': key, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        sshfp1 = self.do_generic_add(data)
+        self.do_generic_add(data)
 
         label = "df"
-        data = "aasdf"
+        key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
         s_type = 1
         a_type = 1
-        data = {'label': label, 'key': data, 'domain': self.o_e,
+        data = {'label': label, 'key': key, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        sshfp1 = self.do_generic_add(data)
+        self.do_generic_add(data)
 
         label = "12314"
-        data = "dd"
+        key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
         s_type = 1
         a_type = 1
-        data = {'label': label, 'key': data, 'domain': self.o,
+        data = {'label': label, 'key': key, 'domain': self.o,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        sshfp1 = self.do_generic_add(data)
+        self.do_generic_add(data)

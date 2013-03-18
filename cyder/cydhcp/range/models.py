@@ -3,8 +3,10 @@ from django.db import models
 from django.http import HttpResponse
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.constants import IP_TYPES
-from cyder.cydhcp.constants import *
+from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.cydhcp.constants import (
+    ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
+)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two
@@ -123,12 +125,12 @@ class Range(models.Model, ObjectUrlMixin):
                                   "with a network and is not reserved".format(
                                   self.start_str, self.end_str))
         try:
-            if self.ip_type == '4':
+            if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
                     ipaddr.IPv4Address(self.start_str))
                 self.end_upper, self.end_lower = 0, int(
                     ipaddr.IPv4Address(self.end_str))
-            elif self.ip_type == '6':
+            elif self.ip_type == IP_TYPE_6:
                 self.start_upper, self.start_lower = ipv6_to_longs(
                     self.start_str)
                 self.end_upper, self.end_lower = ipv6_to_longs(self.end_str)
@@ -136,6 +138,7 @@ class Range(models.Model, ObjectUrlMixin):
                 raise ValidationError("ERROR: could not determine the ip type")
         except ipaddr.AddressValueError, e:
             raise ValidationError(str(e))
+
         """
         Some notes:
         start = s1 s2
@@ -164,13 +167,13 @@ class Range(models.Model, ObjectUrlMixin):
                                   " or equal to the end of the range.")
         if not self.is_reserved:
             self.network.update_network()
-            if self.network.ip_type == '4':
+            if self.network.ip_type == IP_TYPE_4:
                 IPClass = ipaddr.IPv4Address
             else:
                 IPClass = ipaddr.IPv6Address
 
-            if IPClass(self.start_str) < self.network.network.network or \
-                    IPClass(self.end_str) > self.network.network.broadcast:
+            if (IPClass(self.start_str) < self.network.network.network or
+                    IPClass(self.end_str) > self.network.network.broadcast):
                 raise RangeOverflowError(
                     "Range {0} to {1} doesn't fit in {2}".format(
                         IPClass(self.start_lower),
@@ -191,11 +194,16 @@ class Range(models.Model, ObjectUrlMixin):
         return allow
 
     def check_for_overlaps(self):
-        """This function will look at all the other ranges and make sure we
-        don't overlap with any of them.
+        """
+        This function will look at all the other ranges and make sure we don't
+        overlap with any of them.
         """
         self._range_ips()
-        Ip = ipaddr.IPv4Address if self.ip_type == '4' else ipaddr.IPv6Address
+        if self.ip_type == IP_TYPE_4:
+            Ip = ipaddr.IPv4Address
+        else:
+            Ip = ipaddr.IPv6Address
+
         for range in Range.objects.all():
             if range.pk == self.pk:
                 continue
@@ -286,7 +294,7 @@ def find_free_ip(start, end, ip_type='4'):
     :param ip_type: The type of IP you are looking for.
     :type ip_type: str either '4' or '6'
     """
-    if ip_type == '4':
+    if ip_type == IP_TYPE_4:
         records = AddressRecord.objects.filter(ip_upper=0, ip_lower__gte=start,
                                                ip_lower__lte=end)
         ptrs = PTR.objects.filter(ip_upper=0, ip_lower__gte=start,
