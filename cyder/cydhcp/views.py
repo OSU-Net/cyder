@@ -48,6 +48,11 @@ def cydhcp_view(request, pk=None):
     return cy_view(request, get_klasses, 'cydhcp/cydhcp_view.html', pk)
 
 
+def cydhcp_create(request, pk=None):
+    print request.GET
+    return cy_view(request, get_klasses, 'cydhcp/cydhcp_form.html', pk)
+
+
 def cydhcp_get_update_form(request):
     return get_update_form(request, get_klasses)
 

@@ -73,9 +73,13 @@
               {% else %}
                 <td><b>Free</b></td>
                   <td>
-                      Create <a href="/cydns/address_record/create/?ip_str={{ object[1]}}&ip_type=4">A</a>
-                      <a href="/cydns/ptr/create/?ip_str={{ object[1]}}&ip_type=4">PTR</a>
-                      <a href="/cydhcp/interface/create/?ip_str={{ object[1]}}&ip_type=4">Interface</a>
+                      Create <a href="/cydns/address_record/create/?ip_str={{
+                          object[1]}}&ip_type=4">A</a> |
+                      <a href="/cydns/ptr/create/?ip_str={{
+                          object[1]}}&ip_type=4">PTR</a> |
+                      <a href="{{ url('static_intr-create')}}?ip_str={{
+                          object[1]}}&ip_type=4">Static Interface</a> |
+                      <a href="{{ url('dynamic_intr-create')}}?range={{range_.pk}}">Dynamic Interface</a>
                   </td>
               {% endif %}
             </tr>

@@ -13,7 +13,8 @@ from django.views.generic import (CreateView, DeleteView, DetailView,
 
 import cyder as cy
 from cyder.base.utils import (_filter, do_sort, make_megafilter,
-                              make_paginator, model_to_post, tablefy)
+                              make_paginator, model_to_post, tablefy,
+                              qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
 
@@ -51,7 +52,8 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
                                 'record_type': record_type,
                                 'pk': pk,
                               })
-
+    elif request.method == 'GET':
+        form = FormKlass(initial=qd_to_py_dict(request.GET))
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
