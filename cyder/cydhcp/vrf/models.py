@@ -34,6 +34,18 @@ class Vrf(models.Model, ObjectUrlMixin):
         ]}
 
 
+    def build_vrf(self):
+        build_str = ''
+        dynamic_clients = self.dynamic_interface_set.all()
+        for range_ in self.range_set.all():
+            build_str += "\n# {0} for range {1}:{2}\n".format(
+                self.name, range_.start_str, range_.end_str)
+            build_str += "\tmatch hardware;\n"
+            for client in dynamic_clients:
+                build_str += client.build_host(range_, self)
+        return build_str
+
+
 class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)
 

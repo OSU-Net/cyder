@@ -33,6 +33,18 @@ class Ctnr(models.Model, ObjectUrlMixin):
         )
         return data
 
+    def build_legacy_class(self):
+        build_str = ""
+        dynamic_clients = self.dynamic_interface_set.all()
+        for range_ in self.ranges.all():
+            build_str += "class \"{0}:{1}:{2} {{\n".format(
+                self.name, range_.start_str, range_.end_str)
+            build_str += "\tmatch hardware;\n"
+            build_str += "}\n"
+            for client in dynamic_clients:
+                client.build_subclass(range_, self)
+        return build_str
+
 
 class CtnrUser(models.Model, ObjectUrlMixin):
     user = models.ForeignKey(User)

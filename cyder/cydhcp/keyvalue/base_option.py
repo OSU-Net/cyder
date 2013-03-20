@@ -55,8 +55,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         for value in values:
             if value in choices:
                 continue
-            else:
-                raise ValidationError("Invalid option ({0}) parameter "
+            else: raise ValidationError("Invalid option ({0}) parameter "
                                       "({1})'".format(self.key, self.value))
 
     def _aa_allow(self):
@@ -189,6 +188,13 @@ class CommonOption(KeyValue, ObjectUrlMixin):
                 raise ValidationError("Each name needs to be a non empty "
                                       "domain name surrounded by \"\"")
             validate_name(name.strip('"'))
+
+
+    def _check_is_digit(self):
+        if not self.value.is_digit():
+            raise ValidationError("The option must be a digit")
+
+
 
     def _ip_list(self):
         #ip_list = self._get_value()
@@ -468,6 +474,12 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         self._int_size_validator(32)
 
+
+    def _aa_interface_type(self):
+        if not(self.value == "eth" or self.value == "mgmt"):
+            raise ValidationError("Interface type must be 'eth' or 'mgmt'")
+
+
     def _aa_dhcp_parameter_request_list(self):
         """
         The dhcp-parameter-request-list option
@@ -513,7 +525,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         self._single_string_validator()
 
-    def _aa_host_name(self):
+    def _aa_hostname(self):
         """
         The host-name option
 
@@ -617,6 +629,24 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         self._ip_list()
+
+
+    def _aa_primary(self):
+        self._aa_alias()
+
+
+    def _aa_alias(self):
+        """
+        The alis of this interface(I.E. eth1.0 would have a primary number of
+        '0').
+        """
+        self.is_option = False
+        self.is_statement = False
+        self.has_validator = True
+        self._check_is_digit()
+
+
+
 
     def _aa_impress_server(self):
         """

@@ -36,3 +36,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Vrf', 'vrf', self.vrf),
             ('Domain', 'domain', self.domain)]
         return data
+
+    def build_subclass(self, contained_range, allowed):
+        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
+            allowed.name, contained_range.start_str, contained_range.end_str)

@@ -30,7 +30,8 @@ class Network(models.Model, ObjectUrlMixin):
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
     network_str = models.CharField(
-        max_length=49, editable=True, help_text="The network address of this network.")
+        max_length=49, editable=True,
+        help_text="The network address of this network.")
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
 
@@ -186,6 +187,38 @@ class Network(models.Model, ObjectUrlMixin):
 
     def get_related_sites(self, related_networks):
         return set([network.site for network in related_networks])
+
+    def build_subnet(self, raw=False):
+        join_args = lambda x: "\n".join(map(lambda y: "\t{0};".format(y), x)
+        self.update_network()
+        statements = self.network_key_value_set.filter(is_statement=True)
+        options = self.network_key_value_set.filter(is_option=True)
+        # not yet implementing IPv6 logic
+        if network.ip_tye == '6':
+            raise NotImplemented("The dhcp builds do not yet have full ipv6 "
+                                 "support.  We will add it eventually")
+        ip_start = int(network.network.network)
+        ip_end = int(network.network.broadcast) - 1
+        static_clients = StaticInterface.objects.filter(
+            ip_upper=0, ip_lower__gte=ip_start, ip_lower__lte=ip_end,
+            dhcp_enabled=True, ip_type='4')
+        ranges = self.range_set.all()
+        build_str = "\nsubnet {0} netmask {1} {{\n".format(
+            network.network.network, network.network.netmask)
+        if not raw:
+            build_str += "\t# Network Statements\n"
+            build_str += join_args(statements)
+            build_str += "\t# Network Options\n"
+            build_str += join_args(options)
+            if self.dhcpd_raw_include:
+                build_str += "\t# Raw Network Options\n"
+                build_str += join_args(self.dhcpd_raw_include.split("\n"))
+        for range_ in ranges:
+            build_str += range_.build_range()
+        for client in static_clients:
+            build_str += client.build_host()
+        build_str += "}\n"
+        return build_str
 
     def get_related(self):
         related_networks = self.get_related_networks()

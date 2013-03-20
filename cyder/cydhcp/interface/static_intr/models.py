@@ -9,7 +9,7 @@ import cydns
 from cyder.core.system.models import System
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.cydhcp.keyvalue.models import KeyValue
+from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
@@ -133,17 +133,6 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     @property
     def rdtype(self):
         return 'INTR'
-    """
-    def get_update_url(self):
-        return "/cydhcp/interface/static/update{0}".format(self.pk)
-
-
-    def get_delete_url(self):
-        return "/cydhcp/interface/static/delete/{0}".format(self.pk)
-
-    def get_detail_url(self):
-        return "cydhcp/interface/static/{0}".format(self.system.pk)
-    """
 
     def interface_name(self):
         self.update_attrs()
@@ -160,6 +149,27 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
             return "{0}{1}".format(itype, primary)
         else:
             return "{0}{1}.{2}".format(itype, primary, alias)
+
+
+    def build_host(self):
+        join_args = lambda x: "\n".join(map(lambda y: "\t\t{0};".format(y)))
+        build_str = "\thost {0} {{\n".format(self.fqdn)
+        build_str += "\t\thardware ethernet {0};\n".format(self.mac)
+        build_str += "\t\tfixed-address {0};\n".format(self.ip_str)
+        options = self.static_intr_key_value_set.filter(is_option=True)
+        statements = self.statc_intr_key_value_set.filter(is_statement=True)
+        build_str += "\t\t# Host Options\n"
+        build_str += join_args(options)
+        build_str += "\t\t# Host Statements\n"
+        build_str += join_args(statements)
+        build_str += "\t}\n\n"
+        return build_str
+
+
+    def build_subclass(self, contained_range, allowed):
+        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
+            allowed.name, contained_range.start_str, contained_range.end_str)
+
 
     def clean(self, *args, **kwargs):
         #if not isinstance(self.mac, basestring):
@@ -247,51 +257,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         return self.fqdn
 
 
-class StaticIntrKeyValue(KeyValue):
+class StaticIntrKeyValue(CommonOption):
     intr = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
-        db_table = "static_inter_key_value"
+        db_table = "static_intr_key_value"
         unique_together = ("key", "value", "intr")
-
-    def _aa_primary(self):
-        """The primary number of this interface (I.E. eth1.0 would have a
-        primary number of '1')"""
-        if not self.value.isdigit():
-            raise ValidationError("The primary number must be a number.")
-
-    def _aa_alias(self):
-        """
-        The alias of this interface (I.E. eth1.0 would have a primary number of
-        '0').
-        """
-        if not self.value.isdigit():
-            raise ValidationError("The alias number must be a number.")
-
-    def _aa_hostname(self):
-        """DHCP option hostname."""
-        if not self.value:
-            raise ValidationError("Hostname Required")
-
-    def _aa_domain_name_servers(self):
-        """DHCP option domain-name-servers."""
-        if not self.value:
-            raise ValidationError("Domain Name Servers Required")
-
-    def _aa_domain_name(self):
-        """DHCP option domain-name."""
-        if not self.value:
-            raise ValidationError("Domain Name Required")
-
-    def _aa_filename(self):
-        """DHCP option filename."""
-        if not self.value:
-            raise ValidationError("Filename Required")
-
-    def _aa_interface_type(self):
-        """Either eth (ethernet) or mgmt (mgmt)."""
-        is_eth = re.compile("^eth$")
-        is_mgmt = re.compile("^mgmt$")
-        if not (is_eth.match(self.value) or is_mgmt.match(self.value)):
-            raise ValidationError("Interface type must either be 'eth' "
-                                  "or 'mgmt'")
