@@ -286,7 +286,7 @@ def migrate_zone_user():
         level = NEW_LEVEL[level]
         user, _ = User.objects.get_or_create(username=username)
         if zone_id == 0:
-            ctnr = Ctnr.objects.get(pk=1)
+            ctnr = Ctnr.objects.get(1)
         else:
             ctnr = maintain_find_zone(zone_id)
         CtnrUser.objects.get_or_create(user=user, ctnr=ctnr, level=level)
@@ -376,19 +376,6 @@ def maintain_find_workgroup(workgroup_id):
         name = cursor.fetchone()[0]
         return Workgroup.objects.get(name=name)
     return None
-
-
-def migrate_all():
-            migrate_vlans()
-            migrate_zones()
-            migrate_workgroups()
-            migrate_subnets()
-            migrate_ranges()
-            migrate_dynamic_hosts()
-            migrate_zone_range()
-            migrate_zone_workgroup()
-            migrate_user()
-            migrate_zone_user()
 
 
 class Command(BaseCommand):
@@ -492,4 +479,13 @@ class Command(BaseCommand):
         if options['zone-user']:
             migrate_zone_user()
         if options['all']:
-            migrate_all()
+            migrate_vlans()
+            migrate_zones()
+            migrate_workgroups()
+            migrate_subnets()
+            migrate_ranges()
+            migrate_dynamic_hosts()
+            migrate_zone_range()
+            migrate_zone_workgroup()
+            migrate_user()
+            migrate_zone_user()
