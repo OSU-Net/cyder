@@ -189,7 +189,7 @@ class Network(models.Model, ObjectUrlMixin):
         return set([network.site for network in related_networks])
 
     def build_subnet(self, raw=False):
-        join_args = lambda x: "\n".join(map(lambda y: "\t{0};".format(y), x)
+        join_args = lambda x: "\n".join(map(lambda y: "\t{0};".format(y), x))
         self.update_network()
         statements = self.network_key_value_set.filter(is_statement=True)
         options = self.network_key_value_set.filter(is_option=True)
