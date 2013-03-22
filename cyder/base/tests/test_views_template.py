@@ -1,7 +1,13 @@
 import random
 import string
 
+from django.test.client import RequestFactory
+
 from nose.tools import eq_
+
+from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE
+from cyder.core.cyuser.models import User
+from cyder.core.cyuser.utils import perm_soft
 
 
 class GenericViewTests(object):
@@ -47,6 +53,7 @@ class GenericViewTests(object):
     def get_helpers(self):
         return (
             self.do_create(),
+            self.has_perm(),
         )
 
     def do_create(self):
@@ -54,6 +61,14 @@ class GenericViewTests(object):
             return self.client.post(self.test_class.get_create_url(),
                                     self.post_data(), follow=True)
         return do_create
+
+    def has_perm(self):
+        def has_perm(self, user, action):
+            rf = RequestFactory()
+            rf.user = user
+            rf.session = {}
+            return perm_soft(rf, action=action, obj_class=self.test_class)
+        return has_perm
 
     def test_list_get(self):
         """List view."""
@@ -71,6 +86,36 @@ class GenericViewTests(object):
             self.assertTrue(resp.status_code in (302, 200))
             self.assertTrue(self.test_class.objects.count() > count)
         return test_create_post
+
+    def test_create_post_guest(self):
+        """Create view, guest"""
+        def test_create_post_guest(self):
+            self.client.login(username='test_guest', password='password')
+            count = self.test_class.objects.count()
+            resp = self.do_create()
+            if not self.has_perm(User.objects.get(username='test_guest'),
+                                 ACTION_CREATE):
+                eq_(resp.status_code, 403)
+                eq_(self.test_class.objects.count(), count)
+            else:
+                self.assertTrue(resp.status_code in (302, 200))
+                self.assertTrue(self.test_class.objects.count() > count)
+        return test_create_post_guest
+
+    def test_create_post_user(self):
+        """Create view, user"""
+        def test_create_post_guest(self):
+            self.client.login(username='test_user', password='password')
+            count = self.test_class.objects.count()
+            resp = self.do_create()
+            if not self.has_perm(User.objects.get(username='test_user'),
+                                 ACTION_CREATE):
+                eq_(resp.status_code, 403)
+                eq_(self.test_class.objects.count(), count)
+            else:
+                self.assertTrue(resp.status_code in (302, 200))
+                self.assertTrue(self.test_class.objects.count() > count)
+        return test_create_post_guest
 
     def test_update_post(self):
         """Update view, post."""
