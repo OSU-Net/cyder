@@ -319,13 +319,17 @@ def migrate_zone_domain():
     for zone_id, domain_id in results:
         ctnr = maintain_find_zone(zone_id)
         domain = maintain_find_domain(domain_id)
+        if not ctnr or not domain:
+            continue
+
         try:
             ctnr.domains.add(domain)
             ctnr.save()
-        except:
+        except Exception, e:
+            print e
             raise NotInMaintain("Unable to migrate relation between "
                                 "domain_id {0} and "
-                                "zone_id {1}".format(zone_id, domain_id))
+                                "zone_id {1}".format(domain_id, zone_id))
 
 
 def migrate_zone_workgroup():
