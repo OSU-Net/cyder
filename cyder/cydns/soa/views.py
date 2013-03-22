@@ -25,18 +25,6 @@ class SOAView(object):
     extra_context = {'record_type': 'soa'}
 
 
-class SOAListView(SOAView, CydnsListView):
-    """"""
-
-
-class SOAUpdateView(SOAView, CydnsUpdateView):
-    """"""
-
-
-class SOADeleteView(SOAView, CydnsDeleteView):
-    """"""
-
-
 class SOADetailView(SOAView, CydnsDetailView):
     template_name = 'soa/soa_detail.html'
 
@@ -56,10 +44,6 @@ class SOADetailView(SOAView, CydnsDetailView):
         }.items() + context.items())
 
         return context
-
-
-class SOACreateView(SOAView, CydnsCreateView):
-    """"""
 
 
 def delete_soa_attr(request, attr_pk):
