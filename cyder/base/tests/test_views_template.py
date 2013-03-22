@@ -1,13 +1,12 @@
 import random
 import string
 
-from django.test.client import RequestFactory
-
 from nose.tools import eq_
 
 from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.cyuser.backends import _has_perm
 from cyder.core.cyuser.models import User
-from cyder.core.cyuser.utils import perm_soft
 
 
 class GenericViewTests(object):
@@ -43,6 +42,7 @@ class GenericViewTests(object):
         return (
             self.test_list_get(),
             self.test_create_post(),
+            self.test_create_post_guest(),
             self.test_update_post(),
             self.test_delete_post(),
             self.test_detail_get(),
@@ -64,10 +64,8 @@ class GenericViewTests(object):
 
     def has_perm(self):
         def has_perm(self, user, action):
-            rf = RequestFactory()
-            rf.user = user
-            rf.session = {}
-            return perm_soft(rf, action=action, obj_class=self.test_class)
+            return _has_perm(user, Ctnr.objects.get(name='test_ctnr'),
+                             action=action, obj_class=self.test_class)
         return has_perm
 
     def test_list_get(self):
@@ -94,21 +92,6 @@ class GenericViewTests(object):
             count = self.test_class.objects.count()
             resp = self.do_create()
             if not self.has_perm(User.objects.get(username='test_guest'),
-                                 ACTION_CREATE):
-                eq_(resp.status_code, 403)
-                eq_(self.test_class.objects.count(), count)
-            else:
-                self.assertTrue(resp.status_code in (302, 200))
-                self.assertTrue(self.test_class.objects.count() > count)
-        return test_create_post_guest
-
-    def test_create_post_user(self):
-        """Create view, user"""
-        def test_create_post_guest(self):
-            self.client.login(username='test_user', password='password')
-            count = self.test_class.objects.count()
-            resp = self.do_create()
-            if not self.has_perm(User.objects.get(username='test_user'),
                                  ACTION_CREATE):
                 eq_(resp.status_code, 403)
                 eq_(self.test_class.objects.count(), count)

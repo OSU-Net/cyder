@@ -3,6 +3,11 @@ from cyder.core.ctnr.models import CtnrUser
 
 
 def has_perm(self, request, action, obj=None, obj_class=None):
+    return _has_perm(request.user, request.session['ctnr'], action, obj,
+                     obj_class)
+
+
+def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     """
     Checks whether a user (``request.user``) has permission to act on a
     given object (``obj``) within the current session CTNR. Permissions will
@@ -48,8 +53,6 @@ def has_perm(self, request, action, obj=None, obj_class=None):
         ... obj=domain)
     """
     user_level = None
-    user = request.user
-    ctnr = request.session['ctnr']
 
     # Get user level.
     try:
@@ -71,7 +74,7 @@ def has_perm(self, request, action, obj=None, obj_class=None):
         is_cyder_user = False
         is_cyder_guest = False
 
-    if request.user.is_superuser:
+    if user.is_superuser:
         return True
     elif is_cyder_admin:
         user_level = 'cyder_admin'
