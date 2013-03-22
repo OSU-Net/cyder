@@ -35,17 +35,6 @@ function initForms() {
     $('.submit-on-change').change(function() {
         this.form.submit();
     });
-    $('input[type="search"]').each(function(i, e) {
-        var $e = $(e);
-        if ($e.val() == 'Search...') {
-            $e.addClass('blur');
-        }
-    });
-    $('input[type="search"]').click(function() {
-        if ($(this).val() == 'Search...') {
-            $(this).val('');
-        }
-    });
 }
 
 function slideUp($e) {
