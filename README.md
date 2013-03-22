@@ -36,7 +36,6 @@ cyder/settings/local.py
 ```
 cp cyder/settings/local.py-dist cyder/settings/local.py
 python manage.py syncdb
-python manage.py loaddata cyder/core/fixtures/core/users.json
 ```
 
 Set up Sass CSS with Django. We use a forked version of jingo-minify to compile

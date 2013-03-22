@@ -1,0 +1,31 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "username": "test_superuser",
+        "first_name": "test_superuser",
+        "last_name": "test_superuser",
+        "is_superuser": true,
+        "email": "test_superuser@foo.bar.com",
+        "password": "sha1$cKIenQ5GA8Q5$5be4265dcecc594e60f38bee0e45478cbdc02b3e"
+    }
+  },
+  {
+    "model": "cyuser.userprofile",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "default_ctnr": 1,
+      "phone_number": 1234567890 }
+  },
+  {
+    "model": "ctnr.ctnruser",
+    "pk": 1,
+    "fields": {
+        "user": 1,
+        "ctnr": 1,
+        "level": 2
+    }
+  }
+]

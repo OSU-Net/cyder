@@ -1,0 +1,10 @@
+[
+  {
+    "model": "ctnr.ctnr",
+    "pk": 9999,
+    "fields": {
+      "description": "Test Ctnr",
+      "name": "test"
+    }
+  }
+]

@@ -112,7 +112,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'migration',
 
     # Third party apps
-    'south',
+    # 'south',
     'django_cas',
     'djcelery',
     'django_extensions',
@@ -146,6 +146,11 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.csrf',
     'django.contrib.messages.context_processors.messages'
 )
+
+FIXTURES = [
+    'cyder/core/ctnr/fixtures/base',
+    'cyder/core/cyuser/fixtures/test_users',
+]
 
 SESSION_COOKIE_NAME = 'cyder'
 SESSION_COOKIE_SECURE = False

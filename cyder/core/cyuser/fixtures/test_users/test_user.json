@@ -1,16 +1,7 @@
 [
   {
-    "model": "ctnr.ctnr",
-    "pk": 9999,
-    "fields": {
-      "description": "Restrictive Ctnr",
-      "name": "restrictive"
-    }
-  },
-
-  {
     "model": "auth.user",
-    "pk": 9999,
+    "pk": 99991,
     "fields": {
         "username": "test_user",
         "first_name": "test_user",
@@ -22,18 +13,17 @@
   },
   {
     "model": "cyuser.userprofile",
-    "pk": 9999,
+    "pk": 99991,
     "fields": {
       "user": 9999,
       "default_ctnr": 9999,
       "phone_number": 1234567890 }
   },
-
   {
     "model": "ctnr.ctnruser",
-    "pk": 9999,
+    "pk": 99991,
     "fields": {
-        "user": 9999,
+        "user": 99991,
         "ctnr": 9999,
         "level": 1
     }

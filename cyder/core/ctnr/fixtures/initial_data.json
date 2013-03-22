@@ -1,0 +1,18 @@
+[
+  {
+    "model": "ctnr.ctnr",
+    "pk": 1,
+    "fields": {
+      "description": "Global Ctnr",
+      "name": "global"
+    }
+  },
+  {
+    "model": "ctnr.ctnr",
+    "pk": 2,
+    "fields": {
+      "description": "Default Ctnr",
+      "name": "default"
+    }
+  }
+]
