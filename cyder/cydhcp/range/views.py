@@ -2,7 +2,6 @@ import json
 
 from django.db.models import Q
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 
@@ -11,30 +10,12 @@ import ipaddr
 from cyder.base.utils import make_paginator, tablefy
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
-from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.views import (CydhcpDeleteView, CydhcpDetailView,
-                                CydhcpCreateView, CydhcpUpdateView,
-                                CydhcpListView)
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
-
-
-class RangeView(object):
-    model = Range
-    form_class = RangeForm
-    queryset = Range.objects.all()
-
-
-class RangeDeleteView(RangeView, CydhcpDeleteView):
-    success_url = "/cydhcp/range/"
-
-
-class RangeDetailView(RangeView, CydhcpDetailView):
-    template_name = 'range/range_detail.html'
 
 
 def delete_range_attr(request, attr_pk):
@@ -74,8 +55,8 @@ def range_detail(request, range_pk):
     intrs = StaticInterface.objects.filter(gt_start, lt_end)
 
     range_data = []
-    ips_total = (((end_upper << 64) + end_lower - 1) -
-                  ((start_upper << 64) + start_lower))
+    ips_total = ((end_upper << 64) + end_lower - 1 -
+                 (start_upper << 64) + start_lower)
     ips_used = 0
 
     for i in range((start_upper << 64) + start_lower, (end_upper << 64) +
@@ -130,10 +111,6 @@ def range_detail(request, range_pk):
     })
 
 
-class RangeCreateView(RangeView, CydhcpCreateView):
-    """"""
-
-
 def redirect_to_range_from_ip(request):
     ip_str = request.GET.get('ip_str')
     ip_type = request.GET.get('ip_type')
@@ -164,11 +141,3 @@ def redirect_to_range_from_ip(request):
         return HttpResponse(json.dumps(
             {'success': True,
              'redirect_url': range_[0].get_detail_url()}))
-
-
-class RangeUpdateView(RangeView, CydhcpUpdateView):
-    """"""
-
-
-class RangeListView(RangeView, CydhcpListView):
-    """"""

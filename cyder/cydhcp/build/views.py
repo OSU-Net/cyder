@@ -1,8 +1,8 @@
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render_to_response
+
 from cyder.cydhcp.build.subnet import build_subnet
 from cyder.cydhcp.network.models import Network
-from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse
-
 
 
 def build_network(request, network_pk):

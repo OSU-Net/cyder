@@ -99,31 +99,6 @@ class CtnrCreateView(CtnrView, CoreCreateView):
         return super(CtnrCreateView, self).get(request, *args, **kwargs)
 
 
-class CtnrDeleteView(CtnrView, CoreDeleteView):
-    """"""
-
-
-class CtnrUpdateView(CtnrView, CoreUpdateView):
-    """"""
-
-
-class CtnrListView(CtnrView, CoreListView):
-    """"""
-    template_name = 'ctnr/ctnr_list.html'
-
-
-class CtnrUserView(object):
-    model = CtnrUser
-    queryset = CtnrUser.objects.all()
-    form_class = CtnrUserForm
-
-
-class CtnrUserCreateView(CtnrUserView, CoreCreateView):
-    """"""
-    def get_queryset(self):
-        return Ctnr.objects.get(id=self.args[0])
-
-
 def change_ctnr(request, pk=None):
     """
     Change session container and other related session variables.

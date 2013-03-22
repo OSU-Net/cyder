@@ -1,7 +1,4 @@
-import re
-
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.util import ErrorList, ErrorDict
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -10,35 +7,11 @@ from cyder.cydhcp.keyvalue.utils import get_attrs, update_attrs
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.site.models import Site, SiteKeyValue
 from cyder.cydhcp.site.forms import SiteForm
-from cyder.cydhcp.views import (CydhcpCreateView, CydhcpDeleteView,
-                                CydhcpListView, CydhcpUpdateView)
-
-
-class SiteView(object):
-    model = Site
-    queryset = Site.objects.all()
-    form_class = SiteForm
-
-
-class SiteDeleteView(SiteView, CydhcpDeleteView):
-    success_url = '/cydhcp/site/'
 
 
 def delete_site(request, site_pk):
     get_object_or_404(Site, pk=site_pk)
     return render(request, 'site/site_confirm_delete.html')
-
-
-class SiteListView(SiteView, CydhcpListView):
-    template_name = 'cydhcp/cydhcp_list.html'
-
-
-class SiteCreateView(SiteView, CydhcpCreateView):
-    template_name = 'cydhcp/cydhcp_form.html'
-
-
-class SiteUpdateView(SiteView, CydhcpUpdateView):
-    template_name = 'site/site_edit.html'
 
 
 def update_site(request, site_pk):

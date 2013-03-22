@@ -1,9 +1,10 @@
+from django.shortcuts import get_object_or_404, render
+
+
 from cyder.base.utils import tablefy
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-
-from django.shortcuts import get_object_or_404, render
 
 
 def system_detail(request, pk):

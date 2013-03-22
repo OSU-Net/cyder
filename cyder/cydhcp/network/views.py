@@ -1,10 +1,9 @@
 import json
 
 from django.core.exceptions import ValidationError
-from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.base.utils import tablefy
 from cyder.cydhcp.network.forms import *
@@ -12,22 +11,6 @@ from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.network.utils import calc_networks
 from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_dhcp_aa,
                                          get_dhcp_docstrings, dict_to_kv)
-from cyder.cydhcp.views import CydhcpDeleteView, CydhcpListView
-
-
-class NetworkView(object):
-    model = Network
-    queryset = Network.objects.select_related('site').all()
-    form_class = NetworkForm
-
-
-class NetworkDeleteView(NetworkView, CydhcpDeleteView):
-    success_url = "/cydhcp/network/"
-
-
-class NetworkListView(NetworkView, CydhcpListView):
-    """"""
-    template_name = 'network/network_list.html'
 
 
 def delete_network_attr(request, attr_pk):
@@ -53,7 +36,7 @@ def create_network(request):
         else:
             return render(request, 'cydhcp/cydhcp_form.html', {
                 'form': form,
-        })
+            })
 
     else:
         form = NetworkForm()
@@ -114,7 +97,7 @@ def network_detail(request, network_pk):
     """Network detail view. Shows related ranges, networks, attributes."""
     network = get_object_or_404(Network, pk=network_pk)
     network.update_network()
-    parent_networks , sub_networks = calc_networks(network)
+    parent_networks, sub_networks = calc_networks(network)
 
     return render(request, 'network/network_detail.html', {
         'network': network,

@@ -1,17 +1,11 @@
 import json
 
-from django.contrib import messages
-from django.forms import ValidationError
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import DetailView
 
 from cyder.base.utils import tablefy
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.forms import DomainForm, DomainUpdateForm
-from cyder.cydns.soa.models import SOA
-from cyder.cydns.views import CydnsDeleteView, CydnsListView
+from cyder.cydns.domain.forms import DomainForm
 
 
 class DomainView(object):
@@ -19,14 +13,6 @@ class DomainView(object):
     queryset = Domain.objects.all().order_by('name')
     form_class = DomainForm
     extra_context = {'record_type': 'domain'}
-
-
-class DomainListView(DomainView, CydnsListView):
-    queryset = Domain.objects.filter(is_reverse=False)
-
-
-class DomainDeleteView(DomainView, CydnsDeleteView):
-    """"""
 
 
 class DomainDetailView(DomainView, DetailView):
@@ -97,91 +83,10 @@ class DomainDetailView(DomainView, DetailView):
         }.items() + context.items())
 
 
-class DomainCreateView(DomainView, CreateView):
-    model_form = DomainForm
-
-    def post(self, request, *args, **kwargs):
-        domain_form = DomainForm(request.POST)
-        # Try to create the domain. Catch all exceptions.
-        try:
-            domain = domain_form.save()
-        except ValueError, e:
-            return render(request, "cydns/cydns_form.html", {
-                'form': domain_form,
-                'form_title': 'Create Domain'
-            })
-
-        try:
-            if domain.master_domain and domain.master_domain.soa:
-                domain.soa = domain.master_domain.soa
-                domain.save()
-        except ValidationError, e:
-            return render(request, "cydns/cydns_form.html",
-                         {'form': domain_form, 'form_title': 'Create Domain'})
-        # Success. Redirect.
-        messages.success(request, "{0} was successfully created.".
-                         format(domain.name))
-        return redirect(domain)
-
-    def get(self, request, *args, **kwargs):
-        domain_form = DomainForm()
-        return render(request, "cydns/cydns_form.html",
-                      {'form': domain_form, 'form_title': 'Create Domain'})
-
-
-class DomainUpdateView(DomainView, UpdateView):
-    form_class = DomainUpdateForm
-    template_name = "cydns/cydns_update.html"
-
-    def post(self, request, *args, **kwargs):
-        domain = get_object_or_404(Domain, pk=kwargs.get('pk', 0))
-        try:
-            domain_form = DomainUpdateForm(request.POST)
-            new_soa_pk = domain_form.data.get('soa', None)
-            delegation_status = domain_form.data.get('delegated', False)
-
-            if new_soa_pk:
-                new_soa = get_object_or_404(SOA, pk=new_soa_pk)
-            else:
-                new_soa = None
-
-            if delegation_status == 'on':
-                new_delegation_status = True
-            else:
-                new_delegation_status = False
-
-            updated = False
-            if domain.soa != new_soa:
-                domain.soa = new_soa
-                updated = True
-            if domain.delegated != new_delegation_status:
-                domain.delegated = new_delegation_status
-                updated = True
-
-            if updated:
-                domain.save()  # Major exception handling logic goes here.
-        except ValidationError, e:
-            domain_form = DomainUpdateForm(instance=domain)
-            messages.error(request, str(e))
-            return render(request, "domain/domain_update.html", {"form":
-                                                                 domain_form})
-
-        messages.success(request, '{0} was successfully updated.'.
-                         format(domain.name))
-
-        return redirect(domain)
-
-
-class ReverseDomainListView(DomainView, CydnsListView):
-    extra_context = {'record_type': 'reverse_domain'}
-    queryset = Domain.objects.filter(is_reverse=True).order_by('name')
-
-
 def domain_sort(domains):
     """
     This is soooooo slow.
     """
-
     roots = domains.filter(master_domain=None)
     ordered = []
     for root in roots:

@@ -56,8 +56,8 @@ def login_session(request, username):
         global_ctnr = CtnrUser.objects.get(user=request.user, ctnr=1)
         if global_ctnr:
             request.session['ctnrs'] = (list(Ctnr.objects.filter(Q(id=1)
-            | Q(id=2))) + list(Ctnr.objects.exclude(Q(id=1)
-            | Q(id=2)).order_by("name")))
+                | Q(id=2))) + list(Ctnr.objects.exclude(Q(id=1)
+                | Q(id=2)).order_by("name")))
 
     except CtnrUser.DoesNotExist:
         # Set ctnr list (to switch between).
@@ -128,17 +128,7 @@ def unbecome_user(request):
     return redirect(referer)
 
 
-def cylogin(request):
-    """Not implemented."""
-    return redirect('/')
-
-
-def cylogout(request):
-    """Not implemented. """
-    return redirect('/')
-
-
-def UserDetailView(request, pk):
+def user_detail(request, pk):
     user = User.objects.get(id=pk)
     user_table = tablefy([user], users=True)
     ctnr_table = tablefy(CtnrUser.objects.filter(id=pk))
