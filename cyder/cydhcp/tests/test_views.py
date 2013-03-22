@@ -5,8 +5,6 @@ import cyder.base.tests
 from cyder.base.tests.test_views_template import GenericViewTests
 from cyder.cydhcp.constants import (ALLOW_OPTION_VRF, DENY_OPTION_UNKNOWN,
                                     STATIC)
-from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.site.models import Site
@@ -26,7 +24,7 @@ def do_setUp(self, test_class, test_data):
 
 
 class NetworkViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'network'
 
     def setUp(self):
@@ -44,7 +42,7 @@ class NetworkViewTests(cyder.base.tests.TestCase):
 
 
 class RangeViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'range'
 
     def setUp(self):
@@ -72,7 +70,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
 
 
 class SiteViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'site'
 
     def setUp(self):
@@ -88,7 +86,7 @@ class SiteViewTests(cyder.base.tests.TestCase):
 
 
 class WorkgroupViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'workgroup'
 
     def setUp(self):
@@ -104,7 +102,7 @@ class WorkgroupViewTests(cyder.base.tests.TestCase):
 
 
 class VlanViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'vlan'
 
     def setUp(self):
@@ -122,7 +120,7 @@ class VlanViewTests(cyder.base.tests.TestCase):
 
 
 class VrfViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'vrf'
 
     def setUp(self):

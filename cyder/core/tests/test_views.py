@@ -16,7 +16,7 @@ def do_setUp(self, test_class, test_data):
 
 
 class SystemViewTests(cyder.base.tests.TestCase):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/users.json']
     name = 'system'
 
     def setUp(self):

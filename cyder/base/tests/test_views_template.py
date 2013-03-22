@@ -62,8 +62,6 @@ class GenericViewTests(object):
             self.assertTrue(self.test_class.objects.count() > count)
         return test_create_post
 
-    def create_post_guest
-
     def update_post(self):
         """Update view, post."""
         def test_update_post(self):
