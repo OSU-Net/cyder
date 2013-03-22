@@ -19,14 +19,13 @@ class UserProfile(models.Model, ObjectUrlMixin):
         db_table = 'auth_user_profile'
 
     def __str__(self):
-        return '%s (%s %s)' % (self.user.username, self.user.first_name,
-                               self.user.last_name)
+        return self.user.username
 
     def details(self):
         """For tables."""
         data = super(UserProfile, self).details()
         data['data'] = [
-            ('Username', 'user__username', self.user.username),
+            ('Username', 'user__username', self),
             ('First Name', 'user__firstname', self.user.first_name),
             ('Last Name', 'user__lastname', self.user.last_name),
             ('Email', 'user__email', self.user.email),

@@ -11,7 +11,7 @@
         data-addUserUrl="{{ url('ctnr-add-user', object.pk) }}">
   </span>
 
-  {% if request.session.superuser or
+  {% if request.user.is_superuser or
         (request.session.ctnr == object and request.session.level == 2) %}
     <form class="form" id="add-user">
       <h3>Add User to Container</h3>

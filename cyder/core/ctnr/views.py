@@ -35,9 +35,11 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         # Add user levels of ctnr to user table.
         users = ctnr.users.all()
         extra_cols = [{'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'}]
-        extra_cols[0]['data'] = [
-            {'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level],
-             'url': ''} for user in users]
+        extra_cols[0]['data'] = [{
+            'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level]
+                     if not user.is_superuser else 'Superuser',
+            'url': ''
+        } for user in users]
         user_table = tablefy(users, extra_cols=extra_cols, users=True)
 
         domains = ctnr.domains.filter(is_reverse=False)

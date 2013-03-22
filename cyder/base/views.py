@@ -54,6 +54,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
                               })
     elif request.method == 'GET':
         form = FormKlass(initial=qd_to_py_dict(request.GET))
+
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
