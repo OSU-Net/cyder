@@ -33,18 +33,29 @@ class GenericViewTests(object):
             server = random_label()
             return {'server': server, 'domain':self.domain.pk}
     """
-    def build_tests(self):
+    def get_tests(self):
         return (
-            self.list_get(),
-            self.create_post(),
-            self.update_post(),
-            self.delete_post(),
-            self.detail_get(),
-            self.table_update_post(),
+            self.test_list_get(),
+            self.test_create_post(),
+            self.test_update_post(),
+            self.test_delete_post(),
+            self.test_detail_get(),
+            self.test_table_update_post(),
             lambda junk: True
         )
 
-    def list_get(self):
+    def get_helpers(self):
+        return (
+            self.do_create(),
+        )
+
+    def do_create(self):
+        def do_create(self):
+            return self.client.post(self.test_class.get_create_url(),
+                                    self.post_data(), follow=True)
+        return do_create
+
+    def test_list_get(self):
         """List view."""
         def test_list_get(self):
             resp = self.client.get(self.test_class.get_list_url(),
@@ -52,17 +63,16 @@ class GenericViewTests(object):
             self.assertEqual(resp.status_code, 200)
         return test_list_get
 
-    def create_post(self):
+    def test_create_post(self):
         """Create view."""
         def test_create_post(self):
             count = self.test_class.objects.count()
-            resp = self.client.post(self.test_class.get_create_url(),
-                                    self.post_data(), follow=True)
+            resp = self.do_create()
             self.assertTrue(resp.status_code in (302, 200))
             self.assertTrue(self.test_class.objects.count() > count)
         return test_create_post
 
-    def update_post(self):
+    def test_update_post(self):
         """Update view, post."""
         def test_update_post(self):
             post_data = self.post_data()
@@ -82,7 +92,7 @@ class GenericViewTests(object):
 
         return test_update_post
 
-    def delete_post(self):
+    def test_delete_post(self):
         """Delete view."""
         def test_delete_post(self):
             count = self.test_class.objects.count()
@@ -92,7 +102,7 @@ class GenericViewTests(object):
             self.assertTrue(self.test_class.objects.count() < count)
         return test_delete_post
 
-    def detail_get(self):
+    def test_detail_get(self):
         """Detail view."""
         def test_detail_get(self):
             resp = self.client.get(self.test_obj.get_detail_url(),
@@ -100,7 +110,7 @@ class GenericViewTests(object):
             self.assertEqual(resp.status_code, 200)
         return test_detail_get
 
-    def table_update_post(self):
+    def test_table_update_post(self):
         """Table update view, post."""
         def test_table_update_post(self):
             post_data = self.post_data()
@@ -122,6 +132,20 @@ class GenericViewTests(object):
                     else:
                         eq_(str(obj_val), str(v))
         return test_table_update_post
+
+
+def build(tests):
+    """
+    Attaches test methods and helper functions to test classes.
+    """
+    builder = GenericViewTests()
+    for test in tests:
+        for generic_test in builder.get_tests():
+            # Set name of test.
+            setattr(test, generic_test.__name__ + '_' + test.name,
+                    generic_test)
+        for helper in builder.get_helpers():
+            setattr(test, helper.__name__, helper)
 
 
 def random_label():

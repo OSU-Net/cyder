@@ -3,8 +3,7 @@ from django.test.client import Client
 from nose.tools import eq_
 
 import cyder.base.tests
-from cyder.base.tests.test_views_template import GenericViewTests
-from cyder.base.tests.test_views_template import random_label
+from cyder.base.tests.test_views_template import build, random_label
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -20,7 +19,7 @@ from cyder.cydns.sshfp.models import SSHFP
 
 def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     self.client = Client()
-    self.client.login(username='development', password='password')
+    self.client.login(username='test_superuser', password='password')
     self.test_class = test_class
 
     # Create domain.
@@ -45,7 +44,7 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
 
 
 class AddressRecordViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'address_record'
 
     def setUp(self):
@@ -67,7 +66,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase):
 
 
 class CNAMEViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'cname'
 
     def setUp(self):
@@ -86,12 +85,13 @@ class CNAMEViewTests(cyder.base.tests.TestCase):
 
 
 class NSViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'nameserver'
 
     def setUp(self):
+        test_domain = Domain.objects.create(name='test_domain')
         test_data = {
-            'server': self.domain.name
+            'server': test_domain.name
         }
         do_setUp(self, Nameserver, test_data)
 
@@ -103,7 +103,7 @@ class NSViewTests(cyder.base.tests.TestCase):
 
 
 class MXViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'mx'
 
     def setUp(self):
@@ -126,7 +126,7 @@ class MXViewTests(cyder.base.tests.TestCase):
 
 
 class PTRViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'ptr'
 
     def setUp(self):
@@ -163,12 +163,12 @@ class PTRViewTests(cyder.base.tests.TestCase):
 
 
 class SRVViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'srv'
 
     def setUp(self):
         test_data = {
-            'label': "_" + random_label(),
+            'label': '_' + random_label(),
             'target': random_label(),
             'priority': 2,
             'weight': 2222,
@@ -178,8 +178,8 @@ class SRVViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
-            'label': "_" + random_label(),
+            'fqdn': '_' + self.domain.name,
+            'label': '_' + random_label(),
             'target': random_label(),
             'priority': 2,
             'weight': 2222,
@@ -188,7 +188,7 @@ class SRVViewTests(cyder.base.tests.TestCase):
 
 
 class TXTViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'txt'
 
     def setUp(self):
@@ -207,7 +207,7 @@ class TXTViewTests(cyder.base.tests.TestCase):
 
 
 class SSHFPViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'sshfp'
 
     def setUp(self):
@@ -230,10 +230,5 @@ class SSHFPViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = (AddressRecordViewTests, CNAMEViewTests, MXViewTests, PTRViewTests,
-         TXTViewTests)
-for view_test in tests:
-    builder = GenericViewTests()
-    for test in builder.build_tests():
-        # Set name of test.
-        setattr(view_test, test.__name__ + '_' + view_test.name, test)
+build([AddressRecordViewTests, CNAMEViewTests, MXViewTests, NSViewTests,
+       PTRViewTests, SRVViewTests, TXTViewTests, SSHFPViewTests])

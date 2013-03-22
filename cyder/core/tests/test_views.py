@@ -1,13 +1,13 @@
 from django.test.client import Client
 
 import cyder.base.tests
-from cyder.base.tests.test_views_template import GenericViewTests
+from cyder.base.tests.test_views_template import build
 from cyder.core.system.models import System
 
 
 def do_setUp(self, test_class, test_data):
     self.client = Client()
-    self.client.login(username='development', password='password')
+    self.client.login(username='test_superuser', password='password')
     self.test_class = test_class
 
     # Create test object.
@@ -16,7 +16,7 @@ def do_setUp(self, test_class, test_data):
 
 
 class SystemViewTests(cyder.base.tests.TestCase):
-    fixtures = ['test_users/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'system'
 
     def setUp(self):
@@ -36,9 +36,4 @@ class SystemViewTests(cyder.base.tests.TestCase):
 
 
 # Build the tests.
-tests = (SystemViewTests,)
-for view_test in tests:
-    builder = GenericViewTests()
-    for test in builder.build_tests():
-        # Set name of test.
-        setattr(view_test, test.__name__ + '_' + view_test.name, test)
+build([SystemViewTests])

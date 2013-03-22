@@ -1,6 +1,6 @@
-from django.shortcuts import redirect
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 
 # from django_cas.models import SessionServiceTicket
 # import requests
@@ -28,6 +28,7 @@ class AuthenticationMiddleware(object):
         if not request.user.email:
             request.user.email = request.user.username + settings.EMAIL_SUFFIX
             request.user.save()
+
 #            # Get user attributes from CAS via SAML.
 #            ticket = SessionServiceTicket.objects.get(
 #                session_key=request.session.session_key).service_ticket
