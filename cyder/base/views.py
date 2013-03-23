@@ -39,7 +39,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
 
         if form.is_valid():
             try:
-                if perm(request, cy.ACTION_CREATE, obj_class=Klass):
+                if perm(request, cy.ACTION_CREATE, obj=obj, obj_class=Klass):
                     obj = form.save()
                     return redirect(obj.get_list_url())
             except (ValidationError, ValueError) as e:

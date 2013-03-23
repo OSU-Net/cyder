@@ -167,9 +167,12 @@ class SRVViewTests(cyder.base.tests.TestCase):
     name = 'srv'
 
     def setUp(self):
+        soa = SOA.objects.create(
+            primary=random_label(), contact=random_label())
+        domain = Domain.objects.create(name='_' + random_label(), soa=soa)
         test_data = {
-            'label': '_' + random_label(),
-            'target': random_label(),
+            'label': domain.name,
+            'target': domain.name,
             'priority': 2,
             'weight': 2222,
             'port': 222
@@ -177,10 +180,13 @@ class SRVViewTests(cyder.base.tests.TestCase):
         do_setUp(self, SRV, test_data)
 
     def post_data(self):
+        soa = SOA.objects.create(
+            primary=random_label(), contact=random_label())
+        domain = Domain.objects.create(name='_' + random_label(), soa=soa)
         return {
-            'fqdn': '_' + self.domain.name,
-            'label': '_' + random_label(),
-            'target': random_label(),
+            'fqdn': domain.name,
+            'label': domain.name,
+            'target': domain.name,
             'priority': 2,
             'weight': 2222,
             'port': 222

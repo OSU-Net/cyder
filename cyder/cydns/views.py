@@ -76,6 +76,7 @@ def cydns_view(request, pk=None):
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:
+            print errors
             fqdn_form = FQDNFormKlass(request.POST)
             fqdn_form._errors = ErrorDict()
             fqdn_form._errors['__all__'] = ErrorList(errors)
@@ -90,7 +91,7 @@ def cydns_view(request, pk=None):
             form = FormKlass(qd, instance=record)
 
         try:
-            if perm(request, cy.ACTION_CREATE, obj=record):
+            if perm(request, cy.ACTION_CREATE, obj=record, obj_class=Klass):
                 record = form.save()
                 # If domain, add to current ctnr.
                 if record_type == 'domain':

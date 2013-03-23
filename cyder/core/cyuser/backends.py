@@ -94,6 +94,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         obj_type = obj_class.__name__
     else:
         return False
+
     handling_function = {
         # Administrative.
         'Ctnr': has_administrative_perm,
