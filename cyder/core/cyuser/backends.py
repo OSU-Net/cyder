@@ -110,20 +110,21 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'CNAME': has_domain_record_perm,
         'MX': has_domain_record_perm,
         'Nameserver': has_domain_record_perm,
-        'TXT': has_domain_record_perm,
         'SRV': has_domain_record_perm,
         'SSHFP': has_domain_record_perm,
+        'TXT': has_domain_record_perm,
 
         # Reverse domain records.
         'PTR': has_reverse_domain_record_perm,
         'ReverseNameserver': has_reverse_domain_record_perm,
 
         # DHCP.
+        'Network': has_generic_dhcp_perm,
         'Range': has_range_perm,
         'Site': has_generic_dhcp_perm,
-        'Subnet': has_subnet_perm,
         'System': has_system_perm,
         'Vlan': has_generic_dhcp_perm,
+        'Vrf': has_generic_dhcp_perm,
         'Workgroup': has_workgroup_perm,
 
         # Options.
@@ -132,8 +133,8 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'PoolOption': has_generic_dhcp_perm,
         'GroupOption': has_generic_dhcp_perm,
 
-        'StaticRegistration': has_static_registration_perm,
-        'DynamicRegistration': has_dynamic_registration_perm,
+        'StaticInterface': has_static_registration_perm,
+        'DynamicInterface': has_dynamic_registration_perm,
     }.get(obj_type, False)
     return handling_function(user_level, obj, ctnr, action)
 
