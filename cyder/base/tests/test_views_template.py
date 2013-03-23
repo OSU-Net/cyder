@@ -65,6 +65,9 @@ class GenericViewTests(object):
             res = self.client.post(self.test_class.get_create_url(),
                                    self.post_data(), follow=True)
 
+            self.assertTrue(res.status_code in (302, 200),
+                            'Response code %s' % res.status_code)
+
             if not self.has_perm(User.objects.get(username=username),
                                  ACTION_CREATE):
                 # Nothing should be created if no permissions.
@@ -87,9 +90,8 @@ class GenericViewTests(object):
             res = self.client.post(self.test_obj.get_update_url(),
                                    post_data, follow=True)
 
-            if has_perm:
-                self.assertTrue(res.status_code in (302, 200),
-                                'Response code %s' % res.status_code)
+            self.assertTrue(res.status_code in (302, 200),
+                            'Response code %s' % res.status_code)
 
             test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
             if has_perm:
@@ -115,8 +117,11 @@ class GenericViewTests(object):
                                      ACTION_DELETE)
 
             count = self.test_class.objects.count()
-            self.client.post(self.test_obj.get_delete_url(),
-                             follow=True)
+            res = self.client.post(self.test_obj.get_delete_url(),
+                                   follow=True)
+
+            self.assertTrue(res.status_code in (302, 200),
+                            'Response code %s' % res.status_code)
 
             if has_perm:
                 self.assertTrue(self.test_class.objects.count() < count)
