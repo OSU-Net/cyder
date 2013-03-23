@@ -42,7 +42,6 @@ class GenericViewTests(object):
         return (
             self.test_list_get(),
             self.test_create_post(),
-            self.test_create_post_guest(),
             self.test_update_post(),
             self.test_delete_post(),
             self.test_detail_get(),
@@ -57,7 +56,8 @@ class GenericViewTests(object):
         )
 
     def do_create(self):
-        def do_create(self):
+        def do_create(self, username='test_superuser'):
+            self.client.login(username=username, password='password')
             return self.client.post(self.test_class.get_create_url(),
                                     self.post_data(), follow=True)
         return do_create
@@ -79,26 +79,22 @@ class GenericViewTests(object):
     def test_create_post(self):
         """Create view."""
         def test_create_post(self):
-            count = self.test_class.objects.count()
-            resp = self.do_create()
-            self.assertTrue(resp.status_code in (302, 200))
-            self.assertTrue(self.test_class.objects.count() > count)
+            for username in ['test_guest', 'test_user', 'test_admin',
+                             'test_superuser']:
+                count = self.test_class.objects.count()
+                resp = self.do_create(username)
+                if not self.has_perm(User.objects.get(username=username),
+                                     ACTION_CREATE):
+                    # Nothing should be created if no permissions.
+                    eq_(self.test_class.objects.count(), count)
+                else:
+                    # Check object was created.
+                    self.assertTrue(resp.status_code in (302, 200),
+                                    'Response code was %s for %s' % (
+                                    resp.status_code, username))
+                    self.assertTrue(self.test_class.objects.count() > count,
+                                    'Could not create as %s' % username)
         return test_create_post
-
-    def test_create_post_guest(self):
-        """Create view, guest"""
-        def test_create_post_guest(self):
-            self.client.login(username='test_guest', password='password')
-            count = self.test_class.objects.count()
-            resp = self.do_create()
-            if not self.has_perm(User.objects.get(username='test_guest'),
-                                 ACTION_CREATE):
-                eq_(resp.status_code, 403)
-                eq_(self.test_class.objects.count(), count)
-            else:
-                self.assertTrue(resp.status_code in (302, 200))
-                self.assertTrue(self.test_class.objects.count() > count)
-        return test_create_post_guest
 
     def test_update_post(self):
         """Update view, post."""

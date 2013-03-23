@@ -108,9 +108,10 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'AddressRecord': has_domain_record_perm,
         'CNAME': has_domain_record_perm,
         'MX': has_domain_record_perm,
+        'Nameserver': has_domain_record_perm,
         'TXT': has_domain_record_perm,
         'SRV': has_domain_record_perm,
-        'Nameserver': has_domain_record_perm,
+        'SSHFP': has_domain_record_perm,
 
         # Reverse domain records.
         'PTR': has_reverse_domain_record_perm,
