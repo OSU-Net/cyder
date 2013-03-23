@@ -11,28 +11,9 @@ from cyder.core.cyuser.models import User
 
 class GenericViewTests(object):
     """
-    An object that builds test funtions.
-    You need to define a setUp function like this.
-    def setUp(self):
-        # A name of domain to use when creating records
-        dname = "food"
-        self.domain, create = Domain.objects.get_or_create(name=dname)
-        while not create: # This ensures that a domain is created.
-            dname = "a"+dname
-            self.domain, create = Domain.objects.get_or_create(name=dname)
+    Builds test funtions. Need to define a setUp function.
 
-        # Make a generic test "object". This object is called self.test_obj and
-        # is used to test datail and update views
-        server = "random"
-        self.test_obj, create = Nameserver.objects.get_or_create(
-            server=server, domain= self.domain)
-        while not create:
-            server = "a"+server
-            self.test_obj, create = Nameserver.objects.get_or_create(
-                server=server, domain= self.domain)
-
-    This function is used to generate valid data to test views that require
-    POST data.
+    Also requires post_data to generate test view POST data:
 
         def post_data(self):
             server = random_label()
@@ -45,7 +26,10 @@ class GenericViewTests(object):
             self.test_create_post_user(),
             self.test_create_post_admin(),
             self.test_create_post_superuser(),
-            self.test_update_post(),
+            self.test_update_post_guest(),
+            self.test_update_post_user(),
+            self.test_update_post_admin(),
+            self.test_update_post_superuser(),
             self.test_delete_post(),
             self.test_detail_get(),
             self.test_table_update_post(),
@@ -55,6 +39,7 @@ class GenericViewTests(object):
     def get_helpers(self):
         return (
             self.do_create(),
+            self.do_update(),
             self.has_perm(),
         )
 
@@ -73,11 +58,41 @@ class GenericViewTests(object):
             else:
                 # Check object was created.
                 self.assertTrue(res.status_code in (302, 200),
-                                'Response code was %s for %s' % (
-                                res.status_code, username))
+                                'Response code %s' % res.status_code)
                 self.assertTrue(self.test_class.objects.count() > count,
                                 'Could not create as %s' % username)
         return do_create
+
+    def do_update(self):
+        def do_update(self, username='test_superuser'):
+            self.client.login(username=username, password='password')
+            has_perm = self.has_perm(User.objects.get(username=username),
+                                     ACTION_UPDATE)
+
+            post_data = self.post_data()
+            res = self.client.post(self.test_obj.get_update_url(),
+                                   post_data, follow=True)
+
+            if has_perm:
+                self.assertTrue(res.status_code in (302, 200),
+                                'Response code %s' % res.status_code)
+
+            test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
+            if has_perm:
+                # Check that the attributes we posted updated the object.
+                for k, v in post_data.items():
+                    if k not in ['fqdn', 'label']:
+                        obj_val = getattr(test_obj, k)
+                        if hasattr(obj_val, 'id'):
+                            eq_(obj_val.id, v)
+                        else:
+                            eq_(str(obj_val), str(v))
+            else:
+                # Check nothing has changed.
+                for k, v in post_data.items():
+                    if k not in ['fqdn', 'label']:
+                        eq_(getattr(self.test_obj, k), getattr(test_obj, k))
+        return do_update
 
     def has_perm(self):
         def has_perm(self, user, action):
@@ -117,25 +132,29 @@ class GenericViewTests(object):
             self.do_create('test_superuser')
         return test_create_post_superuser
 
-    def test_update_post(self):
-        """Update view, post."""
-        def test_update_post(self):
-            post_data = self.post_data()
-            resp = self.client.post(self.test_obj.get_update_url(),
-                                    post_data, follow=True)
-            self.assertTrue(resp.status_code in (302, 200))
+    def test_update_post_guest(self):
+        """Create view, guest."""
+        def test_update_post_guest(self):
+            self.do_update('test_guest')
+        return test_update_post_guest
 
-            # Check that the attributes we posted updated the object.
-            test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
-            for k, v in post_data.items():
-                if k not in ['fqdn', 'label']:
-                    obj_val = getattr(test_obj, k)
-                    if hasattr(obj_val, 'id'):
-                        eq_(obj_val.id, v)
-                    else:
-                        eq_(str(obj_val), str(v))
+    def test_update_post_user(self):
+        """Create view, user."""
+        def test_update_post_user(self):
+            self.do_update('test_user')
+        return test_update_post_user
 
-        return test_update_post
+    def test_update_post_admin(self):
+        """Create view, admin."""
+        def test_update_post_admin(self):
+            self.do_update('test_admin')
+        return test_update_post_admin
+
+    def test_update_post_superuser(self):
+        """Create view, superuser."""
+        def test_update_post_superuser(self):
+            self.do_update('test_superuser')
+        return test_update_post_superuser
 
     def test_delete_post(self):
         """Delete view."""
