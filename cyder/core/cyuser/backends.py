@@ -136,6 +136,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
     }.get(obj_type, False)
+
     return handling_function(user_level, obj, ctnr, action)
 
 

@@ -75,7 +75,8 @@ def cy_delete(request, pk, get_klasses_fn):
     obj = get_object_or_404(Klass, pk=pk)
 
     try:
-        obj.delete()
+        if perm(request, cy.ACTION_DELETE, obj=obj):
+            obj.delete()
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
 

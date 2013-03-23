@@ -3,7 +3,7 @@ import string
 
 from nose.tools import eq_
 
-from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE
+from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.cyuser.backends import _has_perm
 from cyder.core.cyuser.models import User
@@ -30,7 +30,10 @@ class GenericViewTests(object):
             self.test_update_post_user(),
             self.test_update_post_admin(),
             self.test_update_post_superuser(),
-            self.test_delete_post(),
+            self.test_delete_post_guest(),
+            self.test_delete_post_user(),
+            self.test_delete_post_admin(),
+            self.test_delete_post_superuser(),
             self.test_detail_get(),
             self.test_table_update_post(),
             lambda junk: True
@@ -38,10 +41,21 @@ class GenericViewTests(object):
 
     def get_helpers(self):
         return (
+            self.has_perm(),
             self.do_create(),
             self.do_update(),
-            self.has_perm(),
+            self.do_delete(),
         )
+
+    def has_perm(self):
+        def has_perm(self, user, action):
+            if action == ACTION_CREATE:
+                return _has_perm(user, Ctnr.objects.get(name='test_ctnr'),
+                                 action=action, obj_class=self.test_class)
+            elif action in (ACTION_UPDATE, ACTION_DELETE):
+                return _has_perm(user, Ctnr.objects.get(name='test_ctnr'),
+                                 action=action, obj=self.test_obj)
+        return has_perm
 
     def do_create(self):
         def do_create(self, username='test_superuser'):
@@ -94,11 +108,21 @@ class GenericViewTests(object):
                         eq_(getattr(self.test_obj, k), getattr(test_obj, k))
         return do_update
 
-    def has_perm(self):
-        def has_perm(self, user, action):
-            return _has_perm(user, Ctnr.objects.get(name='test_ctnr'),
-                             action=action, obj_class=self.test_class)
-        return has_perm
+    def do_delete(self):
+        def do_delete(self, username='test_superuser'):
+            self.client.login(username=username, password='password')
+            has_perm = self.has_perm(User.objects.get(username=username),
+                                     ACTION_DELETE)
+
+            count = self.test_class.objects.count()
+            self.client.post(self.test_obj.get_delete_url(),
+                             follow=True)
+
+            if has_perm:
+                self.assertTrue(self.test_class.objects.count() < count)
+            else:
+                eq_(self.test_class.objects.count(), count)
+        return do_delete
 
     def test_list_get(self):
         """List view."""
@@ -133,38 +157,52 @@ class GenericViewTests(object):
         return test_create_post_superuser
 
     def test_update_post_guest(self):
-        """Create view, guest."""
+        """Update view, guest."""
         def test_update_post_guest(self):
             self.do_update('test_guest')
         return test_update_post_guest
 
     def test_update_post_user(self):
-        """Create view, user."""
+        """Update view, user."""
         def test_update_post_user(self):
             self.do_update('test_user')
         return test_update_post_user
 
     def test_update_post_admin(self):
-        """Create view, admin."""
+        """Update view, admin."""
         def test_update_post_admin(self):
             self.do_update('test_admin')
         return test_update_post_admin
 
     def test_update_post_superuser(self):
-        """Create view, superuser."""
+        """Update view, superuser."""
         def test_update_post_superuser(self):
             self.do_update('test_superuser')
         return test_update_post_superuser
 
-    def test_delete_post(self):
-        """Delete view."""
-        def test_delete_post(self):
-            count = self.test_class.objects.count()
-            resp = self.client.post(self.test_obj.get_delete_url(),
-                                    follow=True)
-            self.assertEqual(resp.status_code, 200)
-            self.assertTrue(self.test_class.objects.count() < count)
-        return test_delete_post
+    def test_delete_post_guest(self):
+        """Delete view, guest."""
+        def test_delete_post_guest(self):
+            self.do_delete('test_guest')
+        return test_delete_post_guest
+
+    def test_delete_post_user(self):
+        """Delete view, user."""
+        def test_delete_post_user(self):
+            self.do_delete('test_user')
+        return test_delete_post_user
+
+    def test_delete_post_admin(self):
+        """Delete view, admin."""
+        def test_delete_post_admin(self):
+            self.do_delete('test_admin')
+        return test_delete_post_admin
+
+    def test_delete_post_superuser(self):
+        """Delete view, superuser."""
+        def test_delete_post_superuser(self):
+            self.do_delete('test_superuser')
+        return test_delete_post_superuser
 
     def test_detail_get(self):
         """Detail view."""
