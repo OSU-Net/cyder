@@ -278,7 +278,7 @@ def migrate_user():
 
 def migrate_zone_user():
     print "migrate_zone_user"
-    NEW_LEVEL = {5: 0, 25: 1, 50: 2, 100: 3}
+    NEW_LEVEL = {5: 0, 25: 1, 50: 2, 100: 2}
     cursor.execute("SELECT * FROM zone_user")
     result = cursor.fetchall()
     for _, username, zone_id, level in result:
@@ -287,6 +287,8 @@ def migrate_zone_user():
         user, _ = User.objects.get_or_create(username=username)
         if zone_id == 0:
             ctnr = Ctnr.objects.get(pk=1)
+            user.is_superuser = True
+            user.save()
         else:
             ctnr = maintain_find_zone(zone_id)
         CtnrUser.objects.get_or_create(user=user, ctnr=ctnr, level=level)
