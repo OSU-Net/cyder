@@ -60,7 +60,7 @@ class RangeDetailView(RangeView, CydhcpDetailView):
                     (start_upper << 64) + start_lower)
         ips_used = 0
 
-        for i in range((start_upper << 64) + start_lower, (end_upper << 64) + \
+        for i in range((start_upper << 64) + start_lower, (end_upper << 64) +
                        end_lower - 1):
             taken = False
             adr_taken = None
@@ -105,7 +105,7 @@ class RangeDetailView(RangeView, CydhcpDetailView):
             'allow_list': allow,
             'range_used': "{0}%".format(
                 int(100 * float(ips_used) / ips_total) if ips_total else "N/A")
-            }.items() + [(key, val) for key, val in context.items() if key != 'range'])
+            }.items() + [(k, v) for k, v in context.items() if k != 'range'])
 
 
 def delete_range_attr(request, attr_pk):
