@@ -4,7 +4,8 @@
   {% include "cydns/includes/cydns_sidebar.html" %}
 {% endblock %}
 
-{% block content %}
+
+{% block action_bar_extra %}
   {% if object.domain %}
     <a class="btn" href="{{ object.domain.get_detail_url() }}">View Domain</a>
   {% endif %}
@@ -12,22 +13,10 @@
   {% if object.reverse_domain %}
     <a class="btn" href="{{ object.reverse_domain.get_detail_url() }}">View Reverse Domain</a>
   {% endif %}
+{% endblock %}
 
+{% block content %}
   <div class='dns-title'>{{ object }}</div>
-
-  {% block action_bar %}
-    {% if object.get_update_url %}
-      <a class="btn" href="{{ object.get_update_url() }}">Edit</a>
-    {% endif %}
-
-    {% block extra_action_bar %}
-    {% endblock %}
-
-    {% if object.get_delete_url %}
-      <a class="btn red" href="{{ object.get_delete_url() }}">Delete</a>
-    {% endif %}
-  {% endblock %}
-
   {% from "base/tables.html" import render_table %}
 
   <table class="table">

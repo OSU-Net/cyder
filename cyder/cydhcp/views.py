@@ -54,6 +54,7 @@ def cydhcp_create(request, pk=None):
 
 
 def cydhcp_get_update_form(request):
+    print request
     return get_update_form(request, get_klasses)
 
 

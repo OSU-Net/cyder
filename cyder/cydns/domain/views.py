@@ -64,12 +64,13 @@ class DomainDetailView(DomainView, DetailView):
 
         ns_objects = domain.nameserver_set.all().order_by('server')
         ns_table = tablefy(ns_objects, views=True)
-
         # Join the two dicts
         return dict({
+            'form': self.form_class,
+            'record_type': 'domain',
+            'pretty_type': 'Domain',
             'address_views': address_views,
             'cname_views': cname_views,
-
             'address_table': address_table,
             'cname_table': cname_table,
             'domain_table': domain_table,

@@ -70,24 +70,28 @@
     </div>
 
     <div class="main wrap container">
-        <img id="kid" style="position: fixed; right: -25px; top: 95px; opacity:.3; z-index: -1000;"
-             src="/media/img/cyder.gif">
-        <img id="cyderman" style="position: fixed; left: -45px; top: 55px; opacity:.2; transform: scale(.8); z-index: -1000;"
-             src="http://i.imgur.com/8pFtwjC.jpg">
+      <img id="kid" style="position: fixed; right: -25px; top: 95px; opacity:.3; z-index: -1000;"
+        src="/media/img/cyder.gif">
+      <img id="cyderman" style="position: fixed; left: -45px; top: 55px; opacity:.2; transform: scale(.8); z-index: -1000;"
+        src="http://i.imgur.com/8pFtwjC.jpg">
 
-        {% if self.sidebar() %}<div id="sidebar">{% endif %}
-        {% block sidebar %}{% endblock %}
-        {% if self.sidebar() %}</div>{% endif %}
+      {% if self.sidebar() %}<div id="sidebar">{% endif %}
+      {% block sidebar %}{% endblock %}
+      {% if self.sidebar() %}</div>{% endif %}
 
-        <div class="page-header">
-          <h1 id="title">{{ self.title() }}</h1>
-          <span id="action-bar" class="c">{% block action_bar %}{% endblock %}</span>
-          {% block filter_bar %}{% endblock %}
-        </div>
-
-        <div class="content">
-          {% block content %}{% endblock %}
-        </div>
+      <div class="page-header">
+        <h1 id="title">{{ self.title() }}</h1>
+        <span id="action-bar" class="c">
+            {% block action_bar %} {% endblock %}
+            {% block extra_action_bar %} {% endblock %}
+        </span>
+        {% block filter_bar %} {% endblock %}
+      </div>
+      {% block view_meta_data %} {% endblock %}
+      {% block hidden_form %} {% endblock %}
+      <div class="content">
+        {% block content %}{% endblock %}
+      </div>
     </div>
 
     <div id="footer">
