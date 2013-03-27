@@ -384,13 +384,14 @@ def maintain_find_workgroup(workgroup_id):
     return None
 
 
-def migrate_all():
+def migrate_all(skip=False):
             migrate_vlans()
             migrate_zones()
             migrate_workgroups()
             migrate_subnets()
             migrate_ranges()
-            migrate_dynamic_hosts()
+            if not skip:
+                migrate_dynamic_hosts()
             migrate_zone_range()
             migrate_zone_workgroup()
             migrate_user()
@@ -445,6 +446,11 @@ class Command(BaseCommand):
                     dest='delete',
                     default=False,
                     help='Delete things'),
+        make_option('-S', '--skip',
+                    action='store_true',
+                    dest='skip',
+                    default=False,
+                    help='Don\'t migrate dynamic hosts'),
         make_option('-z', '--zone-domain',
                     action='store_true',
                     dest='zone-domain',
@@ -498,4 +504,4 @@ class Command(BaseCommand):
         if options['zone-user']:
             migrate_zone_user()
         if options['all']:
-            migrate_all()
+            migrate_all(skip=options['skip'])

@@ -1,109 +1,30 @@
-import json
-
-from django.core.exceptions import ValidationError
-from django.forms.util import ErrorList, ErrorDict
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-
 from cyder.base.utils import tablefy
 from cyder.cydhcp.network.forms import *
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
+from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.utils import calc_networks
-from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_dhcp_aa,
-                                         get_dhcp_docstrings, dict_to_kv)
+from cyder.cydhcp.views import CydhcpDetailView
 
 
-def delete_network_attr(request, attr_pk):
-    """
-    An view destined to be called by ajax to remove an attr.
-    """
-    attr = get_object_or_404(NetworkKeyValue, pk=attr_pk)
-    attr.delete()
-    return HttpResponse("Attribute Removed.")
+class NetworkView(object):
+    model = Network
+    form_class = NetworkForm
+    queryset = Network.objects.all()
+    extra_context = {'record_type': 'network'}
 
 
-def create_network(request):
-    if request.method == 'POST':
-        form = NetworkForm(request.POST)
-        network = form.instance
-        if form.is_valid():
-            if network.site is None:
-                parent = calc_parent(network)
-                if parent:
-                    network.site = parent.site
-            network.save()
-            return redirect(network)
-        else:
-            return render(request, 'cydhcp/cydhcp_form.html', {
-                'form': form,
-            })
+class NetworkDetailView(NetworkView, CydhcpDetailView):
+    template_name = 'network/network_detail.html'
 
-    else:
-        form = NetworkForm()
-        return render(request, 'cydhcp/cydhcp_form.html', {
-            'form': form,
-        })
-
-
-def update_network(request, network_pk):
-    network = get_object_or_404(Network, pk=network_pk)
-    attrs = network.networkkeyvalue_set.all()
-    docs = get_dhcp_docstrings(NetworkKeyValue())
-    aa = get_dhcp_aa(NetworkKeyValue())
-    if request.method == 'POST':
-        form = NetworkForm(request.POST, instance=network)
-        try:
-            if not form.is_valid():
-                return render(request, 'network/network_edit.html', {
-                    'network': network,
-                    'form': form,
-                    'attrs': attrs,
-                    'docs': docs,
-                    'aa': json.dumps(aa)
-                })
-            else:
-                # Handle key value stuff.
-                kv = None
-                kv = get_attrs(request.POST)
-                update_attrs(kv, attrs, NetworkKeyValue, network, 'network')
-                network = form.save()
-                return redirect(network.get_update_url())
-        except ValidationError, e:
-            if form._errors is None:
-                form._errors = ErrorDict()
-            form._errors['__all__'] = ErrorList(e.messages)
-            if kv:
-                attrs = dict_to_kv(kv, NetworkKeyValue)
-            return render(request, 'network/network_edit.html', {
-                'network': network,
-                'form': form,
-                'attrs': attrs,
-                'docs': docs,
-                'aa': json.dumps(aa)
-            })
-
-    else:
-        form = NetworkForm(instance=network)
-        return render(request, 'network/network_edit.html', {
-            'network': network,
-            'form': form,
-            'attrs': attrs,
-            'docs': docs,
-            'aa': json.dumps(aa)
-        })
-
-
-def network_detail(request, network_pk):
-    """Network detail view. Shows related ranges, networks, attributes."""
-    network = get_object_or_404(Network, pk=network_pk)
-    network.update_network()
-    parent_networks, sub_networks = calc_networks(network)
-
-    return render(request, 'network/network_detail.html', {
-        'network': network,
-        'network_table': tablefy((network,)),
-        'ranges_table': tablefy(network.range_set.all()),
-        'parent_networks_table': tablefy(parent_networks),
-        'sub_networks_table': tablefy(sub_networks),
-        'attrs_table': tablefy(network.networkkeyvalue_set.all()),
-    })
+    def get_context_data(self, **kwargs):
+        context = super(NetworkDetailView, self).get_context_data(**kwargs)
+        network = kwargs.get('object', False)
+        parent_networks, child_networks = calc_networks(network)
+        context = dict({
+            'object': network,
+            'network_table': tablefy((network,)),
+            'ranges_table': tablefy(network.range_set.all()),
+            'parent_network_table': tablefy(parent_networks),
+            'sub_networks_table': tablefy(child_networks),
+            'attrs_table': tablefy(network.networkkeyvalue_set.all()),
+        }.items() + context.items())
+        return context

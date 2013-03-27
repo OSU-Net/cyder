@@ -41,7 +41,8 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
             try:
                 if perm(request, cy.ACTION_CREATE, obj=obj, obj_class=Klass):
                     obj = form.save()
-                    return redirect(obj.get_list_url())
+                    return redirect(
+                        request.META.get('HTTP_REFERER', obj.get_list_url()))
             except (ValidationError, ValueError) as e:
                 if form._errors is None:
                     form._errors = ErrorDict()

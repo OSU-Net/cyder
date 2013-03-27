@@ -10,12 +10,102 @@ import ipaddr
 from cyder.base.utils import make_paginator, tablefy
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
+from cyder.cydhcp.range.forms import RangeForm
 from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
+
+from cyder.cydhcp.views import CydhcpDetailView
+
+
+class RangeView(object):
+    model = Range
+    form_class = RangeForm
+    queryset = Range.objects.all()
+    extra_context = {'record_type': 'range'}
+
+
+class RangeDetailView(RangeView, CydhcpDetailView):
+    template_name = 'range/range_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(RangeDetailView, self).get_context_data(**kwargs)
+        mrange = kwargs.get('object', False)
+        if mrange.allow == ALLOW_OPTION_VRF:
+            try:
+                allow = mrange.network.vrf_set.all()
+            except ObjectDoesNotExist:
+                allow = []
+        elif mrange.allow == ALLOW_OPTION_KNOWN:
+            allow = [ALLOW_OPTION_KNOWN]
+        elif mrange.allow == ALLOW_OPTION_LEGACY:
+            allow = mrange.ctnr_set.all()
+
+        start_upper, start_lower = mrange.start_upper, mrange.start_lower
+        end_upper, end_lower = mrange.end_upper, mrange.end_lower
+
+        gt_start = Q(ip_upper=start_upper, ip_lower__gte=start_lower)
+        gt_start = gt_start | Q(ip_upper__gte=start_upper)
+
+        lt_end = Q(ip_upper=end_upper, ip_lower__gte=start_lower)
+        lt_end = lt_end | Q(ip_upper__lte=end_upper)
+        records = AddressRecord.objects.filter(gt_start, lt_end)
+        ptrs = PTR.objects.filter(gt_start, lt_end)
+        intrs = StaticInterface.objects.filter(gt_start, lt_end)
+        range_data = []
+        ips_total = ((end_upper << 64) + end_lower - 1 -
+                    (start_upper << 64) + start_lower)
+        ips_used = 0
+
+        for i in range((start_upper << 64) + start_lower, (end_upper << 64) + \
+                       end_lower - 1):
+            taken = False
+            adr_taken = None
+            ip_str = str(ipaddr.IPv4Address(i))
+            for record in records:
+                if record.ip_lower == i:
+                    adr_taken = record
+                    break
+            ptr_taken = None
+            for ptr in ptrs:
+                if ptr.ip_lower == i:
+                    ptr_taken = ptr
+                    break
+            if ptr_taken and adr_taken:
+                if ptr_taken.name == adr_taken.fqdn:
+                    range_data.append(('A/PTR', ip_str, ptr_taken, adr_taken))
+                else:
+                    range_data.append(('PTR', ip_str, ptr_taken))
+                    range_data.append(('A', ip_str, adr_taken))
+                taken = True
+            elif ptr_taken and not adr_taken:
+                range_data.append(('PTR', ip_str, ptr_taken))
+                taken = True
+            elif not ptr_taken and adr_taken:
+                range_data.append(('A', ip_str, adr_taken))
+                taken = True
+            for intr in intrs:
+                if intr.ip_lower == i:
+                    range_data.append(('Interface', ip_str, intr))
+                    taken = True
+                    break
+
+            if not taken:
+                range_data.append((None, ip_str))
+            else:
+                ips_used += 1
+        return dict({
+            'object': mrange,
+            'ranges_table': tablefy((mrange,)),
+            'range_data': make_paginator(self.request, range_data, 50),
+            'attrs_table': tablefy(mrange.rangekeyvalue_set.all()),
+            'allow_list': allow,
+            'range_used': "{0}%".format(
+                int(100 * float(ips_used) / ips_total) if ips_total else "N/A")
+            }.items() + [(key, val) for key, val in context.items() if key != 'range'])
 
 
 def delete_range_attr(request, attr_pk):

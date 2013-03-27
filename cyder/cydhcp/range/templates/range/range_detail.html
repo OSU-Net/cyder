@@ -1,19 +1,16 @@
-{% extends "cydhcp/cydhcp_base.html" %}
+{% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
 
 {% block title %}
-  Range {{ range_.start_str }} to {{ range_.end_str }}
-{% endblock %}
-
-{% block action_bar %}
-  {% if range_.network.pk %}
-    <a href="{{ url('build-network', range_.network.pk) }}">DHCP Build Output</a>
-  {% endif %}
+  Range {{ object.start_str }} to {{ object.end_str }}
 {% endblock %}
 
 {% block content %}
-    {{ render_table(request, range_table) }}
+  {% if object.network.pk %}
+    <a href="{{ url('build-network', object.network.pk) }}">DHCP Build Output</a>
+  {% endif %}
+    {{ render_table(request, ranges_table) }}
 
     {% if allow_list %}
       <h3>Allowed</h3>
@@ -78,8 +75,7 @@
                       <a href="/cydns/ptr/create/?ip_str={{
                           object[1]}}&ip_type=4">PTR</a> |
                       <a href="{{ url('static_intr-create')}}?ip_str={{
-                          object[1]}}&ip_type=4">Static Interface</a> |
-                      <a href="{{ url('dynamic_intr-create')}}?range={{range_.pk}}">Dynamic Interface</a>
+                          object[1]}}&ip_type=4">Static Interface</a> 
                   </td>
               {% endif %}
             </tr>

@@ -9,15 +9,10 @@
     <a class="btn btn-danger" href="{{ object.get_delete_url() }}">Delete</a>
   {% endif %}
 {% endblock %}
+
 {% block action_bar_extra %} {% endblock %}
 
-{% block view_meta_data %}
-  <span id="view-metadata"
-    data-objType="{{ record_type }}"
-    data-prettyObjType="{{ record_type|prettify_record_type + 's' }}"
-    data-getUrl="{{ url('cydns-get-record') }}">
-  </span>
-{% endblock %}
+{% block view_meta_data %} {% endblock %}
 
 {% block hidden_form %}
 <div class="hidden" id="obj-form">

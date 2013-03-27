@@ -42,6 +42,9 @@ class Range(models.Model, ObjectUrlMixin):
             existing range's `start` and `end` values to make sure that the new
             range does not overlap.
     """
+
+    ALLOW_OPTIONS
+
     id = models.AutoField(primary_key=True)
 
     ip_type = models.CharField(max_length=1, choices=IP_TYPES.items())
@@ -175,11 +178,10 @@ class Range(models.Model, ObjectUrlMixin):
                         self.network.network))
         self.check_for_overlaps()
 
-
     def get_allowed_clients(self):
         if self.allow == 'vrf':
             allow = ["allow members of {0}".format(vrf.name)
-                for vrf in self.vrf_set.all()]
+                     for vrf in self.vrf_set.all()]
         elif self.allow == 'known-clients':
             allow = ['allow known clients']
         elif self.allow == 'legacy':
@@ -187,7 +189,6 @@ class Range(models.Model, ObjectUrlMixin):
                 ctnr.name, self.start_str, self.end_str)
                 for ctnr in self.ctnr_set.all()]
         return allow
-
 
     def check_for_overlaps(self):
         """This function will look at all the other ranges and make sure we
@@ -212,7 +213,6 @@ class Range(models.Model, ObjectUrlMixin):
                                       Ip(self._start),
                                       Ip(self._end)))
 
-
     def build_range(self):
         join_args = lambda x: "\n".join(map(lambda y: "\t\t{0}".format(y), x))
         range_options = self.range_key_value.filter(is_option=True)
@@ -232,13 +232,11 @@ class Range(models.Model, ObjectUrlMixin):
         build_str += "\t}\n\n"
         return build_str
 
-
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
         rules."""
         self.ipf = IPFilter(self.start_str, self.end_str, self.network.ip_type,
                             object_=self)
-
 
     def display(self):
         return "Range: {3} to {4} {0} -- {2} -- {1}".format(
@@ -258,7 +256,6 @@ class Range(models.Model, ObjectUrlMixin):
         return "{0} - {1} - ({2}) {3} to {4}".format(
             site_name, vlan_name,
             self.network, self.start_str, self.end_str)
-
 
     def get_next_ip(self):
         """Find's the most appropriate ip address within a range. If it can't

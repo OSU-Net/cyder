@@ -1,14 +1,16 @@
-{% extends "cydhcp/cydhcp_base.html" %}
+{% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
+<!-- the template recieves the network object with the name name 'object' that way
+we do not need to override the logic for the edit and delete buttons so that
+they can be defined generically in the base template.  The other option I considered
+was doing that and then setting network as object in the template for clarity.  I am
+not sure which approach is better so im doing this for now -->
 
-{% block title %}Network {{ network.network_str }}{% endblock %}
-
-{% block action_bar %}
-  <a href="{{ url('build-network', network.pk) }}">DHCP Build Output</a>
-{% endblock %}
+{% block title %}Network {{ object.network_str }}{% endblock %}
 
 {% block content %}
+  <a href="{{ url('build-network', object.pk) }}">DHCP Build Output</a>
   {{ render_table(request, network_table) }}
 
   {% if attrs_table %}

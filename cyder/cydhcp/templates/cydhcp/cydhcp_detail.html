@@ -1,22 +1,19 @@
-{% extends "cydhcp/cydhcp_base.html" %}
+{% extends "base/detail.html" %}
 
+{% block sidebar %}
+    {% include "cydhcp/includes/cydhcp_sidebar.html" %}
+{% endblock %}
+
+{% block view_meta_data %}
+  <span id="view-metadata"
+    data-objType="{{ record_type }}"
+    data-prettyObjType="{{ record_type|prettify_record_type + 's' }}"
+    data-getUrl="{{ url('cydhcp-get-record') }}">
+  </span>
+{% endblock %}
 
 {% block content %}
     <div class='dns-title'>{{ object }}</div>
-    <!--
-    {% block action_bar %}
-        {% if object.get_update_url %}
-            <a class="btn btn-primary" href="{{ object.get_update_url() }}">Edit</a>
-        {% endif %}
-
-        {% block mid_action_bar %}
-        {% endblock %}
-
-        {% if object.get_delete_url %}
-            <a class="btn btn-danger" href="{{ object.get_delete_url() }}">Delete</a>
-        {% endif %}
-        {% endblock %} -->
-
         {% from "base/tables.html" import render_table %}
 
         <table class="table">

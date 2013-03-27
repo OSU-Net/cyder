@@ -68,7 +68,6 @@ class DomainDetailView(DomainView, DetailView):
         return dict({
             'form': self.form_class,
             'record_type': 'domain',
-            'pretty_type': 'Domain',
             'address_views': address_views,
             'cname_views': cname_views,
             'address_table': address_table,
