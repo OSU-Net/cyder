@@ -1,14 +1,29 @@
-{% extends "cydhcp/cydhcp_base.html" %}
+{% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
-
+{% set vrf = object %}
 {% block title %}VRF {{ vrf.name }}{% endblock %}
 
 {% block content %}
   {{ render_table(request, vrf_table ) }}
-
   {% if attrs %}
     <h3>VRF Attributes</h4>
     {{ render_table(request, attrs_table) }}
   {% endif %}
+  {% if dynamic_hosts_table %}
+    <h3>Dynamic Hosts in {{ vrf.name }}</h3>
+    {% with page_obj = dynamic_hosts_page_obj %}
+      {% include "base/includes/pagination.html" %}
+    {% endwith %}
+    {{ render_table(request, dynamic_hosts_table) }}
+  {% endif %}
+  
+  {% if static_hosts_table %}
+    <h3>Static Hosts in {{ vrf.name }}</h3>
+    {% with page_obj = static_hosts_page_obj %}
+      {% include "base/includes/pagination.html" %}
+    {% endwith %}
+    {{ render_table(request, static_hosts_table) }}
+  {% endif %}
+
 {% endblock %}
