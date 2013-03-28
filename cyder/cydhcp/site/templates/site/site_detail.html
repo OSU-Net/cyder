@@ -23,16 +23,19 @@
     <h3>Child Sites</h3>
     {{ render_table(request, child_sites_table) }}
   {% endif %}
-
   {% if networks_table %}
     <h3>Networks</h3>
-    {{ render_table(networks_table) }}
+    {% with page_obj = networks_table_page_obj %}
+      {% include "base/includes/pagination.html" %}
+    {% endwith %}
+    {{ render_table(request, networks_table) }}
   {% endif %}
 
   {% if vlanless_networks_page_obj %}
     <h3>Vlan-less Networks</h3>
-    {% set page_obj = vlanless_networks_page_obj %}
-    {% include "base/includes/pagination.html" %}
-    {{ render_table(request, vlanless_networks_page_obj) }}
+    {% with page_obj = vlanless_networks_page_obj %}
+      {% include "base/includes/pagination.html" %}
+    {% endwith %}
+    {{ render_table(request, vlanless_networks_table) }}
   {% endif %}
 {% endblock %}
