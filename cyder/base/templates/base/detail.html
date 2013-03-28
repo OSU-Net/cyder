@@ -15,20 +15,20 @@
 
 {% block view_meta_data %} {% endblock %}
 
-{% block hidden_form %}
-<div class="hidden" id="obj-form">
- <form class="form" method="POST">
-   <h2 id="form-title">
-     {{ 'Updating ' + record_type|prettify_record_type }}
-   </h2>
-   <div class="inner-form"> </div>
-   <div class="form-btns">
-     <hr>
-     <a class="btn submit c">Update</a>
-     <a class="btn cancel c" data-formId="obj-form">Cancel</a>
-   </div>
- </form>
-</div>
+{% block form %}
+  <div class="hidden" id="obj-form">
+   <form class="form" method="POST">
+     <h2 id="form-title">
+       {{ 'Updating ' + record_type|prettify_record_type }}
+     </h2>
+     <div class="inner-form"></div>
+     <div class="form-btns">
+       <hr>
+       <a class="btn submit c">Update</a>
+       <a class="btn cancel c" data-formId="obj-form">Cancel</a>
+     </div>
+   </form>
+  </div>
 {% endblock %}
 
 {% block content %}
@@ -49,5 +49,4 @@
       </tr>
     </tbody>
   </table>
-
 {% endblock %}

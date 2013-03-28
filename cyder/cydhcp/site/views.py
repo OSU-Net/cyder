@@ -8,7 +8,7 @@ from cyder.cydhcp.site.models import Site
 def site_detail(request, site_pk):
     site = get_object_or_404(Site, pk=site_pk)
     networks = Network.objects.filter(site=site)
-    print networks
+
     return render(request, 'site/site_detail.html', {
         'object': site,
         'record_type': 'site',

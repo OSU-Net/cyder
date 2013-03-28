@@ -2,33 +2,33 @@
 {% from "base/tables.html" import render_table %}
 
 {% block sidebar %}
-    {% include "cydhcp/includes/cydhcp_sidebar.html" %}
+  {% include "cydhcp/includes/cydhcp_sidebar.html" %}
 {% endblock %}
 
 {% block view_meta_data %}
   <span id="view-metadata"
-    data-objType="{{ record_type }}"
-    data-prettyObjType="{{ record_type|prettify_record_type + 's' }}"
-    data-getUrl="{{ url('cydhcp-get-record') }}">
+        data-objType="{{ record_type }}"
+        data-prettyObjType="{{ record_type|prettify_record_type + 's' }}"
+        data-getUrl="{{ url('cydhcp-get-record') }}">
   </span>
 {% endblock %}
 
 {% block content %}
-    <div class='dns-title'>{{ object }}</div>
+  <div class='dns-title'>{{ object }}</div>
 
-        <table class="table">
-            <thead>
-                {% for item, _, value in object.details()['data'] %}
-                    <th>{{ item }}</th>
-                {% endfor %}
-            </thead>
+  <table class="table">
+    <thead>
+      {% for item, _, value in object.details()['data'] %}
+      <th>{{ item }}</th>
+      {% endfor %}
+    </thead>
 
-            <tbody>
-                <tr>
-                {% for item, _, value in object.details()['data'] %}
-                    <td>{{ value }}</td>
-                {% endfor %}
-                </tr>
-            </tbody>
-        </table>
+    <tbody>
+      <tr>
+        {% for item, _, value in object.details()['data'] %}
+        <td>{{ value }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
+  </table>
 {% endblock %}

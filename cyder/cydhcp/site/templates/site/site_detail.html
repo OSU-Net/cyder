@@ -1,5 +1,6 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
+
 {% set site = object %}
 {% block title %}Site {{ site.get_full_name() }}{% endblock %}
 
@@ -34,5 +35,4 @@
     {% include "base/includes/pagination.html" %}
     {{ render_table(request, vlanless_networks_page_obj) }}
   {% endif %}
-
 {% endblock %}
