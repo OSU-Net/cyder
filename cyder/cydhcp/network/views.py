@@ -9,7 +9,7 @@ class NetworkView(object):
     model = Network
     form_class = NetworkForm
     queryset = Network.objects.all()
-    extra_context = {'record_type': 'network'}
+    extra_context = {'obj_type': 'network'}
 
 
 class NetworkDetailView(NetworkView, CydhcpDetailView):

@@ -31,10 +31,11 @@ pip install -r requirements/dev.txt
 ```
 
 Set up MySQL along with tables and data. Enter local database settings into
-cyder/settings/local.py
+cyder/settings/local.py. Use settings_test.py when running tests.
 
 ```
 cp cyder/settings/local.py-dist cyder/settings/local.py
+cp cyder/settings_test.py-dist cyder/settings_test.py
 python manage.py syncdb
 ```
 

@@ -20,15 +20,15 @@ def cydns_home(request):
 
 def commit_record(request):
     commit_data = json.loads(request.raw_post_data)
-    record_type = commit_data.pop("rtype", None)
-    if not record_type:
+    obj_type = commit_data.pop("rtype", None)
+    if not obj_type:
         commit_data["errors"] = {"__all__": "No record type."}
         return HttpResponse(commit_data)
-    if record_type == "A":
+    if obj_type == "A":
         commit_data = add_ip_type_to_commit(commit_data)
         commit_data = add_domain_to_commit(commit_data)
         Klass = AddressRecord
-    elif record_type == "PTR":
+    elif obj_type == "PTR":
         commit_data = add_ip_type_to_commit(commit_data)
         Klass = PTR
 

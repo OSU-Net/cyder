@@ -7,8 +7,8 @@
 
 {% block view_meta_data %}
   <span id="view-metadata"
-        data-objType="{{ record_type }}"
-        data-prettyObjType="{{ record_type|prettify_record_type + 's' }}"
+        data-objType="{{ obj_type }}"
+        data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
         data-getUrl="{{ url('cydhcp-get-record') }}">
   </span>
 {% endblock %}

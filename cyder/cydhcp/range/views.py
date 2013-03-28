@@ -25,7 +25,7 @@ class RangeView(object):
     model = Range
     form_class = RangeForm
     queryset = Range.objects.all()
-    extra_context = {'record_type': 'range'}
+    extra_context = {'obj_type': 'range'}
 
 
 class RangeDetailView(RangeView, CydhcpDetailView):

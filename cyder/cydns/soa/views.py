@@ -22,7 +22,7 @@ class SOAView(object):
     model = SOA
     form_class = SOAForm
     queryset = SOA.objects.all()
-    extra_context = {'record_type': 'soa'}
+    extra_context = {'obj_type': 'soa'}
 
 
 class SOADetailView(SOAView, CydnsDetailView):

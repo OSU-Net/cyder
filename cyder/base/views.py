@@ -25,12 +25,12 @@ def home(request):
     })
 
 
-def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
+def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
-    # Infer record_type from URL, saves trouble of having to specify
-    record_type = record_type or request.path.split('/')[2]
+    # Infer obj_type from URL, saves trouble of having to specify
+    obj_type = obj_type or request.path.split('/')[2]
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     form = FormKlass(instance=obj)
 
@@ -50,7 +50,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
                 return render(request, template, {
                                 'form': form,
                                 'obj': obj,
-                                'record_type': record_type,
+                                'obj_type': obj_type,
                                 'pk': pk,
                               })
     elif request.method == 'GET':
@@ -64,15 +64,15 @@ def cy_view(request, get_klasses_fn, template, pk=None, record_type=None):
                     'obj': obj,
                     'page_obj': page_obj,
                     'object_table': tablefy(page_obj),
-                    'record_type': record_type,
+                    'obj_type': obj_type,
                     'pk': pk,
                   })
 
 
 def cy_delete(request, pk, get_klasses_fn):
     """DELETE. DELETE. DELETE."""
-    record_type = request.path.split('/')[2]
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
+    obj_type = request.path.split('/')[2]
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
 
     try:
@@ -84,16 +84,22 @@ def cy_delete(request, pk, get_klasses_fn):
     return redirect(request.META.get('HTTP_REFERER', obj.get_list_url()))
 
 
+def cy_detail(request, pk, get_klasses_fn):
+    """Show bunches of related tables."""
+    obj_type = request.path.split('/')[2]
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+
+
 def get_update_form(request, get_klasses_fn):
     """
     Update view called asynchronously from the list_create view
     """
-    record_type = request.GET.get('object_type', '')
+    obj_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
-    if not (record_type and record_pk):
+    if not (obj_type and record_pk):
         raise Http404
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
 
     # Get the object if updating.
     try:
@@ -111,14 +117,14 @@ def get_update_form(request, get_klasses_fn):
 
 def search_obj(request, get_klasses_fn):
     """
-    Returns a list of objects of 'record_type' matching 'term'.
+    Returns a list of objects of 'obj_type' matching 'term'.
     """
-    record_type = request.GET.get('record_type', '')
+    obj_type = request.GET.get('obj_type', '')
     term = request.GET.get('term', '')
-    if not (record_type and term):
+    if not (obj_type and term):
         raise Http404
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
 
     records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]

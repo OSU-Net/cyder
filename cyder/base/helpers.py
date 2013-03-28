@@ -40,33 +40,33 @@ def humanized_model_name(model_name, *args, **kwargs):
 
 
 @register.filter
-def prettify_record_type(record_type, *args, **kwargs):
+def prettify_obj_type(obj_type, *args, **kwargs):
     """
     Turns all-lowercase record type string to all caps or splits into
     words if underscore.
     e.g. 'cname' to 'CNAME' and 'address_record' to 'Address Record'
     """
-    if not record_type:
+    if not obj_type:
         return
 
     prettified = ''
-    if record_type in ['range', 'network', 'site', 'domain', 'nameserver',
+    if obj_type in ['range', 'network', 'site', 'domain', 'nameserver',
                        'workgroup', 'system']:
-        return record_type[0].upper() + record_type[1:]
-    elif '_' in record_type:
+        return obj_type[0].upper() + obj_type[1:]
+    elif '_' in obj_type:
         capitalize = True
-        for i in range(len(record_type)):
+        for i in range(len(obj_type)):
             if capitalize:
-                prettified += record_type[i].upper()
+                prettified += obj_type[i].upper()
                 capitalize = False
-            elif record_type[i] == '_':
+            elif obj_type[i] == '_':
                 prettified += ' '
                 capitalize = True
             else:
-                prettified += record_type[i]
+                prettified += obj_type[i]
         return prettified
 
-    return record_type.upper()
+    return obj_type.upper()
 
 
 @register.function

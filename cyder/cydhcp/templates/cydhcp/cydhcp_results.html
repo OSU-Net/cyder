@@ -78,7 +78,7 @@
                     {% for addr in addrs %}
                     <tr>
                         <td><a href='{{ addr.get_detail_url() }}'>{{ addr.fqdn }}</a></td>
-                        <td>{{ addr.record_type() }}</td>
+                        <td>{{ addr.obj_type() }}</td>
                         <td>{{ addr.ip_str }}</td>
                     </tr>
                     {% endfor %}

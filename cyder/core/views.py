@@ -10,11 +10,11 @@ from cyder.core.system.forms import SystemForm
 from cyder.core.system.models import System
 
 
-def get_klasses(record_type):
+def get_klasses(obj_type):
     return {
         'ctnr': (Ctnr, CtnrForm, None),
         'system': (System, SystemForm, None),
-    }.get(record_type, (None, None, None))
+    }.get(obj_type, (None, None, None))
 
 
 def core_view(request, pk=None):
@@ -33,8 +33,8 @@ def core_delete(request, pk):
     return cy_delete(request, pk, get_klasses)
 
 
-def core_table_update(request, pk, record_type=None):
-    return table_update(request, pk, get_klasses, record_type)
+def core_table_update(request, pk, obj_type=None):
+    return table_update(request, pk, get_klasses, obj_type)
 
 
 def core_index(request):

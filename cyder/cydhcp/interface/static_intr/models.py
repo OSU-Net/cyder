@@ -235,7 +235,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
             self.template = self.a_template
         return super(StaticInterface, self).bind_render_record(pk=pk, **kwargs)
 
-    def record_type(self):
+    def obj_type(self):
         return "A/PTR"
 
     def delete(self, *args, **kwargs):
@@ -243,7 +243,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
             if self.intrnameserver_set.exists():
                 raise ValidationError("Cannot delete the record {0}. "
                                       "It is a glue record.".format(
-                                      self.record_type()))
+                                      self.obj_type()))
         check_cname = kwargs.pop("check_cname", True)
         super(StaticInterface, self).delete(validate_glue=False,
                                             check_cname=check_cname)

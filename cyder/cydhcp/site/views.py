@@ -11,7 +11,7 @@ def site_detail(request, site_pk):
 
     return render(request, 'site/site_detail.html', {
         'object': site,
-        'record_type': 'site',
+        'obj_type': 'site',
         'site_table': tablefy((site,)),
         'networks_table': tablefy(networks),
         'attrs_table': tablefy(site.sitekeyvalue_set.all()),

@@ -31,7 +31,7 @@ from cyder.cydhcp.workgroup.forms import WorkgroupForm
 import ipaddr
 
 
-def get_klasses(record_type):
+def get_klasses(obj_type):
     return {
         'network': (Network, NetworkForm, None),
         'range': (Range, RangeForm, None),
@@ -41,7 +41,7 @@ def get_klasses(record_type):
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
         'vrf': (Vrf, VrfForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
-    }.get(record_type, (None, None, None))
+    }.get(obj_type, (None, None, None))
 
 
 def cydhcp_view(request, pk=None):
@@ -66,17 +66,17 @@ def cydhcp_delete(request, pk):
     return cy_delete(request, pk, get_klasses)
 
 
-def cydhcp_table_update(request, pk, record_type=None):
-    return table_update(request, pk, get_klasses, record_type)
+def cydhcp_table_update(request, pk, obj_type=None):
+    return table_update(request, pk, get_klasses, obj_type)
 
 
 def cydhcp_detail(request, pk):
-    record_type = request.path.split('/')[2]
-    Klass, FormKlass = get_klasses(record_type)
+    obj_type = request.path.split('/')[2]
+    Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
-    attr_getter = getattr(obj, "{0}keyvalue_set".format(record_type))
-    return render(request, "{0}/{0}_detail.html".format(record_type), {
-        record_type: obj,
+    attr_getter = getattr(obj, "{0}keyvalue_set".format(obj_type))
+    return render(request, "{0}/{0}_detail.html".format(obj_type), {
+        obj_type: obj,
         'attrs': attr_getter.all()
     })
 

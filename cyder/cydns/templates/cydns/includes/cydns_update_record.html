@@ -1,7 +1,7 @@
 <script>
   // So if people paste links around.
   $(document).ready(function (){
-    window.location.hash = '#record_type={{record_type}}&record_pk={{record_pk}}';
+    window.location.hash = '#obj_type={{obj_type}}&record_pk={{record_pk}}';
   });
 </script>
 <style>
@@ -60,7 +60,7 @@
   {% endif %}
 </div>
 {% endif %}
-<input type="hidden" id="record_type" name="record_type" value="{{record_type}}"/>
+<input type="hidden" id="obj_type" name="obj_type" value="{{obj_type}}"/>
 {{ form.as_p() }}
 <input type="hidden" id="record_pk" name="record_pk" value="{{record_pk}}"/>
 <input type="submit" value="Submit"/>

@@ -12,7 +12,7 @@ class DomainView(object):
     model = Domain
     queryset = Domain.objects.all().order_by('name')
     form_class = DomainForm
-    extra_context = {'record_type': 'domain'}
+    extra_context = {'obj_type': 'domain'}
 
 
 class DomainDetailView(DomainView, DetailView):
@@ -67,7 +67,7 @@ class DomainDetailView(DomainView, DetailView):
         # Join the two dicts
         return dict({
             'form': self.form_class,
-            'record_type': 'domain',
+            'obj_type': 'domain',
             'address_views': address_views,
             'cname_views': cname_views,
             'address_table': address_table,

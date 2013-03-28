@@ -35,7 +35,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 
-def get_klasses(record_type):
+def get_klasses(obj_type):
     """
     Given record type string, grab its class and forms.
     """
@@ -51,14 +51,14 @@ def get_klasses(record_type):
         'srv': (SRV, SRVForm, SRVForm),
         'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
-    }.get(record_type, (None, None, None))
+    }.get(obj_type, (None, None, None))
 
 
 def cydns_view(request, pk=None):
     """List, create, update view in one for a flatter heirarchy. """
-    # Infer record_type from URL, saves trouble of having to specify
+    # Infer obj_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
-    record_type = request.path.split('/')[2]
+    obj_type = request.path.split('/')[2]
 
     domains = json.dumps([domain.name for domain in
                           Domain.objects.filter(is_reverse=False)
@@ -66,7 +66,7 @@ def cydns_view(request, pk=None):
                                        obj=domain)]),
 
     # Get the record form.
-    Klass, FormKlass, FQDNFormKlass = get_klasses(record_type)
+    Klass, FormKlass, FQDNFormKlass = get_klasses(obj_type)
 
     # Get the object if updating.
     record = get_object_or_404(Klass, pk=pk) if pk else None
@@ -83,7 +83,7 @@ def cydns_view(request, pk=None):
             return render(request, 'cydns/cydns_view.html', {
                 'domain': domains,
                 'form': fqdn_form,
-                'record_type': record_type,
+                'obj_type': obj_type,
                 'pk': pk,
                 'obj': record
             })
@@ -94,7 +94,7 @@ def cydns_view(request, pk=None):
             if perm(request, cy.ACTION_CREATE, obj=record, obj_class=Klass):
                 record = form.save()
                 # If domain, add to current ctnr.
-                if record_type == 'domain':
+                if obj_type == 'domain':
                     request.session['ctnr'].domains.add(record)
                     return redirect(record.get_list_url())
         except (ValidationError, ValueError):
@@ -110,7 +110,7 @@ def cydns_view(request, pk=None):
         'page_obj': page_obj,
         'object_table': tablefy(page_obj, views=True),
         'domains': domains,
-        'record_type': record_type,
+        'obj_type': obj_type,
         'pk': pk,
     })
 

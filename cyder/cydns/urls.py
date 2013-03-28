@@ -4,16 +4,16 @@ from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.cydns.views import *
 
 
-def cydns_urls(record_type):
+def cydns_urls(obj_type):
     """Url generator for DNS record views."""
     return patterns('',
-        url(r'^$', cydns_view, name=record_type),
+        url(r'^$', cydns_view, name=obj_type),
         url(r'(?P<pk>[\w-]+)/update/$', cydns_view,
-            name=record_type + '-update'),
+            name=obj_type + '-update'),
         url(r'(?P<pk>[\w-]+)/delete/$', cydns_delete,
-            name=record_type + '-delete'),
+            name=obj_type + '-delete'),
         url(r'(?P<pk>[\w-]+)/tableupdate/$', cydns_table_update,
-            name=record_type + '-table-update'),
+            name=obj_type + '-table-update'),
     )
 
 

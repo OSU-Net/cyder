@@ -14,7 +14,7 @@ class NSView(object):
     model = Nameserver
     form_class = NameserverForm
     queryset = Nameserver.objects.all()
-    extra_context = {'record_type': 'nameserver'}
+    extra_context = {'obj_type': 'nameserver'}
 
 
 class NSCreateView(NSView, CydnsCreateView):

@@ -50,7 +50,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
 
     def __str__(self):
         return '{0} {1} {2}'.format(self.fqdn,
-                                    self.record_type(), str(self.ip_str))
+                                    self.obj_type(), str(self.ip_str))
 
     def __repr__(self):
         return '<Address Record "{0}">'.format(str(self))
@@ -60,7 +60,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
         data = super(BaseAddressRecord, self).details()
         data['data'] = [
             ('Domain', 'domain__name', self.domain),
-            ('Record Type', 'record_type', self.record_type()),
+            ('Record Type', 'obj_type', self.obj_type()),
             ('IP', 'ip_str', str(self.ip_str)),
             ('Name', 'fqdn', self.fqdn),
         ]
@@ -70,7 +70,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'fqdn', 'datatype': 'string', 'editable': True},
-            {'name': 'record_type', 'datatype': 'string', 'editable': False},
+            {'name': 'obj_type', 'datatype': 'string', 'editable': False},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
 
@@ -134,12 +134,12 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
             if self.nameserver_set.exists():
                 raise ValidationError(
                     "Cannot delete the record {0}. It is a ' 'glue record."
-                    .format(self.record_type()))
+                    .format(self.obj_type()))
         if kwargs.pop('check_cname', True):
             if CNAME.objects.filter(target=self.fqdn):
                 raise ValidationError('A CNAME points to this {0} record. '
                                       'Change the CNAME before deleting this '
-                                      'record.'.format(self.record_type()))
+                                      'record.'.format(self.obj_type()))
 
         from cyder.cydns.utils import prune_tree
         objs_domain = self.domain
@@ -180,7 +180,7 @@ class BaseAddressRecord(Ip, ObjectUrlMixin, DisplayMixin):
                                   'Nameserver. Change the Nameserver to '
                                   'edit this record.')
 
-    def record_type(self):
+    def obj_type(self):
         # If PTR didn't share this field, we would use 'A' and 'AAAA'
         # instead of '4' and '6'.
         if self.ip_type == '4':
