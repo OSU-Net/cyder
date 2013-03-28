@@ -1,17 +1,22 @@
 {% extends "cydhcp/cydhcp_base.html" %}
 {% from "base/tables.html" import render_table %}
 
-
+{% set vlan = object %}
 {% block title %}VLAN {{ vlan.name }}{% endblock %}
 
 {% block content %}
-  {{ render_table(request, [vlan]) }}
+
+  {{ render_table(request, vlan_table) }}
 
   {% if attrs %}
     <h3>VLAN Attributes</h3>
-    {{ render_table(request, attrs) }}
+    {{ render_table(request, attrs_table) }}
   {% endif %}
-
-  <h3>Networks</h3>
-  {{ render_table(vlan.network_set.all()) }}
+  {% if network_table %}
+    <h3>Networks</h3>
+    {% with page_obj = network_page_obj %}
+      {% include "base/includes/pagination.html" %}
+    {% endwith %}
+    {{ render_table(request, network_table) }}
+  {% endif %}
 {% endblock %}
