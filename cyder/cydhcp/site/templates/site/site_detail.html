@@ -1,22 +1,7 @@
-{% extends "cydhcp/cydhcp_base.html" %}
+{% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
-
+{% set site = object %}
 {% block title %}Site {{ site.get_full_name() }}{% endblock %}
-
-<!--
-{% block action_bar %}
-  {% if site.get_update_url %}
-    <a class="btn btn-primary" href="{{ site.get_update_url() }}">Edit</a>
-  {% endif %}
-
-  {% block mid_action_bar %}
-  {% endblock %}
-
-  {% if site.get_delete_url %}
-    <a class="btn btn-danger" href="{{ site.get_delete_url() }}">Delete</a>
-  {% endif %}
-{% endblock %}
--->
 
 {% block content %}
   {% if site.parent %}
@@ -40,7 +25,6 @@
 
   {% if networks_table %}
     <h3>Networks</h3>
-    {% include "base/includes/object_table.html" %}
     {{ render_table(networks_table) }}
   {% endif %}
 
@@ -48,7 +32,7 @@
     <h3>Vlan-less Networks</h3>
     {% set page_obj = vlanless_networks_page_obj %}
     {% include "base/includes/pagination.html" %}
-    {{ render_table(no_vlan_networks) }}
+    {{ render_table(request, vlanless_networks_page_obj) }}
   {% endif %}
 
 {% endblock %}
