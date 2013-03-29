@@ -220,23 +220,6 @@ class BaseListView(ListView):
         return context
 
 
-class BaseDetailView(DetailView):
-    template_name = 'detail.html'
-    extra_context = None
-
-    def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-        context['form_title'] = "{0} Details".format(
-            self.form_class.Meta.model.__name__
-        )
-        # Extra_context takes precedence over original values in context.
-        try:
-            context = dict(context.items() + self.extra_context.items())
-        except AttributeError:
-            pass
-        return context
-
-
 class BaseCreateView(CreateView):
     template_name = "form.html"
     extra_context = None

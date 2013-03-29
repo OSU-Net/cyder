@@ -2,10 +2,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.util import ErrorList
 from django.shortcuts import render, get_object_or_404
 
-from cyder.base.views import (BaseCreateView, BaseDeleteView,
-                              BaseDetailView, BaseListView, BaseUpdateView,
-                              cy_view, cy_delete, get_update_form, search_obj,
-                              table_update)
+from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseListView,
+                              BaseUpdateView, cy_view, cy_delete,
+                              get_update_form, search_obj, table_update)
 from cyder.cydhcp.forms import IpSearchForm
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
@@ -83,10 +82,6 @@ def cydhcp_detail(request, pk):
 
 class CydhcpListView(BaseListView):
     template_name = 'cydhcp/cydhcp_list.html'
-
-
-class CydhcpDetailView(BaseDetailView):
-    template_name = 'cydhcp/cydhcp_detail.html'
 
 
 class CydhcpCreateView(BaseCreateView):

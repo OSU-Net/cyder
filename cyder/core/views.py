@@ -1,9 +1,8 @@
 from django.shortcuts import render
 
-from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
-                              BaseListView, BaseUpdateView,
-                              cy_view, cy_delete, get_update_form, search_obj,
-                              table_update)
+from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseListView,
+                              BaseUpdateView, cy_view, cy_delete,
+                              get_update_form, search_obj, table_update)
 from cyder.core.ctnr.forms import CtnrForm
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.forms import SystemForm
@@ -44,11 +43,6 @@ def core_index(request):
 class CoreDeleteView(BaseDeleteView):
     """"""
     template_name = "core/core_confirm_delete.html"
-
-
-class CoreDetailView(BaseDetailView):
-    """"""
-    template_name = "core/core_detail.html"
 
 
 class CoreCreateView(BaseCreateView):
