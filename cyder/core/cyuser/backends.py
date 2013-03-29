@@ -251,8 +251,8 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
 
 def has_system_perm(user_level, obj, ctnr, action):
     """Permissions for systems. Systems are assigned a ctnr."""
-    if obj and obj.ctnr != ctnr:
-        return False
+    # if obj and obj.ctnr != ctnr:
+    #    return False
 
     return {
         'cyder_admin': True,
