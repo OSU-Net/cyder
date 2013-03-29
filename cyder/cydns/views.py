@@ -6,9 +6,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 import cyder as cy
 from cyder.base.utils import (do_sort, make_paginator, _filter, tablefy)
-from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseListView,
-                              BaseUpdateView, cy_delete, get_update_form,
-                              search_obj, table_update)
+from cyder.base.views import (BaseCreateView, BaseDeleteView,
+                              BaseDetailView, BaseListView, BaseUpdateView,
+                              cy_delete, get_update_form, search_obj,
+                              table_update)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
@@ -198,6 +199,10 @@ def cydns_index(request):
 
 class CydnsListView(BaseListView):
     template_name = 'cydns/cydns_list.html'
+
+
+class CydnsDetailView(BaseDetailView):
+    template_name = 'cydns/cydns_detail.html'
 
 
 class CydnsCreateView(BaseCreateView):
