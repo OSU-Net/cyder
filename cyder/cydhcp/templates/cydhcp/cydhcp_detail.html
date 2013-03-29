@@ -1,11 +1,11 @@
 {% extends "base/detail.html" %}
-{% from "base/tables.html" import render_table %}
+
 
 {% block sidebar %}
   {% include "cydhcp/includes/cydhcp_sidebar.html" %}
 {% endblock %}
 
-{% block view_meta_data %}
+{% block view_metadata %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
