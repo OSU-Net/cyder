@@ -1,22 +1,13 @@
-from django.shortcuts import get_object_or_404,  render
+from django.shortcuts import get_object_or_404
 
-from cyder.base.utils import tablefy, make_paginator
+from cyder.base.views import cy_detail
 from cyder.cydhcp.vrf.models import Vrf
 
 
-def vrf_detail(request, vrf_pk):
-    vrf = get_object_or_404(Vrf, pk=vrf_pk)
-    attrs = vrf.vrfkeyvalue_set.all()
-    static_hosts_paginator = make_paginator(
-        request, vrf.staticinterface_set.all(), obj_type='static')
-    dynamic_hosts_paginator = make_paginator(
-        request, vrf.dynamicinterface_set.all(), obj_type='dynamic')
-    return render(request, 'vrf/vrf_detail.html', {
-        'object': vrf,
-        'vrf_table': tablefy([vrf]),
-        'dynamic_hosts_page_obj': dynamic_hosts_paginator,
-        'dynamic_hosts_table': tablefy(dynamic_hosts_paginator),
-        'static_hosts_page_obj': static_hosts_paginator,
-        'static_hosts_table': tablefy(static_hosts_paginator),
-        'attrs_table': tablefy(attrs),
-    })
+def vrf_detail(request, pk):
+    vrf = get_object_or_404(Vrf, pk=pk)
+    return cy_detail(request, Vrf, 'cydhcp/cydhcp_detail.html', {
+        'Dynamic Hosts': 'dynamicinterface_set',
+        'Static Hosts': 'staticinterface_set',
+        'Attributes': 'vrfkeyvalue_set',
+    }, pk=pk)
