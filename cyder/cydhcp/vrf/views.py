@@ -8,9 +8,9 @@ def vrf_detail(request, vrf_pk):
     vrf = get_object_or_404(Vrf, pk=vrf_pk)
     attrs = vrf.vrfkeyvalue_set.all()
     static_hosts_paginator = make_paginator(
-        request, vrf.staticinterface_set.all(), record_type='static')
+        request, vrf.staticinterface_set.all(), obj_type='static')
     dynamic_hosts_paginator = make_paginator(
-        request, vrf.dynamicinterface_set.all(), record_type='dynamic')
+        request, vrf.dynamicinterface_set.all(), obj_type='dynamic')
     return render(request, 'vrf/vrf_detail.html', {
         'object': vrf,
         'vrf_table': tablefy([vrf]),

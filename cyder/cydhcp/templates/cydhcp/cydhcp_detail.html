@@ -12,23 +12,3 @@
         data-getUrl="{{ url('cydhcp-get-record') }}">
   </span>
 {% endblock %}
-
-{% block content %}
-  <div class='dns-title'>{{ object }}</div>
-
-  <table class="table">
-    <thead>
-      {% for item, _, value in object.details()['data'] %}
-      <th>{{ item }}</th>
-      {% endfor %}
-    </thead>
-
-    <tbody>
-      <tr>
-        {% for item, _, value in object.details()['data'] %}
-        <td>{{ value }}</td>
-        {% endfor %}
-      </tr>
-    </tbody>
-  </table>
-{% endblock %}

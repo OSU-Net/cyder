@@ -237,9 +237,9 @@ def has_range_perm(user_level, obj, ctnr, action):
 
 def has_workgroup_perm(user_level, obj, ctnr, action):
     """Permissions for groups. Groups are assigned a subnet."""
-    if obj and not obj.subnet in [ip_range.subnet for ip_range in
-                                  ctnr.ranges.all()]:
-        return False
+    # if obj and not obj.network in [ip_range.network for ip_range in
+    #                                ctnr.ranges.all()]:
+    #    return False
 
     return {
         'cyder_admin': True,  # ?

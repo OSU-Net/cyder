@@ -60,13 +60,13 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
     return render(request, template, {
-                    'form': form,
-                    'obj': obj,
-                    'page_obj': page_obj,
-                    'object_table': tablefy(page_obj),
-                    'obj_type': obj_type,
-                    'pk': pk,
-                  })
+        'form': form,
+        'obj': obj,
+        'page_obj': page_obj,
+        'object_table': tablefy(page_obj),
+        'obj_type': obj_type,
+        'pk': pk,
+    })
 
 
 def cy_delete(request, pk, get_klasses_fn):
@@ -84,10 +84,40 @@ def cy_delete(request, pk, get_klasses_fn):
     return redirect(request.META.get('HTTP_REFERER', obj.get_list_url()))
 
 
-def cy_detail(request, pk, get_klasses_fn):
-    """Show bunches of related tables."""
+def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None):
+    """Show bunches of related tables.
+
+    obj_sets -- string of foreign key attribute of the obj OR
+                queryset relating to the obj
+
+    Pass in either pk or already retrieved obj.
+    """
+    # Get object if needed.
     obj_type = request.path.split('/')[2]
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    if not obj and pk:
+        obj = get_object_or_404(Klass, pk=pk)
+    elif not obj and pk:
+        raise Exception("pk or obj required.")
+
+    # Build related tables and paginators.
+    tables = []
+    for name, obj_set in obj_sets.items():
+        if isinstance(obj_set, str):
+            obj_set = getattr(obj, obj_set).all()
+        page_obj = make_paginator(
+            request, obj_set, obj_type=name.lower().replace(' ', ''))
+        tables.append({
+            'name': name,
+            'page_obj': page_obj,
+            'table': tablefy(page_obj)
+        })
+
+    return render(request, template, {
+        'obj': obj,
+        'obj_table': tablefy((obj,)),
+        'obj_type': obj_type,
+        'tables': tables
+    })
 
 
 def get_update_form(request, get_klasses_fn):

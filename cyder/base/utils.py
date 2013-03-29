@@ -8,11 +8,11 @@ from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
 
-def make_paginator(request, qs, num=20, record_type=None):
+def make_paginator(request, qs, num=20, obj_type=None):
     """
     Paginator, returns object_list.
     """
-    page_name = 'page' if not record_type else "{0}_page".format(record_type)
+    page_name = 'page' if not obj_type else '{0}_page'.format(obj_type)
     paginator = Paginator(qs, num)
     paginator.page_name = page_name
     page = request.GET.get(page_name)

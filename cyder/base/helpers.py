@@ -51,7 +51,7 @@ def prettify_obj_type(obj_type, *args, **kwargs):
 
     prettified = ''
     if obj_type in ['range', 'network', 'site', 'domain', 'nameserver',
-                       'workgroup', 'system']:
+                    'workgroup', 'system']:
         return obj_type[0].upper() + obj_type[1:]
     elif '_' in obj_type:
         capitalize = True
