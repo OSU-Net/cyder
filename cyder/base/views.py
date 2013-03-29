@@ -48,11 +48,11 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                     form._errors = ErrorDict()
                 form._errors["__all__"] = ErrorList(e.messages)
                 return render(request, template, {
-                                'form': form,
-                                'obj': obj,
-                                'obj_type': obj_type,
-                                'pk': pk,
-                              })
+                    'form': form,
+                    'obj': obj,
+                    'obj_type': obj_type,
+                    'pk': pk,
+                })
     elif request.method == 'GET':
         form = FormKlass(initial=qd_to_py_dict(request.GET))
 
@@ -212,13 +212,11 @@ class BaseListView(ListView):
         context['form_title'] = "{0} Details".format(
             self.form_class.Meta.model.__name__
         )
-
         # Extra_context takes precedence over original values in context.
         try:
             context = dict(context.items() + self.extra_context.items())
         except AttributeError:
             pass
-
         return context
 
 
@@ -231,13 +229,11 @@ class BaseDetailView(DetailView):
         context['form_title'] = "{0} Details".format(
             self.form_class.Meta.model.__name__
         )
-
         # Extra_context takes precedence over original values in context.
         try:
             context = dict(context.items() + self.extra_context.items())
         except AttributeError:
             pass
-
         return context
 
 
@@ -248,13 +244,11 @@ class BaseCreateView(CreateView):
     def post(self, request, *args, **kwargs):
         try:
             obj = super(BaseCreateView, self).post(request, *args, **kwargs)
-
         # Redirect back to form if errors.
         except (IntegrityError, ValidationError), e:
             messages.error(request, str(e))
             request.method = 'GET'
             return super(BaseCreateView, self).get(request, *args, **kwargs)
-
         return obj
 
     def get(self, request, *args, **kwargs):
@@ -265,13 +259,11 @@ class BaseCreateView(CreateView):
         context['form_title'] = "Create {0}".format(
             self.form_class.Meta.model.__name__
         )
-
-        # extra_context takes precedence over original values in context.
+        # Extra_context takes precedence over original values in context.
         try:
             context = dict(context.items() + self.extra_context.items())
         except AttributeError:
             pass
-
         return context
 
 
@@ -328,7 +320,6 @@ class BaseDeleteView(DeleteView):
         # Get the object to delete.
         obj = get_object_or_404(self.form_class.Meta.model,
                                 pk=kwargs.get('pk', 0))
-
         try:
             view = super(BaseDeleteView, self).delete(request, *args, **kwargs)
         except ValidationError, e:
@@ -343,13 +334,11 @@ class BaseDeleteView(DeleteView):
         context['form_title'] = "Update {0}".format(
             self.form_class.Meta.model.__name__
         )
-
         # Extra_context takes precedence over original values in context.
         try:
             context = dict(context.items() + self.extra_context.items())
         except AttributeError:
             pass
-
         return context
 
 
