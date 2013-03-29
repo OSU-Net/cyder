@@ -1,5 +1,6 @@
 @import "globals.scss";
 
+
 .container {
     margin: 0 auto;
     width: 960px;
@@ -282,7 +283,13 @@ div#header {
     height: 100%;
     margin-right: 26px;
     width: 150px;
-    a.nav-link {
+    .nav-item:first-child .nav-link {
+        border-radius: 2px 2px 0 0;
+    }
+    .nav-item:last-child .nav-link {
+        border-radius: 0 0 2px 2px;
+    }
+    .nav-link {
         background: $black;
         border: 1px solid $dark-gray;
         color: $white;
@@ -300,11 +307,6 @@ div#header {
             &:hover {
                 color: $dark-gray;
             }
-        }
-        .nav-item {
-            display: block;
-            position: relative;
-            right: auto;
         }
     }
 }
