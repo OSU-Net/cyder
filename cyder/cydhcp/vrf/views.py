@@ -13,7 +13,6 @@ def vrf_detail(request, vrf_pk):
         request, vrf.dynamicinterface_set.all(), record_type='dynamic')
     return render(request, 'vrf/vrf_detail.html', {
         'object': vrf,
-        'obj_type': 'vrf',
         'vrf_table': tablefy([vrf]),
         'dynamic_hosts_page_obj': dynamic_hosts_paginator,
         'dynamic_hosts_table': tablefy(dynamic_hosts_paginator),

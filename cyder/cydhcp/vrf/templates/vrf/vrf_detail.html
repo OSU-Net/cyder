@@ -2,6 +2,8 @@
 {% from "base/tables.html" import render_table %}
 
 {% set vrf = object %}
+{% set obj_type = object._meta.db_table %}
+
 {% block title %}VRF {{ vrf.name }}{% endblock %}
 
 {% block content %}
@@ -17,7 +19,7 @@
     {% endwith %}
     {{ render_table(request, dynamic_hosts_table) }}
   {% endif %}
-  
+
   {% if static_hosts_table %}
     <h3>Static Hosts in {{ vrf.name }}</h3>
     {% with page_obj = static_hosts_page_obj %}
