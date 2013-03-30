@@ -50,6 +50,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
 
         add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
         return dict({
+            'obj_type': 'ctnr',
             'user_table': user_table,
             'domain_table': domain_table,
             'rdomain_table': rdomain_table,
