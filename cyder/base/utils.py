@@ -7,6 +7,8 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
+from cyder.cydns.domain.models import Domain
+
 
 def make_paginator(request, qs, num=20, obj_type=None):
     """
@@ -127,14 +129,32 @@ def make_megafilter(Klass, term):
     return reduce(operator.or_, megafilter)
 
 
+def filter_by_ctnr(request, Klass):
+    if Klass is Domain:
+        objects = request.session['ctnr'].domains
+    else:
+        objects = Klass.objects
+        if hasattr(Klass, 'domain'):
+            objects = objects.filter(
+                domain__in=request.session['ctnr'].domains.all())
+
+    return objects
+
+
 def _filter(request, Klass):
+    if request.session['ctnr'].name == 'global':
+        objects = Klass.objects
+    else:
+        objects = filter_by_ctnr(request, Klass)
+
     if request.GET.get('filter'):
         try:
-            return Klass.objects.filter(make_megafilter(Klass,
-                                        request.GET.get('filter')))
+            return objects.filter(make_megafilter(Klass,
+                                                  request.GET.get('filter')))
         except TypeError:
             pass
-    return Klass.objects.all()
+
+    return objects.all()
 
 
 def qd_to_py_dict(qd):
