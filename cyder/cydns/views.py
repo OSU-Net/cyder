@@ -28,7 +28,7 @@ from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.sshfp.forms import FQDNSSHFPForm, SSHFPForm
 from cyder.cydns.sshfp.models import SSHFP
-from cyder.cydns.srv.forms import SRVForm
+from cyder.cydns.srv.forms import SRVForm, FQDNSRVForm
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
@@ -48,7 +48,7 @@ def get_klasses(obj_type):
         'nameserver': (Nameserver, NameserverForm, NameserverForm),
         'ptr': (PTR, PTRForm, PTRForm),
         'soa': (SOA, SOAForm, SOAForm),
-        'srv': (SRV, SRVForm, SRVForm),
+        'srv': (SRV, SRVForm, FQDNSRVForm),
         'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
     }.get(obj_type, (None, None, None))

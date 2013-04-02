@@ -25,7 +25,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
 
     def __str__(self):
         return '{0} {1} {2}'.format(self.fqdn,
-                                    self.obj_type(), str(self.ip_str))
+                                    self.rdtype, str(self.ip_str))
 
     def __repr__(self):
         return "<Address Record '{0}'>".format(str(self))
@@ -41,7 +41,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         data = super(BaseAddressRecord, self).details()
         data['data'] = [
             ('Domain', 'domain__name', self.domain),
-            ('Record Type', 'obj_type', self.obj_type()),
+            ('Record Type', 'obj_type', self.rdtype),
             ('IP', 'ip_str', str(self.ip_str)),
             ('Name', 'fqdn', self.fqdn),
         ]

@@ -12,6 +12,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
+from cyder.cydns.soa.models import SOA
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
@@ -88,7 +89,7 @@ class NoNSTests(object):
 
 
 class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'address_record'
 
     def setUp(self):
@@ -110,7 +111,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
 
 
 class CNAMEViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'cname'
 
     def setUp(self):
@@ -135,7 +136,7 @@ class NSViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.domain = create_fake_zone("foobarbaz.com")
         test_data = {
-            'server': test_domain.name
+            'server': self.domain.name
         }
         do_setUp(self, Nameserver, test_data)
 
@@ -192,7 +193,7 @@ class NSViewTests(cyder.base.tests.TestCase):
 
 
 class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'mx'
 
     def setUp(self):
@@ -215,7 +216,7 @@ class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
 
 
 class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'ptr'
 
     def get_domain_and_post_data(self):
@@ -261,16 +262,13 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
 
 
 class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'srv'
 
     def setUp(self):
-        soa = SOA.objects.create(
-            primary=random_label(), contact=random_label())
-        domain = Domain.objects.create(name='_' + random_label(), soa=soa)
         test_data = {
-            'label': domain.name,
-            'target': domain.name,
+            'label': '_' + random_label(),
+            'target': 'foo.com',
             'priority': 2,
             'weight': 2222,
             'port': 222
@@ -278,21 +276,16 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
         do_setUp(self, SRV, test_data)
 
     def post_data(self):
-        soa = SOA.objects.create(
-            primary=random_label(), contact=random_label())
-        domain = Domain.objects.create(name='_' + random_label(), soa=soa)
         return {
-            'fqdn': "_" + self.domain.name,
-            'label': "_" + random_label(),
-            'target': random_label(),
+            'fqdn': '_' + random_label() + '.' + self.domain.name,
+            'target': 'foo.bar',
             'priority': 2,
             'weight': 2222,
             'port': 222
         }
 
-
 class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'txt'
 
     def setUp(self):
@@ -311,7 +304,7 @@ class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
 
 
 class SSHFPViewTests(cyder.base.tests.TestCase, NoNSTests):
-    fixtures = ['core/users.json']
+    fixtures = ['test_users/test_users.json']
     name = 'sshfp'
 
     def setUp(self):
