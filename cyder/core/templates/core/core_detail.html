@@ -1,5 +1,13 @@
 {% extends "base/detail.html" %}
 
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('core-get-update-form') }}">
+  </span>
+{% endblock %}
+
 
 {% block sidebar %}
     {% include "core/includes/core_sidebar.html" %}

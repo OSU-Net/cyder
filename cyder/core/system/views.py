@@ -20,4 +20,6 @@ def system_detail(request, pk):
       'attrs_table': tablefy(attrs),
       'static_intrs_table': tablefy(static),
       'dynamic_intrs_table': tablefy(dynamic),
+      'obj_type': 'system',
+      'obj': system,
     })
