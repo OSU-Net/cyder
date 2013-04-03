@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
+
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
@@ -11,9 +12,12 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
+
 import ipaddr
 import MySQLdb
 from optparse import make_option
+
+from lib.utilities import long2ip
 
 
 allow_all_subnets = [
@@ -334,6 +338,30 @@ def migrate_zone_domain():
                                 "zone_id {1}".format(domain_id, zone_id))
 
 
+def migrate_zone_reverse():
+    cursor.execute("SELECT ip,zone FROM pointer WHERE type='reverse'")
+    results = cursor.fetchall()
+    for ip, zone_id in results:
+        ctnr = maintain_find_zone(zone_id)
+        if not ctnr:
+            continue
+
+        doctets = []
+        octets = long2ip(ip).split(".")
+        for octet in octets:
+            doctets = [octet] + doctets
+            dname = ".".join(doctets) + ".in-addr.arpa"
+            domain, _ = Domain.objects.get_or_create(name=dname,
+                                                     is_reverse=True)
+
+        try:
+            ctnr.domains.add(domain)
+            ctnr.save()
+        except Exception, e:
+            print e
+            raise
+
+
 def migrate_zone_workgroup():
     cursor.execute("SELECT * FROM zone_workgroup")
     result = cursor.fetchall()
@@ -499,6 +527,7 @@ class Command(BaseCommand):
             migrate_zone_workgroup()
         if options['zone-domain']:
             migrate_zone_domain()
+            migrate_zone_reverse()
         if options['user']:
             migrate_user()
         if options['zone-user']:

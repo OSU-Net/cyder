@@ -137,6 +137,9 @@ def filter_by_ctnr(request, Klass):
         if hasattr(Klass, 'domain'):
             objects = objects.filter(
                 domain__in=request.session['ctnr'].domains.all())
+        elif hasattr(Klass, 'reverse_domain'):
+            objects = objects.filter(
+                reverse_domain__in=request.session['ctnr'].domains.all())
 
     return objects
 
