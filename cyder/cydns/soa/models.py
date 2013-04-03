@@ -76,6 +76,13 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
     attrs = None
 
+    class Meta:
+        db_table = 'soa'
+        # We are using the description field here to stop the same SOA from
+        # being assigned to multiple zones. See the documentation in the
+        # Domain models.py file for more info.
+        unique_together = ('primary', 'contact', 'description')
+
     def bind_render_record(self):
         template = Template(self.template).substitute(**self.justs)
         return template.format(root_domain=self.root_domain,
@@ -86,13 +93,6 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         self.attrs = AuxAttr(SOAKeyValue, self, 'soa')
 
     attrs = None
-
-    class Meta:
-        db_table = 'soa'
-        # We are using the description field here to stop the same SOA from
-        # being assigned to multiple zones. See the documentation in the
-        # Domain models.py file for more info.
-        unique_together = ('primary', 'contact', 'description')
 
     def __str__(self):
         return "{0}".format(str(self.description))
@@ -108,7 +108,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     def root_domain(self):
         try:
             return self.domain_set.get(~Q(master_domain__soa=F('soa')),
-                    soa__isnull=False)
+                                       soa__isnull=False)
         except ObjectDoesNotExist:
             return None
 
