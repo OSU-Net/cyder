@@ -32,13 +32,17 @@ def cy_restricted_form(related_type, related_pk, KlassForm):
             isinstance(KlassForm.base_fields[related_type], ModelChoiceField)):
         raise ValidationError("Form does not have fk of type "
                               "{0}".format(related_type))
-    obj = get_object_or_404(KlassForm._meta.model, pk=related_pk)
+    #obj = get_object_or_404(KlassForm._meta.model, pk=related_pk)
     class RestrictedForm(KlassForm):
         def __init__(self, *args, **kwargs):
             super(KlassForm, self).__init__(*args, **kwargs)
+            self.base_fields[related_type].choices = \
+                self._meta.model.objects.filter(pk=related_pk)
+            """
             # restrict choice field to only the related option
-            setattr(KlassForm, related_type, ModelChoiceField(
+            setattr(self, related_type, ModelChoiceField(
                 queryset=self._meta.model.objects.filter(pk=related_pk)))
+            """
     return RestrictedForm
 
 
@@ -141,10 +145,12 @@ def get_update_form(request, get_klasses_fn):
     """
     Update view called asynchronously from the list_create view
     """
+    update_form_args = ['object_type', 'pk' 'related_type', 'related_pk']
     obj_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
+    kwargs = json.loads(request.GET.get('data', ''))
     if not obj_type:
         raise Http404
 
@@ -161,14 +167,15 @@ def get_update_form(request, get_klasses_fn):
                     form = FormKlass(instance=record)
         else:
             if related_type and related_pk:
-                FormKlass = cy_restricted_form(related_type, related_pk, FormKlass)
-                form = FormKlass(initial={related_type: related_pk})
+                form = FormKlass(initial=dict(
+                    {related_type: related_pk}.items() + kwargs.items()))
             else:
-                form = FormKlass(initial={})
+                form = FormKlass(initial=kwargs)
     except ObjectDoesNotExist:
         raise Http404
 
-    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
+    return HttpResponse(
+        json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
 
 
 def search_obj(request, get_klasses_fn):

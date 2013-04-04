@@ -11,6 +11,7 @@ from cyder.base.utils import make_paginator, tablefy
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
 from cyder.cydhcp.range.models import Range, RangeKeyValue
+from cyder.cydhcp.range.utils import ip_taken
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
@@ -58,45 +59,27 @@ def range_detail(request, pk):
     ips_total = ((end_upper << 64) + end_lower - 1 -
                  (start_upper << 64) + start_lower)
     ips_used = 0
-
-    for i in range((start_upper << 64) + start_lower, (end_upper << 64) +
+    for i in xrange((start_upper << 64) + start_lower, (end_upper << 64) +
                    end_lower - 1):
-        taken = False
-        adr_taken = None
         ip_str = str(ipaddr.IPv4Address(i))
-        for record in records:
-            if record.ip_lower == i:
-                adr_taken = record
-                break
-
-        ptr_taken = None
-        for ptr in ptrs:
-            if ptr.ip_lower == i:
-                ptr_taken = ptr
-                break
-
+        kwarg_data = json.dumps({'ip_str': ip_str, 'ip_type': mrange.ip_type})
+        ptr_taken = ip_taken(i, ptrs)
+        adr_taken = ip_taken(i, records)
+        intr_taken = ip_taken(i, intrs)
+        taken = any([ptr_taken, adr_taken, intr_taken])
         if ptr_taken and adr_taken:
             if ptr_taken.name == adr_taken.fqdn:
-                range_data.append(('A/PTR', ip_str, ptr_taken, adr_taken))
+                range_data.append(
+                    ('A/PTR', ip_str, ptr_taken, adr_taken, kwarg_data))
             else:
-                range_data.append(('PTR', ip_str, ptr_taken))
-                range_data.append(('A', ip_str, adr_taken))
-            taken = True
+                range_data.append(('PTR', ip_str, ptr_taken, kwarg_data))
+                range_data.append(('A', ip_str, adr_taken, kwarg_data))
         elif ptr_taken and not adr_taken:
-            range_data.append(('PTR', ip_str, ptr_taken))
-            taken = True
+            range_data.append(('PTR', ip_str, ptr_taken, kwarg_data))
         elif not ptr_taken and adr_taken:
-            range_data.append(('A', ip_str, adr_taken))
-            taken = True
-
-        for intr in intrs:
-            if intr.ip_lower == i:
-                range_data.append(('Interface', ip_str, intr))
-                taken = True
-                break
-
+            range_data.append(('A', ip_str, adr_taken, kwarg_data))
         if not taken:
-            range_data.append((None, ip_str))
+            range_data.append((None, ip_str, kwarg_data))
         else:
             ips_used += 1
 

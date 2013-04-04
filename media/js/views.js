@@ -20,16 +20,22 @@ $(document).ready(function() {
             var formObjType = $createBtn.attr('data-objType');
             var formGetUrl = $createBtn.attr('data-getUrl');
             var formObjName = $createBtn.attr('data-objName');
+            var data_to_post = $createBtn.attr('data-kwargs');
             slideUp($('#obj-form'));
             $.get(formGetUrl,
                 {
                     'object_type': formObjType,
                     'related_type': objType,
-                    'related_pk': objPk
+                    'related_pk': objPk,
+                    'data': data_to_post
                 },
                 function(data) {
                     setTimeout(function() {
-                        $('#form-title').html('Creating ' + FormPrettyObjType + ' for ' + formObjName);
+                        if(formObjName) {
+                            $('#form-title').html('Creating ' + formPrettyObjType + ' for ' + formObjName);
+                        } else {
+                            $('#form-title').html('Creating ' + formPrettyObjType);
+                        }
                         $('.inner-form').empty().append(data.form);
                         initForms();
                     }, 150);

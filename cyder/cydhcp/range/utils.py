@@ -1,7 +1,20 @@
-from cyder.cydhcp.utils import start_end_filter, two_to_one
+from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
+
+
+def ip_taken(ip, records):
+    """
+    Given an ip as an integer and a queryset find an object in the queryset
+    with the same ip as the integer.  This is inteded for ptrs and arecords and
+    interfaces.
+    """
+    ip_low, ip_high =  one_to_two(ip)
+    for record in records:
+        if record.ip_lower is ip_low and record.ip_upper is ip_high:
+            return record
+    return None
 
 
 def range_usage(ip_start, ip_end, ip_type, get_objects=True):
