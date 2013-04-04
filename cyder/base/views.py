@@ -25,27 +25,6 @@ def home(request):
     })
 
 
-def cy_restricted_form(related_type, related_pk, KlassForm):
-    from django.forms.models import ModelChoiceField
-    # check if related_type is the label of an fk
-    if not (related_type in KlassForm.base_fields and
-            isinstance(KlassForm.base_fields[related_type], ModelChoiceField)):
-        raise ValidationError("Form does not have fk of type "
-                              "{0}".format(related_type))
-    #obj = get_object_or_404(KlassForm._meta.model, pk=related_pk)
-    class RestrictedForm(KlassForm):
-        def __init__(self, *args, **kwargs):
-            super(KlassForm, self).__init__(*args, **kwargs)
-            self.base_fields[related_type].choices = \
-                self._meta.model.objects.filter(pk=related_pk)
-            """
-            # restrict choice field to only the related option
-            setattr(self, related_type, ModelChoiceField(
-                queryset=self._meta.model.objects.filter(pk=related_pk)))
-            """
-    return RestrictedForm
-
-
 def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
@@ -145,19 +124,18 @@ def get_update_form(request, get_klasses_fn):
     """
     Update view called asynchronously from the list_create view
     """
-    update_form_args = ['object_type', 'pk' 'related_type', 'related_pk']
     obj_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
-    kwargs = json.loads(request.GET.get('data', ''))
+    kwargs = json.loads(request.GET.get('data', '') or '{}')
     if not obj_type:
         raise Http404
 
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
 
-    # Get the object if updating.
     try:
+        # Get the object if updating.
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
             if perm(request, cy.ACTION_UPDATE, obj=record):
@@ -166,6 +144,7 @@ def get_update_form(request, get_klasses_fn):
                 else:
                     form = FormKlass(instance=record)
         else:
+            #  Get form to create a new object and prepopulate
             if related_type and related_pk:
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
