@@ -12,8 +12,9 @@ $(document).ready(function() {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
 
-    $('.create-obj').click(function() {
+    $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
+        e.preventDefault();
         if(this.hasAttribute('data-objType')) {
             var $createBtn = $(this);
             var formPrettyObjType = $createBtn.attr('data-prettyobjtype');
@@ -36,11 +37,13 @@ $(document).ready(function() {
                         } else {
                             $('#form-title').html('Creating ' + formPrettyObjType);
                         }
+                        data.form.action = $createBtn.attr('href');
                         $('.inner-form').empty().append(data.form);
                         initForms();
                     }, 150);
+                    $('#obj-form form')[0].action = $createBtn.attr('href');
                     $('.form-btns a.submit').text('Create ' + formPrettyObjType);
-                    $('#obj-form').slideDown();
+                    $('#obj-form').slideToggle();
                 }, 'json');
         } else {
             setTimeout(function() {

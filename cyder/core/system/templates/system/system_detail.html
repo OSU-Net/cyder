@@ -18,9 +18,9 @@
 
 {% block extra_action_bar %}
 {{ create_button(
-    'static_interface', url('cydhcp-get-record'), objName=system.name) }}
+    'static_interface', url('cydhcp-get-record'), url('static_interface'), objName=system.name) }}
 {{ create_button(
-    'dynamic_interface', url('cydhcp-get-record'), objName=system.name) }}
+    'dynamic_interface', url('cydhcp-get-record'), url('dynamic_interface'), objName=system.name) }}
 {% endblock %} 
 
 {% block content %}
