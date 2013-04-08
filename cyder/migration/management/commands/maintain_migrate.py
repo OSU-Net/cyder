@@ -5,7 +5,7 @@ from cyder.cydns.cybind.builder import DNSBuilder, BuildError
 
 import subprocess
 import dns_migrate
-#import dhcp_migrate
+import dhcp_migrate
 from optparse import make_option
 from lib.diffdns import diff_zones
 from lib.checkexcept import checkexcept
@@ -49,7 +49,12 @@ class Command(BaseCommand):
                     action='store_true',
                     dest='diff',
                     default=False,
-                    help='Compare results to nameserver.'))
+                    help='Compare results to nameserver.'),
+        make_option('-p', '--dhcp',
+                    action='store_true',
+                    dest='dhcp',
+                    default=False,
+                    help='Migrate DHCP objects.'))
 
     def handle(self, **options):
         if options['dns']:
@@ -84,4 +89,5 @@ class Command(BaseCommand):
                 print settings.VERIFICATION_SERVER, B
                 print
 
-        #dhcp_migrate.migrate_all()
+        if options['dhcp']:
+            dhcp_migrate.do_everything(skip=True)
