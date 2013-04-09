@@ -1,0 +1,60 @@
+
+
+WS = ' ' | '\t' | '\n'
+
+NL = '\n'
+
+WSS = (WS | NL)*
+
+
+Char = :c ?(c not in [';' , ' ', '\t'])
+OptionValueChar = :c ?(c is not ';')
+
+
+OptionKey = < Char* >
+OptionValue = < OptionValueChar* >
+
+Option = WS* 'option' WS OptionKey:key WS OptionValue:value ';'
+            -> Option(key, value)
+
+IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
+MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
+
+FixedAddress = WS* 'fixed-address' WS* IP:ip ';'
+        -> {'ip' : ip}.items()
+
+HardwareAddress = WSS 'hardware ethernet' WSS MAC:mac ';'
+        -> {'mac': mac}.items()
+
+HostAttributes = (HardwareAddress | FixedAddress)
+
+FQDN = < Char* >
+
+Range = WS* 'range' WS IP:start WS IP:end ';'
+        -> {'range': {'start': start, 'end': end }}
+
+Failover = WS* 'failover' WS OptionValue:failover ';'
+        -> {'failover' : failover}
+
+Allow = WS* 'allow' WS OptionValue:allow ';'
+        -> {'allow': allow}
+
+Deny = WS* 'deny' WS OptionValue:deny ';'
+        -> {'deny': deny}
+
+PoolAttrs = Option | Allow | Failover | Range | Deny
+
+Pool = WS* 'pool' WS* '{' WSS PoolAttrs*:attrs WS* '}'
+        -> attrs
+
+Subnet = WS* 'subnet' WS IP:network_addr WS 'netmask' WS IP:netmask_addr WS '{'
+    Option*:options Pool*:pools WS* '}'
+        -> {'network_addr': network_addr, 'netmask_addr': netmask_addr,
+            'options': options, 'pools':pools}
+
+Host = WS* 'host' WS FQDN:fqdn WSS '{' WSS HostAttributes*:values WSS '}'
+        -> Host(fqdn, **dict([e[0] for e in values]))
+
+GroupAttrs = Group | Host | Option
+
+Group = WS* 'group' WS* '{' GroupAttrs*:groupattrs '}'
