@@ -1,10 +1,8 @@
 from parsley import wrapGrammar
 from ometa.grammar import OMeta
 from ometa.runtime import OMetaBase
-from string import letters, hexdigits
 from itertools import chain
 from ipaddr import IPv4Address, IPv6Address, IPv4Network, IPv6Network
-from collections import defaultdict
 import re
 import sys
 
@@ -46,14 +44,14 @@ class Pool(object):
         self.failover = failover or []
 
 
-def parse_to_pool(parse):
+def parse_to_object(parse, Klass, exclude_from_list = []):
     kwargs = {}
     for key, value in chain(*(elem.items() for elem in parse)):
         if key in kwargs:
             kwargs[key].append(value)
         else:
-            kwargs[key] = [value] if key not in ['start', 'end'] else value
-    return Pool(**kwargs)
+            kwargs[key] = [value] if key not in exclude_from_list else value
+    return Klass(**kwargs)
 
 
 class Subnet(object):
@@ -64,6 +62,14 @@ class Subnet(object):
         self.options = options or []
         self.statements = statements or []
         self.pools = pools or []
+
+
+class Group(object):
+    def __init__(self, options=None, groups=None, hosts=None):
+        self.options = options or []
+        self.groups = groups or []
+        self.hosts = hosts or []
+
 
 mac_match = "(([0-9a-f]){2}:){5}([0-9a-f]){2}$"
 is_mac = re.compile(mac_match)

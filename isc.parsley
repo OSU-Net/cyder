@@ -33,16 +33,17 @@ Deny = WS* 'deny' WS OptionValue:deny ';'
 PoolAttrs = Option | Allow | Failover | Range | Deny
 
 Pool = WS* 'pool' WS* '{' PoolAttrs*:attrs WS* '}'
-        -> parse_to_pool(attrs)
+        -> parse_to_object(attrs, Pool, ['start', 'end'])
 
 Subnet = WS* 'subnet' WS IP:network_addr WS 'netmask' WS IP:netmask_addr WS '{'
     Option*:options Pool*:pools WS* '}'
         -> Subnet(**{'network_addr': network_addr, 'netmask_addr': netmask_addr,
-            'options': options, 'pools':pools})
+                     'options': options, 'pools': pools})
 
 Host = WS* 'host' WS FQDN:fqdn WS* '{' HostAttributes*:values WS* '}'
         -> Host(fqdn, **dict(e.items()[0] for e in values))
 
 GroupAttrs = Group | Host | Option
 
-Group = WS* 'group' WS* '{' GroupAttrs*:groupattrs WS* '}'
+Group = WS* 'group' WS* '{' GroupAttrs*:attrs WS* '}'
+        -> parse_to_object(attrs, Group)
