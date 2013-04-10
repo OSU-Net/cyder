@@ -1,37 +1,25 @@
-
-
 WS = ' ' | '\t' | '\n'
-
-NL = '\n'
-
-WSS = (WS | NL)*
-
-
 Char = :c ?(c not in [';' , ' ', '\t'])
 OptionValueChar = :c ?(c is not ';')
-
-
 OptionKey = < Char* >
 OptionValue = < OptionValueChar* >
+FQDN = < Char* >
+IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
+MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
 
 Option = WS* 'option' WS OptionKey:key WS OptionValue:value ';'
             -> Option(key, value)
 
-IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
-MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
-
 FixedAddress = WS* 'fixed-address' WS* IP:ip ';'
-        -> {'ip' : ip}.items()
+        -> {'ip' : ip}
 
-HardwareAddress = WSS 'hardware ethernet' WSS MAC:mac ';'
-        -> {'mac': mac}.items()
+HardwareAddress = WS* 'hardware ethernet' WS MAC:mac ';'
+        -> {'mac': mac}
 
 HostAttributes = (HardwareAddress | FixedAddress)
 
-FQDN = < Char* >
-
 Range = WS* 'range' WS IP:start WS IP:end ';'
-        -> {'range': {'start': start, 'end': end }}
+        -> {'start': start, 'end': end }
 
 Failover = WS* 'failover' WS OptionValue:failover ';'
         -> {'failover' : failover}
@@ -44,17 +32,17 @@ Deny = WS* 'deny' WS OptionValue:deny ';'
 
 PoolAttrs = Option | Allow | Failover | Range | Deny
 
-Pool = WS* 'pool' WS* '{' WSS PoolAttrs*:attrs WS* '}'
-        -> attrs
+Pool = WS* 'pool' WS* '{' PoolAttrs*:attrs WS* '}'
+        -> parse_to_pool(attrs)
 
 Subnet = WS* 'subnet' WS IP:network_addr WS 'netmask' WS IP:netmask_addr WS '{'
     Option*:options Pool*:pools WS* '}'
-        -> {'network_addr': network_addr, 'netmask_addr': netmask_addr,
-            'options': options, 'pools':pools}
+        -> Subnet(**{'network_addr': network_addr, 'netmask_addr': netmask_addr,
+            'options': options, 'pools':pools})
 
-Host = WS* 'host' WS FQDN:fqdn WSS '{' WSS HostAttributes*:values WSS '}'
-        -> Host(fqdn, **dict([e[0] for e in values]))
+Host = WS* 'host' WS FQDN:fqdn WS* '{' HostAttributes*:values WS* '}'
+        -> Host(fqdn, **dict(e.items()[0] for e in values))
 
 GroupAttrs = Group | Host | Option
 
-Group = WS* 'group' WS* '{' GroupAttrs*:groupattrs '}'
+Group = WS* 'group' WS* '{' GroupAttrs*:groupattrs WS* '}'
