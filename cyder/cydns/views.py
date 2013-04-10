@@ -1,5 +1,3 @@
-import json as json
-
 from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +8,7 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
                               cy_delete, get_update_form, search_obj,
                               table_update)
-from cyder.core.cyuser.utils import perm, perm_soft
+from cyder.core.cyuser.utils import perm
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
 from cyder.cydns.address_record.models import AddressRecord
@@ -60,11 +58,6 @@ def cydns_view(request, pk=None):
     # kwargs everywhere in the dispatchers.
     obj_type = request.path.split('/')[2]
 
-    domains = json.dumps([domain.name for domain in
-                          Domain.objects.filter(is_reverse=False)
-                          if perm_soft(request, cy.ACTION_UPDATE,
-                                       obj=domain)]),
-
     # Get the record form.
     Klass, FormKlass, FQDNFormKlass = get_klasses(obj_type)
 
@@ -81,7 +74,6 @@ def cydns_view(request, pk=None):
             fqdn_form._errors = ErrorDict()
             fqdn_form._errors['__all__'] = ErrorList(errors)
             return render(request, 'cydns/cydns_view.html', {
-                'domain': domains,
                 'form': fqdn_form,
                 'obj_type': obj_type,
                 'pk': pk,
@@ -109,7 +101,6 @@ def cydns_view(request, pk=None):
         'obj': record,
         'page_obj': page_obj,
         'object_table': tablefy(page_obj, views=True),
-        'domains': domains,
         'obj_type': obj_type,
         'pk': pk,
     })
