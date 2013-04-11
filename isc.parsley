@@ -7,43 +7,66 @@ FQDN = < Char* >
 IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
 MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
 
-Option = WS* 'option' WS OptionKey:key WS OptionValue:value ';'
-            -> Option(key, value)
+# Dhcp option statements in subnet and pool and group statement
+Option = ws 'option' ws OptionKey:key ws OptionValue:value ';'
+            -> {'options' : Attribute(key, value)}
 
-FixedAddress = WS* 'fixed-address' WS* IP:ip ';'
+# Fixed address statement in a host block
+FixedAddress = ws 'fixed-address' ws IP:ip ';'
         -> {'ip' : ip}
 
-HardwareAddress = WS* 'hardware ethernet' WS MAC:mac ';'
+# Hardware address statement in a host block
+HardwareAddress = ws 'hardware ethernet' ws MAC:mac ';'
         -> {'mac': mac}
 
+# Set of attributes possible in a host statement
+# This should contain more options but no more are implemented in cyder or
+# maintain so this is a "nice to have" feature
 HostAttributes = (HardwareAddress | FixedAddress)
 
-Range = WS* 'range' WS IP:start WS IP:end ';'
+Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:values ws '}'
+        -> {'hosts': Host(fqdn, **dict(e.items()[0] for e in values))}
+
+# Range declaration in pool block
+Range = ws 'range' ws IP:start ws IP:end ';'
         -> {'start': start, 'end': end }
 
-Failover = WS* 'failover' WS OptionValue:failover ';'
-        -> {'failover' : failover}
+# failover peer in pool block
+Failover = ws 'failover' ws OptionValue:failover ';'
+        -> {'options': Attribute('failover', failover)}
 
-Allow = WS* 'allow' WS OptionValue:allow ';'
-        -> {'allow': allow}
+# allow members of, unknown-client, known-clients etc..
+Allow = ws 'allow' ws OptionValue:allow ';'
+        -> {'options': Attribute('allow',allow)}
 
-Deny = WS* 'deny' WS OptionValue:deny ';'
-        -> {'deny': deny}
+# sort of like allow only not
+Deny = ws 'deny' ws OptionValue:deny ';'
+        -> {'options' : Attribute('deny', deny) }
 
+ParameterKey = OptionKey:parm ?( param not in ['deny', 'allow', 'option', 'range'])
+
+Paramteter = ws ParameterKey:param_key ws OptionValue:param_value ';'
+        -> Parameter(param_key, param_value, 
+
+
+# all the things (not really just the ones I have to deal with)
 PoolAttrs = Option | Allow | Failover | Range | Deny
 
-Pool = WS* 'pool' WS* '{' PoolAttrs*:attrs WS* '}'
-        -> parse_to_object(attrs, Pool, ['start', 'end'])
+Pool = ws 'pool' ws '{' PoolAttrs*:attrs ws '}'
+        -> {'pools': parse_to_object(attrs, Pool, ['start', 'end'])}
 
-Subnet = WS* 'subnet' WS IP:network_addr WS 'netmask' WS IP:netmask_addr WS '{'
-    Option*:options Pool*:pools WS* '}'
-        -> Subnet(**{'network_addr': network_addr, 'netmask_addr': netmask_addr,
-                     'options': options, 'pools': pools})
+SubnetAttrs = Option | Pool
 
-Host = WS* 'host' WS FQDN:fqdn WS* '{' HostAttributes*:values WS* '}'
-        -> Host(fqdn, **dict(e.items()[0] for e in values))
+# subnets can contain hosts but there is no reason for it so we will assume
+# that it wont happen for this initial draft.
+Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
+                SubnetAttrs*:attrs ws
+            '}'
+        -> config.add_subnet(
+                parse_to_object(attrs, Subnet, ['netmask_addr', 'network_addr']))
 
+# Reconsider handling nested groups within groups
 GroupAttrs = Group | Host | Option
 
-Group = WS* 'group' WS* '{' GroupAttrs*:attrs WS* '}'
+Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
         -> parse_to_object(attrs, Group)
