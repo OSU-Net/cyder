@@ -9,7 +9,7 @@ MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
 
 # Dhcp option statements in subnet and pool and group statement
 Option = ws 'option' ws OptionKey:key ws OptionValue:value ';'
-            -> {'options' : Attribute(key, value)}
+            -> {'options' : Option(key, value)}
 
 # Fixed address statement in a host block
 FixedAddress = ws 'fixed-address' ws IP:ip ';'
@@ -31,31 +31,26 @@ Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:values ws '}'
 Range = ws 'range' ws IP:start ws IP:end ';'
         -> {'start': start, 'end': end }
 
-# failover peer in pool block
-Failover = ws 'failover' ws OptionValue:failover ';'
-        -> {'options': Attribute('failover', failover)}
-
 # allow members of, unknown-client, known-clients etc..
 Allow = ws 'allow' ws OptionValue:allow ';'
-        -> {'options': Attribute('allow',allow)}
+        -> {'allow': allow}
 
 # sort of like allow only not
 Deny = ws 'deny' ws OptionValue:deny ';'
-        -> {'options' : Attribute('deny', deny) }
+        -> {'deny', deny}
 
 ParameterKey = OptionKey:parm ?( param not in ['deny', 'allow', 'option', 'range'])
 
 Paramteter = ws ParameterKey:param_key ws OptionValue:param_value ';'
         -> Parameter(param_key, param_value, 
 
-
 # all the things (not really just the ones I have to deal with)
-PoolAttrs = Option | Allow | Failover | Range | Deny
+PoolAttrs = Option | Allow | Parameter | Range | Deny
 
 Pool = ws 'pool' ws '{' PoolAttrs*:attrs ws '}'
         -> {'pools': parse_to_object(attrs, Pool, ['start', 'end'])}
 
-SubnetAttrs = Option | Pool
+SubnetAttrs = Option | Pool | Parameter
 
 # subnets can contain hosts but there is no reason for it so we will assume
 # that it wont happen for this initial draft.
@@ -66,7 +61,10 @@ Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
                 parse_to_object(attrs, Subnet, ['netmask_addr', 'network_addr']))
 
 # Reconsider handling nested groups within groups
-GroupAttrs = Group | Host | Option
+
+NestedGroup = Group:group -> {'groups' : group }
+
+GroupAttrs = NestedGroup | Host | Option
 
 Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
         -> parse_to_object(attrs, Group)
