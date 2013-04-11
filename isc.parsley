@@ -1,15 +1,21 @@
-WS = ' ' | '\t' | '\n'
+
 Char = :c ?(c not in [';' , ' ', '\t'])
 OptionValueChar = :c ?(c is not ';')
-OptionKey = < Char* >
-OptionValue = < OptionValueChar* >
 FQDN = < Char* >
 IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
 MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
 
+OptionKey = < Char* >
+OptionValue = < OptionValueChar* >
+
 # Dhcp option statements in subnet and pool and group statement
-Option = ws 'option' ws OptionKey:key ws OptionValue:value ';'
-            -> {'options' : Option(key, value)}
+Option = ws 'option' ws OptionKey:option_key ws OptionValue:option_value ';'
+            -> {'key': option_key, 'value': option_value}
+
+ParameterKey = OptionKey:parm ?(param not in ['deny', 'allow', 'option', 'range'])
+
+Paramteter = ws ParameterKey:param_key ws OptionValue:param_value ';'
+        -> {'key': param_key, 'value': param_value}
 
 # Fixed address statement in a host block
 FixedAddress = ws 'fixed-address' ws IP:ip ';'
@@ -22,10 +28,17 @@ HardwareAddress = ws 'hardware ethernet' ws MAC:mac ';'
 # Set of attributes possible in a host statement
 # This should contain more options but no more are implemented in cyder or
 # maintain so this is a "nice to have" feature
-HostAttributes = (HardwareAddress | FixedAddress)
 
-Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:values ws '}'
-        -> {'hosts': Host(fqdn, **dict(e.items()[0] for e in values))}
+HostAttributes = HostOption | HardwareAddress | FixedAddress HostParameter
+
+HostOption = Option:option 
+        -> {'options': Option(**parse_to_dict(option, {'scope': HOST}))}
+
+HostParameter = Parmeter:parmeter
+        -> {'parameters' Paremeter(**parse_to_dict(parameter, {'scope': HOST}))}
+
+Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:attrs ws '}'
+        -> Host(**parse_to_dict(*attrs + [{'fqdn': fqdn}], exclude_list=['fqdn']))
 
 # Range declaration in pool block
 Range = ws 'range' ws IP:start ws IP:end ';'
@@ -39,18 +52,26 @@ Allow = ws 'allow' ws OptionValue:allow ';'
 Deny = ws 'deny' ws OptionValue:deny ';'
         -> {'deny', deny}
 
-ParameterKey = OptionKey:parm ?( param not in ['deny', 'allow', 'option', 'range'])
-
-Paramteter = ws ParameterKey:param_key ws OptionValue:param_value ';'
-        -> Parameter(param_key, param_value, 
 
 # all the things (not really just the ones I have to deal with)
-PoolAttrs = Option | Allow | Parameter | Range | Deny
+PoolOption = {'options': Parameter:kwargs
+        -> {'options': Option(**pares_to_dict(kwargs,  {'scope': POOL}))}
+
+PoolParameter = Paremeter:kwargs
+        -> {'parameters': Parameter(**parse_to_dict(kwargs, {'scope': POOL}))}
+
+PoolAttrs = PoolOption | Allow | PoolParameter | Range | Deny
 
 Pool = ws 'pool' ws '{' PoolAttrs*:attrs ws '}'
-        -> {'pools': parse_to_object(attrs, Pool, ['start', 'end'])}
+        -> {'pools': Pool(**parse_to_dict(attrs, exclude_list=['start', 'end']))}
 
-SubnetAttrs = Option | Pool | Parameter
+SubnetOption = Option:kwargs
+        -> {'options': Option(**parse_to_dict(kwargs, {'scope': SUBNET}))}
+
+SubnetParameter = Parameter:kwargs
+        -> {'parameters': Parameter(**parse_to_dict(kwargs, {'scope': SUBNET}))}
+
+SubnetAttrs = SubnetOption | Pool | SubnetParameter
 
 # subnets can contain hosts but there is no reason for it so we will assume
 # that it wont happen for this initial draft.
@@ -58,13 +79,24 @@ Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
                 SubnetAttrs*:attrs ws
             '}'
         -> config.add_subnet(
-                parse_to_object(attrs, Subnet, ['netmask_addr', 'network_addr']))
+                parse_to_dict(*attrs + [{'netmask_addr': netmask_addr,
+                                         'network_addr': network_addr}],
+                              exclude_list=['netmask_addr', 'network_addr']))
 
 # Reconsider handling nested groups within groups
 
+GroupHost = Host:host -> {'hosts': host}
+
+GroupOption = Option:kwargs
+        -> {'options': Option(**parse_to_dict(kwargs, {'scope': GROUP}))}
+
+GroupParameter = Parameter:kwargs
+        -> {'parameters': Parameter(**parse_to_dict(kwargs, {'scope': GROUP}))}
+
 NestedGroup = Group:group -> {'groups' : group }
 
-GroupAttrs = NestedGroup | Host | Option
+GroupAttrs = NestedGroup | GroupHost | GroupOption | GroupParameter
+TopLevelGroup = Group:group -> config.add_group(group)
 
 Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
-        -> parse_to_object(attrs, Group)
+        -> Group(**parse_to_dict(attrs))

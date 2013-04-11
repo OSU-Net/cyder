@@ -1,8 +1,9 @@
 from parsley import wrapGrammar
 from ometa.grammar import OMeta
 from ometa.runtime import OMetaBase
+from constants import scope_weight
 from dhcp_objects import Host, Pool, Option, Subnet, Group, DhcpConfigContext
-from utils import parse_to_object, is_mac, is_ip
+from utils import parse_to_dict, is_mac, is_ip
 import sys
 
 

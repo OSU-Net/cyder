@@ -4,12 +4,7 @@ from operator import __eq__
 from functools import total_ordering
 from collections import MutableSequence
 from bisect import insort_left, bisect_left
-
-scope_weight = {'global': 0,
-                'subnet': 1,
-                'group': 2,
-                'host': 3}
-
+from constants import scope_weight
 
 
 @total_ordering
@@ -104,6 +99,15 @@ class ScopeForHost(object):
             for attr in chain(self.options, self.parameters):
                 host.add_option_or_parameter(attr, force=force)
 
+    def compare_options(self, other):
+        return sorted(self.options) == sorted(other.options)
+
+    def compare_parameters(self, other):
+        return sorted(self.parameters) == sorted(other.parameters)
+
+    def __eq__(self, other):
+        return sorted(self.options) == sorted(other.options) and \
+               sorted(self.parameters) == sorted(other.parameters)
 
 @total_ordering
 class Pool(ScopeForHost):
@@ -121,9 +125,11 @@ class Pool(ScopeForHost):
         if not isinstance(type(self), other):
             raise Exception("Can't compare objects of type "
                             "{0} and {1}".format(type(self), type(other)))
-        return self.start == other.start and \
+        return  super(ScopeForHost, self).__eq__(other) and \
+                self.start == other.start and \
                 self.end == other.end and \
-                sorted(self.options) == sorted(other.options)
+                sorted(self.allow) == sorted(other.allow) and \
+                sorted(self.deny) == sorted(other.deny)
 
     def __lt__(self, other):
         return self.start < other.start
@@ -140,23 +146,17 @@ class Subnet(ScopeForHost):
         self.pools = pools or []
         self.parameters = parameters or []
 
-    def compare_options(self, other):
-        return sorted(self.options) == sorted(other.options)
-
     def compare_pools(self, other):
         return sorted(self.pools) == sorted(other.pools)
 
-    def compare_parameters(self, other):
-        return sorted(self.parameters) == sorted(other.parameters)
-
     def __eq__(self, other):
-        return self.network == other.network and \
-               self.compare_options(other) and \
+        return super(ScopeForHost).__eq__(other) and \
+               self.network == other.network and \
                self.compare_pools(other)
 
     def __lt__(self, other):
         if isinstance(other, Host):
-            return self.network < other
+            return self.network < other.ip
         else:
             return self.network < other.network
 
@@ -171,9 +171,11 @@ class Group(ScopeForHost):
         self.groups = groups or []
         self.hosts = hosts or []
         self.parameters = parameters or []
+
+    def group_update(self):
         self.update_host_attributes(force=True)
         for group in self.groups:
-            group.update_host_attributes(force=True)
+            group.group_update()
 
 
 class ClientClass(object):
@@ -197,6 +199,15 @@ class DhcpConfigContext(object):
     def add_subnet(self, subnet):
         insort_left(self.subnets, subnet)
         hosts_contained_in = filter(lambda x: x in subnet, self.hosts)
+        """
+        Consider adding the hosts to the subnets after the parse is complete
+        and then recursively update options and parameters in each nested
+        scope.  If I used a similar approach that I took with the groups I
+        think I could clean things up.  If hosts are added after the fact I
+        could stop assigning scopes to attributes and infer the option
+        presedence alot easier.  Yeah after writting this comment im going to
+        do that.
+        """
 
     def add_host(self, host):
         insort_left(self.hosts, host)
@@ -205,7 +216,13 @@ class DhcpConfigContext(object):
             self.apply_attrs(
                 host, chain(contained_in.options, contained_in.parameters))
 
-    def add_group(self, host):parser.py
+    def add_group(self, group):
+        group.group_update()
+        self.groups.append(group)
+
+    # I think that I will be doing something with classes in the future
+    def add_class(self, dhcp_class):
+        self.classes.append(dhcp_class)
 
     def subnet_search(self, host):
         if self.subnets:

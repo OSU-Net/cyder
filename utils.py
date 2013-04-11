@@ -1,16 +1,15 @@
-from itertools import chain
+from itertools import chain, imap
 import re
 
 
-def parse_to_object(parse, Klass, exclude_from_list = []):
+def parse_to_dict(*args, exclude_list = []):
     kwargs = {}
-    for key, value in chain(*(elem.items() for elem in parse)):
+    for key, value in chain(*imap(lambda x: x.iteritems(), args)):
         if key in kwargs:
             kwargs[key].append(value)
         else:
             kwargs[key] = [value] if key not in exclude_from_list else value
-    return Klass(**kwargs)
-
+    return kwargs
 
 mac_match = "(([0-9a-f]){2}:){5}([0-9a-f]){2}$"
 is_mac = re.compile(mac_match)
