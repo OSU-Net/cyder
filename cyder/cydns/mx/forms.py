@@ -1,9 +1,9 @@
 from django import forms
-from django.forms import ModelForm
+from cyder.cydns.forms import DNSForm
 from cyder.cydns.mx.models import MX
 
 
-class MXForm(ModelForm):
+class MXForm(DNSForm):
     class Meta:
         model = MX
         exclude = ('fqdn',)

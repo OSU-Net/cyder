@@ -97,10 +97,14 @@ class Domain(models.Model, ObjectUrlMixin):
         db_table = 'domain'
 
     def __str__(self):
-        return '{0}'.format(self.name)
+        return "{0}".format(self.name)
 
     def __repr__(self):
         return "<Domain '{0}'>".format(self.name)
+
+    @property
+    def rdtype(self):
+        return 'DOMAIN'
 
     def details(self):
         """For tables."""
@@ -126,23 +130,39 @@ class Domain(models.Model, ObjectUrlMixin):
         self.check_for_children()
         if self.is_reverse:
             self.reassign_ptr_delete()
+        if self.has_record_set():
+            raise ValidationError("There are records associated with this "
+                                  "domain. Delete them before deleting this "
+                                  "domain.")
         super(Domain, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        if self.pk is None:
+        if not self.pk:
             new_domain = True
         else:
             new_domain = False
-
-        if self.pk:  # We need to exist in the db first.
             db_self = Domain.objects.get(pk=self.pk)
-            if db_self.name != self.name:
-                self.check_for_children()
-
+            # Raise an exception...
+            # If our soa is different AND it's non-null AND we have records in
+            # this domain AND EITHER
+            #       the new soa has a record domain with no nameservers
+            #   OR
+            #       it has no root domain, which means we are going to
+            #       be the root domain, and we have no nameserver records.
+            # TODO: fix the view bug
+            if (db_self.soa != self.soa and
+                self.soa and self.has_record_set() and
+                (self.soa.root_domain and
+                not self.soa.root_domain.nameserver_set.exists() or
+                not self.soa.root_domain and
+                 not self.nameserver_set.all().exists())):
+                    raise ValidationError("By changing this domain's SOA you "
+                                          "are attempting to create a zone "
+                                          "whos root domain has no NS record.")
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:
-            # Collect any ptr's that belong to this new domain
+            # Collect any ptr's that belong to this new domain.
             reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
 
     def ip_type(self):
@@ -171,13 +191,43 @@ class Domain(models.Model, ObjectUrlMixin):
                 objects = qset.all()
                 raise ValidationError("Objects with this name already "
                                       "exist {0}".format(objects))
+        else:
+            db_self = Domain.objects.get(pk=self.pk)
+            if db_self.name != self.name and self.domain_set.exists():
+                raise ValidationError("Child domains rely on this domain's "
+                                      "name remaining the same.")
 
     def check_for_children(self):
         if self.domain_set.exists():
             raise ValidationError("Before deleting this domain, please "
                                   "remove it's children.")
-    ### Reverse Domain Functions
 
+    def has_record_set(self, view=None, exclude_ns=False):
+        object_sets = [
+            self.addressrecord_set,
+            self.cname_set,
+            self.mx_set,
+            self.srv_set,
+            self.sshfp_set,
+            self.staticinterface_set,
+            self.txt_set,
+            self.ptr_set
+        ]
+        if not view:
+            for object_set in object_sets:
+                if object_set.exists():
+                    return True
+            if not exclude_ns and self.nameserver_set.exists():
+                return True
+        else:
+            for object_set in object_sets:
+                if object_set.filter(views=view).exists():
+                    return True
+            if (not exclude_ns and
+                    self.nameserver_set.filter(views=view).exists()):
+                return True
+
+    ### Reverse Domain Functions
     def reassign_ptr_delete(self):
         """This function serves as a pretty subtle workaround.
 
@@ -196,25 +246,6 @@ class Domain(models.Model, ObjectUrlMixin):
         for ptr in ptrs:
             ptr.reverse_domain = self.master_domain
             ptr.save(update_reverse_domain=False)
-
-    def has_record_set(self):
-        if self.mx_set.exists():
-            return True
-        if self.nameserver_set.exists():
-            return True
-        if self.addressrecord_set.exists():
-            return True
-        if self.staticinterface_set.exists():
-            return True
-        if self.srv_set.exists():
-            return True
-        if self.cname_set.exists():
-            return True
-        if self.txt_set.exists():
-            return True
-        if self.sshfp_set.exists():
-            return True
-        return False
 
 
 def boot_strap_ipv6_reverse_domain(ip, soa=None):
@@ -249,22 +280,22 @@ def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
     to the 128.193 domain. We need to re-asign the ip to it's correct
     reverse domain.
 
-    :param reverse_domain_1: The domain which could possible have
+    :param reverse_domain_1: The domain which could possibly have
         addresses added to it.
 
-    :type reverse_domain_1: str
+    :type reverse_domain_1: :class:`Domain`
 
     :param reverse_domain_2: The domain that has ip's which might not
         belong to it anymore.
 
-    :type reverse_domain_2: str
+    :type reverse_domain_2: :class:`Domain`
     """
 
     if reverse_domain_2 is None or ip_type is None:
         return
     ptrs = reverse_domain_2.ptr_set.iterator()
-    #intrs = reverse_domain_2.staticinterface_set.iterator()
-    #TODO do the intr case
+    # intrs = reverse_domain_2.staticinterface_set.iterator()
+    # TODO do the intr case
     for ptr in ptrs:
         if ip_type == '6':
             nibz = nibbilize(ptr.ip_str)
@@ -302,18 +333,3 @@ def name_to_master_domain(name):
         else:
             master_domain = possible_master_domain[0]
     return master_domain
-
-
-def _name_to_domain(fqdn):
-    return name_to_domain(fqdn)
-
-
-def _check_TLD_condition(record):
-    domain = Domain.objects.filter(name=record.fqdn)
-    if not domain:
-        return
-    if not record.label and domain[0] == record.domain:
-        return  # This is allowed
-    else:
-        raise ValidationError("You cannot create an record that points "
-                              "to the top level of another domain.")

@@ -7,6 +7,14 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
+from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.vrf.models import Vrf
+
 
 def make_paginator(request, qs, num=20, obj_type=None):
     """
@@ -127,14 +135,53 @@ def make_megafilter(Klass, term):
     return reduce(operator.or_, megafilter)
 
 
+def filter_by_ctnr(request, Klass):
+    if Klass is Domain:
+        objects = request.session['ctnr'].domains
+    elif Klass is Workgroup:
+        objects = request.session['ctnr'].workgroups
+    elif Klass is Range:
+        objects = request.session['ctnr'].ranges
+    elif Klass is Vrf:
+        # TODO: filter vrfs by container
+        objects = Vrf.objects
+    elif Klass is Network:
+        objects = Network.objects.filter(
+            range__in=request.session['ctnr'].ranges.all())
+    elif Klass is Vlan:
+        networks = Network.objects.filter(
+            range__in=request.session['ctnr'].ranges.all())
+        objects = Vlan.objects.filter(network__in=networks)
+    elif Klass is Site:
+        networks = Network.objects.filter(
+            range__in=request.session['ctnr'].ranges.all())
+        objects = Site.objects.filter(network__in=networks)
+    else:
+        objects = Klass.objects
+        if hasattr(Klass, 'domain'):
+            objects = objects.filter(
+                domain__in=request.session['ctnr'].domains.all())
+        elif hasattr(Klass, 'reverse_domain'):
+            objects = objects.filter(
+                reverse_domain__in=request.session['ctnr'].domains.all())
+
+    return objects
+
+
 def _filter(request, Klass):
+    if request.session['ctnr'].name == 'global':
+        objects = Klass.objects
+    else:
+        objects = filter_by_ctnr(request, Klass)
+
     if request.GET.get('filter'):
         try:
-            return Klass.objects.filter(make_megafilter(Klass,
-                                        request.GET.get('filter')))
+            return objects.filter(make_megafilter(Klass,
+                                                  request.GET.get('filter')))
         except TypeError:
             pass
-    return Klass.objects.all()
+
+    return objects.distinct()
 
 
 def qd_to_py_dict(qd):

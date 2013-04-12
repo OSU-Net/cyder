@@ -24,6 +24,8 @@ Installation
 
 Install dependencies. (virtualenv recommended)
 
+#TODO sudo yum install openldap-devel on fedora
+
 ```
 sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev
 git submodule update --init --recursive

@@ -34,8 +34,7 @@ class StaticInterfaceForm(forms.ModelForm):
 
     class Meta:
         model = StaticInterface
-        exclude = ('ip_upper', 'ip_lower', 'reverse_domain',
-                   'system', 'fqdn')
+        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
 
 
 class FullStaticInterfaceForm(forms.ModelForm):

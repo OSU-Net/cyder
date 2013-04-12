@@ -38,8 +38,9 @@ def get_klasses(obj_type):
         'site': (Site, SiteForm, None),
         'vlan': (Vlan, VlanForm, None),
         'static_interface': (StaticInterface, StaticInterfaceForm, None),
-        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
-        'vrf': (Vrf, VrfForm, None),
+        'dynamic_interface':
+            (DynamicInterface, DynamicInterfaceForm, None),
+        'vrf': (Vrf, VrfForm, None, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
     }.get(obj_type, (None, None, None))
 
@@ -49,12 +50,10 @@ def cydhcp_view(request, pk=None):
 
 
 def cydhcp_create(request, pk=None):
-    print request.GET
     return cy_view(request, get_klasses, 'cydhcp/cydhcp_form.html', pk)
 
 
 def cydhcp_get_update_form(request):
-    print request
     return get_update_form(request, get_klasses)
 
 

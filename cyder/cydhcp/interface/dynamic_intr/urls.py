@@ -7,8 +7,8 @@ from cyder.cydhcp.views import cydhcp_create
 urlpatterns = patterns('',
                        url(r'create/$',
                            cydhcp_create,
-                           name='dynamic_intr-create'),
+                           name='dynamic_interface-create'),
                        url(r'(?P<pk>[\w-]+)/$',
                            DynamicInterfaceDetailView.as_view(),
                            name='dynamic_interface-details'),)
-urlpatterns += cydhcp_urls('dynamic_intr')
+urlpatterns += cydhcp_urls('dynamic_interface')

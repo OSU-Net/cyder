@@ -80,6 +80,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'core.ctnr',
     'core.cyuser',
     'core.system',
+    'core.task',
     'cydhcp',
     'cydhcp.site',
     'cydhcp.vlan',
@@ -120,7 +121,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'jingo_minify',
     'tastypie',
     'tastytools',
-    # 'reversion',
 
     # Django contrib apps
     'django.contrib.sessions',
@@ -137,7 +137,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_cas.middleware.CASMiddleware',
     'cyder.middleware.authentication.AuthenticationMiddleware',
-    # 'reversion.middleware.RevisionMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS += (
@@ -203,8 +202,10 @@ PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 # Migration settings
 POINTERS = [('128.193.76.253', 'cob-dc81.bus.oregonstate.edu', 'forward'),
             ('128.193.76.254', 'cob-dc82.bus.oregonstate.edu', 'forward')]
-REVERSE_DOMAINS = ['50.209.59.69', '193.128', '10', '211.140', '201.199', '32.198', '232.111',
-                   '127', '131.80.252.131', '5.68.98.207']
+REVERSE_DOMAINS = [
+    '50.209.59.69', '193.128', '10', '211.140', '201.199', '32.198', '232.111',
+    '127', '131.80.252.131', '5.68.98.207'
+]
 
 VERIFICATION_SERVER = "ns1.oregonstate.edu"
 ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"

@@ -1,5 +1,6 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
+{% from "base/utility.html" import create_button %}
 
 
 {% block title %}
@@ -71,10 +72,12 @@
             {% else %}
               <td><b>Free</b></td>
               <td>
-                Create
-                <a href="/cydns/address_record/create/?ip_str={{ obj[1] }}&ip_type=4">A Record</a> |
-                <a href="/cydns/ptr/create/?ip_str={{ obj[1] }}&ip_type=4">PTR Record</a> |
-                <a href="{{ url('static_intr-create') }}?ip_str={{ obj[1] }}&ip_type=4">Static Interface</a>
+                {{ create_button(
+                    'address_record', url('cydns-get-record'), data=obj[-1]) }}
+                {{ create_button(
+                    'ptr', url('cydns-get-record'), data=obj[-1]) }}
+                {{ create_button(
+                    'static_interface', url('cydhcp-get-record'), data=obj[-1]) }}
               </td>
             {% endif %}
           </tr>

@@ -126,23 +126,35 @@ def get_update_form(request, get_klasses_fn):
     """
     obj_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
-    if not (obj_type and record_pk):
+    related_type = request.GET.get('related_type', '')
+    related_pk = request.GET.get('related_pk', '')
+    kwargs = json.loads(request.GET.get('data', '') or '{}')
+    if not obj_type:
         raise Http404
 
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
 
-    # Get the object if updating.
     try:
-        record = Klass.objects.get(pk=record_pk)
-        if perm(request, cy.ACTION_UPDATE, obj=record):
-            if FQDNFormKlass:
-                form = FQDNFormKlass(instance=record)
+        # Get the object if updating.
+        if record_pk:
+            record = Klass.objects.get(pk=record_pk)
+            if perm(request, cy.ACTION_UPDATE, obj=record):
+                if FQDNFormKlass:
+                    form = FQDNFormKlass(instance=record)
+                else:
+                    form = FormKlass(instance=record)
+        else:
+            #  Get form to create a new object and prepopulate
+            if related_type and related_pk:
+                form = FormKlass(initial=dict(
+                    {related_type: related_pk}.items() + kwargs.items()))
             else:
-                form = FormKlass(instance=record)
+                form = FormKlass(initial=kwargs)
     except ObjectDoesNotExist:
         raise Http404
 
-    return HttpResponse(json.dumps({'form': form.as_p(), 'pk': record.pk}))
+    return HttpResponse(
+        json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
 
 
 def search_obj(request, get_klasses_fn):

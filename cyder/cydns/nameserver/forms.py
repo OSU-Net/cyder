@@ -1,13 +1,12 @@
 from django import forms
-from django.forms import ModelForm
 
-from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.forms import DNSForm
+from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-import itertools
 
 
-class NameserverForm(ModelForm):
+class NameserverForm(DNSForm):
     class Meta:
         model = Nameserver
         exclude = ('addr_glue', 'intr_glue')

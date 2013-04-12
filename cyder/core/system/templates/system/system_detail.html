@@ -1,8 +1,27 @@
-{% extends "core/core_base.html" %}
+{% extends "core/core_detail.html" %}
 {% from "base/tables.html" import render_table %}
-
+{% from "base/utility.html" import create_button %}
 
 {% block title %}System {{ system.name }}{% endblock %}
+
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-objPk="{{ system.pk }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('core-get-update-form') }}"
+    data-objName="{{ system.name }}">
+  </span>
+{% endblock %}
+
+
+
+{% block extra_action_bar %}
+{{ create_button(
+    'static_interface', url('cydhcp-get-record'), url('static_interface'), objName=system.name) }}
+{{ create_button(
+    'dynamic_interface', url('cydhcp-get-record'), url('dynamic_interface'), objName=system.name) }}
+{% endblock %} 
 
 {% block content %}
   {{ render_table(request, system_table) }}
@@ -11,7 +30,6 @@
     <h3>System Attributes</h3>
     {{ render_table(request, attrs_table) }}
   {% endif %}
-
   {% if static_intrs_table %}
     <h3>Static Interfaces</h3>
     {{ render_table(request, static_intrs_table) }}

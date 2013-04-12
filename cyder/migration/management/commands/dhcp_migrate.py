@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
+
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
@@ -11,9 +12,12 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
+
 import ipaddr
 import MySQLdb
 from optparse import make_option
+
+from lib.utilities import long2ip
 
 
 allow_all_subnets = [
@@ -150,6 +154,7 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
 
 
 def migrate_subnets():
+    print "Migrating subnets."
     migrated = []
     cursor.execute("SELECT * FROM subnet")
     results = cursor.fetchall()
@@ -164,6 +169,7 @@ def migrate_subnets():
 
 
 def migrate_ranges():
+    print "Migrating ranges."
     cursor.execute("SELECT id, start, end, type, subnet, comment, enabled, "
                    "allow_all_hosts "
                    "FROM `ranges`")
@@ -180,6 +186,7 @@ def migrate_ranges():
 
 
 def migrate_vlans():
+    print "Migrating VLANs."
     cursor.execute("SELECT * FROM vlan")
     results = cursor.fetchall()
     migrated = []
@@ -194,6 +201,7 @@ def migrate_vlans():
 
 
 def migrate_workgroups():
+    print "Migrating workgroups."
     cursor.execute("SELECT * FROM workgroup")
     results = cursor.fetchall()
     migrated = []
@@ -228,6 +236,7 @@ def create_ctnr(id):
 
 
 def migrate_zones():
+    print "Migrating containers."
     cursor.execute("SELECT name, description, comment, "
                    "support_mail, allow_blank_ha "
                    "FROM zone")
@@ -248,6 +257,7 @@ def migrate_zones():
 
 
 def migrate_dynamic_hosts():
+    print "Migrating dynamic hosts."
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
                    "workgroup, zone FROM host WHERE ip = 0")
     results = cursor.fetchall()
@@ -268,7 +278,7 @@ def migrate_dynamic_hosts():
 
 
 def migrate_user():
-    print "migrate_user"
+    print "Migrating users."
     cursor.execute("SELECT username FROM user")
     result = cursor.fetchall()
     for username, in result:
@@ -277,7 +287,7 @@ def migrate_user():
 
 
 def migrate_zone_user():
-    print "migrate_zone_user"
+    print "Migrating user-container relationship."
     NEW_LEVEL = {5: 0, 25: 1, 50: 2, 100: 2}
     cursor.execute("SELECT * FROM zone_user")
     result = cursor.fetchall()
@@ -295,6 +305,7 @@ def migrate_zone_user():
 
 
 def migrate_zone_range():
+    print "Migrating container-domain relationship."
     cursor.execute("SELECT * FROM zone_range")
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
@@ -316,6 +327,7 @@ def migrate_zone_range():
 
 
 def migrate_zone_domain():
+    print "Migrating container-domain relationship."
     cursor.execute("SELECT zone, domain FROM zone_domain")
     results = cursor.fetchall()
     for zone_id, domain_id in results:
@@ -324,17 +336,37 @@ def migrate_zone_domain():
         if not ctnr or not domain:
             continue
 
+        ctnr.domains.add(domain)
+        ctnr.save()
+
+
+def migrate_zone_reverse():
+    print "Migrating container-reverse_domain relationship."
+    cursor.execute("SELECT ip,zone FROM pointer WHERE type='reverse'")
+    results = cursor.fetchall()
+    for ip, zone_id in results:
+        ctnr = maintain_find_zone(zone_id)
+        if not ctnr:
+            continue
+
+        doctets = []
+        octets = long2ip(ip).split(".")
+        for octet in octets:
+            doctets = [octet] + doctets
+            dname = ".".join(doctets) + ".in-addr.arpa"
+            domain, _ = Domain.objects.get_or_create(name=dname,
+                                                     is_reverse=True)
+
         try:
             ctnr.domains.add(domain)
             ctnr.save()
         except Exception, e:
             print e
-            raise NotInMaintain("Unable to migrate relation between "
-                                "domain_id {0} and "
-                                "zone_id {1}".format(domain_id, zone_id))
+            raise
 
 
 def migrate_zone_workgroup():
+    print "Migrating container-workgroup relationship."
     cursor.execute("SELECT * FROM zone_workgroup")
     result = cursor.fetchall()
     for _, workgroup_id, zone_id, _ in result:
@@ -360,12 +392,17 @@ def maintain_find_range(range_id):
 
 
 def maintain_find_domain(domain_id):
+    dom = None
     if cursor.execute("SELECT name "
                       "FROM `domain` "
                       "WHERE id = {0}".format(domain_id)):
         name = cursor.fetchone()[0]
-        return Domain.objects.get(name=name)
-    return None
+        try:
+            dom = Domain.objects.get(name=name)
+        except Domain.DoesNotExist:
+            pass
+
+    return dom
 
 
 def maintain_find_zone(zone_id):
@@ -385,17 +422,35 @@ def maintain_find_workgroup(workgroup_id):
 
 
 def migrate_all(skip=False):
-            migrate_vlans()
-            migrate_zones()
-            migrate_workgroups()
-            migrate_subnets()
-            migrate_ranges()
-            if not skip:
-                migrate_dynamic_hosts()
-            migrate_zone_range()
-            migrate_zone_workgroup()
-            migrate_user()
-            migrate_zone_user()
+    migrate_vlans()
+    migrate_zones()
+    migrate_workgroups()
+    migrate_subnets()
+    migrate_ranges()
+    if not skip:
+        migrate_dynamic_hosts()
+    migrate_zone_range()
+    migrate_zone_workgroup()
+    migrate_zone_domain()
+    migrate_zone_reverse()
+    migrate_user()
+    migrate_zone_user()
+
+
+def delete_all():
+    Range.objects.all().delete()
+    Vlan.objects.all().delete()
+    Network.objects.all().delete()
+    Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
+    DynamicInterface.objects.all().delete()
+    Workgroup.objects.all().delete()
+    User.objects.filter(id__gt=1).delete()  # First user is a fixture
+    CtnrUser.objects.filter(id__gt=2).delete()  # First 2 are fixtures
+
+
+def do_everything(skip=False):
+    delete_all()
+    migrate_all(skip)
 
 
 class Command(BaseCommand):
@@ -474,13 +529,7 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         if options['delete']:
-            Range.objects.all().delete()
-            Network.objects.all().delete()
-            Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
-            DynamicInterface.objects.all().delete()
-            Workgroup.objects.all().delete()
-            User.objects.filter(id__gt=1).delete()  # First user is a fixture
-            CtnrUser.objects.filter(id__gt=2).delete()  # First 2 are fixtures
+            delete_all()
         if options['vlan']:
             migrate_vlans()
         if options['zone']:
@@ -499,6 +548,7 @@ class Command(BaseCommand):
             migrate_zone_workgroup()
         if options['zone-domain']:
             migrate_zone_domain()
+            migrate_zone_reverse()
         if options['user']:
             migrate_user()
         if options['zone-user']:

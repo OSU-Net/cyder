@@ -8,20 +8,15 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain
-from cyder.cydns.soa.models import SOA
+
+from cyder.cydns.tests.utils import create_fake_zone
 
 
 class UpdateRecordDeleteDomainTests(TestCase):
 
     def generic_check(self, obj, do_label=True, label_prefix=""):
         # Make sure all record types block
-        c, _ = Domain.objects.get_or_create(name='foo22')
-        self.assertFalse(c.purgeable)
-        f_c, _ = Domain.objects.get_or_create(name='foo.foo22')
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
-                                         description="foo.foo22")
-        f_c.soa = s
-        f_c.save()
+        f_c = create_fake_zone("foo.foo22", suffix="")
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo22"
         label, the_domain = ensure_label_domain(fqdn)

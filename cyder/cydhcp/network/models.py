@@ -3,7 +3,7 @@ import ipaddr
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.base.constants import IP_TYPES
+from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter
@@ -95,7 +95,7 @@ class Network(models.Model, ObjectUrlMixin):
         super(Network, self).save(*args, **kwargs)
 
         if add_routers:
-            if self.ip_type == '4':
+            if self.ip_type == IP_TYPE_4:
                 router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
             else:
                 router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
@@ -138,7 +138,7 @@ class Network(models.Model, ObjectUrlMixin):
                 fail = True
                 break
 
-            if self.ip_type == '4':
+            if self.ip_type == IP_TYPE_4:
                 brdcst_upper, brdcst_lower = 0, int(self.network.broadcast)
             else:
                 brdcst_upper, brdcst_lower = ipv6_to_longs(str(
@@ -233,9 +233,9 @@ class Network(models.Model, ObjectUrlMixin):
         if not isinstance(self.network_str, basestring):
             raise ValidationError("ERROR: No network str.")
         try:
-            if self.ip_type == '4':
+            if self.ip_type == IP_TYPE_4:
                 self.network = ipaddr.IPv4Network(self.network_str)
-            elif self.ip_type == '6':
+            elif self.ip_type == IP_TYPE_6:
                 self.network = ipaddr.IPv6Network(self.network_str)
             else:
                 raise ValidationError("Could not determine IP type of network"

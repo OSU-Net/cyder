@@ -10,20 +10,17 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.soa.models import SOA
+from cyder.cydns.tests.utils import create_fake_zone
 
 
 class AutoDeleteTests(TestCase):
 
     def setUp(self):
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                                         description="foo")
-        self.c = Domain(name='poo')
-        self.c.save()
-        self.assertFalse(self.c.purgeable)
-        self.f_c = Domain(name='foo.poo')
-        self.f_c.soa = s
-        self.f_c.save()
+        c = Domain(name='poo')
+        c.save()
+        self.assertFalse(c.purgeable)
+        self.f_c = create_fake_zone('foo.poo', suffix="")
+        self.assertEqual(self.f_c.name, 'foo.poo')
 
     def test_cleanup_txt(self):
         self.assertFalse(Domain.objects.filter(name="x.y.z.foo.poo"))
@@ -108,8 +105,10 @@ class AutoDeleteTests(TestCase):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
-        srv = SRV(label='_' + label, domain=the_domain, target="foo", priority=4,
-            weight=4, port=34)
+        srv = SRV(
+            label='_' + label, domain=the_domain, target="foo", priority=4,
+            weight=4, port=34
+        )
         srv.save()
         self.assertFalse(prune_tree(the_domain))
         srv.delete()
@@ -124,11 +123,8 @@ class AutoDeleteTests(TestCase):
         c = Domain(name='foo1')
         c.save()
         self.assertFalse(c.purgeable)
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                                         description="dddfoo")
-        f_c = Domain(name='foo.foo1')
-        f_c.soa = s
-        f_c.save()
+        f_c = create_fake_zone('foo.foo1', suffix="")
+        self.assertEqual(f_c.name, 'foo.foo1')
 
         self.assertFalse(Domain.objects.filter(name="x.y.z.foo.foo1"))
         self.assertFalse(Domain.objects.filter(name="y.z.foo.foo1"))
@@ -163,9 +159,10 @@ class AutoDeleteTests(TestCase):
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
         system = System()
-        addr = StaticInterface(label=label, domain=the_domain,
-                               ip_type='4', ip_str="10.2.3.4", mac="00:11:22:33:44:55",
-                               system=system)
+        addr = StaticInterface(
+            label=label, domain=the_domain, ip_type='4', ip_str="10.2.3.4",
+            mac="00:11:22:33:44:55", system=system
+        )
         addr.save()
         self.assertFalse(prune_tree(the_domain))
         addr.delete()

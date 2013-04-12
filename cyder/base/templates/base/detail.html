@@ -15,8 +15,6 @@
   {% endif %}
 {% endblock %}
 
-{% block action_bar_extra %}{% endblock %}
-
 {% block view_metadata %}{% endblock %}
 
 {% block form %}
@@ -37,7 +35,6 @@
 
 {% block content %}
   {{ render_table(request, obj_table) }}
-
   {% for table in tables %}
     {% if table.table %}
       <h2>{{ table.name }}</h2>

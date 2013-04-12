@@ -191,7 +191,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
 
 
     def _check_is_digit(self):
-        if not self.value.is_digit():
+        if not self.value.isdigit():
             raise ValidationError("The option must be a digit")
 
 

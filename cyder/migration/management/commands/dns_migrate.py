@@ -41,12 +41,12 @@ class Zone(object):
 
         self.domain = self.gen_domain()
         if self.domain:
-            self.domain.soa = self.gen_soa() or soa
-            self.domain.save()
             self.gen_MX()
             self.gen_static()
             self.gen_AR()
             self.gen_NS()
+            self.domain.soa = self.gen_soa() or soa
+            self.domain.save()
             self.walk_zone()
 
     def gen_soa(self):

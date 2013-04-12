@@ -1,9 +1,12 @@
 from django import forms
-from django.forms import ModelForm
+
+from cyder.cydns.forms import DNSForm
 from cyder.cydns.ptr.models import PTR
 
 
-class PTRForm(ModelForm):
+class PTRForm(DNSForm):
+    def delete_instance(self, instance):
+        instance.delete()
 
     class Meta:
         model = PTR

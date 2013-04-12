@@ -6,14 +6,14 @@ from cyder.cydns.cname.models import CNAME
 
 from cyder.cydns.validation import validate_mx_priority
 from cyder.cydns.validation import validate_name
-from cyder.base.mixins import DisplayMixin
+from cyder.cydns.models import LabelDomainMixin
 
 # import reversion
 
 from gettext import gettext as _
 
 
-class MX(CydnsRecord, DisplayMixin):
+class MX(CydnsRecord, LabelDomainMixin):
     """
     >>> MX(label=label, domain=domain, server=server, priority=prio,
     ...     ttl=tll)
@@ -22,23 +22,18 @@ class MX(CydnsRecord, DisplayMixin):
     # The mail server this record should point to.
     server = models.CharField(max_length=100, validators=[validate_name],
                               help_text="The name of the mail server this "
-                                        "record points to.")
+                              "record points to.")
     priority = models.PositiveIntegerField(null=False,
                                            validators=[validate_mx_priority])
     template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just}{priority:$prio_just} "
                  "{server:$rhs_just}.")
     search_fields = ('fqdn', 'server')
-    enabled = models.BooleanField(default=True,
-                                  help_text="Enable this MX record?")
 
     class Meta:
         db_table = 'mx'
+        # label and domain in CydnsRecord
         unique_together = ('domain', 'label', 'server', 'priority')
-
-    @property
-    def rdtype(self):
-        return 'MX'
 
     def __str__(self):
         return "{0} {1} {3} {4} {5}".format(self.fqdn, self.ttl, 'IN', 'MX',
@@ -67,6 +62,10 @@ class MX(CydnsRecord, DisplayMixin):
             {'name': 'ttl', 'datatype': 'integer', 'editable': True},
         ]}
 
+    @property
+    def rdtype(self):
+        return 'MX'
+
     @classmethod
     def get_api_fields(cls):
         return super(MX, cls).get_api_fields() + ['server', 'priority']
@@ -77,7 +76,6 @@ class MX(CydnsRecord, DisplayMixin):
 
     def clean(self, *args, **kwargs):
         super(MX, self).clean(*args, **kwargs)
-        super(MX, self).check_for_delegation()
         super(MX, self).check_for_cname()
         self.no_point_to_cname()
 
@@ -86,5 +84,3 @@ class MX(CydnsRecord, DisplayMixin):
         # TODO, cite an RFC.
         if CNAME.objects.filter(fqdn=self.server):
             raise ValidationError("MX records should not point to CNAMES.")
-
-# reversion.(MX)

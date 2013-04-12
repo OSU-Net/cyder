@@ -1,53 +1,37 @@
 from django.test import TestCase
 
-from cydns.domain.models import Domain
-from cydns.soa.models import SOA
-from cydns.srv.models import SRV
-from cydns.txt.models import TXT
-from cydns.ptr.models import PTR
-from cydns.mx.models import MX
-from cydns.cname.models import CNAME
-from cydns.address_record.models import AddressRecord
-from cydns.nameserver.models import Nameserver
-from core.interface.static_intr.models import StaticInterface
+from cyder.cydns.soa.models import SOA
+from cyder.cydns.srv.models import SRV
+from cyder.cydns.txt.models import TXT
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.mx.models import MX
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.tests.utils import create_fake_zone
 
-from systems.models import System
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+
+from cyder.core.system.models import System
+from core.task.models import Task
 
 
 class DirtySOATests(TestCase):
     def setUp(self):
-        Domain.objects.get_or_create(name="arpa")
-        Domain.objects.get_or_create(name="in-addr.arpa")
-        self.r1, _ = Domain.objects.get_or_create(name="10.in-addr.arpa")
-        self.sr, sr_c = SOA.objects.get_or_create(
-            primary="ns1.foo.gaz",
-            contact="hostmaster.foo",
-            description="123foo.gazsdi2")
-        self.r1.soa = self.sr
-        self.r1.save()
+        self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
+        self.sr = self.r1.soa
+        self.sr.dirty = False
+        self.sr.save()
 
-        s1, s1_c = SOA.objects.get_or_create(
-            primary="ns1.foo.gaz",
-            contact="hostmaster.dfdfoo",
-            description="123fooasdfsdfasdfsa.gaz2")
-        self.soa = s1
-        d, _ = Domain.objects.get_or_create(name="bgaz")
-        d.soa = s1
-        d.save()
-        self.dom = d
+        self.dom = create_fake_zone("bgaz", suffix="")
+        self.soa = self.dom.soa
         self.soa.dirty = False
-        self.dom.dirty = False
+        self.soa.save()
 
-        s2, s1_c = SOA.objects.get_or_create(primary="ns1.foo.gaz",
-                                             contact="hostmaster.foo",
-                                             description="123fooasdfsdf.gaz2")
-        self.rsoa = s2
-        rd, _ = Domain.objects.get_or_create(name="123.in-addr.arpa")
-        rd.soa = s2
-        rd.save()
-        self.rdom = rd
+        self.rdom = create_fake_zone("123.in-addr.arpa", suffix="")
+        self.rsoa = self.r1.soa
         self.rsoa.dirty = False
-        self.rdom.dirty = False
+        self.rsoa.save()
 
         self.s = System()
         self.s.save()
@@ -57,6 +41,7 @@ class DirtySOATests(TestCase):
         self.assertTrue(self.rsoa.bind_render_record() not in ('', None))
 
     def generic_dirty(self, Klass, create_data, update_data, local_soa):
+        Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
         rec = Klass(**create_data)
@@ -66,7 +51,10 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
+        self.assertEqual(1, Task.dns.all().count())
+
         # Now try updating
+        Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
         local_soa = SOA.objects.get(pk=local_soa.pk)
@@ -77,50 +65,88 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
+        self.assertEqual(1, Task.dns.all().count())
+
+        # Now delete
+        Task.dns.all().delete()  # Delete all tasks
+        local_soa.dirty = False
+        local_soa.save()
+        local_soa = SOA.objects.get(pk=local_soa.pk)
+        self.assertFalse(local_soa.dirty)
+        rec.delete()
+        local_soa = SOA.objects.get(pk=local_soa.pk)
+        self.assertTrue(local_soa.dirty)
+
+        self.assertEqual(1, Task.dns.all().count())
+
     def test_dirty_a(self):
-        create_data = {'label': 'asdf',
-                       'domain': self.dom,
-                       'ip_str': '10.2.3.1',
-                       'ip_type': '4'}
-        update_data = {'label': 'asdfx'}
+        create_data = {
+            'label': 'asdf',
+            'domain': self.dom,
+            'ip_str': '10.2.3.1',
+            'ip_type': '4'
+        }
+        update_data = {
+            'label': 'asdfx',
+        }
         self.generic_dirty(AddressRecord, create_data, update_data, self.soa)
 
     def test_dirty_intr(self):
-        create_data = {'label': 'asdf1',
-                       'domain': self.dom,
-                       'ip_str': '10.2.3.1',
-                       'ip_type': '4',
-                       'system': self.s,
-                       'mac': '11:22:33:44:55:66'}
-        update_data = {'label': 'asdfx1'}
+        create_data = {
+            'label': 'asdf1',
+            'domain': self.dom,
+            'ip_str': '10.2.3.1',
+            'ip_type': '4',
+            'system': self.s,
+            'mac': '11:22:33:44:55:66'
+        }
+        update_data = {
+            'label': 'asdfx1',
+        }
         self.generic_dirty(StaticInterface, create_data, update_data, self.soa)
 
     def test_dirty_cname(self):
-        create_data = {'label': 'asdf2',
-                       'domain': self.dom,
-                       'target': 'foo.bar.com'}
-        update_data = {'label': 'asdfx2'}
+        create_data = {
+            'label': 'asdf2',
+            'domain': self.dom,
+            'target': 'foo.bar.com',
+        }
+        update_data = {
+            'label': 'asdfx2',
+        }
         self.generic_dirty(CNAME, create_data, update_data, self.soa)
 
     def test_dirty_ptr(self):
-        create_data = {'ip_str': '10.2.3.4',
-                       'ip_type': '4',
-                       'name': 'foo.bar.com'}
-        update_data = {'label': 'asdfx2'}
+        create_data = {
+            'ip_str': '10.2.3.4',
+            'ip_type': '4',
+            'name': 'foo.bar.com',
+        }
+        update_data = {
+            'label': 'asdfx2',
+        }
         self.generic_dirty(PTR, create_data, update_data, local_soa=self.sr)
 
     def test_dirty_mx(self):
-        create_data = {'label': '',
-                       'domain': self.dom,
-                       'priority': 10,
-                       'server': 'foo.bar.com'}
-        update_data = {'label': 'asdfx3'}
+        create_data = {
+            'label': '',
+            'domain': self.dom,
+            'priority': 10,
+            'server': 'foo.bar.com',
+        }
+        update_data = {
+            'label': 'asdfx3',
+        }
         self.generic_dirty(MX, create_data, update_data, self.soa)
 
     def test_dirty_ns(self):
-        create_data = {'domain': self.dom,
-                       'server': 'foo.bar.com'}
-        update_data = {'label': 'asdfx4'}
+        create_data = {
+            'domain': self.dom,
+            'server': 'foo.bar.com',
+        }
+        update_data = {
+            'label': 'asdfx4',
+        }
         self.generic_dirty(Nameserver, create_data, update_data, self.soa)
 
     def test_dirty_soa(self):
@@ -130,18 +156,26 @@ class DirtySOATests(TestCase):
         self.assertTrue(self.soa.dirty)
 
     def test_dirty_srv(self):
-        create_data = {'label': '_asdf7',
-                       'domain': self.dom,
-                       'priority': 10,
-                       'port': 10,
-                       'weight': 10,
-                       'target': 'foo.bar.com'}
-        update_data = {'label': '_asdfx4'}
+        create_data = {
+            'label': '_asdf7',
+            'domain': self.dom,
+            'priority': 10,
+            'port': 10,
+            'weight': 10,
+            'target': 'foo.bar.com',
+        }
+        update_data = {
+            'label': '_asdfx4',
+        }
         self.generic_dirty(SRV, create_data, update_data, self.soa)
 
     def test_dirty_txt(self):
-        create_data = {'label': 'asdf8',
-                       'domain': self.dom,
-                       'txt_data': 'some shit'}
-        update_data = {'label': 'asdfx5'}
+        create_data = {
+            'label': 'asdf8',
+            'domain': self.dom,
+            'txt_data': 'some shit',
+        }
+        update_data = {
+            'label': 'asdfx5',
+        }
         self.generic_dirty(TXT, create_data, update_data, self.soa)

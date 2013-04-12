@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 
 import cyder.base.tests
-from cyder.cydns.soa.models import SOA
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.mx.models import MX
@@ -13,6 +12,7 @@ from cyder.cydns.address_record.models import AddressRecord
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.tests.utils import create_fake_zone
 
 from cyder.core.system.models import System
 
@@ -32,27 +32,11 @@ class CNAMETests(cyder.base.tests.TestCase):
         return d
 
     def setUp(self):
-        primary = "ns5.oregonstate.edu"
-        contact = "admin.oregonstate.edu"
-        retry = 1234
-        refresh = 1234123
-        self.soa = SOA(primary=primary, contact=contact, retry=retry,
-                       refresh=refresh)
-        self.soa.save()
+        self.g = create_fake_zone("gz", suffix="")
+        self.c_g = create_fake_zone("coo.gz", suffix="")
+        self.d = create_fake_zone("dz", suffix="")
 
-        self.g = Domain(name="gz")
-        self.g.save()
-        self.c_g = Domain(name="coo.gz")
-        self.c_g.soa = self.soa
-        self.c_g.save()
-        self.d = Domain(name="dz")
-        self.d.save()
-
-        self.arpa = self.create_domain(name='arpa')
-        self.arpa.save()
-        self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i_arpa.save()
-        self.r1 = self.create_domain(name="10")
+        self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
         self.r1.save()
 
         self.s = System()
@@ -87,7 +71,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         self.do_add(label, domain, data)
         self.assertRaises(ValidationError, self.do_add, *(label, domain, data))
 
-        label = ""
+        label = "hooo"
         domain = self.g
         data = "foo.com"
         self.do_add(label, domain, data)
@@ -163,6 +147,18 @@ class CNAMETests(cyder.base.tests.TestCase):
         cn = CNAME(label=label, domain=dom, target=data)
         self.assertRaises(ValidationError, cn.full_clean)
 
+    def test_address_record_exists_upper_case(self):
+        label = "testyfoo"
+        data = "wat"
+        dom, _ = Domain.objects.get_or_create(name="cd")
+        dom, _ = Domain.objects.get_or_create(name="what.cd")
+
+        rec, _ = AddressRecord.objects.get_or_create(
+            label=label, domain=dom, ip_type='4', ip_str="128.193.1.1")
+
+        cn = CNAME(label=label.title(), domain=dom, target=data)
+        self.assertRaises(ValidationError, cn.full_clean)
+
     def test_address_record_cname_exists(self):
         label = "testyfoo"
         data = "wat"
@@ -170,7 +166,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
         CNAME.objects.get_or_create(
-            label=label, domain=dom, target=data)
+            label=label, domain=dom, target=data
+        )
         rec = AddressRecord(label=label, domain=dom, ip_str="128.193.1.1")
 
         self.assertRaises(ValidationError, rec.save)
@@ -311,8 +308,10 @@ class CNAMETests(cyder.base.tests.TestCase):
         cn.full_clean()
         cn.save()
 
-        intr = StaticInterface(label=label, domain=dom, ip_str="10.0.0.2",
-                               ip_type='4', system=self.s, mac="00:11:22:33:44:55")
+        intr = StaticInterface(
+            label=label, domain=dom, ip_str="10.0.0.2", ip_type='4',
+            system=self.s, mac="00:11:22:33:44:55"
+        )
 
         self.assertRaises(ValidationError, intr.clean)
         cn.label = "differentlabel"
