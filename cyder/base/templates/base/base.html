@@ -70,6 +70,7 @@
     </div>
 
     <div class="main wrap container">
+      <input type="checkbox" id="sidebar_toggle">
       <img id="kid" style="position: fixed; right: -25px; top: 95px; opacity:.3; z-index: -1000;"
         src="/media/img/cyder.gif">
 
@@ -90,8 +91,12 @@
         {% block form %}{% endblock %}
         {% block content %}{% endblock %}
       </div>
-    </div>
-
+        <div id="chevronfooter">
+          <label id="chevron" for="sidebar_toggle">
+              <img id="chevronimg" src="/media/img/chevron.png"></img>
+          </label>
+        </div>
+      </div>
     <div id="footer">
       <a href="http://github.com/ngokevin/chili">Source Code</a>
     </div>

@@ -94,4 +94,21 @@ table {
 
 .editable-grid {
     float: right;
+    margin-right: 1.5%;
 }
+
+
+@media all and (max-width: 980px){
+    div.editable-grid {
+        margin-right: 3%;
+        margin-top: 1%;
+    }
+
+    table.table {
+        margin-left: .5%;
+        width: 96%;
+    }
+}
+
+
+
