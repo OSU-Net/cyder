@@ -1,5 +1,6 @@
 import unittest
-from dhcp_objects import DhcpConfigContext, Subnet, Host, Option, Parameter, Pool, Group
+from dhcp_objects import (DhcpConfigContext, Subnet, Host, Option, Parameter,
+                          Pool, Group, Allow, Deny)
 from parser import iscgrammar
 from constants import *
 
@@ -83,14 +84,13 @@ class ParserTests(unittest.TestCase):
             }
         }"""
     def test_subnet_parse(self):
-        return
-        o1 = Option('subnet-mask', '255.255.255.224', SUBNET)
+        o1 = Option('subnet-mask', '255.255.254.0', SUBNET)
         o2 = Option('time-offset', '28800', SUBNET)
         o3 = Option('routers', '128.193.212.1', SUBNET)
         o4 = Option('netbios-node-type', '8', SUBNET)
-        p1 = Parameter('failover', 'peer "dhcp', POOL)
-        a1 = 'members of "zone.science:128.193.213.1:128.193.213.244"'
-        d1 = 'dynamic bootp clients'
+        p1 = Parameter('failover', 'peer "dhcp"', POOL)
+        a1 = Allow('members of "zone.science:128.193.213.1:128.193.213.244"')
+        d1 = Deny('dynamic bootp clients')
         expected_pool = Pool(start='128.193.213.1', end='128.193.213.244',
                              allow=[a1],
                              deny=[d1],
@@ -103,11 +103,10 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(subnet, expected_subnet)
 
     def test_pool_parse(self):
-        return
-        p1 = Parameter('failover', 'peer "dhcp', POOL)
-        a1 = 'members of "zone.vet:128.193.215.160:128.193.215.199"'
-        a2 = 'members of "zone.vetoregonstate:128.193.215.160:128.193.215.199"'
-        d1 = 'dynamic bootp clients'
+        p1 = Parameter('failover', 'peer "dhcp"', POOL)
+        a1 = Allow('members of "zone.vet:128.193.215.160:128.193.215.199"')
+        a2 = Allow('members of "zone.vetoregonstate:128.193.215.160:128.193.215.199"')
+        d1 = Deny('dynamic bootp clients')
         expected_pool = Pool(start='128.193.215.160', end='128.193.215.199',
                              allow=[a1, a2],
                              deny=[d1],
@@ -127,9 +126,7 @@ class ParserTests(unittest.TestCase):
         host2 = iscgrammar(self.host_input2).Host()
         self.assertEqual(host2, expected_host2)
 
-
     def test_group_parse(self):
-        return
         o1 = Option('subnet-mask', '255.255.255.224', GROUP)
         o2 = Option('time-offset', '28800', GROUP)
         o3 = Option('routers', '128.193.158.65', GROUP)

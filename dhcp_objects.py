@@ -41,10 +41,22 @@ class Parameter(Attribute):
         return "{0} {1};".format(self.key, self.value)
 
 
+@total_ordering
 class Allow(object):
     def __init__(self, value):
-        self.key = 'allow'
         self.value = value
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
 
     def is_allowed(self, host):
         # implement later
@@ -53,11 +65,19 @@ class Allow(object):
 
 class Deny(object):
     def __init__(self, value):
-        self.key = 'deny'
         self.value = value
 
-    def is_allowed(self, other):
-        return True
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
 
 
 @total_ordering
@@ -160,10 +180,8 @@ class Pool(ScopeForHost):
         self.parameters = parameters or []
 
     def __eq__(self, other):
-        if not isinstance(type(self), other):
-            raise Exception("Can't compare objects of type "
-                            "{0} and {1}".format(type(self), type(other)))
-        return  super(ScopeForHost, self).__eq__(other) and \
+        return  sorted(self.options) == sorted(other.options) and \
+                sorted(self.parameters) == sorted(other.parameters) and \
                 self.start == other.start and \
                 self.end == other.end and \
                 sorted(self.allow) == sorted(other.allow) and \
@@ -188,9 +206,10 @@ class Subnet(ScopeForHost):
         return sorted(self.pools) == sorted(other.pools)
 
     def __eq__(self, other):
-        return super(ScopeForHost).__eq__(other) and \
-               self.network == other.network and \
-               self.compare_pools(other)
+        return sorted(self.options) == sorted(other.options) and \
+               sorted(self.parameters) == sorted(other.parameters) and \
+               sorted(self.pools) == sorted(other.pools) and \
+               self.network == other.network
 
     def __lt__(self, other):
         if isinstance(other, Host):

@@ -19,7 +19,7 @@ key_table = [(Option, 'options'),
 
 
 def get_key(obj):
-    for o, k in key_tables:
+    for o, k in key_table:
         if obj is o:
             return k
     raise Exception("Key not found")
@@ -29,12 +29,12 @@ def prepare_arguments(attrs, exclude_list=None, **kwargs):
     exclude_list = exclude_list or []
     new_kwargs = {}
     dicts = [d for d in attrs if type(d) is dict]
-    kwargs = dict(kwargs.items() + dicts.items())
-    atts = [a for a in attrs if not type(a) is dict]
+    kwargs.update(dict(chain(*map(lambda x: x.items(), dicts))))
+    attrs = [a for a in attrs if not (type(a) is dict)]
     for k, g in groupby(sorted(attrs, key=type), type):
         key = get_key(k)
-        new_kwargs[key] = list(g) if not key in exclude_list else list(g)[0]
-    return dict(new_kwargs.items() + kwargs.itemes())
+        kwargs[key] = list(g) if not key in exclude_list else list(g)[0]
+    return dict(new_kwargs.items() + kwargs.items())
 
 
 mac_match = "(([0-9a-f]){2}:){5}([0-9a-f]){2}$"
