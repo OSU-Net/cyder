@@ -9,16 +9,15 @@ OptionKey = < Char* >
 OptionValue = < OptionValueChar* >
 
 # Dhcp option statements in subnet and pool and group statement
-Option = ws 'option' ws OptionKey:option_key ws OptionValue:option_value ';'
-            -> {'key': option_key, 'value': option_value}
+Option :scope = ws 'option' ws OptionKey:option_key ws OptionValue:option_value ';'
+            -> Option(key=option_key, value=option_value, scope=scope)
 
-ParameterKey = OptionKey:parm ?(param not in ['deny', 'allow', 'option', 'range'])
-
-Paramteter = ws ParameterKey:param_key ws OptionValue:param_value ';'
-        -> {'key': param_key, 'value': param_value}
+ParameterKey = OptionKey:p ?(p not in ['deny', 'allow', 'option', 'range'])
+Parameter :scope = ws ParameterKey:param_key ws OptionValue:param_value ';'
+        -> Parameter(key=param_key, value=param_value, scope=scope)
 
 # Fixed address statement in a host block
-FixedAddress = ws 'fixed-address' ws IP:ip ';'
+FixedAddress = ws 'fixed-address' ws IP*:ip ';'
         -> {'ip' : ip}
 
 # Hardware address statement in a host block
@@ -29,74 +28,42 @@ HardwareAddress = ws 'hardware ethernet' ws MAC:mac ';'
 # This should contain more options but no more are implemented in cyder or
 # maintain so this is a "nice to have" feature
 
-HostAttributes = HostOption | HardwareAddress | FixedAddress HostParameter
-
-HostOption = Option:option 
-        -> {'options': Option(**parse_to_dict(option, {'scope': HOST}))}
-
-HostParameter = Parmeter:parmeter
-        -> {'parameters' Paremeter(**parse_to_dict(parameter, {'scope': HOST}))}
+HostAttributes = Option(HOST) |
+                 Parameter(HOST) |
+                 HardwareAddress |
+                 FixedAddress
 
 Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:attrs ws '}'
-        -> Host(**parse_to_dict(*attrs + [{'fqdn': fqdn}], exclude_list=['fqdn']))
+        -> Host(**prepare_arguments(attrs, exclude_list=['mac', fqdn']))
 
 # Range declaration in pool block
 Range = ws 'range' ws IP:start ws IP:end ';'
-        -> {'start': start, 'end': end }
+        -> {'start': start, 'end': end}
 
 # allow members of, unknown-client, known-clients etc..
-Allow = ws 'allow' ws OptionValue:allow ';'
-        -> {'allow': allow}
+Allow = ws 'allow' ws OptionValue:allow ';' -> Allow(allow)
 
 # sort of like allow only not
-Deny = ws 'deny' ws OptionValue:deny ';'
-        -> {'deny', deny}
+Deny = ws 'deny' ws OptionValue:deny ';' -> Deny(deny)
 
-
-# all the things (not really just the ones I have to deal with)
-PoolOption = {'options': Parameter:kwargs
-        -> {'options': Option(**pares_to_dict(kwargs,  {'scope': POOL}))}
-
-PoolParameter = Paremeter:kwargs
-        -> {'parameters': Parameter(**parse_to_dict(kwargs, {'scope': POOL}))}
-
-PoolAttrs = PoolOption | Allow | PoolParameter | Range | Deny
+PoolAttrs = Option(POOL) | Allow | Parameter(POOL) | Range | Deny
 
 Pool = ws 'pool' ws '{' PoolAttrs*:attrs ws '}'
-        -> {'pools': Pool(**parse_to_dict(attrs, exclude_list=['start', 'end']))}
+        -> Pool(**prepare_arguments(attrs, exclude_list=['start', 'end']))
 
-SubnetOption = Option:kwargs
-        -> {'options': Option(**parse_to_dict(kwargs, {'scope': SUBNET}))}
-
-SubnetParameter = Parameter:kwargs
-        -> {'parameters': Parameter(**parse_to_dict(kwargs, {'scope': SUBNET}))}
-
-SubnetAttrs = SubnetOption | Pool | SubnetParameter
+SubnetAttrs = Option(SUBNET) | Pool | Parameter(SUBNET)
 
 # subnets can contain hosts but there is no reason for it so we will assume
 # that it wont happen for this initial draft.
 Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
-                SubnetAttrs*:attrs ws
-            '}'
+            SubnetAttrs*:attrs ws
+        '}'
         -> config.add_subnet(
-                parse_to_dict(*attrs + [{'netmask_addr': netmask_addr,
-                                         'network_addr': network_addr}],
-                              exclude_list=['netmask_addr', 'network_addr']))
-
+            Subnet(**prepare_arguments(attrs,
+                {'netmask_addr': netmask_addr, 'network_addr': network_addr},
+                exclude_list=['netmask_addr', 'network_addr'])))
 # Reconsider handling nested groups within groups
 
-GroupHost = Host:host -> {'hosts': host}
-
-GroupOption = Option:kwargs
-        -> {'options': Option(**parse_to_dict(kwargs, {'scope': GROUP}))}
-
-GroupParameter = Parameter:kwargs
-        -> {'parameters': Parameter(**parse_to_dict(kwargs, {'scope': GROUP}))}
-
-NestedGroup = Group:group -> {'groups' : group }
-
-GroupAttrs = NestedGroup | GroupHost | GroupOption | GroupParameter
-TopLevelGroup = Group:group -> config.add_group(group)
-
+GroupAttrs = Group | Host | Option(GROUP) | Parameter(GROUP)
 Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
-        -> Group(**parse_to_dict(attrs))
+        -> Group(prepare_arguments(attrs))

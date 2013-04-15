@@ -4,7 +4,6 @@ from operator import __eq__
 from functools import total_ordering
 from collections import MutableSequence
 from bisect import insort_left, bisect_left
-from constants import scope_weight
 
 
 @total_ordering
@@ -12,7 +11,7 @@ class Attribute(object):
     def __init__(self, key, value, scope):
         self.key = key
         self.value = value
-        self.scope = scope_weight[scope]
+        self.scope = scope
 
     def __eq__(self, other):
         return (self.key, self.value)  == (other.key, other.value)
@@ -42,12 +41,51 @@ class Parameter(Attribute):
         return "{0} {1};".format(self.key, self.value)
 
 
+class Allow(object):
+    def __init__(self, value):
+        self.key = 'allow'
+        self.value = value
+
+    def is_allowed(self, host):
+        # implement later
+        return True
+
+
+class Deny(object):
+    def __init__(self, value):
+        self.key = 'deny'
+        self.value = value
+
+    def is_allowed(self, other):
+        return True
+
+
+@total_ordering
+class Ip(object):
+    def __init__(self, ip):
+        self.ip = IPv4Address(ip)
+
+    def __eq__(self, other):
+        self.ip == other.ip
+
+    def __lt__(self, other):
+        self.ip < other.ip
+
+
+class Mac(object):
+    def __init__(self, mac):
+        self.mac = mac
+
+    def __eq__(self, other):
+        return self.mac == other.mac
+
+
 # We need to consider creating an allow and deny type but I think taht i will
 # just use the Parameter class for the time being.
 
 @total_ordering
 class Host(object):
-    def __init__(self, fqdn, ip=None, mac=None, options=None, parameters=NOne):
+    def __init__(self, fqdn, ip=None, mac=None, options=None, parameters=None):
         self.fqdn = fqdn
         self.ip = IPv4Address(ip) if ip else None
         self.mac = mac
@@ -58,7 +96,7 @@ class Host(object):
     def __eq__(self, other):
         if not isinstance(self, type(other)):
             raise Exception("Can't compare objects of type "
-                            "{0} and {1}".format(type(self, type(other)))
+                            "{0} and {1}".format(type(self, type(other))))
         return self.fqdn == other.fqdn and \
                self.ip == other.ip and \
                self.mac == other.mac and \
@@ -73,7 +111,7 @@ class Host(object):
     def add_to_class(self, dhcp_class):
         self.classes_contained_in.append(dhcp_class)
 
-    def add_options_or_parameters(self, new_attrs, force=False
+    def add_options_or_parameters(self, new_attrs, force=False):
         for new_attr in new_attrs:
             self.add_option_or_parameter(new_attr, force=force)
 

@@ -1,15 +1,41 @@
-from itertools import chain, imap
+from itertools import chain, imap, groupby
 import re
+from dhcp_objects import (Option, Group, Host, Parameter, Pool, Allow,
+                          Deny, Subnet, Ip)
+
+key_table = [(Option, 'options'),
+             (Group, 'groups'),
+             (Host, 'hosts'),
+             (Parameter, 'parameters'),
+             (Pool, 'pools'),
+             (Allow, 'allow'),
+             (Deny, 'deny'),
+             (Subnet, 'subnets'),
+             (Ip, 'ip'),
+             ('mac', 'mac'),
+             ('start', 'start'),
+             ('end', 'end'),
+             ('fqdn', 'fqdn')]
 
 
-def parse_to_dict(*args, exclude_list = []):
-    kwargs = {}
-    for key, value in chain(*imap(lambda x: x.iteritems(), args)):
-        if key in kwargs:
-            kwargs[key].append(value)
-        else:
-            kwargs[key] = [value] if key not in exclude_from_list else value
-    return kwargs
+def get_key(obj):
+    for o, k in key_tables:
+        if obj is o:
+            return k
+    raise Exception("Key not found")
+
+
+def prepare_arguments(attrs, exclude_list=None, **kwargs):
+    exclude_list = exclude_list or []
+    new_kwargs = {}
+    dicts = [d for d in attrs if type(d) is dict]
+    kwargs = dict(kwargs.items() + dicts.items())
+    atts = [a for a in attrs if not type(a) is dict]
+    for k, g in groupby(sorted(attrs, key=type), type):
+        key = get_key(k)
+        new_kwargs[key] = list(g) if not key in exclude_list else list(g)[0]
+    return dict(new_kwargs.items() + kwargs.itemes())
+
 
 mac_match = "(([0-9a-f]){2}:){5}([0-9a-f]){2}$"
 is_mac = re.compile(mac_match)
