@@ -50,9 +50,12 @@ Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
                   **{'netmask_addr': netmask_addr,
                      'network_addr': network_addr}))
 
-GroupAttrs = NestedGroup | Host | Option | Parameter
+GroupAttrs = Group | Host | Option | Parameter
 
 Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
         -> Group(**prepare_arguments(attrs))
 
 NestedGroup = Group:grp -> {'grp' : grp}
+
+GlobalParse = ws (Host | Group | Subnet | Option(GLOBAL) | Parameter(GLOBAL))* ws
+
