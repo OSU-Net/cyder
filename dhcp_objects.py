@@ -1,8 +1,6 @@
 from ipaddr import IPv4Address, IPv6Address, IPv4Network, IPv6Network
 from itertools import chain
-from operator import __eq__
 from functools import total_ordering
-from collections import MutableSequence
 from bisect import insort_left, bisect_left
 
 
@@ -53,7 +51,7 @@ class Allow(object):
         return self.value < other.value
 
     def __str__(self):
-        return self.value
+        return "allow {0};".format(self.value)
 
     def __repr__(self):
         return self.value
@@ -62,7 +60,7 @@ class Allow(object):
         # implement later
         return True
 
-
+@total_ordering
 class Deny(object):
     def __init__(self, value):
         self.value = value
@@ -74,34 +72,11 @@ class Deny(object):
         return self.value < other.value
 
     def __str__(self):
-        return self.value
+        return "deny {0};".format(self.value)
 
     def __repr__(self):
         return self.value
 
-
-@total_ordering
-class Ip(object):
-    def __init__(self, ip):
-        self.ip = IPv4Address(ip)
-
-    def __eq__(self, other):
-        self.ip == other.ip
-
-    def __lt__(self, other):
-        self.ip < other.ip
-
-
-class Mac(object):
-    def __init__(self, mac):
-        self.mac = mac
-
-    def __eq__(self, other):
-        return self.mac == other.mac
-
-
-# We need to consider creating an allow and deny type but I think taht i will
-# just use the Parameter class for the time being.
 
 @total_ordering
 class Host(object):
@@ -163,9 +138,6 @@ class ScopeForHost(object):
     def compare_parameters(self, other):
         return sorted(self.parameters) == sorted(other.parameters)
 
-    def __eq__(self, other):
-        return sorted(self.options) == sorted(other.options) and \
-               sorted(self.parameters) == sorted(other.parameters)
 
 @total_ordering
 class Pool(ScopeForHost):
@@ -180,8 +152,8 @@ class Pool(ScopeForHost):
         self.parameters = parameters or []
 
     def __eq__(self, other):
-        return  sorted(self.options) == sorted(other.options) and \
-                sorted(self.parameters) == sorted(other.parameters) and \
+        return  self.compare_options(other) and \
+                self.compare_parameters(other) and \
                 self.start == other.start and \
                 self.end == other.end and \
                 sorted(self.allow) == sorted(other.allow) and \
@@ -220,7 +192,7 @@ class Subnet(ScopeForHost):
     def is_host_in_subnet(self, host):
         return host.ip in self.network
 
-
+@total_ordering
 class Group(ScopeForHost):
 
     def __init__(self, options=None, groups=None, hosts=None, parameters=None):
@@ -233,6 +205,16 @@ class Group(ScopeForHost):
         self.update_host_attributes(force=True)
         for group in self.groups:
             group.group_update()
+
+    def __eq__(self, other):
+        return self.compare_options(other) and \
+               self.compare_parameters(other) and \
+               sorted(self.hosts) == sorted(other.hosts) and \
+               sorted(self.groups) == sorted(other.groups)
+
+    def __lt__(self, other):
+        # lol wut
+        return len(self.groups) < len(other.groups)
 
 
 class ClientClass(object):
@@ -256,22 +238,9 @@ class DhcpConfigContext(object):
     def add_subnet(self, subnet):
         insort_left(self.subnets, subnet)
         hosts_contained_in = filter(lambda x: x in subnet, self.hosts)
-        """
-        Consider adding the hosts to the subnets after the parse is complete
-        and then recursively update options and parameters in each nested
-        scope.  If I used a similar approach that I took with the groups I
-        think I could clean things up.  If hosts are added after the fact I
-        could stop assigning scopes to attributes and infer the option
-        presedence alot easier.  Yeah after writting this comment im going to
-        do that.
-        """
 
     def add_host(self, host):
         insort_left(self.hosts, host)
-        contained_in = self.subnet_search(host)
-        if contained_in:
-            self.apply_attrs(
-                host, chain(contained_in.options, contained_in.parameters))
 
     def add_group(self, group):
         group.group_update()
@@ -280,6 +249,12 @@ class DhcpConfigContext(object):
     # I think that I will be doing something with classes in the future
     def add_class(self, dhcp_class):
         self.classes.append(dhcp_class)
+
+    def __eq__(self, other):
+        return sorted(self.hosts) == sorted(other.hosts) and \
+               sorted(self.subnets) == sorted(other.subnets) and \
+               sorted(self.groups) == sorted(other.groups) and \
+               sorted(self.classes) == sorted(other.classes)
 
     def subnet_search(self, host):
         if self.subnets:
