@@ -40,7 +40,7 @@ def get_klasses(obj_type):
         'static_interface': (StaticInterface, StaticInterfaceForm, None),
         'dynamic_interface':
             (DynamicInterface, DynamicInterfaceForm, None),
-        'vrf': (Vrf, VrfForm, None, None),
+        'vrf': (Vrf, VrfForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
     }.get(obj_type, (None, None, None))
 

@@ -1,32 +1,20 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
+{% from "base/utility.html" import create_button %}
+{% block title %}Network {{ obj.network_str }}{% endblock %}
 
-{% set network = object %}
-{% set obj_type = object._meta.db_table %}
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-objPk="{{ obj.pk }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('cydhcp-get-record') }}"
+    data-objName="{{ obj.ip_str }}">
+  </span>
+{% endblock %}
 
-{% block title %}Network {{ network.network_str }}{% endblock %}
-
-{% block content %}
-  <a href="{{ url('build-network', network.pk) }}">DHCP Build Output</a>
-  {{ render_table(request, network_table) }}
-
-  {% if attrs_table %}
-    <h3>Network Options</h3>
-    {{ render_table(request, attrs_table) }}
-  {% endif %}
-
-  {% if parent_networks_table %}
-    <h3>Parent Networks</h3>
-      {{ render_table(request, parent_networks) }}
-  {% endif %}
-
-  {% if sub_networks_table %}
-    <h3>Sub Networks</h3>
-    {{ render_table(request, sub_networks) }}
-  {% endif %}
-
-  {% if ranges_table %}
-    <h3>Ranges</h3>
-    {{ render_table(request, ranges_table) }}
-  {% endif %}
+{% block extra_action_bar %}
+  {{ create_button('range', url('cydhcp-get-record'),
+                   url('range'), objName=obj.ip_str) }}
+  <a href="{{ url('build-network', obj.pk) }}">DHCP Build Output</a>
 {% endblock %}

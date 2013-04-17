@@ -84,7 +84,7 @@ def cy_delete(request, pk, get_klasses_fn):
     return redirect(request.META.get('HTTP_REFERER', obj.get_list_url()))
 
 
-def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None):
+def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     """Show bunches of related tables.
 
     obj_sets -- string of foreign key attribute of the obj OR
@@ -112,12 +112,12 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None):
             'table': tablefy(page_obj)
         })
 
-    return render(request, template, {
+    return render(request, template, dict({
         'obj': obj,
         'obj_table': tablefy((obj,)),
         'obj_type': obj_type,
         'tables': tables
-    })
+    }.items() + kwargs.items()))
 
 
 def get_update_form(request, get_klasses_fn):
