@@ -81,6 +81,7 @@ class Deny(Accessable):
 
 @total_ordering
 class Host(object):
+
     def __init__(self, fqdn, ip=None, mac=None, options=None, parameters=None):
         self.fqdn = fqdn
         self.ip = IPv4Address(ip) if ip else None
@@ -192,6 +193,7 @@ class Pool(ScopeForHost):
 
 @total_ordering
 class Subnet(ScopeForHost):
+
     def __init__(self, network_addr, netmask_addr, options=None, pools=None,
                  parameters=None):
         netmask = IPv4Address(netmask_addr)
@@ -238,10 +240,7 @@ class Group(ScopeForHost):
 
     def __init__(self, options=None, groups=None, hosts=None, parameters=None):
         self.options = set(options or [])
-        self.groups = set(groups or [])
-        self.hosts = set(hosts or [])
-        self.parameters = set(parameters or [])
-
+        self.groups = set(groups or []) self.hosts = set(hosts or []) self.parameters = set(parameters or [])
     def group_update(self):
         self.update_host_attributes(force=True)
         for group in self.groups:
@@ -270,60 +269,7 @@ class Group(ScopeForHost):
 
 
 class ClientClass(object):
+
     def __init__(self, name, subclass = None):
         self.name = name
         self.subclass = subclass or []
-
-
-class DhcpConfigContext(object):
-    def __init__(self):
-        self.hosts = []
-        self.subnets = []
-        self.groups = []
-        self.classes = []
-        self.options = []
-        self.parameters = []
-
-    def apply_attrs(self, host, attrs):
-        for attr in attrs:
-            host.add_option_or_parameter(attr)
-
-    def add_subnet(self, subnet):
-        self.subnets.append(subnet)
-
-    def add_host(self, host):
-        self.hosts.append(host)
-
-    def add_group(self, group):
-        self.groups.append(group)
-
-    def add_option(self, option):
-        self.options.append(option)
-
-    def add_parameter(self, parameter):
-        self.parameters.append(parameter)
-
-    # I think that I will be doing something with classes in the future
-    def add_class(self, dhcp_class):
-        self.classes.append(dhcp_class)
-
-    def __eq__(self, other):
-        return self.hosts == other.hosts and \
-               self.subnets == other.subnets and \
-               self.groups == other.groups and \
-               self.classes == other.classes
-
-    def subnet_search(self, host):
-        if self.subnets:
-            hi = len(self.subnets)
-            lo = 0
-            while lo < hi:
-                mid = (lo + hi) / 2
-                if host.ip in self.subnets[mid].network:
-                    return self.subnets[mid]
-                # lol if the ip is less than the network's network address
-                elif host.ip < self.subnets[mid].network.network:
-                    hi = mid
-                else:
-                    lo = mid + 1
-        return None
