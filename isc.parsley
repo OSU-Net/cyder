@@ -1,5 +1,5 @@
 Char = :c ?(c not in [';' , ' ', '\t'])
-OptionValueChar = :c ?(c is not ';')
+OptionValueChar = :c ?(not c in [';', '}', '{'])
 FQDN = < Char* >
 IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
 MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
@@ -47,15 +47,19 @@ Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
             SubnetAttrs*:attrs ws
         '}'
         -> Subnet(**prepare_arguments(attrs,
-                  **{'netmask_addr': netmask_addr,
-                     'network_addr': network_addr}))
+                                      netmask_addr=netmask_addr,
+                                      network_addr=network_addr))
 
-GroupAttrs = Group | Host | Option | Parameter
+GroupAttrs = Group | Host | Option(GROUP) | Parameter(GROUP)
 
 Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
         -> Group(**prepare_arguments(attrs))
 
-NestedGroup = Group:grp -> {'grp' : grp}
+TopLevelGroup = Group:group -> self.add_group(group)
 
-GlobalParse = ws (Host | Group | Subnet | Option(GLOBAL) | Parameter(GLOBAL))* ws
+TopLevelHost = Host:host -> self.add_host(host)
 
+TopLevelOption = Option(GLOBAL):option -> config.add_option(option)
+TopLevelParameter = Parameter(GLOBAL):param -> self.add_parameter(param)
+TopLevelSubnet = Subnet:sub -> self.add_subnet(sub)
+GlobalParse = (TopLevelSubnet | TopLevelOption | TopLevelParameter | TopLevelGroup | TopLevelHost)* ws -> self

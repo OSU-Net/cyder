@@ -1,7 +1,7 @@
 from itertools import chain, imap, groupby
 import re
 from dhcp_objects import (Option, Group, Host, Parameter, Pool, Allow,
-                          Deny, Subnet, Ip)
+                          Deny, Subnet)
 
 key_table = [(Option, 'options'),
              (Group, 'groups'),
@@ -11,7 +11,6 @@ key_table = [(Option, 'options'),
              (Allow, 'allow'),
              (Deny, 'deny'),
              (Subnet, 'subnets'),
-             (Ip, 'ip'),
              ('mac', 'mac'),
              ('start', 'start'),
              ('end', 'end'),
