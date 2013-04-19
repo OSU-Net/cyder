@@ -1,4 +1,5 @@
 @import "globals.scss";
+@import "base_mobile.scss";
 
 
 .container {
@@ -135,7 +136,7 @@ a.btn {
     display: none;
 }
 
-div#header {
+#header {
     background-color: $dark-gray;
     height: 50px;
     padding-top: 10px;
@@ -279,6 +280,9 @@ div#header {
 }
 
 #sidebar {
+    .expand {
+        opacity: 0;
+    }
     float: left;
     height: 100%;
     margin-right: 26px;
@@ -326,6 +330,31 @@ div#header {
         // TODO: gridding.
         width: 771px;
     }
+}
+
+#chevronfooter {
+    display: none;
+    position: fixed;
+    left: 43%;
+    bottom: 0%;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    #chevron {
+        height: 100%;
+        width: 100%;
+        #chevronimg {
+            width: 48px;
+            height: 48px;
+            background-color: transparent;
+            position:fixed;
+            opacity: .7;
+        }
+    }
+}
+
+#sidebar_toggle{
+    display: none;
 }
 
 .page-header {
