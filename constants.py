@@ -8,8 +8,7 @@ GROUP = 4
 HOST = 5
 
 keywords = ['deny', 'class', 'subclass', 'option', 'range', 'match',
-            'fixed-address', 'hardware ethernet']
-
-
+            'fixed-address', 'hardware ethernet', 'host', 'subnet', 'allow',
+            'pool', 'group']
 
 reserved_chars = [';', '}', '{']

@@ -1,11 +1,11 @@
 Char = (letterOrDigit | '.' | '-' | '_')
 OptionValueChar = :c ?(not c in reserved_chars)
 FQDN = < Char* >
-IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
 HexDigit = :c ?( c in hexdigits )
 MACSeg = HexDigit{2}':'
+Octet = <digit{1,3}>:dig -> int(dig) < 256
+IP = <Octet '.' Octet '.' Octet '.' Octet>:ip -> ip
 MAC = <MACSeg{5}HexDigit{2}>:mac
-#MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
 OptionKey = < Char* >
 OptionValue = < OptionValueChar* >
 ParameterKey = OptionKey:p ?(p not in keywords) -> p
