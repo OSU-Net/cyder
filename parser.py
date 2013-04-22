@@ -1,11 +1,13 @@
 from parsley import wrapGrammar
 from ometa.grammar import OMeta
 from ometa.runtime import OMetaBase
-from constants import POOL, SUBNET, GROUP, HOST, GLOBAL
-from dhcp_objects import (Host, Pool, Parameter, Option, Subnet, Group, Allow, Deny)
+from constants import *
+from dhcp_objects import (Host, Pool, Parameter, Option, Subnet, Group, Allow,
+                          Deny, ClientClass)
 from utils import prepare_arguments, is_mac, is_ip
 import sys
 from bisect import insort_left, bisect_left
+from ipaddr import IPv4Address, IPv6Address
 
 
 def strip_comments(content):
@@ -15,7 +17,9 @@ def strip_comments(content):
 grammar = open('isc.parsley').read()
 
 class DhcpConfigContext(
-        OMeta.makeGrammar(grammar, name='DhcpConfigContext').createParserClass(OMetaBase, globals())):
+        OMeta.makeGrammar(
+            grammar,
+            name='DhcpConfigContext').createParserClass(OMetaBase, globals())):
 
     def __init__(self, *args, **kwargs):
         self.hosts = set()
@@ -45,9 +49,16 @@ class DhcpConfigContext(
     def add_parameter(self, parameter):
         self.parameters.add(parameter)
 
-    # I think that I will be doing something with classes in the future
     def add_class(self, dhcp_class):
         self.classes.add(dhcp_class)
+
+    def add_subclass(self, start, end, mac):
+        start = IPv4Address(start)
+        for _class in self.classes:
+            if _class.start == start:
+                _class.add_subclass(mac)
+                return True
+        return False
 
     def __eq__(self, other):
         return self.hosts == other.hosts and \
@@ -55,10 +66,47 @@ class DhcpConfigContext(
                self.groups  == other.groups and \
                self.classes == other.classes
 
+    def diff(self, other):
+        if not (self == other):
+            first_subnets = self.subnets - other.subnets
+            second_subnets = other.subnets - self.subnets
+            first_hosts = self.hosts - other.hosts
+            second_hosts = other.hosts - self.hosts
+            first_groups = self.groups - other.groups
+            second_groups = other.groups - self.groups
+            if first_subnets:
+                print "Subnets found in the first config and not in the second"
+                for subnet in first_subnets:
+                    print subnet
+            if second_subnets:
+                print "Subnets found in the second config and not in the first"
+                for subnet in second_subnets:
+                    print subnet
+            if first_hosts:
+                print "Hosts found in the first config and not in the second"
+                for host in first_hosts:
+                    print host
+            if second_hosts:
+                print "Hosts found in the second config and not in the first"
+                for host in second_hosts:
+                    print host
+            if first_groups:
+                print "Groups found in the first config and not in the second"
+                for groups in first_groups:
+                    print groups
+            if second_groups:
+                print "Groups found in the second config and not in the first"
+                for groups in second_groups:
+                    print groups
+
+
+
+
 
 iscgrammar = wrapGrammar(DhcpConfigContext)
 
 if __name__ == '__main__':
     parse1 = iscgrammar(strip_comments(open(sys.argv[1]))).GlobalParse()
     parse2 = iscgrammar(strip_comments(open(sys.argv[2]))).GlobalParse()
-    print parse1 == parse2
+    parse1.diff(parse2)
+#print parse1 == parse2

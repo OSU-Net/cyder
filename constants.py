@@ -1,5 +1,15 @@
+from string import hexdigits
+
 GLOBAL = 0
-SUBNET =  1
+SUBNET = 1
 POOL = 2
-GROUP = 3
-HOST = 4
+CLASS = 3
+GROUP = 4
+HOST = 5
+
+keywords = ['deny', 'class', 'subclass', 'option', 'range', 'match',
+            'fixed-address', 'hardware ethernet']
+
+
+
+reserved_chars = [';', '}', '{']

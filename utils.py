@@ -1,7 +1,7 @@
 from itertools import chain, imap, groupby
 import re
 from dhcp_objects import (Option, Group, Host, Parameter, Pool, Allow,
-                          Deny, Subnet)
+                          Deny, Subnet, )
 
 key_table = [(Option, 'options'),
              (Group, 'groups'),
@@ -14,14 +14,15 @@ key_table = [(Option, 'options'),
              ('mac', 'mac'),
              ('start', 'start'),
              ('end', 'end'),
-             ('fqdn', 'fqdn')]
+             ('fqdn', 'fqdn'),
+             ('match' , 'match')]
 
 
 def get_key(obj):
     for o, k in key_table:
         if obj is o:
             return k
-    raise Exception("Key not found")
+    raise Exception("key {0} was not found".format(obj))
 
 
 def prepare_arguments(attrs, exclude_list=None, **kwargs):
@@ -36,6 +37,6 @@ def prepare_arguments(attrs, exclude_list=None, **kwargs):
     return dict(new_kwargs.items() + kwargs.items())
 
 
-mac_match = "(([0-9a-f]){2}:){5}([0-9a-f]){2}$"
+mac_match = "(([0-9a-fA-F]){2}:){5}([0-9a-fA-F]){2}$"
 is_mac = re.compile(mac_match)
 is_ip = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")

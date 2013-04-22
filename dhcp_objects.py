@@ -240,7 +240,10 @@ class Group(ScopeForHost):
 
     def __init__(self, options=None, groups=None, hosts=None, parameters=None):
         self.options = set(options or [])
-        self.groups = set(groups or []) self.hosts = set(hosts or []) self.parameters = set(parameters or [])
+        self.groups = set(groups or [])
+        self.hosts = set(hosts or [])
+        self.parameters = set(parameters or [])
+
     def group_update(self):
         self.update_host_attributes(force=True)
         for group in self.groups:
@@ -267,9 +270,39 @@ class Group(ScopeForHost):
     def __hash__(self):
         return hash(self.__str__())
 
-
+@total_ordering
 class ClientClass(object):
 
-    def __init__(self, name, subclass = None):
+    def __init__(self, start=None, end=None, name=None, options=None,
+                 parameters=None, match=None):
         self.name = name
-        self.subclass = subclass or []
+        self.start = IPv4Address(start) if start else None
+        self.end = IPv4Address(end) if start else None
+        self.options = options or []
+        self.parameters = parameters or []
+        self.match = match
+        self.subclass = []
+
+    def __str__(self):
+        join_p = lambda xs, d=1: "".join('\t' * d + "%s\n"%x for x in xs)
+        # This is specific to the way that our dhcp config class names are
+        # labeled
+        return "class {1}:{2} {{\n{3}{4}{6}\n\tmatch {7};\n}}".format(
+            self.start, self.end,
+            join_p(sorted(self.options)),
+            join_p(sorted(self.parameters)),
+            join_p(sorted(self.subclass)),
+            self.match)
+
+    def __hash__(self):
+        return hash(self.__str__())
+
+    def add_subclass(self, mac):
+        self.subclass.append(mac)
+
+    def __eq__(self, other):
+        return (self.start, self.end, self.name) == \
+               (other.start, other.end, self.name)
+
+    def __lt__(self, other):
+        return self.start < other.start

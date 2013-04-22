@@ -1,14 +1,14 @@
-Char = :c ?(c not in [';' , ' ', '\t'])
-OptionValueChar = :c ?(not c in [';', '}', '{'])
+Char = (letterOrDigit | '.' | '-' | '_')
+OptionValueChar = :c ?(not c in reserved_chars)
 FQDN = < Char* >
 IP = OptionKey:ip ?( is_ip.match(ip) ) -> ip
-MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
+HexDigit = :c ?( c in hexdigits )
+MACSeg = HexDigit{2}':'
+MAC = <MACSeg{5}HexDigit{2}>:mac
+#MAC = OptionKey:mac ?( is_mac.match(mac) ) -> mac
 OptionKey = < Char* >
 OptionValue = < OptionValueChar* >
-ParameterKey = OptionKey:p ?(p not in ['deny', 'allow', 'option',
-                                       'range', 'fixed-address',
-                                       'hardware ethernet'])
-        -> p
+ParameterKey = OptionKey:p ?(p not in keywords) -> p
 
 Option :scope = ws 'option' ws OptionKey:option_key ws OptionValue:option_value ';'
         -> Option(key=option_key, value=option_value, scope=scope)
@@ -36,12 +36,12 @@ Allow = ws 'allow' ws OptionValue:allow ';'
 Deny = ws 'deny' ws OptionValue:deny ';'
         -> Deny(deny)
 
-PoolAttrs = Option | Allow | Parameter | Range | Deny
+PoolAttrs = Option(POOL) | Allow | Parameter(POOL) | Range | Deny
 
 Pool = ws 'pool' ws '{' PoolAttrs*:attrs ws '}'
         -> Pool(**prepare_arguments(attrs, exclude_list=['start', 'end']))
 
-SubnetAttrs = Option | Pool | Parameter
+SubnetAttrs = Option(SUBNET) | Pool | Parameter(SUBNET)
 
 Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
             SubnetAttrs*:attrs ws
@@ -59,7 +59,14 @@ TopLevelGroup = Group:group -> self.add_group(group)
 
 TopLevelHost = Host:host -> self.add_host(host)
 
+TopLevelClass = ws 'class' ws '"' (Char | ' ')* ':' IP:start ':' IP:end '"' ws '{'
+                        ws 'match' ws <Char*>:match ';' ws '}'
+
+TopLevelSubClass = ws 'subclass' ws '"' (Char | ' ')* ':' IP:start ':' IP:end '"' ws  '1:' MAC:mac ';'
+        -> self.add_subclass(start, end, mac)
+
+
 TopLevelOption = Option(GLOBAL):option -> config.add_option(option)
 TopLevelParameter = Parameter(GLOBAL):param -> self.add_parameter(param)
 TopLevelSubnet = Subnet:sub -> self.add_subnet(sub)
-GlobalParse = (TopLevelSubnet | TopLevelOption | TopLevelParameter | TopLevelGroup | TopLevelHost)* ws -> self
+GlobalParse = (TopLevelClass | TopLevelSubClass | TopLevelSubnet | TopLevelOption | TopLevelParameter | TopLevelGroup | TopLevelHost)* ws -> self
