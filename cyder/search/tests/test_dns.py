@@ -51,11 +51,6 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        resp = self.c.get(
-            '/en-US/search/', {'search': 'mozilla.com'}, follow=True
-        )
-        self.assertEqual(200, resp.status_code)
-
     def test_integration2(self):
         root_domain = create_fake_zone("wee2.wee.mozilla.com", "")
         res, error = self.search("wee2.wee.mozilla.com")
