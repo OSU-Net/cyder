@@ -2,3 +2,4 @@ src/django-tastypie
 src/django-tastytools
 src/mimeparse
 src/django-extensions
+src/iscpy

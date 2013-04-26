@@ -1,22 +1,19 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 
 from cyder.cydns.tests.utils import create_fake_zone
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.search.compiler.django_compile import compile_to_django
-from cyder.search.compiler.invfilter import searchables
 
 
 class SearchDNSTests(TestCase):
+    def setUp(self):
+        self.c = Client()
+
     def search(self, query):
         res, errors = compile_to_django(query)
-        res_dict = {}
-        if errors:
-            return res, errors
-        for type_, res in zip(searchables, res):
-            res_dict[type_[0]] = res
-        return res_dict, errors
+        return res, errors
 
     def test_integration1(self):
         create_fake_zone("wee.wee.mozilla.com", "")
@@ -53,6 +50,11 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['SOA']), 0)
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
+
+        resp = self.c.get(
+            '/en-US/search/', {'search': 'mozilla.com'}, follow=True
+        )
+        self.assertEqual(200, resp.status_code)
 
     def test_integration2(self):
         root_domain = create_fake_zone("wee2.wee.mozilla.com", "")

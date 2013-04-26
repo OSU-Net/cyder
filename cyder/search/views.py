@@ -38,7 +38,20 @@ def _search(request):
     if not objs:
         return ([], [])
     (addrs, cnames, domains, intrs, mxs, nss, ptrs, soas, srvs, sshfps, sys,
-     txts, misc) = objs
+     txts, misc) = (
+        objs['A'],
+        objs['CNAME'],
+        objs['DOMAIN'],
+        objs['INTR'],
+        objs['MX'],
+        objs['NS'],
+        objs['PTR'],
+        objs['SOA'],
+        objs['SRV'],
+        objs['SSHFP'],
+        objs['SYSTEM'],
+        objs['TXT'],
+        [])
 
     meta = [
         (addrs.count() if addrs else 0, 'address', 'Address Records'),

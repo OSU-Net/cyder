@@ -135,7 +135,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_cas.middleware.CASMiddleware',
+    #'django_cas.middleware.CASMiddleware',
     'cyder.middleware.authentication.AuthenticationMiddleware',
 )
 
@@ -157,7 +157,7 @@ SESSION_COOKIE_SECURE = False
 AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'django_cas.backends.CASBackend',
+    #'django_cas.backends.CASBackend',
 )
 
 # Because Jinja2 is the default template loader, add any non-Jinja templated
