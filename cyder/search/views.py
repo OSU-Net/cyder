@@ -18,7 +18,10 @@ env = Environment(loader=PackageLoader('search', 'templates'))
 def search(request):
     """Search page."""
     search = request.GET.get('search', '')
-    meta, tables = _search(request)
+    if search:
+        meta, tables = _search(request)
+    else:
+        meta, tables = [], []
 
     return render(request, 'search/search.html', {
         'search': search,
@@ -30,9 +33,6 @@ def search(request):
 
 def _search(request):
     search = request_to_search(request)
-    errors = handle_shady_search(search)
-    if errors:
-        return errors
 
     objs, error_resp = compile_to_django(search)
     if not objs:
@@ -100,15 +100,6 @@ def request_to_search(request):
         else:
             search = adv_search
     return search
-
-
-def handle_shady_search(search):
-    if not search:
-        return HttpResponse("What do you want?!?")
-    dos_terms = ["10", "com", "network:10/8", "network:10.0.0.0/8"]
-    if search in dos_terms:
-        return HttpResponse("Search term '{0}' is too general".format(search))
-    return None
 
 
 def search_ajax(request):
