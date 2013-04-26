@@ -13,6 +13,7 @@ from cyder.search.compiler.invfilter import searchables
 
 
 def compile_to_django(search):
+    search = search.strip()
     compiled_qs, error = compile_q_objects(search)
     if error:
         return None, error
