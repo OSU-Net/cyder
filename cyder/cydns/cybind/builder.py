@@ -33,7 +33,7 @@ class BuildError(Exception):
 
 class SVNBuilderMixin(object):
     svn_ignore = [re.compile("---\s.+\s+\(revision\s\d+\)"),
-                  re.compile("\+\+\+\s.+\s+\(working copy\)")]
+                  re.compile("\+\+\+.*")]
 
     vcs_type = 'svn'
 
