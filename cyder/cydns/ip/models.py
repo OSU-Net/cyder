@@ -2,8 +2,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_6, IP_TYPE_4
-from cyder.cydns.domain.models import name_to_domain
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 
 import ipaddr
 
@@ -111,19 +109,6 @@ class Ip(models.Model):
             self.ip_upper, self.ip_lower = 0, int(ip)
         else:  # We already gaurded again't a non '6' ip_type
             self.ip_upper, self.ip_lower = ipv6_to_longs(int(ip))
-
-    def update_reverse_domain(self):
-        # We are assuming that self.clean_ip has been called already
-        if self.ip_type == IP_TYPE_6:
-            rvname = nibbilize(self.ip_str)
-        else:
-            rvname = self.ip_str
-        rvname = ip_to_domain_name(rvname, ip_type=self.ip_type)
-        self.reverse_domain = name_to_domain(rvname)
-        if (self.reverse_domain is None or self.reverse_domain.name in
-                ('arpa', 'in-addr.arpa', 'ip6.arpa')):
-            raise ValidationError("No reverse Domain found for {0} "
-                                  .format(self.ip_str))
 
     def validate_ip_str(self):
         if not isinstance(self.ip_str, basestring):

@@ -129,7 +129,7 @@ class Domain(models.Model, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         self.check_for_children()
         if self.is_reverse:
-            self.reassign_ptr_delete()
+            self.reassign_reverse_delete()
         if self.has_record_set():
             raise ValidationError("There are records associated with this "
                                   "domain. Delete them before deleting this "
@@ -228,8 +228,9 @@ class Domain(models.Model, ObjectUrlMixin):
                 return True
 
     ### Reverse Domain Functions
-    def reassign_ptr_delete(self):
-        """This function serves as a pretty subtle workaround.
+    def reassign_reverse_delete(self):
+        """
+        This function serves as a pretty subtle workaround.
 
             *   An Ip is not allowed to have a reverse_domain of None.
 
@@ -241,11 +242,13 @@ class Domain(models.Model, ObjectUrlMixin):
         you can reassign the reverse_domain of an Ip, save it, and then
         delete the old reverse_domain.
         """
-        # TODO is there a better way of doing this?
-        ptrs = self.ptr_set.iterator()
-        for ptr in ptrs:
-            ptr.reverse_domain = self.master_domain
-            ptr.save(update_reverse_domain=False)
+        def reassign(objs):
+            for obj in objs:
+                obj.reverse_domain = self.master_domain
+                obj.save(update_reverse_domain=False)
+
+        reassign(self.ptr_set.iterator())
+        reassign(self.reverse_staticintr_set.iterator())
 
 
 def boot_strap_ipv6_reverse_domain(ip, soa=None):
@@ -293,21 +296,26 @@ def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
 
     if reverse_domain_2 is None or ip_type is None:
         return
+
+    def reassign(objs):
+        for obj in objs:
+            if ip_type == '6':
+                nibz = nibbilize(obj.ip_str)
+                revname = ip_to_domain_name(nibz, ip_type='6')
+            else:
+                revname = ip_to_domain_name(obj.ip_str, ip_type='4')
+            correct_reverse_domain = name_to_domain(revname)
+            if correct_reverse_domain != obj.reverse_domain:
+                # TODO, is this needed? The save() function (actually the
+                # clean_ip function) will assign the correct reverse domain.
+                obj.reverse_domain = correct_reverse_domain
+                obj.save()
+
     ptrs = reverse_domain_2.ptr_set.iterator()
-    # intrs = reverse_domain_2.staticinterface_set.iterator()
-    # TODO do the intr case
-    for ptr in ptrs:
-        if ip_type == '6':
-            nibz = nibbilize(ptr.ip_str)
-            revname = ip_to_domain_name(nibz, ip_type='6')
-        else:
-            revname = ip_to_domain_name(ptr.ip_str, ip_type='4')
-        correct_reverse_domain = name_to_domain(revname)
-        if correct_reverse_domain != ptr.reverse_domain:
-            # TODO, is this needed? The save() function (actually the
-            # clean_ip function) will assign the correct reverse domain.
-            ptr.reverse_domain = correct_reverse_domain
-            ptr.save()
+    intrs = reverse_domain_2.reverse_staticintr_set.iterator()
+
+    reassign(ptrs)
+    reassign(intrs)
 
 
 # A bunch of handy functions that would cause circular dependencies if

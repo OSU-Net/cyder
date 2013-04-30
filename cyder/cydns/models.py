@@ -205,15 +205,16 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         be changed.  Delegated domains cannot have objects created in
         them.
         """
-        try:
-            if not self.domain.delegated:
-                return
-        except ObjectDoesNotExist:
+        if not (self.domain and self.domain.delegated):
             return
-        if not self.pk:  # We don't exist yet.
-            raise ValidationError("No objects can be created in the {0}"
-                                  "domain. It is delegated."
-                                  .format(self.domain.name))
+        if self.domain.nameserver_set.filter(server=self.fqdn).exists():
+            return
+        else:
+            # Confusing error messege?
+            raise ValidationError(
+                "You can only create an a records in a delegated domain that "
+                "has an NS record pointing at it."
+            )
 
     def check_TLD_condition(self):
         domain = Domain.objects.filter(name=self.fqdn)

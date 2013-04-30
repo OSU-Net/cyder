@@ -40,7 +40,7 @@ class Nameserver(CydnsRecord):
     addr_glue = models.ForeignKey(AddressRecord, null=True, blank=True,
                                   related_name="nameserver_set")
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
-                                  related_name="intrnameserver_set")
+                                  related_name="nameserver_set")
 
     template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {server:$rhs_just}.")

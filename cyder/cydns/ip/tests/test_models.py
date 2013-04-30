@@ -125,10 +125,6 @@ class SimpleTest(TestCase):
 
         ip = Ip(ip_str="130.193.1.2", ip_type='4')
         self.assertFalse(ip.ip_upper and ip.ip_lower and ip.reverse_domain)
-        ip.clean_ip()
-        ip.update_reverse_domain()
-        self.assertTrue(
-            ip.ip_upper == 0 and ip.ip_lower and ip.reverse_domain)
 
     def test_bad_create(self):
         ip = Ip(ip_str="66.193.1.2", ip_type='x')

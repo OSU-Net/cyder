@@ -61,24 +61,16 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                                                                  'ip_type']
 
     def clean(self, *args, **kwargs):
-        validate_glue = kwargs.pop('validate_glue', True)
+        self.clean_ip()
+        ignore_intr = kwargs.pop("ignore_intr", False)
+        validate_glue = kwargs.pop("validate_glue", True)
+
+        super(BaseAddressRecord, self).clean(*args, **kwargs)
+
         if validate_glue:
             self.check_glue_status()
-        self.clean_ip()
-        self.set_fqdn()
-        self.check_TLD_condition()
-        self.validate_delegation_conditions()
-        self.check_no_ns_soa_condition(self.domain)
-        self.check_for_cname()
-
-        from cyder.cydhcp.interface.static_intr.models import StaticInterface
-        if not kwargs.pop('ignore_interface', False):
-            if StaticInterface.objects.filter(
-                    fqdn=self.fqdn, ip_upper=self.ip_upper,
-                    ip_lower=self.ip_lower).exists():
-                raise ValidationError(
-                    "A Static Interface has already reserved this A "
-                    "record.")
+        if not ignore_intr:
+            self.check_intr_collision()
 
     def delete(self, *args, **kwargs):
         """
@@ -97,6 +89,15 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                     "before deleting this record.".format(self.record_type()))
 
         super(BaseAddressRecord, self).delete(*args, **kwargs)
+
+    def check_intr_collision(self):
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
+        if StaticInterface.objects.filter(
+                fqdn=self.fqdn, ip_upper=self.ip_upper,
+                ip_lower=self.ip_lower).exists():
+            raise ValidationError(
+                "A Static Interface has already reserved this A record."
+            )
 
     def validate_delegation_conditions(self):
         """

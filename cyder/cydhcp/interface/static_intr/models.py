@@ -1,5 +1,4 @@
 from gettext import gettext as _
-import re
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -8,19 +7,21 @@ import cydns
 
 from cyder.core.system.models import System
 
-from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydns.ptr.models import BasePTR, PTR
 
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.domain.models import Domain
 
 
-class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
+class StaticInterface(BaseAddressRecord, BasePTR):
+    # Keep in mind that BaseAddressRecord will have it's methods called before
+    # BasePTR
     """The StaticInterface Class.
 
         >>> s = StaticInterface(label=label, domain=domain, ip_str=ip_str,
@@ -83,7 +84,7 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     mac = models.CharField(max_length=17, validators=[validate_mac],
                            help_text='Mac address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
-                                       related_name='staticintrdomain_set')
+                                       related_name='reverse_staticintr_set')
     system = models.ForeignKey(
         System, null=True, blank=True,
         help_text='System to associate the interface with')
@@ -139,6 +140,36 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
     def rdtype(self):
         return 'INTR'
 
+    def save(self, *args, **kwargs):
+        urd = kwargs.pop('update_reverse_domain', True)
+        self.clean_reverse(update_reverse_domain=urd)  # BasePTR
+        super(StaticInterface, self).save(*args, **kwargs)
+        self.rebuild_reverse()
+
+    def clean(self, validate_glue=True):
+        if not self.system:
+            raise ValidationError(
+                "An registartion means nothing without it's system."
+            )
+        self.check_A_PTR_collision()
+        super(StaticInterface, self).clean(  # BaseAddressRecord
+            validate_glue=validate_glue, ignore_intr=True
+        )
+
+    def delete(self, *args, **kwargs):
+        if self.reverse_domain and self.reverse_domain.soa:
+            self.reverse_domain.soa.schedule_rebuild()
+            # The reverse_domain field is in the Ip class.
+        super(StaticInterface, self).delete(*args, **kwargs)
+        # ^ goes to BaseAddressRecord
+
+    def check_A_PTR_collision(self):
+        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
+            raise ValidationError("A PTR already uses this Name and IP")
+        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
+                                        ).exists():
+            raise ValidationError("An A record already uses this Name and IP")
+
     def interface_name(self):
         self.update_attrs()
         try:
@@ -169,34 +200,9 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
         build_str += '\t}\n\n'
         return build_str
 
-
     def build_subclass(self, contained_range, allowed):
         return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
             allowed.name, contained_range.start_str, contained_range.end_str)
-
-
-    def clean(self, *args, **kwargs):
-        self.mac = self.mac.lower()
-        if not self.system:
-            raise ValidationError(
-                "An interface means nothing without it's system."
-            )
-
-        from cyder.cydns.ptr.models import PTR
-
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
-            raise ValidationError('A PTR already uses this Name and IP')
-        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
-                                        ).exists():
-            raise ValidationError('An A record already uses this Name and IP')
-
-        if kwargs.pop('validate_glue', True):
-            self.check_glue_status()
-
-        self.update_reverse_domain()
-        self.check_no_ns_soa_condition(self.reverse_domain)
-        super(StaticInterface, self).clean(validate_glue=False,
-                                           ignore_interface=True)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
@@ -234,16 +240,6 @@ class StaticInterface(BaseAddressRecord, models.Model, ObjectUrlMixin):
 
     def obj_type(self):
         return 'A/PTR'
-
-    def delete(self, *args, **kwargs):
-        if kwargs.pop('validate_glue', True):
-            if self.intrnameserver_set.exists():
-                raise ValidationError("Cannot delete the record {0}. "
-                                      "It is a glue record.".format(
-                                      self.obj_type()))
-        check_cname = kwargs.pop('check_cname', True)
-        super(StaticInterface, self).delete(validate_glue=False,
-                                            check_cname=check_cname)
 
 
 class StaticIntrKeyValue(CommonOption):

@@ -40,7 +40,8 @@ class DirtySOATests(TestCase):
         self.assertTrue(self.soa.bind_render_record() not in ('', None))
         self.assertTrue(self.rsoa.bind_render_record() not in ('', None))
 
-    def generic_dirty(self, Klass, create_data, update_data, local_soa):
+    def generic_dirty(self, Klass, create_data, update_data, local_soa,
+                      tdiff=1):
         Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
@@ -51,7 +52,7 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
-        self.assertEqual(1, Task.dns.all().count())
+        self.assertEqual(tdiff, Task.dns.all().count())
 
         # Now try updating
         Task.dns.all().delete()  # Delete all tasks
@@ -65,7 +66,7 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
-        self.assertEqual(1, Task.dns.all().count())
+        self.assertEqual(tdiff, Task.dns.all().count())
 
         # Now delete
         Task.dns.all().delete()  # Delete all tasks
@@ -77,7 +78,7 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
-        self.assertEqual(1, Task.dns.all().count())
+        self.assertEqual(tdiff, Task.dns.all().count())
 
     def test_dirty_a(self):
         create_data = {
@@ -103,7 +104,8 @@ class DirtySOATests(TestCase):
         update_data = {
             'label': 'asdfx1',
         }
-        self.generic_dirty(StaticInterface, create_data, update_data, self.soa)
+        self.generic_dirty(StaticInterface, create_data, update_data, self.soa,
+                           tdiff=2)
 
     def test_dirty_cname(self):
         create_data = {
