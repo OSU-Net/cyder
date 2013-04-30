@@ -205,7 +205,7 @@ class StaticInterTests(TestCase):
                   'ip_str': ip_str}
         i = self.do_add(**kwargs)
         i.ip_str = "9.0.0.1"
-        self.assertRaises(ValidationError, i.clean)
+        self.assertRaises(ValidationError, i.save)
 
     def test1_no_system(self):
         mac = "15:22:33:44:55:66"
