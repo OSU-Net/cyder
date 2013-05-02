@@ -41,11 +41,11 @@ cp cyder/settings_test.py-dist cyder/settings_test.py
 python manage.py syncdb
 ```
 
-Set up Sass CSS with Django. We use a forked version of jingo-minify to compile
-Sass automatically. We point our settings file towards the location of the Sass
-binary.
+Set up Sass CSS with Django. Pull jingo-minify for Django Sass support. We
+point our settings file towards the location of the Sass binary.
 
 ```
+cd vendor/src/jingo-minify && git pull origin master && cd -
 sudo apt-get install rubygems
 sudo gem install sass
 sed -i 's/SASS_BIN = \'.*\'/SASS_BIN = \'$(echo which sass)\'/' cyder/settings/local.py
