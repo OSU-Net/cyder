@@ -10,13 +10,13 @@ import os
 import re
 import time
 
-from settings.dnsbuilds import (
+from cyder.settings.dnsbuilds import (
     STAGE_DIR, PROD_DIR, LOCK_FILE, STOP_UPDATE_FILE, NAMED_CHECKZONE_OPTS,
     MAX_ALLOWED_LINES_CHANGED, MAX_ALLOWED_CONFIG_LINES_REMOVED,
     NAMED_CHECKZONE, NAMED_CHECKCONF, LAST_RUN_FILE, BIND_PREFIX
 )
 
-from core.task.models import Task
+from cyder.core.task.models import Task
 
 from cyder.cydns.domain.models import SOA
 from cyder.cydns.view.models import View
@@ -24,7 +24,7 @@ from cyder.cydns.cybind.zone_builder import build_zone_data
 from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
-from core.utils import fail_mail
+from cyder.core.utils import fail_mail
 
 
 class BuildError(Exception):

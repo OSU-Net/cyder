@@ -8,7 +8,7 @@ PROD_DIR = "/tmp/dns_prod/cyzones/"
 # BIND_PREFIX: This is the path to where inventory zone files are built
 # relative to the root of the SVN repo. This is usually a substring of
 # PROD_DIR.
-BIND_PREFIX = ""
+BIND_PREFIX = PROD_DIR
 
 
 LOCK_FILE = "/tmp/lock.file"
