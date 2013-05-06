@@ -1,6 +1,9 @@
 from django.db import models
 
+from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.utils import join_dhcp_args
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.ctnr.models import Ctnr
@@ -22,7 +25,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
                                          "the interface with")
     vrf = models.ForeignKey(Vrf, null=True)
     domain = models.ForeignKey(Domain, null=True)
-
+    dhcp_enabled = models.BooleanField(default=True)
+    dns_enabled = models.BooleanField(default=True)
     search_fields = ('mac')
 
     class Meta:
@@ -39,6 +43,34 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Domain', 'domain', self.domain)]
         return data
 
-    def build_subclass(self, contained_range, allowed):
+    def build_host(self):
+        build_str = "\thost {0} {{\n".format(self.get_fqdn())
+        build_str += "\t\thardware ethernet {0};\n".format(self.mac)
+        options = self.dynamicintrkeyvalue_set.filter(is_option=True)
+        statements = self.dynamicintrkeyvalue_set.filter(is_statement=True)
+        if options:
+            build_str += "\t\t# Host Options\n"
+            build_str += join_dhcp_args(options, depth=2)
+        if statements:
+            build_str += "\t\t# Host Statemets\n"
+            build_str += join_dhcp_args(statements, depth=2)
+        build_str += "\t}\n\n"
+        return build_str
+
+    def build_subclass(self, allowed):
         return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed.name, contained_range.start_str, contained_range.end_str)
+            allowed, self.range.start_str, self.range.end_str,
+            self.mac)
+
+    def get_fqdn(self):
+        if not self.system.name:
+            return self.domain.name
+        else:
+            return "{0}.{1}".format(self.system.name, self.domain.name)
+
+class DynamicIntrKeyValue(CommonOption):
+    intr = models.ForeignKey(DynamicInterface, null=False)
+
+    class Meta:
+        db_table = "dynamic_intr_key_value"
+        unique_together = "key", "value", "intr"

@@ -1,9 +1,11 @@
 from django.db import models
 # Create your models here.
 
+from itertools import chain
+
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-
+from cyder.cydhcp.utils import join_dhcp_args
 
 class Workgroup(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
@@ -31,22 +33,22 @@ class Workgroup(models.Model, ObjectUrlMixin):
         ]}
 
     def build_workgroup(self):
-        join_args = lambda x: "\n".join(map(lambda y: "\t{0};\n".format(y), x))
-        clients = self.static_interface_set.all()
-        build_str = "group {\n"
-        statements = self.workgroup_key_value_set.filter(is_statement=True)
-        options = self.workgroup_key_value_set.filter(is_option=True)
+        build_str = ""
+        static_clients = self.staticinterface_set.all()
+        dynamic_clients = self.dynamicinterface_set.all()
+        if not (static_clients or dynamic_clients):
+            return build_str
+        build_str += "group {\n"
+        statements = self.workgroupkeyvalue_set.filter(is_statement=True)
+        options = self.workgroupkeyvalue_set.filter(is_option=True)
         build_str += "\t# Workgroup Options\n"
-        build_str += join_args(options)
+        build_str += join_dhcp_args(options)
         build_str += "\t# Workgroup Statements\n"
-        build_str += join_args(statements)
-        # This only builds the static interfaces in the workgroup which is not
-        # complete.  We should also build dynamic ranges but that requires that
-        # each dynamic ranges has a fqdn.  That is not currently the case so
-        # logic needs to be implemented to make sure that they do.
+        build_str += join_dhcp_args(statements)
         build_str += "\t# Static Hosts in Workgorup\n"
-        build_str += join_args(map(lambda x: x.build_host(), clients))
-        build_str += ")\n"
+        for client in chain(dynamic_clients, static_clients):
+            build_str += client.build_host()
+        build_str += "}\n"
         return build_str
 
 

@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponse
 
+from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.cydhcp.constants import (
@@ -9,7 +10,7 @@ from cyder.cydhcp.constants import (
 )
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter, four_to_two
+from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
@@ -182,9 +183,10 @@ class Range(models.Model, ObjectUrlMixin):
         self.check_for_overlaps()
 
     def get_allowed_clients(self):
+        allow = []
         if self.allow == 'vrf':
             allow = ["allow members of {0}".format(vrf.name)
-                     for vrf in self.vrf_set.all()]
+                     for vrf in self.network.vrf_set.all()]
         elif self.allow == 'known-clients':
             allow = ['allow known clients']
         elif self.allow == 'legacy':
@@ -222,21 +224,27 @@ class Range(models.Model, ObjectUrlMixin):
                                       Ip(self._end)))
 
     def build_range(self):
-        join_args = lambda x: "\n".join(map(lambda y: "\t\t{0}".format(y), x))
-        range_options = self.range_key_value.filter(is_option=True)
-        range_statements = self.range_key_value.filter(is_statement=True)
+        range_options = self.rangekeyvalue_set.filter(is_option=True)
+        range_statements = self.rangekeyvalue_set.filter(is_statement=True)
         build_str = "\tpool {\n"
         build_str += "\t\t# Pool Statements\n"
         build_str += "\t\tfailover peer \"dhcp\";\n"
         build_str += "\t\tdeny dynamic bootp clients;\n"
-        build_str += join_args(range_statements)
-        build_str += "\t\t# Pool Options\n"
-        build_str += join_args(range_options)
+        build_str += join_dhcp_args(range_statements, depth=2)
+        if range_options:
+            build_str += "\t\t# Pool Options\n"
+            build_str += join_dhcp_args(range_options, depth=2)
         if self.dhcpd_raw_include:
             build_str += "\t\t# Raw pool includes\n"
             build_str += "\t\t{0};".format(self.dhcp_raw_include)
         build_str += "\t\t# Allow statements\n"
-        build_str += join_args(self.get_allowed_clients())
+        build_str += join_dhcp_args(self.get_allowed_clients(), depth=2)
+        if self.ip_type == IP_TYPE_4:
+            build_str += "\t\trange{0} {1};\n".format(self.start_str,
+                                                      self.end_str)
+        else:
+            build_str += "\t\trange6{0} {1};\n".format(self.start_str,
+                                                       self.end_str)
         build_str += "\t}\n\n"
         return build_str
 

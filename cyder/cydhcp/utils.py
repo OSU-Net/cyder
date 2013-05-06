@@ -1,4 +1,7 @@
 import ipaddr
+
+from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
+
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
@@ -89,18 +92,13 @@ class IPFilter(object):
 
 
 def start_end_filter(start, end, ip_type):
-    if ip_type == '6':
+    if ip_type == IP_TYPE_6:
         IPKlass = ipaddr.IPv6Address
-    elif ip_type == '4':
+    elif ip_type == IP_TYPE_4:
         IPKlass = ipaddr.IPv4Address
 
     istart = IPKlass(start)
     iend = IPKlass(end)
-
-    if int(istart) == int(iend):
-        raise ValidationError("start and end cannot be equal")
-    elif int(istart) > int(iend):
-        raise ValidationError("start cannot be greater than end")
 
     start_upper, start_lower = one_to_two(int(istart))
     end_upper, end_lower = one_to_two(int(iend))
@@ -158,11 +156,15 @@ def int_to_ip(ip, ip_type):
     format.
 
     """
-    if ip_type == '6':
+    if ip_type == IP_TYPE_6:
         IPKlass = ipaddr.IPv6Address
-    elif ip_type == '4':
+    elif ip_type == IP_TYPE_4:
         IPKlass = ipaddr.IPv4Address
     return str(IPKlass(ip))
+
+
+def join_dhcp_args(opts, depth=1):
+    return "".join("\t" * depth + "{0};\n".format(o) for o in opts)
 
 
 def find_network_for_range(start, end,):

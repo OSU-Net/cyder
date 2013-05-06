@@ -259,19 +259,29 @@ def migrate_zones():
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
-                   "workgroup, zone FROM host WHERE ip = 0")
-    results = cursor.fetchall()
-    for range_id, name, domain_id, mac, loc, workgroup_id, zone_id in results:
+                   "workgroup, zone, enabled FROM host WHERE ip = 0")
+    res = cursor.fetchall()
+    for range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en in res:
+        """
         r = maintain_find_range(range_id)
         c = maintain_find_zone(zone_id) if zone_id else None
         d = maintain_find_domain(domain_id) if domain_id else None
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
         s, _ = System.objects.get_or_create(name=name, location=loc)
+        """
+        if not all([range_id, zone_id, domain_id, workgroup_id]):
+            print "Trouble migrating host with mac {0}".format(mac)
+        r = maintain_find_range(range_id)
+        c = maintain_find_zone(zone_id)
+        d = maintain_find_domain(domain_id)
+        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
+
+        s, _ = System.objects.get_or_create(name=name, location=loc)
         if r.allow == 'vrf':
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=mac, system=s)
+                mac=mac, system=s, dhcp_enabled=en, dns_enabled=en)
             continue
         intr, _ = DynamicInterface.objects.get_or_create(
             system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac)
@@ -380,6 +390,7 @@ def migrate_zone_workgroup():
                 c = Ctnr.objects.get(name=zone_name)
                 w = Workgroup.objects.get(name=w_name)
                 c.workgroups.add(w)
+                c.save()
 
 
 def maintain_find_range(range_id):

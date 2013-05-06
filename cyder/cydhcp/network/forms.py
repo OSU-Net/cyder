@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 import ipaddr
 
-from cyder.base.constants import IP_TYPES
+from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
@@ -36,12 +36,12 @@ class NetworkForm(forms.ModelForm):
         network_str = cleaned_data.get('network_str', '')
         try:
             ip_type = cleaned_data.get('ip_type')
-            if ip_type not in ('4', '6'):
+            if ip_type not in IP_TYPES:
                 raise ValidationError("IP type must be either IPv4 or IPv6.")
-            if ip_type == '4':
+            if ip_type == IP_TYPE_4:
                 network = ipaddr.IPv4Network(network_str)
                 ip_upper, ip_lower = 0, int(network.network)
-            elif ip_type == '6':
+            elif ip_type == IP_TYPE_6:
                 network = ipaddr.IPv6Network(network_str)
                 ip_upper, ip_lower = ipv6_to_longs(network.network)
 
@@ -67,12 +67,12 @@ class NetworkForm_network(forms.Form):
         network_str = cleaned_data.get('network', '')
         try:
             ip_type = cleaned_data.get('ip_type')
-            if ip_type not in ('4', '6'):
+            if ip_type not in IP_TYPES:
                 raise ValidationError("IP type must be either IPv4 or IPv6.")
-            elif ip_type == '4':
+            elif ip_type == IP_TYPE_4:
                 network = ipaddr.IPv4Network(network_str)
                 ip_upper, ip_lower = 0, int(network.network)
-            elif ip_type == '6':
+            elif ip_type == IP_TYPE_4:
                 network = ipaddr.IPv6Network(network_str)
                 ip_upper, ip_lower = ipv6_to_longs(network.network)
         except ipaddr.AddressValueError, e:

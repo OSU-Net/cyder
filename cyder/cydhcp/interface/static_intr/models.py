@@ -7,8 +7,12 @@ import cydns
 
 from cyder.core.system.models import System
 
+from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.mixins import ObjectUrlMixin
+
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
+from cyder.cydhcp.utils import join_dhcp_args
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -187,16 +191,20 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             return '{0}{1}.{2}'.format(itype, primary, alias)
 
     def build_host(self):
-        join_args = lambda x: '\n'.join(map(lambda y: '\t\t{0};'.format(y)))
         build_str = '\thost {0} {{\n'.format(self.fqdn)
         build_str += '\t\thardware ethernet {0};\n'.format(self.mac)
-        build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
-        options = self.static_intr_key_value_set.filter(is_option=True)
-        statements = self.statc_intr_key_value_set.filter(is_statement=True)
-        build_str += '\t\t# Host Options\n'
-        build_str += join_args(options)
-        build_str += '\t\t# Host Statements\n'
-        build_str += join_args(statements)
+        if self.ip_type == IP_TYPE_6:
+            build_str += '\t\tfixed-address6 {0};\n'.format(self.ip_str)
+        else:
+            build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
+        options = self.staticintrkeyvalue_set.filter(is_option=True)
+        statements = self.staticintrkeyvalue_set.filter(is_statement=True)
+        if options:
+            build_str += '\t\t# Host Options\n'
+            build_str += join_dhcp_args(options, depth=2)
+        if statements:
+            build_str += '\t\t# Host Statements\n'
+            build_str += join_dhcp_args(statements, depth=2)
         build_str += '\t}\n\n'
         return build_str
 

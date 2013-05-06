@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.utils import IPFilter
+from cyder.cydhcp.utils import IPFilter, start_end_filter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
@@ -189,34 +189,29 @@ class Network(models.Model, ObjectUrlMixin):
         return set([network.site for network in related_networks])
 
     def build_subnet(self, raw=False):
-        join_args = lambda x: "\n".join(map(lambda y: "\t{0};".format(y), x))
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
         self.update_network()
-        statements = self.network_key_value_set.filter(is_statement=True)
-        options = self.network_key_value_set.filter(is_option=True)
-        # not yet implementing IPv6 logic
-        if network.ip_tye == '6':
-            raise NotImplemented("The dhcp builds do not yet have full ipv6 "
-                                 "support.  We will add it eventually")
-        ip_start = int(network.network.network)
-        ip_end = int(network.network.broadcast) - 1
-        static_clients = StaticInterface.objects.filter(
-            ip_upper=0, ip_lower__gte=ip_start, ip_lower__lte=ip_end,
-            dhcp_enabled=True, ip_type='4')
+        statements = self.networkkeyvalue_set.filter(is_statement=True)
+        options = self.networkkeyvalue_set.filter(is_option=True)
+        ip_start = int(self.network.network)
+        ip_end = int(self.network.broadcast)
         ranges = self.range_set.all()
-        build_str = "\nsubnet {0} netmask {1} {{\n".format(
-            network.network.network, network.network.netmask)
+        if self.ip_type == IP_TYPE_4:
+            build_str = "\nsubnet {0} netmask {1} {{\n".format(
+                self.network.network, self.network.netmask)
+        else:
+            build_str = "\nsubnet6 {0} netmask {1} {{\n".format(
+                self.network.network, self.network.netmask)
         if not raw:
             build_str += "\t# Network Statements\n"
-            build_str += join_args(statements)
+            build_str += join_dhcp_args(statements)
             build_str += "\t# Network Options\n"
-            build_str += join_args(options)
+            build_str += join_dhcp_args(options)
             if self.dhcpd_raw_include:
                 build_str += "\t# Raw Network Options\n"
-                build_str += join_args(self.dhcpd_raw_include.split("\n"))
+                build_str += join_dhcp_args(self.dhcpd_raw_include.split("\n"))
         for range_ in ranges:
             build_str += range_.build_range()
-        for client in static_clients:
-            build_str += client.build_host()
         build_str += "}\n"
         return build_str
 
