@@ -50,7 +50,7 @@ class NetworkForm(forms.ModelForm):
         except ipaddr.NetmaskValueError, e:
             raise ValidationError("Bad Netmask {0}".format(e))
         if (Network.objects.filter(ip_upper=ip_upper,
-                  ip_lower=ip_lower).exists()):
+                                   ip_lower=ip_lower).exists()):
             raise ValidationError("This network has already been allocated.")
         return cleaned_data
 
@@ -59,7 +59,7 @@ class NetworkForm_network(forms.Form):
     network = forms.CharField(
         required=True,
         help_text='Enter the address and mask in '
-                 'CIDR notation (e.g. 10.0.0.0/24)')
+                  'CIDR notation (e.g. 10.0.0.0/24)')
     ip_type = forms.ChoiceField(choices=IP_TYPES.items())
 
     def clean(self):
@@ -80,10 +80,11 @@ class NetworkForm_network(forms.Form):
         except ipaddr.NetmaskValueError, e:
             raise ValidationError("Bad Netmask {0}".format(e))
         if (Network.objects.filter(ip_upper=ip_upper,
-                  ip_lower=ip_lower).exists()):
+                                   ip_lower=ip_lower).exists()):
             raise ValidationError("This network has already been allocated.")
         # TODO add parent calculaitons
         return cleaned_data
+
 
 class NetworkForm_site(forms.Form):
     site = forms.ModelChoiceField(
@@ -97,7 +98,6 @@ class NetworkForm_site(forms.Form):
         if not site:
             raise ValidationError("That site does not exist.  Try again")
         return cleaned_data
-
 
 
 class NetworkForm_vlan(forms.Form):

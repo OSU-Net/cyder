@@ -1,6 +1,5 @@
 from django.db import models
 
-from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import join_dhcp_args
@@ -67,6 +66,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             return self.domain.name
         else:
             return "{0}.{1}".format(self.system.name, self.domain.name)
+
 
 class DynamicIntrKeyValue(CommonOption):
     intr = models.ForeignKey(DynamicInterface, null=False)

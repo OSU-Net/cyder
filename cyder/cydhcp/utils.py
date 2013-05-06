@@ -2,7 +2,6 @@ import ipaddr
 
 from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
-from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 

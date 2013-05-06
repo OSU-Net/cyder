@@ -212,6 +212,29 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
             allowed.name, contained_range.start_str, contained_range.end_str)
 
+    def clean(self, *args, **kwargs):
+        self.mac = self.mac.lower()
+        if not self.system:
+            raise ValidationError(
+                "An interface means nothing without it's system."
+            )
+
+        from cyder.cydns.ptr.models import PTR
+
+        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
+            raise ValidationError('A PTR already uses this Name and IP')
+        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
+                                        ).exists():
+            raise ValidationError('An A record already uses this Name and IP')
+
+        if kwargs.pop('validate_glue', True):
+            self.check_glue_status()
+
+        self.update_reverse_domain()
+        self.check_no_ns_soa_condition(self.reverse_domain)
+        super(StaticInterface, self).clean(validate_glue=False,
+                                           ignore_interface=True)
+
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
         do not allow modifications to this record. The Nameserver will

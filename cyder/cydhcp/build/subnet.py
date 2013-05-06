@@ -1,19 +1,11 @@
 import os
-
-from django.core.exceptions import ObjectDoesNotExist
-
 import chili_manage
+
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
+from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.utils import calc_networks
-#from cyder.cydhcp.interface.dynamic_intr.models import DynamicIntrfKeyValue
-#from django.core.exceptions import ObjectDoesNotExist, ValidationError
-#from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.range.models import Range, RangeKeyValue
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
+from cyder.cydhcp.workgroup.models import Workgroup
 
 
 def main():

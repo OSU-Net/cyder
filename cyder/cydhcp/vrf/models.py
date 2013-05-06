@@ -4,7 +4,6 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.keyvalue.models import KeyValue
 
-from itertools import chain
 
 class Vrf(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
@@ -33,7 +32,6 @@ class Vrf(models.Model, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
             {'name': 'network', 'datatype': 'string', 'editable': False},
         ]}
-
 
     def build_vrf(self):
         build_str = ''

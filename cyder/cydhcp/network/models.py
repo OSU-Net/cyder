@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.utils import IPFilter, start_end_filter, join_dhcp_args
+from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
@@ -189,12 +189,9 @@ class Network(models.Model, ObjectUrlMixin):
         return set([network.site for network in related_networks])
 
     def build_subnet(self, raw=False):
-        from cyder.cydhcp.interface.static_intr.models import StaticInterface
         self.update_network()
         statements = self.networkkeyvalue_set.filter(is_statement=True)
         options = self.networkkeyvalue_set.filter(is_option=True)
-        ip_start = int(self.network.network)
-        ip_end = int(self.network.broadcast)
         ranges = self.range_set.all()
         if self.ip_type == IP_TYPE_4:
             build_str = "\nsubnet {0} netmask {1} {{\n".format(

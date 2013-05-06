@@ -7,6 +7,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
 
+
 class Ctnr(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
@@ -40,7 +41,8 @@ class Ctnr(models.Model, ObjectUrlMixin):
                 self.name, range_.start_str, range_.end_str)
             build_str += "\tmatch hardware;\n"
             build_str += "}\n"
-            dynamic_clients = DynamicInterface.objects.filter(range=range_, ctnr=self)
+            dynamic_clients = DynamicInterface.objects.filter(
+                range=range_, ctnr=self)
             for client in dynamic_clients:
                 client.build_subclass(self.name)
         return build_str
