@@ -61,7 +61,8 @@ $(document).ready(function() {
 
         e.preventDefault();
         form.action = this.href;
-        $.get(getUrl, {'object_type': objType, 'pk': $(this).attr('data-pk')}, function(data) {
+        $.get($(this).attr('data-getUrl') || getUrl, {'object_type': $(this).attr('data-object_type') || objType,
+                       'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
                 $('#form-title').html('Updating ' + prettyObjType);
                 $('.inner-form').empty().append(data.form);

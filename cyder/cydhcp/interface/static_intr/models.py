@@ -150,16 +150,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
 
-    def clean(self, validate_glue=True):
-        if not self.system:
-            raise ValidationError(
-                "An registartion means nothing without it's system."
-            )
-        self.check_A_PTR_collision()
-        super(StaticInterface, self).clean(  # BaseAddressRecord
-            validate_glue=validate_glue, ignore_intr=True
-        )
-
     def delete(self, *args, **kwargs):
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
@@ -233,7 +223,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         self.update_reverse_domain()
         self.check_no_ns_soa_condition(self.reverse_domain)
         super(StaticInterface, self).clean(validate_glue=False,
-                                           ignore_interface=True)
+                                           ignore_intr=True)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,

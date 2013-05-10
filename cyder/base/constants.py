@@ -24,3 +24,11 @@ IP_TYPES = {
     IP_TYPE_4: 'ipv4',
     IP_TYPE_6: 'ipv6'
 }
+
+DHCP_OBJECTS = ("workgroup", "vrf", "vlan", "site", "range", "network",
+                "static_interface", "dynamic_interface",)
+
+DNS_OBJECTS = ("address_record", "cname", "domain", "mx", "nameserver", "ptr",
+              "soa", "srv", "sshfp", "txt", "view",)
+
+CORE_OBJECTS = ("ctnr_users", "ctnr", "user",)

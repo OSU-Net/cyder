@@ -3,10 +3,12 @@ import urllib
 import urlparse
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
+from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydhcp.range.models import Range
@@ -14,6 +16,16 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
+
+
+def find_get_record_url(obj):
+    obj_type = obj._meta.db_table
+    if obj_type in DHCP_OBJECTS:
+        return reverse('cydhcp-get-record')
+    elif obj_type in DNS_OBJECTS:
+        return reverse('cydns-get-record')
+    elif obj_type in CORE_OBJECTS:
+        return reverse('core-get-record')
 
 
 def make_paginator(request, qs, num=20, obj_type=None):
@@ -107,9 +119,11 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         # Actions
         if can_update:
             row_data.append({'value': ['Update', 'Delete'],
-                             'url': [obj.get_update_url(),
-                                     obj.get_delete_url()],
-                             'data': [[('pk', obj.id)], None],
+                             'url': [obj.get_update_url(), obj.get_delete_url()],
+                             'data': [[('pk', obj.id),
+                                       ('object_type', obj._meta.db_table),
+                                       ('getUrl', find_get_record_url(obj))],
+                                       None],
                              'class': ['update', 'delete'],
                              'img': ['/media/img/update.png',
                                      '/media/img/delete.png']})

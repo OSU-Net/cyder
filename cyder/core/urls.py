@@ -21,7 +21,7 @@ def core_urls(object_type):
 urlpatterns = patterns('',
     url(r'^$', core_index, name='core-index'),
 
-    url(r'^record/get/', core_get_update_form, name='core-get-update-form'),
+    url(r'^record/get/', core_get_update_form, name='core-get-record'),
     url(r'^record/search/', core_search_obj, name='core-search'),
 
     url(r'^ctnr/', include('cyder.core.ctnr.urls')),
