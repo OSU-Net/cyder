@@ -119,7 +119,8 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         # Actions
         if can_update:
             row_data.append({'value': ['Update', 'Delete'],
-                             'url': [obj.get_update_url(), obj.get_delete_url()],
+                             'url': [obj.get_update_url(),
+                                     obj.get_delete_url()],
                              'data': [[('pk', obj.id),
                                        ('object_type', obj._meta.db_table),
                                        ('getUrl', find_get_record_url(obj))],

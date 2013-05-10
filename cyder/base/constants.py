@@ -29,6 +29,6 @@ DHCP_OBJECTS = ("workgroup", "vrf", "vlan", "site", "range", "network",
                 "static_interface", "dynamic_interface",)
 
 DNS_OBJECTS = ("address_record", "cname", "domain", "mx", "nameserver", "ptr",
-              "soa", "srv", "sshfp", "txt", "view",)
+               "soa", "srv", "sshfp", "txt", "view",)
 
 CORE_OBJECTS = ("ctnr_users", "ctnr", "user",)

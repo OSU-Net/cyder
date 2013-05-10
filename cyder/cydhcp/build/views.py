@@ -12,4 +12,5 @@ def build_network(request, network_pk):
     else:
         DEBUG_BUILD_STRING = network.build_subnet(raw=False)
         return render_to_response('build/sample_build.html',
-                                  {'data': DEBUG_BUILD_STRING, 'network': network})
+                                  {'data': DEBUG_BUILD_STRING,
+                                   'network': network})
