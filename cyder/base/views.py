@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
@@ -128,7 +128,7 @@ def get_update_form(request, get_klasses_fn):
     record_pk = request.GET.get('pk', '')
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
-    kwargs = json.loads(request.GET.get('data', '') or '{}')
+    kwargs = json.loads(request.GET.get('data', '{}').replace("'", "\""))
     if not obj_type:
         raise Http404
 

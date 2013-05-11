@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_6, IP_TYPE_4
 
+from cyder.cydhcp.utils import two_to_one
+
 import ipaddr
 
 
@@ -84,6 +86,13 @@ class Ip(models.Model):
             return self.ip_lower
         return (self.ip_upper * (2 ** 64)) + self.ip_lower
 
+    def get_wrapped_ip(self):
+        if self.ip_type == IP_TYPE_4:
+            ip_klass = ipaddr.IPv4Address
+        else:
+            ip_klass = ipaddr.IPv6Address
+        return ip_klass(two_to_one(self.ip_upper, self.ip_lower))
+
     def clean_ip(self, update_reverse_domain=True):
         """
         The clean method in Ip is different from the rest. It needs
@@ -92,7 +101,6 @@ class Ip(models.Model):
         deleting a reverse_domain).
         """
         # TODO, it's a fucking hack. Car babies.
-        self.validate_ip_str()
         if self.ip_type == IP_TYPE_4:
             Klass = ipaddr.IPv4Address
         elif self.ip_type == IP_TYPE_6:

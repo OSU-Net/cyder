@@ -40,47 +40,52 @@
       <thead>
         <th>IP</th>
         <th>Object</th>
-        <th>Action</th>
+        <th>View or Create</th>
       </thead>
       <tbody>
         {% for obj in range_data %}
+          {% if obj[0] == 'Free' %}
           <tr>
-            <td>{{ obj[1] }}</td>
-            {% if obj[0] == "A/PTR" %}
+              {% if obj[1] == obj[2] %}
+                <td>{{ obj[1] }}</td>
+              {% else %}
+                <td>{{ obj[1] }} - {{ obj[2] }}</td>
+              {% endif %}
+              <td>Free</td>
               <td>
-                {{ obj[3].fqdn }} (<a href="{{ obj[3].get_detail_url() }}">A</a>/<a href="{{ obj[2].get_detail_url() }}">PTR</a>)
-              </td>
-              <td>
-                <b>Combine</b> <a class='combine_to_system' rel="{{ obj[3].pk}}|{{ obj[2].pk }}" href="/cydhcp/interface/combine_a_ptr_to_interface/{{ obj[3].pk}}/{{ obj[2].pk }}/">A/PTR to Interface.</a>
-              </td>
-            {% elif obj[0] == "Interface" %}
-              <td>
-                Interface (<a href="{{ obj[2].get_detail_url() }}">{{ obj[2].fqdn }}</a>) for System
-                <a href="{{ obj[2].system.get_detail_url() }}">{{ obj[2].system }}</a>
-              </td>
-              <td></td>
-            {% elif obj[0] == "A" %}
-              <td>
-                A <a href="{{ obj[2].get_detail_url() }}">{{ obj[2].fqdn }}</a>
-              </td>
-              <td></td>
-            {% elif obj[0] == "PTR" %}
-              <td>
-                PTR <a href="{{ obj[2].get_detail_url() }}">{{ obj[2].name }}</a>
-              </td>
-              <td></td>
-            {% else %}
-              <td><b>Free</b></td>
-              <td>
+                {{ create_button('address_record',
+                                 url('cydns-get-record'),
+                                 url('address_record'),
+                                 data=obj[-1],
+                                 button_prefix="") }}
+                {{ create_button('ptr',
+                                 url('cydns-get-record'),
+                                 url('ptr'),
+                                 data=obj[-1],
+                                 button_prefix="") }}
                 {{ create_button(
-                    'address_record', url('cydns-get-record'), data=obj[-1]) }}
-                {{ create_button(
-                    'ptr', url('cydns-get-record'), data=obj[-1]) }}
-                {{ create_button(
-                    'static_interface', url('cydhcp-get-record'), data=obj[-1]) }}
-              </td>
-            {% endif %}
-          </tr>
+                       'static_interface',
+                       url('cydhcp-get-record'),
+                       url('static_interface'),
+                       data={"ip_str" : obj[1].__str__(), "ip_type" : '4'},
+                       button_prefix="") }}
+              <td>
+            </tr>
+          {% else %}
+            {% for record_ip, record_set in obj %}
+              {% for record in record_set %}
+                <tr>
+                  <td>{{ record_ip }}</td>
+                  <td>{{ record._meta.db_table|prettify_obj_type }}</td>
+                  {% if record.get_detail_url() %}
+                    <td><a href="{{ record.get_detail_url() }}">{{record.fqdn}}</a></td>
+                  {% else %}
+                    <td><a href="{{ record.domain.get_detail_url() }}">{{record.fqdn}}</a></td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            {% endfor %}
+          {% endif %}
         {% endfor %}
       </tbody>
     </table>

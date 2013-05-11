@@ -30,13 +30,25 @@
     <h3>System Attributes</h3>
     {{ render_table(request, attrs_table) }}
   {% endif %}
-  {% if static_intrs_table %}
-    <h3>Static Interfaces</h3>
-    {{ render_table(request, static_intrs_table) }}
+  {% if static_intr_tables %}
+    {% for table in static_intr_tables %}
+      <h3>Static Interface</h3>
+      {{ render_table(request, table[0]) }}
+      {% if table[1] %}
+        <h3>Static Interface Attrs</h4>
+        {{render_table(request, table[1]) }}
+      {% endif %}
+    {% endfor %}
   {% endif %}
 
-  {% if dynamic_intrs_table %}
-    <h3>Dynamic Interfaces</h3>
-    {{ render_table(request, dynamic_intrs_table) }}
+  {% if dynamic_intr_tables %}
+    {% for table in dynamic_intr_tables %}
+      <h3>Dynamic Interface</h3>
+      {{ render_table(request, table[0]) }}
+      {% if table[1] %}
+        <h3>Static Interface Attrs</h4>
+        {{render_table(request, table[1]) }}
+      {% endif %}
+    {% endfor %}
   {% endif %}
 {% endblock %}
