@@ -54,7 +54,7 @@ class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)
 
     class Meta:
-        db_table = "vrf_key_value"
+        db_table = "vrf_kv"
 
     def _aa_decription(self):
         return

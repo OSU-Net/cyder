@@ -341,7 +341,7 @@ class RangeKeyValue(CommonOption):
     range = models.ForeignKey(Range, null=False)
 
     class Meta:
-        db_table = 'range_key_value'
+        db_table = 'range_kv'
         unique_together = ('key', 'value', 'range')
 
     def _aa_failover(self):

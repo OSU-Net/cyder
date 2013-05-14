@@ -6,4 +6,4 @@ from cyder.cydhcp.site.views import site_detail
 
 urlpatterns = cydhcp_urls('site') + patterns('',
     url(r'^(?P<pk>[\w-]+)/$', site_detail, name='site-detail'),
-)
+) + cydhcp_urls('site_kv')

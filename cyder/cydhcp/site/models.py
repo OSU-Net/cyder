@@ -99,7 +99,7 @@ class SiteKeyValue(KeyValue):
     site = models.ForeignKey(Site, null=False)
 
     class Meta:
-        db_table = 'site_key_value'
+        db_table = 'site_kv'
         unique_together = ('key', 'value')
 
     def _aa_address(self):

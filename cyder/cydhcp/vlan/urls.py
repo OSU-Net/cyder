@@ -5,4 +5,4 @@ from cyder.cydhcp.urls import cydhcp_urls
 
 urlpatterns = cydhcp_urls('vlan') + patterns('',
     url(r'^(?P<pk>[\w-]+)/$', vlan_detail, name='vlan-detail'),
-)
+) + cydhcp_urls('vlan_kv')

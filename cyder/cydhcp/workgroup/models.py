@@ -58,7 +58,7 @@ class WorkgroupKeyValue(CommonOption):
     aux_attrs = (('description', 'A description of the workgroup'))
 
     class Meta:
-        db_table = 'workgroup_key_value'
+        db_table = 'workgroup_kv'
         unique_together = ('key', 'value', 'workgroup')
 
     def save(self, *args, **kwargs):

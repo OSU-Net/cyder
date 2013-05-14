@@ -1,8 +1,10 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.mixins import ObjectUrlMixin
 
-class KeyValue(models.Model):
+
+class KeyValue(models.Model, ObjectUrlMixin):
     """
     The KeyValue objects have functions that correspond to different
     keys. When a key is saved an attempt is made to find a validation

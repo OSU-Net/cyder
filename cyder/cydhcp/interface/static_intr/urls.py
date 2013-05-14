@@ -4,4 +4,4 @@ from cyder.cydhcp.views import cydhcp_create
 urlpatterns = patterns('',
     url(r'^create/$', cydhcp_create,
         name='static_intr-create'),
-) + cydhcp_urls('static_interface')
+) + cydhcp_urls('static_interface') + cydhcp_urls('static_interface_kv')

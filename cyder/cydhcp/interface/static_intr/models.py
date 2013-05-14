@@ -8,7 +8,6 @@ import cydns
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
-from cyder.base.mixins import ObjectUrlMixin
 
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
@@ -267,5 +266,5 @@ class StaticIntrKeyValue(CommonOption):
     intr = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
-        db_table = 'static_intr_key_value'
+        db_table = 'static_interface_kv'
         unique_together = ('key', 'value', 'intr')

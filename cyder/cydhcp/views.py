@@ -38,25 +38,25 @@ import ipaddr
 def get_klasses(obj_type):
     return {
         'network': (Network, NetworkForm, None),
-        'network_key_value': (NetworkKeyValue, NetworkKeyValueForm, None),
+        'network_kv': (NetworkKeyValue, NetworkKeyValueForm, None),
         'range': (Range, RangeForm, None),
-        'range_key_value': (RangeKeyValue, RangeKeyValueForm, None),
+        'range_kv': (RangeKeyValue, RangeKeyValueForm, None),
         'site': (Site, SiteForm, None),
-        'site_key_value': (SiteKeyValue, SiteKeyValueForm, None),
+        'site_kv': (SiteKeyValue, SiteKeyValueForm, None),
         'vlan': (Vlan, VlanForm, None),
-        'vlan_key_value': (VlanKeyValue, VlanKeyValueForm, None),
+        'vlan_kv': (VlanKeyValue, VlanKeyValueForm, None),
         'static_interface':
             (StaticInterface, StaticInterfaceForm, None),
-        'static_interface_key_value':
+        'static_interface_kv':
             (StaticIntrKeyValue, StaticIntrKeyValueForm, None),
         'dynamic_interface':
             (DynamicInterface, DynamicInterfaceForm, None),
-        'dynamic_interface_key_value':
+        'dynamic_interface_kv':
             (DynamicIntrKeyValue, DynamicIntrKeyValueForm, None),
         'vrf': (Vrf, VrfForm, None),
-        'vrf_key_value': (VrfKeyValue, VrfKeyValueForm, None),
+        'vrf_kv': (VrfKeyValue, VrfKeyValueForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
-        'workgroup_key_value':
+        'workgroup_kv':
             (WorkgroupKeyValue, WorkgroupKeyValueForm, None),
     }.get(obj_type, (None, None, None))
 

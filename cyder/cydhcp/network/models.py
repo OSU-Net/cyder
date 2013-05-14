@@ -259,7 +259,7 @@ class NetworkKeyValue(CommonOption):
     )
 
     class Meta:
-        db_table = 'network_key_value'
+        db_table = 'network_kv'
         unique_together = ('key', 'value', 'network')
 
     def save(self, *args, **kwargs):

@@ -136,7 +136,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     #'django_cas.middleware.CASMiddleware',
-    'cyder.middleware.authentication.AuthenticationMiddleware',
+    'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS += (

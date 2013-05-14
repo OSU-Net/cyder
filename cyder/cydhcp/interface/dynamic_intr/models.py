@@ -72,5 +72,5 @@ class DynamicIntrKeyValue(CommonOption):
     intr = models.ForeignKey(DynamicInterface, null=False)
 
     class Meta:
-        db_table = "dynamic_intr_key_value"
+        db_table = "dynamic_interface_kv"
         unique_together = "key", "value", "intr"

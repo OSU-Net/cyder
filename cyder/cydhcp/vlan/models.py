@@ -83,7 +83,7 @@ class VlanKeyValue(KeyValue):
     vlan = models.ForeignKey(Vlan, null=False)
 
     class Meta:
-        db_table = "vlan_key_value"
+        db_table = "vlan_kv"
         unique_together = ("key", "value")
 
     def _aa_description(self):
