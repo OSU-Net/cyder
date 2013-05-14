@@ -11,22 +11,26 @@ from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
-from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
-from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.network.forms import NetworkForm
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.range.forms import RangeForm
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.site.forms import SiteForm
-from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.vlan.forms import VlanForm
-from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.vrf.forms import VrfForm
-from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cydhcp.workgroup.forms import WorkgroupForm
+from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
+                                                        DynamicIntrKeyValue)
+from cyder.cydhcp.interface.dynamic_intr.forms import (DynamicInterfaceForm,
+                                                       DynamicIntrKeyValueForm)
+from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
+                                                       StaticIntrKeyValue)
+from cyder.cydhcp.interface.static_intr.forms import (StaticInterfaceForm,
+                                                      StaticIntrKeyValueForm)
+from cyder.cydhcp.network.models import Network, NetworkKeyValue
+from cyder.cydhcp.network.forms import NetworkForm, NetworkKeyValueForm
+from cyder.cydhcp.range.models import Range, RangeKeyValue
+from cyder.cydhcp.range.forms import RangeForm, RangeKeyValueForm
+from cyder.cydhcp.site.models import Site, SiteKeyValue
+from cyder.cydhcp.site.forms import SiteForm, SiteKeyValueForm
+from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
+from cyder.cydhcp.vlan.forms import VlanForm, VlanKeyValueForm
+from cyder.cydhcp.vrf.models import Vrf, VrfKeyValue
+from cyder.cydhcp.vrf.forms import VrfForm, VrfKeyValueForm
+from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
+from cyder.cydhcp.workgroup.forms import WorkgroupForm, WorkgroupKeyValueForm
 
 import ipaddr
 
@@ -34,14 +38,26 @@ import ipaddr
 def get_klasses(obj_type):
     return {
         'network': (Network, NetworkForm, None),
+        'network_key_value': (NetworkKeyValue, NetworkKeyValueForm, None),
         'range': (Range, RangeForm, None),
+        'range_key_value': (RangeKeyValue, RangeKeyValueForm, None),
         'site': (Site, SiteForm, None),
+        'site_key_value': (SiteKeyValue, SiteKeyValueForm, None),
         'vlan': (Vlan, VlanForm, None),
-        'static_interface': (StaticInterface, StaticInterfaceForm, None),
+        'vlan_key_value': (VlanKeyValue, VlanKeyValueForm, None),
+        'static_interface':
+            (StaticInterface, StaticInterfaceForm, None),
+        'static_interface_key_value':
+            (StaticIntrKeyValue, StaticIntrKeyValueForm, None),
         'dynamic_interface':
             (DynamicInterface, DynamicInterfaceForm, None),
+        'dynamic_interface_key_value':
+            (DynamicIntrKeyValue, DynamicIntrKeyValueForm, None),
         'vrf': (Vrf, VrfForm, None),
+        'vrf_key_value': (VrfKeyValue, VrfKeyValueForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
+        'workgroup_key_value':
+            (WorkgroupKeyValue, WorkgroupKeyValueForm, None),
     }.get(obj_type, (None, None, None))
 
 

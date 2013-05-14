@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 import ipaddr
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
-from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cydns.ip.models import ipv6_to_longs
@@ -53,6 +53,12 @@ class NetworkForm(forms.ModelForm):
                                    ip_lower=ip_lower).exists()):
             raise ValidationError("This network has already been allocated.")
         return cleaned_data
+
+
+class NetworkKeyValueForm(forms.ModelForm):
+    class Meta:
+        model = NetworkKeyValue
+        exclude = ('is_statement', 'is_option', 'is_quoted')
 
 
 class NetworkForm_network(forms.Form):

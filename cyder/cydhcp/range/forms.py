@@ -1,6 +1,6 @@
 from django import forms
 
-from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.range.models import Range, RangeKeyValue
 
 
 class RangeForm(forms.ModelForm):
@@ -14,3 +14,9 @@ class RangeForm(forms.ModelForm):
         self.fields['dhcpd_raw_include'].widget.attrs.update(
             {'cols': '80',
              'style': 'display: none;width: 680px'})
+
+
+class RangeKeyValueForm(forms.ModelForm):
+    class Meta:
+        model = RangeKeyValue
+        exclude = ('is_option', 'is_statement', 'is_quoted')

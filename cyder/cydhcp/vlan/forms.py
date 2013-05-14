@@ -1,6 +1,6 @@
 from django import forms
 
-from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
 
 
 class VlanForm(forms.ModelForm):
@@ -8,3 +8,10 @@ class VlanForm(forms.ModelForm):
 
     class Meta:
         model = Vlan
+
+
+class VlanKeyValueForm(forms.ModelForm):
+
+    class Meta:
+        model = VlanKeyValue
+        exclude = ('is_quoted',)

@@ -4,7 +4,8 @@ from django.core.exceptions import ValidationError
 import ipaddr
 
 from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
+                                                       StaticIntrKeyValue)
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
@@ -35,6 +36,13 @@ class StaticInterfaceForm(forms.ModelForm):
     class Meta:
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
+
+
+class StaticIntrKeyValueForm(forms.ModelForm):
+
+    class Meta:
+        model = StaticIntrKeyValue
+        exclude = ('is_option', 'is_statement', 'is_quoted')
 
 
 class FullStaticInterfaceForm(forms.ModelForm):
