@@ -14,4 +14,3 @@ class SiteKeyValueForm(forms.ModelForm):
     class Meta:
         model = SiteKeyValue
         exclude = ('is_quoted',)
-
