@@ -107,6 +107,20 @@ table {
     table.table {
         margin-left: .5%;
         width: 96%;
+        .update:focus {
+            transition: all .25s;
+            position: absolute;
+            right: 300px;
+            transform: scale(3,3);
+            -webkit-transform: scale(3,3);
+        }
+        .delete:focus {
+            transition: all .25s;
+            position: absolute;
+            right: 300px;
+            transform: scale(3,3);
+            -webkit-transform: scale(3,3);
+        }
     }
 }
 
