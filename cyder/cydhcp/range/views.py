@@ -10,7 +10,7 @@ from cyder.base.utils import make_paginator, tablefy
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
 from cyder.cydhcp.range.models import Range, RangeKeyValue
-from cyder.cydhcp.range.range_usage import range_usage
+from cyder.cydhcp.range.utils import range_usage
 from cyder.cydhcp.utils import two_to_one
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.ip.models import ipv6_to_longs
