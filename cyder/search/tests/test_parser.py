@@ -86,20 +86,12 @@ class ANDTest(T):
         t = 'AND'
         self.assertTrue(callable(self.parse(t)))
 
-    def test2(self):
-        t = 'aND'
-        self.assertTrue(callable(self.parse(t)))
-
 
 class ORTest(T):
     rule = 'OR'
 
     def test1(self):
         t = 'OR'
-        self.assertTrue(callable(self.parse(t)))
-
-    def test2(self):
-        t = 'oR'
         self.assertTrue(callable(self.parse(t)))
 
 
