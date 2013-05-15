@@ -21,9 +21,8 @@ html, body {
 
 .main {
     display: block;
-    min-height: 150%;
+    min-height: 200%;
     overflow:auto;
-    padding-bottom: 650px;
 }  /* must be same height as the footer */
 
 #footer {
