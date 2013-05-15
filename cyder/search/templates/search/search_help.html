@@ -6,8 +6,8 @@
 
 {% block content %}
   <div id="search-help">
-    <table border="1">
-      <h2>Search Patterns</h2>
+      <table border="0" cellspacing="10">
+      <h2><u>Search Patterns</u></h2>
       <tr>
         <td>
           a-zA-Z0-9.
@@ -46,8 +46,8 @@
         </td>
       </tr>
     </table>
-    <table border="1">
-      <h2>Operators</h2>
+    <table border="0" cellspacing="10">
+      <h2><u>Operators</u></h2>
       <tr>
         <td>
           '-'
@@ -60,8 +60,8 @@
         </td>
       </tr>
     </table>
-    <table border="1">
-      <h2>Directives</h2>
+    <table border="0" cellspacing="10">
+      <h2><u>Directives</u></h2>
       <tr>
         <td>
           type:
@@ -126,12 +126,12 @@
         </td>
       </tr>
     </table>
-    <table border="1">
-      <h2>Examples</h2>
+    <table border="0" cellspacing="10">
+      <h2><u>Examples</u></h2>
       <tr>
         <td>
           <p>
-          <code>puppet site:scl3 type:A</code>
+          <code><u>puppet site:scl3 type:A</u></code>
           </p>
           <p>
           Find all A records in scl3 that have the string 'puppet' in their name.
@@ -141,7 +141,7 @@
       <tr>
         <td>
           <p>
-          <code>/^node[1-9]\.seamicro type:A type:PTR network:10.8.32.0/24</code>
+          <code><u>/^node[1-9]\.seamicro type:A type:PTR network:10.8.32.0/24</u></code>
           </p>
           <p>
           Find all A and PTR records who's name match the regex '^node[1-9]\.seamicro' that are also in
