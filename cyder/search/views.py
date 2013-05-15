@@ -54,6 +54,7 @@ def _search(request):
         [])
 
     meta = [
+        (soas.count() if soas else 0, 'soa', 'SOA Records'),
         (addrs.count() if addrs else 0, 'address', 'Address Records'),
         (cnames.count() if cnames else 0, 'cname', 'CNAMEs'),
         (domains.count() if domains else 0, 'domain', 'Domains'),
@@ -67,16 +68,17 @@ def _search(request):
     ]
 
     tables = [
-        (tablefy(addrs, views=True), 'address', 'Address Records'),
-        (tablefy(cnames, views=True), 'cname', 'CNAMEs'),
-        (tablefy(domains, views=True), 'domain', 'Domains'),
-        (tablefy(intrs, views=True), 'interface', 'Interfaces'),
-        (tablefy(mxs, views=True), 'mx', 'MXs'),
-        (tablefy(nss, views=True), 'nameserver', 'Nameservers'),
-        (tablefy(ptrs, views=True), 'ptr', 'PTRs'),
-        (tablefy(srvs, views=True), 'srv', 'SRVs'),
-        (tablefy(sys, views=True), 'sys', 'Systems'),
-        (tablefy(txts, views=True), 'txt', 'TXTs'),
+        (tablefy(soas), 'soa', 'SOA Records'),
+        (tablefy(addrs), 'address', 'Address Records'),
+        (tablefy(cnames), 'cname', 'CNAMEs'),
+        (tablefy(domains), 'domain', 'Domains'),
+        (tablefy(intrs), 'interface', 'Interfaces'),
+        (tablefy(mxs), 'mx', 'MXs'),
+        (tablefy(nss), 'nameserver', 'Nameservers'),
+        (tablefy(ptrs), 'ptr', 'PTRs'),
+        (tablefy(srvs), 'srv', 'SRVs'),
+        (tablefy(sys), 'sys', 'Systems'),
+        (tablefy(txts), 'txt', 'TXTs'),
     ]
 
     return (meta, tables)
