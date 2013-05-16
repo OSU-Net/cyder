@@ -12,6 +12,14 @@ $(document).ready(function() {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
 
+    function prettify(obj) {
+        var obj_name = obj.split('_');
+        for(i=0; i < obj_name.length; i++){
+            obj_name[i] = obj_name[i].charAt(0).toUpperCase() + obj_name[i].slice(1);
+        }
+        return obj_name.join(' ');
+    }
+
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
@@ -61,14 +69,15 @@ $(document).ready(function() {
 
         e.preventDefault();
         form.action = this.href;
-        $.get($(this).attr('data-getUrl') || getUrl, {'object_type': $(this).attr('data-object_type') || objType,
+        var object_type = $(this).attr('data-object_type') || objType;
+        $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
-                $('#form-title').html('Updating ' + prettyObjType);
+                $('#form-title').html('Updating ' + prettify(object_type));
                 $('.inner-form').empty().append(data.form);
                 initForms();
             }, 150);
-            $('.form-btns a.submit').text('Update ' + prettyObjType);
+            $('.form-btns a.submit').text('Update ' + prettify(object_type));
             $('#obj-form').slideDown();
         }, 'json');
     });
