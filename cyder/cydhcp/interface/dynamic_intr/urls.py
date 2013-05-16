@@ -5,7 +5,6 @@ from cyder.cydhcp.urls import cydhcp_urls
 from cyder.cydhcp.views import cydhcp_create
 
 urlpatterns = cydhcp_urls('dynamic_interface') + \
-    cydhcp_urls('dynamic_interface_kv') + \
     patterns('',
              url(r'create/$', cydhcp_create, name='dynamic_interface-create'),
              url(r'(?P<pk>[\w-]+)/$', DynamicInterfaceDetailView.as_view(),

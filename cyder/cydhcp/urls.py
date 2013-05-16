@@ -4,7 +4,7 @@ from django.views.generic.simple import direct_to_template
 from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
                                 cydhcp_get_update_form, cydhcp_search_obj,
                                 cydhcp_delete)
-
+from cyder.cydhcp.constants import DHCP_KEY_VALUES
 
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
@@ -36,3 +36,6 @@ urlpatterns = patterns('',
     url(r'^vrf/', include('cyder.cydhcp.vrf.urls')),
     url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
 )
+for kv in DHCP_KEY_VALUES:
+    urlpatterns += patterns('',
+            url(r"^{0}/".format(kv), include(cydhcp_urls(kv))))
