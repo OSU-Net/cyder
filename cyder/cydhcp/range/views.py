@@ -10,7 +10,7 @@ from cyder.base.utils import make_paginator, tablefy
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
 from cyder.cydhcp.range.models import Range, RangeKeyValue
-from cyder.cydhcp.range.utils import range_usage
+from cyder.cydhcp.range.range_usage import range_usage
 from cyder.cydhcp.utils import two_to_one
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -39,9 +39,10 @@ def range_detail(request, pk):
     elif mrange.allow == ALLOW_OPTION_LEGACY:
         allow = [ctnr for ctnr in Ctnr.objects.filter(ranges=mrange)]
 
-    start_upper, start_lower = mrange.start_upper, mrange.start_lower
-    end_upper, end_lower = mrange.end_upper, mrange.end_lower
-
+    start_upper = mrange.start_upper
+    start_lower = mrange.start_lower
+    end_upper = mrange.end_upper
+    end_lower = mrange.end_lower
     range_data, ip_usage_percent = range_usage(
         two_to_one(start_upper, start_lower),
         two_to_one(end_upper, end_lower),

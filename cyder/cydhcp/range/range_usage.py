@@ -1,7 +1,6 @@
 from itertools import chain, groupby
 
 import json
-import simplejson as json
 from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
 from cyder.cydhcp.utils import start_end_filter, two_to_one
@@ -69,7 +68,8 @@ def range_usage(start, end, ip_type):
             range_usage_list.append(
                 ("Free",
                  free_range_start, filled_range[0][0] - 1,
-                 json.dumps({"ip_str": str(free_range_start), "ip_type": ip_type})))
+                 json.dumps({"ip_str": str(free_range_start),
+                             "ip_type": ip_type})))
         # the new free range may start with the next address after the end of
         # the current filled range
         free_range_start = filled_range[-1][0] + 1
@@ -80,6 +80,7 @@ def range_usage(start, end, ip_type):
         range_usage_list.append(
                 ("Free",
                  free_range_start, ip_end,
-                 json.dumps({"ip_str": str(free_range_start), "ip_type": ip_type})))
+                 json.dumps({"ip_str": str(free_range_start),
+                             "ip_type": ip_type})))
 
     return range_usage_list, int((float(total_used) / total_ips) * 100)
