@@ -615,6 +615,10 @@ class DNSBuilder(SVNBuilderMixin):
             # it as dirty so it can be rebuild
             try:
                 root_domain = soa.root_domain  # This is an expensive lookup
+
+                if not root_domain:
+                    continue
+
                 # General order of things:
                 # * Find which views should have a zone file built and add them
                 # to a list.
