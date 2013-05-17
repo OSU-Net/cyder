@@ -113,7 +113,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'migration',
 
     # Third party apps
-    # 'south',
+    'south',
     'django_cas',
     'djcelery',
     'django_extensions',
