@@ -36,7 +36,8 @@ class Vrf(models.Model, ObjectUrlMixin):
     def build_vrf(self):
         build_str = ''
         for range_ in self.network.range_set.all():
-            dynamic_clients = range_.dynamicinterface_set.filter(dhcp_enabled=True)
+            dynamic_clients = range_.dynamicinterface_set.filter(
+                dhcp_enabled=True)
             if not dynamic_clients:
                 continue
             build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(

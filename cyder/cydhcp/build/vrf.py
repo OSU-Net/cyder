@@ -1,10 +1,7 @@
 import os
 import chili_manage
 
-from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.workgroup.models import Workgroup
 
 
 def main():

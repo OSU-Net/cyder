@@ -7,11 +7,11 @@ import cydns
 
 from cyder.core.system.models import System
 
-from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.constants import IP_TYPE_6
 
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydhcp.utils import join_dhcp_args, format_mac
+from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup

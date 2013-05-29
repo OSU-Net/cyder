@@ -2,7 +2,7 @@ from django.db import models
 
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.utils import join_dhcp_args, format_mac
+from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.ctnr.models import Ctnr

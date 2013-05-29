@@ -4,7 +4,6 @@ from django.http import HttpResponse
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.cydhcp.constants import (
     ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
 )
@@ -187,7 +186,7 @@ class Range(models.Model, ObjectUrlMixin):
         if self.allow == 'vrf':
             allow = ["allow members of \"{0}:{1}:{2}\"".format(
                 vrf.name, self.start_str, self.end_str)
-                     for vrf in self.network.vrf_set.all()]
+                for vrf in self.network.vrf_set.all()]
         elif self.allow == 'known-clients':
             allow = ['allow known clients']
         elif self.allow == 'legacy':
@@ -242,7 +241,7 @@ class Range(models.Model, ObjectUrlMixin):
         build_str += join_dhcp_args(self.get_allowed_clients(), depth=2)
         if self.ip_type == IP_TYPE_4:
             build_str += "\t\trange {0} {1};\n".format(self.start_str,
-                                                      self.end_str)
+                                                       self.end_str)
         else:
             build_str += "\t\trange6{0} {1};\n".format(self.start_str,
                                                        self.end_str)
