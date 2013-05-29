@@ -2,7 +2,7 @@ from django.db import models
 
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.utils import join_dhcp_args
+from cyder.cydhcp.utils import join_dhcp_args, format_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.ctnr.models import Ctnr
@@ -44,7 +44,9 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def build_host(self):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
-        build_str += "\t\thardware ethernet {0};\n".format(self.mac)
+        build_str += "\t\thardware ethernet {0};\n".format(
+            format_mac(self.mac))
+        """
         options = self.dynamicintrkeyvalue_set.filter(is_option=True)
         statements = self.dynamicintrkeyvalue_set.filter(is_statement=True)
         if options:
@@ -53,13 +55,14 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         if statements:
             build_str += "\t\t# Host Statemets\n"
             build_str += join_dhcp_args(statements, depth=2)
+        """
         build_str += "\t}\n\n"
         return build_str
 
     def build_subclass(self, allowed):
         return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
             allowed, self.range.start_str, self.range.end_str,
-            self.mac)
+            format_mac(self.mac))
 
     def get_fqdn(self):
         if not self.system.name:

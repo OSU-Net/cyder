@@ -8,7 +8,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 
 def main():
-    with open(os.path.join(os.path.dirname(__file__), 'subnet.conf'), 'w') as f:
-        for network in Network.objects.all():
-            f.write(network.build_subnet())
+    with open(os.path.join(os.path.dirname(__file__), 'vrf.conf'), 'w') as f:
+        for vrf in Vrf.objects.all():
+            f.write(vrf.build_vrf())
 main()

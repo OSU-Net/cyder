@@ -69,7 +69,7 @@ class Range(models.Model, ObjectUrlMixin):
 
     attrs = None
     dhcpd_raw_include = models.TextField(null=True, blank=True)
-
+    dhcp_enabled = models.BooleanField(default=True)
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
                                   default=STATIC, editable=False)
 
@@ -185,7 +185,8 @@ class Range(models.Model, ObjectUrlMixin):
     def get_allowed_clients(self):
         allow = []
         if self.allow == 'vrf':
-            allow = ["allow members of {0}".format(vrf.name)
+            allow = ["allow members of \"{0}:{1}:{2}\"".format(
+                vrf.name, self.start_str, self.end_str)
                      for vrf in self.network.vrf_set.all()]
         elif self.allow == 'known-clients':
             allow = ['allow known clients']
@@ -240,7 +241,7 @@ class Range(models.Model, ObjectUrlMixin):
         build_str += "\t\t# Allow statements\n"
         build_str += join_dhcp_args(self.get_allowed_clients(), depth=2)
         if self.ip_type == IP_TYPE_4:
-            build_str += "\t\trange{0} {1};\n".format(self.start_str,
+            build_str += "\t\trange {0} {1};\n".format(self.start_str,
                                                       self.end_str)
         else:
             build_str += "\t\trange6{0} {1};\n".format(self.start_str,

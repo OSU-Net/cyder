@@ -8,7 +8,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 
 def main():
-    with open(os.path.join(os.path.dirname(__file__), 'subnet.conf'), 'w') as f:
-        for network in Network.objects.all():
-            f.write(network.build_subnet())
+    with open(os.path.join(os.path.dirname(__file__), 'group.conf'), 'w') as f:
+        for workgroup in Workgroup.objects.all():
+            f.write(workgroup.build_workgroup())
 main()
