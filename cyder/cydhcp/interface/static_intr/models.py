@@ -213,7 +213,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             )
 
         from cyder.cydns.ptr.models import PTR
-
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError('A PTR already uses this Name and IP')
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
@@ -223,8 +222,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if kwargs.pop('validate_glue', True):
             self.check_glue_status()
 
-        self.update_reverse_domain()
-        self.check_no_ns_soa_condition(self.reverse_domain)
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
 
