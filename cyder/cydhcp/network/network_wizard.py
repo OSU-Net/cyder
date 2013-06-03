@@ -2,15 +2,23 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
+from django.utils import simplejson
+from django.http import HttpResponse
 
 import ipaddr
+import json
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.forms import *
-from cyder.cydhcp.network.utils import calc_parent_str
+from cyder.cydhcp.network.utils import *
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.site.utils import *
+from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydhcp.vrf.utils import *
+from cyder.cydhcp.range.utils import pretty_ranges
 from cyder.cydns.ip.models import ipv6_to_longs
+
 
 def test_wizard(request):
     net_form = NetworkForm_network()
@@ -47,6 +55,56 @@ def test_wizard(request):
 
 
 def network_wizard(request):
+    networks = list(Network.objects.order_by("network_str"))
+    vrfs = list(Vrf.objects.order_by("id"))
+    sites = list(Site.objects.order_by("id"))
+    request.session['networks'] = pretty_networks(networks)
+    request.session['vrfs'] = pretty_vrfs(vrfs)
+    request.session['sites'] = pretty_sites(sites)
+    if request.method == 'POST':
+        print request.POST
+        data = {}
+        networks, vrfs, sites, ranges = [], [], [], []
+        relatedNetworks = set()
+        if 'networks' in request.POST:
+            for network in dict(request.POST)['networks']:
+                networks += [Network.objects.get(network_str=network)]
+            for network in networks:
+                relatedNetworks.update(network.get_related_networks())
+            vrfs = get_vrfs(relatedNetworks)
+            sites = list(networks)[0].get_related_sites(relatedNetworks)
+        if 'vrfs' in request.POST:
+            for vrf in dict(request.POST)['vrfs']:
+                vrfs += [Vrf.objects.get(name=vrf)]
+            for network in vrfs[0].get_related_networks(vrfs):
+                relatedNetworks.update(network.get_related_networks())
+            sites = list(relatedNetworks)[0].get_related_sites(relatedNetworks)
+        if 'sites' in request.POST:
+            for site in dict(request.POST)['sites']:
+                sites += [Site.objects.get(name=site)]
+            networks = sites[0].get_related_networks(sites)
+            for network in networks:
+                relatedNetworks.update(network.get_related_networks())
+            vrfs = get_vrfs(relatedNetworks)
+        ranges = get_ranges(relatedNetworks)
+        NetworkList = pretty_networks(relatedNetworks)
+        VrfList = pretty_vrfs(vrfs)
+        RangeList = pretty_ranges(ranges)
+        SiteList = pretty_sites(sites)
+
+        data['ranges'] = [(RangeList),([rng.id for rng in ranges])]
+        data['sites'] = SiteList
+        data['vrfs'] = VrfList
+        data['networks'] = NetworkList
+
+        return HttpResponse(simplejson.dumps(data), mimetype="application/json")
+
+    else:
+        return render(request, 'network/wizard.html', {
+        })
+
+def network_wizard2(request):
+    print request.session['vrfs']
     if request.method == 'POST':
         form = NetworkForm_network(request.POST)
         if form.is_valid():
@@ -54,7 +112,7 @@ def network_wizard(request):
                 parent = calc_parent
                 if parent:
                     network.site = parent.site
-            date = form.cleaned_data
+            data = form.cleaned_data
             form = NetworkForm_site()
             return render(request, 'network/wizard_form.html', {
                 'form': form,
@@ -69,6 +127,7 @@ def network_wizard(request):
         return render(request, 'network/wizard_form.html', {
             'form': form,
         })
+
 
 def site_wizard(request):
     if request.method == 'POST':
@@ -337,3 +396,4 @@ def create_objects(nvars):
     network.vlan = vlan
 
     return site, network, vlan
+

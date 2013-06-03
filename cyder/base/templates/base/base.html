@@ -20,11 +20,11 @@
             <span>
                 <a href="{{ request.user.get_profile().get_detail_url() }}">{{ request.user.username }}</a>
                 {% if request.session.level == 0 %}
-                  <p> Guest on </p>
+                  <p> guest on </p>
                 {% elif request.session.level == 1 %}
-                  <p> User on </p>
+                  <p> user on </p>
                 {% else %}
-                  <p> Admin on </p>
+                  <p> admin on </p>
                 {% endif %}
               <a href="{{ request.session.ctnr.get_detail_url() }}">{{ request.session.ctnr.name }}</a>
             </span>

@@ -26,6 +26,17 @@ class Vrf(models.Model, ObjectUrlMixin):
         )
         return data
 
+    # vrfs will have one masked network, but that may change when they are expanding
+    # eg: network_id's in vrf
+    def get_related_networks(self, vrfs):
+        networks = set()
+        for vrf in vrfs:
+            root_networks = Network.objects.filter(id=vrf.network_id)
+            for network in root_networks:
+                networks.update(network.get_related_networks())
+        return networks
+
+
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [

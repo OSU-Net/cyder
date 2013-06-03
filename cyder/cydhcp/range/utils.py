@@ -4,6 +4,11 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
 
+def pretty_ranges(ranges):
+    pretty = [(rng.start_str + " - " + rng.end_str) for rng in ranges]
+    return pretty
+
+
 def ip_taken(ip, records):
     """
     Given an ip as an integer and a queryset find an object in the queryset
