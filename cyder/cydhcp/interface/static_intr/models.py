@@ -7,11 +7,11 @@ import cydns
 
 from cyder.core.system.models import System
 
-from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.constants import IP_TYPE_6
 
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydhcp.utils import join_dhcp_args
+from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -181,11 +181,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def build_host(self):
         build_str = '\thost {0} {{\n'.format(self.fqdn)
-        build_str += '\t\thardware ethernet {0};\n'.format(self.mac)
+        build_str += '\t\thardware ethernet {0};\n'.format(
+            format_mac(self.mac))
         if self.ip_type == IP_TYPE_6:
             build_str += '\t\tfixed-address6 {0};\n'.format(self.ip_str)
         else:
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
+        """
         options = self.staticintrkeyvalue_set.filter(is_option=True)
         statements = self.staticintrkeyvalue_set.filter(is_statement=True)
         if options:
@@ -194,12 +196,14 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if statements:
             build_str += '\t\t# Host Statements\n'
             build_str += join_dhcp_args(statements, depth=2)
+        """
         build_str += '\t}\n\n'
         return build_str
 
     def build_subclass(self, contained_range, allowed):
         return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed.name, contained_range.start_str, contained_range.end_str)
+            allowed.name, contained_range.start_str, contained_range.end_str,
+            format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
         self.mac = self.mac.lower()
@@ -209,7 +213,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             )
 
         from cyder.cydns.ptr.models import PTR
-
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError('A PTR already uses this Name and IP')
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
@@ -219,8 +222,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if kwargs.pop('validate_glue', True):
             self.check_glue_status()
 
-        self.update_reverse_domain()
-        self.check_no_ns_soa_condition(self.reverse_domain)
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
 

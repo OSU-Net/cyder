@@ -37,14 +37,14 @@ class Ctnr(models.Model, ObjectUrlMixin):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
         for range_ in self.ranges.all():
-            build_str += "class \"{0}:{1}:{2} {{\n".format(
-                self.name, range_.start_str, range_.end_str)
-            build_str += "\tmatch hardware;\n"
-            build_str += "}\n"
-            dynamic_clients = DynamicInterface.objects.filter(
-                range=range_, ctnr=self)
-            for client in dynamic_clients:
-                client.build_subclass(self.name)
+            build_str += ("class \"{0}:{1}:{2}\" {{"
+                          "\n\tmatch hardware;\n}}\n".format(
+                              self.name, range_.start_str, range_.end_str))
+            for client in DynamicInterface.objects.filter(range=range_,
+                                                          ctnr=self,
+                                                          dhcp_enabled=True):
+                if client.mac:
+                    build_str += client.build_subclass(self.name)
         return build_str
 
 
