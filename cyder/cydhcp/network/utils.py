@@ -1,4 +1,28 @@
 from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.vrf.models import Vrf
+
+def pretty_networks(networks):
+    pretty = [network.network_str for network in networks]
+    return pretty
+
+
+def get_vrfs(networks):
+    vrfs = set()
+    if len(networks) > 0:
+        for network in networks:
+            vrfs.update(Vrf.objects.filter(network_id=network.id))
+    if len(vrfs) == 0:
+        return []
+    return vrfs
+
+
+def get_ranges(networks):
+    ranges = set()
+    if len(networks) > 0:
+        for network in networks:
+            ranges.update(Range.objects.filter(network_id=network.id))
+    return ranges
 
 
 def calc_networks(network):
