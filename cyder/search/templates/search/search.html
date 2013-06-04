@@ -9,7 +9,7 @@
 
 {% block filter_bar %}
   <form class="search" action="/search/" method="get">
-    <input type="search" name="search" value="{{ search if search else 'Search...' }}"></input>
+    <input type="search" name="search" placeholder="{{ search if search else 'Search...' }}"></input>
     <a class="btn submit">Search</a>
   </form>
   <a class="search-help" href="{{ url('search-help') }}">Search Help</a>
