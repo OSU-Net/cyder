@@ -27,7 +27,10 @@ Installation
 ######Fedora
 
 ```
-sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel
+sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel python-pip community-mysql
+sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems
+sudo pip install django_cas
+sudo systemctl start mysqld
 ```
 
 ######Debian
@@ -50,6 +53,7 @@ cyder/settings/local.py. Use settings_test.py when running tests.
 cp cyder/settings/local.py-dist cyder/settings/local.py
 cp cyder/settings_test.py-dist cyder/settings_test.py
 python manage.py syncdb
+python manage.py migrate
 ```
 
 Set up Sass CSS with Django. Pull jingo-minify for Django Sass support. We
