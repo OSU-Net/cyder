@@ -71,7 +71,7 @@ Install a PEP8 linter as a git pre-commit hook.
 ```
 git clone git@github.com:jbalogh/check && cd check
 sudo python check/setup.py install
-cp requirements/.pre-commit cyder/.git/hooks/pre-commit
+cp requirements/.pre-commit .git/hooks/pre-commit
 ```
 
 Coding Standards
