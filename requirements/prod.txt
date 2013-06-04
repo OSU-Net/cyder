@@ -6,7 +6,6 @@ django-reversion==1.5
 ply
 simplejson
 south
-mysql-python
 Parsley
 
 -e git://github.com/KTHse/django-cas2#egg=django-cas2
