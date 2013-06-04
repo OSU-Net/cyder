@@ -2,11 +2,10 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.forms.util import ErrorList, ErrorDict
-from django.utils import simplejson
+from django.utils import simplejson as json
 from django.http import HttpResponse
 
 import ipaddr
-import json
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.forms import *
@@ -25,56 +24,64 @@ def test_wizard(request):
     site_form = NetworkForm_site()
     vlan_form = NetworkForm_vlan()
     if request.method == 'POST':
-        confirmed = dict([(key, str(val)) for key, val in request.POST.items()])
+        confirmed = dict([(key, str(val)) for key,
+                         val in request.POST.items()])
         action = confirmed['action']
         if action == "#network_form":
             form = NetworkForm_network(confirmed)
             if form.is_valid():
-                return HttpResponse(json.dumps({'action':'#site_form'}), mimetype="application/json")
-            return HttpResponse(json.dumps({'action': '#network_form', 'form':form.as_p() }), mimetype="application/json")
+                return HttpResponse(json.dumps({'action':'#site_form'}),
+                                    mimetype="application/json")
+            return HttpResponse(json.dumps({'action': '#network_form',
+                                            'form':form.as_p()}),
+                                mimetype="application/json")
         elif action == "#site_form":
             form = NetworkForm_site(confirmed)
             if form.is_valid():
-                return HttpResponse(json.dumps({'action':'#vlan_form'}), mimetype="application/json")
-            return HttpResponse(json.dumps({'action': '#site_form', 'form':form.as_p() }), mimetype="application/json")
+                return HttpResponse(json.dumps({'action':'#vlan_form'}),
+                                    mimetype="application/json")
+            return HttpResponse(json.dumps({'action': '#site_form',
+                                            'form':form.as_p()}),
+                                mimetype="application/json")
         elif action == "#vlan_form":
             form = NetworkForm_vlan(confirmed)
             if form.is_valid():
-                return HttpResponse(json.dumps({'action':'#poop_form'}), mimetype="application/json")
-            return HttpResponse(json.dumps({'action': '#vlan_form', 'form':form.as_p() }), mimetype="application/json")
+                return HttpResponse(json.dumps({'action':'#poop_form'}),
+                                    mimetype="application/json")
+            return HttpResponse(json.dumps({'action': '#vlan_form',
+                                            'form':form.as_p()}),
+                                mimetype="application/json")
     net_form = NetworkForm_network()
     site_form = NetworkForm_site()
     vlan_form = NetworkForm_vlan()
     return render(request, 'network/wizard.html', {
-        'net_form' : net_form,
-        'site_form' : site_form,
-        'vlan_form' : vlan_form,
-        'action' : '#network_form'
+        'net_form': net_form,
+        'site_form': site_form,
+        'vlan_form': vlan_form,
+        'action': '#network_form'
     })
 
 
-
 def network_wizard(request):
-    networks = list(Network.objects.order_by("network_str"))
-    vrfs = list(Vrf.objects.order_by("id"))
-    sites = list(Site.objects.order_by("id"))
+    networks = Network.objects.order_by("network_str")
+    vrfs = Vrf.objects.order_by("name")
+    sites = Site.objects.order_by("name")
     request.session['networks'] = pretty_networks(networks)
     request.session['vrfs'] = pretty_vrfs(vrfs)
     request.session['sites'] = pretty_sites(sites)
     if request.method == 'POST':
-        print request.POST
         data = {}
         networks, vrfs, sites, ranges = [], [], [], []
         relatedNetworks = set()
         if 'networks' in request.POST:
-            for network in dict(request.POST)['networks']:
+            for network in request.POST.getlist('networks'):
                 networks += [Network.objects.get(network_str=network)]
             for network in networks:
                 relatedNetworks.update(network.get_related_networks())
             vrfs = get_vrfs(relatedNetworks)
-            sites = list(networks)[0].get_related_sites(relatedNetworks)
+            sites = list(relatedNetworks)[0].get_related_sites(relatedNetworks)
         if 'vrfs' in request.POST:
-            for vrf in dict(request.POST)['vrfs']:
+            for vrf in request.POST.getlist('vrfs'):
                 vrfs += [Vrf.objects.get(name=vrf)]
             for network in vrfs[0].get_related_networks(vrfs):
                 relatedNetworks.update(network.get_related_networks())
@@ -87,21 +94,16 @@ def network_wizard(request):
                 relatedNetworks.update(network.get_related_networks())
             vrfs = get_vrfs(relatedNetworks)
         ranges = get_ranges(relatedNetworks)
-        NetworkList = pretty_networks(relatedNetworks)
-        VrfList = pretty_vrfs(vrfs)
-        RangeList = pretty_ranges(ranges)
-        SiteList = pretty_sites(sites)
-
-        data['ranges'] = [(RangeList),([rng.id for rng in ranges])]
-        data['sites'] = SiteList
-        data['vrfs'] = VrfList
-        data['networks'] = NetworkList
-
-        return HttpResponse(simplejson.dumps(data), mimetype="application/json")
-
+        data['ranges'] = [(pretty_ranges(ranges)),
+                          ([rng.id for rng in ranges])]
+        data['networks'] = pretty_networks(relatedNetworks)
+        data['vrfs'] = pretty_vrfs(vrfs)
+        data['sites'] = pretty_sites(sites)
+        return HttpResponse(json.dumps(data), mimetype="application/json")
     else:
         return render(request, 'network/wizard.html', {
         })
+
 
 def network_wizard2(request):
     print request.session['vrfs']
@@ -150,12 +152,14 @@ def site_wizard(request):
             'form': form,
         })
 
+
 def vlan_wizard(request):
     if request.method == 'POST':
         form = NetworkForm_vlan(request.POST)
         if form.is_valid():
             data = request.POST.get('data')
             data = dict(data.items() + form.cleaned_data.items())
+
 
 def network_wizard1(request):
     if request.method == 'POST':
@@ -396,4 +400,3 @@ def create_objects(nvars):
     network.vlan = vlan
 
     return site, network, vlan
-

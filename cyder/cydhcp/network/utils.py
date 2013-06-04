@@ -2,9 +2,9 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.vrf.models import Vrf
 
+
 def pretty_networks(networks):
-    pretty = [network.network_str for network in networks]
-    return pretty
+    return [network.network_str for network in networks]
 
 
 def get_vrfs(networks):

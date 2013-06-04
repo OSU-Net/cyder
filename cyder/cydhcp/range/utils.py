@@ -5,8 +5,7 @@ from cyder.cydns.ptr.models import PTR
 
 
 def pretty_ranges(ranges):
-    pretty = [(rng.start_str + " - " + rng.end_str) for rng in ranges]
-    return pretty
+    return [(rng.start_str + " - " + rng.end_str) for rng in ranges]
 
 
 def ip_taken(ip, records):
@@ -15,7 +14,7 @@ def ip_taken(ip, records):
     with the same ip as the integer.  This is inteded for ptrs and arecords and
     interfaces.
     """
-    ip_low, ip_high =  one_to_two(ip)
+    ip_low, ip_high = one_to_two(ip)
     for record in records:
         if record.ip_lower is ip_low and record.ip_upper is ip_high:
             return record
@@ -72,8 +71,8 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
         return two_to_one(rec.ip_upper, rec.ip_lower)
 
     lists = [sorted(AddressRecord.objects.filter(ipf_q), key=get_ip),
-            sorted(PTR.objects.filter(ipf_q), key=get_ip),
-            sorted(StaticInterface.objects.filter(ipf_q), key=get_ip)]
+             sorted(PTR.objects.filter(ipf_q), key=get_ip),
+             sorted(StaticInterface.objects.filter(ipf_q), key=get_ip)]
 
     free_ranges = []
 
@@ -105,7 +104,7 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
             break
 
         min_list = min(lists, key=lambda x: two_to_one(x[0].ip_upper,
-                        x[0].ip_lower))
+                       x[0].ip_lower))
 
         minimum = min_list[0]
         minimum_i = two_to_one(minimum.ip_upper, minimum.ip_lower)

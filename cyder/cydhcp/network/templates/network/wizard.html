@@ -4,42 +4,43 @@ function edit_lists(subject){
     $('#' + subject.value + ' input:checked').each(function() {
             query += '&' + (subject.name) + '=' + ($(this).val());
     });
-
-    $.ajax({
-    type: "POST",
-    url:  location.href,
-    data: query,
-    dataType: 'json',
-
-    success: function(data){
-    var ranges = '';
-    ranges += '<h3>Ranges</h3>';
-        for (var i = 0; i <(data.ranges[0].length); i++){
-            ranges += '<a href="/dhcp/range/' + data.ranges[1][i] +'/">' + data.ranges[0][i] + '</a><br>';
-        }
-        ranges += '</select>';
-    var sites = '';
-        for (var i = 0; i <(data.sites.length); i++){
-            sites += '<input type="checkbox" name="sites" id="sites" value="' + data.sites[i] + '">' + data.sites[i] + '</input><br>';
-        }
-    var vrfs = '';
-        for (var i = 0; i <(data.vrfs.length); i++){
-            vrfs += '<input type="checkbox" name="vrfs" id="vrfs" value="' + data.vrfs[i] + '">' + data.vrfs[i] + '</input><br>';
-        }
-
-    var networks = '';
-        for (var i = 0; i <(data.networks.length); i++){
-            networks += '<input type="checkbox" name="networks" id="networks" value="' + data.networks[i] + '">' + data.networks[i] + '</input><br>';
-        }
-
-        $("#Ranges").html(ranges);
-        $("#Sites").html(sites);
-        $("#Vrfs").html(vrfs);
-        $("#Networks").html(networks);
-
+    if (query != ''){
+        $.ajax({
+            type: "POST",
+            url:  location.href,
+            data: query,
+            dataType: 'json',
+            success: function(data){
+                var ranges = '';
+                ranges += '<h3>Ranges</h3>';
+                    for (var i = 0; i <(data.ranges[0].length); i++){
+                        ranges += '<a href="/dhcp/range/' + data.ranges[1][i]
+                        +'/">' + data.ranges[0][i] + '</a><br>';
+                    }
+                    ranges += '</select>';
+                var sites = '';
+                    for (var i = 0; i <(data.sites.length); i++){
+                        sites += '<input type="checkbox" name="sites" id="sites" value="'
+                        + data.sites[i] + '">' + data.sites[i] + '</input><br>';
+                    }
+                var vrfs = '';
+                    for (var i = 0; i <(data.vrfs.length); i++){
+                        vrfs += '<input type="checkbox" name="vrfs" id="vrfs" value="'
+                        + data.vrfs[i] + '">' + data.vrfs[i] + '</input><br>';
+                    }
+                var networks = '';
+                    for (var i = 0; i <(data.networks.length); i++){
+                            networks += '<input type="checkbox" name="networks" id="networks" value="'
+                            + data.networks[i] + '">' + data.networks[i] + '</input><br>';
+                    }
+                $("#Ranges").html(ranges);
+                $("#Sites").html(sites);
+                $("#Vrfs").html(vrfs);
+                $("#Networks").html(networks);
+            }
+        });
+        return false;
     }
-    });
-    return false;
 }
 </script>
 
