@@ -24,49 +24,77 @@ Installation
 
 ###Dependencies (virtualenv recommended)
 
-######Fedora
+####Linux packages
+
+- Fedora:
 
 ```
 sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel python-pip community-mysql
 sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems
-sudo pip install django_cas
 sudo systemctl start mysqld
 ```
 
-######Debian
+- Debian:
+
+<!-- TODO: add MySQL, pip, etc. -->
 
 ```
 sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev
 ```
 
+####Miscellaneous
+
+```
+sudo pip install django_cas
+```
+
 ###Setup
+
+- Clone the repo:
+
+```
+git clone 'git@github.com:OSU-Net/cyder.git'
+cd cyder
+```
+
+- Install submodules and other dependencies and set up files:
 
 ```
 git submodule update --init --recursive
 pip install -r requirements/dev.txt
-```
-
-Set up MySQL along with tables and data. Enter local database settings into
-cyder/settings/local.py. Use settings_test.py when running tests.
-
-```
 cp cyder/settings/local.py-dist cyder/settings/local.py
 cp cyder/settings_test.py-dist cyder/settings_test.py
+```
+
+(Use settings_test.py when running tests.)
+
+- Set up MySQL along with tables and data. Enter local database settings into `cyder/settings/local.py`.
+
+- Sync and migrate the database:
+
+<!-- clarify "migrate" -->
+
+```
 python manage.py syncdb
 python manage.py migrate
 ```
 
-Set up Sass CSS with Django. Pull jingo-minify for Django Sass support. We
-point our settings file towards the location of the Sass binary.
+
+- Pull jingo-minify for Django Sass support, and set up Sass CSS with Django:
 
 ```
 cd vendor/src/jingo-minify && git pull origin master && cd -
 sudo apt-get install rubygems
 sudo gem install sass
+```
+
+- Point our settings file towards the location of the Sass binary:
+
+```
 sed -i 's/SASS_BIN = \'.*\'/SASS_BIN = \'$(echo which sass)\'/' cyder/settings/local.py
 ```
 
-Install a PEP8 linter as a git pre-commit hook.
+- Install a PEP8 linter as a git pre-commit hook:
 
 ```
 git clone git@github.com:jbalogh/check && cd check
