@@ -39,7 +39,7 @@ sudo systemctl start mysqld
 <!-- TODO: add MySQL, pip, etc. -->
 
 ```
-sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev
+sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev rubygems
 ```
 
 ####Miscellaneous
@@ -84,14 +84,13 @@ python manage.py migrate
 
 ```
 cd vendor/src/jingo-minify && git pull origin master && cd -
-sudo apt-get install rubygems
 sudo gem install sass
 ```
 
 - Point our settings file towards the location of the Sass binary:
 
 ```
-sed -i 's/SASS_BIN = \'.*\'/SASS_BIN = \'$(echo which sass)\'/' cyder/settings/local.py
+sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
 ```
 
 - Install a PEP8 linter as a git pre-commit hook:
