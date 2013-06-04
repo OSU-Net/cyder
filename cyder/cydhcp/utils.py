@@ -166,10 +166,6 @@ def join_dhcp_args(opts, depth=1):
     return "".join("\t" * depth + "{0};\n".format(o) for o in opts)
 
 
-def format_mac(mac):
-    return ":".join([mac[i:i+2] for i in xrange(0, len(mac), 2)])
-
-
 def find_network_for_range(start, end,):
     from cyder.cydhcp.network.models import Network
     for network in Network.objects.all():

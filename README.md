@@ -22,23 +22,12 @@ data models have been designed-to-spec using the RFCs.
 Installation
 ============
 
-###Dependencies (virtualenv recommended)
+Install dependencies. (virtualenv recommended)
 
-######Fedora
-
-```
-sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel
-```
-
-######Debian
+#TODO sudo yum install openldap-devel on fedora
 
 ```
 sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev
-```
-
-###Setup
-
-```
 git submodule update --init --recursive
 pip install -r requirements/dev.txt
 ```

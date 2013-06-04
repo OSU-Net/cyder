@@ -237,8 +237,8 @@ class Domain(models.Model, ObjectUrlMixin):
             *   When you save an Ip it is automatically assigned the most
                 appropriate reverse_domain
 
-        Passing the update_reverse_domain as False will bypass the Ip
-        class's attempt to find an appropriate reverse_domain. This way
+        Passing the update_reverse_domain as False will by pass the Ip's
+        class attempt to find an appropriate reverse_domain. This way
         you can reassign the reverse_domain of an Ip, save it, and then
         delete the old reverse_domain.
         """

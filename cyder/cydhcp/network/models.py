@@ -34,7 +34,7 @@ class Network(models.Model, ObjectUrlMixin):
         help_text="The network address of this network.")
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
-    enabled = models.BooleanField(default=True)
+
     dhcpd_raw_include = models.TextField(
         null=True, blank=True,
         help_text="The config options in this box will be included "
