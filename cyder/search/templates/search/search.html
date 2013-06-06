@@ -51,7 +51,7 @@
     <div id='search-results'>
       {% for table in tables %}
         {% if table[0] %}
-          <h3 name="{{ table[1] }}">{{ table[2] }}</h3>
+          <h3 name="{{ table[1] }}" id="{{ table[1] }}">{{ table[2] }}</h3>
           {{ render_table(request, table[0]) }}
         {% endif %}
       {% endfor %}
