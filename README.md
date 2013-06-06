@@ -30,7 +30,7 @@ Installation
 
 ```
 sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel python-pip community-mysql
-sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems
+sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems bind
 sudo systemctl start mysqld
 ```
 
