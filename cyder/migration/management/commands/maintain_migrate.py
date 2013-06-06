@@ -26,9 +26,9 @@ def build_dns():
     try:
         b.build_dns()
     except BuildError as why:
-        b.log('LOG_ERR', why)
+        b.log(why, 'LOG_ERR')
     except Exception as err:
-        b.log('LOG_CRIT', err)
+        b.log(err, 'LOG_CRIT')
         raise
 
 
