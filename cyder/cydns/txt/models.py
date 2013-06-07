@@ -19,6 +19,21 @@ class TXT(CydnsRecord, LabelDomainMixin):
 
     search_fields = ("fqdn", "txt_data")
 
+    class Meta:
+        db_table = "txt"
+        # unique_together = ("domain", "label", "txt_data")
+        # TODO
+        # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
+        # "txt_data" used in key specification without a key length")
+        # Fix that ^
+
+    def details(self):
+        return (
+            ("FQDN", self.fqdn),
+            ("Record Type", "TXT"),
+            ("Text", self.txt_data)
+        )
+
     template = ("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                 "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
 
@@ -49,19 +64,4 @@ class TXT(CydnsRecord, LabelDomainMixin):
         return template.format(
             bind_name=bind_name, ttl=self.ttl, rdtype=self.rdtype,
             rdclass='IN', txt_data=txt_data
-        )
-
-    class Meta:
-        db_table = "txt"
-        # unique_together = ("domain", "label", "txt_data")
-        # TODO
-        # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
-        # "txt_data" used in key specification without a key length")
-        # Fix that ^
-
-    def details(self):
-        return (
-            ("FQDN", self.fqdn),
-            ("Record Type", "TXT"),
-            ("Text", self.txt_data)
         )
