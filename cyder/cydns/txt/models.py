@@ -2,8 +2,8 @@ from string import Template
 
 from django.db import models
 
-from cydns.models import CydnsRecord, LabelDomainMixin
-from cydns.validation import validate_txt_data
+from cyder.cydns.models import CydnsRecord, LabelDomainMixin
+from cyder.cydns.validation import validate_txt_data
 
 
 class TXT(CydnsRecord, LabelDomainMixin):
