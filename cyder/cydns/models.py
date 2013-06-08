@@ -44,8 +44,7 @@ class LabelDomainMixin(models.Model):
         help_text="Short name of the fqdn"
     )
     fqdn = models.CharField(
-        max_length=255, blank=True, validators=[validate_name],
-        db_index=True
+        max_length=255, blank=True, validators=[validate_name], db_index=True
     )
 
     class Meta:
