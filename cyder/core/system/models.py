@@ -7,7 +7,8 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 
 class System(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=255, unique=False)
-    department = models.CharField(max_length=255, unique=False)
+    department = models.CharField(max_length=255, unique=False,
+                                  blank=True, null=True)
     location = models.CharField(max_length=255, unique=False,
                                 blank=True, null=True)
 
