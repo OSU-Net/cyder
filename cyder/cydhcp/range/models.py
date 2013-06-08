@@ -62,12 +62,12 @@ class Range(models.Model, ObjectUrlMixin):
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS.items(),
-                             null=True, blank=True)
+                             blank=True)
     deny = models.CharField(max_length=20, choices=DENY_OPTIONS.items(),
-                            null=True, blank=True)
+                            blank=True)
 
     attrs = None
-    dhcpd_raw_include = models.TextField(null=True, blank=True)
+    dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
                                   default=STATIC, editable=False)
