@@ -59,7 +59,7 @@ class DeleteStaticInterTests(TestCase):
         label = "foo"
         domain = self.f_c
         ip_str = "10.0.0.2"
-        system = System()
+        system = System(name='test1_delete_basic')
         system.save()
         kwargs = {'mac': mac, 'label': label, 'domain': domain, 'ip_str':
                   ip_str, 'system': system}
