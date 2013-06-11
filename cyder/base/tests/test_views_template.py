@@ -21,6 +21,7 @@ class GenericViewTests(object):
     """
     def get_tests(self):
         return (
+            self.test_filter(),
             self.test_list_get(),
             self.test_create_post_guest(),
             self.test_create_post_user(),
@@ -128,6 +129,15 @@ class GenericViewTests(object):
             else:
                 eq_(self.test_class.objects.count(), count)
         return do_delete
+
+    def test_filter(self):
+        def test_filter(self, username='test_superuser'):
+            url = self.test_class.get_list_url()
+            query = random_label()
+            url = "{0}?filter={1}".format(url, query)
+            resp = self.client.get(url, follow=True)
+            self.assertEqual(resp.status_code, 200)
+        return test_filter
 
     def test_list_get(self):
         """List view."""
