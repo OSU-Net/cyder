@@ -75,7 +75,6 @@ class PTRTests(cyder.base.tests.TestCase):
             "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.5.0.1.0.0.2.6.8.ip6.arpa.",
             ret.dns_name())
 
-
     def do_generic_invalid_add(self, ip, fqdn, ip_type, exception, domain=None):
         # LOL, looks like I didn't know about assertRaises!
         e = None
@@ -144,11 +143,15 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_add(bad_ip, "foo.bar.oregonstate.edu", '6')
         self.do_generic_invalid_add(
             bad_ip, "foo.bar.oregonstate.edu", '6', ValidationError)
-        self.do_generic_invalid_add(self.osu_block + ":0:0:0233", "foo.bar.oregonstate.edu", '6', ValidationError)
+        self.do_generic_invalid_add(self.osu_block + ":0:0:0233",
+                                    "foo.bar.oregonstate.edu", '6',
+                                    ValidationError)
 
-        self.do_generic_add(
-            self.osu_block + ":dd", "foo.bar.oregondfastate.com", '6')
-        self.do_generic_invalid_add(self.osu_block + ":dd", "foo.bar.oregondfastate.com", '6', ValidationError)
+        self.do_generic_add(self.osu_block + ":dd",
+                            "foo.bar.oregondfastate.com", '6')
+        self.do_generic_invalid_add(self.osu_block + ":dd",
+                                    "foo.bar.oregondfastate.com", '6',
+                                    ValidationError)
 
     def test_add_invalid_ip_ipv4_ptr(self):
         test_name = "testyfoo.com"
@@ -194,7 +197,8 @@ class PTRTests(cyder.base.tests.TestCase):
 
         ip = Ip(ip_str=ip, ip_type=ip_type)
         ip.clean_ip()
-        ptr = PTR.objects.filter(name=fqdn, ip_upper=ip.ip_upper, ip_lower=ip.ip_lower)
+        ptr = PTR.objects.filter(name=fqdn, ip_upper=ip.ip_upper,
+                                 ip_lower=ip.ip_lower)
         self.assertFalse(ptr)
 
     def test_remove_ipv4(self):
@@ -237,15 +241,15 @@ class PTRTests(cyder.base.tests.TestCase):
         fqdn = "asffad124jfasf-oregonstate.edu"
         self.do_generic_remove(ip, fqdn, '6')
 
-
     def do_generic_update(self, ptr, new_fqdn, ip_type):
         ptr.name = new_fqdn
         ptr.full_clean()
         ptr.save()
 
-        ptr = PTR.objects.filter(name=new_fqdn, ip_upper=ptr.ip_upper, ip_lower=ptr.ip_lower)
+        ptr = PTR.objects.filter(name=new_fqdn, ip_upper=ptr.ip_upper,
+                                 ip_lower=ptr.ip_lower)
         self.assertTrue(ptr)
-        self.assertEqual( new_fqdn,ptr[0].name )
+        self.assertEqual(new_fqdn, ptr[0].name)
 
     def test_update_ipv4(self):
         ptr = self.do_generic_add("128.193.1.1", "oregonstate.edu", '4')
