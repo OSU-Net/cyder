@@ -131,7 +131,7 @@ class GenericViewTests(object):
         return do_delete
 
     def test_filter(self):
-        def test_filter(self, username='test_superuser'):
+        def test_filter(self):
             url = self.test_class.get_list_url()
             query = random_label()
             url = "{0}?filter={1}".format(url, query)
