@@ -19,6 +19,8 @@ class Ctnr(models.Model, ObjectUrlMixin):
     description = models.CharField(max_length=200, blank=True)
     email_contact = models.EmailField(blank=True, null=True)
 
+    search_fields = ('name', 'description')
+
     class Meta:
         db_table = 'ctnr'
 
