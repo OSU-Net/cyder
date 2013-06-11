@@ -22,7 +22,7 @@ data models have been designed-to-spec using the RFCs.
 Installation
 ============
 
-###Dependencies (virtualenv recommended)
+###Dependencies
 
 ####Linux packages
 
@@ -57,6 +57,14 @@ git clone 'git@github.com:OSU-Net/cyder.git'
 cd cyder
 ```
 
+- Set up virtualenv (optional):
+
+```
+virtualenv --distribute .
+```
+
+Do `source bin/activate` now and every time you run your shell.
+
 - Install submodules and other dependencies and set up files:
 
 ```
@@ -66,19 +74,18 @@ cp cyder/settings/local.py-dist cyder/settings/local.py
 cp cyder/settings_test.py-dist cyder/settings_test.py
 ```
 
+<!-- cyder/settings_test.py-dist should be settings_test.py-dist, but where should settings_test.py go? -->
+
 (Use settings_test.py when running tests.)
 
 - Set up MySQL along with tables and data. Enter local database settings into `cyder/settings/local.py`.
 
-- Sync and migrate the database:
-
-<!-- clarify "migrate" -->
+- Sync the database and run migrations:
 
 ```
 python manage.py syncdb
 python manage.py migrate
 ```
-
 
 - Pull jingo-minify for Django Sass support, and set up Sass CSS with Django:
 
