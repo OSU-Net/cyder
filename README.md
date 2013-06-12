@@ -46,6 +46,7 @@ sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev rubygems
 
 ```
 sudo pip install django_cas
+sudo gem install sass
 ```
 
 ###Setup
@@ -57,7 +58,7 @@ git clone 'git@github.com:OSU-Net/cyder.git'
 cd cyder
 ```
 
-- Set up virtualenv (optional):
+- Set up virtualenv (recommended):
 
 ```
 virtualenv --distribute .
@@ -65,39 +66,29 @@ virtualenv --distribute .
 
 Do `source bin/activate` now and every time you run your shell.
 
-- Install submodules and other dependencies and set up files:
+- Install submodules and other dependencies:
 
 ```
 git submodule update --init --recursive
 pip install -r requirements/dev.txt
+cd vendor/src/jingo-minify && git pull origin master && cd -
+```
+- Set up settings
+
+```
 cp cyder/settings/local.py-dist cyder/settings/local.py
-cp cyder/settings_test.py-dist cyder/settings_test.py
+sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
 ```
 
-<!-- cyder/settings_test.py-dist should be settings_test.py-dist, but where should settings_test.py go? -->
+<!-- If you want to use setting_test.py-dist, figure it out yourself. -->
 
-(Use settings_test.py when running tests.)
-
-- Set up MySQL along with tables and data. Enter local database settings into `cyder/settings/local.py`.
+- Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
 
 - Sync the database and run migrations:
 
 ```
 python manage.py syncdb
 python manage.py migrate
-```
-
-- Pull jingo-minify for Django Sass support, and set up Sass CSS with Django:
-
-```
-cd vendor/src/jingo-minify && git pull origin master && cd -
-sudo gem install sass
-```
-
-- Point our settings file towards the location of the Sass binary:
-
-```
-sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
 ```
 
 - Install a PEP8 linter as a git pre-commit hook:
