@@ -30,8 +30,8 @@ DATABASES = {
         'PORT': '',
         'OPTIONS': {
             'init_command': 'SET storage_engine=InnoDB',
-            'charset' : 'utf8',
-            'use_unicode' : True,
+            'charset': 'utf8',
+            'use_unicode': True,
         },
         'TEST_CHARSET': 'utf8',
         'TEST_COLLATION': 'utf8_general_ci',
@@ -45,7 +45,7 @@ SECRET_KEY = ''
 
 SERVICES_URL = SITE_URL = STATIC_URL = 'http://localhost:8000/'
 
-API_ACCESS = ('GET','POST','PUT','DELETE')
+API_ACCESS = ('GET', 'POST', 'PUT', 'DELETE')
 SCRIPT_URL = 'https://localhost.com'
 DESKTOP_EMAIL_ADDRESS = 'desktop@example.com'
 FROM_EMAIL_ADDRESS = 'inventory@example.com'

@@ -72,8 +72,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             self.g_o_e = Domain(name='george.oregonstate.edu')
             self.g_o_e.save()
         except IntegrityError:
-            self.g_o_e = Domain.objects.filter(
-                                        name='george.oregonstate.edu')[0]
+            self.g_o_e = Domain.objects.filter(name=
+                                               'george.oregonstate.edu')[0]
             pass
 
         try:
@@ -200,9 +200,9 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         rec2.save()
 
         rec3 = AddressRecord(
-                label='0123456780123456780123456780123456780123456789999901'
-                      '234567891',
-                domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
+            label='0123456780123456780123456780123456780123456789999901'
+                  '234567891',
+            domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
         rec3.save()
 
         self.do_update_A_record(rec0, "whooooop1", "128.193.23.1")
@@ -211,7 +211,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.do_update_A_record(rec2, "whsdflhjsafdohaosdfhsadooooop1",
                                 "128.193.23.4")
         self.do_update_A_record(rec3,
-                "wasdflsadhfaoshfuoiwehfjsdkfavbhooooop1", "128.193.23.3")
+                                "wasdflsadhfaoshfuoiwehfjsdkfavbhooooop1",
+                                "128.193.23.3")
         self.do_update_A_record(rec0, "liaslfdjsa8df09823hsdljf-whooooop1",
                                 "128.193.25.17")
         self.do_update_A_record(rec1, "w", "128.193.29.83")
@@ -255,23 +256,27 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.assertRaises(ValidationError, self.do_update_A_record,
                           **{'record': rec1, 'new_name': ".", "new_ip": None})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': " sdfsa ", "new_ip": None})
+                          **{'record': rec0, 'new_name': " sdfsa ",
+                             "new_ip": None})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': "asdf.", "new_ip": None})
+                          **{'record': rec0, 'new_name': "asdf.",
+                             "new_ip": None})
 
         # BAD IPs
         self.assertRaises(ValidationError, self.do_update_A_record, **{
                           'record': rec0, 'new_name': None, "new_ip": 71134})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': None, "new_ip":
-                    "19.193.23.1.2"})
+                          **{'record': rec0, 'new_name': None,
+                             "new_ip": "19.193.23.1.2"})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': None, "new_ip": 12314123})
+                          **{'record': rec0, 'new_name': None,
+                             "new_ip": 12314123})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': "narf", "new_ip": 1214123})
+                          **{'record': rec0, 'new_name': "narf",
+                             "new_ip": 1214123})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': "%asdfsaf", "new_ip":
-                    "1928.193.23.1"})
+                          **{'record': rec0, 'new_name': "%asdfsaf",
+                             "new_ip": "1928.193.23.1"})
         self.assertRaises(ValidationError, self.do_update_A_record,
                 **{'record': rec0, 'new_name': None, "new_ip":
                     "1928.193.23.1"})

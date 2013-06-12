@@ -22,7 +22,7 @@ do
         # mozilla.com-common
         # mozilla.org-common
         # mozilla.office-common
-        # 
+        #
         continue
     fi
 

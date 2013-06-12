@@ -7,18 +7,17 @@ import unittest
 
 from unittest import TestCase
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    os.pardir)))
+                                os.pardir)))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    os.pardir, os.pardir)))
+                                os.pardir, os.pardir)))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    os.pardir, os.pardir, os.pardir)))
+                                os.pardir, os.pardir, os.pardir)))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.base'
 
 #import manage
 
 from cydns.cybind.builder import DNSBuilder, BuildError
 from cydns.soa.models import SOA
-
 
 
 class BuildScriptTests(object):
