@@ -65,7 +65,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     # The time when the slave will try to refresh the zone from the master
     refresh = models.PositiveIntegerField(null=False, default=DEFAULT_REFRESH)
     minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM)
-    description = models.CharField(max_length=200, null=True, blank=True)
+    description = models.CharField(max_length=200, blank=True)
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)

@@ -40,12 +40,11 @@ class LabelDomainMixin(models.Model):
     # "The length of any one label is limited to between 1 and 63 octets."
     # -- RFC218
     label = models.CharField(
-        max_length=63, blank=True, null=True,
-        validators=[validate_first_label], help_text="Short name of the fqdn"
+        max_length=63, blank=True, validators=[validate_first_label],
+        help_text="Short name of the fqdn"
     )
     fqdn = models.CharField(
-        max_length=255, blank=True, null=True, validators=[validate_name],
-        db_index=True
+        max_length=255, blank=True, validators=[validate_name], db_index=True
     )
 
     class Meta:
@@ -95,7 +94,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
                                       help_text="Time to Live of this record")
-    description = models.CharField(max_length=1000, blank=True, null=True,
+    description = models.CharField(max_length=1000, blank=True,
                                    help_text="A description of this record.")
 
     class Meta:

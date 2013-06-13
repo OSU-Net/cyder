@@ -16,17 +16,16 @@ class SRV(CydnsRecord):
     ... priority=priority, weight=weight, ttl=ttl)
     """
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=63, blank=True, null=True,
+    label = models.CharField(max_length=63, blank=True,
                              validators=[validate_srv_label],
                              help_text="Short name of the fqdn")
     domain = models.ForeignKey(Domain, null=False)
-    fqdn = models.CharField(max_length=255, blank=True, null=True,
+    fqdn = models.CharField(max_length=255, blank=True,
                             validators=[validate_srv_name])
     # fqdn = label + domain.name <--- see set_fqdn
 
     target = models.CharField(max_length=100,
-                              validators=[validate_srv_target], blank=True,
-                              null=True)
+                              validators=[validate_srv_target], blank=True)
 
     port = models.PositiveIntegerField(null=False,
                                        validators=[validate_srv_port])
