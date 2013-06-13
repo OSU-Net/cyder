@@ -538,3 +538,9 @@ def validate_view(view, ip_str, ip_type):
         raise ValidationError(
                 "{0} is a private IP address. You cannot put a record that "
                 "contains private data into a public view.")
+
+def validate_txt_data(data):
+    if data.find('"') > -1:
+        raise ValidationError(
+            "Don't put quotes in TXT data."
+        )
