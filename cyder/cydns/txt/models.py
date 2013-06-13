@@ -20,7 +20,7 @@ class TXT(CydnsRecord, LabelDomainMixin):
     search_fields = ("fqdn", "txt_data")
 
     class Meta:
-        db_table = "txt"
+        db_table = 'txt'
         # unique_together = ("domain", "label", "txt_data")
         # TODO
         # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
@@ -28,11 +28,20 @@ class TXT(CydnsRecord, LabelDomainMixin):
         # Fix that ^
 
     def details(self):
-        return (
-            ("FQDN", self.fqdn),
-            ("Record Type", "TXT"),
-            ("Text", self.txt_data)
-        )
+        """For tables."""
+        data = super(TXT, self).details()
+        data['data'] = [
+            ('Domain', 'domain__name', self.domain),
+            ('Text', 'txt_data', self.txt_data)
+        ]
+        return data
+
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'txt_data', 'datatype': 'string', 'editable': True},
+        ]}
 
     template = ("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                 "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
