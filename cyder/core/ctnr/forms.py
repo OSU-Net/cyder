@@ -7,7 +7,7 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 class CtnrForm(forms.ModelForm):
     class Meta:
         model = Ctnr
-
+        exclude = ('users',)
 
 class CtnrUserForm(forms.ModelForm):
     level = forms.ChoiceField(widget=forms.RadioSelect,
