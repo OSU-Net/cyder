@@ -61,10 +61,10 @@ cd cyder
 - Set up virtualenv (recommended):
 
 ```
-virtualenv --distribute .
+virtualenv --distribute .env
 ```
 
-Do `source bin/activate` now and every time you run your shell.
+Do `source .env/bin/activate` now and every time you run your shell.
 
 - Install submodules and other dependencies:
 
