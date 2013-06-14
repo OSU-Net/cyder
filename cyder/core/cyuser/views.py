@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.db.models import Q
+from django.conf import settings
 
 from cyder.base.utils import tablefy
 from cyder.base.utils import make_megafilter
@@ -22,7 +23,8 @@ def login_session(request, username):
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
     except User.DoesNotExist:
-        messages.error(request, "User %s does not exist" % (username))
+        if not settings.TESTING:
+            messages.error(request, "User %s does not exist" % (username))
         return request
 
     try:
@@ -103,7 +105,8 @@ def become_user(request, username=None):
     if str(request.user) == username:
         request.session['become_user_stack'] = become_user_stack
 
-    messages.error(request, "You are now logged in as %s" % username)
+    if not settings.TESTING:
+        messages.error(request, "You are now logged in as %s" % username)
     return redirect(referer)
 
 
