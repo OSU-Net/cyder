@@ -39,15 +39,10 @@ class Site(models.Model, ObjectUrlMixin):
         ]}
 
     def get_full_name(self):
-        full_name = self.name
-        target = self
-        while True:
-            if target.parent is None:
-                break
-            else:
-                full_name = target.parent.name + " " + target.name
-                target = target.parent
-        return full_name.title()
+        if self.parent is not None:
+            return (self.parent.get_full_name() + " " + self.name).title()
+        else:
+            return self.name.title()
 
     def get_site_path(self):
         full_name = self.name
