@@ -9,12 +9,12 @@ import ipaddr
 
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.network.forms import *
-from cyder.cydhcp.network.utils import *
+from cyder.cydhcp.network.utils import get_ranges, get_vrfs, pretty_networks
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.site.utils import *
+from cyder.cydhcp.site.utils import pretty_sites
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.vrf.utils import *
+from cyder.cydhcp.vrf.utils import pretty_vrfs
 from cyder.cydhcp.range.utils import pretty_ranges
 from cyder.cydns.ip.models import ipv6_to_longs
 
@@ -30,26 +30,26 @@ def test_wizard(request):
         if action == "#network_form":
             form = NetworkForm_network(confirmed)
             if form.is_valid():
-                return HttpResponse(json.dumps({'action':'#site_form'}),
+                return HttpResponse(json.dumps({'action': '#site_form'}),
                                     mimetype="application/json")
             return HttpResponse(json.dumps({'action': '#network_form',
-                                            'form':form.as_p()}),
+                                            'form': form.as_p()}),
                                 mimetype="application/json")
         elif action == "#site_form":
             form = NetworkForm_site(confirmed)
             if form.is_valid():
-                return HttpResponse(json.dumps({'action':'#vlan_form'}),
+                return HttpResponse(json.dumps({'action': '#vlan_form'}),
                                     mimetype="application/json")
             return HttpResponse(json.dumps({'action': '#site_form',
-                                            'form':form.as_p()}),
+                                            'form': form.as_p()}),
                                 mimetype="application/json")
         elif action == "#vlan_form":
             form = NetworkForm_vlan(confirmed)
             if form.is_valid():
-                return HttpResponse(json.dumps({'action':'#poop_form'}),
+                return HttpResponse(json.dumps({'action': '#poop_form'}),
                                     mimetype="application/json")
             return HttpResponse(json.dumps({'action': '#vlan_form',
-                                            'form':form.as_p()}),
+                                            'form': form.as_p()}),
                                 mimetype="application/json")
     net_form = NetworkForm_network()
     site_form = NetworkForm_site()

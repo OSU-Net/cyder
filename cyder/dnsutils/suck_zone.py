@@ -1,20 +1,15 @@
-from cyder.truth.models import Truth
+from django.conf import settings
 
+from cyder.truth.models import Truth
 from cyder.dnsutils.inventory_build import inventory_build_sites
 from cyder.dnsutils.svn_build import collect_svn_zones, collect_rev_svn_zones
 from cyder.dnsutils.svn_build import get_forward_svn_sites_changed
 from cyder.dnsutils.svn_build import get_reverse_svn_sites_changed
 from cyder.dnsutils.build_nics import *
 from cyder.dnsutils.utils import *
-import ipaddr
 from cyder.core.system.models import ScheduledTask
-from django.conf import settings
-from django.conf import settings
-from django.conf import settings
-from django.conf import settings
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -28,6 +23,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.domain.utils import *
 from cyder.cydns.ip.utils import ip_to_domain_name
 
+import ipaddr
 import os.path
 import pprint
 import re
@@ -116,7 +112,8 @@ def populate_interface():
                              print_system(nic.system)), ERROR)
             misses.append(nic)
         else:
-            log("SUCCESS: Guess Interface:{0} AddressRecord:{1} PTR:{2}".format(intr, addr, ptr))
+            log(("SUCCESS: Guess Interface:{0} AddressRecord:{1}"
+                 + "PTR:{2}").format(intr, addr, ptr))
             matches.append((nic, intr, addr, ptr))
 
     log("-+" * 80)
@@ -154,12 +151,11 @@ def populate_reverse_dns(rev_svn_zones):
 
         for (name, ttl, rdata) in zone.iterate_rdatas('SOA'):
             print str(name) + " SOA " + str(rdata)
-            exists = SOA.objects.filter(minimum=rdata.minimum,
-                                        contact=rdata.rname.to_text(
-                                        ).strip('.'),
-                                        primary=rdata.mname.to_text(
-                                        ).strip('.'),
-                                        comment="SOA for {0}.in-addr.arpa".format(site))
+            exists = SOA.objects.filter(
+                minimum=rdata.minimum,
+                contact=rdata.rname.to_text().strip('.'),
+                primary=rdata.mname.to_text().strip('.'),
+                comment="SOA for {0}.in-addr.arpa".format(site))
             if exists:
                 soa = exists[0]
             else:
@@ -186,8 +182,8 @@ def populate_reverse_dns(rev_svn_zones):
             print str(name) + " NS " + str(rdata)
             domain_name = '.'.join(list(reversed(name.split('.'))))
             domain = ensure_rev_domain(domain_name)
-            ns, _ = Nameserver.objects.get_or_create(domain=domain,
-                                                     server=rdata.target.to_text().strip('.'))
+            ns, _ = Nameserver.objects.get_or_create(
+                domain=domain, server=rdata.target.to_text().strip('.'))
         for (name, ttl, rdata) in zone.iterate_rdatas('PTR'):
             ip_str = name.to_text().strip('.')
             ip_str = ip_str.replace('.IN-ADDR.ARPA', '')
@@ -256,25 +252,25 @@ def populate_forward_dns(svn_zones):
 
         for (name, ttl, rdata) in zone.iterate_rdatas('SOA'):
             print str(name) + " SOA " + str(rdata)
-            exists = SOA.objects.filter(minimum=rdata.minimum,
-                                        contact=rdata.rname.to_text(
-                                        ).strip('.'),
-                                        primary=rdata.mname.to_text().strip('.'), comment="SOA for"
-                                        " {0}.mozilla.com".format(site))
+            exists = SOA.objects.filter(
+                minimum=rdata.minimum,
+                contact=rdata.rname.to_text().strip('.'),
+                primary=rdata.mname.to_text().strip('.'),
+                comment="SOA for {0}.mozilla.com".format(site))
             if exists:
                 soa = exists[0]
             else:
                 soa = SOA(serial=rdata.serial, minimum=rdata.minimum,
                           contact=rdata.rname.to_text().strip('.'),
-                          primary=rdata.mname.to_text().strip('.'), comment="SOA for"
-                          " {0}.mozilla.com".format(site))
+                          primary=rdata.mname.to_text().strip('.'),
+                          comment="SOA for {0}.mozilla.com".format(site))
                 soa.clean()
                 soa.save()
             domain_split = list(reversed(name.to_text().strip('.').split('.')))
             for i in range(len(domain_split)):
                 domain_name = domain_split[:i + 1]
-                base_domain, created = Domain.objects.get_or_create(name=
-                                                                    '.'.join(list(reversed(domain_name))))
+                base_domain, created = Domain.objects.get_or_create(
+                    name='.'.join(list(reversed(domain_name))))
             base_domain.soa = soa
             base_domain.save()
 
@@ -298,8 +294,9 @@ def populate_forward_dns(svn_zones):
         names = []
         for (name, ttl, rdata) in zone.iterate_rdatas('A'):
             names.append((name.to_text().strip('.'), rdata))
-        sorted_names = list(sorted(names, cmp=lambda n1, n2: -1 if
-                                   len(n1[0].split('.')) > len(n2[0].split('.')) else 1))
+        sorted_names = list(sorted(
+            names, cmp=lambda n1, n2: -1
+            if len(n1[0].split('.')) > len(n2[0].split('.')) else 1))
 
         for name, rdata in sorted_names:
             print str(name) + " A " + str(rdata)
@@ -320,15 +317,16 @@ def populate_forward_dns(svn_zones):
                                                                    domain_name)
                     if domain.master_domain and domain.master_domain.soa:
                         domain.soa = domain.master_domain.soa
-            a, _ = AddressRecord.objects.get_or_create(label=label,
-                                                       domain=domain, ip_str=rdata.to_text(), ip_type='4')
+            a, _ = AddressRecord.objects.get_or_create(
+                label=label, domain=domain, ip_str=rdata.to_text(),
+                ip_type='4')
 
         for (name, ttl, rdata) in zone.iterate_rdatas('NS'):
             name = name.to_text().strip('.')
             print str(name) + " NS " + str(rdata)
             domain = ensure_domain(name)
-            ns, _ = Nameserver.objects.get_or_create(domain=domain,
-                                                     server=rdata.target.to_text().strip('.'))
+            ns, _ = Nameserver.objects.get_or_create(
+                domain=domain, server=rdata.target.to_text().strip('.'))
         for (name, ttl, rdata) in zone.iterate_rdatas('MX'):
             name = name.to_text().strip('.')
             print str(name) + " MX " + str(rdata)
@@ -342,8 +340,9 @@ def populate_forward_dns(svn_zones):
                 domain = ensure_domain(domain_name)
             priority = rdata.preference
             server = rdata.exchange.to_text().strip('.')
-            mx, _ = MX.objects.get_or_create(label=label, domain=domain,
-                                             server=server, priority=priority, ttl="3600")
+            mx, _ = MX.objects.get_or_create(
+                label=label, domain=domain, server=server, priority=priority,
+                ttl="3600")
         for (name, ttl, rdata) in zone.iterate_rdatas('CNAME'):
             name = name.to_text().strip('.')
             print str(name) + " CNAME " + str(rdata)
@@ -411,8 +410,8 @@ def build_reverse(sites_to_build, inv_reverse, rev_svn_zones):
     final_records = {}
     for network, interfaces in inv_reverse.items():
         network_path, svn_entries = rev_svn_zones[network]
-        network_path, inv_entries = final_records.setdefault(network,
-                                                             (network_path, set()))
+        network_path, inv_entries = final_records.setdefault(
+            network, (network_path, set()))
         # TODO, rename inv_entries to something more descriptive.
         for intr in interfaces:
             name = intr.hostname + "."
@@ -477,7 +476,8 @@ def build_forward(sites_to_build, inv_forward, svn_zones):
                     cdata = dns_data.to_text()
                     # This is madness, but it must be done.
                     if cname == name:
-                        log("'{0}  A {1}' would conflict with '{2}   CNAME {3}', This "
+                        log("'{0}  A {1}' would conflict with"
+                            "'{2}   CNAME {3}', This "
                             "A record will not be included in the build "
                             "output.".format(name, ip, cname, cdata),
                             WARNING)
@@ -499,8 +499,8 @@ def generate_reverse_inventory_data_file(network, records, network_file):
     inventory_file = '{0}.inventory'.format(network_file)
     inv_fd = open(inventory_file, 'w+')
     try:
-        log(";---------- PTR records for {0} (in file {1})\n".format(network,
-                                                                     inventory_file), BUILD)
+        log(";---------- PTR records for {0} (in file {1})\n".format(
+            network, inventory_file), BUILD)
         template = "{dnsip:50} {rclass:10} {rtype:15} {name:7}\n"
         for dnsip, name in records:
             info = {'dnsip': dnsip, 'rclass': "IN", 'rtype':
@@ -516,7 +516,7 @@ def generate_reverse_inventory_data_file(network, records, network_file):
     finally:
         inv_fd.close()
 
-    if DEBUG == True:
+    if DEBUG is True:
         pp.pprint(records)
 
 
@@ -532,8 +532,8 @@ def generate_forward_inventory_data_file(site, records, site_path):
     a_records = [(name, address) for name, address, intr in records]
     a_records = set(a_records)
     try:
-        log(";---------- A records for {0} (in file {1})\n".format(site,
-                                                                   site_path), BUILD)
+        log(";---------- A records for {0} (in file {1})\n".format(
+            site, site_path), BUILD)
         template = "{name:50} {rclass:10} {rtype:15} {address:7}\n"
         for name, address in a_records:
             info = {'name': name, 'rclass': "IN", 'rtype': 'A',
@@ -549,7 +549,7 @@ def generate_forward_inventory_data_file(site, records, site_path):
     finally:
         inv_fd.close()
 
-    if DEBUG == True:
+    if DEBUG is True:
         pp.pprint(records)
 
 
