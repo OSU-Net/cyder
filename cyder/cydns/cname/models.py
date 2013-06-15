@@ -130,7 +130,7 @@ class CNAME(CydnsRecord, LabelDomainMixin):
             raise ValidationError(
                 "Objects with this name already exist: {0}".format(objects)
             )
-        MX = cyder.cydns.mx.models.MX
+        from cyder.cydns.mx.models import MX
         if MX.objects.filter(server=self.fqdn):
             raise ValidationError(
                 "RFC 2181 says you shouldn't point MX records at CNAMEs and "
