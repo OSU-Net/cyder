@@ -55,9 +55,10 @@ def login_session(request, username):
         # Set ctnr list (to switch between).
         global_ctnr = CtnrUser.objects.get(user=request.user, ctnr=1)
         if global_ctnr:
-            request.session['ctnrs'] = (list(Ctnr.objects.filter(Q(id=1)
-                | Q(id=2))) + list(Ctnr.objects.exclude(Q(id=1)
-                | Q(id=2)).order_by("name")))
+            request.session['ctnrs'] = (
+                list(Ctnr.objects.filter(
+                    Q(id=1) | Q(id=2))) + list(Ctnr.objects.exclude(
+                        Q(id=1) | Q(id=2)).order_by("name")))
 
     except CtnrUser.DoesNotExist:
         # Set ctnr list (to switch between).
@@ -112,7 +113,7 @@ def unbecome_user(request):
     referer = request.META.get('HTTP_REFERER', '/')
 
     if ('become_user_stack' in request.session and
-        len(request.session['become_user_stack']) > 0):
+            len(request.session['become_user_stack']) > 0):
         become_user_stack = [user for user in
                              request.session['become_user_stack']]
         username = become_user_stack.pop()
