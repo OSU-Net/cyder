@@ -21,11 +21,11 @@ def system_detail(request, pk):
         dynamic_intr.append((tablefy((intr,)),
                              tablefy(intr.dynamicintrkeyvalue_set.all())))
     return render(request, 'system/system_detail.html', {
-      'system': system,
-      'system_table': tablefy([system]),
-      'attrs_table': tablefy(attrs),
-      'static_intr_tables': static_intr,
-      'dynamic_intr_tables': dynamic_intr,
-      'obj_type': 'system',
-      'obj': system,
+        'system': system,
+        'system_table': tablefy([system]),
+        'attrs_table': tablefy(attrs),
+        'static_intr_tables': static_intr,
+        'dynamic_intr_tables': dynamic_intr,
+        'obj_type': 'system',
+        'obj': system,
     })
