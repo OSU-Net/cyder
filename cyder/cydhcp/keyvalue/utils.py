@@ -52,6 +52,14 @@ def is_ip_list(option_list, ip_type=IP_TYPE_4):
     return list_validator(
         option_list, functools.partial(is_valid_ip, ip_type=ip_type))
 
+def is_bool_and_ip_list(option_list, ip_type=IP_TYPE_4):
+    # FIXME: if option_list was stripped before being stored, strip() on the
+    # next line is not necessary
+    option_list_parts = option_list.strip(' ').split(' ')
+    if is_bool(option_list_parts[0]) and len(option_list_parts) == 2:
+        return is_ip_list(option_list_parts[1], ip_type)
+    else:
+        return is_ip_list(option_list, ip_type)
 
 def is_domain_list(option_list, ip_type=IP_TYPE_4):
     return list_validator(option_list, is_valid_domain)

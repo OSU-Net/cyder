@@ -5,7 +5,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import (is_valid_ip, is_ip_list, is_int32,
                                          is_valid_domain, is_domain_list,
-                                         is_int32_list)
+                                         is_int32_list, is_bool_and_ip_list)
 
 
 class CommonOption(KeyValue, ObjectUrlMixin):
@@ -336,7 +336,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
+            raise ValidationError("The log-servers options {0} "
                                   "are not a valid ip list".format(val))
 
     def _aa_next_server(self):
@@ -390,8 +390,8 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
+        if not is_bool_and_ip_list(val):
+            raise ValidationError("The slp-directory-agent options {0} "
                                   "are not a valid ip list".format(val))
 
     def _aa_slp_scope(self):
