@@ -14,7 +14,8 @@ from cyder.core.cyuser import views as cyuser_views
 # from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', core_index, name='core-index'),
     url(r'^admin/',  include(admin.site.urls)),
     url(r'^core/',   include('cyder.core.urls')),
