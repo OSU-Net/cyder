@@ -123,7 +123,7 @@ def _ensure_include(text, file_type, include_file):
         matches = [re.compile("^\s*\S*\s*IN\s*PTR\s*.*")]  # Match PTR
 
     for raw_line in text.readlines():
-        if done == True:
+        if done is True:
             return_text += raw_line
             continue
 
@@ -206,7 +206,7 @@ def _str_increment_soa(text):
         if isSOA:
             # If we made it here, this should be the serial.
             serial = _lex_word(ll)
-            assert(serial.isdigit() == True)
+            assert(serial.isdigit() is True)
             new_text += raw_line.replace(serial, str(int(serial) + 1))
             done = True
             continue
@@ -216,9 +216,9 @@ def _str_increment_soa(text):
             new_text += raw_line
             continue
 
-        # name        ttl class rr    name-server email-addr  (sn ref ret ex min)
-        # 1           2   3     4     5           6            7  8   9   10 11
-        # Everything up through 6 needs to be on the same line.
+    # name        ttl class rr    name-server email-addr  (sn ref ret ex min)
+    # 1           2   3     4     5           6            7  8   9   10 11
+    # Everything up through 6 needs to be on the same line.
         state = 1
         _lex_word(ll)  # name
         _lex_ws(ll)
@@ -261,7 +261,7 @@ def _str_increment_soa(text):
             # The serial must be on the next line
             continue
 
-        assert(serial.isdigit() == True)
+        assert(serial.isdigit() is True)
         new_text += raw_line.replace(serial, str(int(serial) + 1))
         done = True
 

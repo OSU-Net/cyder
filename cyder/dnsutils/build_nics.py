@@ -60,8 +60,8 @@ class Interface(object):
         pp.pformat(vars(self))
 
     def __str__(self):
-        return "nic.{0}.{1} IP: {2} Hostname: {3}".format(self.primary,
-                                                          self.alias, self.ips, self.hostname)
+        return "nic.{0}.{1} IP: {2} Hostname: {3}".format(
+            self.primary, self.alias, self.ips, self.hostname)
 
     def __repr__(self):
         return "<Interface: {0}>".format(self)
@@ -81,8 +81,8 @@ def build_nic(sub_nic):
         if is_mac_key.match(nic_data.key):
             if intr.mac is not None:
                 log("!" * 20, WARNING)
-                log("nic with more than one mac in system "
-                    "{0} (https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
+                log("nic with more than one mac in system {0} "
+                    "(https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
                     .format(intr.system, intr.system.pk), WARNING)
                 log(pp.pformat(sub_nic), WARNING)
             intr.mac = nic_data.value
@@ -91,8 +91,8 @@ def build_nic(sub_nic):
         if is_hostname_key.match(nic_data.key):
             if intr.hostname is not None:
                 log("!" * 20, WARNING)
-                log("nic with more than one hostname in system "
-                    "{0} (https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
+                log("nic with more than one hostname in system {0} "
+                    "(https://inventory.mozilla.org/en-US/systems/edit/{1}/)"
                     .format(intr.system, intr.system.pk), WARNING)
                 log(pp.pformat(sub_nic), WARNING)
             intr.hostname = nic_data.value
@@ -126,8 +126,8 @@ def build_nic(sub_nic):
                 setattr(intr, tmp.group(1), nic_data.value)
     if intr.hostname is None:
         log("System {0} and nic {1}/{2} hast no hostname key, using hostname "
-            "found on the system.".format(print_system(intr.system), intr.primary,
-            intr.alias), ERROR)
+            "found on the system.".format(print_system(intr.system),
+                                          intr.primary, intr.alias), ERROR)
         intr.hostname = intr.system.hostname
 
     return intr

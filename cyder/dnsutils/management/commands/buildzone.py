@@ -4,7 +4,8 @@ from cyder.dnsutils.dns_build import do_zone_build
 
 class Command(BaseCommand):
     args = ''
-    help = 'Build dns files: ./manage.py buildzone <zone type> <view> <zone_name> <path-to-zone-file>'
+    help = "'Build dns files: ./manage.py buildzone "
+    "<zone type> <view> <zone_name> <path-to-zone-file>'"
 
     def handle(self, *args, **options):
         if len(args) != 4:

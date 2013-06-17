@@ -56,7 +56,8 @@ def build_from_config(configs):
                      ztype, view, relative_path)
 
 
-def migrate_zone(root_domain_name, name_reversed, zone_path, ztype, view, relative_path):
+def migrate_zone(root_domain_name, name_reversed, zone_path, ztype, view,
+                 relative_path):
     if view == "both":
         private, _ = View.objects.get_or_create(name="private")
         public, _ = View.objects.get_or_create(name="public")
@@ -68,8 +69,8 @@ def migrate_zone(root_domain_name, name_reversed, zone_path, ztype, view, relati
     try:
         if ztype == 'r':
             if name_reversed:
-                root_domain_name = '.'.join(reversed(root_domain_name.split('.'))
-                                            ) + ".in-addr.arpa"
+                root_domain_name = '.'.join(reversed(
+                    root_domain_name.split('.'))) + ".in-addr.arpa"
             else:
                 root_domain_name = '.'.join(
                     root_domain_name.split('.')) + ".in-addr.arpa"
@@ -216,17 +217,17 @@ def migrate_PTR(zone, root_domain, soa, views):
 def migrate_soa(zone, root_domain_name):
     for (name, ttl, rdata) in zone.iterate_rdatas('SOA'):
         print str(name) + " SOA " + str(rdata)
-        exists = SOA.objects.filter(minimum=rdata.minimum,
-                                    contact=rdata.rname.to_text().strip('.'),
-                                    primary=rdata.mname.to_text().strip('.'), comment="SOA for"
-                                    " {0}".format(root_domain_name))
+        exists = SOA.objects.filter(
+            minimum=rdata.minimum, contact=rdata.rname.to_text().strip('.'),
+            primary=rdata.mname.to_text().strip('.'),
+            comment="SOA for {0}".format(root_domain_name))
         if exists:
             soa = exists[0]
         else:
             soa = SOA(serial=rdata.serial, minimum=rdata.minimum,
                       contact=rdata.rname.to_text().strip('.'),
-                      primary=rdata.mname.to_text().strip('.'), comment="SOA for"
-                      " {0}".format(root_domain_name))
+                      primary=rdata.mname.to_text().strip('.'),
+                      comment="SOA for {0}".format(root_domain_name))
             soa.clean()
             soa.save()
     return soa
@@ -236,8 +237,9 @@ def migrate_A(zone, root_domain, soa, views):
     names = []
     for (name, ttl, rdata) in zone.iterate_rdatas('A'):
         names.append((name.to_text().strip('.'), rdata))
-    sorted_names = list(sorted(names, cmp=lambda n1, n2: -1 if
-                               len(n1[0].split('.')) > len(n2[0].split('.')) else 1))
+    sorted_names = list(sorted(
+        names, cmp=lambda n1, n2: -1 if len(n1[0].split('.')) > len(
+            n2[0].split('.')) else 1))
 
     for name, rdata in sorted_names:
         print str(name) + " A " + str(rdata)
@@ -252,8 +254,9 @@ def migrate_A(zone, root_domain, soa, views):
             label = name.split('.')[0]
             domain_name = '.'.join(name.split('.')[1:])
             domain = ensure_domain(domain_name, force=True)
-        a, _ = AddressRecord.objects.get_or_create(label=label,
-                                                   domain=domain, ip_str=rdata.to_text(), ip_type='4')
+        a, _ = AddressRecord.objects.get_or_create(
+            label=label, domain=domain, ip_str=rdata.to_text(),
+            ip_type='4')
         for view in views:
             a.views.add(view)
             a.save()
@@ -275,12 +278,12 @@ def migrate_AAAA(zone, root_domain, soa, views):
             domain = ensure_domain(domain_name, force=True)
 
         ip_upper, ip_lower = ipv6_to_longs(rdata.to_text())
-        if AddressRecord.objects.filter(label=label,
-                                        domain=domain, ip_upper=ip_upper, ip_lower=ip_lower,
-                                        ip_type='6').exists():
-            a = AddressRecord.objects.get(label=label,
-                                          domain=domain, ip_type='6', ip_upper=ip_upper,
-                                          ip_lower=ip_lower)
+        if AddressRecord.objects.filter(
+                label=label, domain=domain, ip_upper=ip_upper,
+                ip_lower=ip_lower, ip_type='6').exists():
+            a = AddressRecord.objects.get(
+                label=label, domain=domain, ip_upper=ip_upper,
+                ip_lower=ip_lower, ip_type='6')
         else:
             a = AddressRecord(label=label, domain=domain,
                               ip_str=rdata.to_text(), ip_type='6')
@@ -297,8 +300,8 @@ def migrate_NS(zone, root_domain, soa, views):
         print str(name) + " NS " + str(rdata)
         domain_name = '.'.join(name.split('.')[1:])
         domain = ensure_domain(name, force=True)
-        ns, _ = Nameserver.objects.get_or_create(domain=domain,
-                                                 server=rdata.target.to_text().strip('.'))
+        ns, _ = Nameserver.objects.get_or_create(
+            domain=domain, server=rdata.target.to_text().strip('.'))
         for view in views:
             ns.views.add(view)
             ns.save()
@@ -318,8 +321,9 @@ def migrate_MX(zone, root_domain, soa, views):
             domain = ensure_domain(domain_name, force=True)
         priority = rdata.preference
         server = rdata.exchange.to_text().strip('.')
-        mx, _ = MX.objects.get_or_create(label=label, domain=domain,
-                                         server=server, priority=priority, ttl="3600")
+        mx, _ = MX.objects.get_or_create(
+            label=label, domain=domain, server=server, priority=priority,
+            ttl="3600")
         for view in views:
             mx.views.add(view)
             mx.save()

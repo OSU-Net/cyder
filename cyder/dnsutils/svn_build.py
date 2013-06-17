@@ -89,8 +89,8 @@ def collect_svn_zones(svn_site_path, relative_zone_path):
     :param svn_site_path: Full path to where reverse sites live. Atm that is in
         dnsconfig/zones/in-addr
     :type svn_rev_site_path: str
-    :param relative_zone_path: Full path to the root of where zone files live. This full
-        path is used by the zone parser during '$INCLUDE' statements.
+    :param relative_zone_path: Full path to the root of where zone files live.
+    This full path is used by the zone parser during '$INCLUDE' statements.
     :type relative_zone_path: str
     """
 
@@ -116,8 +116,9 @@ def collect_svn_zones(svn_site_path, relative_zone_path):
         log("=" * 10 + "Processing site: {0}".format(site), DEBUG)
         if is_valid_site_dir(site, site_dir):
             domain = "{0}.mozilla.com".format(site)
-            site_zone_data = get_zone_data(domain,
-                                           "{0}/private".format(full_site_path), relative_zone_path, 'A')
+            site_zone_data = get_zone_data(
+                domain, "{0}/private".format(full_site_path),
+                relative_zone_path, 'A')
             sites[site] = site_zone_data
         else:
             log("[Invalid] site dir for site {0}".format(site_dir), WARNING)
@@ -137,11 +138,11 @@ def collect_rev_svn_zone(rev_domain, rev_zone_path, relative_zone_path):
 
 def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
     """
-    :param svn_rev_site_path: Full path to where reverse sites live. Atm that is in
-        dnsconfig/zones/in-addr
+    :param svn_rev_site_path: Full path to where reverse sites live.
+    Atm that is in dnsconfig/zones/in-addr
     :type svn_rev_site_path: str
-    :param relative_zone_path: Full path to the root of where zone files live. This full
-        path is used by the zone parser during '$INCLUDE' statements.
+    :param relative_zone_path: Full path to the root of where zone files live.
+    This full path is used by the zone parser during '$INCLUDE' statements.
     :type relative_zone_path: str
     """
     sites = {}
@@ -182,8 +183,8 @@ def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
             for octet in reversed(octets):
                 if not octet.isdigit():
                     print ("Could not parse reverse domain name ",
-                           "from file {0}/{1}/{2}.".format(svn_rev_site_path,
-                                                           site, network), ERROR)
+                           "from file {0}/{1}/{2}.".format(
+                               svn_rev_site_path, site, network), ERROR)
                     fail = True
                 rev_domain.append(octet)
 
@@ -202,14 +203,15 @@ def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
             try:
                 if full_network_path.replace('in-addr', '').find('-') != -1:
                     continue
-                site_zone_data = get_zone_data(rev_domain,
-                                               full_network_path, relative_zone_path, 'PTR')
+                site_zone_data = get_zone_data(
+                    rev_domain, full_network_path, relative_zone_path, 'PTR')
             except dns.zone.NoSOA:
                 log("No SOA found for {0}".format(full_network_path),
                     ERROR)
                 log("domain = '{0}'\nsvn_rev_site_path = '{1}'\n"
-                    "full_network_path = '{2}'\n".format(rev_domain,
-                                                         svn_rev_site_path, full_network_path), ERROR)
+                    "full_network_path = '{2}'\n".format(
+                        rev_domain, svn_rev_site_path, full_network_path),
+                    ERROR)
 
             sites[network] = (full_network_path, site_zone_data)
 
@@ -217,9 +219,10 @@ def collect_rev_svn_zones(svn_rev_site_path, relative_zone_path):
 
 
 def get_hash_store():
-    hash_store, created = Truth.objects.get_or_create(name="dns_site_hash",
-                                                      description="Truth store for storing hashes of DNS data files in "
-                                                      "SVN. Don't edit these entries")
+    hash_store, created = Truth.objects.get_or_create(
+        name="dns_site_hash",
+        description="Truth store for storing hashes of DNS data files in "
+        "SVN. Don't edit these entries")
     if created:
         log("Created dns_site_hash")
     return hash_store
