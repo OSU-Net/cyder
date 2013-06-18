@@ -110,6 +110,13 @@ class AuxAttrTests(TestCase):
         self.assertEqual(intr.attrs.cache['primary'], '2')
         del intr.attrs.primary
 
+        def bad_get():
+            intr.attrs.primary
+        self.assertRaises(AttributeError, bad_get)
+        intr.attrs.primary = '3'
+        self.assertEqual(intr.attrs.primary, '3')
+        self.assertEqual(intr.attrs.cache['primary'], '3')
+
     def test7_create(self):
         mac = "13:22:33:44:55:27"
         label = "foo2"
@@ -119,6 +126,7 @@ class AuxAttrTests(TestCase):
                   'ip_str': ip_str}
         intr = self.do_add(**kwargs)
         intr.update_attrs()
+
         def bad_assign():
             intr.attrs.primary = '22f'
         self.assertRaises(ValidationError, bad_assign)
