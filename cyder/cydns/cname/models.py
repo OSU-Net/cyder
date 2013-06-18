@@ -1,7 +1,7 @@
 from django.db import models
+from django.db.models import get_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-import cyder
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_name
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -130,7 +130,7 @@ class CNAME(CydnsRecord, LabelDomainMixin):
             raise ValidationError(
                 "Objects with this name already exist: {0}".format(objects)
             )
-        from cyder.cydns.mx.models import MX
+        MX = get_model('mx', 'MX')
         if MX.objects.filter(server=self.fqdn):
             raise ValidationError(
                 "RFC 2181 says you shouldn't point MX records at CNAMEs and "
