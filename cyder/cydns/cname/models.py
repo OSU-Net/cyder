@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import get_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-import cyder
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_name
 from cyder.cydns.search_utils import smart_fqdn_exists
