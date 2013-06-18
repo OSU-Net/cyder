@@ -620,7 +620,10 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_option = False
         self.is_statement = False
         self.has_validator = True
-        self._check_is_digit()
+        if self._check_is_digit() is False:
+            raise ValidationError("{0} does not have a valid primary number, "
+                                  "It's current value is {1}".format(
+                                      self.key, self.value))
 
     def _aa_impress_server(self):
         """
