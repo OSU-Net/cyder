@@ -17,7 +17,10 @@ def list_validator(things, validator):
 
 def is_valid_ip(ip, ip_type=IP_TYPE_4):
     try:
-        ip_klass = ipaddr.IPv4Address if ip_type == '4' else ipaddr.IPv6Address
+        if ip_type == IP_TYPE_4:
+            ip_klass = ipaddr.IPv4Address
+        else:
+            ip_klass = ipaddr.IPv6Address
         ip_klass(ip)
         return True
     except:
@@ -194,7 +197,7 @@ class AuxAttr(object):
             try:
                 kv = self.KVClass.objects.get(**{'key': attr, self.obj_name:
                                                  self.obj})
-            except ObjectDoesNotExist, e:
+            except ObjectDoesNotExist:
                 raise AttributeError("{0} AuxAttr has no attribute "
                                      "{1}".format(self.KVClass, attr))
             self.cache[attr] = kv.value
@@ -221,7 +224,7 @@ class AuxAttr(object):
         try:
             kv = self.KVClass.objects.get(**{'key': attr, self.obj_name:
                                              self.obj})
-        except ObjectDoesNotExist, e:
+        except ObjectDoesNotExist:
             kv = self.KVClass(**{'key': attr, self.obj_name: self.obj})
         kv.value = value
         kv.clean()
