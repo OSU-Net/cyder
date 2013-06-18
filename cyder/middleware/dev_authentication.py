@@ -10,10 +10,10 @@ class DevAuthenticationMiddleware(object):
         # Log in as development user.
         if 'ctnr' not in request.session:
             if '_auth_user_id' in request.session:
-                username = User.objects.get(pk=request.session['_auth_user_id'])
+                user = User.objects.get(pk=request.session['_auth_user_id'])
             else:
-                username = 'test_superuser'
-            request = login_session(request, username)
+                user = 'test_superuser'
+            request = login_session(request, user)
 
         if request.path == '/logout/':
             request.session.flush()
