@@ -39,9 +39,6 @@ class BasePTR(object):
             1.1.193.128     PTR         FOO.BAR.COM
             ^-- PTR's shouldn't point to CNAMES
         """
-        # There are preexisting records that break this rule. We can't support
-        # this requirement until those records are fixed
-        return
         if CNAME.objects.filter(fqdn=self.name).exists():
             raise ValidationError(
                 "PTR records must point back to a valid A record, not a "
