@@ -51,6 +51,9 @@ class KeyValue(models.Model, ObjectUrlMixin):
     def __str__(self):
         return "Key: {0} Value {1}".format(self.key, self.value)
 
+    def _check_is_digit(self):
+        return self.value.isdigit()
+
     def clean(self, require_validation=True):
         key_attr = self.key.replace('-', '_')
         # aa stands for auxillary attribute.
