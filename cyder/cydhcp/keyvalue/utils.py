@@ -17,7 +17,10 @@ def list_validator(things, validator):
 
 def is_valid_ip(ip, ip_type=IP_TYPE_4):
     try:
-        ip_klass = ipaddr.IPv4Address if ip_type == '4' else ipaddr.IPv6Address
+        if ip_type == IP_TYPE_4:
+            ip_klass = ipaddr.IPv4Address
+        else:
+            ip_klass = ipaddr.IPv6Address
         ip_klass(ip)
         return True
     except:
