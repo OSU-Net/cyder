@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
-import ipaddr
+from ipaddr import IPv4Address, IPv6Address, AddressValueError
 import functools
 import re
 
@@ -16,21 +16,19 @@ def list_validator(things, validator):
 
 
 def is_valid_ip(ip, ip_type=None):
-    if ip_type == IP_TYPE_4:
-        ip_klass = ipaddr.IPv4Address
-    elif ip_type == IP_TYPE_6:
-        ip_klass = ipaddr.IPv6Address
-    else:
+    def validate_ip(ip, addr_type):
         try:
-            ipaddr.IPv4Address(ip)
+            addr_type(ip)
             return True
-        except:
-            ip_klass = ipaddr.IPv6Address
-    try:
-        ip_klass(ip)
-        return True
-    except:
-        return False
+        except AddressValueError:
+            return False
+
+    if ip_type == IP_TYPE_4:
+        return validate_ip(ip, IPv4Address)
+    elif ip_type == IP_TYPE_6:
+        return validate_ip(ip, IPv6Address)
+    else:
+        return validate_ip(ip, IPv4Address) or validate_ip(ip, IPv6Address)
 
 
 def is_valid_domain(name):
