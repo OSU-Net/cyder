@@ -34,3 +34,4 @@ parsetab.py
 cyder/working_tests.py
 test.conf
 migout.txt
+.env

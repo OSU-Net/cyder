@@ -6,6 +6,7 @@ import sys
 from funfactory.settings_base import *
 from cyder.settings.dns import *
 
+TESTING = True if sys.argv[1:] and sys.argv[1] == 'test' else False
 
 ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True

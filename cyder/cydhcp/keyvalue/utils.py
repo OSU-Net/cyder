@@ -1,9 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
-from cyder.base.constants import IP_TYPE_4
+from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
-import ipaddr
+from ipaddr import IPv4Address, IPv6Address, AddressValueError
 import functools
 import re
 
@@ -15,13 +15,20 @@ def list_validator(things, validator):
     return all([validator(thing.strip(' ')) for thing in things.split(',')])
 
 
-def is_valid_ip(ip, ip_type=IP_TYPE_4):
-    try:
-        ip_klass = ipaddr.IPv4Address if IP_TYPE_4 else ipaddr.IPv6Address
-        ip_klass(ip)
-        return True
-    except:
-        return False
+def is_valid_ip(ip, ip_type=None):
+    def validate_ip(ip, addr_type):
+        try:
+            addr_type(ip)
+            return True
+        except AddressValueError:
+            return False
+
+    if ip_type == IP_TYPE_4:
+        return validate_ip(ip, IPv4Address)
+    elif ip_type == IP_TYPE_6:
+        return validate_ip(ip, IPv6Address)
+    else:
+        return validate_ip(ip, IPv4Address) or validate_ip(ip, IPv6Address)
 
 
 def is_valid_domain(name):
@@ -48,7 +55,7 @@ def is_bool(val):
     return val.lower() in ['on', 'off', 'true', 'false']
 
 
-def is_ip_list(option_list, ip_type=IP_TYPE_4):
+def is_ip_list(option_list, ip_type=None):
     return list_validator(
         option_list, functools.partial(is_valid_ip, ip_type=ip_type))
 
@@ -194,7 +201,7 @@ class AuxAttr(object):
             try:
                 kv = self.KVClass.objects.get(**{'key': attr, self.obj_name:
                                                  self.obj})
-            except ObjectDoesNotExist, e:
+            except ObjectDoesNotExist:
                 raise AttributeError("{0} AuxAttr has no attribute "
                                      "{1}".format(self.KVClass, attr))
             self.cache[attr] = kv.value
@@ -221,7 +228,7 @@ class AuxAttr(object):
         try:
             kv = self.KVClass.objects.get(**{'key': attr, self.obj_name:
                                              self.obj})
-        except ObjectDoesNotExist, e:
+        except ObjectDoesNotExist:
             kv = self.KVClass(**{'key': attr, self.obj_name: self.obj})
         kv.value = value
         kv.clean()
