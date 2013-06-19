@@ -96,7 +96,7 @@ def create_range(range_id, start, end, type, subnet_id, comment, en, known):
                                 prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
         if str(ipaddr.IPv4Address(start)) in allow_all_subnets:
-            allow = None
+            allow = ''
         if known:
             allow = 'known-client'
         if '128.193.177.71' == str(ipaddr.IPv4Address(start)):
