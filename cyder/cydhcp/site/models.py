@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import RegexValidator
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
@@ -7,7 +8,7 @@ from cyder.cydhcp.utils import networks_to_Q
 
 class Site(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, validators=[RegexValidator('^[^/]+$')])
     parent = models.ForeignKey("self", null=True, blank=True)
 
     search_fields = ('name', 'parent__name')
@@ -40,7 +41,7 @@ class Site(models.Model, ObjectUrlMixin):
 
     def get_full_name(self):
         if self.parent is not None:
-            return (self.parent.get_full_name() + " " + self.name).title()
+            return (self.parent.get_full_name() + "/" + self.name).title()
         else:
             return self.name.title()
 
