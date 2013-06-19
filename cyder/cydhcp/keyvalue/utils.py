@@ -21,8 +21,11 @@ def is_valid_ip(ip, ip_type=None):
     elif ip_type == IP_TYPE_6:
         ip_klass = ipaddr.IPv6Address
     else:
-        return max(is_valid_ip(ip, ip_type=IP_TYPE_4),
-                   is_valid_ip(ip, ip_type=IP_TYPE_6))
+        try:
+            ipaddr.IPv4Address(ip)
+            return True
+        except:
+            ip_klass = ipaddr.IPv6Address
     try:
         ip_klass(ip)
         return True
