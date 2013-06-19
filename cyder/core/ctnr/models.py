@@ -35,6 +35,13 @@ class Ctnr(models.Model, ObjectUrlMixin):
         )
         return data
 
+    def eg_metadata(self):
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'description', 'datatype': 'string', 'editable': True},
+        ]}
+
     def build_legacy_class(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""

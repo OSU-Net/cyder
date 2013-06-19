@@ -65,22 +65,22 @@ class AuthenticationTest(TestCase):
         user if superuser
         """
         self.setup_request()
-        self.request = login_session(self.request, 'development')
+        self.request = login_session(self.request, 'test_superuser')
 
-        user = User.objects.create(username='development2')
+        user = User.objects.create(username='test_new_user')
         user.save()
 
-        become_user(self.request, 'development2')
-        self.assertTrue(self.request.user.username == 'development2')
-        become_user(self.request, 'development')
-        self.assertTrue(self.request.user.username == 'development')
+        become_user(self.request, 'test_new_user')
+        self.assertTrue(self.request.user.username == 'test_new_user')
+        become_user(self.request, 'test_superuser')
+        self.assertTrue(self.request.user.username == 'test_superuser')
 
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'development2')
+        self.assertTrue(self.request.user.username == 'test_new_user')
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'development')
+        self.assertTrue(self.request.user.username == 'test_superuser')
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'development')
+        self.assertTrue(self.request.user.username == 'test_superuser')
 
     def setup_request(self):
         """
@@ -99,7 +99,7 @@ class PermissionsTest(TestCase):
         self.setup_request()
 
         # Superuser.
-        self.superuser = User.objects.get(username='development')
+        self.superuser = User.objects.get(username='test_superuser')
 
         # Cyder admin.
         self.cyder_admin = User.objects.create(username='cyder_admin')
