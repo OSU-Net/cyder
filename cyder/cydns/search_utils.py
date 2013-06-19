@@ -35,7 +35,7 @@ def smart_fqdn_exists(fqdn, *args, **kwargs):
         search_domain = None
     if search_domain:
         for type_, qset in _build_label_domain_queries(
-                                            label, search_domain, **kwargs):
+                label, search_domain, **kwargs):
             if qset.exists():
                 return qset
 
@@ -47,12 +47,12 @@ def smart_fqdn_exists(fqdn, *args, **kwargs):
         label = fqdn.split('.')[0]
         domain_name = '.'.join(fqdn.split('.')[1:])
         search_domain = cydns.domain.models.Domain.objects.get(
-                            name=domain_name)
+            name=domain_name)
     except ObjectDoesNotExist:
         search_domain = None
     if search_domain:
         for type_, qset in _build_label_domain_queries(
-                                            label, search_domain, **kwargs):
+                label, search_domain, **kwargs):
             if qset.exists():
                 return qset
 

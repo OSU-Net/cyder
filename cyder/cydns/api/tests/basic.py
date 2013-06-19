@@ -66,7 +66,8 @@ class CydnsAPITests(object):
         # @@ -161,6 +161,8 @@ class TestApiClient(object):
         #
         #          if data is not None:
-        #              kwargs['data'] = self.serializer.serialize(data, format=content_type)
+        #              kwargs['data'] = self.serializer.serialize(
+        #                  data, format=content_type)
         # +            if content_type == 'application/json':
         # +                kwargs['data'] = str(kwargs['data'])
         #
@@ -445,7 +446,8 @@ class StaticIntrV4APITests(CydnsAPITests, ResourceTestCase):
     def compare_data(self, old_data, new_obj_data):
         for key in old_data.keys():
             if key == 'system_hostname':
-                self.assertEqual(old_data[key], new_obj_data['system']['hostname'])
+                self.assertEqual(old_data[key],
+                                 new_obj_data['system']['hostname'])
                 continue
             if key in ('iname', 'system'):
                 continue  # StaticInterface needs this done. Too lazy to factor
@@ -506,8 +508,8 @@ class StaticIntrV6APITests(CydnsAPITests, ResourceTestCase):
             'dns_enabled': True,
             'mac': '11:22:33:44:55:00',
             'system': '/tasty/systems/system/{0}/'.format(self.s.pk),
-            'ip_str': "2000:a{0}:a{1}:a{2}::".format(random_byte(), random_byte(),
-                                                     random_byte()),
+            'ip_str': "2000:a{0}:a{1}:a{2}::".format(
+                random_byte(), random_byte(), random_byte()),
             'ip_type': '6'
         }
 """
