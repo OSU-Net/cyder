@@ -96,7 +96,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val) and not is_ip_list(val, ip_type='6'):
+        if not is_ip_list(val):
             raise ValidationError("The router options {0} "
                                   "is not a valid ip list".format(val))
 

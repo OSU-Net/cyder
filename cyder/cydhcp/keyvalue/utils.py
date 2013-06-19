@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
-from cyder.base.constants import IP_TYPE_4
+from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
 import ipaddr
 import functools
@@ -15,12 +15,15 @@ def list_validator(things, validator):
     return all([validator(thing.strip(' ')) for thing in things.split(',')])
 
 
-def is_valid_ip(ip, ip_type=IP_TYPE_4):
+def is_valid_ip(ip, ip_type=None):
+    if ip_type == IP_TYPE_4:
+        ip_klass = ipaddr.IPv4Address
+    elif ip_type == IP_TYPE_6:
+        ip_klass = ipaddr.IPv6Address
+    else:
+        return max(is_valid_ip(ip, ip_type=IP_TYPE_4),
+                   is_valid_ip(ip, ip_type=IP_TYPE_6))
     try:
-        if ip_type == IP_TYPE_4:
-            ip_klass = ipaddr.IPv4Address
-        else:
-            ip_klass = ipaddr.IPv6Address
         ip_klass(ip)
         return True
     except:
@@ -51,7 +54,7 @@ def is_bool(val):
     return val.lower() in ['on', 'off', 'true', 'false']
 
 
-def is_ip_list(option_list, ip_type=IP_TYPE_4):
+def is_ip_list(option_list, ip_type=None):
     return list_validator(
         option_list, functools.partial(is_valid_ip, ip_type=ip_type))
 
