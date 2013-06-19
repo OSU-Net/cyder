@@ -25,7 +25,10 @@ def is_valid_ip(ip, ip_type=IP_TYPE_4):
 
 
 def is_valid_domain(name):
-    return re.match('[a-zA-Z\d-]{1,63}(\.[a-zA-Z\d-]{1,63})*', name)
+    if name[-1] == '.':
+        name = name[:-1]
+    return all([re.match(r'^[a-zA-Z\d]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$', \
+            label) for label in name.split('.')]) and len(name) <= 253
 
 
 def check_int(val, bits):
