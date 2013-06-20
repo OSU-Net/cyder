@@ -95,8 +95,9 @@ class DomainTests(TestCase):
         self.assertRaises(ValidationError, m.save)
 
     def test_2_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
-                            contact="hostmaster.foo", description="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(
+            primary="ns1.foo.gaz", contact="hostmaster.foo",
+            description="foo.gaz2")
         d, _ = Domain.objects.get_or_create(name="gaz")
         d.soa = None
         d.save()
@@ -105,8 +106,9 @@ class DomainTests(TestCase):
         d1.save()
 
     def test_3_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
-                            contact="hostmaster.foo", description="foo.gaz2")
+        s1, _ = SOA.objects.get_or_create(
+            primary="ns1.foo2.gaz", contact="hostmaster.foo",
+            description="foo.gaz2")
 
         r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
         r.soa = s1

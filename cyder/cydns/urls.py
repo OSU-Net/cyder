@@ -6,7 +6,8 @@ from cyder.cydns.views import *
 
 def cydns_urls(obj_type):
     """Url generator for DNS record views."""
-    return patterns('',
+    return patterns(
+        '',
         url(r'^$', cydns_view, name=obj_type),
         url(r'(?P<pk>[\w-]+)/update/$', cydns_view,
             name=obj_type + '-update'),
@@ -17,13 +18,14 @@ def cydns_urls(obj_type):
     )
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', cydns_index, name='cydns-index'),
 
     url(r'^record/get/', cydns_get_update_form, name='cydns-get-record'),
     url(r'^record/search/', cydns_search_obj, name='cydns-search-record'),
 
-    url(r'^address_record/', include ('cyder.cydns.address_record.urls')),
+    url(r'^address_record/', include('cyder.cydns.address_record.urls')),
     url(r'^cname/', include('cyder.cydns.cname.urls')),
     url(r'^domain/', include('cyder.cydns.domain.urls')),
     url(r'^mx/', include('cyder.cydns.mx.urls')),

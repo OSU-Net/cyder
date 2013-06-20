@@ -363,9 +363,9 @@ class StaticInterfaceResource(CommonDNSResource, ObjectListMixin,
         return bundle
 
     def extract_kv(self, bundle):
-        #This function decides if the POST/PATCH is a trying to add a KV pair to
-        #the interface. If it is, it makes sure key and value keys are the only
-        #keys that exist in bundle.data.
+        #This function decides if the POST/PATCH is a trying to add a KV pair
+        #to the interface. If it is, it makes sure key and value keys are the
+        #only keys that exist in bundle.data.
 
         #If there is no key or value in bundle.data this function will attempt
         #to decompose KV-ish values (interface_name) into the correct key value

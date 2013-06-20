@@ -55,8 +55,9 @@ class Ip(models.Model):
         This class is abstract.
 
     """
-    ip_str = models.CharField(max_length=39, editable=True, verbose_name='IP',
-                help_text="IP Address in dotted quad or dotted colon format")
+    ip_str = models.CharField(
+        max_length=39, editable=True, verbose_name='IP',
+        help_text="IP Address in dotted quad or dotted colon format")
     # ip_upper/lower are calculated from ip_str on ip_clean.
     # TODO rename ip_* to ipaddr_*
     ip_upper = models.BigIntegerField(null=True, blank=True)

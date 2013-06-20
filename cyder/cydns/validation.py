@@ -157,11 +157,11 @@ def check_for_soa_partition(domain, child_domains):
                 continue
             if i_domain.soa == j_domain.soa and i_domain.soa is not None:
                 raise ValidationError(
-                        "Changing the SOA for the {0} domain would cause the "
-                        "child domains {1} and {2} to become two zones that "
-                        "share the same SOA. Change {3} or {4}'s SOA before "
-                        "changing this SOA.".format(domain.name, i_domain.name,
-                        j_domain.name, i_domain.name, j_domain.name))
+                    "Changing the SOA for the {0} domain would cause the "
+                    "child domains {1} and {2} to become two zones that "
+                    "share the same SOA. Change {3} or {4}'s SOA before "
+                    "changing this SOA.".format(domain.name, i_domain.name,
+                    j_domain.name, i_domain.name, j_domain.name))
 
 
 def find_root_domain(soa):
@@ -518,12 +518,12 @@ def validate_views(views, ip_str, ip_type):
     if views.filter(name="public").exists():
         if ip_type == '4' and is_rfc1918(ip_str):
             raise ValidationError(
-                    "{0} is a private IP address. You cannot put a record "
-                    "that contains private data into a public view.")
+                "{0} is a private IP address. You cannot put a record "
+                "that contains private data into a public view.")
         if ip_type == '6' and is_rfc4193(ip_str):
             raise ValidationError(
-                    "{0} is a private IP address. You cannot put a record "
-                    "that contains private data into a public view.")
+                "{0} is a private IP address. You cannot put a record "
+                "that contains private data into a public view.")
 
 
 def validate_view(view, ip_str, ip_type):
@@ -532,12 +532,13 @@ def validate_view(view, ip_str, ip_type):
     """
     if ip_type == '4' and is_rfc1918(ip_str):
         raise ValidationError(
-                "{0} is a private IP address. You cannot put a record that "
-                "contains private data into a public view.")
+            "{0} is a private IP address. You cannot put a record that "
+            "contains private data into a public view.")
     if ip_type == '6' and is_rfc4193(ip_str):
         raise ValidationError(
-                "{0} is a private IP address. You cannot put a record that "
-                "contains private data into a public view.")
+            "{0} is a private IP address. You cannot put a record that "
+            "contains private data into a public view.")
+
 
 def validate_txt_data(data):
     if data.find('"') > -1:
