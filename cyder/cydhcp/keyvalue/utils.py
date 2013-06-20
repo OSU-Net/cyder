@@ -35,7 +35,7 @@ def check_int(val, bits):
     return val.isdigit() and int(val) < (2 ** bits - 1)
 
 
-def is__int8(val):
+def is_int8(val):
     return check_int(val, 8)
 
 
