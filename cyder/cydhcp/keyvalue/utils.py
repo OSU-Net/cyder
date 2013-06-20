@@ -32,10 +32,16 @@ def is_valid_ip(ip, ip_type=None):
 
 
 def is_valid_domain(name):
+    if len(name) == 0:
+        return False
     if name[-1] == '.':
         name = name[:-1]
     return all([re.match(r'^[_a-zA-Z\d]([_a-zA-Z0-9-]{0,61}[_a-zA-Z0-9])?$', \
             label) for label in name.split('.')]) and len(name) <= 253
+
+
+def is_valid_ip_or_domain(x, ip_type=None):
+    return is_valid_ip(x, ip_type) or is_valid_domain(x)
 
 
 def check_int(val, bits):
@@ -62,7 +68,14 @@ def is_ip_list(option_list, ip_type=None):
     return list_validator(
         option_list, functools.partial(is_valid_ip, ip_type=ip_type))
 
-def is_bool_and_ip_list(option_list, ip_type=IP_TYPE_4):
+
+def is_ip_or_domain_list(option_list, ip_type=None):
+    return list_validator(
+        option_list, functools.partial(is_valid_ip_or_domain,
+            ip_type=ip_type))
+
+
+def is_bool_and_ip_list(option_list, ip_type=None):
     # FIXME: if option_list was stripped before being stored, strip() on the
     # next line is not necessary
     option_list_parts = option_list.strip(' ').split(' ')
