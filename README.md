@@ -97,7 +97,6 @@ python manage.py migrate
     ```
 git clone git@github.com:jbalogh/check && cd check
 sudo python setup.py install && cd -
-rm -rf check.egg-info/
 cp requirements/.pre-commit .git/hooks/pre-commit
     ```
 
