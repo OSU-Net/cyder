@@ -1,7 +1,7 @@
 settings_local.py
 settings/local.py
 *.py[co]
-*.sw[po]
+.*.sw?
 .coverage
 pip-log.txt
 docs/_gh-pages
@@ -22,8 +22,6 @@ migrations/*
 private.json
 truth.json
 private_tests.py
-tastytools/*.pyc
-*.pyc
 mdns/migrate/zone_configs/
 local.py
 .sass-cache
@@ -34,4 +32,6 @@ parsetab.py
 cyder/working_tests.py
 test.conf
 migout.txt
-.env
+/.env/
+.vimrc
+/check/
