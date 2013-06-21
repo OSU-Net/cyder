@@ -394,10 +394,8 @@ def delete_CNAME():
 
 
 def do_everything(skip_edu=False):
-    dump_maintain()
     delete_dns()
     delete_CNAME()
-    fix_maintain.main()
     gen_DNS(skip_edu)
     gen_CNAME()
 
