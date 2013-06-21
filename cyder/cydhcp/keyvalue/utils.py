@@ -66,13 +66,12 @@ def is_bool(val):
 
 
 def is_ip_list(option_list, ip_type=None):
-    return list_validator(option_list, functools.partial(is_valid_ip,
-                                                         ip_type=ip_type))
+    return list_validator(option_list, lambda ip: is_valid_ip(ip, ip_type))
 
 
 def is_ip_or_domain_list(option_list, ip_type=None):
-    return list_validator(option_list, functools.partial(is_valid_ip_or_domain,
-                                                         ip_type=ip_type))
+    return list_validator(option_list,
+                          lambda x: is_valid_ip_or_domain(x, ip_type))
 
 
 def is_bool_and_ip_list(option_list, ip_type=None):
