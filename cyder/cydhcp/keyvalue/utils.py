@@ -77,7 +77,7 @@ def is_ip_or_domain_list(option_list, ip_type=None):
 def is_bool_and_ip_list(option_list, ip_type=None):
     # FIXME: if option_list was stripped before being stored, strip() on the
     # next line is not necessary
-    option_list_parts = option_list.strip(' ').split(' ')
+    option_list_parts = option_list.strip().split()
     if is_bool(option_list_parts[0]) and len(option_list_parts) == 2:
         return is_ip_list(option_list_parts[1], ip_type)
     else:
