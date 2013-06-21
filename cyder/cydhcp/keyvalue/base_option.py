@@ -357,7 +357,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = True
         self.has_validator = True
         val = self._get_value()
-        if not (is_valid_ip_or_domain(val)):
+        if not is_valid_ip_or_domain(val):
             raise ValidationError("The next-server option {0} "
                                   "is not a valid ip or domain".format(val))
 
