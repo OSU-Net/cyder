@@ -1,11 +1,10 @@
 import json
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
-from django.shortcuts import redirect
 from django.db.models import Q
 from django.conf import settings
 
