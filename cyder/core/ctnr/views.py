@@ -48,12 +48,20 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         rdomains = ctnr.domains.filter(is_reverse=True)
         rdomain_table = tablefy(rdomains)
 
+        ranges = ctnr.domains.all()
+        range_table = tablefy(ranges)
+
+        workgroups = ctnr.workgroups.all()
+        workgroup_table = tablefy(workgroups)
+
         add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
         return dict({
             'obj_type': 'ctnr',
             'user_table': user_table,
             'domain_table': domain_table,
             'rdomain_table': rdomain_table,
+            'range_table': range_table,
+            'workgroup_table': workgroup_table,
             'add_user_form': add_user_form
         }.items() + context.items())
 

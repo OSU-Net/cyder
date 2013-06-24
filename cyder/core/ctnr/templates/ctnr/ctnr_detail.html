@@ -41,5 +41,15 @@
     {{ render_table(request, rdomain_table) }}
   {% endif %}
 
+  {% if range_table %}
+    <h3>Ranges</h3>
+    {{ render_table(request, range_table) }}
+  {% endif %}
+
+  {% if workgroup_table %}
+    <h3>Workgroups</h3>
+    {{ render_table(request, workgroup_table) }}
+  {% endif %}
+
   {{ js('ctnr') }}
 {% endblock %}
