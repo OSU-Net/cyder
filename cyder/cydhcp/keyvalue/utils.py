@@ -12,7 +12,7 @@ is_attr = re.compile("^attr_\d+$")
 
 
 def list_validator(things, validator):
-    return all([validator(thing.strip(' ')) for thing in things.split(',')])
+    return all([validator(thing.strip()) for thing in things.split(',')])
 
 
 def is_valid_ip(ip, ip_type=None):
