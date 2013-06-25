@@ -247,7 +247,7 @@ def migrate_zones():
             Ctnr.objects.get_or_create(
                 name=name,
                 description=comment or desc,
-                email_contact=(email_contact or '')))
+                email_contact=email_contact or ''))
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
            "Records created {2}".format(
