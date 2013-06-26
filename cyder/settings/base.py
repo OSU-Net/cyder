@@ -95,8 +95,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydhcp.vrf',
     'cydhcp.workgroup',
     'cydns',
-    'dnsutils',
-    'dnsutils.migrate',
     'cydns',
     'cydns.address_record',
     'cydns.cname',
