@@ -467,7 +467,22 @@ def do_everything(skip=False):
 class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
-        make_option('--vlan',
+        make_option('-D', '--delete',
+                    action='store_true',
+                    dest='delete',
+                    default=False,
+                    help='Delete things'),
+        make_option('-a', '--all',
+                    action='store_true',
+                    dest='all',
+                    default=False,
+                    help='Migrate everything'),
+        make_option('-S', '--skip',
+                    action='store_true',
+                    dest='skip',
+                    default=False,
+                    help='Don\'t migrate dynamic hosts with -a option'),
+        make_option('-n', '--vlan',
                     action='store_true',
                     dest='vlan',
                     default=False,
@@ -501,27 +516,22 @@ class Command(BaseCommand):
                     action='store_true',
                     dest='zone-range',
                     default=False,
-                    help='Migrate zone range relationship'),
+                    help='Migrate zone/range relationship'),
         make_option('-W', '--zone-workgroup',
                     action='store_true',
                     dest='zone-workgroup',
                     default=False,
-                    help='Migrate zone workgroup relationship'),
-        make_option('-D', '--delete',
-                    action='store_true',
-                    dest='delete',
-                    default=False,
-                    help='Delete things'),
-        make_option('-S', '--skip',
-                    action='store_true',
-                    dest='skip',
-                    default=False,
-                    help='Don\'t migrate dynamic hosts'),
+                    help='Migrate zone/workgroup relationship'),
         make_option('-z', '--zone-domain',
                     action='store_true',
                     dest='zone-domain',
                     default=False,
-                    help='GIMME IT ALL!!!11!!'),
+                    help='Migrate zone/domain relationship'),
+        make_option('-e', '--zone-reverse',
+                    action='store_true',
+                    dest='zone-domain',
+                    default=False,
+                    help='Migrate zone/reverse domain relationship'),
         make_option('-u', '--user',
                     action='store_true',
                     dest='user',
@@ -531,38 +541,35 @@ class Command(BaseCommand):
                     action='store_true',
                     dest='zone-user',
                     default=False,
-                    help='Migrate zone user relationship'),
-        make_option('-a', '--all',
-                    action='store_true',
-                    dest='all',
-                    default=False,
-                    help='Migrate everything'))
+                    help='Migrate zone/user relationship'))
 
     def handle(self, **options):
         if options['delete']:
             delete_all()
-        if options['vlan']:
-            migrate_vlans()
-        if options['zone']:
-            migrate_zones()
-        if options['workgroup']:
-            migrate_workgroups()
-        if options['subnet']:
-            migrate_subnets()
-        if options['range']:
-            migrate_ranges()
-        if options['dynamic']:
-            migrate_dynamic_hosts()
-        if options['zone-range']:
-            migrate_zone_range()
-        if options['zone-workgroup']:
-            migrate_zone_workgroup()
-        if options['zone-domain']:
-            migrate_zone_domain()
-            migrate_zone_reverse()
-        if options['user']:
-            migrate_user()
-        if options['zone-user']:
-            migrate_zone_user()
         if options['all']:
             migrate_all(skip=options['skip'])
+        else:
+            if options['vlan']:
+                migrate_vlans()
+            if options['zone']:
+                migrate_zones()
+            if options['workgroup']:
+                migrate_workgroups()
+            if options['subnet']:
+                migrate_subnets()
+            if options['range']:
+                migrate_ranges()
+            if options['dynamic']:
+                migrate_dynamic_hosts()
+            if options['zone-range']:
+                migrate_zone_range()
+            if options['zone-workgroup']:
+                migrate_zone_workgroup()
+            if options['zone-domain']:
+                migrate_zone_domain()
+            if options['zone-reverse']:
+                migrate_zone_reverse()
+            if options['user']:
+                migrate_user()
+            if options['zone-user']:
+                migrate_zone_user()
