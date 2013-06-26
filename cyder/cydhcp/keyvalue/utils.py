@@ -36,9 +36,10 @@ def is_valid_domain(name):
         return False
     if name[-1] == '.':
         name = name[:-1]
-    return all([re.match(r'^[_a-zA-Z\d]([_a-zA-Z0-9-]{0,61}[_a-zA-Z0-9])?$',
-                         label) for label in name.split('.')]) \
-           and len(name) <= 253
+    return (all([re.match(r'^[_a-zA-Z\d]([_a-zA-Z0-9-]{0,61}[_a-zA-Z0-9])?$',
+                          label)
+                 for label in name.split('.')])
+            and len(name) <= 253)
 
 
 def is_valid_ip_or_domain(x, ip_type=None):
