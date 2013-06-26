@@ -465,16 +465,6 @@ class CommonOption(KeyValue, ObjectUrlMixin):
             raise ValidationError("{0} not a valid dhcp-parameter-request-list"
                                   " {0}".format(val))
 
-    def _aa_dns_servers(self):
-        """A list of DNS servers for this network."""
-        self.is_statement = False
-        self.is_option = False
-        val = self._get_value()
-        #TODO handle different ip types for key value ip lists
-        if not is_ip_or_domain_list(val):
-            raise ValidationError("{0} is not a valid "
-                                  "list of name servers".format(val))
-
     def _aa_filename(self):
         """
         The filename statement
