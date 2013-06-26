@@ -8,7 +8,7 @@ from cyder.core.ctnr.models import Ctnr
 
 
 class UserProfile(models.Model, ObjectUrlMixin):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, related_name='profile')
     default_ctnr = models.ForeignKey(Ctnr, default=2)
     phone_number = models.IntegerField(null=True)
 

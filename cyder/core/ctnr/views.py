@@ -32,15 +32,17 @@ class CtnrDetailView(CtnrView, CoreDetailView):
             return context
 
         # Add user levels of ctnr to user table.
-        users = ctnr.users.all()
         data = []
-
-        for user in users:
+        users = []
+        ctnrusers = ctnr.ctnruser_set.select_related('user', 'user__profile')
+        for ctnruser in ctnrusers:
+            user = ctnruser.user
             if user.is_superuser:
                 val = 'Superuser'
             else:
-                val = LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level]
+                val = LEVELS[ctnruser.level]
             data.append({'value': val, 'url': ''})
+            users.append(user)
 
         extra_cols = [{'header': 'Level to %s' % ctnr.name,
                        'sort_field': 'user'}]
