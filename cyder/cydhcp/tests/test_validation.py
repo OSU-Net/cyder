@@ -3,6 +3,7 @@ from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
 from cyder.base.tests import TestCase
 
+
 class ValidationTests(TestCase):
     ip_v4_good = ['0.0.0.0', '0.99.0.0', '0.0.0.255', '255.255.255.255']
     ip_v4_bad = ['-1.0.0.-1', '0.0.0.256', '8.8.8.9001', '00.0.0.0',

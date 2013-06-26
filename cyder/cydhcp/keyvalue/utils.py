@@ -4,7 +4,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 
 from ipaddr import IPv4Address, IPv6Address, AddressValueError
-import functools
 import re
 
 
@@ -83,6 +82,7 @@ def is_bool_and_ip_list(option_list, ip_type=None):
         return is_ip_list(option_list_parts[1], ip_type)
     else:
         return is_ip_list(option_list, ip_type)
+
 
 def is_domain_list(option_list, ip_type=IP_TYPE_4):
     return list_validator(option_list, is_valid_domain)
