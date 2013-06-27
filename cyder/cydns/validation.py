@@ -272,6 +272,11 @@ def validate_label(label, valid_chars=None):
         if valid_chars.find(char) < 0:
             raise ValidationError("Ivalid name {0}. Character '{1}' is "
                                   "invalid.".format(label, char))
+
+    if set(label[0] + label[-1]) - set(string.ascii_letters + string.digits):
+        raise ValidationError("Invalid name {0}. Name must begin and end with "
+                              "an alphanumeric character.".format(label))
+
     return
 
 
@@ -282,6 +287,10 @@ def validate_domain_name(name):
         :type name: str
     """
     _name_type_check(name)
+
+    if len(name) > 253:
+        raise ValidationError("Error: Domain name must not exceed 253 "
+                              "characters in length.")
 
     for label in name.split('.'):
         if not label:

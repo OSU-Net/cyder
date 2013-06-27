@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
+from cyder.cydns.validation import validate_domain_name
 
 from ipaddr import IPv4Address, IPv6Address, AddressValueError
 import re
@@ -31,14 +32,14 @@ def is_valid_ip(ip, ip_type=None):
 
 
 def is_valid_domain(name):
-    if len(name) == 0:
-        return False
-    if name[-1] == '.':
+    if name and name[-1] == '.':
         name = name[:-1]
-    return (all([re.match(r'^[_a-zA-Z\d]([_a-zA-Z0-9-]{0,61}[_a-zA-Z0-9])?$',
-                          label)
-                 for label in name.split('.')])
-            and len(name) <= 253)
+
+    try:
+        validate_domain_name(name)
+        return True
+    except ValidationError:
+        return False
 
 
 def is_valid_ip_or_domain(x, ip_type=None):
