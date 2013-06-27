@@ -64,41 +64,41 @@ def render_forward_zone(view, mega_filter):
         default_ttl=DEFAULT_TTL,
 
         nameserver_set=Nameserver.objects
-            .filter(mega_filter)
-            .filter(views__name=view.name).order_by('server'),
+        .filter(mega_filter)
+        .filter(views__name=view.name).order_by('server'),
 
         mx_set=MX.objects
-            .filter(mega_filter)
-            .filter(views__name=view.name).order_by('server'),
+        .filter(mega_filter)
+        .filter(views__name=view.name).order_by('server'),
 
         addressrecord_set=AddressRecord.objects
-            .filter(mega_filter).filter(views__name=view.name)
-            .order_by('pk', 'ip_type', 'fqdn', 'ip_upper', 'ip_lower'),
+        .filter(mega_filter).filter(views__name=view.name)
+        .order_by('pk', 'ip_type', 'fqdn', 'ip_upper', 'ip_lower'),
 
         interface_set=StaticInterface.objects
-            .filter(mega_filter, dns_enabled=True)
-            .filter(views__name=view.name)
-            .order_by('pk', 'ip_type', 'fqdn', 'ip_upper', 'ip_lower'),
+        .filter(mega_filter, dns_enabled=True)
+        .filter(views__name=view.name)
+        .order_by('pk', 'ip_type', 'fqdn', 'ip_upper', 'ip_lower'),
 
         cname_set=CNAME.objects
-            .filter(mega_filter)
-            .filter(views__name=view.name)
-            .order_by('fqdn'),
+        .filter(mega_filter)
+        .filter(views__name=view.name)
+        .order_by('fqdn'),
 
         srv_set=SRV.objects
-            .filter(mega_filter)
-            .filter(views__name=view.name)
-            .order_by('pk', 'fqdn'),
+        .filter(mega_filter)
+        .filter(views__name=view.name)
+        .order_by('pk', 'fqdn'),
 
         txt_set=TXT.objects
-            .filter(mega_filter)
-            .filter(views__name=view.name)
-            .order_by('pk', 'fqdn'),
+        .filter(mega_filter)
+        .filter(views__name=view.name)
+        .order_by('pk', 'fqdn'),
 
         sshfp_set=SSHFP.objects
-            .filter(mega_filter)
-            .filter(views__name=view.name)
-            .order_by('pk', 'fqdn'),
+        .filter(mega_filter)
+        .filter(views__name=view.name)
+        .order_by('pk', 'fqdn'),
     )
     return data
 

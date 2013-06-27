@@ -9,6 +9,7 @@ class CtnrForm(forms.ModelForm):
         model = Ctnr
         exclude = ('users',)
 
+
 class CtnrUserForm(forms.ModelForm):
     level = forms.ChoiceField(widget=forms.RadioSelect,
                               choices=[item for item in LEVELS.items()])

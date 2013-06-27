@@ -39,19 +39,19 @@ def _search(request):
         return ([], [])
     (addrs, cnames, domains, intrs, mxs, nss, ptrs, soas, srvs, sshfps, sys,
      txts, misc) = (
-        objs['A'],
-        objs['CNAME'],
-        objs['DOMAIN'],
-        objs['INTR'],
-        objs['MX'],
-        objs['NS'],
-        objs['PTR'],
-        objs['SOA'],
-        objs['SRV'],
-        objs['SSHFP'],
-        objs['SYSTEM'],
-        objs['TXT'],
-        [])
+         objs['A'],
+         objs['CNAME'],
+         objs['DOMAIN'],
+         objs['INTR'],
+         objs['MX'],
+         objs['NS'],
+         objs['PTR'],
+         objs['SOA'],
+         objs['SRV'],
+         objs['SSHFP'],
+         objs['SYSTEM'],
+         objs['TXT'],
+         [])
 
     meta = [
         (soas.count() if soas else 0, 'soa', 'SOA Records'),
@@ -118,7 +118,7 @@ def search_dns_text(request):
         response_str = ""
         for obj in rdtype_set:
             response_str += _("{0:<6}".format(obj.pk) +
-                                obj.bind_render_record(**kwargs) + "\n")
+                              obj.bind_render_record(**kwargs) + "\n")
         return response_str
 
     def text_response(**kwargs):

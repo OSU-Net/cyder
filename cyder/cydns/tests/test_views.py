@@ -284,6 +284,7 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
             'port': 222
         }
 
+
 class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'txt'

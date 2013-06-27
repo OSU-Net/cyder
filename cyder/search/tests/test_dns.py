@@ -31,7 +31,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['DOMAIN']), 1)
 
         res, error = self.search("wee1.wee.mozilla.com OR "
-                                       "wee.wee.mozilla.com")
+                                 "wee.wee.mozilla.com")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 2)
         self.assertEqual(len(res['NS']), 2)
@@ -88,7 +88,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['PTR']), 1)
 
         res, error = self.search("host1.wee2.wee.mozilla.com type=:A "
-                                       "type=:PTR")
+                                 "type=:PTR")
         self.assertFalse(error)
         self.assertEqual(len(res['A']), 0)
         self.assertEqual(len(res['PTR']), 0)
@@ -108,7 +108,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['CNAME']), 1)
 
         res, error = self.search("zone=:wee3.wee.mozilla.com "
-                                       "type=:CNAME")
+                                 "type=:CNAME")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 0)
         self.assertEqual(len(res['NS']), 0)
@@ -141,7 +141,7 @@ class SearchDNSTests(TestCase):
         root_domain = create_fake_zone("wee5.wee.mozilla.com", "")
         create_fake_zone("10.in-addr.arpa", "")
         res, error = self.search("10.in-addr.arpa OR "
-                                       "wee5.wee.mozilla.com")
+                                 "wee5.wee.mozilla.com")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 2)
         self.assertEqual(len(res['NS']), 2)

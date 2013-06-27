@@ -24,10 +24,10 @@ class V4RangeTests(TestCase):
         self.s1.update_network()
         self.s1.save()
 
-    def do_add(self, start_str, end_str, default_domain, \
-                                    network, rtype, ip_type):
+    def do_add(self, start_str, end_str, default_domain,
+               network, rtype, ip_type):
         r = Range(start_str=start_str, end_str=end_str, network=network,
-                ip_type=ip_type)
+                  ip_type=ip_type)
         r.__repr__()
         r.save()
         return r
@@ -358,8 +358,8 @@ class V4RangeTests(TestCase):
         ip_type = '4'
 
         kwargs = {'start_str': start_str, 'end_str': end_str,
-                'default_domain': default_domain, 'network': network,
-                'rtype': rtype, 'ip_type': ip_type}
+                  'default_domain': default_domain, 'network': network,
+                  'rtype': rtype, 'ip_type': ip_type}
         r = self.do_add(**kwargs)
         r.end_str = "160.0.4.60"
 

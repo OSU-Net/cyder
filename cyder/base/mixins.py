@@ -17,12 +17,12 @@ class DisplayMixin(object):
     }
 
     def bind_render_record(self, pk=False):
-        template  = Template(self.template).substitute(**self.justs)
+        template = Template(self.template).substitute(**self.justs)
         bind_name = self.fqdn + "."
-        
+
         if not self.ttl:
             self.ttl = 3600
-            
+
         return template.format(bind_name=bind_name, rdtype=self.rdtype,
                                rdclass='IN', **vars(self))
 

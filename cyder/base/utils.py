@@ -124,7 +124,7 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                              'data': [[('pk', obj.id),
                                        ('object_type', obj._meta.db_table),
                                        ('getUrl', find_get_record_url(obj))],
-                                       None],
+                                      None],
                              'class': ['update', 'delete'],
                              'img': ['/media/img/update.png',
                                      '/media/img/delete.png']})
@@ -285,8 +285,8 @@ def urlparams(url_, hash=None, **query):
     query_dict = dict(urlparse.parse_qsl(smart_str(q))) if q else {}
     query_dict.update((k, v) for k, v in query.items())
 
-    query_string = urllib.urlencode([(k, v) for k, v in query_dict.items()
-                                     if v is not None])
+    query_string = urllib.urlencode([(k2, v2) for k2, v2 in query_dict.items()
+                                     if v2 is not None])
     new = urlparse.ParseResult(url.scheme, url.netloc, url.path, url.params,
                                query_string, fragment)
     return new.geturl()
