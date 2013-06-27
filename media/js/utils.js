@@ -8,7 +8,7 @@ function insertTablefyRow(tablefy, tbody) {
 
         for (col in row) {
             var col = row[col];
-            var newCol = $('<td></td>');
+            var newCol = $('<td>' + col.value + '</td>');
 
             if (col.url) {
                 // Make link if has url.

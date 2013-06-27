@@ -4,18 +4,22 @@ $(document).ready(function() {
     var addUserUrl = ctnr.attr('data-addUserUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
     var userPk = null;
-
+    var username = null;
     // Auto complete for user search dialog.
     $('#user-searchbox').autocomplete({
-        minLength: 1,
+        minLength: 2,
         source: searchUserUrl,
+        delay: 400,
         select: function(event, ui) {
             userPk = ui.item.pk;
+            username = ui.item.label;
         }
     });
-
     // Add user to ctnr.
-    $('#add-user-ctnr').click(function() {
+    $('#add-user-ctnr').click(function(event) {
+        if (username != ($('#user-searchbox').val())) {
+            userPk = null;
+        }
         var postData = {
             ctnr: ctnrPk,
             user: userPk,
@@ -23,14 +27,23 @@ $(document).ready(function() {
         };
         $.post(addUserUrl, postData, function(data) {
             if (data.error) {
+                $('#add-user-errorlist').empty();
                 // Put error message.
                 console.log(data.error);
+                var forms = document.getElementById('add-user-errorlist');
+                forms.innerHTML = "<li><font color='red'>" + data.error +"</font></li>" + forms.innerHTML;
+                $('#user-searchbox').val('');
+                userPk = null;
             } else {
                 // Append row to user table.
-                insertTablefyRow(data.user, $('.user-table tbody'));
-
-                userPk = null;
-                $('#user-searchbox').val('');
+                if ($('.user-table tbody')[0]) {
+                    insertTablefyRow(data.user, $('.user-table tbody'));
+                    event.preventDefault();
+                    $('#user-searchbox').val('');
+                    userPk = null;
+                } else {
+                    document.location.reload();
+                }
             }
         }, 'json');
     });

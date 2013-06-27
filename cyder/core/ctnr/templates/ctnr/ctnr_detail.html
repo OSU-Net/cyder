@@ -16,8 +16,9 @@
         (request.session.ctnr == object and request.session.level == 2) %}
     <form class="form" id="add-user">
       <h3>Add User to Container</h3>
-      <div class="inner-form">
-        {{ add_user_form.as_p() }}
+      <div class="inner-form" id="add-user-inner-form">
+          <ul style="float:top; left:0;" id="add-user-errorlist"></ul>
+          {{ add_user_form.as_p() }}
       </div>
       <div class="form-btns">
         <hr>
@@ -25,21 +26,21 @@
       </div>
     </form>
   {% endif %}
+  <div id=tables class=tableclass>
+    {% if user_table %}
+      <h3>Users</h3>
+      {{ render_table(request, user_table, 'user-table') }}
+    {% endif %}
 
-  {% if user_table %}
-    <h3>Users</h3>
-    {{ render_table(request, user_table, 'user-table') }}
-  {% endif %}
+    {% if domain_table %}
+      <h3>Domains</h3>
+      {{ render_table(request, domain_table) }}
+    {% endif %}
 
-  {% if domain_table %}
-    <h3>Domains</h3>
-    {{ render_table(request, domain_table) }}
-  {% endif %}
-
-  {% if rdomain_table %}
-    <h3>Reverse Domains</h3>
-    {{ render_table(request, rdomain_table) }}
-  {% endif %}
-
+    {% if rdomain_table %}
+      <h3>Reverse Domains</h3>
+      {{ render_table(request, rdomain_table) }}
+    {% endif %}
+  </div>
   {{ js('ctnr') }}
 {% endblock %}
