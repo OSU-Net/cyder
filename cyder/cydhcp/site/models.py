@@ -8,7 +8,8 @@ from cyder.cydhcp.utils import networks_to_Q
 
 class Site(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, validators=[RegexValidator('^[^/]+$')])
+    name = models.CharField(max_length=255,
+                            validators=[RegexValidator('^[^/]+$')])
     parent = models.ForeignKey("self", null=True, blank=True)
 
     search_fields = ('name', 'parent__name')

@@ -1,5 +1,4 @@
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.interface.static_intr.views import find_available_ip_from_ipv4_range
 from cyder.cydhcp.site.models import Site
 
 

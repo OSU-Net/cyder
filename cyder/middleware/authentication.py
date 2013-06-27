@@ -29,15 +29,17 @@ class AuthenticationMiddleware(object):
             request.user.email = request.user.username + settings.EMAIL_SUFFIX
             request.user.save()
 
-#            # Get user attributes from CAS via SAML.
-#            ticket = SessionServiceTicket.objects.get(
-#                session_key=request.session.session_key).service_ticket
-#
-#            url = 'https://cyder.nws.oregonstate.edu'
-#            res = requests.post(
-#                'https://login.oregonstate.edu/cas/samlValidate?TARGET=%s' % url,
-#                data=get_saml_assertion(ticket))
-#
-#            from django.http import HttpResponse
-#            import cgi
-#            return HttpResponse(str(res.text) + str(res.url) + str(dir(res)))
+            '''
+            # Get user attributes from CAS via SAML.
+            ticket = SessionServiceTicket.objects.get(
+                session_key=request.session.session_key).service_ticket
+
+            url = 'https://cyder.nws.oregonstate.edu'
+            res = requests.post(
+                'https://login.oregonstate.edu/cas/samlValidate?TARGET=%s'
+                % url, data=get_saml_assertion(ticket))
+
+            from django.http import HttpResponse
+            import cgi
+            return HttpResponse(str(res.text) + str(res.url) + str(dir(res)))
+            '''
