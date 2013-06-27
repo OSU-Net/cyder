@@ -81,7 +81,10 @@ def cy_delete(request, pk, get_klasses_fn):
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
 
-    return redirect(request.META.get('HTTP_REFERER', obj.get_list_url()))
+    referer = request.META.get('HTTP_REFERER', obj.get_list_url())
+    # if there is path beyond obj.get_list_url() remove
+    referer = referer.replace(referer.split(obj.get_list_url())[1], '')
+    return redirect(referer)
 
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):

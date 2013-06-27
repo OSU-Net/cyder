@@ -130,18 +130,18 @@ class CNAME(CydnsRecord, LabelDomainMixin):
             raise ValidationError(
                 "Objects with this name already exist: {0}".format(objects)
             )
+
         MX = get_model('mx', 'MX')
         if MX.objects.filter(server=self.fqdn):
             raise ValidationError(
                 "RFC 2181 says you shouldn't point MX records at CNAMEs and "
                 "an MX points to this name!"
             )
-        # There are preexisting records that break this rule. We can't support
-        # this requirement until those records are fixed
-        # PTR = cydns.ptr.models.PTR
-        # if PTR.objects.filter(name=self.fqdn):
-        #    raise ValidationError("RFC 1034 says you shouldn't point PTR "
-        #                          "records at CNAMEs, and a PTR points to"
-        #                          " this name!")
+
+        PTR = get_model('ptr', 'PTR')
+        if PTR.objects.filter(name=self.fqdn):
+            raise ValidationError("RFC 1034 says you shouldn't point PTR "
+                                  "records at CNAMEs, and a PTR points to"
+                                  " this name!")
 
         # Should SRV's not be allowed to point to a CNAME? /me looks for an RFC
