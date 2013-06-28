@@ -10,7 +10,7 @@ from django.db import models
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydns.validation import validate_name, validate_ttl
+from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.core.task.models import Task
 
 # import reversion
@@ -54,8 +54,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
                                       help_text="Time to Live of this record")
-    primary = models.CharField(max_length=100, validators=[validate_name])
-    contact = models.CharField(max_length=100, validators=[validate_name])
+    primary = models.CharField(max_length=100, validators=[validate_fqdn])
+    contact = models.CharField(max_length=100, validators=[validate_fqdn])
     serial = models.PositiveIntegerField(null=False, default=int(time.time()))
     # Indicates when the zone data is no longer authoritative. Used by slave.
     expire = models.PositiveIntegerField(null=False, default=DEFAULT_EXPIRE)

@@ -3,7 +3,7 @@ from django.db.models import get_model
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
-from cyder.cydns.validation import validate_name
+from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.search_utils import smart_fqdn_exists
 
 from gettext import gettext as _
@@ -23,7 +23,7 @@ class CNAME(CydnsRecord, LabelDomainMixin):
     """
     # TODO cite an RFC for that ^ (it's around somewhere)
     id = models.AutoField(primary_key=True)
-    target = models.CharField(max_length=100, validators=[validate_name],
+    target = models.CharField(max_length=100, validators=[validate_fqdn],
                               help_text="CNAME Target")
     template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {target:$rhs_just}.")

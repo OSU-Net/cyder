@@ -307,7 +307,7 @@ def validate_domain_name(name):
         validate_label(label, valid_chars=valid_chars)
 
 
-def validate_name(fqdn):
+def validate_fqdn(fqdn):
     """Run test on a name to make sure that the new name is constructed
     with valid syntax.
 
@@ -448,7 +448,7 @@ def validate_srv_label(srv_label):
 
 
 def validate_srv_name(srv_name):
-    """This function is the same as :func:`validate_name` expect
+    """This function is the same as :func:`validate_fqdn` expect
     :class:`SRV` records can have a ``_`` preceding is name.
     """
     if srv_name and srv_name[0] != '_':
@@ -456,14 +456,14 @@ def validate_srv_name(srv_name):
     if not srv_name:
         raise ValidationError("Error: SRV label must not be None")
     mod_srv_name = srv_name[1:]  # Get rid of '_'
-    validate_name(mod_srv_name)
+    validate_fqdn(mod_srv_name)
 
 
 def validate_srv_target(srv_target):
     if srv_target == "":
         return
     else:
-        validate_name(srv_target)
+        validate_fqdn(srv_target)
 
 ###################################################################
 #               Functions that Validate MX fields                 #

@@ -5,7 +5,7 @@ from cyder.cydns.models import CydnsRecord
 from cyder.cydns.cname.models import CNAME
 
 from cyder.cydns.validation import validate_mx_priority
-from cyder.cydns.validation import validate_name
+from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.models import LabelDomainMixin
 
 # import reversion
@@ -20,7 +20,7 @@ class MX(CydnsRecord, LabelDomainMixin):
     """
     id = models.AutoField(primary_key=True)
     # The mail server this record should point to.
-    server = models.CharField(max_length=100, validators=[validate_name],
+    server = models.CharField(max_length=100, validators=[validate_fqdn],
                               help_text="The name of the mail server this "
                               "record points to.")
     priority = models.PositiveIntegerField(null=False,
