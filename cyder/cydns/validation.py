@@ -295,11 +295,12 @@ def validate_domain_name(name):
         raise ValidationError("Error: Domain name must not exceed 253 "
                               "characters in length.")
 
-    # A domain's first label is allowed to start with '_'
-    if len(name) > 0 and name[0] == '_':
-        name = name[1:]
 
     for label in name.split('.'):
+        # Domain labels are allowed to start with '_'
+        if len(label) > 0 and label[0] == '_':
+            label = label[1:]
+
         if not label:
             raise ValidationError("Error: Ivalid name {0}. Empty label."
                                   .format(label))
