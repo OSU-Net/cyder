@@ -26,11 +26,6 @@
     </form>
   {% endif %}
 
-  {% if user_table %}
-    <h3>Users</h3>
-    {{ render_table(request, user_table, 'user-table') }}
-  {% endif %}
-
   {% if domain_table %}
     <h3>Domains</h3>
     {{ render_table(request, domain_table) }}
@@ -49,6 +44,11 @@
   {% if workgroup_table %}
     <h3>Workgroups</h3>
     {{ render_table(request, workgroup_table) }}
+  {% endif %}
+
+  {% if user_table %}
+    <h3>Users</h3>
+    {{ render_table(request, user_table, 'user-table') }}
   {% endif %}
 
   {{ js('ctnr') }}
