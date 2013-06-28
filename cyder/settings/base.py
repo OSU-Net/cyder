@@ -21,6 +21,8 @@ sys.path.append(site_root + '/vendor')
 EMAIL_SUFFIX = '@onid.oregonstate.edu'
 CAS_SERVER_URL = 'https://login.oregonstate.edu/cas/login'
 CAS_AUTO_CREATE_USERS = True  # Not to be used in production.
+BUG_REPORT_EMAIL = 'minions@net.oregonstate.edu'
+EMAIL_HOST = 'mail.oregonstate.edu'
 
 SASS_PREPROCESS = True
 JINGO_MINIFY_USE_STATIC = False

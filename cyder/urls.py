@@ -8,7 +8,7 @@ patch()
 from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.core.views import core_index
 from cyder.core.cyuser import views as cyuser_views
-
+from cyder.base.views import send_email
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     url(r'^dns/',    include('cyder.cydns.urls')),
     url(r'^api/',    include(v1_dns_api.urls)),
     url(r'^search/', include('cyder.search.urls')),
+    url(r'^bug/$', send_email, name='bug-report'),
 
     url(r'^accounts/login/$',  'django_cas.views.login',  name='login'),
     url(r'^accounts/logout/$', 'django_cas.views.logout', name='logout'),

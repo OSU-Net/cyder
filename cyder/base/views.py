@@ -2,6 +2,8 @@ import simplejson as json
 
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail, BadHeaderError
+from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.forms import ValidationError
 from django.forms.util import ErrorList, ErrorDict
@@ -17,12 +19,38 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
+from cyder.base.forms import BugReportForm
+from cyder.core.cyuser.models import User
+
+import settings
 
 
 def home(request):
     return render_to_response('base/index.html', {
         'read_only': getattr(request, 'read_only', False),
     })
+
+
+def send_email(request):
+    if request.method == 'POST':
+        form = BugReportForm(qd_to_py_dict(request.POST))
+        if form.is_valid():
+            from_email = User.objects.get(
+                pk=request.session['_auth_user_id']).email
+            subject = request.POST.get('bug', '')
+            message = request.POST.get('message', '')
+            try:
+                print 'test'
+                send_mail(subject, message, from_email,
+                          [settings.BUG_REPORT_EMAIL])
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+            return redirect(reverse('core-index'))
+        else:
+            return render(request, 'base/email_form.html', {'form': form})
+    else:
+        return render(request, 'base/email_form.html',
+                      {'form': BugReportForm()})
 
 
 def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
