@@ -48,7 +48,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         rdomains = ctnr.domains.filter(is_reverse=True)
         rdomain_table = tablefy(rdomains)
 
-        ranges = ctnr.domains.all()
+        ranges = ctnr.ranges.all()
         range_table = tablefy(ranges)
 
         workgroups = ctnr.workgroups.all()
