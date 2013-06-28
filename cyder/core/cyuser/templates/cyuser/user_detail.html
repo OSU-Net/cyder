@@ -21,7 +21,13 @@
 
 {% block content %}
     {{ render_table(request, user_table, 'user-table') }}
-    <h3>Containers</h3>
-    {{ render_table(request, ctnr_table, 'ctnr-table') }}
+    {% if contact_table %}
+      <h3>Listed as contact for:</h3>
+      {{ render_table(request, contact_table, 'contact-table') }}
+    {% endif %}
+    {% if ctnr_table %}
+      <h3>Containers</h3>
+      {{ render_table(request, ctnr_table, 'ctnr-table') }}
+    {% endif %}
 {% endblock %}
 
