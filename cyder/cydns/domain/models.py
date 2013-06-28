@@ -14,7 +14,7 @@ from cyder.cydns.domain.utils import name_to_domain
 class Domain(models.Model, ObjectUrlMixin):
     """A Domain is used as a foreign key for most DNS records.
 
-    A domain's SOA should be shared by only domains within it's zone.
+    A domain's SOA should be shared by only domains within its zone.
 
     If two domains are part of different zones, they (and their
     subdomains) will need different SOA objects even if the data contained
