@@ -262,7 +262,6 @@ def validate_label(label, valid_chars=None):
         valid_chars = string.ascii_letters + "0123456789" + "-" + "_"
 
     # Labels may not be all numbers, but may have a leading digit TODO
-    # Labels must end and begin only with a letter or digit TODO
 
     for char in label:
         if char == '.':
@@ -295,6 +294,10 @@ def validate_domain_name(name):
     if len(name) > 253:
         raise ValidationError("Error: Domain name must not exceed 253 "
                               "characters in length.")
+
+    # A domain's first label is allowed to start with '_'
+    if len(name) > 0 and name[0] == '_':
+        name = name[1:]
 
     for label in name.split('.'):
         if not label:
