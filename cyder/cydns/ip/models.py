@@ -20,7 +20,7 @@ class Ip(models.Model):
     :ref:`ptr`'s :class:`Ip`.
 
     The reason why an IP must be mapped back to a Reverse :ref:`domain` has to
-    do with how bind files are generated. In a reverse zone file, ip addresses
+    do with how bind files are generated. In a reverse zone file, IP addresses
     are mapped from IP to DATA. For instance an :ref:`ptr` record would
     look like this::
 
@@ -29,21 +29,21 @@ class Ip(models.Model):
 
     If we were building the file ``197.in-addr.arpa``, all IP addresses
     in the ``197`` domain would need to be in this file. To reduce the
-    complexity of finding records for a reverse domain, an :class:`IP` is
-    linked to it's appropriate reverse domain when it is created. It's
-    mapping is updated when it's reverse domain is deleted or a more
-    appropritate reverse domain is added.  Keeping the :class:`Ip` feild on
-    :ref:`ptr` will help preformance when building reverse zone files.
+    complexity of finding records for a reverse domain, an :class:`Ip` is
+    linked to its appropriate reverse domain when it is created. Its
+    mapping is updated when its reverse domain is deleted or a more
+    appropriate reverse domain is added.  Keeping the :class:`Ip` field on
+    :ref:`ptr` will help performance when building reverse zone files.
 
-    The algorithm for determineing which reverse domain an :class:`Ip`
+    The algorithm for determining which reverse domain an :class:`Ip`
     belongs to is done by applying a 'longest prefix match' to all
     reverse domains in the :ref:`domain` table.
 
-    :ref:`address_record` objects need the ip validation that happens in this
-    class but do not need their :class:`Ip`'s to be tied back to a reverse
+    :ref:`address_record` objects need the IP validation that happens in this
+    class but do not need their :class:`Ip`s to be tied back to a reverse
     domain.
 
-    :ref:`staticinterface` objects need to have their ip tied back to reverse
+    :ref:`staticinterface` objects need to have their IP tied back to reverse
     domain because they represent a :ref:`PTR` record as well as an
     :ref:`address_record`.
 
@@ -56,12 +56,12 @@ class Ip(models.Model):
 
     """
     ip_str = models.CharField(max_length=39, editable=True, verbose_name='IP',
-                help_text="IP Address in dotted quad or dotted colon format")
+                help_text="IP address in dotted quad or dotted colon format")
     # ip_upper/lower are calculated from ip_str on ip_clean.
-    # TODO rename ip_* to ipaddr_*
+    # TODO: rename ip_* to ipaddr_*
     ip_upper = models.BigIntegerField(null=True, blank=True)
     ip_lower = models.BigIntegerField(null=True, blank=True)
-    # TODO, should reverse_domain go into the PTR model?  I would think
+    # TODO: Should reverse_domain go into the PTR model?  I would think
     # it shouldn't because it is used in this class during the ip_clean
     # function.  Technically the ip_clean function would work if the
     # field existed in the PTR model, but overall it would hurt
@@ -100,22 +100,22 @@ class Ip(models.Model):
         need to not update the reverse domain of an IP (i.e. when we are
         deleting a reverse_domain).
         """
-        # TODO, it's a fucking hack. Car babies.
+        # TODO: It's a fucking hack. Car babies.
         if self.ip_type == IP_TYPE_4:
             Klass = ipaddr.IPv4Address
         elif self.ip_type == IP_TYPE_6:
             Klass = ipaddr.IPv6Address
         else:
-            raise ValidationError("Invalid ip type {0}".format(self.ip_type))
+            raise ValidationError("Invalid IP type {0}".format(self.ip_type))
         try:
             ip = Klass(self.ip_str)
             self.ip_str = str(ip)
         except ipaddr.AddressValueError:
-            raise ValidationError("Invalid Ip address {0}".format(self.ip_str))
+            raise ValidationError("Invalid IP address {0}".format(self.ip_str))
 
         if self.ip_type == IP_TYPE_4:
             self.ip_upper, self.ip_lower = 0, int(ip)
-        else:  # We already gaurded again't a non '6' ip_type
+        else:  # We already guarded against a non-'6' ip_type
             self.ip_upper, self.ip_lower = ipv6_to_longs(int(ip))
 
     def validate_ip_str(self):
@@ -126,7 +126,7 @@ class Ip(models.Model):
 
 def ipv6_to_longs(addr):
     """This function will turn an IPv6 into two longs. The first number
-    represents the first 64 bits of the address and second represents
+    represents the first 64 bits of the address and the second represents
     the lower 64 bits.
 
     :param addr: IPv6 to be converted.
@@ -139,7 +139,7 @@ def ipv6_to_longs(addr):
     except ipaddr.AddressValueError:
         raise ValidationError("AddressValueError: Invalid IPv6 address {0}".
                               format(addr))
-    # TODO, use int() instead of _int. Make sure tests pass
+    # TODO: Use int() instead of _int. Make sure tests pass.
     ip_upper = ip._ip >> 64  # Put the last 64 bits in the first 64
-    ip_lower = ip._ip & (1 << 64) - 1  # Mask off the last sixty-four bits
+    ip_lower = ip._ip & (1 << 64) - 1  # Mask off the last 64 bits
     return (ip_upper, ip_lower)

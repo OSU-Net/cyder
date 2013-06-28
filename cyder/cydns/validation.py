@@ -269,7 +269,7 @@ def validate_label(label, valid_chars=None):
                                   "multiple domains when creating records."
                                   .format(label))
         if valid_chars.find(char) < 0:
-            raise ValidationError("Ivalid name {0}. Character '{1}' is "
+            raise ValidationError("Invalid name {0}. Character '{1}' is "
                                   "invalid.".format(label, char))
 
     if set(label[0] + label[-1]) - set(string.ascii_letters + string.digits):
@@ -301,7 +301,7 @@ def validate_domain_name(name):
             label = label[1:]
 
         if not label:
-            raise ValidationError("Error: Ivalid name {0}. Empty label."
+            raise ValidationError("Error: Invalid name {0}. Empty label."
                                   .format(label))
         valid_chars = string.ascii_letters + "0123456789" + "-_"
         validate_label(label, valid_chars=valid_chars)
@@ -378,13 +378,13 @@ def validate_reverse_name(reverse_name, ip_type):
     for nibble in reverse_name.split('.'):
         if ip_type == '6':
             if valid_ipv6.find(nibble) < 0:
-                raise ValidationError("Error: Ivalid Ipv6 name {0}. Character "
-                                      "'{1}' is invalid."
+                raise ValidationError("Error: Invalid IPv6 name {0}. "
+                                      "Character '{1}' is invalid."
                                       .format(reverse_name, nibble))
         else:
             if not(int(nibble) <= 255 and int(nibble) >= 0):
-                raise ValidationError("Error: Ivalid Ipv4 name {0}. Character "
-                                      "'{1}' is invalid."
+                raise ValidationError("Error: Invalid IPv4 name {0}. "
+                                      "Character '{1}' is invalid."
                                       .format(reverse_name, nibble))
 
 
@@ -410,7 +410,7 @@ def _name_type_check(name):
         raise ValidationError("Error: A name must be of type str.")
 
 ###################################################################
-#               Functions that Validate SRV fields                #
+#               Functions that validate SRV fields                #
 ###################################################################
 
 
@@ -467,7 +467,7 @@ def validate_srv_target(srv_target):
         validate_fqdn(srv_target)
 
 ###################################################################
-#               Functions that Validate MX fields                 #
+#               Functions that validate MX fields                 #
 ###################################################################
 
 
@@ -482,7 +482,7 @@ def validate_mx_priority(priority):
                               "range. See RFC 1035")
 
 ###################################################################
-#               Functions Validate ip_type fields                 #
+#             Functions that validate ip_type fields              #
 ###################################################################
 
 
@@ -494,7 +494,7 @@ def validate_ip_type(ip_type):
         raise ValidationError("Error: Plase provide a valid ip type.")
 
 ###################################################################
-#              Functions Validate RFC1918 requirements            #
+#          Functions that validate RFC1918 requirements           #
 ###################################################################
 
 
