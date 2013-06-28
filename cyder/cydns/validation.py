@@ -295,7 +295,6 @@ def validate_domain_name(name):
         raise ValidationError("Error: Domain name must not exceed 253 "
                               "characters in length.")
 
-
     for label in name.split('.'):
         # Domain labels are allowed to start with '_'
         if len(label) > 0 and label[0] == '_':
@@ -348,7 +347,8 @@ def validate_fqdn(fqdn):
     # Star records are allowed. Remove them during validation.
     if fqdn[0] == '*':
         fqdn = fqdn[1:]
-        fqdn = fqdn.strip('.')
+        if fqdn[0] == '.':
+            fqdn = fqdn[1:]
 
     for label in fqdn.split('.'):
         if not label:
