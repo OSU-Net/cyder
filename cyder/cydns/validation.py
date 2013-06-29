@@ -279,10 +279,6 @@ def validate_label(label, valid_chars=None):
             raise ValidationError("Invalid name {0}. Character '{1}' is "
                                   "invalid.".format(label, char))
 
-    if set(label[0] + label[-1]) - set(string.ascii_letters + string.digits):
-        raise ValidationError("Invalid name {0}. Name must begin and end with "
-                              "an alphanumeric character.".format(label))
-
     if len(label) > 63:
         raise ValidationError("Invalid name {0}. Name must be at most 63 "
                               "characters in length.".format(label))
