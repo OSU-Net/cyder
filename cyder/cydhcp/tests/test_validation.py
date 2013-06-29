@@ -51,8 +51,8 @@ class ValidationTests(TestCase):
         for ip_list in self.ip_v6_list_bad:
             self.assertFalse(utils.is_ip_list(ip_list))
 
-    # FIXME: The cases that were commented out fail tests as of the commit
-    # following 5a37a01. They should pass.
+    # FIXME: The cases that were commented out fail tests as of f2ec934.
+    # They probably shouldn't.
 
     domain_good = ['example.com', 'example.com.', 'x.example.com',
                    '1.example.com', '1-2-3.example.com', 'test']
