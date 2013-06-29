@@ -33,20 +33,20 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         >>> s.save()
 
     This class is the main interface to DNS and DHCP. A static
-    interface consists of three key pieces of information: Ip address, Mac
-    Address, and Hostname (the hostname is comprised of a label and a domain).
-    From these three peices of information, three things are ensured: An A or
+    interface consists of three key pieces of information: IP address, MAC
+    address, and hostname (the hostname is comprised of a label and a domain).
+    From these three pieces of information, three things are ensured: An A or
     AAAA DNS record, a PTR record, and a `host` statement in the DHCP builds
     that grants the mac address of the interface the correct IP address and
     hostname.
 
-    If you want an A/AAAA, PTR, and a DHCP lease, create on of these objects.
+    If you want an A/AAAA, PTR, and a DHCP lease, create one of these objects.
 
     In terms of DNS, a static interface represents a PTR and A record and must
-    adhear to the requirements of those classes. The interface inherits from
-    BaseAddressRecord and will call it's clean method with
-    'update_reverse_domain' set to True. This will ensure that it's A record is
-    valid *and* that it's PTR record is valid.
+    adhere to the requirements of those classes. The interface inherits from
+    BaseAddressRecord and will call its clean method with
+    'update_reverse_domain' set to True. This will ensure that its A record is
+    valid *and* that its PTR record is valid.
 
     Using the 'attrs' attribute.
 
