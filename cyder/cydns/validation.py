@@ -231,6 +231,13 @@ def validate_first_label(label, valid_chars=None):
         validate_label(label)
 
 
+def validate_hostname_label(label):
+    """Validate the first label in a hostname"""
+
+    valid_chars = string.ascii_letters + "0123456789" + "-"
+    validate_label(label, valid_chars)
+
+
 def validate_label(label, valid_chars=None):
     """Validate a label.
 
