@@ -6,7 +6,7 @@ from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.view.models import View
-from cyder.cydns.validation import validate_first_label, validate_name
+from cyder.cydns.validation import validate_first_label, validate_fqdn
 from cyder.cydns.validation import validate_ttl
 
 
@@ -44,7 +44,7 @@ class LabelDomainMixin(models.Model):
         help_text="Short name of the fqdn"
     )
     fqdn = models.CharField(
-        max_length=255, blank=True, validators=[validate_name], db_index=True
+        max_length=255, blank=True, validators=[validate_fqdn], db_index=True
     )
 
     class Meta:

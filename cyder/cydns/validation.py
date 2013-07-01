@@ -157,11 +157,11 @@ def check_for_soa_partition(domain, child_domains):
                 continue
             if i_domain.soa == j_domain.soa and i_domain.soa is not None:
                 raise ValidationError(
-                        "Changing the SOA for the {0} domain would cause the "
-                        "child domains {1} and {2} to become two zones that "
-                        "share the same SOA. Change {3} or {4}'s SOA before "
-                        "changing this SOA.".format(domain.name, i_domain.name,
-                        j_domain.name, i_domain.name, j_domain.name))
+                    "Changing the SOA for the {0} domain would cause the "
+                    "child domains {1} and {2} to become two zones that "
+                    "share the same SOA. Change {3} or {4}'s SOA before "
+                    "changing this SOA.".format(domain.name, i_domain.name,
+                    j_domain.name, i_domain.name, j_domain.name))
 
 
 def find_root_domain(soa):
@@ -231,6 +231,13 @@ def validate_first_label(label, valid_chars=None):
         validate_label(label)
 
 
+def validate_hostname_label(label):
+    """Validate the first label in a hostname"""
+
+    valid_chars = string.ascii_letters + "0123456789" + "-"
+    validate_label(label, valid_chars)
+
+
 def validate_label(label, valid_chars=None):
     """Validate a label.
 
@@ -262,7 +269,6 @@ def validate_label(label, valid_chars=None):
         valid_chars = string.ascii_letters + "0123456789" + "-" + "_"
 
     # Labels may not be all numbers, but may have a leading digit TODO
-    # Labels must end and begin only with a letter or digit TODO
 
     for char in label:
         if char == '.':
@@ -270,8 +276,13 @@ def validate_label(label, valid_chars=None):
                                   "multiple domains when creating records."
                                   .format(label))
         if valid_chars.find(char) < 0:
-            raise ValidationError("Ivalid name {0}. Character '{1}' is "
+            raise ValidationError("Invalid name {0}. Character '{1}' is "
                                   "invalid.".format(label, char))
+
+    if len(label) > 63:
+        raise ValidationError("Invalid name {0}. Name must be at most 63 "
+                              "characters in length.".format(label))
+
     return
 
 
@@ -283,15 +294,23 @@ def validate_domain_name(name):
     """
     _name_type_check(name)
 
+    if len(name) > 253:
+        raise ValidationError("Error: Domain name must not exceed 253 "
+                              "characters in length.")
+
     for label in name.split('.'):
+        # Domain labels are allowed to start with '_'
+        if len(label) > 0 and label[0] == '_':
+            label = label[1:]
+
         if not label:
-            raise ValidationError("Error: Ivalid name {0}. Empty label."
+            raise ValidationError("Error: Invalid name {0}. Empty label."
                                   .format(label))
         valid_chars = string.ascii_letters + "0123456789" + "-_"
         validate_label(label, valid_chars=valid_chars)
 
 
-def validate_name(fqdn):
+def validate_fqdn(fqdn):
     """Run test on a name to make sure that the new name is constructed
     with valid syntax.
 
@@ -331,7 +350,8 @@ def validate_name(fqdn):
     # Star records are allowed. Remove them during validation.
     if fqdn[0] == '*':
         fqdn = fqdn[1:]
-        fqdn = fqdn.strip('.')
+        if fqdn[0] == '.':
+            fqdn = fqdn[1:]
 
     for label in fqdn.split('.'):
         if not label:
@@ -361,13 +381,13 @@ def validate_reverse_name(reverse_name, ip_type):
     for nibble in reverse_name.split('.'):
         if ip_type == '6':
             if valid_ipv6.find(nibble) < 0:
-                raise ValidationError("Error: Ivalid Ipv6 name {0}. Character "
-                                      "'{1}' is invalid."
+                raise ValidationError("Error: Invalid IPv6 name {0}. "
+                                      "Character '{1}' is invalid."
                                       .format(reverse_name, nibble))
         else:
             if not(int(nibble) <= 255 and int(nibble) >= 0):
-                raise ValidationError("Error: Ivalid Ipv4 name {0}. Character "
-                                      "'{1}' is invalid."
+                raise ValidationError("Error: Invalid IPv4 name {0}. "
+                                      "Character '{1}' is invalid."
                                       .format(reverse_name, nibble))
 
 
@@ -393,7 +413,7 @@ def _name_type_check(name):
         raise ValidationError("Error: A name must be of type str.")
 
 ###################################################################
-#               Functions that Validate SRV fields                #
+#               Functions that validate SRV fields                #
 ###################################################################
 
 
@@ -432,7 +452,7 @@ def validate_srv_label(srv_label):
 
 
 def validate_srv_name(srv_name):
-    """This function is the same as :func:`validate_name` expect
+    """This function is the same as :func:`validate_fqdn` expect
     :class:`SRV` records can have a ``_`` preceding is name.
     """
     if srv_name and srv_name[0] != '_':
@@ -440,17 +460,17 @@ def validate_srv_name(srv_name):
     if not srv_name:
         raise ValidationError("Error: SRV label must not be None")
     mod_srv_name = srv_name[1:]  # Get rid of '_'
-    validate_name(mod_srv_name)
+    validate_fqdn(mod_srv_name)
 
 
 def validate_srv_target(srv_target):
     if srv_target == "":
         return
     else:
-        validate_name(srv_target)
+        validate_fqdn(srv_target)
 
 ###################################################################
-#               Functions that Validate MX fields                 #
+#               Functions that validate MX fields                 #
 ###################################################################
 
 
@@ -465,7 +485,7 @@ def validate_mx_priority(priority):
                               "range. See RFC 1035")
 
 ###################################################################
-#               Functions Validate ip_type fields                 #
+#             Functions that validate ip_type fields              #
 ###################################################################
 
 
@@ -477,7 +497,7 @@ def validate_ip_type(ip_type):
         raise ValidationError("Error: Plase provide a valid ip type.")
 
 ###################################################################
-#              Functions Validate RFC1918 requirements            #
+#          Functions that validate RFC1918 requirements           #
 ###################################################################
 
 
@@ -518,12 +538,12 @@ def validate_views(views, ip_str, ip_type):
     if views.filter(name="public").exists():
         if ip_type == '4' and is_rfc1918(ip_str):
             raise ValidationError(
-                    "{0} is a private IP address. You cannot put a record "
-                    "that contains private data into a public view.")
+                "{0} is a private IP address. You cannot put a record "
+                "that contains private data into a public view.")
         if ip_type == '6' and is_rfc4193(ip_str):
             raise ValidationError(
-                    "{0} is a private IP address. You cannot put a record "
-                    "that contains private data into a public view.")
+                "{0} is a private IP address. You cannot put a record "
+                "that contains private data into a public view.")
 
 
 def validate_view(view, ip_str, ip_type):
@@ -532,12 +552,13 @@ def validate_view(view, ip_str, ip_type):
     """
     if ip_type == '4' and is_rfc1918(ip_str):
         raise ValidationError(
-                "{0} is a private IP address. You cannot put a record that "
-                "contains private data into a public view.")
+            "{0} is a private IP address. You cannot put a record that "
+            "contains private data into a public view.")
     if ip_type == '6' and is_rfc4193(ip_str):
         raise ValidationError(
-                "{0} is a private IP address. You cannot put a record that "
-                "contains private data into a public view.")
+            "{0} is a private IP address. You cannot put a record that "
+            "contains private data into a public view.")
+
 
 def validate_txt_data(data):
     if data.find('"') > -1:

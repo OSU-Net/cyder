@@ -5,7 +5,9 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import (is_valid_ip, is_ip_list, is_int32,
                                          is_valid_domain, is_domain_list,
-                                         is_int32_list)
+                                         is_int32_list, is_bool_and_ip_list,
+                                         is_valid_ip_or_domain,
+                                         is_ip_or_domain_list)
 
 
 class CommonOption(KeyValue, ObjectUrlMixin):
@@ -97,7 +99,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         if not is_ip_list(val):
-            raise ValidationError("The router options {0} "
+            raise ValidationError("The router option {0} "
                                   "is not a valid ip list".format(val))
 
     def _aa_ntp_servers(self):
@@ -112,9 +114,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The ntp servers options {0} "
-                                  "are not a valid ip list".format(val))
+        if not is_ip_or_domain_list(val):
+            raise ValidationError("The ntp-servers option {0} "
+                                  "is not a valid ip list".format(val))
 
     def _aa_domain_name_servers(self):
         """
@@ -128,9 +130,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The DNS servers options {0} "
-                                  "are not a valid ip list".format(val))
+        if not is_ip_or_domain_list(val):
+            raise ValidationError("The domain-name-servers option {0} "
+                                  "is not a valid ip list".format(val))
 
     def _aa_domain_name(self):
         """
@@ -147,8 +149,8 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_quoted = True
         val = self._get_value()
         if not is_valid_domain(val):
-            raise ValidationError("{0} is not a valid "
-                                  "domain-name option".format(val))
+            raise ValidationError("The domain-name option {0} "
+                                  "is not a valid domain name".format(val))
 
     def _aa_search_domain(self):
         """
@@ -165,8 +167,8 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         if not is_domain_list(val):
-            raise ValidationError("{0} not a valid "
-                                  "domain search list".format(val))
+            raise ValidationError("The domain-search option {0} "
+                                  "is not a valid domain list".format(val))
         self.value = ", ".join(
             ["\"{0}\"".format(dom.strip()) for dom in self.value.split(',')])
 
@@ -239,9 +241,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The netbios-name-servers options {0} "
-                                  "are not a valid ip list".format(val))
+        if not is_ip_or_domain_list(val):
+            raise ValidationError("The netbios-name-servers option {0} "
+                                  "is not a valid ip list".format(val))
 
     def _aa_subnet_mask(self):
         """
@@ -296,9 +298,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
-                                  "are not a valid ip list".format(val))
+        if not is_ip_or_domain_list(val):
+            raise ValidationError("The time-servers option {0} "
+                                  "is not a valid ip list".format(val))
 
     def _aa_always_reply_rfc1048(self):
         """
@@ -335,9 +337,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
-                                  "are not a valid ip list".format(val))
+        if not is_ip_or_domain_list(val):
+            raise ValidationError("The log-servers option {0} "
+                                  "is not a valid ip list".format(val))
 
     def _aa_next_server(self):
         """
@@ -355,9 +357,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = True
         self.has_validator = True
         val = self._get_value()
-        if not (is_valid_ip(val) or is_valid_domain(val)):
-            raise ValidationError("{0} is not a valid next-server statement "
-                                  "and should be an ip or domain".format(val))
+        if not is_valid_ip_or_domain(val):
+            raise ValidationError("The next-server option {0} "
+                                  "is not a valid ip or domain".format(val))
 
     def _aa_ipphone(self):
         """
@@ -390,9 +392,9 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_statement = False
         self.has_validator = True
         val = self._get_value()
-        if not is_ip_list(val):
-            raise ValidationError("The time-servers options {0} "
-                                  "are not a valid ip list".format(val))
+        if not is_bool_and_ip_list(val):
+            raise ValidationError("The slp-directory-agent option {0} "
+                                  "is not a valid ip list".format(val))
 
     def _aa_slp_scope(self):
         """
@@ -462,16 +464,6 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         if not is_int32_list(val):
             raise ValidationError("{0} not a valid dhcp-parameter-request-list"
                                   " {0}".format(val))
-
-    def _aa_dns_servers(self):
-        """A list of DNS servers for this network."""
-        self.is_statement = False
-        self.is_option = False
-        val = self._get_value()
-        #TODO handle different ip types for key value ip lists
-        if not is_ip_list(val):
-            raise ValidationError("{0} is not a valid "
-                                  "list of name servers".format(val))
 
     def _aa_filename(self):
         """
@@ -568,7 +560,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         #TODO handle different ip types for key value ip lists
-        if not is_ip_list(val):
+        if not is_ip_or_domain_list(val):
             raise ValidationError("{0} is not a valid "
                                   "list of name servers".format(val))
 
@@ -586,7 +578,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         #TODO handle different ip types for key value ip lists
-        if not is_ip_list(val):
+        if not is_ip_or_domain_list(val):
             raise ValidationError("{0} is not a valid "
                                   "list of finger servers".format(val))
 
@@ -605,7 +597,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         #TODO handle different ip types for key value ip lists
-        if not is_ip_list(val):
+        if not is_ip_or_domain_list(val):
             raise ValidationError("{0} is not a valid "
                                   "list of font servers".format(val))
 
@@ -640,6 +632,6 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.has_validator = True
         val = self._get_value()
         #TODO handle different ip types for key value ip lists
-        if not is_ip_list(val):
+        if not is_ip_or_domain_list(val):
             raise ValidationError("{0} is not a valid "
                                   "list of servers".format(val))

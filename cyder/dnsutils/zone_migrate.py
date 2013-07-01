@@ -188,7 +188,7 @@ def migrate_PTR(zone, root_domain, soa, views):
         elif name.endswith('.ipv6.arpa'):
             ip_type = '6'
             ip_str = name.replace('.ipv6.arpa', '')
-            raise NotImplemented("Ipv6 migration isn't done yet.")
+            raise NotImplemented("IPv6 migration isn't done yet.")
         else:
             print "We so fucked. Lol"
             pdb.set_trace()

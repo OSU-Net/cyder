@@ -14,7 +14,7 @@ from cyder.cydns.domain.utils import name_to_domain
 class Domain(models.Model, ObjectUrlMixin):
     """A Domain is used as a foreign key for most DNS records.
 
-    A domain's SOA should be shared by only domains within it's zone.
+    A domain's SOA should be shared by only domains within its zone.
 
     If two domains are part of different zones, they (and their
     subdomains) will need different SOA objects even if the data contained
@@ -32,7 +32,7 @@ class Domain(models.Model, ObjectUrlMixin):
     Both 'forward' domains under TLD's like 'com', 'edu', and 'org' and
     'reverse' domains under the TLD's 'in-addr.arpa' and 'ip6.arpa' are stored
     in this table. At first glance it would seem like the two types of domains
-    have disjoint data set's; record types that have a Foreign Key back to a
+    have disjoint data sets; record types that have a Foreign Key back to a
     'reverse' domain would never need to have a Foreign Key back to a 'forward'
     domain. This is not the case. The two main examples are NS and CNAME
     records. If there were two different domain tables, NS/CNAME records would
@@ -159,7 +159,8 @@ class Domain(models.Model, ObjectUrlMixin):
                  not self.nameserver_set.all().exists())):
                     raise ValidationError("By changing this domain's SOA you "
                                           "are attempting to create a zone "
-                                          "whos root domain has no NS record.")
+                                          "whose root domain has no NS "
+                                          "record.")
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:
             # Collect any ptr's that belong to this new domain.
@@ -200,7 +201,7 @@ class Domain(models.Model, ObjectUrlMixin):
     def check_for_children(self):
         if self.domain_set.exists():
             raise ValidationError("Before deleting this domain, please "
-                                  "remove it's children.")
+                                  "remove its children.")
 
     def has_record_set(self, view=None, exclude_ns=False):
         object_sets = [
@@ -260,7 +261,7 @@ def boot_strap_ipv6_reverse_domain(ip, soa=None):
         function to exit successfully.
 
 
-    :param ip: The ip address in nibble format
+    :param ip: The IP address in nibble format
     :type ip: str
     :raises: ReverseDomainNotFoundError
     """
@@ -278,9 +279,9 @@ def boot_strap_ipv6_reverse_domain(ip, soa=None):
 def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
     """There are some formalities that need to happen when a reverse
     domain is added and deleted. For example, when adding say we had the
-    ip address 128.193.4.0 and it had the reverse_domain 128.193. If we
+    IP address 128.193.4.0 and it had the reverse_domain 128.193. If we
     add the reverse_domain 128.193.4, our 128.193.4.0 no longer belongs
-    to the 128.193 domain. We need to re-asign the ip to it's correct
+    to the 128.193 domain. We need to re-assign the IP to its correct
     reverse domain.
 
     :param reverse_domain_1: The domain which could possibly have
@@ -288,7 +289,7 @@ def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
 
     :type reverse_domain_1: :class:`Domain`
 
-    :param reverse_domain_2: The domain that has ip's which might not
+    :param reverse_domain_2: The domain that has IPs which might not
         belong to it anymore.
 
     :type reverse_domain_2: :class:`Domain`
@@ -306,7 +307,7 @@ def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
                 revname = ip_to_domain_name(obj.ip_str, ip_type='4')
             correct_reverse_domain = name_to_domain(revname)
             if correct_reverse_domain != obj.reverse_domain:
-                # TODO, is this needed? The save() function (actually the
+                # TODO: Is this needed? The save() function (actually the
                 # clean_ip function) will assign the correct reverse domain.
                 obj.reverse_domain = correct_reverse_domain
                 obj.save()
@@ -336,7 +337,7 @@ def name_to_master_domain(name):
         parent_name = '.'.join(tokens[i + 1:])
         possible_master_domain = Domain.objects.filter(name=parent_name)
         if not possible_master_domain:
-            raise ValidationError("Master Domain for domain {0}, not "
+            raise ValidationError("Master Domain for domain {0} not "
                                   "found.".format(name))
         else:
             master_domain = possible_master_domain[0]

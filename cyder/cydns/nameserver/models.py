@@ -7,7 +7,7 @@ from django.db import models
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.validation import validate_label, validate_name
+from cyder.cydns.validation import validate_label, validate_fqdn
 from cyder.cydns.view.models import View
 from cyder.cydns.models import CydnsRecord
 
@@ -32,7 +32,7 @@ class Nameserver(CydnsRecord):
     id = models.AutoField(primary_key=True)
     domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
                                "record is for.")
-    server = models.CharField(max_length=255, validators=[validate_name],
+    server = models.CharField(max_length=255, validators=[validate_fqdn],
                               help_text="The name of the server this records "
                               "points to.")
     # "If the name server does lie within the domain it should have a

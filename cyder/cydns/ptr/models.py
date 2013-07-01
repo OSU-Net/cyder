@@ -7,7 +7,7 @@ from cyder.cydns.models import ViewMixin, DisplayMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
-from cyder.cydns.validation import validate_name, validate_ttl
+from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.cname.models import CNAME
 
@@ -84,7 +84,7 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True)
 
     name = models.CharField(
-        max_length=255, validators=[validate_name], help_text="The name that "
+        max_length=255, validators=[validate_fqdn], help_text="The name that "
         "this record points to."
     )
     ttl = models.PositiveIntegerField(
