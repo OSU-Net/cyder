@@ -64,7 +64,8 @@ def add_user(request, pk):
     form = CtnrUserForm(qd_to_py_dict(request.POST))
     if form.is_valid():
         # Create table so client can inside new row into user table.
-        extra_cols = [{'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'}]
+        extra_cols = [{'header': 'Level to %s' % ctnr.name,
+                       'sort_field': 'user'}]
         extra_cols[0]['data'] = [{'value': LEVELS[int(request.POST['level'])],
                                   'url': ''}]
         user_table = tablefy(User.objects.filter(id=request.POST['user']),

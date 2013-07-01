@@ -95,7 +95,7 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                 url = value.get_detail_url()
             except AttributeError:
                 url = None
-            if value==obj:
+            if value == obj:
                 value = str(value)
             row_data.append({'value': [value], 'url': [url]})
 

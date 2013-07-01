@@ -7,7 +7,7 @@ $(document).ready(function() {
     var username = null;
     // Auto complete for user search dialog.
     $('#user-searchbox').autocomplete({
-        minLength: 2,
+        minLength: 1,
         source: searchUserUrl,
         delay: 400,
         select: function(event, ui) {
