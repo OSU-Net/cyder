@@ -45,19 +45,16 @@ def get_klasses(obj_type):
         'site_kv': (SiteKeyValue, SiteKeyValueForm, None),
         'vlan': (Vlan, VlanForm, None),
         'vlan_kv': (VlanKeyValue, VlanKeyValueForm, None),
-        'static_interface':
-            (StaticInterface, StaticInterfaceForm, None),
-        'static_interface_kv':
-            (StaticIntrKeyValue, StaticIntrKeyValueForm, None),
-        'dynamic_interface':
-            (DynamicInterface, DynamicInterfaceForm, None),
-        'dynamic_interface_kv':
-            (DynamicIntrKeyValue, DynamicIntrKeyValueForm, None),
+        'static_interface': (StaticInterface, StaticInterfaceForm, None),
+        'static_interface_kv': (StaticIntrKeyValue, StaticIntrKeyValueForm,
+                                None),
+        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
+        'dynamic_interface_kv': (DynamicIntrKeyValue, DynamicIntrKeyValueForm,
+                                 None),
         'vrf': (Vrf, VrfForm, None),
         'vrf_kv': (VrfKeyValue, VrfKeyValueForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
-        'workgroup_kv':
-            (WorkgroupKeyValue, WorkgroupKeyValueForm, None),
+        'workgroup_kv': (WorkgroupKeyValue, WorkgroupKeyValueForm, None),
     }.get(obj_type, (None, None, None))
 
 

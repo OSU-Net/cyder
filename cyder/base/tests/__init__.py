@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.test.client import Client
 
+from cyder.core.ctnr.models import Ctnr
+
 
 class CyTestMixin(object):
     """

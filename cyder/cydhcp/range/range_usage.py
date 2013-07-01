@@ -52,10 +52,11 @@ def range_usage(start, end, ip_type):
     """
     ip_start, ip_end, ipf_q = start_end_filter(start, end, ip_type)
     record_ip = lambda x: two_to_one(x.ip_upper, x.ip_lower)
-    taken_ips = sorted(chain(AddressRecord.objects.filter(ipf_q),
-                             PTR.objects.filter(ipf_q),
-                             StaticInterface.objects.filter(ipf_q)),
-                             key=record_ip)
+    taken_ips = sorted(chain(
+        AddressRecord.objects.filter(ipf_q),
+        PTR.objects.filter(ipf_q),
+        StaticInterface.objects.filter(ipf_q)),
+        key=record_ip)
     contiguous_ip_list, total_used = contiguous_ips(taken_ips)
     total_ips = end - start
     range_usage_list = []
@@ -78,9 +79,9 @@ def range_usage(start, end, ip_type):
     # filled range
     if free_range_start < ip_end:
         range_usage_list.append(
-                ("Free",
-                 free_range_start, ip_end,
-                 json.dumps({"ip_str": str(free_range_start),
-                             "ip_type": ip_type})))
+            ("Free",
+             free_range_start, ip_end,
+             json.dumps({"ip_str": str(free_range_start),
+                         "ip_type": ip_type})))
 
     return range_usage_list, int((float(total_used) / total_ips) * 100)

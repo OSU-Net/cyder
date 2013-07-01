@@ -116,7 +116,8 @@ class ReverseDomainTests(TestCase):
 
     def test_2_soa_validators(self):
         s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
-                        contact="hostmaster.foo", description="foo.gaz2")
+                                          contact="hostmaster.foo",
+                                          description="foo.gaz2")
         d, _ = Domain.objects.get_or_create(name="11.in-addr.arpa")
         d.soa = None
         d.save()
@@ -126,7 +127,8 @@ class ReverseDomainTests(TestCase):
 
     def test_3_soa_validators(self):
         s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
-                        contact="hostmaster.foo", description="foo.gaz2")
+                                          contact="hostmaster.foo",
+                                          description="foo.gaz2")
 
         d, _ = Domain.objects.get_or_create(name="gaz")
         d.soa = s1
@@ -387,21 +389,21 @@ class ReverseDomainTests(TestCase):
 
     def test_bad_names(self):
         name = None
-        self.assertRaises(ValidationError, self.create_domain, **{'name': name,
-            'ip_type': '6'})
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': name, 'ip_type': '6'})
         name = 124
-        self.assertRaises(ValidationError, self.create_domain, **{'name': name,
-            'ip_type': '6'})
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': name, 'ip_type': '6'})
         name = "0.9.0"
         ip_type = "asdf"
-        self.assertRaises(ValidationError, self.create_domain, **{'name': name,
-            'ip_type': ip_type})
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': name, 'ip_type': ip_type})
         ip_type = None
-        self.assertRaises(ValidationError, self.create_domain, **{'name': name,
-            'ip_type': ip_type})
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': name, 'ip_type': ip_type})
         ip_type = 1234
-        self.assertRaises(ValidationError, self.create_domain, **{'name': name,
-            'ip_type': ip_type})
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': name, 'ip_type': ip_type})
 
     def test_add_remove_reverse_ipv6_domains(self):
         osu_block = "2620:105:F000"
@@ -508,22 +510,22 @@ class ReverseDomainTests(TestCase):
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6',
-                ip_type='6')
+                                ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5',
-                ip_type='6')
+                                ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6',
-                ip_type='6')
+                                ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7',
-                ip_type='6')
+                                ip_type='6')
         rd.save()
         rds.append(rd)
 
@@ -533,70 +535,67 @@ class ReverseDomainTests(TestCase):
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '', ip_type='6')
+                                '', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0', ip_type='6')
+                                '.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0', ip_type='6')
+                                '.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0', ip_type='6')
+                                '.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0', ip_type='6')
+                                '.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0', ip_type='6')
+                                '.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0', ip_type='6')
+                                '.0.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0.0', ip_type='6')
+                                '.0.0.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0.0.0', ip_type='6')
+                                '.0.0.0.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0.0.0.0', ip_type='6')
+                                '.0.0.0.0.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0.0.0.0.0',
-                                             ip_type='6')
+                                '.0.0.0.0.0.0.0.0.0.0', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0.0.0.0.0.3',
-                                             ip_type='6')
+                                '.0.0.0.0.0.0.0.0.0.0.3', ip_type='6')
         rd.save()
         rds.append(rd)
 
         rd = self.create_domain(name='1.2.8.3.0.0.0.0.4.3.4.5.6.6.5.6.7.0.0'
-                                             '.0.0.0.0.0.0.0.0.0.0.3.2',
-                                             ip_type='6')
+                                '.0.0.0.0.0.0.0.0.0.0.3.2', ip_type='6')
         rd.save()
         rds.append(rd)
 
@@ -623,5 +622,5 @@ class ReverseDomainTests(TestCase):
         dom = self.create_domain(name='3', delegated=True)
         dom.save()
 
-        self.assertRaises(ValidationError, self.create_domain, **{'name':
-            '3.4', 'delegated': False})
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': '3.4', 'delegated': False})
