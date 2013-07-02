@@ -134,7 +134,10 @@ def unbecome_user(request):
 def user_detail(request, pk):
     user = User.objects.get(id=pk)
     email = user.email
-    contacts = Ctnr.objects.filter(email_contact=email)
+    if email:
+        contacts = Ctnr.objects.filter(email_contact=email)
+    else:
+        contacts = []
     ctnr_pks = [ctnr_user.ctnr_id for ctnr_user in CtnrUser.objects.filter(
         user_id=user.id)]
     ctnrs = []
