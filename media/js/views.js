@@ -74,7 +74,7 @@ $(document).ready(function() {
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
                 $('#form-title').html('Updating ' + prettify(object_type));
-                $('#base-inner-form').empty().append(data.form);
+                $('#hidden-inner-form').empty().append(data.form);
                 initForms();
             }, 150);
             $('.form-btns a.submit').text('Update ' + prettify(object_type));
