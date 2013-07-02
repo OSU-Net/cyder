@@ -32,25 +32,42 @@ def home(request):
 
 
 def send_email(request):
-    if request.method == 'POST':
+    if request.POST:
         form = BugReportForm(qd_to_py_dict(request.POST))
+
         if form.is_valid():
             from_email = User.objects.get(
                 pk=request.session['_auth_user_id']).email
             subject = request.POST.get('bug', '')
-            message = request.POST.get('message', '')
+            message = (
+                "|.......User Description......|\n\n"
+                + request.POST.get('message', '')
+                + request.POST.get('session_data', ''))
+
             try:
-                print 'test'
                 send_mail(subject, message, from_email,
                           [settings.BUG_REPORT_EMAIL])
+                return redirect(reverse('core-index'))
+
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
-            return redirect(reverse('core-index'))
+
         else:
             return render(request, 'base/email_form.html', {'form': form})
+
     else:
+        session_data = (
+            "\n\n|................URL...............|\n\n"
+            + str(request.META.get('HTTP_REFERER', ''))
+            + "\n\n|.........Session data.........|\n\n"
+            + str(dict(request.session))
+            + "\n\n|.........Request data.........|\n\n"
+            + str(request))
+
+        form = BugReportForm(initial={'session_data': session_data})
+
         return render(request, 'base/email_form.html',
-                      {'form': BugReportForm()})
+                      {'form': form})
 
 
 def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
