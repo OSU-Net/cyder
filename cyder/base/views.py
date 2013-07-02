@@ -38,16 +38,16 @@ def send_email(request):
         if form.is_valid():
             from_email = User.objects.get(
                 pk=request.session['_auth_user_id']).email
-            subject = request.POST.get('bug', '')
+            subject = "Cyder Bug Report: " + str(request.POST.get('bug', ''))
             message = (
-                "|.......User Description......|\n\n"
+                "|.......User Description......|\n"
                 + request.POST.get('description', '')
                 + "\n\nHow to Reproduce:"
-                + "\n\n" + request.POST.get('reproduce', '')
+                + "\n" + request.POST.get('reproduce', '')
                 + "\n\nExpected Result:"
-                + "\n\n" + request.POST.get('expected', '')
+                + "\n" + request.POST.get('expected', '')
                 + "\n\nActual Result:"
-                + "\n\n" + request.POST.get('actual', '')
+                + "\n" + request.POST.get('actual', '')
                 + request.POST.get('session_data', ''))
             try:
                 send_mail(subject, message, from_email,
