@@ -41,9 +41,11 @@ def send_email(request):
             subject = request.POST.get('bug', '')
             message = (
                 "|.......User Description......|\n\n"
-                + request.POST.get('message', '')
+                + request.POST.get('description', '')
+                + "\n" + request.POST.get('reproduce', '')
+                + "\n" + request.POST.get('expected', '')
+                + "\n" + request.POST.get('actual', '')
                 + request.POST.get('session_data', ''))
-
             try:
                 send_mail(subject, message, from_email,
                           [settings.BUG_REPORT_EMAIL])
