@@ -22,7 +22,7 @@ function insertTablefyRow(tablefy, tbody) {
             newRow.append(newCol);
         }
         // Add row to table.
-        tbody.append(newRow);
+        tbody.prepend(newRow);
     }
 }
 
