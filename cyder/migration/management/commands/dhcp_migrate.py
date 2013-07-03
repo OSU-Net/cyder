@@ -315,7 +315,7 @@ def migrate_zone_user():
 
 
 def migrate_zone_range():
-    print "Migrating container-domain relationship."
+    print "Migrating container-range relationship."
     cursor.execute("SELECT * FROM zone_range")
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
@@ -481,7 +481,7 @@ class Command(BaseCommand):
                     action='store_true',
                     dest='skip',
                     default=False,
-                    help='Don\'t migrate dynamic hosts with -a option'),
+                    help='Ignore dynamic hosts when using -a option'),
         make_option('-n', '--vlan',
                     action='store_true',
                     dest='vlan',
