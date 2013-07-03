@@ -7,7 +7,7 @@
 
   <div class="pagination">
     <ul>
-        <li><a href="?{{ page_name}}=1">First</a></li>
+        <li><a href="{{ page_url|urlparams(**{page_name: 1}) }}">First</a></li>
       {% if page_obj.has_previous() %}
       <li><a href="{{ page_url|urlparams(**{page_name: page_obj.previous_page_number()}) }}">Prev</a></li>
       {% else %}
