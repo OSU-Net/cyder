@@ -1,6 +1,7 @@
 from django import forms
 
 from cyder.cydhcp.range.models import Range, RangeKeyValue
+from cyder.cydhcp.network.models import Network
 
 
 class RangeForm(forms.ModelForm):
@@ -10,6 +11,8 @@ class RangeForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(RangeForm, self).__init__(*args, **kwargs)
+        self.fields['network'].queryset = Network.objects.order_by(
+            "network_str")
         self.fields['dhcpd_raw_include'].label = "DHCP Config Extras"
         self.fields['dhcpd_raw_include'].widget.attrs.update(
             {'cols': '80',
