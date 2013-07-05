@@ -529,7 +529,7 @@ class Command(BaseCommand):
                     help='Migrate zone/domain relationship'),
         make_option('-e', '--zone-reverse',
                     action='store_true',
-                    dest='zone-domain',
+                    dest='zone-reverse',
                     default=False,
                     help='Migrate zone/reverse domain relationship'),
         make_option('-u', '--user',
