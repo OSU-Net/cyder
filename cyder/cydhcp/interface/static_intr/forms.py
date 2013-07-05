@@ -10,12 +10,13 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_label
+from cyder.cydns.domain.models import Domain
 
 
 def validate_ip(ip):
     try:
         ipaddr.IPv4Address(ip)
-    except ipaddr.AddressValueError, e:
+    except ipaddr.AddressValueError:
         try:
             ipaddr.IPv6Address(ip)
         except ipaddr.AddressValueError:
@@ -36,6 +37,11 @@ class StaticInterfaceForm(forms.ModelForm):
     class Meta:
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
+
+    def __init__(self, *args, **kwargs):
+        super(StaticInterfaceForm, self).__init__(*args, **kwargs)
+        self.fields['domain'].queryset = Domain.objects.order_by("name")
+        self.fields['system'].queryset = System.objects.order_by("name")
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):
