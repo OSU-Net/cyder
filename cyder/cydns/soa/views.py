@@ -7,11 +7,7 @@ from django.shortcuts import render
 from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA, SOAKeyValue
 from cyder.base.utils import tablefy
-from cyder.cydns.views import CydnsCreateView
-from cyder.cydns.views import CydnsDeleteView
 from cyder.cydns.views import CydnsDetailView
-from cyder.cydns.views import CydnsListView
-from cyder.cydns.views import CydnsUpdateView
 
 from cyder.cydhcp.keyvalue.utils import get_aa, get_docstrings, get_attrs
 from cyder.cydhcp.keyvalue.utils import update_attrs, dict_to_kv
@@ -35,6 +31,8 @@ class SOADetailView(SOAView, CydnsDetailView):
             return soa
 
         context = dict({
+            'obj': soa,
+            'obj_type': 'soa',
             'domain_table': tablefy(soa.domain_set.filter(is_reverse=False)
                                     .order_by('master_domain')
                                     .select_related()),

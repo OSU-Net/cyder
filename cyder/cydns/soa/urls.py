@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from cyder.cydns.soa.views import *
+from cyder.cydns.soa.views import delete_soa_attr, SOADetailView
 from cyder.cydns.urls import cydns_urls
 
 
