@@ -186,7 +186,7 @@ def filter_by_ctnr(request, Klass):
 
 
 def _filter(request, Klass):
-    if request.session['ctnr'].name == 'global':
+    if request.session['ctnr'].name == 'global' or Klass.__name__ == 'Site':
         objects = Klass.objects
     else:
         objects = filter_by_ctnr(request, Klass)
