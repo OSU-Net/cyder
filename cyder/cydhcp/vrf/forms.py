@@ -1,17 +1,12 @@
 from django import forms
 
 from cyder.cydhcp.vrf.models import Vrf, VrfKeyValue
-from cyder.cydhcp.network.models import Network
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class VrfForm(forms.ModelForm):
+class VrfForm(forms.ModelForm, AlphabetizeFormMixin):
     class Meta:
         model = Vrf
-
-    def __init__(self, *args, **kwargs):
-        super(VrfForm, self).__init__(*args, **kwargs)
-        self.fields['network'].queryset = Network.objects.order_by(
-            "network_str")
 
 
 class VrfKeyValueForm(forms.ModelForm):

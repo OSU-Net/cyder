@@ -91,13 +91,14 @@ class Domain(models.Model, ObjectUrlMixin):
     purgeable = models.BooleanField(default=False)
     delegated = models.BooleanField(default=False, null=False, blank=True)
 
+    display_fields = ('name',)
     search_fields = ('name',)
 
     class Meta:
         db_table = 'domain'
 
     def __str__(self):
-        return "{0}".format(self.name)
+        return " ".join([getattr(self, f) for f in self.display_fields])
 
     def __repr__(self):
         return "<Domain '{0}'>".format(self.name)

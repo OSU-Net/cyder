@@ -4,10 +4,10 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.forms import DNSForm
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydns.domain.models import Domain
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class NameserverForm(DNSForm):
+class NameserverForm(DNSForm, AlphabetizeFormMixin):
     class Meta:
         model = Nameserver
         exclude = ('addr_glue', 'intr_glue')
@@ -15,7 +15,6 @@ class NameserverForm(DNSForm):
 
     def __init__(self, *args, **kwargs):
         super(NameserverForm, self).__init__(*args, **kwargs)
-        self.fields['domain'].queryset = Domain.objects.order_by("name")
         if not self.instance:
             return
         if not self.instance.glue:
