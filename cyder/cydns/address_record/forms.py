@@ -9,11 +9,13 @@ class AddressRecordForm(DNSForm):
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
         fields = ('label', 'domain', 'ip_type', 'ip_str', 'views', 'ttl',
                   'description')
-        widgets = {'views': forms.CheckboxSelectMultiple}
+        widgets = {'views': forms.CheckboxSelectMultiple,
+                   'ip_type': forms.RadioSelect}
 
 
 class AddressRecordFQDNForm(AddressRecordForm):
     class Meta:
         model = AddressRecord
         fields = ('fqdn', 'ip_type', 'ip_str', 'views', 'ttl', 'description')
-        widgets = {'views': forms.CheckboxSelectMultiple}
+        widgets = {'views': forms.CheckboxSelectMultiple,
+                   'ip_type': forms.RadioSelect}
