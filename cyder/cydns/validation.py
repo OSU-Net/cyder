@@ -391,6 +391,12 @@ def validate_reverse_name(reverse_name, ip_type):
                                       .format(reverse_name, nibble))
 
 
+def validate_minimum(minimum):
+    if minimum >= 4294967296:
+        raise ValidationError(
+            "Minimum must be within the 0 to 4294967295 range.")
+
+
 def validate_ttl(ttl):
     """
         "It is hereby specified that a TTL value is an unsigned number,

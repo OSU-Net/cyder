@@ -10,7 +10,8 @@ from django.db import models
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydns.validation import validate_fqdn, validate_ttl
+from cyder.cydns.validation import (validate_fqdn, validate_ttl,
+                                    validate_minimum)
 from cyder.core.task.models import Task
 
 # import reversion
@@ -64,7 +65,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     retry = models.PositiveIntegerField(null=False, default=DEFAULT_RETRY)
     # The time when the slave will try to refresh the zone from the master
     refresh = models.PositiveIntegerField(null=False, default=DEFAULT_REFRESH)
-    minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM)
+    minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM,
+                                          validators=[validate_minimum])
     description = models.CharField(max_length=200, blank=True)
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
