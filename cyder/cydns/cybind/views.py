@@ -14,19 +14,25 @@ def build_debug_soa(request, soa_pk):
     #DEBUG_BUILD_STRING = build_zone(soa, root_domain)
     # Figure out what sort of domains are in this zone.
     public_view = View.objects.get(id=1)
-    if View.objects.get(id=2):
+
+    if View.objects.filter(id=2).exists():
         private_view = View.objects.get(id=2)
+
     try:
         public_data = build_zone_data(public_view, soa.root_domain, soa)
-        if private_view:
+
+        try:
             private_data = build_zone_data(private_view, soa.root_domain, soa)
 
-        output = _("""
-                   ;======= Private Data =======
-                   {0}
+        except:
+            private_data = ''
 
-                   ;======= Private Data =======
-                   {1}
+        output = _("""
+;======= Private Data =======
+{0}
+
+;======= Public Data =======
+{1}
                    """.format(private_data, public_data))
     except Exception:
         return HttpResponse(json.dumps(
