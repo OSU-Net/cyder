@@ -116,6 +116,9 @@ class SimpleTest(TestCase):
         rd = self.create_domain(name='130', ip_type='4')
         rd.save()
 
+        ip = Ip(ip_str="111:22:3::")  # Default type is IPv4
+        self.assertRaises(ValidationError, ip.clean_ip)
+
         ip = Ip(ip_str="130.193.1.2", ip_type='4')
         self.assertFalse(ip.ip_upper and ip.ip_lower and ip.reverse_domain)
 
