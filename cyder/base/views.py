@@ -18,9 +18,10 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
                               make_paginator, model_to_post, tablefy,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
+from cyder.core.cyuser.models import User
+from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_create_session
 from cyder.cydns.utils import ensure_label_domain
 from cyder.base.forms import BugReportForm
-from cyder.core.cyuser.models import User
 
 import settings
 
@@ -91,6 +92,8 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
             try:
                 if perm(request, cy.ACTION_CREATE, obj=obj, obj_class=Klass):
                     obj = form.save()
+                    if Klass.__name__ == 'Ctnr':
+                        request = ctnr_create_session(request, obj)
                     return redirect(
                         request.META.get('HTTP_REFERER', obj.get_list_url()))
             except (ValidationError, ValueError) as e:
@@ -124,7 +127,8 @@ def cy_delete(request, pk, get_klasses_fn):
     obj_type = request.path.split('/')[2]
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
-
+    if obj_type == 'ctnr':
+        request = ctnr_delete_session(request, obj)
     try:
         if perm(request, cy.ACTION_DELETE, obj=obj):
             obj.delete()
