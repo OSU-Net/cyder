@@ -7,7 +7,8 @@ from cyder.core.views import (core_index, core_view, core_table_update,
 
 def core_urls(object_type):
     """Url generator for Core views"""
-    return patterns('',
+    return patterns(
+        '',
         url(r'^$', core_view, name=object_type),
         url(r'^(?P<pk>[\w-]+)/update/$', core_view,
             name=object_type + '-update'),
@@ -18,7 +19,8 @@ def core_urls(object_type):
     )
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', core_index, name='core-index'),
 
     url(r'^record/get/', core_get_update_form, name='core-get-record'),

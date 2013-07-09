@@ -6,9 +6,11 @@ from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
                                 cydhcp_delete)
 from cyder.cydhcp.constants import DHCP_KEY_VALUES
 
+
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
-    return patterns('',
+    return patterns(
+        '',
         url(r'^$', cydhcp_view, name=object_type),
         url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
             name=object_type + '-update'),
@@ -19,7 +21,8 @@ def cydhcp_urls(object_type):
     )
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_index.html'},
         name='cydhcp-index'),
     url(r'^record/get/', cydhcp_get_update_form, name='cydhcp-get-record'),
@@ -37,5 +40,6 @@ urlpatterns = patterns('',
     url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
 )
 for kv in DHCP_KEY_VALUES:
-    urlpatterns += patterns('',
-            url(r"^{0}/".format(kv), include(cydhcp_urls(kv))))
+    urlpatterns += patterns(
+        '',
+        url(r"^{0}/".format(kv), include(cydhcp_urls(kv))))

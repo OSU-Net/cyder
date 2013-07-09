@@ -4,9 +4,11 @@ from django.conf import settings
 from cyder.cydns.cybind.builder import DNSBuilder, BuildError
 
 import subprocess
+from optparse import make_option
+
 import dns_migrate
 import dhcp_migrate
-from optparse import make_option
+from lib import fix_maintain
 from lib.diffdns import diff_zones
 from lib.checkexcept import checkexcept
 
@@ -35,6 +37,11 @@ def build_dns():
 class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
+        make_option('-q', '--qlobber',
+                    action='store_true',
+                    dest='qlobber',
+                    default=False,
+                    help='Clobber the Maintain sandbox.'),
         make_option('-d', '--dns',
                     action='store_true',
                     dest='dns',
@@ -57,6 +64,11 @@ class Command(BaseCommand):
                     help='Migrate DHCP objects.'))
 
     def handle(self, **options):
+        if options['qlobber']:
+            print "Clobbering Maintain sandbox."
+            dns_migrate.dump_maintain()
+            fix_maintain.main()
+
         if options['dns']:
             print "Migrating DNS objects."
             dns_migrate.do_everything(skip_edu=False)

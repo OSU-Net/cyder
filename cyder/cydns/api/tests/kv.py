@@ -35,7 +35,8 @@ class KVAPITests(object):
         # @@ -161,6 +161,8 @@ class TestApiClient(object):
         #
         #          if data is not None:
-        #              kwargs['data'] = self.serializer.serialize(data, format=content_type)
+        #              kwargs['data'] = self.serializer.serialize(
+        #                  data, format=content_type)
         # +            if content_type == 'application/json':
         # +                kwargs['data'] = str(kwargs['data'])
         #
@@ -75,8 +76,8 @@ class KVAPITests(object):
     def generic_create(self, post_data):
         # Check how many are there first.
         obj_count = self.test_type.objects.count()
-        create_url = self.object_list_url.format(API_VERSION,
-                                                 str(self.test_type.__name__).lower())
+        create_url = self.object_list_url.format(
+            API_VERSION, str(self.test_type.__name__).lower())
         resp = self.api_client.post(create_url, format='json', data=post_data)
         self.assertHttpCreated(resp)
         # Verify a new one has been added.

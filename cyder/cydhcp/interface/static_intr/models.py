@@ -20,6 +20,7 @@ from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.validation import validate_hostname_label
 
 
 class StaticInterface(BaseAddressRecord, BasePTR):
@@ -206,6 +207,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
+        validate_hostname_label(self.label)
+
         self.mac = self.mac.lower()
         if not self.system:
             raise ValidationError(

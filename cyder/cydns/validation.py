@@ -231,6 +231,13 @@ def validate_first_label(label, valid_chars=None):
         validate_label(label)
 
 
+def validate_hostname_label(label):
+    """Validate the first label in a hostname"""
+
+    valid_chars = string.ascii_letters + "0123456789" + "-"
+    validate_label(label, valid_chars)
+
+
 def validate_label(label, valid_chars=None):
     """Validate a label.
 
@@ -271,10 +278,6 @@ def validate_label(label, valid_chars=None):
         if valid_chars.find(char) < 0:
             raise ValidationError("Invalid name {0}. Character '{1}' is "
                                   "invalid.".format(label, char))
-
-    if set(label[0] + label[-1]) - set(string.ascii_letters + string.digits):
-        raise ValidationError("Invalid name {0}. Name must begin and end with "
-                              "an alphanumeric character.".format(label))
 
     if len(label) > 63:
         raise ValidationError("Invalid name {0}. Name must be at most 63 "

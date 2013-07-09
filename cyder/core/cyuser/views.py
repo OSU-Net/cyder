@@ -1,11 +1,10 @@
 import json
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
-from django.shortcuts import redirect
 from django.db.models import Q
 from django.conf import settings
 
@@ -133,9 +132,21 @@ def unbecome_user(request):
 
 def user_detail(request, pk):
     user = User.objects.get(id=pk)
+    email = user.email
+    if email:
+        contacts = Ctnr.objects.filter(email_contact=email)
+    else:
+        contacts = []
+    ctnr_pks = [ctnr_user.ctnr_id for ctnr_user in CtnrUser.objects.filter(
+        user_id=user.id)]
+    ctnrs = []
+    for pk in ctnr_pks:
+        ctnrs += [Ctnr.objects.get(id=pk)]
+
     user_table = tablefy([user], users=True)
-    ctnr_table = tablefy(CtnrUser.objects.filter(id=pk))
+    ctnr_table = tablefy(ctnrs)
+    contact_table = tablefy(contacts)
 
     return render(request, 'cyuser/user_detail.html',
                   {'user': user, 'user_table': user_table,
-                  'ctnr_table': ctnr_table})
+                   'ctnr_table': ctnr_table, 'contact_table': contact_table})

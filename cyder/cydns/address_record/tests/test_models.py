@@ -278,8 +278,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                           **{'record': rec0, 'new_name': "%asdfsaf",
                              "new_ip": "1928.193.23.1"})
         self.assertRaises(ValidationError, self.do_update_A_record,
-                **{'record': rec0, 'new_name': None, "new_ip":
-                    "1928.193.23.1"})
+                          **{'record': rec0, 'new_name': None,
+                             "new_ip": "1928.193.23.1"})
 
     def test_update_invalid_ip_AAAA_record(self):
         osu_block = "7620:105:F000:"
@@ -290,21 +290,23 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.assertRaises(ValidationError, self.do_update_AAAA_record, **{
                           'record': rec0, 'new_name': None, 'new_ip': 71134})
         self.assertRaises(ValidationError, self.do_update_AAAA_record,
-                **{'record': rec0, 'new_name': None, 'new_ip': osu_block +
-                    ":::"})
+                          **{'record': rec0, 'new_name': None,
+                             'new_ip': osu_block + ":::"})
         self.assertRaises(ValidationError, self.do_update_AAAA_record,
-                **{'record': rec0, 'new_name': "%asdfsaf", 'new_ip':
-                    osu_block})
+                          **{'record': rec0, 'new_name': "%asdfsaf",
+                             'new_ip': osu_block})
         self.assertRaises(ValidationError, self.do_update_AAAA_record,
-                **{'record': rec0, 'new_name': "sdfsa", 'new_ip':
-                    1239812472934623847})
+                          **{'record': rec0, 'new_name': "sdfsa",
+                             'new_ip': 1239812472934623847})
         self.assertRaises(ValidationError, self.do_update_AAAA_record,
-                **{'record': rec0, 'new_name': None, 'new_ip': "128.193.1.1"})
+                          **{'record': rec0, 'new_name': None,
+                             'new_ip': "128.193.1.1"})
         self.assertRaises(ValidationError, self.do_update_AAAA_record,
-                **{'record': rec0, 'new_name': "%asdfsaf",
-                    'new_ip': osu_block + ":1"})
+                          **{'record': rec0, 'new_name': "%asdfsaf",
+                             'new_ip': osu_block + ":1"})
         self.assertRaises(ValidationError, self.do_update_AAAA_record,
-                **{'record': rec0, 'new_name': " sdfsa ", 'new_ip': None})
+                          **{'record': rec0, 'new_name': " sdfsa ",
+                             'new_ip': None})
 
     ######################
     ### Removing Tests ###
@@ -381,8 +383,9 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.assertTrue(rec.__repr__())
         self.assertTrue(rec.details())
 
-        search = AddressRecord.objects.filter(label=data['label'],
-                    domain=data['domain'], ip_type='4', ip_str=data['ip'])
+        search = AddressRecord.objects.filter(
+            label=data['label'], domain=data['domain'], ip_type='4',
+            ip_str=data['ip'])
         found = False
         for record in search:
             if record.ip_str == data['ip']:

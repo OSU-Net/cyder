@@ -10,8 +10,7 @@ from cyder.base.constants import LEVELS
 from cyder.base.utils import qd_to_py_dict, tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
-from cyder.core.views import (CoreCreateView, CoreDetailView, CoreDeleteView,
-                              CoreListView, CoreUpdateView)
+from cyder.core.views import CoreCreateView, CoreDetailView
 
 
 class CtnrView(object):
@@ -33,13 +32,22 @@ class CtnrDetailView(CtnrView, CoreDetailView):
             return context
 
         # Add user levels of ctnr to user table.
-        users = ctnr.users.all()
-        extra_cols = [{'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'}]
-        extra_cols[0]['data'] = [{
-            'value': LEVELS[CtnrUser.objects.get(user=user, ctnr=ctnr).level]
-                     if not user.is_superuser else 'Superuser',
-            'url': ''
-        } for user in users]
+        data = []
+        users = []
+        ctnrusers = ctnr.ctnruser_set.select_related('user', 'user__profile')
+        for ctnruser in ctnrusers:
+            user = ctnruser.user
+            if user.is_superuser:
+                val = 'Superuser'
+            else:
+                val = LEVELS[ctnruser.level]
+            data.append({'value': val, 'url': ''})
+            users.append(user)
+
+        extra_cols = [{'header': 'Level to %s' % ctnr.name,
+                       'sort_field': 'user'}]
+        extra_cols[0]['data'] = data
+
         user_table = tablefy(users, extra_cols=extra_cols, users=True)
 
         domains = ctnr.domains.filter(is_reverse=False)
@@ -48,22 +56,32 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         rdomains = ctnr.domains.filter(is_reverse=True)
         rdomain_table = tablefy(rdomains)
 
+        ranges = ctnr.ranges.all()
+        range_table = tablefy(ranges)
+
+        workgroups = ctnr.workgroups.all()
+        workgroup_table = tablefy(workgroups)
+
         add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
         return dict({
             'obj_type': 'ctnr',
             'user_table': user_table,
             'domain_table': domain_table,
             'rdomain_table': rdomain_table,
+            'range_table': range_table,
+            'workgroup_table': workgroup_table,
             'add_user_form': add_user_form
         }.items() + context.items())
 
 
 def add_user(request, pk):
     """Add user to container."""
+    ctnr = Ctnr.objects.get(id=pk)
     form = CtnrUserForm(qd_to_py_dict(request.POST))
     if form.is_valid():
         # Create table so client can inside new row into user table.
-        extra_cols = [{'header': ''}]
+        extra_cols = [{'header': 'Level to %s' % ctnr.name,
+                       'sort_field': 'user'}]
         extra_cols[0]['data'] = [{'value': LEVELS[int(request.POST['level'])],
                                   'url': ''}]
         user_table = tablefy(User.objects.filter(id=request.POST['user']),
@@ -146,7 +164,7 @@ def change_ctnr(request, pk=None):
         messages.error(request, "You do not have access to this container.")
 
     if ('/' + '/'.join(referer.split('/')[3:]) ==
-        reverse('ctnr-detail', kwargs={'pk': prev.id})):
+            reverse('ctnr-detail', kwargs={'pk': prev.id})):
         referer = reverse('ctnr-detail', kwargs={'pk': ctnr.id})
 
     return redirect(referer)

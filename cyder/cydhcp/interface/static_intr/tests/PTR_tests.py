@@ -78,7 +78,8 @@ class PTRStaticRegTests(TestCase):
         self.assertRaises(ValidationError, self.do_add_intr, **kwargs)
 
     def test2_conflict_add_intr_first(self):
-        # Add an intr and update an existing PTR to conflict. Test for exception.
+        # Add an intr and update an existing PTR to conflict.
+        # Test for exception.
         mac = "12:22:33:44:55:66"
         label = "fo99"
         domain = self.f_c
@@ -93,7 +94,8 @@ class PTRStaticRegTests(TestCase):
         self.assertRaises(ValidationError, ptr.clean)
 
     def test2_conflict_add_A_first(self):
-        # Add an PTR and update and existing intr to conflict. Test for exception.
+        # Add an PTR and update and existing intr to conflict.
+        # Test for exception.
         mac = "11:22:33:44:55:66"
         label = "foo98"
         domain = self.f_c

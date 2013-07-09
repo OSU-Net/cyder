@@ -115,11 +115,11 @@ class BuildScriptTests(object):
         if os.path.exists(self.lock_file):
             os.remove(self.lock_file)
         b1 = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file)
+                        LOCK_FILE=self.lock_file)
         b2 = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file)
+                        LOCK_FILE=self.lock_file)
         b3 = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file)
+                        LOCK_FILE=self.lock_file)
         self.assertFalse(os.path.exists(self.lock_file))
         self.assertTrue(b1.lock())
         self.assertTrue(os.path.exists(self.lock_file))

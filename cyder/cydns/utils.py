@@ -92,9 +92,9 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
 
         if not leaf_domain:
             raise ValidationError(
-                    "Creating this record would cause the creation of a new "
-                    "TLD. Please contact http://www.icann.org/ for more "
-                    "information.")
+                "Creating this record would cause the creation of a new "
+                "TLD. Please contact http://www.icann.org/ for more "
+                "information.")
         if leaf_domain.delegated:
             raise ValidationError(
                 "Creating this record would cause the creation of a domain "
@@ -190,4 +190,4 @@ def get_zones():
     """This function returns a list of domains that are at the root of their
     respective zones."""
     return Domain.objects.filter(~Q(master_domain__soa=F('soa')),
-                            soa__isnull=False)
+                                 soa__isnull=False)

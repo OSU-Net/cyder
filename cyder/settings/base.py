@@ -21,6 +21,8 @@ sys.path.append(site_root + '/vendor')
 EMAIL_SUFFIX = '@onid.oregonstate.edu'
 CAS_SERVER_URL = 'https://login.oregonstate.edu/cas/login'
 CAS_AUTO_CREATE_USERS = True  # Not to be used in production.
+BUG_REPORT_EMAIL = 'minions@net.oregonstate.edu'
+EMAIL_HOST = 'mail.oregonstate.edu'
 
 SASS_PREPROCESS = True
 JINGO_MINIFY_USE_STATIC = False
@@ -95,8 +97,6 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cydhcp.vrf',
     'cydhcp.workgroup',
     'cydns',
-    'dnsutils',
-    'dnsutils.migrate',
     'cydns',
     'cydns.address_record',
     'cydns.cname',
@@ -202,7 +202,10 @@ PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 
 # Migration settings
 POINTERS = [('128.193.76.253', 'cob-dc81.bus.oregonstate.edu', 'forward'),
-            ('128.193.76.254', 'cob-dc82.bus.oregonstate.edu', 'forward')]
+            ('128.193.76.254', 'cob-dc82.bus.oregonstate.edu', 'forward'),
+            ('128.193.76.252', 'cob-dc83.bus.oregonstate.edu', 'forward'),
+            ('128.193.76.255', 'cob-dc84.bus.oregonstate.edu', 'forward')]
+
 REVERSE_DOMAINS = [
     '50.209.59.69', '193.128', '10', '211.140', '201.199', '32.198', '232.111',
     '127', '131.80.252.131', '5.68.98.207'

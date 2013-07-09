@@ -1,5 +1,5 @@
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.interface.static_intr.views import find_available_ip_from_ipv4_range
+from cyder.cydhcp.site.models import Site
 
 
 def get_available_ip_by_domain(domain):
@@ -21,7 +21,7 @@ def get_available_ip_by_domain(domain):
     # First look for a site. This could be the first label or a combination of
     # labels.
     site_name = ""
-    for label in reversed(name.split('.'):
+    for label in reversed(name.split('.')):
         possible = Site.objects.filter(label)
         if possible:
             site = possible[0]

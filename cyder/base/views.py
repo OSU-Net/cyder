@@ -2,6 +2,8 @@ import simplejson as json
 
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail, BadHeaderError
+from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.forms import ValidationError
 from django.forms.util import ErrorList, ErrorDict
@@ -17,12 +19,60 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
+from cyder.base.forms import BugReportForm
+from cyder.core.cyuser.models import User
+
+import settings
 
 
 def home(request):
     return render_to_response('base/index.html', {
         'read_only': getattr(request, 'read_only', False),
     })
+
+
+def send_email(request):
+    if request.POST:
+        form = BugReportForm(qd_to_py_dict(request.POST))
+
+        if form.is_valid():
+            from_email = User.objects.get(
+                pk=request.session['_auth_user_id']).email
+            subject = "Cyder Bug Report: " + str(request.POST.get('bug', ''))
+            message = (
+                "|.......User Description......|\n"
+                + request.POST.get('description', '')
+                + "\n\nHow to Reproduce:"
+                + "\n" + request.POST.get('reproduce', '')
+                + "\n\nExpected Result:"
+                + "\n" + request.POST.get('expected', '')
+                + "\n\nActual Result:"
+                + "\n" + request.POST.get('actual', '')
+                + request.POST.get('session_data', ''))
+            try:
+                send_mail(subject, message, from_email,
+                          [settings.BUG_REPORT_EMAIL])
+                return redirect(reverse('core-index'))
+
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+
+        else:
+            return render(request, 'base/email_form.html', {'form': form})
+
+    else:
+        session_data = (
+            "\n\n|................URL...............|\n\n"
+            + str(request.META.get('HTTP_REFERER', ''))
+            + "\n\n|.........Session data.........|\n\n"
+            + str(dict(request.session))
+            + "\n\n|.........Request data.........|\n\n"
+            + str(request))
+
+        form = BugReportForm(initial={'session_data': session_data})
+
+        return render(request, 'base/email_form.html',
+                      {'form': form})
 
 
 def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
@@ -81,7 +131,10 @@ def cy_delete(request, pk, get_klasses_fn):
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
 
-    return redirect(request.META.get('HTTP_REFERER', obj.get_list_url()))
+    referer = request.META.get('HTTP_REFERER', obj.get_list_url())
+    # if there is path beyond obj.get_list_url() remove
+    referer = referer.replace(referer.split(obj.get_list_url())[1], '')
+    return redirect(referer)
 
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):

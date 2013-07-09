@@ -348,6 +348,7 @@ def gen_CNAME():
 
 
 def gen_DNS(skip_edu=False):
+    add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
 
@@ -372,15 +373,23 @@ def gen_DNS(skip_edu=False):
         Zone(domain_id=domain_id, dname=dname,)
 
 
-def dump_maintain():
-    maintain_dump.main()
+def add_pointers_manual():
     opts = settings.POINTERS
     for opt in opts:
         (ip, hn, ptype) = opt
-        x = (ip2long(ip), hn, ptype)
-        sql = ('INSERT INTO pointer (ip, hostname, type) '
-               'VALUES (%s, "%s", "%s")' % x)
+        ip = ip2long(ip)
+        sql = ('SELECT count(*) FROM pointer WHERE ip = %s AND hostname = "%s"'
+               'AND type = "%s"' % (ip, hn, ptype))
         cursor.execute(sql)
+        exists = cursor.fetchone()[0]
+        if not exists:
+            sql = ('INSERT INTO pointer (ip, hostname, type) '
+                   'VALUES (%s, "%s", "%s")' % (ip, hn, ptype))
+            cursor.execute(sql)
+
+
+def dump_maintain():
+    maintain_dump.main()
 
 
 def delete_dns():
@@ -394,10 +403,8 @@ def delete_CNAME():
 
 
 def do_everything(skip_edu=False):
-    dump_maintain()
     delete_dns()
     delete_CNAME()
-    fix_maintain.main()
     gen_DNS(skip_edu)
     gen_CNAME()
 

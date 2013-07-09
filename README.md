@@ -28,24 +28,23 @@ Installation
 
 - Fedora:
 
-```
+    ```
 sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel python-pip community-mysql
 sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems bind
 sudo systemctl start mysqld
-```
+    ```
 
 - Debian:
 
-<!-- TODO: add MySQL, pip, etc. -->
-
-```
+    ```
 sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev rubygems
-```
+    ```
+
+<!-- TODO: add MySQL, pip, etc. -->
 
 ####Miscellaneous
 
 ```
-sudo pip install django_cas
 sudo gem install sass
 ```
 
@@ -53,32 +52,32 @@ sudo gem install sass
 
 - Clone the repo:
 
-```
+    ```
 git clone 'git@github.com:OSU-Net/cyder.git'
 cd cyder
-```
+    ```
 
 - Set up virtualenv (recommended):
 
-```
+    ```
 virtualenv --distribute .env
-```
+    ```
 
-Do `source .env/bin/activate` now and every time you run your shell.
+    Do `source .env/bin/activate` now and every time you run your shell.
 
 - Install submodules and other dependencies:
 
-```
+    ```
 git submodule update --init --recursive
 pip install -r requirements/dev.txt
 cd vendor/src/jingo-minify && git pull origin master && cd -
-```
+    ```
 - Set up settings
 
-```
+    ```
 cp cyder/settings/local.py-dist cyder/settings/local.py
 sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
-```
+    ```
 
 <!-- If you want to use setting_test.py-dist, figure it out yourself. -->
 
@@ -86,18 +85,21 @@ sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
 
 - Sync the database and run migrations:
 
-```
+    ```
 python manage.py syncdb
 python manage.py migrate
-```
+    ```
 
 - Install a PEP8 linter as a git pre-commit hook:
 
-```
+    (With virtualenv, omit the `sudo`.)
+
+    ```
 git clone git@github.com:jbalogh/check && cd check
-sudo python check/setup.py install
+sudo python setup.py install && cd -
 cp requirements/.pre-commit .git/hooks/pre-commit
-```
+    ```
+
 
 Coding Standards
 ================
@@ -108,10 +110,10 @@ Adhere to coding standards, or feel the wrath of my **erupting burning finger**.
 - Strict 80-character limit on lines of code in Python, recommended in HTML and JS
 - 2-space HTML indents, 4-space indent everything else
 - Single-quotes over double-quotes
-- Use whitespace to separate logical blocks of code - no 200 line walls of code
-- Reduce, reuse, recycle - this project is very generic-heavy, look for previously invented wheels
+- Use whitespace to separate logical blocks of code — no 200 line walls of code
+- Reduce, reuse, recycle — this project is very generic-heavy, look for previously invented wheels
 - Keep files litter-free: throw away old print statements and pdb imports
-- Descriptive variable names - verbose > incomprehensible
+- Descriptive variable names — verbose > incomprehensible
 
 For multi-line blocks of code, either use 4-space hanging indents or visual indents.
 
