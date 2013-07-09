@@ -7,6 +7,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.constants import (
     ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
 )
+from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
@@ -49,7 +50,11 @@ class Range(models.Model, ObjectUrlMixin):
 
     id = models.AutoField(primary_key=True)
 
-    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items())
+    ip_type = models.CharField(
+            verbose_name='IP address type', max_length=1,
+            choices=IP_TYPES.items(), default=IP_TYPE_4,
+            validators=[validate_ip_type]
+    )
     start_upper = models.BigIntegerField(null=True)
     start_lower = models.BigIntegerField(null=True)
     start_str = models.CharField(max_length=39, editable=True)
