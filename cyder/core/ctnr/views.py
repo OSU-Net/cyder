@@ -131,7 +131,11 @@ def change_ctnr(request, pk=None):
         else:
             ctnr = Ctnr.objects.get(id=pk)
     except:
+        for ctnr in request.session['ctnrs']:
+            if ctnr.name == request.POST['ctnr_name']:
+                request.session['ctnrs'].remove(ctnr)
         messages.error(request, "Could not change container, does not exist")
+        request.session.modified = True
         return redirect(referer)
 
     # Check if user has access to ctnr.
