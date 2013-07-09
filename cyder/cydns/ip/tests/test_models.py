@@ -115,13 +115,6 @@ class SimpleTest(TestCase):
     def test_creation(self):
         rd = self.create_domain(name='130', ip_type='4')
         rd.save()
-        try:
-            ip = Ip(ip_str="130.193.1.2")  # Forget the ip_type
-            ip.clean_ip()
-
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
 
         ip = Ip(ip_str="130.193.1.2", ip_type='4')
         self.assertFalse(ip.ip_upper and ip.ip_lower and ip.reverse_domain)

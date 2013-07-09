@@ -493,17 +493,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                 self.f_o_e, 'ip': osu_block + ":8"}
         self.do_add_record6(data)
 
-    def test_no_type(self):
-        data = {'label': 'uuu', 'domain': self.f_o_e, 'ip': '128.193.4.1'}
-        rec = AddressRecord(label=data['label'], domain=data[
-                            'domain'], ip_str=data['ip'], ip_type='x')
-        self.assertRaises(ValidationError, rec.save)
-
-        data = {'label': 'uuu', 'domain': self.f_o_e, 'ip': '128.193.4.1'}
-        rec = AddressRecord(
-            label=data['label'], domain=data['domain'], ip_str=data['ip'])
-        self.assertRaises(ValidationError, rec.save)
-
     def test_bad_A_ip(self):
         #IPv4 Tests
         osu_block = "2620:105:F000:"
