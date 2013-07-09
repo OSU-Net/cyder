@@ -24,8 +24,11 @@ class Network(models.Model, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
 
     # NETWORK/NETMASK FIELDS
-    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items(),
-                               editable=True, validators=[validate_ip_type])
+    ip_type = models.CharField(
+            verbose_name='IP address type', max_length=1,
+            choices=IP_TYPES.items(), default=IP_TYPE_4,
+            validators=[validate_ip_type]
+    )
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
