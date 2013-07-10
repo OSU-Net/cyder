@@ -116,17 +116,25 @@ class SimpleTest(TestCase):
         rd = self.create_domain(name='130', ip_type='4')
         rd.save()
 
-        ip = Ip(ip_str="111:22:3::")  # Default type is IPv4
-        self.assertRaises(ValidationError, ip.clean_ip)
+        ip = Ip(ip_str="111:22:3::", ip_type='6')
+        ip.clean_ip()
 
         ip = Ip(ip_str="130.193.1.2", ip_type='4')
         self.assertFalse(ip.ip_upper and ip.ip_lower and ip.reverse_domain)
 
     def test_bad_create(self):
+        ip = Ip(ip_str="111:22:3::")  # Default type is IPv4
+        self.assertRaises(ValidationError, ip.clean_ip)
+
+        ip = Ip(ip_str="130.193.1.2", ip_type='6')
+        self.assertRaises(ValidationError, ip.clean_ip)
+
         ip = Ip(ip_str="66.193.1.2", ip_type='x')
         self.assertRaises(ValidationError, ip.clean_ip)
+
         ip = Ip(ip_str="66.193.1.2", ip_type=None)
         self.assertRaises(ValidationError, ip.clean_ip)
+
         ip = Ip(ip_str="66.193.1.2", ip_type=99)
         self.assertRaises(ValidationError, ip.clean_ip)
 
