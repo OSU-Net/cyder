@@ -127,7 +127,7 @@ def cy_delete(request, pk, get_klasses_fn):
     obj_type = request.path.split('/')[2]
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
-    if obj_type == 'ctnr':
+    if Klass.__name__ == 'Ctnr':
         request = ctnr_delete_session(request, obj)
     try:
         if perm(request, cy.ACTION_DELETE, obj=obj):
