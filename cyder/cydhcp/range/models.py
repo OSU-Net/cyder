@@ -73,6 +73,7 @@ class Range(models.Model, ObjectUrlMixin):
                                   default=STATIC, editable=False)
 
     search_fields = ('start_str', 'end_str')
+    display_fields = ('start_str', 'end_str')
 
     class Meta:
         db_table = 'range'
@@ -80,7 +81,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return "{0}  -  {1}".format(self.start_str, self.end_str)
+        return " ".join([getattr(self, f) for f in self.display_fields])
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))

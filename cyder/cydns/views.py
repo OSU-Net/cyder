@@ -96,6 +96,9 @@ def cydns_view(request, pk=None):
     page_obj = make_paginator(
         request, do_sort(request, object_list), 50)
 
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
+
     return render(request, 'cydns/cydns_view.html', {
         'form': form,
         'obj': record,

@@ -109,6 +109,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
+
     return render(request, template, {
         'form': form,
         'obj': obj,

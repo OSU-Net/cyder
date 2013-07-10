@@ -10,7 +10,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_label
-from cyder.cydns.domain.models import Domain
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
 def validate_ip(ip):
@@ -28,7 +28,7 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(forms.ModelForm):
+class StaticInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
@@ -37,11 +37,6 @@ class StaticInterfaceForm(forms.ModelForm):
     class Meta:
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
-
-    def __init__(self, *args, **kwargs):
-        super(StaticInterfaceForm, self).__init__(*args, **kwargs)
-        self.fields['domain'].queryset = Domain.objects.order_by("name")
-        self.fields['system'].queryset = System.objects.order_by("name")
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):

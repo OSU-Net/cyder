@@ -42,13 +42,14 @@ class Network(models.Model, ObjectUrlMixin):
     network = None
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
+    display_fields = ('network_str',)
 
     class Meta:
         db_table = 'network'
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
     def __str__(self):
-        return self.network_str
+        return " ".join([getattr(self, f) for f in self.display_fields])
 
     def __repr__(self):
         return "<Network {0}>".format(str(self))
