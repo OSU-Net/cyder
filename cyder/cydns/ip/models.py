@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_6, IP_TYPE_4
+from cyder.cydns.validation import validate_ip_type
 
 from cyder.cydhcp.utils import two_to_one
 
@@ -75,8 +76,9 @@ class Ip(models.Model):
     # the definition for 'domain'.
     # reverse_domain = models.ForeignKey(Domain, null=True, blank=True)
     ip_type = models.CharField(
-        max_length=1, choices=IP_TYPES.items(), editable=True,
-        help_text='IPv4 or IPv6 Address type'
+        verbose_name='IP address type', max_length=1,
+        choices=IP_TYPES.items(), default=IP_TYPE_4,
+        validators=[validate_ip_type]
     )
 
     class Meta:

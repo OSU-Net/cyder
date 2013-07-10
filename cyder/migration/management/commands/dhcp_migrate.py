@@ -128,7 +128,7 @@ def create_zone(id, name, description, comment, purge, email, notify, blank):
     """
     Takes a row from the Maintain zone table
     returns a newly made container and creates the many to many relatiosnhip
-    between the new ctnr and it's associated range
+    between the new ctnr and its associated range
     """
     c, created = Ctnr.objects.get_or_create(name=name,
                                             description=comment or description)

@@ -30,6 +30,7 @@ class NetworkForm(forms.ModelForm):
     class Meta:
         model = Network
         exclude = ('ip_upper', 'ip_lower', 'prefixlen')
+        widgets = {'ip_type': forms.RadioSelect}
 
     def clean(self):
         cleaned_data = super(NetworkForm, self).clean()

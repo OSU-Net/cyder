@@ -3,9 +3,9 @@ from django import forms
 
 class BugReportForm(forms.Form):
 
-    bug = forms.CharField(label="Bug: - (required)", required=True)
+    bug = forms.CharField(label="Bug (required)", required=True)
     description = forms.CharField(
-        label="Description: - (required)",
+        label="Description (required)",
         widget=forms.Textarea(attrs={'rows': 4, 'cols': 50}), required=True)
     reproduce = forms.CharField(
         label="How to reproduce the error",

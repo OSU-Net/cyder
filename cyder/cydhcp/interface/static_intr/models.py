@@ -34,20 +34,20 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         >>> s.save()
 
     This class is the main interface to DNS and DHCP. A static
-    interface consists of three key pieces of information: Ip address, Mac
-    Address, and Hostname (the hostname is comprised of a label and a domain).
-    From these three peices of information, three things are ensured: An A or
+    interface consists of three key pieces of information: IP address, MAC
+    address, and hostname (the hostname is comprised of a label and a domain).
+    From these three pieces of information, three things are ensured: An A or
     AAAA DNS record, a PTR record, and a `host` statement in the DHCP builds
-    that grants the mac address of the interface the correct IP address and
+    that grants the MAC address of the interface the correct IP address and
     hostname.
 
-    If you want an A/AAAA, PTR, and a DHCP lease, create on of these objects.
+    If you want an A/AAAA, PTR, and a DHCP lease, create one of these objects.
 
     In terms of DNS, a static interface represents a PTR and A record and must
-    adhear to the requirements of those classes. The interface inherits from
-    BaseAddressRecord and will call it's clean method with
-    'update_reverse_domain' set to True. This will ensure that it's A record is
-    valid *and* that it's PTR record is valid.
+    adhere to the requirements of those classes. The interface inherits from
+    BaseAddressRecord and will call its clean method with
+    'update_reverse_domain' set to True. This will ensure that its A record is
+    valid *and* that its PTR record is valid.
 
     Using the 'attrs' attribute.
 
@@ -86,7 +86,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     """
     id = models.AutoField(primary_key=True)
     mac = models.CharField(max_length=17, validators=[validate_mac],
-                           help_text='Mac address in format XX:XX:XX:XX:XX:XX')
+                           help_text='MAC address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
@@ -97,9 +97,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
-        default=True, help_text='Enable dhcp for this interface?')
+        default=True, help_text='Enable DHCP for this interface?')
     dns_enabled = models.BooleanField(
-        default=True, help_text='Enable dns for this interface?')
+        default=True, help_text='Enable DNS for this interface?')
 
     attrs = None
     search_fields = ('mac', 'ip_str', 'fqdn')
@@ -112,7 +112,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return '<StaticInterface: {0}>'.format(str(self))
 
     def __str__(self):
-        #return 'IP:{0} Full Name:{1} Mac:{2}'.format(self.ip_str,
+        #return 'IP:{0} Full Name:{1} MAC:{2}'.format(self.ip_str,
         #        self.fqdn, self.mac)
         return self.fqdn
 
@@ -212,7 +212,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         self.mac = self.mac.lower()
         if not self.system:
             raise ValidationError(
-                "An interface means nothing without it's system."
+                "An interface means nothing without its system."
             )
 
         from cyder.cydns.ptr.models import PTR
@@ -241,7 +241,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         db_self = StaticInterface.objects.get(pk=self.pk)
         if db_self.label == self.label and db_self.domain == self.domain:
             return
-        # The label of the domain changed. Make sure it's not a glue record
+        # The label of the domain changed. Make sure it's not a glue record.
         Nameserver = cydns.nameserver.models.Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
             raise ValidationError(
