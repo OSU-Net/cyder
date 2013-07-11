@@ -103,7 +103,11 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
             # Manual extra columns.
             for col in extra_cols:
                 d = col['data'][i]
-                row_data.append({'value': [d['value']], 'url': [d['url']]})
+                if 'img' in d:
+                    row_data.append({'value': [d['value']], 'url': [d['url']],
+                                    'img': [d['img']]})
+                else:
+                    row_data.append({'value': [d['value']], 'url': [d['url']]})
 
         if views:
             # Another column for views.
