@@ -259,9 +259,11 @@ def migrate_zones():
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
-                   "workgroup, zone, enabled FROM host WHERE ip = 0")
+                   "workgroup, zone, enabled, last_seen "
+                   "FROM host WHERE ip = 0")
     res = cursor.fetchall()
-    for range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en in res:
+    for (range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en,
+         last_seen) in res:
         """
         r = maintain_find_range(range_id)
         c = maintain_find_zone(zone_id) if zone_id else None
@@ -281,10 +283,12 @@ def migrate_dynamic_hosts():
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=mac, system=s, dhcp_enabled=en, dns_enabled=en)
+                mac=mac, system=s, dhcp_enabled=en, dns_enabled=en,
+                last_seen=last_seen)
             continue
         intr, _ = DynamicInterface.objects.get_or_create(
-            system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac)
+            system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
+            last_seen=last_seen)
 
 
 def migrate_user():

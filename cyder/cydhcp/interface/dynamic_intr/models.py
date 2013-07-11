@@ -10,6 +10,8 @@ from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 
+import datetime
+
 
 class DynamicInterface(models.Model, ObjectUrlMixin):
     ctnr = models.ForeignKey(Ctnr, null=False)
@@ -26,6 +28,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     domain = models.ForeignKey(Domain, null=True)
     dhcp_enabled = models.BooleanField(default=True)
     dns_enabled = models.BooleanField(default=True)
+    last_seen = models.PositiveIntegerField(
+        max_length=11, blank=True, default=0)
     search_fields = ('mac')
 
     class Meta:
@@ -33,13 +37,21 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def details(self):
         data = super(DynamicInterface, self).details()
+        if self.last_seen == 0:
+            date = 0
+
+        else:
+            date = datetime.datetime.fromtimestamp(self.last_seen)
+            date = date.strftime('%B %d, %Y, %I:%M %p')
+
         data['data'] = [
             ('System', 'system', self.system),
             ('Mac', 'mac', self.mac),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
             ('Vrf', 'vrf', self.vrf),
-            ('Domain', 'domain', self.domain)]
+            ('Domain', 'domain', self.domain),
+            ('Last_Seen', 'last_seen', date)]
         return data
 
     def build_host(self):

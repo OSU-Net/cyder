@@ -4,6 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 import cydns
+import datetime
 
 from cyder.core.system.models import System
 
@@ -101,6 +102,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     dns_enabled = models.BooleanField(
         default=True, help_text='Enable DNS for this interface?')
 
+    last_seen = models.PositiveIntegerField(
+        max_length=11, blank=True, default=0)
+
     attrs = None
     search_fields = ('mac', 'ip_str', 'fqdn')
 
@@ -121,6 +125,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def details(self):
         data = super(StaticInterface, self).details()
+        if self.last_seen == 0:
+            date = 0
+
+        else:
+            date = datetime.datetime.fromtimestamp(self.last_seen)
+            date = date.strftime('%B %d, %Y, %I:%M %p')
+
         data['data'] = (
             ('Name', 'fqdn', self),
             ('IP', 'ip_str', str(self.ip_str)),
@@ -132,6 +143,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('DNS Enabled', 'dns_enabled',
                 'True' if self.dns_enabled else 'False'),
             ('DNS Type', '', 'A/PTR'),
+            ('Last_Seen', 'last_seen', date),
         )
         return data
 

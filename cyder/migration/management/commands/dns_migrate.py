@@ -127,12 +127,12 @@ class Zone(object):
         cursor.execute("SELECT id, ip, name, workgroup, enabled, ha, "
                        "type, os, location, department , serial, other_id, "
                        "purchase_date, po_number, warranty_date, owning_unit, "
-                       "user_id "
+                       "user_id, last_seen "
                        "FROM host "
                        "WHERE ip != 0 AND domain = '%s';" % self.domain_id)
         for id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
                 serial, other_id, purchase_date, po_number, warranty_date, \
-                owning_unit, user_id in cursor.fetchall():
+                owning_unit, user_id, last_seen in cursor.fetchall():
             name = name.lower()
             enabled = bool(enabled)
             if ip == 0:
@@ -165,7 +165,8 @@ class Zone(object):
                     static = StaticInterface(label=name, domain=self.domain,
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
-                                             vrf=v, workgroup=w)
+                                             vrf=v, workgroup=w,
+                                             last_seen=last_seen)
 
                     # Static Interfaces need to be cleaned independently.
                     # (no get_or_create)
