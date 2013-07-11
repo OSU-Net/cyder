@@ -143,7 +143,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('DNS Enabled', 'dns_enabled',
                 'True' if self.dns_enabled else 'False'),
             ('DNS Type', '', 'A/PTR'),
-            ('Last_Seen', 'last_seen', date),
+            ('Last Seen', 'last_seen', date),
         )
         return data
 

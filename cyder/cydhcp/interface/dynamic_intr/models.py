@@ -51,7 +51,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Workgroup', 'workgroup', self.workgroup),
             ('Vrf', 'vrf', self.vrf),
             ('Domain', 'domain', self.domain),
-            ('Last_Seen', 'last_seen', date)]
+            ('Last Seen', 'last_seen', date)]
         return data
 
     def build_host(self):
