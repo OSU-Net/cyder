@@ -31,6 +31,19 @@ def home(request):
     })
 
 
+def admin_page(request):
+    if request.POST:
+        print 'actions!'
+
+    else:
+        if request.session['level'] == 2:
+            return render(request, 'base/admin_page.html')
+        else:
+            return redirect(reverse('core-index'))
+
+
+
+
 def send_email(request):
     if request.POST:
         form = BugReportForm(qd_to_py_dict(request.POST))
