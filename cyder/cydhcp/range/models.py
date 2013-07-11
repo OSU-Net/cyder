@@ -81,7 +81,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return " ".join([getattr(self, f) for f in self.display_fields])
+        return " - ".join([getattr(self, f) for f in self.display_fields])
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
