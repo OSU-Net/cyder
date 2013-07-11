@@ -33,6 +33,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
 
         # Add user levels of ctnr to user table.
         data = []
+        action_data = []
         users = []
         ctnrusers = ctnr.ctnruser_set.select_related('user', 'user__profile')
         for ctnruser in ctnrusers:
@@ -43,10 +44,19 @@ class CtnrDetailView(CtnrView, CoreDetailView):
                 val = LEVELS[ctnruser.level]
             data.append({'value': val, 'url': ''})
             users.append(user)
+            action_data.append({
+                'value': 'delete',
+                #'url': '/ctnr/' + str(ctnr.id) + '/remove_user/'
+                #         + str(user.id) +'/',
+                'url': reverse('ctnr-remove-user', kwargs={'ctnr_pk':ctnr.id,
+                                                           'user_pk':user.id}),
+                'img': '/media/img/delete.png'})
 
         extra_cols = [{'header': 'Level to %s' % ctnr.name,
-                       'sort_field': 'user'}]
+                       'sort_field': 'user'},
+                      {'header': 'Actions', 'sort_field': 'user'}]
         extra_cols[0]['data'] = data
+        extra_cols[1]['data'] = action_data
 
         user_table = tablefy(users, extra_cols=extra_cols, users=True)
 
@@ -72,6 +82,11 @@ class CtnrDetailView(CtnrView, CoreDetailView):
             'workgroup_table': workgroup_table,
             'add_user_form': add_user_form
         }.items() + context.items())
+
+
+def remove_user(request, ctnr_pk, user_pk):
+    CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
+    return redirect(request.META.get('HTTP_REFERER', ''))
 
 
 def add_user(request, pk):
