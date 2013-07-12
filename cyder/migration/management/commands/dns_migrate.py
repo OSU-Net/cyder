@@ -144,9 +144,7 @@ class Zone(object):
             # TODO: Make systems unique by hostname, ip, mac tuple
             # TODO: Add key-value attributes to system objects.
 
-            system, _ = System.objects.get_or_create(name=name,
-                                                     location=location,
-                                                     department=dept)
+            system = System(name=name, location=location, department=dept)
             try:
                 cursor.execute("SELECT name "
                                "FROM workgroup"
