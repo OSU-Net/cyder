@@ -9,9 +9,9 @@ class DisplayMixin(object):
         'pk_just':      10,
         'rhs_just':     1,
         'ttl_just':     6,
-        'rdtype_just':  6,
+        'rdtype_just':  7,
         'rdclass_just': 3,
-        'prio_just':    1,
+        'prio_just':    2,
         'lhs_just':     39,
         'extra_just':   1
     }
