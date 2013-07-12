@@ -72,7 +72,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)
     search_fields = ('primary', 'contact', 'description')
-    template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
+    template = _("{root_domain}. {ttl:$ttl_just}  {rdclass:$rdclass_just}  "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
                  "{refresh} {retry} {expire})")
 

@@ -8,11 +8,11 @@ class DisplayMixin(object):
     justs = {
         'pk_just':      10,
         'rhs_just':     1,
-        'ttl_just':     1,
-        'rdtype_just':  4,
+        'ttl_just':     6,
+        'rdtype_just':  6,
         'rdclass_just': 3,
         'prio_just':    1,
-        'lhs_just':     40,
+        'lhs_just':     39,
         'extra_just':   1
     }
 
