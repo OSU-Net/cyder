@@ -461,6 +461,7 @@ class Command(BaseCommand):
         if options['cname']:
             gen_CNAME()
 
-        print map(lambda x: len(x.objects.all()),
-                  [Domain, AddressRecord, PTR, SOA, MX,
-                  CNAME, Nameserver, StaticInterface])
+        print map(
+            lambda x: len(x.objects.all()),
+            [Domain, AddressRecord, PTR, SOA, MX,
+             CNAME, Nameserver, StaticInterface])
