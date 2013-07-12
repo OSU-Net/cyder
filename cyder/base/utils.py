@@ -104,8 +104,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
             for col in extra_cols:
                 d = col['data'][i]
                 if 'img' in d:
-                    row_data.append({'value': [d['value']], 'url': [d['url']],
-                                    'img': [d['img']]})
+                    print 'img found'
+                    row_data.append({'value': d['value'], 'url': d['url'],
+                                    'img': d['img']})
                 else:
                     row_data.append({'value': [d['value']], 'url': [d['url']]})
 

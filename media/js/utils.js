@@ -8,17 +8,29 @@ function insertTablefyRow(tablefy, tbody) {
 
         for (col in row) {
             var col = row[col];
-            var newCol = $('<td>' + col.value + '</td>');
-
+            var newCol = $('<td>');
             if (col.url) {
-                // Make link if has url.
-                var newLink = $('<a></a>');
-                newLink.attr('href', col.url);
-                newLink.text(col.value);
-                newCol.append(newLink);
+                for (i in col.url) {
+                    if (col.url[i] == '') {
+                        newCol.text(col.value[i]);
+                    } else {
+                        if (col.img) {
+                            if (col.img[i] == '') {
+                                var newLink = $('<a>' + col.value[i] + '</a>');
+                            } else {
+                                var newLink = $('<a><img src=' + col.img[i] + '></a>');
+                            }
+                        } else {
+                            var newLink = $('<a>' + col.value[i] + '</a>');
+                        }
+                        newLink.attr('href', col.url[i]);
+                    newCol.append(newLink);
+                    }
+                }
             } else {
                 newCol.text(col.value);
             }
+            newCol.append('</td>');
             newRow.append(newCol);
         }
         // Add row to table.
