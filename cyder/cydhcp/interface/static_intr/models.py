@@ -248,8 +248,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 "This Interface represents a glue record for a "
                 "Nameserver. Change the Nameserver to edit this record.")
 
-    a_template = _("{bind_name:$rhs_just} {ttl} {rdclass:$rdclass_just}"
-                   "{rdtype_clob:$rdtype_just} {ip_str:$lhs_just}")
+    a_template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just}"
+                   " {rdtype_clob:$rdtype_just} {ip_str:$rhs_just}")
     ptr_template = _("{dns_ip:$lhs_just} {ttl} {rdclass:$rdclass_just}"
                      " {rdtype_clob:$rdtype_just} {fqdn:1}.")
 
