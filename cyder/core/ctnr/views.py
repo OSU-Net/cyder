@@ -1,7 +1,6 @@
 import json
 
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -31,48 +30,8 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         if not ctnr:
             return context
 
-        # Add user levels of ctnr to user table.
-        level_data = []
-        action_data = []
-        users = []
         ctnrusers = ctnr.ctnruser_set.select_related('user', 'user__profile')
-
-        extra_cols = [
-            {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'},
-            {'header': 'Actions', 'sort_field': 'user'}]
-
-        for ctnruser in ctnrusers:
-            user = ctnruser.user
-            if user.is_superuser:
-                val = 'Superuser'
-                level_data.append({
-                    'value': val,
-                    'url': '',
-                })
-            else:
-                level_data.append({
-                    'value': [LEVELS[ctnruser.level], '+', '-'],
-                    'url': [
-                        '',
-                        reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
-                                                            'user_pk': user.id,
-                                                            'lvl': -1}),
-                        reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
-                                                            'user_pk': user.id,
-                                                            'lvl': 1})],
-                    'img': ['', '/media/img/minus.png', '/media/img/plus.png']
-                })
-            users.append(user)
-            action_data.append({
-                'value': ['Delete'],
-                'url': [reverse('ctnr-remove-user', kwargs={
-                    'ctnr_pk': ctnr.id, 'user_pk': user.id})],
-                'img': ['/media/img/delete.png']
-            })
-
-        extra_cols[0]['data'] = level_data
-        extra_cols[1]['data'] = action_data
-
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
         user_table = tablefy(users, extra_cols=extra_cols, users=True)
 
         domains = ctnr.domains.filter(is_reverse=False)
@@ -99,6 +58,61 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         }.items() + context.items())
 
 
+def create_user_extra_cols(ctnr, ctnrusers):
+    level_data = []
+    action_data = []
+    users = []
+    extra_cols = [
+        {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'},
+        {'header': 'Actions', 'sort_field': 'user'}]
+
+    for ctnruser in ctnrusers:
+        user = ctnruser.user
+        if user.is_superuser:
+            val = 'Superuser'
+            level = {
+                'value': val,
+                'url': '',
+            }
+        else:
+            level = {
+                'value': [LEVELS[ctnruser.level], '+', '-'],
+                'url': [
+                    '',
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
+                                                        'user_pk': user.id,
+                                                        'lvl': -1}),
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
+                                                        'user_pk': user.id,
+                                                        'lvl': 1})],
+                'img': ['', '/media/img/minus.png', '/media/img/plus.png']
+            }
+
+            if level['value'][0] == 'Admin':
+                del level['value'][2]
+                del level['url'][2]
+                del level['img'][2]
+
+            elif level['value'][0] == 'Guest':
+                del level['value'][1]
+                del level['url'][1]
+                del level['img'][1]
+
+        level_data.append(level)
+        users.append(user)
+        action_data.append({
+            'value': ['Delete'],
+            'url': [reverse('ctnr-remove-user', kwargs={
+                'ctnr_pk': ctnr.id, 'user_pk': user.id})],
+            'img': ['/media/img/delete.png']
+        })
+
+    extra_cols[0]['data'] = level_data
+    extra_cols[1]['data'] = action_data
+
+    return extra_cols, users
+
+
 def remove_user(request, ctnr_pk, user_pk):
     CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
     return redirect(request.META.get('HTTP_REFERER', ''))
@@ -122,33 +136,10 @@ def add_user(request, pk):
     if form.is_valid():
         # Create table so client can inside new row into user table.
         form.save()
-
-        extra_cols = [
-            {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'},
-            {'header': 'Actions', 'sort_field': 'user'}]
-
-        extra_cols[0]['data'] = [{
-            'value': [LEVELS[int(request.POST['level'])], '+', '-'],
-            'url': [
-                '',
-                reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
-                                                    'user_pk': user,
-                                                    'lvl': -1}),
-                reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
-                                                    'user_pk': user,
-                                                    'lvl': 1})],
-            'img': ['', '/media/img/minus.png', '/media/img/plus.png']
-        }]
-
-        extra_cols[1]['data'] = [{
-            'value': ['Delete'],
-            'url': [reverse('ctnr-remove-user', kwargs={'ctnr_pk': ctnr.id,
-                                                        'user_pk': user})],
-            'img': ['/media/img/delete.png']
-        }]
-
-        user_table = tablefy(User.objects.filter(id=request.POST['user']),
-                             users=True, extra_cols=extra_cols)
+        ctnrusers = [CtnrUser.objects.select_related().get(
+            ctnr_id=ctnr.id, user_id=user)]
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
+        user_table = tablefy(users, users=True, extra_cols=extra_cols)
 
         return HttpResponse(json.dumps({'user': user_table}))
     else:
