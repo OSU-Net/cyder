@@ -43,7 +43,7 @@ clean:
 
 apidoc:
 	@echo "=== Removing old files ==="
-	-rm -f cyder.*rst
+	find -regextype posix-extended -regex './cyder(\.[^.]*)*\.rst' -delete
 	-rm -f modules.rst
 	@echo "=== Generating autodoc stubs ==="
 	cd ..; $(SPHINXAPIDOC) -o docs cyder
