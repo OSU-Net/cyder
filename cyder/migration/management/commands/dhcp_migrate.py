@@ -296,7 +296,9 @@ def migrate_dynamic_hosts():
 
 def migrate_user():
     print "Migrating users."
-    cursor.execute("SELECT username FROM user")
+    cursor.execute("SELECT username FROM user "
+                   "WHERE username IN ( "
+                   "SELECT DISTINCT username FROM zone_user )")
     result = cursor.fetchall()
     for username, in result:
         username = username.lower()
