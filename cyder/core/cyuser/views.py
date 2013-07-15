@@ -70,6 +70,11 @@ def login_session(request, username):
     return request
 
 
+def delete(request, user_id):
+    User.objects.get(id=user_id).delete()
+    return redirect(request.META.get('HTTP_REFERER', ''))
+
+
 def search(request):
     """Returns a list of users matching 'term'."""
     term = request.GET.get('term', '')

@@ -1,6 +1,11 @@
 {% extends "base/base.html" %}
+{% from "base/tables.html" import render_table %}
 {% block title %}Administration {% endblock %}
 
 {% block header %}Administration {% endblock %}
 {% block content %}
+<div id=tables class=tableclass>
+    <h3> Users not in any Container </h3>
+    {{ render_table(request, user_table, 'user_table') }}
+</div>
 {% endblock %}

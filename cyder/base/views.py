@@ -21,6 +21,7 @@ from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
 from cyder.base.forms import BugReportForm
 from cyder.core.cyuser.models import User
+from cyder.core.ctnr.models import CtnrUser
 
 import settings
 
@@ -34,14 +35,36 @@ def home(request):
 def admin_page(request):
     if request.POST:
         print 'actions!'
+        return redirect(request.META.get('HTTP_REFERER', ''))
 
     else:
-        if request.session['level'] == 2:
-            return render(request, 'base/admin_page.html')
+        if User.objects.get(
+                id=request.session['_auth_user_id']).is_superuser == 1:
+            lost_users = []
+            perma_delete = []
+
+            for user in User.objects.all():
+                if CtnrUser.objects.filter(user_id=user.id).exists() is False:
+                    lost_users.append(user)
+            extra_cols = [
+                {'header': 'Actions', 'sort_field': 'user'}]
+
+            for user in lost_users:
+                perma_delete.append({
+                    'value': ['Delete'],
+                    'url': [reverse('user-delete', kwargs={
+                        'user_id': user.id})],
+                    'img': ['/media/img/delete.png']})
+
+            extra_cols[0]['data'] = perma_delete
+            user_table = tablefy(lost_users, extra_cols=extra_cols, users=True)
+
+            return render(request, 'base/admin_page.html', {
+                'user_table': user_table,
+                'users': lost_users})
+
         else:
             return redirect(reverse('core-index'))
-
-
 
 
 def send_email(request):

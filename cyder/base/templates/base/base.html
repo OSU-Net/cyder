@@ -35,7 +35,9 @@
         </ul>
         <ul class="nav nav-right">
           {% if request.session.level == 2 %}
-            <li><a class="navlink" href="{{ url('admin-page') }}">Admin</a></li>
+            {% if request.session.ctnr.name == 'global' %}
+              <li><a class="navlink" href="{{ url('admin-page') }}">Admin</a></li>
+            {% endif %}
           {% endif %}
             <li><a class="navlink" href="{{ url('logout') }}">Logout</a></li>
         </ul>
