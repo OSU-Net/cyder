@@ -83,7 +83,7 @@ class Command(BaseCommand):
             dhcp_migrate.migrate_zones()
             dhcp_migrate.migrate_zone_reverse()
             dns_migrate.gen_DNS(skip_edu=False)
-            dns_migrate.gen_CNAME(skip_edu=False)
+            dns_migrate.gen_CNAME()
             dhcp_migrate.migrate_all(skip=False)
 
         if options['dns']:
