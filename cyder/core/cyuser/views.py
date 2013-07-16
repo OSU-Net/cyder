@@ -75,6 +75,16 @@ def delete(request, user_id):
     return redirect(request.META.get('HTTP_REFERER', ''))
 
 
+def edit_superuser(request, user, action):
+    user = User.objects.get(username=user)
+    if action == 'Promote':
+        user.is_superuser = True
+    else:
+        user.is_superuser = False
+
+    user.save()
+
+
 def search(request):
     """Returns a list of users matching 'term'."""
     term = request.GET.get('term', '')

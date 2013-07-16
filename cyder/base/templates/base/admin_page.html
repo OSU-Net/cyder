@@ -4,8 +4,29 @@
 
 {% block header %}Administration {% endblock %}
 {% block content %}
+<span id="data"
+    data-SearchUserUrl="{{ url('user-search') }}"
+</span>
+<form class="form" id="Bug-Report" method="POST" action="">
+  <h3>Grant Superuser permissions</h3>
+  <div class="inner-form">
+    {{ superuser_form.as_p() }}
+  </div>
+  <div class="form-btns">
+    <hr>
+    <a class="btn submit c">Submit</a>
+  </div>
+</form>
 <div id=tables class=tableclass>
-    <h3> Users not in any Container </h3>
-    {{ render_table(request, user_table, 'user_table') }}
+    {% if superuser_table %}
+      <h3> Current Superusers </h3>
+      {{ render_table(request, superuser_table, 'superuser_table') }}
+    {% endif %}
+    {% if user_table %}
+      <h3> Users not in any Container </h3>
+      {{ render_table(request, user_table, 'user_table') }}
+    {% endif %}
+
 </div>
+{{ js('admin') }}
 {% endblock %}

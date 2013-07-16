@@ -19,8 +19,9 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
-from cyder.base.forms import BugReportForm
+from cyder.base.forms import BugReportForm, SuperUserForm
 from cyder.core.cyuser.models import User
+from cyder.core.cyuser.views import edit_superuser
 from cyder.core.ctnr.models import CtnrUser
 
 import settings
@@ -34,35 +35,47 @@ def home(request):
 
 def admin_page(request):
     if request.POST:
-        print 'actions!'
+        if 'user' in request.POST:
+            edit_superuser(request, request.POST['user'],
+                           request.POST['action'])
+
         return redirect(request.META.get('HTTP_REFERER', ''))
 
     else:
         if User.objects.get(
                 id=request.session['_auth_user_id']).is_superuser == 1:
-            lost_users = []
-            perma_delete = []
 
+            lost_users = []
+            perma_delete_data = []
+            superusers = []
             for user in User.objects.all():
                 if CtnrUser.objects.filter(user_id=user.id).exists() is False:
                     lost_users.append(user)
+
+                if user.is_superuser:
+                    superusers.append(user)
+
             extra_cols = [
                 {'header': 'Actions', 'sort_field': 'user'}]
 
             for user in lost_users:
-                perma_delete.append({
+                perma_delete_data.append({
                     'value': ['Delete'],
                     'url': [reverse('user-delete', kwargs={
                         'user_id': user.id})],
                     'img': ['/media/img/delete.png']})
 
-            extra_cols[0]['data'] = perma_delete
+            extra_cols[0]['data'] = perma_delete_data
             user_table = tablefy(lost_users, extra_cols=extra_cols, users=True)
+
+            superuser_table = tablefy(superusers, users=True)
+            superuser_form = SuperUserForm()
 
             return render(request, 'base/admin_page.html', {
                 'user_table': user_table,
-                'users': lost_users})
-
+                'superuser_table': superuser_table,
+                'users': lost_users,
+                'superuser_form': superuser_form})
         else:
             return redirect(reverse('core-index'))
 
