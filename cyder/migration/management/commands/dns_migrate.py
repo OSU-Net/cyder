@@ -45,11 +45,11 @@ class Zone(object):
             self.gen_static()
             self.gen_AR()
             self.gen_NS()
-            self.domain.soa = self.gen_soa() or soa
+            self.domain.soa = self.gen_SOA() or soa
             self.domain.save()
             self.walk_zone()
 
-    def gen_soa(self):
+    def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
@@ -393,7 +393,7 @@ def dump_maintain():
     maintain_dump.main()
 
 
-def delete_dns():
+def delete_DNS():
     for thing in [Domain, AddressRecord, PTR, SOA, MX,
                   CNAME, Nameserver, StaticInterface]:
         thing.objects.all().delete()
@@ -404,7 +404,7 @@ def delete_CNAME():
 
 
 def do_everything(skip_edu=False):
-    delete_dns()
+    delete_DNS()
     delete_CNAME()
     gen_DNS(skip_edu)
     gen_CNAME()
@@ -450,7 +450,7 @@ class Command(BaseCommand):
 
         if options['delete']:
             if options['dns']:
-                delete_dns()
+                delete_DNS()
             if options['cname']:
                 delete_CNAME()
 
