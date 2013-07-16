@@ -19,9 +19,9 @@ from cyder.base.utils import (_filter, do_sort, make_megafilter,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
-from cyder.base.forms import BugReportForm, SuperUserForm
+from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.models import User
-from cyder.core.cyuser.views import edit_superuser
+from cyder.core.cyuser.views import edit_user
 from cyder.core.ctnr.models import CtnrUser
 
 import settings
@@ -36,8 +36,8 @@ def home(request):
 def admin_page(request):
     if request.POST:
         if 'user' in request.POST:
-            edit_superuser(request, request.POST['user'],
-                           request.POST['action'])
+            edit_user(request, request.POST['user'],
+                      request.POST['action'])
 
         return redirect(request.META.get('HTTP_REFERER', ''))
 
@@ -69,13 +69,13 @@ def admin_page(request):
             user_table = tablefy(lost_users, extra_cols=extra_cols, users=True)
 
             superuser_table = tablefy(superusers, users=True)
-            superuser_form = SuperUserForm()
+            user_form = EditUserForm()
 
             return render(request, 'base/admin_page.html', {
                 'user_table': user_table,
                 'superuser_table': superuser_table,
                 'users': lost_users,
-                'superuser_form': superuser_form})
+                'user_form': user_form})
         else:
             return redirect(reverse('core-index'))
 

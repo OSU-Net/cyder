@@ -75,14 +75,27 @@ def delete(request, user_id):
     return redirect(request.META.get('HTTP_REFERER', ''))
 
 
-def edit_superuser(request, user, action):
-    user = User.objects.get(username=user)
-    if action == 'Promote':
-        user.is_superuser = True
-    else:
-        user.is_superuser = False
+def edit_user(request, userdata, action):
+    try:
+        user = User.objects.get(username=userdata)
 
-    user.save()
+        if action == 'Promote':
+            user.is_superuser = True
+            user.save()
+
+        elif action == 'Demote':
+            user.is_superuser = False
+            user.save()
+
+        elif action == 'Delete':
+            ctnrs = CtnrUser.objects.filter(user_id=user.id)
+            for ctnr in ctnrs:
+                ctnr.delete()
+            user.delete()
+    except:
+        messages.error(request, 'That user does not exist')
+
+    return redirect(request.META.get('HTTP_REFERER', ''))
 
 
 def search(request):

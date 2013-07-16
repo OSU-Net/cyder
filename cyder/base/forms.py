@@ -19,9 +19,11 @@ class BugReportForm(forms.Form):
     session_data = forms.CharField(widget=forms.HiddenInput())
 
 
-class SuperUserForm(forms.Form):
+class EditUserForm(forms.Form):
     user = forms.CharField(
         widget=forms.TextInput(attrs={'id': 'user-searchbox'}))
     action = forms.ChoiceField(
-        widget=forms.RadioSelect, choices=(('Promote', 'Promote'),
-                                           ('Demote', 'Demote')))
+        widget=forms.RadioSelect, choices=(
+            ('Promote', 'Promote to Superuser'),
+            ('Demote', 'Demote from Superuser'),
+            ('Delete', 'Permantely delete user')))
