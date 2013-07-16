@@ -348,7 +348,7 @@ def gen_CNAME():
             cn.views.add(public)
 
 
-def gen_DNS(skip_edu=False):
+def gen_reverses():
     add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
@@ -365,6 +365,10 @@ def gen_DNS(skip_edu=False):
         print "%s.in-addr.arpa" % i
         Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
                                      is_reverse=True)
+
+
+def gen_DNS(skip_edu=False):
+    gen_reverses()
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():

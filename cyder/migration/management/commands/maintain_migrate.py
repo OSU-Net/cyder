@@ -42,6 +42,11 @@ class Command(BaseCommand):
                     dest='qlobber',
                     default=False,
                     help='Clobber the Maintain sandbox.'),
+        make_option('-t', '--together',
+                    action='store_true',
+                    dest='together',
+                    default=False,
+                    help='Migrate DNS and DHCP objects together efficiently.'),
         make_option('-d', '--dns',
                     action='store_true',
                     dest='dns',
@@ -68,6 +73,18 @@ class Command(BaseCommand):
             print "Clobbering Maintain sandbox."
             dns_migrate.dump_maintain()
             fix_maintain.main()
+
+        if options['together']:
+            options['dns'], options['dhcp'] = False, False
+            dns_migrate.delete_DNS()
+            dns_migrate.delete_CNAME()
+            dhcp_migrate.delete_all()
+            dns_migrate.gen_reverses()
+            dhcp_migrate.migrate_zones()
+            dhcp_migrate.migrate_zone_reverse()
+            dns_migrate.gen_DNS(skip_edu=False)
+            dns_migrate.gen_CNAME(skip_edu=False)
+            dhcp_migrate.migrate_all(skip=False)
 
         if options['dns']:
             print "Migrating DNS objects."
@@ -102,4 +119,4 @@ class Command(BaseCommand):
                 print
 
         if options['dhcp']:
-            dhcp_migrate.do_everything(skip=True)
+            dhcp_migrate.do_everything(skip=False)
