@@ -349,6 +349,7 @@ def gen_CNAME():
 
 
 def gen_reverses():
+    print "Creating reverse domains."
     add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
@@ -362,7 +363,6 @@ def gen_reverses():
     reverses.reverse()
 
     for i in reverses:
-        print "%s.in-addr.arpa" % i
         Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
                                      is_reverse=True)
 
@@ -466,7 +466,3 @@ class Command(BaseCommand):
 
         if options['cname']:
             gen_CNAME()
-
-        print map(lambda x: len(x.objects.all()),
-                  [Domain, AddressRecord, PTR, SOA, MX,
-                  CNAME, Nameserver, StaticInterface])
