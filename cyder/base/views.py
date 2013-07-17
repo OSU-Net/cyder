@@ -5,9 +5,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, BadHeaderError
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
-from django.forms import ValidationError
+from django.forms import ValidationError, ModelChoiceField
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
+from django.db.models.loading import get_model
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
@@ -205,6 +206,11 @@ def get_update_form(request, get_klasses_fn):
                 form = FormKlass(initial=kwargs)
     except ObjectDoesNotExist:
         raise Http404
+
+    if related_type in form.fields:
+        RelatedKlass = get_model(related_type, related_type)
+        form.fields[related_type] = ModelChoiceField(
+            queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
