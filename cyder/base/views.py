@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, BadHeaderError
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
-from django.forms import ValidationError, ModelChoiceField
+from django.forms import ValidationError, ModelChoiceField, RadioSelect
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
 from django.db.models.loading import get_model
@@ -210,6 +210,7 @@ def get_update_form(request, get_klasses_fn):
     if related_type in form.fields:
         RelatedKlass = get_model(related_type, related_type)
         form.fields[related_type] = ModelChoiceField(
+            widget=RadioSelect, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
     return HttpResponse(
