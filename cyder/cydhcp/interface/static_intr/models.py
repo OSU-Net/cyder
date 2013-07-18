@@ -16,8 +16,8 @@ from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cydns.ptr.models import BasePTR, PTR
 
+from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.domain.models import Domain
@@ -86,7 +86,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     changes to propagate to the database.
     """
     id = models.AutoField(primary_key=True)
-    mac = models.CharField(max_length=17, validators=[validate_mac],
+    mac = models.CharField(max_length=17, blank=True,
                            help_text='MAC address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
@@ -221,7 +221,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def clean(self, *args, **kwargs):
         validate_hostname_label(self.label)
 
-        self.mac = self.mac.lower()
+        if self.dhcp_enabled:
+            self.mac = self.mac.lower()
+            validate_mac(self.mac)
+
         if not self.system:
             raise ValidationError(
                 "An interface means nothing without its system."
