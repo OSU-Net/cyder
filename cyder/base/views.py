@@ -209,6 +209,9 @@ def get_update_form(request, get_klasses_fn):
     except ObjectDoesNotExist:
         raise Http404
 
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
+
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
 
