@@ -11,7 +11,6 @@ from cyder.base.utils import qd_to_py_dict, tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.views import CoreCreateView, CoreDetailView
-from cyder.core.cyuser.models import UserProfile
 
 
 class CtnrView(object):
@@ -155,18 +154,25 @@ def add_user(request, pk):
 
         return HttpResponse(json.dumps({'user': user_table}))
     else:
-        if request.POST['confirmation'] == '1':
-            user = User(username=request.POST['name'])
+        if request.POST['confirmation'] == 'true':
+            user, _ = User.objects.get_or_create(username=request.POST['name'])
             user.save()
-            profile = UserProfile(user=user)
-            profile.save()
-            return HttpResponse(json.dumps({
-                'error': [form.errors[err] for err in form.errors]}))
+
+            ctnruser, _ = CtnrUser.objects.get_or_create(
+                user_id=user.id, ctnr_id=ctnr.id, level=request.POST['level'])
+            ctnruser.save()
+
+            ctnrusers = [CtnrUser.objects.select_related().get(
+                ctnr_id=ctnr.id, user_id=user.id)]
+            extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
+            user_table = tablefy(users, users=True, extra_cols=extra_cols)
+
+            return HttpResponse(json.dumps({'user': user_table}))
 
         if [u'Select a valid choice. That choice is not one of the available '
                 'choices.'] in [form.errors[err] for err in form.errors]:
             return HttpResponse(json.dumps({
-                'confirmation': 'This user does not exist, do you want to '
+                'acknowledge': 'This user does not exist, do you want to '
                 'create it?'}))
 
         else:

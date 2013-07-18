@@ -5,7 +5,7 @@ $(document).ready(function() {
     var ctnrPk = ctnr.attr('data-ctnr-pk');
     var userPk = null;
     var userName = null;
-    var confirmation = 0;
+    var confirmation = false;
     // Auto complete for user search dialog.
     $('#user-searchbox').autocomplete({
         minLength: 1,
@@ -30,13 +30,12 @@ $(document).ready(function() {
             level: $('#add-user input[name="level"]:checked')[0].value,
             confirmation : confirmation
         };
-        if (confirmation == 1) {
-            confirmation = 0;
-        }
+        confirmation = false;
+
         $.post(addUserUrl, postData, function(data) {
-            if (data.confirmation) {
-                if (confirm(data.confirmation)) {
-                    confirmation = 1;
+            if (data.acknowledge) {
+                if (confirm(data.acknowledge)) {
+                    confirmation = true;
                     document.getElementById('add-user-ctnr').click();
                 }
             }
