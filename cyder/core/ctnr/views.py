@@ -102,10 +102,10 @@ def create_user_extra_cols(ctnr, ctnrusers):
         level_data.append(level)
         users.append(user)
         action_data.append({
-            'value': ['Delete'],
-            'url': [reverse('ctnr-remove-user', kwargs={
-                'ctnr_pk': ctnr.id, 'user_pk': user.id})],
-            'img': ['/media/img/delete.png']
+            'value': 'Delete',
+            'url': reverse('ctnr-remove-user', kwargs={
+                'ctnr_pk': ctnr.id, 'user_pk': user.id}),
+            'img': '/media/img/delete.png'
         })
 
     extra_cols[0]['data'] = level_data
