@@ -1,6 +1,7 @@
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 
 
 class View(models.Model, ObjectUrlMixin):
@@ -19,7 +20,7 @@ class View(models.Model, ObjectUrlMixin):
         )
 
     def __str__(self):
-        return " ".join([getattr(self, f) for f in self.display_fields])
+        return get_display(self)
 
     def __repr__(self):
         return "<View: {0}>".format(self)

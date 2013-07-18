@@ -11,9 +11,11 @@ class System(BaseModel, ObjectUrlMixin):
     location = models.CharField(max_length=255, unique=False, blank=True)
 
     search_fields = ('name', 'department', 'location')
+    display_fields = ('name', 'pk')
 
     def __str__(self):
-        return self.name
+        return "{0} : {1}".format(*(str(getattr(self, f))
+                                    for f in self.display_fields))
 
     class Meta:
         db_table = 'system'

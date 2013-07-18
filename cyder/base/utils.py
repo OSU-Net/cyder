@@ -5,17 +5,20 @@ import urlparse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_str
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
-from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.vrf.models import Vrf
+
+
+Domain = get_model('domain', 'domain')
+Workgroup = get_model('workgroup', 'workgroup')
+Range = get_model('range', 'range')
+Network = get_model('network', 'network')
+Site = get_model('site', 'site')
+Vlan = get_model('vlan', 'vlan')
+Vrf = get_model('vrf', 'vrf')
 
 
 def find_get_record_url(obj):
@@ -292,3 +295,7 @@ def urlparams(url_, hash=None, **query):
     new = urlparse.ParseResult(url.scheme, url.netloc, url.path, url.params,
                                query_string, fragment)
     return new.geturl()
+
+
+def get_display(obj):
+    return " - ".join(getattr(obj, f) for f in obj.display_fields)

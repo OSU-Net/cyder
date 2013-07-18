@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
@@ -98,7 +99,7 @@ class Domain(models.Model, ObjectUrlMixin):
         db_table = 'domain'
 
     def __str__(self):
-        return " ".join([getattr(self, f) for f in self.display_fields])
+        return get_display(self)
 
     def __repr__(self):
         return "<Domain '{0}'>".format(self.name)

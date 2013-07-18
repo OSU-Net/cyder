@@ -8,6 +8,7 @@ from django.db.models import Q, F
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
+from cyder.base.utils import get_display
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
@@ -98,7 +99,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     attrs = None
 
     def __str__(self):
-        return " ".join([getattr(self, f) for f in self.display_fields])
+        return get_display(self)
 
     def __repr__(self):
         return "<'{0}'>".format(str(self))

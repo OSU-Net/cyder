@@ -4,6 +4,7 @@ from django.http import HttpResponse
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 from cyder.cydhcp.constants import (
     ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
 )
@@ -86,7 +87,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return " - ".join([getattr(self, f) for f in self.display_fields])
+        return get_display(self)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))

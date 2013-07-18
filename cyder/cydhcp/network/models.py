@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -52,7 +53,7 @@ class Network(models.Model, ObjectUrlMixin):
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
     def __str__(self):
-        return " ".join([getattr(self, f) for f in self.display_fields])
+        return get_display(self)
 
     def __repr__(self):
         return "<Network {0}>".format(str(self))
