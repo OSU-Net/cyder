@@ -154,9 +154,9 @@ def migrate_subnets():
     results = cursor.fetchall()
     for row in results:
         migrated.append(create_subnet(*row))
-    print ("Records in Maintain {0}\n"
-           "Records Migrated {1}\n"
-           "Records created {2}".format(
+    print ("Records in Maintain: {0}\n"
+           "Records migrated: {1}\n"
+           "Records created: {2}".format(
                len(results),
                len(migrated),
                len([y for x, y in migrated if y])))
