@@ -13,12 +13,13 @@ class Workgroup(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
 
     search_fields = ('name',)
+    display_fields = ('name',)
 
     class Meta:
         db_table = 'workgroup'
 
     def __str__(self):
-        return self.name
+        return " ".join([getattr(self, f) for f in self.display_fields])
 
     def details(self):
         data = super(Workgroup, self).details()
