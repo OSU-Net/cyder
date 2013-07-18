@@ -10,7 +10,7 @@ function insertTablefyRow(tablefy, tbody) {
             var col = row[col];
             var newCol = $('<td>');
             if (col.url) {
-                for (i in col.url) {
+                for (i in col.value) {
                     if (col.url[i] == '') {
                         newCol.text(col.value[i]);
                     } else {
@@ -24,7 +24,7 @@ function insertTablefyRow(tablefy, tbody) {
                             var newLink = $('<a>' + col.value[i] + '</a>');
                         }
                         newLink.attr('href', col.url[i]);
-                    newCol.append(newLink);
+                        newCol.append(newLink);
                     }
                 }
             } else {

@@ -78,7 +78,6 @@ def delete(request, user_id):
 def edit_user(request, userdata, action):
     try:
         user = User.objects.get(username=userdata)
-
         if action == 'Promote':
             user.is_superuser = True
             user.save()
@@ -92,6 +91,9 @@ def edit_user(request, userdata, action):
             for ctnr in ctnrs:
                 ctnr.delete()
             user.delete()
+
+        else:
+            messages.error(request, 'Cannot complete action')
     except:
         messages.error(request, 'That user does not exist')
 

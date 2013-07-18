@@ -26,4 +26,4 @@ class EditUserForm(forms.Form):
         widget=forms.RadioSelect, choices=(
             ('Promote', 'Promote to Superuser'),
             ('Demote', 'Demote from Superuser'),
-            ('Delete', 'Permantely delete user')))
+            ('Delete', 'Permanently delete user')))

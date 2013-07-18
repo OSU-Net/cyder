@@ -80,12 +80,12 @@ def create_user_extra_cols(ctnr, ctnrusers):
                 'value': [LEVELS[ctnruser.level], '+', '-'],
                 'url': [
                     '',
-                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
-                                                        'user_pk': user.id,
-                                                        'lvl': -1}),
-                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id,
-                                                        'user_pk': user.id,
-                                                        'lvl': 1})],
+                    reverse('update-user-level', kwargs={
+                        'ctnr_pk': ctnr.id, 'user_pk': user.id,
+                        'lvl': -1}),
+                    reverse('update-user-level', kwargs={
+                        'ctnr_pk': ctnr.id, 'user_pk': user.id,
+                        'lvl': 1})],
                 'img': ['', '/media/img/minus.png', '/media/img/plus.png']
             }
 
@@ -124,7 +124,7 @@ def remove_user(request, ctnr_pk, user_pk):
         return redirect(request.META.get('HTTP_REFERER', ''))
 
 
-def update_user(request, ctnr_pk, user_pk, lvl):
+def update_user_level(request, ctnr_pk, user_pk, lvl):
     if request.session['level'] == 2:
         ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
         if (ctnr_user.level + int(lvl)) not in range(0, 3):
