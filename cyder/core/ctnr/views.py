@@ -1,6 +1,7 @@
 import json
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -10,6 +11,7 @@ from cyder.base.utils import qd_to_py_dict, tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.views import CoreCreateView, CoreDetailView
+from cyder.core.cyuser.models import UserProfile
 
 
 class CtnrView(object):
@@ -118,8 +120,8 @@ def remove_user(request, ctnr_pk, user_pk):
         CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
         return redirect(request.META.get('HTTP_REFERER', ''))
     else:
-        messages.error(request,
-                      'You do not have permission to perform this action')
+        messages.error(
+            request, 'You do not have permission to perform this action')
         return redirect(request.META.get('HTTP_REFERER', ''))
 
 
@@ -133,8 +135,8 @@ def update_user(request, ctnr_pk, user_pk, lvl):
             ctnr_user.save()
             return redirect(request.META.get('HTTP_REFERER', ''))
     else:
-        messages.error(request,
-                      'You do not have permission to perform this action')
+        messages.error(
+            request, 'You do not have permission to perform this action')
         return redirect(request.META.get('HTTP_REFERER', ''))
 
 
@@ -153,8 +155,23 @@ def add_user(request, pk):
 
         return HttpResponse(json.dumps({'user': user_table}))
     else:
-        return HttpResponse(
-            json.dumps({'error': [form.errors[err] for err in form.errors]}))
+        if request.POST['confirmation'] == '1':
+            user = User(username=request.POST['name'])
+            user.save()
+            profile = UserProfile(user=user)
+            profile.save()
+            return HttpResponse(json.dumps({
+                'error': [form.errors[err] for err in form.errors]}))
+
+        if [u'Select a valid choice. That choice is not one of the available '
+                'choices.'] in [form.errors[err] for err in form.errors]:
+            return HttpResponse(json.dumps({
+                'confirmation': 'This user does not exist, do you want to '
+                'create it?'}))
+
+        else:
+            return HttpResponse(json.dumps({
+                'error': [form.errors[err] for err in form.errors]}))
 
 
 class CtnrCreateView(CtnrView, CoreCreateView):

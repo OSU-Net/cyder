@@ -4,7 +4,8 @@ $(document).ready(function() {
     var addUserUrl = ctnr.attr('data-addUserUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
     var userPk = null;
-    var username = null;
+    var userName = null;
+    var confirmation = 0;
     // Auto complete for user search dialog.
     $('#user-searchbox').autocomplete({
         minLength: 1,
@@ -12,20 +13,33 @@ $(document).ready(function() {
         delay: 400,
         select: function(event, ui) {
             userPk = ui.item.pk;
-            username = ui.item.label;
+            userName = ui.item.label;
         }
     });
     // Add user to ctnr.
     $('#add-user-ctnr').click(function(event) {
-        if (username != ($('#user-searchbox').val())) {
+        if (userName != ($('#user-searchbox').val())) {
             userPk = null;
+            userName = ($('#user-searchbox').val());
         }
+
         var postData = {
             ctnr: ctnrPk,
             user: userPk,
-            level: $('#add-user input[name="level"]:checked')[0].value
+            name: userName,
+            level: $('#add-user input[name="level"]:checked')[0].value,
+            confirmation : confirmation
         };
+        if (confirmation == 1) {
+            confirmation = 0;
+        }
         $.post(addUserUrl, postData, function(data) {
+            if (data.confirmation) {
+                if (confirm(data.confirmation)) {
+                    confirmation = 1;
+                    document.getElementById('add-user-ctnr').click();
+                }
+            }
             if (data.error) {
                 $('#add-user-errorlist').empty();
                 // Put error message.
