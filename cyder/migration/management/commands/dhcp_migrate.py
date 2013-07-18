@@ -552,6 +552,7 @@ def migrate_all(skip=False):
 
 
 def delete_all():
+    print "Deleting DHCP objects."
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()

@@ -436,12 +436,14 @@ def dump_maintain():
 
 
 def delete_DNS():
+    print "Deleting DNS objects."
     for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
                   StaticInterface, System, Workgroup]:
         thing.objects.all().delete()
 
 
 def delete_CNAME():
+    print 'Deleting CNAMEs.'
     CNAME.objects.all().delete()
 
 
