@@ -138,11 +138,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('MAC', 'mac', self.mac),
             ('Vrf', 'vrf', self.vrf),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('DHCP Enabled', 'dhcp_enabled',
+            ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),
-            ('DNS Enabled', 'dns_enabled',
-                'True' if self.dns_enabled else 'False'),
-            ('DNS Type', '', 'A/PTR'),
+            ('DNS', 'dns_enabled',
+                'True: A/PTR' if self.dns_enabled else 'False'),
             ('Last Seen', 'last_seen', date),
         )
         return data
