@@ -248,6 +248,7 @@ def migrate_zones():
 @transaction.commit_on_success
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
+    default, _ = Workgroup.objects.get_or_create(name='default')
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
                    "workgroup, zone, enabled, last_seen "
                    "FROM host WHERE ip = 0")
@@ -285,10 +286,46 @@ def migrate_dynamic_hosts():
         if mac == "":
             enabled = False
 
-        r = maintain_find_range(items['dynamic_range'])
-        c = maintain_find_zone(items['zone'])
-        d = maintain_find_domain(items['domain'])
-        w = maintain_find_workgroup(items['workgroup'])
+        if not range_id:
+            print ("Host with mac {0} "
+                   "has no dynamic_range in maintain".format(mac))
+            r = None
+        else:
+            r = maintain_find_range(items['dynamic_range'])
+            if not r:
+                print ("Host with mac {0} has "
+                       "no dynamic range in cyder".format(mac))
+
+        if not zone_id:
+            print "Host with mac {0} has no zone id".format(mac)
+            c = None
+        else:
+            c = maintain_find_zone(items['zone'])
+            if not c:
+                print ("Host with mac {0} has "
+                       "no ctnr in cyder".format(mac))
+                print "Failed to migrate zone_id {0}".format(zone_id)
+
+        if not domain_id:
+            print "Host with mac {0} has no domain id".format(mac)
+            d = None
+        else:
+            d = maintain_find_domain(items['domain'])
+            if not d:
+                print ("Host with mac {0} has "
+                       "no domain in cyder".format(mac))
+                print "Failed to migrate domain_id {0}".format(domain_id)
+
+        if not workgroup_id:
+            print "Host with mac {0} has no workgroup id".format(mac)
+            w = default
+        else:
+            w = maintain_find_workgroup(items['workgroup'])
+            if not w:
+                print ("Host with mac {0} has "
+                       "no workgroup in cyder".format(mac))
+                print ("Failed to migrate workgroup_id {0}\n"
+                       "Adding it to the default group".format(workgroup_id))
 
         if not all([r, c, d]):
             stderr.write("Trouble migrating host with mac {0}\n"
