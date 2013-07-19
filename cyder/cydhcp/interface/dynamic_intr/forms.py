@@ -1,9 +1,10 @@
 from django import forms
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class DynamicInterfaceForm(forms.ModelForm):
+class DynamicInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
 
     class Meta:
         model = DynamicInterface

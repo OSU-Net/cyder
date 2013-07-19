@@ -3,6 +3,7 @@ from django.db import models
 
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -19,13 +20,14 @@ class Ctnr(models.Model, ObjectUrlMixin):
     description = models.CharField(max_length=200, blank=True)
     email_contact = models.EmailField(blank=True)
 
+    display_fields = ('name',)
     search_fields = ('name', 'description')
 
     class Meta:
         db_table = 'ctnr'
 
     def __str__(self):
-        return self.name
+        return get_display(self)
 
     def details(self):
         data = super(Ctnr, self).details()

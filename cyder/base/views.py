@@ -109,6 +109,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
+
     return render(request, template, {
         'form': form,
         'obj': obj,
@@ -205,6 +208,9 @@ def get_update_form(request, get_klasses_fn):
                 form = FormKlass(initial=kwargs)
     except ObjectDoesNotExist:
         raise Http404
+
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))

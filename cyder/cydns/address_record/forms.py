@@ -1,9 +1,10 @@
 from django import forms
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.forms import DNSForm
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class AddressRecordForm(DNSForm):
+class AddressRecordForm(DNSForm, AlphabetizeFormMixin):
     class Meta:
         model = AddressRecord
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')

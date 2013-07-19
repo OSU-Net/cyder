@@ -1,9 +1,9 @@
-from django.db import models
-# Create your models here.
-
 from itertools import chain
 
+from django.db import models
+
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import join_dhcp_args
 
@@ -13,12 +13,13 @@ class Workgroup(models.Model, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
 
     search_fields = ('name',)
+    display_fields = ('name',)
 
     class Meta:
         db_table = 'workgroup'
 
     def __str__(self):
-        return self.name
+        return get_display(self)
 
     def details(self):
         data = super(Workgroup, self).details()

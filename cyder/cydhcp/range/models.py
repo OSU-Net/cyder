@@ -4,6 +4,7 @@ from django.http import HttpResponse
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import get_display
 from cyder.cydhcp.constants import (
     ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
 )
@@ -78,6 +79,7 @@ class Range(models.Model, ObjectUrlMixin):
                                   default=STATIC, editable=False)
 
     search_fields = ('start_str', 'end_str')
+    display_fields = ('start_str', 'end_str')
 
     class Meta:
         db_table = 'range'
@@ -85,7 +87,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return "{0}  -  {1}".format(self.start_str, self.end_str)
+        return get_display(self)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
