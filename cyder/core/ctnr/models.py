@@ -7,24 +7,30 @@ from cyder.base.utils import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.core.validation import validate_ctnr_name
 
 
 class Ctnr(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True,
+                            validators=[validate_ctnr_name])
     users = models.ManyToManyField(User, null=False, related_name='users',
                                    through='CtnrUser', blank=True)
     domains = models.ManyToManyField(Domain, null=False, blank=True)
     ranges = models.ManyToManyField(Range, null=False, blank=True)
     workgroups = models.ManyToManyField(Workgroup, null=False, blank=True)
     description = models.CharField(max_length=200, blank=True)
-    email_contact = models.EmailField(blank=True)
+    email_contact = models.CharField(max_length=75, blank=True)
 
     display_fields = ('name',)
     search_fields = ('name', 'description')
 
     class Meta:
         db_table = 'ctnr'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Ctnr, self).save(*args, **kwargs)
 
     def __str__(self):
         return get_display(self)

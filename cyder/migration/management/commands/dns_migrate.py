@@ -34,6 +34,7 @@ cursor = connection.cursor()
 
 
 class Zone(object):
+    option_values = None
 
     def __init__(self, domain_id=None, dname=None, soa=None):
         self.domain_id = 541 if domain_id is None else domain_id
@@ -48,6 +49,24 @@ class Zone(object):
             self.domain.soa = self.gen_SOA() or soa
             self.domain.save()
             self.walk_zone()
+
+    def get_option_values(self, host_id):
+        if Zone.option_values is None:
+            Zone.option_values = {}
+            sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
+                   "INNER JOIN {2} ON {2}.object_id = {0}.id "
+                   "INNER JOIN {1} ON {1}.id = {2}.dhcp_option")
+            cursor.execute(sql.format("host", "dhcp_options", "object_option"))
+            results = cursor.fetchall()
+            for h_id, name, value in results:
+                if h_id not in Zone.option_values:
+                    Zone.option_values[h_id] = set([])
+                Zone.option_values[h_id].add((name, value))
+
+        if host_id in Zone.option_values:
+            return Zone.option_values[host_id]
+        else:
+            return []
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -130,7 +149,7 @@ class Zone(object):
                        "user_id, last_seen "
                        "FROM host "
                        "WHERE ip != 0 AND domain = '%s';" % self.domain_id)
-        for id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
+        for h_id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
                 serial, other_id, purchase_date, po_number, warranty_date, \
                 owning_unit, user_id, last_seen in cursor.fetchall():
             name = name.lower()
@@ -144,9 +163,8 @@ class Zone(object):
             # TODO: Make systems unique by hostname, ip, mac tuple
             # TODO: Add key-value attributes to system objects.
 
-            system, _ = System.objects.get_or_create(name=name,
-                                                     location=location,
-                                                     department=dept)
+            system = System(name=name, location=location, department=dept)
+            system.save()
             try:
                 cursor.execute("SELECT name "
                                "FROM workgroup"
@@ -174,20 +192,13 @@ class Zone(object):
                     static.save()
                     if enabled:
                         static.views.add(public)
-                    cursor.execute("SELECT dhcp_option, value "
-                                   "FROM object_option "
-                                   "WHERE object_id = {0} "
-                                   "AND type = 'host'".format(id))
-                    results = cursor.fetchall()
-                    for dhcp_option, value in results:
-                        cursor.execute("SELECT name, type "
-                                       "FROM dhcp_options "
-                                       "WHERE id = {0}".format(dhcp_option))
-                        name, type = cursor.fetchone()
-                        kv = StaticIntrKeyValue(intr=static, key=name,
+
+                    for key, value in self.get_option_values(h_id):
+                        kv = StaticIntrKeyValue(intr=static, key=key,
                                                 value=value)
                         kv.clean()
                         kv.save()
+
                 except ValidationError, e:
                     print "Error generating static interface. %s" % e
                     exit(1)
@@ -398,8 +409,8 @@ def dump_maintain():
 
 
 def delete_DNS():
-    for thing in [Domain, AddressRecord, PTR, SOA, MX,
-                  CNAME, Nameserver, StaticInterface]:
+    for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
+                  StaticInterface, System, Vrf, Workgroup]:
         thing.objects.all().delete()
 
 
