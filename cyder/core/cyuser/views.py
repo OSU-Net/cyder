@@ -71,13 +71,26 @@ def login_session(request, username):
 
 
 def delete(request, user_id):
-    User.objects.get(id=user_id).delete()
+    try:
+        User.objects.get(id=user_id).delete()
+    except:
+        messages.error(request, 'That user does not exist')
+
     return redirect(request.META.get('HTTP_REFERER', ''))
 
 
-def edit_user(request, userdata, action):
+def edit_user(request, username, action):
+    if action == 'Create':
+        user, _ = User.objects.get_or_create(username=username)
+        if _ is False:
+            messages.error(
+                request, 'A user with that username already exists')
+
+        user.save()
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
     try:
-        user = User.objects.get(username=userdata)
+        user = User.objects.get(username=username)
         if action == 'Promote':
             user.is_superuser = True
             user.save()
