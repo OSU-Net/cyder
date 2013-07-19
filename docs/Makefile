@@ -4,6 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXAPIDOC  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = _build
 
@@ -12,10 +13,14 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest
+.PHONY: help clean apidoc html dirhtml singlehtml pickle json htmlhelp qthelp \
+	devhelp epub latex latexpdf text man changes linkcheck doctest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  apidoc     to generate autodoc stubs (do this following"
+	@echo "             installation and each time a module is added or"
+	@echo "             removed)"
 	@echo "  html       to make standalone HTML files"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
@@ -35,6 +40,13 @@ help:
 
 clean:
 	-rm -rf $(BUILDDIR)/*
+
+apidoc:
+	@echo "=== Removing old files ==="
+	find -regextype posix-extended -regex './cyder(\.[^.]*)*\.rst' -delete
+	-rm -f modules.rst
+	@echo "=== Generating autodoc stubs ==="
+	cd ..; $(SPHINXAPIDOC) -o docs cyder
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

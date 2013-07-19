@@ -4,6 +4,7 @@
 
 django-debug-toolbar
 django-extensions
+sphinx
 
 -r prod.txt
 -r ../vendor/src/funfactory/funfactory/requirements/compiled.txt

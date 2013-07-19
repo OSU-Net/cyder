@@ -72,7 +72,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)
     search_fields = ('primary', 'contact', 'description')
-    template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
+    template = _("{root_domain}. {ttl:$ttl_just}  {rdclass:$rdclass_just}  "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
                  "{refresh} {retry} {expire})")
 
@@ -118,26 +118,26 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         """For tables."""
         data = super(SOA, self).details()
         data['data'] = [
+            ('Description', 'description', self),
             ('Primary', 'primary', self.primary),
             ('Contact', 'contact', self.contact),
             ('Serial', 'serial', self.serial),
             ('Expire', 'expire', self.expire),
             ('Retry', 'retry', self.retry),
             ('Refresh', 'refresh', self.refresh),
-            ('Description', 'description', self.description),
         ]
         return data
 
     def eg_metadata(self):
         """EditableGrid metadata."""
         return {'metadata': [
+            {'name': 'description', 'datatype': 'string', 'editable': True},
             {'name': 'primary', 'datatype': 'string', 'editable': True},
             {'name': 'contact', 'datatype': 'string', 'editable': True},
             {'name': 'serial', 'datatype': 'integer', 'editable': True},
             {'name': 'expire', 'datatype': 'integer', 'editable': True},
             {'name': 'retry', 'datatype': 'integer', 'editable': True},
             {'name': 'refresh', 'datatype': 'integer', 'editable': True},
-            {'name': 'description', 'datatype': 'string', 'editable': True},
         ]}
 
     def get_debug_build_url(self):

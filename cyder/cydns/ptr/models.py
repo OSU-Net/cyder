@@ -91,7 +91,8 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
         default=3600, blank=True, null=True, validators=[validate_ttl]
     )
     description = models.CharField(max_length=1000, blank=True)
-    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+    template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
+                 "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {name:1}.")
     search_fields = ('ip_str', 'name')
 

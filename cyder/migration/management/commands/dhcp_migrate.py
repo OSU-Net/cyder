@@ -20,6 +20,9 @@ from optparse import make_option
 from lib.utilities import long2ip
 
 
+zones = None
+
+
 allow_all_subnets = [
     '10.192.76.2', '10.192.103.150', '10.192.15.2',
     '10.197.32.0', '10.192.148.32', '10.192.144.32',  '10.192.140.32',
@@ -262,7 +265,9 @@ def migrate_dynamic_hosts():
 
 def migrate_user():
     print "Migrating users."
-    cursor.execute("SELECT username FROM user")
+    cursor.execute("SELECT username FROM user "
+                   "WHERE username IN ( "
+                   "SELECT DISTINCT username FROM zone_user )")
     result = cursor.fetchall()
     for username, in result:
         username = username.lower()
@@ -390,10 +395,17 @@ def maintain_find_domain(domain_id):
 
 
 def maintain_find_zone(zone_id):
-    if cursor.execute("SELECT name FROM zone where id = {0}".format(zone_id)):
-        name = cursor.fetchone()[0]
-        return Ctnr.objects.get(name=name) if name else None
-    return None
+    global zones
+
+    if not zones:
+        cursor.execute('SELECT id,name FROM zone')
+        zones = dict(cursor.fetchall())
+
+    try:
+        name = zones[zone_id]
+        return Ctnr.objects.get(name=name)
+    except (KeyError, Ctnr.DoesNotExist):
+        return None
 
 
 def maintain_find_workgroup(workgroup_id):
