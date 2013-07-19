@@ -43,9 +43,13 @@ class Workgroup(models.Model, ObjectUrlMixin):
         ]}
 
     def build_workgroup(self):
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
+        from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
-        static_clients = self.staticinterface_set.filter(dhcp_enabled=True)
-        dynamic_clients = self.dynamicinterface_set.filter(dhcp_enabled=True)
+        dynamic_clients = DynamicInterface.objects.filter(
+            workgroup=self, dhcp_enabled=True)
+        static_clients = StaticInterface.objects.filter(
+            workgroup=self, dhcp_enabled=True)
         if not (static_clients or dynamic_clients):
             return build_str
         build_str += "group {{ #{0}\n".format(self.name)
