@@ -15,7 +15,7 @@ from cyder.cydns.validation import validate_label
 def validate_ip(ip):
     try:
         ipaddr.IPv4Address(ip)
-    except ipaddr.AddressValueError, e:
+    except ipaddr.AddressValueError:
         try:
             ipaddr.IPv6Address(ip)
         except ipaddr.AddressValueError:
@@ -35,7 +35,8 @@ class StaticInterfaceForm(forms.ModelForm):
 
     class Meta:
         model = StaticInterface
-        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
+        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
+                   'last_seen')
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):

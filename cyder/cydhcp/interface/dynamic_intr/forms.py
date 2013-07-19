@@ -7,10 +7,11 @@ class DynamicInterfaceForm(forms.ModelForm):
 
     class Meta:
         model = DynamicInterface
+        exclude = ('last_seen')
 
 
 class DynamicIntrKeyValueForm(forms.ModelForm):
 
     class Meta:
         model = DynamicIntrKeyValue
-        exclude = ('is_option', 'is_statement', 'is_quoted')
+        exclude = ('is_option', 'is_statement', 'is_quoted',)
