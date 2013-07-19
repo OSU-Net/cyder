@@ -171,9 +171,10 @@ def add_user(request, pk):
 
         if [u'Select a valid choice. That choice is not one of the available '
                 'choices.'] in [form.errors[err] for err in form.errors]:
+
             return HttpResponse(json.dumps({
-                'acknowledge': 'This user does not exist, do you want to '
-                'create it?'}))
+                'acknowledge': 'This user is not in any other container. Are '
+                'you sure you want to create this user?'}))
 
         else:
             return HttpResponse(json.dumps({

@@ -37,6 +37,7 @@ $(document).ready(function() {
                 if (confirm(data.acknowledge)) {
                     confirmation = true;
                     document.getElementById('add-user-ctnr').click();
+                    data.removeClass("error");
                 }
             }
             if (data.error) {
