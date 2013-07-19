@@ -17,7 +17,6 @@ class System(BaseModel, ObjectUrlMixin):
 
     class Meta:
         db_table = 'system'
-        unique_together = ('name', 'location', 'department')
 
     def details(self):
         """For tables."""

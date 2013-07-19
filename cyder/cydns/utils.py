@@ -119,20 +119,16 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
                 domain.master_domain.soa is not None):
             domain.soa = domain.master_domain.soa
             domain.save()
+
         for object_, views in clobber_objects:
-            try:
-                object_.domain = domain
-                object_.clean()
+            object_.domain = domain
+            object_.clean()
+            object_.save()
+            for view_name in views:
+                view = View.objects.get(name=view_name)
+                object_.views.add(view)
                 object_.save()
-                for view_name in views:
-                    view = View.objects.get(name=view_name)
-                    object_.views.add(view)
-                    object_.save()
-            except ValidationError:
-                # this is bad
-                import pdb
-                pdb.set_trace()
-                raise
+
     return domain
 
 
