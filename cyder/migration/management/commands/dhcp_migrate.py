@@ -404,7 +404,7 @@ def maintain_find_zone(zone_id):
     try:
         name = zones[zone_id]
         return Ctnr.objects.get(name=name)
-    except KeyError:
+    except (KeyError, Ctnr.DoesNotExist):
         return None
 
 
