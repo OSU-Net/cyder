@@ -1,8 +1,13 @@
-from django.forms import ModelForm
+from django import forms
 
 from cyder.core.system.models import System
 
 
-class SystemForm(ModelForm):
+class SystemForm(forms.ModelForm):
+    interface_type = forms.ChoiceField(
+        widget=forms.RadioSelect, choices=(
+            ('None', 'Do not create an interface now'),
+            ('Static', 'Static Interface'),
+            ('Dynamic', 'Dynamic Interface')))
     class Meta:
         model = System
