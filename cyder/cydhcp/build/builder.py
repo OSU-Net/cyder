@@ -1,4 +1,7 @@
-import chili_manage
+from cyder.core.ctnr.models import Ctnr
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.base.utils import shell_out
 from cyder.cydns.cybind.builder import SVNBuilderMixin, BuildError
@@ -11,7 +14,6 @@ import syslog
 
 
 class DHCPBuilder(SVNBuilderMixin):
-
     def __init__(self, *args, **kwargs):
         defaults = {
             'REPO_DIR': REPO_DIR,
@@ -39,16 +41,17 @@ class DHCPBuilder(SVNBuilderMixin):
                     syslog.syslog(self.LOG_ERR, str(e))
 
     def build(self, test_syntax=True):
-        cmds = ['python subnet.py',
-                'python group.py',
-                'python ctnr.py',
-                'python vrf.py']
         if self.LOG_SYSLOG:
             syslog.syslog(self.DEBUG_LOG_LEVEL, "Dhcp builds started")
         try:
-            procs = [subprocess.Popen(shlex.split(cmd)) for cmd in cmds]
-            for proc in procs:
-                proc.wait()
+            for network in Network.objects.all():
+                f.write(network.build_subnet())
+            for workgroup in Workgroup.objects.all():
+                f.write(workgroup.build_workgroup())
+            for ctnr in Ctnr.objects.all():
+                f.write(ctnr.build_legacy_class())
+            for vrf in Vrf.objects.all():
+                f.write(vrf.build_vrf())
         except (OSError, ValueError), e:
             if self.DEBUG:
                 print str(e)
@@ -78,5 +81,6 @@ class DHCPBuilder(SVNBuilderMixin):
             return (False, stderr)
         return (True, stdout)
 
-d = DHCPBuilder()
-d.build(test_syntax=True)
+def build():
+    d = DHCPBuilder()
+    d.build(test_syntax=True)
