@@ -43,20 +43,21 @@ class DHCPBuilder(SVNBuilderMixin):
     def build(self, test_syntax=True):
         if self.LOG_SYSLOG:
             syslog.syslog(self.DEBUG_LOG_LEVEL, "Dhcp builds started")
-        try:
-            for network in Network.objects.all():
-                f.write(network.build_subnet())
-            for workgroup in Workgroup.objects.all():
-                f.write(workgroup.build_workgroup())
-            for ctnr in Ctnr.objects.all():
-                f.write(ctnr.build_legacy_class())
-            for vrf in Vrf.objects.all():
-                f.write(vrf.build_vrf())
-        except (OSError, ValueError), e:
-            if self.DEBUG:
-                print str(e)
-            if self.LOG_SYSLOG:
-                syslog.syslog(self.ERR_LOG_LEVEL, str(e))
+        with open(os.path.join(self.STAGE_DIR, 'dhcpd.conf'), 'w') as f:
+            try:
+                for ctnr in Ctnr.objects.all():
+                    f.write(ctnr.build_legacy_class())
+                for network in Network.objects.all():
+                    f.write(network.build_subnet())
+                for workgroup in Workgroup.objects.all():
+                    f.write(workgroup.build_workgroup())
+                for vrf in Vrf.objects.all():
+                    f.write(vrf.build_vrf())
+            except (OSError, ValueError), e:
+                if self.DEBUG:
+                    print str(e)
+                if self.LOG_SYSLOG:
+                    syslog.syslog(self.ERR_LOG_LEVEL, str(e))
         if test_syntax:
             valid, output = self.is_valid_syntax()
             if not valid:
@@ -67,7 +68,7 @@ class DHCPBuilder(SVNBuilderMixin):
     def is_valid_syntax(self):
         stdout, stderr, ret = shell_out(
             "dhcpd -t -cf {0}".format(
-                os.path.join('dhcpd.conf')
+                os.path.join(self.STAGE_DIR, 'dhcpd.conf')
             )
         )
         if ret != 0:
