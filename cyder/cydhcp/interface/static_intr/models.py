@@ -86,16 +86,17 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     changes to propagate to the database.
     """
     id = models.AutoField(primary_key=True)
-    mac = models.CharField(max_length=17, validators=[validate_mac],
-                           help_text='MAC address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
         System, null=True, blank=True,
         help_text='System to associate the interface with')
 
-    vrf = models.ForeignKey(Vrf, null=True, blank=True)
+    mac = models.CharField(max_length=17, validators=[validate_mac],
+                           help_text='MAC address in format XX:XX:XX:XX:XX:XX')
+
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+    vrf = models.ForeignKey(Vrf, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
         default=True, help_text='Enable DHCP for this interface?')

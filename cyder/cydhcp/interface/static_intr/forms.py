@@ -36,7 +36,8 @@ class StaticInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
 
     class Meta:
         model = StaticInterface
-        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
+        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
+                   'last_seen')
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):
