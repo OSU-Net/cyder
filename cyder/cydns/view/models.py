@@ -1,7 +1,7 @@
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.utils import get_display
+from cyder.base.helpers import get_display
 
 
 class View(models.Model, ObjectUrlMixin):

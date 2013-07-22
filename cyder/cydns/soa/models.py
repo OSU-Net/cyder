@@ -8,7 +8,7 @@ from django.db.models import Q, F
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
-from cyder.base.utils import get_display
+from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
