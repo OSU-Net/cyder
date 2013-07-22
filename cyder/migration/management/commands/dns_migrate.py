@@ -24,6 +24,7 @@ from lib import maintain_dump, fix_maintain
 from lib.utilities import clean_mac, ip2long, long2ip
 
 public, _ = View.objects.get_or_create(name="public")
+private, _ = View.objects.get_or_create(name="private")
 
 BAD_DNAMES = ['', '.', '_']
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
@@ -190,8 +191,9 @@ class Zone(object):
                     # (no get_or_create)
                     static.full_clean()
                     static.save()
-                    if enabled:
-                        static.views.add(public)
+
+                    static.views.add(public)
+                    static.views.add(private)
 
                     for key, value in self.get_option_values(h_id):
                         kv = StaticIntrKeyValue(intr=static, key=key,
