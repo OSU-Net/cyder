@@ -3,7 +3,7 @@ from itertools import chain
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.utils import get_display
+from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import join_dhcp_args
 

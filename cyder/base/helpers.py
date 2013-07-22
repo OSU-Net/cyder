@@ -182,3 +182,7 @@ def sort_link(request, pretty_name, sort_field):
 
     return create_sort_link(pretty_name, sort_field, get_params,
                             sort, order)
+
+
+def get_display(obj):
+    return " - ".join(getattr(obj, f) for f in obj.display_fields)

@@ -219,7 +219,3 @@ def model_to_post(post, obj):
         if k not in post:
             ret[k] = v
     return ret
-
-
-def get_display(obj):
-    return " - ".join(getattr(obj, f) for f in obj.display_fields)

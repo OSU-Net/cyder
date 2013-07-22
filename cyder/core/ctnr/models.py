@@ -3,7 +3,7 @@ from django.db import models
 
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.utils import get_display
+from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
