@@ -189,16 +189,16 @@ class Zone(object):
                 kv.clean()
                 kv.save()
 
-            try:
+            if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
-                               "FROM workgroup"
+                               "FROM workgroup "
                                "WHERE id = {0}".format(items['workgroup']))
-                name = cursor.fetchone()[0]
-                w, _ = Workgroup.objects.get_or_create(name=name)
-                v, _ = Vrf.objects.get_or_create(name="{0}-".format(name))
-            except:
-                v = None
+                wname = cursor.fetchone()[0]
+                w, _ = Workgroup.objects.get_or_create(name=wname)
+                v, _ = Vrf.objects.get_or_create(name="{0}-".format(wname))
+            else:
                 w = None
+                v = None
 
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
