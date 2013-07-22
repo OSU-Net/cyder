@@ -1,10 +1,13 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 
 
 from cyder.base.utils import tablefy
 from cyder.core.system.models import System
+from cyder.core.system.forms import SystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
 
 
 def system_detail(request, pk):
@@ -29,3 +32,19 @@ def system_detail(request, pk):
         'obj_type': 'system',
         'obj': system,
     })
+
+
+def system_create_view(request):
+    if request.POST:
+        print 'actions'
+        print request.POST
+        return redirect(request.META.get('HTTP_REFERER', ''))
+    else:
+        form = SystemForm()
+        static_form = StaticInterfaceForm()
+        dynamic_form = DynamicInterfaceForm()
+
+        return render(request, 'system/system_create.html', {
+            'form': form,
+            'static_form': static_form,
+            'dynamic_form': dynamic_form})

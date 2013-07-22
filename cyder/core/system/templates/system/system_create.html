@@ -1,0 +1,26 @@
+{% extends "base/base.html" %}
+{% block title %} Create a System {% endblock %}
+
+{% block sidebar %}
+    {% include "core/includes/core_sidebar.html" %}
+{% endblock %}
+
+{% block form %}
+<form class="form" method="POST">
+    <div class="inner-form" id="inner-form">
+        {{ form.as_p() }}
+    </div>
+    <div class="form-btns">
+        <hr>
+    <a class="btn submit c" id="create-system">Create System</a>
+</div>
+</form>
+<div id="static-form" style="display: none">
+    {{ static_form.as_p() }}
+</div>
+<div id="dynamic-form" style="display: none">
+    {{ dynamic_form.as_p() }}
+</div>
+{{ js('systemform') }}
+{% endblock %}
+
