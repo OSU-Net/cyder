@@ -1,3 +1,4 @@
+from django import forms
 from django.shortcuts import get_object_or_404, render, redirect
 
 
@@ -36,13 +37,15 @@ def system_detail(request, pk):
 
 def system_create_view(request):
     if request.POST:
-        print 'actions'
         print request.POST
         return redirect(request.META.get('HTTP_REFERER', ''))
     else:
         form = SystemForm()
         static_form = StaticInterfaceForm()
+        static_form.fields['system'].widget = forms.HiddenInput()
         dynamic_form = DynamicInterfaceForm()
+        dynamic_form.fields['system'].widget = forms.HiddenInput()
+        dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
         return render(request, 'system/system_create.html', {
             'form': form,
