@@ -92,10 +92,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         System, null=True, blank=True,
         help_text='System to associate the interface with')
 
+    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     mac = models.CharField(max_length=17, validators=[validate_mac],
                            help_text='MAC address in format XX:XX:XX:XX:XX:XX')
 
-    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     vrf = models.ForeignKey(Vrf, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
