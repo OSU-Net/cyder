@@ -243,12 +243,16 @@ def migrate_dynamic_hosts():
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
         s, _ = System.objects.get_or_create(name=name, location=loc)
         """
-        if not all([range_id, zone_id, domain_id, workgroup_id]):
+        if not all([range_id, zone_id, domain_id]):
             print "Trouble migrating host with mac {0}".format(mac)
+
         r = maintain_find_range(range_id)
         c = maintain_find_zone(zone_id)
         d = maintain_find_domain(domain_id)
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
+
+        if not all(r, c, d):
+            continue
 
         s, _ = System.objects.get_or_create(name=name, location=loc)
         if r.allow == 'vrf':
@@ -289,6 +293,10 @@ def migrate_zone_user():
             user.save()
         else:
             ctnr = maintain_find_zone(zone_id)
+
+        if not ctnr:
+            continue
+
         CtnrUser.objects.get_or_create(user=user, ctnr=ctnr, level=level)
 
 
