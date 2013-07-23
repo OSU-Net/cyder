@@ -51,6 +51,16 @@ class KeyValue(models.Model, ObjectUrlMixin):
     def __str__(self):
         return "Key: {0} Value {1}".format(self.key, self.value)
 
+    def details(self):
+        """For tables."""
+        data = super(KeyValue, self).details()
+        data['url'] = ''
+        data['data'] = [
+            ('Attribute', 'key', self.key),
+            ('Value', 'value', self.value),
+        ]
+        return data
+
     def _check_is_digit(self):
         return self.value.isdigit()
 

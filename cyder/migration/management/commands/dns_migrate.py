@@ -3,9 +3,9 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
+from cyder.core.system.models import System, SystemKeyValue
+from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
+                                                       StaticIntrKeyValue)
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
@@ -24,6 +24,7 @@ from lib import maintain_dump, fix_maintain
 from lib.utilities import clean_mac, ip2long, long2ip
 
 public, _ = View.objects.get_or_create(name="public")
+private, _ = View.objects.get_or_create(name="private")
 
 BAD_DNAMES = ['', '.', '_']
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
@@ -143,38 +144,61 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        cursor.execute("SELECT id, ip, name, workgroup, enabled, ha, "
-                       "type, os, location, department , serial, other_id, "
-                       "purchase_date, po_number, warranty_date, owning_unit, "
-                       "user_id, last_seen "
-                       "FROM host "
-                       "WHERE ip != 0 AND domain = '%s';" % self.domain_id)
-        for h_id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
-                serial, other_id, purchase_date, po_number, warranty_date, \
-                owning_unit, user_id, last_seen in cursor.fetchall():
-            name = name.lower()
-            enabled = bool(enabled)
+        sys_value_keys = {"type": "Hardware Type",
+                          "os": "Operating System",
+                          "location": "Location",
+                          "department": "Department",
+                          "serial": "Serial Number",
+                          "other_id": "Other ID",
+                          "purchase_date": "Purchase Date",
+                          "po_number": "PO Number",
+                          "warranty_date": "Warranty Date",
+                          "owning_unit": "Owning Unit",
+                          "user_id": "User ID"}
+
+        keys = ("id", "ip", "name", "workgroup", "enabled", "ha",
+                "type", "os", "location", "department", "serial", "other_id",
+                "purchase_date", "po_number", "warranty_date", "owning_unit",
+                "user_id", "last_seen", "expire", "ttl", "last_update")
+
+        sql = ("SELECT %s FROM host WHERE ip != 0 AND domain = '%s';" %
+               (", ".join(keys), self.domain_id))
+
+        cursor.execute(sql)
+        for values in cursor.fetchall():
+            items = dict(zip(keys, values))
+
+            name = items['name'].lower()
+            enabled = bool(items['enabled'])
+            ip = items['ip']
+            ha = items['ha']
             if ip == 0:
                 continue
 
             if len(ha) != 12:
                 ha = "0" * 12
 
-            # TODO: Make systems unique by hostname, ip, mac tuple
-            # TODO: Add key-value attributes to system objects.
-
-            system = System(name=name, location=location, department=dept)
+            system = System(name=name)
             system.save()
-            try:
+            for key in sys_value_keys.keys():
+                value = items[key]
+                if not value or value == '0':
+                    continue
+                kv = SystemKeyValue(system=system, key=sys_value_keys[key],
+                                    value=str(value))
+                kv.clean()
+                kv.save()
+
+            if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
-                               "FROM workgroup"
-                               "WHERE id = {0}".format(workgroup))
-                name = cursor.fetchone()[0]
-                w, _ = Workgroup.objects.get_or_create(name=name)
-                v, _ = Vrf.objects.get_or_create(name="{0}-".format(name))
-            except:
-                v = None
+                               "FROM workgroup "
+                               "WHERE id = {0}".format(items['workgroup']))
+                wname = cursor.fetchone()[0]
+                w, _ = Workgroup.objects.get_or_create(name=wname)
+                v, _ = Vrf.objects.get_or_create(name="{0}-".format(wname))
+            else:
                 w = None
+                v = None
 
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
@@ -184,16 +208,20 @@ class Zone(object):
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
                                              vrf=v, workgroup=w,
-                                             last_seen=last_seen)
+                                             ttl=items['ttl'],
+                                             dns_enabled=enabled,
+                                             dhcp_enabled=enabled,
+                                             last_seen=items['last_seen'])
 
                     # Static Interfaces need to be cleaned independently.
                     # (no get_or_create)
                     static.full_clean()
                     static.save()
-                    if enabled:
-                        static.views.add(public)
 
-                    for key, value in self.get_option_values(h_id):
+                    static.views.add(public)
+                    static.views.add(private)
+
+                    for key, value in self.get_option_values(items['id']):
                         kv = StaticIntrKeyValue(intr=static, key=key,
                                                 value=value)
                         kv.clean()
@@ -207,8 +235,6 @@ class Zone(object):
         """
         Generates the Address Record and PTR objects related to this zone's
         domain.
-
-
 
         .. note::
             Some AddressRecords may need to be added to the pointer table in
