@@ -48,7 +48,7 @@ def admin_page(request):
             lost_users = []
             perma_delete_data = []
             superusers = []
-            for user in User.objects.all():
+            for user in User.objects.all().order_by('username'):
                 if CtnrUser.objects.filter(user_id=user.id).exists() is False:
                     lost_users.append(user)
 

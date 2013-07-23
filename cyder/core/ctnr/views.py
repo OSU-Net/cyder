@@ -125,13 +125,18 @@ def remove_user(request, ctnr_pk, user_pk):
 
 
 def update_user_level(request, ctnr_pk, user_pk, lvl):
-    if request.session['level'] == 2:
+    if (request.session['level'] == 2) or (User.objects.get(
+            id=request.session['_auth_user_id']).is_superuser):
         ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
         if (ctnr_user.level + int(lvl)) not in range(0, 3):
             return redirect(request.META.get('HTTP_REFERER', ''))
         else:
             ctnr_user.level += int(lvl)
             ctnr_user.save()
+            if request.session['_auth_user_id'] == ctnr_user.user_id:
+                request.session['level'] = ctnr_user.level
+                request.session.modified = True
+
             return redirect(request.META.get('HTTP_REFERER', ''))
     else:
         messages.error(
