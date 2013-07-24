@@ -251,7 +251,7 @@ def migrate_dynamic_hosts():
         d = maintain_find_domain(domain_id)
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
 
-        if not all(r, c, d):
+        if not all([r, c, d]):
             continue
 
         s, _ = System.objects.get_or_create(name=name, location=loc)
