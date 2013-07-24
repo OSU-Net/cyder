@@ -51,6 +51,13 @@ connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
 cursor = connection.cursor()
 
 
+def clean_zone_name(name):
+    name = name.replace(' ', '')
+    if name[:5] == "zone.":
+        name = name[5:]
+    return name
+
+
 def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     """
     Takes a row from the Maintain subnet table
@@ -210,9 +217,7 @@ def migrate_zones():
     migrated = []
     results = cursor.fetchall()
     for name, desc, comment, email_contact, allow_blank_mac in results:
-        name = name.replace(' ', '')
-        if name[:5] == "zone.":
-            name = name[5:]
+        name = clean_zone_name(name)
 
         migrated.append(
             Ctnr.objects.get_or_create(
@@ -236,15 +241,6 @@ def migrate_dynamic_hosts():
     res = cursor.fetchall()
     for (range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en,
          last_seen) in res:
-        """
-        r = maintain_find_range(range_id)
-        c = maintain_find_zone(zone_id) if zone_id else None
-        d = maintain_find_domain(domain_id) if domain_id else None
-        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
-        s, _ = System.objects.get_or_create(name=name, location=loc)
-        """
-        if not all([range_id, zone_id, domain_id]):
-            print "Trouble migrating host with mac {0}".format(mac)
 
         r = maintain_find_range(range_id)
         c = maintain_find_zone(zone_id)
@@ -252,9 +248,10 @@ def migrate_dynamic_hosts():
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
 
         if not all([r, c, d]):
+            print "Trouble migrating host with mac {0}".format(mac)
             continue
 
-        s, _ = System.objects.get_or_create(name=name, location=loc)
+        s = System(name=name)
         if r.allow == 'vrf':
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
@@ -262,6 +259,7 @@ def migrate_dynamic_hosts():
                 mac=mac, system=s, dhcp_enabled=en, dns_enabled=en,
                 last_seen=last_seen)
             continue
+
         intr, _ = DynamicInterface.objects.get_or_create(
             system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
             last_seen=last_seen)
@@ -305,19 +303,11 @@ def migrate_zone_range():
     cursor.execute("SELECT * FROM zone_range")
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
-        if cursor.execute("SELECT name "
-                          "FROM zone WHERE id={0}".format(zone_id)):
-            zone_name = cursor.fetchone()[0]
-        else:
+        c = maintain_find_zone(zone_id)
+        r = maintain_find_range(range_id)
+        if not (c and r):
             continue
-        if cursor.execute("SELECT start, end "
-                          "FROM `ranges` "
-                          "WHERE id={0}".format(range_id)):
-            r_start, r_end = cursor.fetchone()
-        else:
-            continue
-        c = Ctnr.objects.get(name=zone_name)
-        r = Range.objects.get(start_lower=r_start, end_lower=r_end)
+
         c.ranges.add(r)
         c.save()
 
@@ -366,17 +356,13 @@ def migrate_zone_workgroup():
     cursor.execute("SELECT * FROM zone_workgroup")
     result = cursor.fetchall()
     for _, workgroup_id, zone_id, _ in result:
-        if cursor.execute("SELECT name "
-                          "FROM zone WHERE id={0}".format(zone_id)):
-            zone_name = cursor.fetchone()[0]
-            if cursor.execute("SELECT * "
-                              "FROM workgroup "
-                              "WHERE id={0}".format(workgroup_id)):
-                _, w_name = cursor.fetchone()
-                c = Ctnr.objects.get(name=zone_name)
-                w = Workgroup.objects.get(name=w_name)
-                c.workgroups.add(w)
-                c.save()
+        c = maintain_find_zone(zone_id)
+        w = maintain_find_workgroup(workgroup_id)
+        if not (c and w):
+            continue
+
+        c.workgroups.add(w)
+        c.save()
 
 
 def maintain_find_range(range_id):
@@ -406,8 +392,9 @@ def maintain_find_zone(zone_id):
     global zones
 
     if not zones:
-        cursor.execute('SELECT id,name FROM zone')
-        zones = dict(cursor.fetchall())
+        cursor.execute('SELECT id, name FROM zone')
+        results = map(lambda (x,y): (x, clean_zone_name(y)), cursor.fetchall())
+        zones = dict(results)
 
     try:
         name = zones[zone_id]
