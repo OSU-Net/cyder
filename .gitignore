@@ -1,5 +1,6 @@
 settings_local.py
-settings/local.py
+cyder/settings/local.py
+cyder/settings/dhcpbuilds.py
 *.py[co]
 .*.sw?
 .coverage
@@ -23,7 +24,6 @@ private.json
 truth.json
 private_tests.py
 mdns/migrate/zone_configs/
-local.py
 .sass-cache
 *.css
 database.cfg
