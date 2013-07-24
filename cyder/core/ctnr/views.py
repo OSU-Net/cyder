@@ -115,7 +115,15 @@ def create_user_extra_cols(ctnr, ctnrusers):
 
 
 def remove_user(request, ctnr_pk, user_pk):
-    if request.session['level'] == 2:
+    acting_user = User.objects.get(id=request.session['_auth_user_id'])
+    acting_user_level = CtnrUser.objects.get(
+        user_id=acting_user.id, ctnr_id=ctnr_pk).level
+
+    if acting_user.id == int(user_pk):
+        messages.error(request, 'You can not edit your own permissions')
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    if acting_user_level == 2 or acting_user.is_superuser:
         CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
         return redirect(request.META.get('HTTP_REFERER', ''))
     else:
@@ -125,19 +133,24 @@ def remove_user(request, ctnr_pk, user_pk):
 
 
 def update_user_level(request, ctnr_pk, user_pk, lvl):
-    if (request.session['level'] == 2) or (User.objects.get(
-            id=request.session['_auth_user_id']).is_superuser):
+    acting_user = User.objects.get(id=request.session['_auth_user_id'])
+    acting_user_level = CtnrUser.objects.get(
+        user_id=acting_user.id, ctnr_id=ctnr_pk).level
+
+    if acting_user.id == int(user_pk):
+        messages.error(request, 'You can not edit your own permissions')
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    if acting_user_level == 2 or acting_user.is_superuser:
         ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
+
         if (ctnr_user.level + int(lvl)) not in range(0, 3):
             return redirect(request.META.get('HTTP_REFERER', ''))
         else:
             ctnr_user.level += int(lvl)
             ctnr_user.save()
-            if request.session['_auth_user_id'] == ctnr_user.user_id:
-                request.session['level'] = ctnr_user.level
-                request.session.modified = True
-
             return redirect(request.META.get('HTTP_REFERER', ''))
+
     else:
         messages.error(
             request, 'You do not have permission to perform this action')
