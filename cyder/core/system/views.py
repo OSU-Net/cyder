@@ -48,8 +48,6 @@ def system_create_view(request):
         post_data = qd_to_py_dict(request.POST)
         system_data = {}
         system_data['name'] = post_data.pop('name', None)
-        system_data['department'] = post_data.pop('department', None)
-        system_data['location'] = post_data.pop('location', None)
         system_data['interface_type'] = post_data.pop('interface_type', None)
         system_form = SystemForm(system_data)
 
