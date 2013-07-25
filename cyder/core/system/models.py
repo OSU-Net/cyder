@@ -8,7 +8,7 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 class System(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=255, unique=False)
 
-    search_fields = ('name')
+    search_fields = ('name',)
     display_fields = ('name', 'pk')
 
     def __str__(self):
