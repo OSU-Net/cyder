@@ -9,12 +9,26 @@ $(document).ready(function() {
     var dynamic_clone = dynamic_form.cloneNode(true);
     dynamic_clone.id ="static_clone";
     $(dynamic_clone).removeAttr('style');
-    for(var i = 0; i < interface_type.length; i++){
+    if ($('#radio').attr('checked') == 'true') {
+        alert('firstcheck');
+    };
+    for(var i = 0; i < interface_type.length; i++) {
+        if (interface_type[i].checked) {
+            if (form.lastChild.textContent != '') {
+                form.removeChild(form.childNodes[form.childNodes.length -1]);
+            };
+            if (interface_type[i].value == 'No_Interface') {
+            } else if (interface_type[i].value =='Static') {
+                form.appendChild(static_clone);
+            } else {
+                form.appendChild(dynamic_clone);
+            };
+        };
         interface_type[i].onclick = function() {
             if (form.lastChild.textContent != '') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
             };
-            if (this.value == 'None') {
+            if (this.value == 'No_Interface') {
             } else if (this.value =='Static') {
                 form.appendChild(static_clone);
             } else {

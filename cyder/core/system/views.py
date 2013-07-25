@@ -1,8 +1,9 @@
 from django import forms
+from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 
 
-from cyder.base.utils import tablefy
+from cyder.base.utils import tablefy, qd_to_py_dict
 from cyder.core.system.models import System
 from cyder.core.system.forms import SystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -36,18 +37,78 @@ def system_detail(request, pk):
 
 
 def system_create_view(request):
+    system_form = SystemForm()
+    static_form = StaticInterfaceForm()
+    static_form.fields['system'].widget = forms.HiddenInput()
+    dynamic_form = DynamicInterfaceForm()
+    dynamic_form.fields['system'].widget = forms.HiddenInput()
+    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+
     if request.POST:
-        print request.POST
+        post_data = qd_to_py_dict(request.POST)
+        system_data = {}
+        system_data['name'] = post_data.pop('name', None)
+        system_data['department'] = post_data.pop('department', None)
+        system_data['location'] = post_data.pop('location', None)
+        system_data['interface_type'] = post_data.pop('interface_type', None)
+        system_form = SystemForm(system_data)
+
+        if system_form.is_valid():
+            system = system_form.save()
+            post_data['system'] = system.id
+
+        if system_data['interface_type'] is not None:
+
+            if system_data['interface_type'] == 'Static':
+                static_form = StaticInterfaceForm(post_data)
+
+                if static_form.is_valid():
+                    static_form.save()
+
+                else:
+                    system.delete()
+                    static_form.fields['system'].widget = forms.HiddenInput()
+                    dynamic_form = DynamicInterfaceForm()
+                    dynamic_form.fields['system'].widget = forms.HiddenInput()
+                    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+
+                    return render(request, 'system/system_create.html', {
+                        'system_form': system_form,
+                        'static_form': static_form,
+                        'dynamic_form': dynamic_form})
+
+            if system_data['interface_type'] == 'Dynamic':
+                post_data['ctnr'] = request.session['ctnr'].id
+                dynamic_form = DynamicInterfaceForm(post_data)
+
+                if dynamic_form.is_valid():
+                    dynamic_form.save()
+
+                else:
+                    system.delete()
+                    static_form = StaticInterfaceForm()
+                    static_form.fields['system'].widget = forms.HiddenInput()
+                    dynamic_form.fields['system'].widget = forms.HiddenInput()
+                    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+
+                    return render(request, 'system/system_create.html', {
+                        'system_form': system_form,
+                        'static_form': static_form,
+                        'dynamic_form': dynamic_form})
+
+            return redirect(reverse('system-detail', args=[system.id]))
+
+        else:
+            return render(request, 'system/system_create.html', {
+                'system_form': system_form,
+                'static_form': static_form,
+                'dynamic_form': dynamic_form})
+
         return redirect(request.META.get('HTTP_REFERER', ''))
+
     else:
-        form = SystemForm()
-        static_form = StaticInterfaceForm()
-        static_form.fields['system'].widget = forms.HiddenInput()
-        dynamic_form = DynamicInterfaceForm()
-        dynamic_form.fields['system'].widget = forms.HiddenInput()
-        dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
         return render(request, 'system/system_create.html', {
-            'form': form,
+            'system_form': system_form,
             'static_form': static_form,
             'dynamic_form': dynamic_form})
