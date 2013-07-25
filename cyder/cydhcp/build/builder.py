@@ -43,7 +43,7 @@ class DHCPBuilder(SVNBuilderMixin):
     def build(self, test_syntax=True):
         if self.LOG_SYSLOG:
             syslog.syslog(self.DEBUG_LOG_LEVEL, "Dhcp builds started")
-        with open(os.path.join(self.STAGE_DIR, 'dhcpd.conf'), 'w') as f:
+        with open(os.path.join(self.STAGE_DIR, 'dhcpd.conf.data'), 'w') as f:
             try:
                 for ctnr in Ctnr.objects.all():
                     f.write(ctnr.build_legacy_class())
