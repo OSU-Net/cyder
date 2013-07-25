@@ -55,6 +55,9 @@ def system_create_view(request):
             system = system_form.save()
             post_data['system'] = system.id
 
+        else:
+            system = None
+
         if system_data['interface_type'] is not None:
 
             if system_data['interface_type'] == 'Static':
@@ -64,7 +67,8 @@ def system_create_view(request):
                     static_form.save()
 
                 else:
-                    system.delete()
+                    if system:
+                        system.delete()
                     static_form.fields['system'].widget = forms.HiddenInput()
                     dynamic_form = DynamicInterfaceForm()
                     dynamic_form.fields['system'].widget = forms.HiddenInput()
@@ -83,7 +87,8 @@ def system_create_view(request):
                     dynamic_form.save()
 
                 else:
-                    system.delete()
+                    if system:
+                        system.delete()
                     static_form = StaticInterfaceForm()
                     static_form.fields['system'].widget = forms.HiddenInput()
                     dynamic_form.fields['system'].widget = forms.HiddenInput()
