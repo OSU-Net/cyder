@@ -3,9 +3,9 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
+from cyder.core.system.models import System, SystemKeyValue
+from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
+                                                       StaticIntrKeyValue)
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
@@ -24,6 +24,7 @@ from lib import maintain_dump, fix_maintain
 from lib.utilities import clean_mac, ip2long, long2ip
 
 public, _ = View.objects.get_or_create(name="public")
+private, _ = View.objects.get_or_create(name="private")
 
 BAD_DNAMES = ['', '.', '_']
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
@@ -34,6 +35,7 @@ cursor = connection.cursor()
 
 
 class Zone(object):
+    option_values = None
 
     def __init__(self, domain_id=None, dname=None, soa=None):
         self.domain_id = 541 if domain_id is None else domain_id
@@ -45,11 +47,29 @@ class Zone(object):
             self.gen_static()
             self.gen_AR()
             self.gen_NS()
-            self.domain.soa = self.gen_soa() or soa
+            self.domain.soa = self.gen_SOA() or soa
             self.domain.save()
             self.walk_zone()
 
-    def gen_soa(self):
+    def get_option_values(self, host_id):
+        if Zone.option_values is None:
+            Zone.option_values = {}
+            sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
+                   "INNER JOIN {2} ON {2}.object_id = {0}.id "
+                   "INNER JOIN {1} ON {1}.id = {2}.dhcp_option")
+            cursor.execute(sql.format("host", "dhcp_options", "object_option"))
+            results = cursor.fetchall()
+            for h_id, name, value in results:
+                if h_id not in Zone.option_values:
+                    Zone.option_values[h_id] = set([])
+                Zone.option_values[h_id].add((name, value))
+
+        if host_id in Zone.option_values:
+            return Zone.option_values[host_id]
+        else:
+            return []
+
+    def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
@@ -124,39 +144,61 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        cursor.execute("SELECT id, ip, name, workgroup, enabled, ha, "
-                       "type, os, location, department , serial, other_id, "
-                       "purchase_date, po_number, warranty_date, owning_unit, "
-                       "user_id, last_seen "
-                       "FROM host "
-                       "WHERE ip != 0 AND domain = '%s';" % self.domain_id)
-        for id, ip, name, workgroup, enabled, ha, type, os, location, dept, \
-                serial, other_id, purchase_date, po_number, warranty_date, \
-                owning_unit, user_id, last_seen in cursor.fetchall():
-            name = name.lower()
-            enabled = bool(enabled)
+        sys_value_keys = {"type": "Hardware Type",
+                          "os": "Operating System",
+                          "location": "Location",
+                          "department": "Department",
+                          "serial": "Serial Number",
+                          "other_id": "Other ID",
+                          "purchase_date": "Purchase Date",
+                          "po_number": "PO Number",
+                          "warranty_date": "Warranty Date",
+                          "owning_unit": "Owning Unit",
+                          "user_id": "User ID"}
+
+        keys = ("id", "ip", "name", "workgroup", "enabled", "ha",
+                "type", "os", "location", "department", "serial", "other_id",
+                "purchase_date", "po_number", "warranty_date", "owning_unit",
+                "user_id", "last_seen", "expire", "ttl", "last_update")
+
+        sql = ("SELECT %s FROM host WHERE ip != 0 AND domain = '%s';" %
+               (", ".join(keys), self.domain_id))
+
+        cursor.execute(sql)
+        for values in cursor.fetchall():
+            items = dict(zip(keys, values))
+
+            name = items['name'].lower()
+            enabled = bool(items['enabled'])
+            ip = items['ip']
+            ha = items['ha']
             if ip == 0:
                 continue
 
             if len(ha) != 12:
                 ha = "0" * 12
 
-            # TODO: Make systems unique by hostname, ip, mac tuple
-            # TODO: Add key-value attributes to system objects.
+            system = System(name=name)
+            system.save()
+            for key in sys_value_keys.keys():
+                value = items[key]
+                if not value or value == '0':
+                    continue
+                kv = SystemKeyValue(system=system, key=sys_value_keys[key],
+                                    value=str(value))
+                kv.clean()
+                kv.save()
 
-            system, _ = System.objects.get_or_create(name=name,
-                                                     location=location,
-                                                     department=dept)
-            try:
+            if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
-                               "FROM workgroup"
-                               "WHERE id = {0}".format(workgroup))
-                name = cursor.fetchone()[0]
-                w, _ = Workgroup.objects.get_or_create(name=name)
-                v, _ = Vrf.objects.get_or_create(name="{0}-".format(name))
-            except:
-                v = None
+                               "FROM workgroup "
+                               "WHERE id = {0}".format(items['workgroup']))
+                wname = cursor.fetchone()[0]
+                w, _ = Workgroup.objects.get_or_create(name=wname)
+                v, _ = Vrf.objects.get_or_create(name="{0}-".format(wname))
+            else:
                 w = None
+                v = None
 
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
@@ -166,28 +208,25 @@ class Zone(object):
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
                                              vrf=v, workgroup=w,
-                                             last_seen=last_seen)
+                                             ttl=items['ttl'],
+                                             dns_enabled=enabled,
+                                             dhcp_enabled=enabled,
+                                             last_seen=items['last_seen'])
 
                     # Static Interfaces need to be cleaned independently.
                     # (no get_or_create)
                     static.full_clean()
                     static.save()
-                    if enabled:
-                        static.views.add(public)
-                    cursor.execute("SELECT dhcp_option, value "
-                                   "FROM object_option "
-                                   "WHERE object_id = {0} "
-                                   "AND type = 'host'".format(id))
-                    results = cursor.fetchall()
-                    for dhcp_option, value in results:
-                        cursor.execute("SELECT name, type "
-                                       "FROM dhcp_options "
-                                       "WHERE id = {0}".format(dhcp_option))
-                        name, type = cursor.fetchone()
-                        kv = StaticIntrKeyValue(intr=static, key=name,
+
+                    static.views.add(public)
+                    static.views.add(private)
+
+                    for key, value in self.get_option_values(items['id']):
+                        kv = StaticIntrKeyValue(intr=static, key=key,
                                                 value=value)
                         kv.clean()
                         kv.save()
+
                 except ValidationError, e:
                     print "Error generating static interface. %s" % e
                     exit(1)
@@ -196,8 +235,6 @@ class Zone(object):
         """
         Generates the Address Record and PTR objects related to this zone's
         domain.
-
-
 
         .. note::
             Some AddressRecords may need to be added to the pointer table in
@@ -348,7 +385,8 @@ def gen_CNAME():
             cn.views.add(public)
 
 
-def gen_DNS(skip_edu=False):
+def gen_reverses():
+    print "Creating reverse domains."
     add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
@@ -362,9 +400,12 @@ def gen_DNS(skip_edu=False):
     reverses.reverse()
 
     for i in reverses:
-        print "%s.in-addr.arpa" % i
         Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
                                      is_reverse=True)
+
+
+def gen_DNS(skip_edu=False):
+    gen_reverses()
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
@@ -393,9 +434,9 @@ def dump_maintain():
     maintain_dump.main()
 
 
-def delete_dns():
-    for thing in [Domain, AddressRecord, PTR, SOA, MX,
-                  CNAME, Nameserver, StaticInterface]:
+def delete_DNS():
+    for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
+                  StaticInterface, System, Vrf, Workgroup]:
         thing.objects.all().delete()
 
 
@@ -404,7 +445,7 @@ def delete_CNAME():
 
 
 def do_everything(skip_edu=False):
-    delete_dns()
+    delete_DNS()
     delete_CNAME()
     gen_DNS(skip_edu)
     gen_CNAME()
@@ -450,7 +491,7 @@ class Command(BaseCommand):
 
         if options['delete']:
             if options['dns']:
-                delete_dns()
+                delete_DNS()
             if options['cname']:
                 delete_CNAME()
 
@@ -462,7 +503,3 @@ class Command(BaseCommand):
 
         if options['cname']:
             gen_CNAME()
-
-        print map(lambda x: len(x.objects.all()),
-                  [Domain, AddressRecord, PTR, SOA, MX,
-                  CNAME, Nameserver, StaticInterface])

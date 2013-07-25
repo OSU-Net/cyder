@@ -15,7 +15,8 @@ from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
 
 import cyder as cy
-from cyder.base.utils import (_filter, do_sort, make_megafilter,
+from cyder.base.helpers import do_sort
+from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, model_to_post, tablefy,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
@@ -109,6 +110,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
+
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
 
     return render(request, template, {
         'form': form,
@@ -212,6 +216,9 @@ def get_update_form(request, get_klasses_fn):
         form.fields[related_type] = ModelChoiceField(
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
+
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))

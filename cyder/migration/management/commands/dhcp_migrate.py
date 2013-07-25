@@ -127,35 +127,6 @@ def create_range(range_id, start, end, type, subnet_id, comment, en, known):
     return (r, created)
 
 
-def create_zone(id, name, description, comment, purge, email, notify, blank):
-    """
-    Takes a row from the Maintain zone table
-    returns a newly made container and creates the many to many relatiosnhip
-    between the new ctnr and its associated range
-    """
-    c, created = Ctnr.objects.get_or_create(name=name,
-                                            description=comment or description)
-    """
-    We need to also create the workgroups and related them to containers
-    """
-    try:
-        cursor.execute("SELECT zone_range.range "
-                       "FROM zone_range "
-                       "WHERE zone = {0}".format(id))
-    except Exception, e:
-        print str(e)
-        return
-
-    for row in cursor.fetchall():
-        if cursor.execute("SELECT start, end "
-                          "FROM `ranges` "
-                          "WHERE id = {0}".format(row[0])):
-            start, end = cursor.fetchone()
-            r = Range.objects.get(start_lower=start, end_lower=end)
-            c.ranges.add(r)
-    return (c, created)
-
-
 def migrate_subnets():
     print "Migrating subnets."
     migrated = []
@@ -231,13 +202,6 @@ def migrate_workgroups():
                len([y for x, y in migrated if y])))
 
 
-def create_ctnr(id):
-    cursor.execute("SELECT * FROM zone WHERE id={0}".format(id))
-    _, name, desc, comment, _, _, _, _ = cursor.fetchone()
-    c = Ctnr.objects.get_or_create(name=name, description=comment or desc)
-    return c
-
-
 def migrate_zones():
     print "Migrating containers."
     cursor.execute("SELECT name, description, comment, "
@@ -246,11 +210,16 @@ def migrate_zones():
     migrated = []
     results = cursor.fetchall()
     for name, desc, comment, email_contact, allow_blank_mac in results:
+        name = name.replace(' ', '')
+        if name[:5] == "zone.":
+            name = name[5:]
+
         migrated.append(
             Ctnr.objects.get_or_create(
                 name=name,
                 description=comment or desc,
                 email_contact=email_contact or ''))
+
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
            "Records created {2}".format(
@@ -274,12 +243,16 @@ def migrate_dynamic_hosts():
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
         s, _ = System.objects.get_or_create(name=name, location=loc)
         """
-        if not all([range_id, zone_id, domain_id, workgroup_id]):
+        if not all([range_id, zone_id, domain_id]):
             print "Trouble migrating host with mac {0}".format(mac)
+
         r = maintain_find_range(range_id)
         c = maintain_find_zone(zone_id)
         d = maintain_find_domain(domain_id)
         w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
+
+        if not all([r, c, d]):
+            continue
 
         s, _ = System.objects.get_or_create(name=name, location=loc)
         if r.allow == 'vrf':
@@ -320,6 +293,10 @@ def migrate_zone_user():
             user.save()
         else:
             ctnr = maintain_find_zone(zone_id)
+
+        if not ctnr:
+            continue
+
         CtnrUser.objects.get_or_create(user=user, ctnr=ctnr, level=level)
 
 
@@ -435,7 +412,7 @@ def maintain_find_zone(zone_id):
     try:
         name = zones[zone_id]
         return Ctnr.objects.get(name=name)
-    except KeyError:
+    except (KeyError, Ctnr.DoesNotExist):
         return None
 
 

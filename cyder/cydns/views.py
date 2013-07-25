@@ -3,7 +3,8 @@ from django.forms.util import ErrorDict, ErrorList
 from django.shortcuts import get_object_or_404, redirect, render
 
 import cyder as cy
-from cyder.base.utils import (do_sort, make_paginator, _filter, tablefy)
+from cyder.base.helpers import do_sort
+from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
                               cy_delete, get_update_form, search_obj,
@@ -95,6 +96,9 @@ def cydns_view(request, pk=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
         request, do_sort(request, object_list), 50)
+
+    if hasattr(form, 'alphabetize_all'):
+        form.alphabetize_all()
 
     return render(request, 'cydns/cydns_view.html', {
         'form': form,

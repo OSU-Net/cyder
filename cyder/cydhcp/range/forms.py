@@ -1,9 +1,10 @@
 from django import forms
 
 from cyder.cydhcp.range.models import Range, RangeKeyValue
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class RangeForm(forms.ModelForm):
+class RangeForm(forms.ModelForm, AlphabetizeFormMixin):
     class Meta:
         model = Range
         exclude = ('start_upper', 'start_lower', 'end_upper', 'end_lower')
