@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.db.models import Q
 from django.conf import settings
@@ -71,6 +72,17 @@ def login_session(request, username):
 
 
 def delete(request, user_id):
+    acting_user = User.objects.get(id=request.session['_auth_user_id'])
+
+    if acting_user.is_superuser is False:
+        messages.error(request, 'You do not have superuser permissions')
+        return redirect(reverse('core-index'))
+
+    if acting_user.id == user_id:
+        messages.error(
+            request, 'You cannot delete yourself')
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
     try:
         User.objects.get(id=user_id).delete()
     except:
@@ -80,6 +92,17 @@ def delete(request, user_id):
 
 
 def edit_user(request, username, action):
+    acting_user = User.objects.get(id=request.session['_auth_user_id'])
+
+    if acting_user.is_superuser is False:
+        messages.error(request, 'You do not have superuser permissions')
+        return redirect(reverse('core-index'))
+
+    if acting_user.username == username:
+        messages.error(
+            request, 'You do not have permission to perform this action')
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
     if action == 'Create':
         user, _ = User.objects.get_or_create(username=username)
         if _ is False:
@@ -94,11 +117,6 @@ def edit_user(request, username, action):
         if action == 'Promote':
             user.is_superuser = True
             user.save()
-
-            ctnruser, _ = CtnrUser.objects.get_or_create(
-                user_id=user.id, ctnr_id=Ctnr.objects.get(name='global').id,
-                level=0)
-            ctnruser.save()
 
         elif action == 'Demote':
             user.is_superuser = False
