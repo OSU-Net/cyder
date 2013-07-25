@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac
@@ -81,6 +83,18 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             return self.domain.name
         else:
             return "{0}.{1}".format(self.system.name, self.domain.name)
+
+    def clean(self, *args, **kwargs):
+        if self.dhcp_enabled:
+            self.mac = self.mac.lower()
+            validate_mac(self.mac)
+
+        if not self.system:
+            raise ValidationError(
+                "An interface means nothing without its system."
+            )
+
+        super(DynamicInterface, self).clean()
 
 
 class DynamicIntrKeyValue(CommonOption):

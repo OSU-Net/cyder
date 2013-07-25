@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.utils import get_display
+from cyder.base.helpers import get_display
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation

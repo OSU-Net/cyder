@@ -16,8 +16,8 @@ from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cydns.ptr.models import BasePTR, PTR
 
+from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.domain.models import Domain
@@ -139,11 +139,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('MAC', 'mac', self.mac),
             ('Vrf', 'vrf', self.vrf),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('DHCP Enabled', 'dhcp_enabled',
+            ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),
-            ('DNS Enabled', 'dns_enabled',
-                'True' if self.dns_enabled else 'False'),
-            ('DNS Type', '', 'A/PTR'),
+            ('DNS', 'dns_enabled',
+                'True: A/PTR' if self.dns_enabled else 'False'),
             ('Last Seen', 'last_seen', date),
         )
         return data
@@ -222,7 +221,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def clean(self, *args, **kwargs):
         validate_hostname_label(self.label)
 
-        self.mac = self.mac.lower()
+        if self.dhcp_enabled:
+            self.mac = self.mac.lower()
+            validate_mac(self.mac)
+
         if not self.system:
             raise ValidationError(
                 "An interface means nothing without its system."

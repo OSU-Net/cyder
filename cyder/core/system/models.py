@@ -7,10 +7,8 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 
 class System(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=255, unique=False)
-    department = models.CharField(max_length=255, unique=False, blank=True)
-    location = models.CharField(max_length=255, unique=False, blank=True)
 
-    search_fields = ('name', 'department', 'location')
+    search_fields = ('name',)
     display_fields = ('name', 'pk')
 
     def __str__(self):
@@ -25,8 +23,6 @@ class System(BaseModel, ObjectUrlMixin):
         data = super(System, self).details()
         data['data'] = [
             ('Name', 'name', self),
-            ('Department', 'department', self.department),
-            ('Location', 'location', self.location),
         ]
         return data
 
@@ -34,8 +30,6 @@ class System(BaseModel, ObjectUrlMixin):
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'name', 'datatype': 'string', 'editable': True},
-            {'name': 'department', 'datatype': 'string', 'editable': True},
-            {'name': 'location', 'datatype': 'string', 'editable': True},
         ]}
 
 
