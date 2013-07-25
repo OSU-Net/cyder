@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from cyder.core.ctnr.models import Ctnr, CtnrUser
-from cyder.core.system.models import System
+from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -238,31 +238,63 @@ def migrate_dynamic_hosts():
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
                    "workgroup, zone, enabled, last_seen "
                    "FROM host WHERE ip = 0")
-    res = cursor.fetchall()
-    for (range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en,
-         last_seen) in res:
 
-        r = maintain_find_range(range_id)
-        c = maintain_find_zone(zone_id)
-        d = maintain_find_domain(domain_id)
-        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
+    sys_value_keys = {"type": "Hardware Type",
+                      "os": "Operating System",
+                      "location": "Location",
+                      "department": "Department",
+                      "serial": "Serial Number",
+                      "other_id": "Other ID",
+                      "purchase_date": "Purchase Date",
+                      "po_number": "PO Number",
+                      "warranty_date": "Warranty Date",
+                      "owning_unit": "Owning Unit",
+                      "user_id": "User ID"}
+
+    keys = ("id", "dynamic_range", "name", "workgroup", "enabled", "ha",
+            "type", "os", "location", "department", "serial", "other_id",
+            "purchase_date", "po_number", "warranty_date", "owning_unit",
+            "user_id", "last_seen", "expire", "ttl", "last_update", "domain",
+            "zone")
+
+    sql = "SELECT %s FROM host WHERE ip = 0" % ", ".join(keys)
+
+    cursor.execute(sql)
+    for values in cursor.fetchall():
+        items = dict(zip(keys, values))
+
+        r = maintain_find_range(items['dynamic_range'])
+        c = maintain_find_zone(items['zone'])
+        d = maintain_find_domain(items['domain'])
+        w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c, d]):
-            print "Trouble migrating host with mac {0}".format(mac)
+            print "Trouble migrating host with mac {0}".format(items['ha'])
             continue
 
-        s = System(name=name)
+        s = System(name=items['name'])
+        s.save()
+        for key in sys_value_keys.keys():
+            value = items[key]
+            if not value or value == '0':
+                continue
+            kv = SystemKeyValue(system=s, key=sys_value_keys[key],
+                                value=str(value))
+            kv.clean()
+            kv.save()
+
         if r.allow == 'vrf':
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=mac, system=s, dhcp_enabled=en, dns_enabled=en,
-                last_seen=last_seen)
+                mac=items['ha'], system=s, dhcp_enabled=items['enabled'],
+                dns_enabled=items['enabled'],
+                last_seen=items['last_seen'])
             continue
 
         intr, _ = DynamicInterface.objects.get_or_create(
-            system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
-            last_seen=last_seen)
+            system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=items['ha'],
+            last_seen=items['last_seen'])
 
 
 def migrate_user():
@@ -371,7 +403,6 @@ def maintain_find_range(range_id):
                       "WHERE id = {0}".format(range_id)):
         start, end = cursor.fetchone()
         return Range.objects.get(start_lower=start, end_lower=end)
-    return None
 
 
 def maintain_find_domain(domain_id):
@@ -404,12 +435,14 @@ def maintain_find_zone(zone_id):
 
 
 def maintain_find_workgroup(workgroup_id):
+    if not workgroup_id:
+        return None
+
     if cursor.execute("SELECT name "
                       "FROM workgroup "
                       "WHERE id = {0}".format(workgroup_id)):
         name = cursor.fetchone()[0]
         return Workgroup.objects.get(name=name)
-    return None
 
 
 def migrate_all(skip=False):
