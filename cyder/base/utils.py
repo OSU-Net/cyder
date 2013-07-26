@@ -153,6 +153,9 @@ def make_megafilter(Klass, term):
 
 
 def filter_by_ctnr(ctnr, Klass, objects=None):
+    if ctnr.name in ['global', 'default']:
+        return Klass.objects
+
     if Klass is Domain:
         if objects:
             objects = ctnr.domains.filter(pk__in=objects)
@@ -193,7 +196,7 @@ def filter_by_ctnr(ctnr, Klass, objects=None):
 
 
 def _filter(request, Klass):
-    if request.session['ctnr'].name == 'global' or Klass.__name__ == 'Site':
+    if Klass.__name__ == 'Site':
         objects = Klass.objects
     else:
         objects = filter_by_ctnr(request.session['ctnr'], Klass)
