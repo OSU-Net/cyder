@@ -152,35 +152,42 @@ def make_megafilter(Klass, term):
     return reduce(operator.or_, megafilter)
 
 
-def filter_by_ctnr(request, Klass):
+def filter_by_ctnr(ctnr, Klass, objects=None):
     if Klass is Domain:
-        objects = request.session['ctnr'].domains
+        if objects:
+            objects = ctnr.domains.filter(pk__in=objects)
+        else:
+            objects = ctnr.domains
     elif Klass is Workgroup:
-        objects = request.session['ctnr'].workgroups
+        if objects:
+            objects = ctnr.workgroups.filter(pk__in=objects)
+        else:
+            objects = ctnr.workgroups
     elif Klass is Range:
-        objects = request.session['ctnr'].ranges
+        if objects:
+            objects = ctnr.ranges.filter(pk__in=objects)
+        else:
+            objects = ctnr.ranges
     elif Klass is Vrf:
         # TODO: filter vrfs by container
-        objects = Vrf.objects
+        objects = objects or Vrf.objects
     elif Klass is Network:
-        objects = Network.objects.filter(
-            range__in=request.session['ctnr'].ranges.all())
+        objects = objects or Network.objects
+        objects = objects.filter(range__in=ctnr.ranges.all())
     elif Klass is Vlan:
-        networks = Network.objects.filter(
-            range__in=request.session['ctnr'].ranges.all())
-        objects = Vlan.objects.filter(network__in=networks)
+        networks = Network.objects.filter(range__in=ctnr.ranges.all())
+        objects = objects or Vlan.objects
+        objects = objects.filter(network__in=networks)
     elif Klass is Site:
-        networks = Network.objects.filter(
-            range__in=request.session['ctnr'].ranges.all())
-        objects = Site.objects.filter(network__in=networks)
+        networks = Network.objects.filter(range__in=ctnr.ranges.all())
+        objects = objects or Site.objects
+        objects = objects.filter(network__in=networks)
     else:
-        objects = Klass.objects
+        objects = objects or Klass.objects
         if hasattr(Klass, 'domain'):
-            objects = objects.filter(
-                domain__in=request.session['ctnr'].domains.all())
+            objects = objects.filter(domain__in=ctnr.domains.all())
         elif hasattr(Klass, 'reverse_domain'):
-            objects = objects.filter(
-                reverse_domain__in=request.session['ctnr'].domains.all())
+            objects = objects.filter(reverse_domain__in=ctnr.domains.all())
 
     return objects
 
@@ -189,7 +196,7 @@ def _filter(request, Klass):
     if request.session['ctnr'].name == 'global' or Klass.__name__ == 'Site':
         objects = Klass.objects
     else:
-        objects = filter_by_ctnr(request, Klass)
+        objects = filter_by_ctnr(request.session['ctnr'], Klass)
 
     if request.GET.get('filter'):
         try:
