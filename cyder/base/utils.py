@@ -14,9 +14,10 @@ import cyder as cy
 
 
 def shell_out(command, use_shlex=True):
-    """A little helper function that will shell out and return stdout
-,
-    stderr and the return code."""
+    """
+    A little helper function that will shell out and return stdout,
+    stderr and the return code.
+    """
     if use_shlex:
         command_args = shlex.split(command)
     else:
