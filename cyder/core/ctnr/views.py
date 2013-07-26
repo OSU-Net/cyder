@@ -6,10 +6,12 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
+import cyder as cy
 from cyder.base.constants import LEVELS
 from cyder.base.utils import qd_to_py_dict, tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
+from cyder.core.cyuser.backends import _has_perm
 from cyder.core.views import CoreCreateView, CoreDetailView
 
 
@@ -115,17 +117,23 @@ def create_user_extra_cols(ctnr, ctnrusers):
 
 
 def remove_user(request, ctnr_pk, user_pk):
-    acting_user = User.objects.get(id=request.session['_auth_user_id'])
-    acting_user_level = CtnrUser.objects.get(
-        user_id=acting_user.id, ctnr_id=ctnr_pk).level
+    acting_user = request.user
 
-    if acting_user.id == int(user_pk):
+    if acting_user.get_profile().id == int(user_pk):
         messages.error(request, 'You can not edit your own permissions')
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    if acting_user_level == 2 or acting_user.is_superuser:
-        CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
+    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), cy.ACTION_UPDATE,
+                 obj_class=CtnrUser):
+        try:
+            CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
+
+        except:
+            messages.error(request,
+                           'That user does not exist inside this container')
+
         return redirect(request.META.get('HTTP_REFERER', ''))
+
     else:
         messages.error(
             request, 'You do not have permission to perform this action')
@@ -133,19 +141,24 @@ def remove_user(request, ctnr_pk, user_pk):
 
 
 def update_user_level(request, ctnr_pk, user_pk, lvl):
-    acting_user = User.objects.get(id=request.session['_auth_user_id'])
-    acting_user_level = CtnrUser.objects.get(
-        user_id=acting_user.id, ctnr_id=ctnr_pk).level
+    acting_user = request.user
 
-    if acting_user.id == int(user_pk):
+    if acting_user.get_profile().id == int(user_pk):
         messages.error(request, 'You can not edit your own permissions')
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    if acting_user_level == 2 or acting_user.is_superuser:
-        ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
+    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), cy.ACTION_UPDATE,
+                 obj_class=CtnrUser):
+        try:
+            ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
+
+        except:
+            messages.error(request,
+                           'That user does not exist inside this container')
 
         if (ctnr_user.level + int(lvl)) not in range(0, 3):
             return redirect(request.META.get('HTTP_REFERER', ''))
+
         else:
             ctnr_user.level += int(lvl)
             ctnr_user.save()

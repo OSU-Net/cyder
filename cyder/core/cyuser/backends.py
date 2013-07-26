@@ -99,6 +99,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         # Administrative.
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
+        'CtnrUser': has_ctnruser_perm,
 
         'SOA': has_soa_perm,
 
@@ -136,7 +137,6 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
     }.get(obj_type, False)
-
     return handling_function(user_level, obj, ctnr, action)
 
 
@@ -144,6 +144,17 @@ def has_administrative_perm(user_level, obj, ctnr, action):
     """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
     return {
         'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
+
+
+def has_ctnruser_perm(user_level, obj, ctnr, action):
+    """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
+    return {
+        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'user': action in [cy.ACTION_VIEW],
         'guest': action in [cy.ACTION_VIEW],
