@@ -5,7 +5,8 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.base.utils import shell_out
 from cyder.cydns.cybind.builder import SVNBuilderMixin, BuildError
-from cyder.settings.dhcpbuilds import (REPO_DIR, STAGE_DIR, VERBOSE_ERROR_LOG,
+from cyder.settings.dhcpbuilds import (REPO_DIR, STAGE_DIR, TARGET_FILE,
+                                       CHECK_FILE, VERBOSE_ERROR_LOG,
                                        VERBOSE_ERROR_LOG_LOCATION)
 import os
 import subprocess
@@ -18,6 +19,8 @@ class DHCPBuilder(SVNBuilderMixin):
         defaults = {
             'REPO_DIR': REPO_DIR,
             'STAGE_DIR': STAGE_DIR,
+            'TARGET_FILE': TARGET_FILE,
+            'CHECK_FILE': CHECK_FILE,
             'LOG_SYSLOG': True,
             'VERBOSE_ERROR_LOG': VERBOSE_ERROR_LOG,
             'VERBOSE_ERROR_LOG_LOCATION': VERBOSE_ERROR_LOG_LOCATION,
@@ -43,7 +46,7 @@ class DHCPBuilder(SVNBuilderMixin):
     def build(self, test_syntax=True):
         if self.LOG_SYSLOG:
             syslog.syslog(self.DEBUG_LOG_LEVEL, "Dhcp builds started")
-        with open(os.path.join(self.STAGE_DIR, 'dhcpd.conf.data'), 'w') as f:
+        with open(os.path.join(self.STAGE_DIR, TARGET_FILE), 'w') as f:
             try:
                 for ctnr in Ctnr.objects.all():
                     f.write(ctnr.build_legacy_class())
@@ -58,7 +61,7 @@ class DHCPBuilder(SVNBuilderMixin):
                     print str(e)
                 if self.LOG_SYSLOG:
                     syslog.syslog(self.ERR_LOG_LEVEL, str(e))
-        if test_syntax:
+        if test_syntax and CHECK_FILE:
             valid, output = self.is_valid_syntax()
             if not valid:
                 raise BuildError(output)
@@ -68,7 +71,7 @@ class DHCPBuilder(SVNBuilderMixin):
     def is_valid_syntax(self):
         stdout, stderr, ret = shell_out(
             "dhcpd -t -cf {0}".format(
-                os.path.join(self.STAGE_DIR, 'dhcpd.conf')
+                os.path.join(self.STAGE_DIR, CHECK_FILE)
             )
         )
         if ret != 0:

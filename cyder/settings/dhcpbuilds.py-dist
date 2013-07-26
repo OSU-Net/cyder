@@ -1,5 +1,12 @@
 STAGE_DIR = '/tmp/dhcp/stage'
 PROD_DIR = '/tmp/dhcp/prod'
+
+# the conf file that will be generated
+TARGET_FILE = 'dhcpd.conf'
+# the conf file whose syntax will be checked (None means don't check)
+CHECK_FILE = TARGET_FILE
+
 REPO_DIR = STAGE_DIR
+
 VERBOSE_ERROR_LOG = True
 VERBOSE_ERROR_LOG_LOCATION = '/tmp/error.log'
