@@ -9,15 +9,6 @@ from django.forms.models import model_to_dict
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
 
 
-Domain = get_model('domain', 'domain')
-Workgroup = get_model('workgroup', 'workgroup')
-Range = get_model('range', 'range')
-Network = get_model('network', 'network')
-Site = get_model('site', 'site')
-Vlan = get_model('vlan', 'vlan')
-Vrf = get_model('vrf', 'vrf')
-
-
 def find_get_record_url(obj):
     obj_type = obj._meta.db_table
     if obj_type in DHCP_OBJECTS:
@@ -152,11 +143,26 @@ def make_megafilter(Klass, term):
     return reduce(operator.or_, megafilter)
 
 
-def filter_by_ctnr(ctnr, Klass, objects=None):
-    if ctnr.name in ['global', 'default']:
-        return Klass.objects
+def filter_by_ctnr(ctnr, Klass=None, objects=None):
+    Ctnr = get_model('ctnr', 'ctnr')
+    Domain = get_model('domain', 'domain')
+    Workgroup = get_model('workgroup', 'workgroup')
+    Range = get_model('range', 'range')
+    Network = get_model('network', 'network')
+    Site = get_model('site', 'site')
+    Vlan = get_model('vlan', 'vlan')
+    Vrf = get_model('vrf', 'vrf')
 
-    if Klass is Domain:
+    if objects and not Klass:
+        Klass = objects.model
+
+    if ctnr.name in ['global', 'default']:
+        return objects or Klass.objects
+
+    if Klass is Ctnr:
+        return Ctnr.objects.filter(pk=ctnr.pk)
+
+    elif Klass is Domain:
         if objects:
             objects = ctnr.domains.filter(pk__in=objects)
         else:

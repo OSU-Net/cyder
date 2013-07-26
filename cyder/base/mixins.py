@@ -3,6 +3,7 @@ from string import Template
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.forms import ModelChoiceField
 
+from cyder.base.utils import filter_by_ctnr
 
 class DisplayMixin(object):
     # Knobs
@@ -78,9 +79,15 @@ class ObjectUrlMixin(object):
         return {'url': self.get_table_update_url()}
 
 
-class AlphabetizeFormMixin(object):
-    def alphabetize_all(self, *args, **kwargs):
+class UsabilityFormMixin(object):
+    def alphabetize_all(self):
         for fieldname, field in self.fields.items():
             if isinstance(field, ModelChoiceField):
                 self.fields[fieldname].queryset = field.queryset.order_by(
                     *field.queryset.model.display_fields)
+
+    def filter_by_ctnr_all(self, ctnr):
+        for fieldname, field in self.fields.items():
+            if hasattr(field, 'queryset'):
+                self.fields[fieldname].queryset = filter_by_ctnr(
+                    ctnr=ctnr, objects=field.queryset)
