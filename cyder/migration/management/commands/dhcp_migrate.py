@@ -285,8 +285,9 @@ def migrate_dynamic_hosts():
             try:
                 value.encode('utf-8')
             except UnicodeDecodeError:
-                print "hello"
+                print "Encode error (%s: %s)..." % (key, value),
                 value = value.decode('cp1252')
+                print "re-encoding as %s" % value
 
             kv = SystemKeyValue(system=s, key=sys_value_keys[key],
                                 value=value)
@@ -390,12 +391,8 @@ def migrate_zone_reverse():
             domain, _ = Domain.objects.get_or_create(name=dname,
                                                      is_reverse=True)
 
-        try:
-            ctnr.domains.add(domain)
-            ctnr.save()
-        except Exception, e:
-            print e
-            raise
+        ctnr.domains.add(domain)
+        ctnr.save()
 
 
 def migrate_zone_workgroup():
@@ -445,7 +442,7 @@ def maintain_get_cached(table, columns, object_id):
     columns = tuple(columns)
     if (table, columns) not in cached:
         sql = "SELECT id, %s FROM %s" % (", ".join(columns), table)
-        print sql
+        print "Caching: %s" % sql
         cursor.execute(sql)
         results = cursor.fetchall()
         results = [(r[0], tuple(r[1:])) for r in results]
