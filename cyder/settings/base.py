@@ -246,14 +246,14 @@ REST_FRAMEWORK = {
 # ==================
 
 
-# STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
+# DNS_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
 DNS_STAGE_DIR = "/tmp/dns_stage/"
 
-# PROD_DIR: This is the directory where Cyder will place its DNS files.
+# DNS_PROD_DIR: This is the directory where Cyder will place its DNS files.
 # This should be an SVN repo
 DNS_PROD_DIR = "/tmp/dns_prod/cyzones/"
 
-# BIND_PREFIX: This is the path to where Cyder zone files are built
+# DNS_BIND_PREFIX: This is the path to where Cyder zone files are built
 # relative to the root of the SVN repo. This is usually a substring of
 # PROD_DIR.
 DNS_BIND_PREFIX = DNS_PROD_DIR
@@ -276,16 +276,16 @@ DNS_LAST_RUN_FILE = "/tmp/last.run"
 # ===================
 
 
-# STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
+# DHCP_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
 DHCP_STAGE_DIR = '/tmp/dhcp/stage'
 
-# PROD_DIR: Where Cyder will place the dhcpd configuration file.
+# DHCP_PROD_DIR: Where Cyder will place the dhcpd configuration file.
 DHCP_PROD_DIR = '/tmp/dhcp/prod'
 
-# TARGET_FILE: The configuration file that will be generated
+# DHCP_TARGET_FILE: The configuration file that will be generated
 DHCP_TARGET_FILE = 'dhcpd.conf'
 
-# CHECK_FILE: The conf file whose syntax will be checked (None means
+# DHCP_CHECK_FILE: The conf file whose syntax will be checked (None means
 # don't check any file)
 DHCP_CHECK_FILE = DHCP_TARGET_FILE
 
