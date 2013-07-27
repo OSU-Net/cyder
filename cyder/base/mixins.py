@@ -91,3 +91,5 @@ class UsabilityFormMixin(object):
             if hasattr(field, 'queryset'):
                 self.fields[fieldname].queryset = filter_by_ctnr(
                     ctnr=ctnr, objects=field.queryset)
+                if field.queryset.count() == 1:
+                    self.fields[fieldname].initial = field.queryset[0]
