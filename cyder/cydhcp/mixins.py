@@ -1,4 +1,4 @@
-from cyder.settings.dhcpsettings import PROD_DIR, STAGE_DIR
+from cyder.settings import DHCP_PROD_DIR, DHCP_STAGE_DIR
 
 
 class DHCPBuildableObject(object):
