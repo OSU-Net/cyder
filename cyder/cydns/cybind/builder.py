@@ -10,10 +10,10 @@ import os
 import re
 import time
 
-from cyder.settings.dnsbuilds import (
-    STAGE_DIR, PROD_DIR, LOCK_FILE, STOP_UPDATE_FILE, NAMED_CHECKZONE_OPTS,
-    MAX_ALLOWED_LINES_CHANGED, MAX_ALLOWED_CONFIG_LINES_REMOVED,
-    NAMED_CHECKZONE, NAMED_CHECKCONF, LAST_RUN_FILE, BIND_PREFIX
+from cyder.settings import (
+    DNS_STAGE_DIR, DNS_PROD_DIR, DNS_LOCK_FILE, DNS_STOP_UPDATE_FILE, DNS_NAMED_CHECKZONE_OPTS,
+    DNS_MAX_ALLOWED_LINES_CHANGED, DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED,
+    DNS_NAMED_CHECKZONE, DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
 )
 
 from cyder.core.task.models import Task
@@ -99,7 +99,7 @@ class SVNBuilderMixin(object):
         returned.
         """
         # svn diff changes and react if changes are too large
-        if sum(lines_changed) > MAX_ALLOWED_LINES_CHANGED:
+        if sum(lines_changed) > DNS_MAX_ALLOWED_LINES_CHANGED:
             if self.FORCE:
                 self.log("Sanity check failed but FORCE == True. "
                          "Ignoring thresholds.")
@@ -111,14 +111,14 @@ class SVNBuilderMixin(object):
     def svn_checkin(self, lines_changed):
         # svn add has already been called
         cwd = os.getcwd()
-        os.chdir(self.PROD_DIR)
-        self.log("Changing pwd to {0}".format(self.PROD_DIR))
+        os.chdir(self.DNS_PROD_DIR)
+        self.log("Changing pwd to {0}".format(self.DNS_PROD_DIR))
         try:
             ci_message = _("Checking in DNS. {0} lines were added and {1} were"
                            " removed".format(*lines_changed))
             self.log("Commit message: {0}".format(ci_message))
             command_str = "svn ci {0} -m \"{1}\"".format(
-                self.PROD_DIR, ci_message)
+                self.DNS_PROD_DIR, ci_message)
             stdout, stderr, returncode = self.shell_out(command_str)
             if returncode != 0:
                 raise BuildError("Failed to check in changes."
@@ -132,12 +132,12 @@ class SVNBuilderMixin(object):
         return
 
     def vcs_checkin(self):
-        command_str = "svn add --force .".format(self.PROD_DIR)
+        command_str = "svn add --force .".format(self.DNS_PROD_DIR)
         stdout, stderr, returncode = self.shell_out(command_str)
         try:
             cwd = os.getcwd()
-            os.chdir(self.PROD_DIR)
-            self.log("Calling `svn up` in {0}".format(self.PROD_DIR))
+            os.chdir(self.DNS_PROD_DIR)
+            self.log("Calling `svn up` in {0}".format(self.DNS_PROD_DIR))
             command_str = "svn up"
             stdout, stderr, returncode = self.shell_out(command_str)
             if returncode != 0:
@@ -148,7 +148,7 @@ class SVNBuilderMixin(object):
             os.chdir(cwd)  # go back!
             self.log("Changing pwd to {0}".format(cwd))
 
-        lines_changed = self.svn_lines_changed(self.PROD_DIR)
+        lines_changed = self.svn_lines_changed(self.DNS_PROD_DIR)
         self.svn_sanity_check(lines_changed)
         if lines_changed == (0, 0):
             self.log("PUSH_TO_PROD is True but "
@@ -156,10 +156,10 @@ class SVNBuilderMixin(object):
                      "from last svn checkin.")
         else:
             config_lines_changed = self.svn_lines_changed(
-                os.path.join(self.PROD_DIR, 'config')
+                os.path.join(self.DNS_PROD_DIR, 'config')
             )
             config_lines_removed = config_lines_changed[1]
-            if config_lines_removed > MAX_ALLOWED_CONFIG_LINES_REMOVED:
+            if config_lines_removed > DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED:
                 if self.FORCE:
                     self.log("Config sanity check failed but "
                              "FORCE == True. Ignoring thresholds.")
@@ -178,14 +178,14 @@ class SVNBuilderMixin(object):
 class DNSBuilder(SVNBuilderMixin):
     def __init__(self, **kwargs):
         defaults = {
-            'STAGE_DIR': STAGE_DIR,
-            'PROD_DIR': PROD_DIR,
-            'BIND_PREFIX': BIND_PREFIX,
-            'LOCK_FILE': LOCK_FILE,
-            'STOP_UPDATE_FILE': STOP_UPDATE_FILE,
-            'LAST_RUN_FILE': LAST_RUN_FILE,
+            'DNS_STAGE_DIR': DNS_STAGE_DIR,
+            'DNS_PROD_DIR': DNS_PROD_DIR,
+            'DNS_BIND_PREFIX': DNS_BIND_PREFIX,
+            'DNS_LOCK_FILE': DNS_LOCK_FILE,
+            'DNS_STOP_UPDATE_FILE': DNS_STOP_UPDATE_FILE,
+            'DNS_LAST_RUN_FILE': DNS_LAST_RUN_FILE,
             'STAGE_ONLY': False,
-            'NAMED_CHECKZONE_OPTS': NAMED_CHECKZONE_OPTS,
+            'DNS_NAMED_CHECKZONE_OPTS': DNS_NAMED_CHECKZONE_OPTS,
             'CLOBBER_STAGE': False,
             'PUSH_TO_PROD': False,
             'BUILD_ZONES': True,
@@ -206,7 +206,7 @@ class DNSBuilder(SVNBuilderMixin):
         """Print the status of the build system"""
         is_locked = False
         try:
-            self.lock_fd = open(self.LOCK_FILE, 'w+')
+            self.lock_fd = open(self.DNS_LOCK_FILE, 'w+')
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
         except IOError, exc_value:
@@ -216,27 +216,27 @@ class DNSBuilder(SVNBuilderMixin):
             print "IS_LOCKED=True"
         else:
             print "IS_LOCKED=False"
-        print "LOCK_FILE={0}".format(self.LOCK_FILE)
+        print "DNS_LOCK_FILE={0}".format(self.DNS_LOCK_FILE)
 
-        if os.path.exists(self.STOP_UPDATE_FILE):
+        if os.path.exists(self.DNS_STOP_UPDATE_FILE):
             print "STOP_UPDATE_FILE_EXISTS=True"
         else:
             print "STOP_UPDATE_FILE_EXISTS=False"
-        print "STOP_UPDATE_FILE={0}".format(self.STOP_UPDATE_FILE)
+        print "DNS_STOP_UPDATE_FILE={0}".format(self.DNS_STOP_UPDATE_FILE)
 
-        if os.path.exists(self.STAGE_DIR):
+        if os.path.exists(self.DNS_STAGE_DIR):
             print "STAGE_DIR_EXISTS=True"
         else:
             print "STAGE_DIR_EXISTS=False"
-        print "STAGE_DIR={0}".format(self.STAGE_DIR)
+        print "DNS_STAGE_DIR={0}".format(self.DNS_STAGE_DIR)
 
-        if os.path.exists(self.PROD_DIR):
+        if os.path.exists(self.DNS_PROD_DIR):
             print "PROD_DIR_EXISTS=True"
         else:
             print "PROD_DIR_EXISTS=False"
-        print "PROD_DIR={0}".format(self.PROD_DIR)
+        print "DNS_PROD_DIR={0}".format(self.DNS_PROD_DIR)
 
-        print "LAST_RUN_FILE={0}".format(self.LAST_RUN_FILE)
+        print "DNS_LAST_RUN_FILE={0}".format(self.DNS_LAST_RUN_FILE)
 
     def format_title(self, title):
         return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
@@ -291,11 +291,11 @@ class DNSBuilder(SVNBuilderMixin):
         Create the stage folder. Fail if it already exists unless
         force=True.
         """
-        if os.path.exists(self.STAGE_DIR) and not force:
+        if os.path.exists(self.DNS_STAGE_DIR) and not force:
             raise BuildError("The DNS build scripts tried to build the staging"
                              " area but the area already exists.")
         try:
-            os.makedirs(self.STAGE_DIR)
+            os.makedirs(self.DNS_STAGE_DIR)
         except OSError:
             if not force:
                 raise
@@ -305,10 +305,10 @@ class DNSBuilder(SVNBuilderMixin):
         rm -rf the staging area. Fail if the staging area doesn't exist.
         """
         self.log("Attempting rm -rf staging "
-                 "area. ({0})...".format(self.STAGE_DIR))
-        if os.path.exists(self.STAGE_DIR) or force:
+                 "area. ({0})...".format(self.DNS_STAGE_DIR))
+        if os.path.exists(self.DNS_STAGE_DIR) or force:
             try:
-                shutil.rmtree(self.STAGE_DIR)
+                shutil.rmtree(self.DNS_STAGE_DIR)
             except OSError, e:
                 if e.errno == 2:
                     self.log("Staging was not present.",
@@ -328,11 +328,11 @@ class DNSBuilder(SVNBuilderMixin):
         return False.
         """
         try:
-            if not os.path.exists(os.path.dirname(self.LOCK_FILE)):
-                os.makedirs(os.path.dirname(self.LOCK_FILE))
+            if not os.path.exists(os.path.dirname(self.DNS_LOCK_FILE)):
+                os.makedirs(os.path.dirname(self.DNS_LOCK_FILE))
             self.log("Attempting acquire mutext "
-                     "({0})...".format(self.LOCK_FILE))
-            self.lock_fd = open(self.LOCK_FILE, 'w+')
+                     "({0})...".format(self.DNS_LOCK_FILE))
+            self.lock_fd = open(self.DNS_LOCK_FILE, 'w+')
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             self.log(self.format_title("Mutex Acquired"))
             return True
@@ -360,7 +360,7 @@ class DNSBuilder(SVNBuilderMixin):
         if not self.lock_fd:
             return False
         self.log("Attempting release mutex "
-                 "({0})...".format(self.LOCK_FILE))
+                 "({0})...".format(self.DNS_LOCK_FILE))
         fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
         self.log("Unlock Complete.")
         return True
@@ -431,18 +431,18 @@ class DNSBuilder(SVNBuilderMixin):
         with errors raise a BuildError.
         """
         # Make sure we have the write tools to do the job
-        command_str = "test -f {0}".format(NAMED_CHECKZONE)
+        command_str = "test -f {0}".format(DNS_NAMED_CHECKZONE)
         stdout, stderr, returncode = self.shell_out(command_str)
         if returncode != 0:
             raise BuildError("Couldn't find named-checkzone.")
 
         # Check the zone file.
         command_str = "{0} {1} {2} {3}".format(
-                      NAMED_CHECKZONE, self.NAMED_CHECKZONE_OPTS,
+                      DNS_NAMED_CHECKZONE, self.DNS_NAMED_CHECKZONE_OPTS,
                       root_domain.name, zone_file)
         self.log(
             "Calling `{0} {1} {2}`".
-            format(NAMED_CHECKZONE, root_domain.name, zone_file),
+            format(DNS_NAMED_CHECKZONE, root_domain.name, zone_file),
             root_domain=root_domain
         )
         stdout, stderr, returncode = self.shell_out(command_str)
@@ -453,14 +453,14 @@ class DNSBuilder(SVNBuilderMixin):
                              stderr))
 
     def named_checkconf(self, conf_file):
-        command_str = "test -f {0}".format(NAMED_CHECKCONF)
+        command_str = "test -f {0}".format(DNS_NAMED_CHECKCONF)
         stdout, stderr, returncode = self.shell_out(command_str)
         if returncode != 0:
-            raise BuildError("Couldn't find {0}".format(NAMED_CHECKCONF))
+            raise BuildError("Couldn't find {0}".format(DNS_NAMED_CHECKCONF))
 
-        command_str = "{0} {1}".format(NAMED_CHECKCONF, conf_file)
+        command_str = "{0} {1}".format(DNS_NAMED_CHECKCONF, conf_file)
         self.log("Calling `{0} {1}` ".
-                 format(NAMED_CHECKCONF, conf_file))
+                 format(DNS_NAMED_CHECKCONF, conf_file))
         stdout, stderr, returncode = self.shell_out(command_str)
         if returncode != 0:
             raise BuildError("\nnamed-checkconf rejected config {0}. "
@@ -469,14 +469,14 @@ class DNSBuilder(SVNBuilderMixin):
                              stderr))
 
     def stage_to_prod(self, src):
-        """Copy file over to PROD_DIR. Return the new location of the
+        """Copy file over to DNS_PROD_DIR. Return the new location of the
         file.
         """
 
-        if not src.startswith(self.STAGE_DIR):
+        if not src.startswith(self.DNS_STAGE_DIR):
             raise BuildError("Improper file '{0}' passed to "
                              "stage_to_prod".format(src))
-        dst = src.replace(self.STAGE_DIR, self.PROD_DIR)
+        dst = src.replace(self.DNS_STAGE_DIR, self.DNS_PROD_DIR)
         dst_dir = os.path.dirname(dst)
 
         if self.STAGE_ONLY:
@@ -501,7 +501,7 @@ class DNSBuilder(SVNBuilderMixin):
         Write config files to the correct area in staging.
         Return the path to the file.
         """
-        stage_config = os.path.join(self.STAGE_DIR, "config", config_fname)
+        stage_config = os.path.join(self.DNS_STAGE_DIR, "config", config_fname)
 
         if not os.path.exists(os.path.dirname(stage_config)):
             os.makedirs(os.path.dirname(stage_config))
@@ -513,12 +513,12 @@ class DNSBuilder(SVNBuilderMixin):
         """
         This function will write the zone's zone file to the the staging area
         and call named-checkconf on the files before they are copied over to
-        PROD_DIR. If will return a tuple of files corresponding to where the
+        DNS_PROD_DIR. If will return a tuple of files corresponding to where the
         `privat_file` and `public_file` are written to. If a file is not
         written to the file system `None` will be returned instead of the path
         to the file.
         """
-        stage_fname = os.path.join(self.STAGE_DIR, file_meta['rel_fname'])
+        stage_fname = os.path.join(self.DNS_STAGE_DIR, file_meta['rel_fname'])
         self.write_stage_zone(
             stage_fname, root_domain, file_meta['rel_fname'], view_data
         )
@@ -601,9 +601,9 @@ class DNSBuilder(SVNBuilderMixin):
         rel_zone_dir = self.calc_target(root_domain, soa)
         file_meta['fname'] = self.calc_fname(view, root_domain)
         file_meta['rel_fname'] = os.path.join(rel_zone_dir, file_meta['fname'])
-        file_meta['prod_fname'] = os.path.join(self.PROD_DIR,
+        file_meta['prod_fname'] = os.path.join(self.DNS_PROD_DIR,
                                                file_meta['rel_fname'])
-        file_meta['bind_fname'] = os.path.join(self.BIND_PREFIX,
+        file_meta['bind_fname'] = os.path.join(self.DNS_BIND_PREFIX,
                                                file_meta['rel_fname'])
         return file_meta
 
@@ -765,14 +765,14 @@ class DNSBuilder(SVNBuilderMixin):
 
     def stop_update_exists(self):
         """
-        Look for a file referenced by `STOP_UPDATE_FILE` and if it exists,
+        Look for a file referenced by `DNS_STOP_UPDATE_FILE` and if it exists,
         cancel the build.
         """
-        if os.path.exists(self.STOP_UPDATE_FILE):
-            msg = ("The STOP_UPDATE_FILE ({0}) exists. Build canceled. \n"
+        if os.path.exists(self.DNS_STOP_UPDATE_FILE):
+            msg = ("The DNS_STOP_UPDATE_FILE ({0}) exists. Build canceled. \n"
                    "Reason for skipped build: \n"
-                   "{1}".format(self.STOP_UPDATE_FILE,
-                                open(self.STOP_UPDATE_FILE).read()))
+                   "{1}".format(self.DNS_STOP_UPDATE_FILE,
+                                open(self.DNS_STOP_UPDATE_FILE).read()))
             fail_mail(msg, subject="DNS builds have stoped")
             self.log(msg)
             return True
