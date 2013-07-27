@@ -21,6 +21,13 @@ class Workgroup(models.Model, ObjectUrlMixin):
     def __str__(self):
         return get_display(self)
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        if objects:
+            return ctnr.workgroups.filter(pk__in=objects)
+        else:
+            return ctnr.workgroups
+
     def details(self):
         data = super(Workgroup, self).details()
         data['data'] = [

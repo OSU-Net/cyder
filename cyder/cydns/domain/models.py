@@ -104,6 +104,13 @@ class Domain(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Domain '{0}'>".format(self.name)
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        if objects:
+            return ctnr.domains.filter(pk__in=objects)
+        else:
+            return ctnr.domains
+
     @property
     def rdtype(self):
         return 'DOMAIN'

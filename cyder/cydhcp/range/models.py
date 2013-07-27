@@ -92,6 +92,13 @@ class Range(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        if objects:
+            return ctnr.ranges.filter(pk__in=objects)
+        else:
+            return ctnr.ranges
+
     def update_attrs(self):
         self.attrs = AuxAttr(RangeKeyValue, self, "range")
 

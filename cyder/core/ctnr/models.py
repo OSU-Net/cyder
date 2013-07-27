@@ -35,6 +35,10 @@ class Ctnr(models.Model, ObjectUrlMixin):
     def __str__(self):
         return get_display(self)
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        return Ctnr.objects.filter(pk=ctnr.pk)
+
     def details(self):
         data = super(Ctnr, self).details()
         data['data'] = (

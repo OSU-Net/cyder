@@ -3,7 +3,6 @@ import operator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
@@ -144,53 +143,14 @@ def make_megafilter(Klass, term):
 
 
 def filter_by_ctnr(ctnr, Klass=None, objects=None):
-    Ctnr = get_model('ctnr', 'ctnr')
-    Domain = get_model('domain', 'domain')
-    Workgroup = get_model('workgroup', 'workgroup')
-    Range = get_model('range', 'range')
-    Network = get_model('network', 'network')
-    Site = get_model('site', 'site')
-    Vlan = get_model('vlan', 'vlan')
-    Vrf = get_model('vrf', 'vrf')
-
     if objects and not Klass:
         Klass = objects.model
 
     if ctnr.name in ['global', 'default']:
         return objects or Klass.objects
 
-    if Klass is Ctnr:
-        return Ctnr.objects.filter(pk=ctnr.pk)
-
-    elif Klass is Domain:
-        if objects:
-            objects = ctnr.domains.filter(pk__in=objects)
-        else:
-            objects = ctnr.domains
-    elif Klass is Workgroup:
-        if objects:
-            objects = ctnr.workgroups.filter(pk__in=objects)
-        else:
-            objects = ctnr.workgroups
-    elif Klass is Range:
-        if objects:
-            objects = ctnr.ranges.filter(pk__in=objects)
-        else:
-            objects = ctnr.ranges
-    elif Klass is Vrf:
-        # TODO: filter vrfs by container
-        objects = objects or Vrf.objects
-    elif Klass is Network:
-        objects = objects or Network.objects
-        objects = objects.filter(range__in=ctnr.ranges.all())
-    elif Klass is Vlan:
-        networks = Network.objects.filter(range__in=ctnr.ranges.all())
-        objects = objects or Vlan.objects
-        objects = objects.filter(network__in=networks)
-    elif Klass is Site:
-        networks = Network.objects.filter(range__in=ctnr.ranges.all())
-        objects = objects or Site.objects
-        objects = objects.filter(network__in=networks)
+    if hasattr(Klass, 'filter_by_ctnr'):
+        return Klass.filter_by_ctnr(ctnr, objects)
     else:
         objects = objects or Klass.objects
         if hasattr(Klass, 'domain'):
@@ -202,10 +162,7 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
 
 
 def _filter(request, Klass):
-    if Klass.__name__ == 'Site':
-        objects = Klass.objects
-    else:
-        objects = filter_by_ctnr(request.session['ctnr'], Klass)
+    objects = filter_by_ctnr(request.session['ctnr'], Klass)
 
     if request.GET.get('filter'):
         try:
