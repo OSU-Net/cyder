@@ -111,14 +111,14 @@ class SVNBuilderMixin(object):
     def svn_checkin(self, lines_changed):
         # svn add has already been called
         cwd = os.getcwd()
-        os.chdir(self.DNS_PROD_DIR)
-        self.log("Changing pwd to {0}".format(self.DNS_PROD_DIR))
+        os.chdir(self.PROD_DIR)
+        self.log("Changing pwd to {0}".format(self.PROD_DIR))
         try:
             ci_message = _("Checking in DNS. {0} lines were added and {1} were"
                            " removed".format(*lines_changed))
             self.log("Commit message: {0}".format(ci_message))
             command_str = "svn ci {0} -m \"{1}\"".format(
-                self.DNS_PROD_DIR, ci_message)
+                self.PROD_DIR, ci_message)
             stdout, stderr, returncode = self.shell_out(command_str)
             if returncode != 0:
                 raise BuildError("Failed to check in changes."
@@ -132,12 +132,12 @@ class SVNBuilderMixin(object):
         return
 
     def vcs_checkin(self):
-        command_str = "svn add --force .".format(self.DNS_PROD_DIR)
+        command_str = "svn add --force .".format(self.PROD_DIR)
         stdout, stderr, returncode = self.shell_out(command_str)
         try:
             cwd = os.getcwd()
-            os.chdir(self.DNS_PROD_DIR)
-            self.log("Calling `svn up` in {0}".format(self.DNS_PROD_DIR))
+            os.chdir(self.PROD_DIR)
+            self.log("Calling `svn up` in {0}".format(self.PROD_DIR))
             command_str = "svn up"
             stdout, stderr, returncode = self.shell_out(command_str)
             if returncode != 0:
@@ -148,7 +148,7 @@ class SVNBuilderMixin(object):
             os.chdir(cwd)  # go back!
             self.log("Changing pwd to {0}".format(cwd))
 
-        lines_changed = self.svn_lines_changed(self.DNS_PROD_DIR)
+        lines_changed = self.svn_lines_changed(self.PROD_DIR)
         self.svn_sanity_check(lines_changed)
         if lines_changed == (0, 0):
             self.log("PUSH_TO_PROD is True but "
@@ -156,7 +156,7 @@ class SVNBuilderMixin(object):
                      "from last svn checkin.")
         else:
             config_lines_changed = self.svn_lines_changed(
-                os.path.join(self.DNS_PROD_DIR, 'config')
+                os.path.join(self.PROD_DIR, 'config')
             )
             config_lines_removed = config_lines_changed[1]
             if config_lines_removed > DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED:
@@ -178,14 +178,14 @@ class SVNBuilderMixin(object):
 class DNSBuilder(SVNBuilderMixin):
     def __init__(self, **kwargs):
         defaults = {
-            'DNS_STAGE_DIR': DNS_STAGE_DIR,
-            'DNS_PROD_DIR': DNS_PROD_DIR,
-            'DNS_BIND_PREFIX': DNS_BIND_PREFIX,
-            'DNS_LOCK_FILE': DNS_LOCK_FILE,
-            'DNS_STOP_UPDATE_FILE': DNS_STOP_UPDATE_FILE,
-            'DNS_LAST_RUN_FILE': DNS_LAST_RUN_FILE,
+            'STAGE_DIR': DNS_STAGE_DIR,
+            'PROD_DIR': DNS_PROD_DIR,
+            'BIND_PREFIX': DNS_BIND_PREFIX,
+            'LOCK_FILE': DNS_LOCK_FILE,
+            'STOP_UPDATE_FILE': DNS_STOP_UPDATE_FILE,
+            'LAST_RUN_FILE': DNS_LAST_RUN_FILE,
             'STAGE_ONLY': False,
-            'DNS_NAMED_CHECKZONE_OPTS': DNS_NAMED_CHECKZONE_OPTS,
+            'NAMED_CHECKZONE_OPTS': DNS_NAMED_CHECKZONE_OPTS,
             'CLOBBER_STAGE': False,
             'PUSH_TO_PROD': False,
             'BUILD_ZONES': True,
