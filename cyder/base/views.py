@@ -19,6 +19,7 @@ from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, model_to_post, tablefy,
                               qd_to_py_dict)
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
 from cyder.base.forms import BugReportForm
@@ -111,8 +112,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
-    if hasattr(form, 'alphabetize_all'):
+    if issubclass(type(form), UsabilityFormMixin):
         form.alphabetize_all()
+        form.filter_by_ctnr_all(request.session['ctnr'])
 
     return render(request, template, {
         'form': form,
@@ -217,10 +219,8 @@ def get_update_form(request, get_klasses_fn):
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
-    if hasattr(form, 'alphabetize_all'):
+    if issubclass(type(form), UsabilityFormMixin):
         form.alphabetize_all()
-
-    if hasattr(form, 'filter_by_ctnr_all'):
         form.filter_by_ctnr_all(request.session['ctnr'])
 
     return HttpResponse(

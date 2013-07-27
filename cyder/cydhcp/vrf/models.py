@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.loading import get_model
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -19,6 +20,13 @@ class Vrf(models.Model, ObjectUrlMixin):
 
     def __str__(self):
         return get_display(self)
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        Network = get_model('network', 'network')
+        networks = Network.objects.filter(range__in=ctnr.ranges.all())
+        objects = objects or Vrf.objects
+        return objects.filter(network__in=networks)
 
     def details(self):
         data = super(Vrf, self).details()
