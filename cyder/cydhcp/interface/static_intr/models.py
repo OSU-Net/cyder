@@ -86,6 +86,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     changes to propagate to the database.
     """
     id = models.AutoField(primary_key=True)
+    ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
     mac = models.CharField(max_length=17, blank=True,
                            help_text='MAC address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
