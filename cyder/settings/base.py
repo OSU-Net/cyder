@@ -276,7 +276,8 @@ DNS_LAST_RUN_FILE = "/tmp/last.run"
 # ===================
 
 
-# DHCP_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
+# DHCP_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN
+# repo.
 DHCP_STAGE_DIR = '/tmp/dhcp/stage'
 
 # DHCP_PROD_DIR: Where Cyder will place the dhcpd configuration file.

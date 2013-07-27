@@ -6,8 +6,8 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.base.utils import shell_out
 from cyder.cydns.cybind.builder import SVNBuilderMixin, BuildError
 from cyder.settings import (DHCP_REPO_DIR, DHCP_STAGE_DIR, DHCP_TARGET_FILE,
-                                       DHCP_CHECK_FILE, DHCP_VERBOSE_ERROR_LOG,
-                                       DHCP_VERBOSE_ERROR_LOG_LOCATION)
+                            DHCP_CHECK_FILE, DHCP_VERBOSE_ERROR_LOG,
+                            DHCP_VERBOSE_ERROR_LOG_LOCATION)
 import os
 import subprocess
 import shlex
@@ -84,6 +84,7 @@ class DHCPBuilder(SVNBuilderMixin):
                 print stderr
             return (False, stderr)
         return (True, stdout)
+
 
 def build():
     d = DHCPBuilder()

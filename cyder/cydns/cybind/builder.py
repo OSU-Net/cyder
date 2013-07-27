@@ -11,9 +11,10 @@ import re
 import time
 
 from cyder.settings import (
-    DNS_STAGE_DIR, DNS_PROD_DIR, DNS_LOCK_FILE, DNS_STOP_UPDATE_FILE, DNS_NAMED_CHECKZONE_OPTS,
-    DNS_MAX_ALLOWED_LINES_CHANGED, DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED,
-    DNS_NAMED_CHECKZONE, DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
+    DNS_STAGE_DIR, DNS_PROD_DIR, DNS_LOCK_FILE, DNS_STOP_UPDATE_FILE,
+    DNS_NAMED_CHECKZONE_OPTS, DNS_MAX_ALLOWED_LINES_CHANGED,
+    DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED, DNS_NAMED_CHECKZONE,
+    DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
 )
 
 from cyder.core.task.models import Task
@@ -450,7 +451,7 @@ class DNSBuilder(SVNBuilderMixin):
             raise BuildError("\nnamed-checkzone failed on zone {0}. "
                              "\ncommand: {1}\nstdout: {2}\nstderr:{3}\n".
                              format(root_domain.name, command_str, stdout,
-                             stderr))
+                                    stderr))
 
     def named_checkconf(self, conf_file):
         command_str = "test -f {0}".format(DNS_NAMED_CHECKCONF)
@@ -466,7 +467,7 @@ class DNSBuilder(SVNBuilderMixin):
             raise BuildError("\nnamed-checkconf rejected config {0}. "
                              "\ncommand: {1}\nstdout: {2}\nstderr:{3}\n".
                              format(conf_file, command_str, stdout,
-                             stderr))
+                                    stderr))
 
     def stage_to_prod(self, src):
         """Copy file over to PROD_DIR. Return the new location of the
