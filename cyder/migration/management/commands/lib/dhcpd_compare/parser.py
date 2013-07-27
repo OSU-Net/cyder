@@ -14,7 +14,8 @@ def strip_comments(content):
     return "".join(line[:line.find('#')] if '#' in line else line for line in content)
 
 
-grammar = open('isc.parsley').read()
+grammar = open('cyder/migration/management/commands/lib/dhcpd_compare/'
+               'isc.parsley').read()
 
 class DhcpConfigContext(
         OMeta.makeGrammar(
@@ -105,8 +106,7 @@ class DhcpConfigContext(
 
 iscgrammar = wrapGrammar(DhcpConfigContext)
 
-if __name__ == '__main__':
-    parse1 = iscgrammar(strip_comments(open(sys.argv[1]))).GlobalParse()
-    parse2 = iscgrammar(strip_comments(open(sys.argv[2]))).GlobalParse()
+def compare(file1, file2):
+    parse1 = iscgrammar(strip_comments(open(file1))).GlobalParse()
+    parse2 = iscgrammar(strip_comments(open(file2))).GlobalParse()
     parse1.diff(parse2)
-#print parse1 == parse2
