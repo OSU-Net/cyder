@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Q
+from django.db.models.loading import get_model
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
@@ -17,6 +19,17 @@ class System(BaseModel, ObjectUrlMixin):
 
     class Meta:
         db_table = 'system'
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or System.objects
+        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
+        StaticInterface = get_model('static_intr', 'staticinterface')
+        dynamic_query = DynamicInterface.objects.filter(
+            ctnr=ctnr).values_list('system')
+        static_query = StaticInterface.objects.filter(
+            ctnr=ctnr).values_list('system')
+        return objects.filter(Q(id__in=static_query) | Q(id__in=dynamic_query))
 
     def details(self):
         """For tables."""
