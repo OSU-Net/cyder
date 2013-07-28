@@ -1,6 +1,6 @@
 [submodule "vendor"]
 	path = vendor
-	url = git@github.com:mozilla/playdoh-lib
+	url = https://github.com/mozilla/playdoh-lib.git
 	ignore = dirty
 [submodule "vendor-local/src/iscpy"]
 	path = vendor-local/src/iscpy
