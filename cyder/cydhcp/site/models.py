@@ -14,13 +14,17 @@ class Site(models.Model, ObjectUrlMixin):
     parent = models.ForeignKey("self", null=True, blank=True)
 
     search_fields = ('name', 'parent__name')
+    display_fields = ('name',)
 
     class Meta:
         db_table = 'site'
         unique_together = ('name', 'parent')
 
     def __str__(self):
-        return "{0}".format(self.get_full_name())
+        if self.parent:
+            return "%s in %s" % (self.name, self.parent.get_full_name())
+        else:
+            return self.name
 
     def __repr__(self):
         return "<Site {0}>".format(str(self))

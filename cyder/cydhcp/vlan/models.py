@@ -3,6 +3,7 @@ from django.db.models.loading import get_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 from cyder.cydhcp.keyvalue.models import KeyValue
@@ -14,13 +15,14 @@ class Vlan(models.Model, ObjectUrlMixin):
     number = models.PositiveIntegerField()
 
     search_fields = ('name', 'number',)
+    display_fields = ('name',)
 
     class Meta:
         db_table = "vlan"
         unique_together = ("name", "number")
 
     def __str__(self):
-        return "{0}".format(self.name)
+        return get_display(self)
 
     def __repr__(self):
         return "<Vlan {0}>".format(str(self))
