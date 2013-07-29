@@ -1,7 +1,6 @@
 from string import Template
 
 from django.core.urlresolvers import NoReverseMatch, reverse
-from django.forms import ModelChoiceField
 
 from cyder.base.utils import filter_by_ctnr
 
@@ -86,13 +85,20 @@ class UsabilityFormMixin(object):
                 self.fields[fieldname].queryset = field.queryset.order_by(
                     *field.queryset.model.display_fields)
 
-    def filter_by_ctnr_all(self, ctnr):
+    def filter_by_ctnr_all(self, ctnr, allow_reverse_domains=False):
         for fieldname, field in self.fields.items():
             if hasattr(field, 'queryset'):
-                self.fields[fieldname].queryset = filter_by_ctnr(
-                    ctnr=ctnr, objects=field.queryset).distinct()
-                if field.queryset.count() == 1:
-                    self.fields[fieldname].initial = field.queryset[0]
+                queryset = self.fields[fieldname].queryset
+                queryset = filter_by_ctnr(ctnr=ctnr,
+                                          objects=field.queryset).distinct()
+
+                if fieldname == 'domain' and not allow_reverse_domains:
+                    queryset = queryset.filter(is_reverse=False)
+
+                if queryset.count() == 1:
+                    self.fields[fieldname].initial = queryset[0]
+
+                self.fields[fieldname].queryset = queryset
 
     def make_usable(self, ctnr=None):
         if ctnr:
