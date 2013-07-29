@@ -107,8 +107,6 @@ def system_create_view(request):
                 'static_form': static_form,
                 'dynamic_form': dynamic_form})
 
-        return redirect(request.META.get('HTTP_REFERER', ''))
-
     else:
 
         return render(request, 'system/system_create.html', {
