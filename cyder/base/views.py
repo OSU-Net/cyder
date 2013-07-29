@@ -187,7 +187,6 @@ def get_update_form(request, get_klasses_fn):
     record_pk = request.GET.get('pk', '')
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
-    kwargs = json.loads(request.GET.get('data', '{}').replace("'", "\""))
     if not obj_type:
         raise Http404
 
@@ -203,12 +202,7 @@ def get_update_form(request, get_klasses_fn):
                 else:
                     form = FormKlass(instance=record)
         else:
-            #  Get form to create a new object and prepopulate
-            if related_type and related_pk:
-                form = FormKlass(initial=dict(
-                    {related_type: related_pk}.items() + kwargs.items()))
-            else:
-                form = FormKlass(initial=kwargs)
+            form = FormKlass()
     except ObjectDoesNotExist:
         raise Http404
 
