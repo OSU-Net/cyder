@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.util import ErrorList
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -68,6 +69,11 @@ def system_create_view(request):
                     static_form.save()
 
                 else:
+                    if static_form._errors['__all__'] == [
+                            u'Mac Address not of valid type.']:
+                        static_form._errors['__all__'] = ErrorList()
+                        static_form._errors['mac'] += ErrorList([
+                            u'Mac Address not of valid type.'])
                     if system:
                         system.delete()
                     static_form.fields['system'].widget = forms.HiddenInput()
@@ -87,6 +93,11 @@ def system_create_view(request):
                     dynamic_form.save()
 
                 else:
+                    if dynamic_form._errors['__all__'] == [
+                            u'Mac Address not of valid type.']:
+                        dynamic_form._errors['__all__'] = ErrorList()
+                        dynamic_form._errors['mac'] += ErrorList([
+                            u'Mac Address not of valid type.'])
                     if system:
                         system.delete()
                     static_form = StaticInterfaceForm()
