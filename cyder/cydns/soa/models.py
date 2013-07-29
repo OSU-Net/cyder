@@ -104,6 +104,12 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     def __repr__(self):
         return "<'{0}'>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or SOA.objects
+        domains = ctnr.domains.values_list('soa')
+        return objects.filter(id__in=domains)
+
     @property
     def rdtype(self):
         return 'SOA'
