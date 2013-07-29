@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from cyder.base.utils import tablefy, qd_to_py_dict
 from cyder.core.system.models import System
-from cyder.core.system.forms import SystemForm
+from cyder.core.system.forms import ExtendedSystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -37,7 +37,7 @@ def system_detail(request, pk):
 
 
 def system_create_view(request):
-    system_form = SystemForm()
+    system_form = ExtendedSystemForm()
     static_form = StaticInterfaceForm()
     static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form = DynamicInterfaceForm()
@@ -49,7 +49,7 @@ def system_create_view(request):
         system_data = {}
         system_data['name'] = post_data.pop('name', None)
         system_data['interface_type'] = post_data.pop('interface_type', None)
-        system_form = SystemForm(system_data)
+        system_form = ExtendedSystemForm(system_data)
         post_data['ctnr'] = request.session['ctnr'].id
 
         if system_form.is_valid():
