@@ -99,8 +99,7 @@ def cydns_view(request, pk=None):
         request, do_sort(request, object_list), 50)
 
     if issubclass(type(form), UsabilityFormMixin):
-        form.alphabetize_all()
-        form.filter_by_ctnr_all(request.session['ctnr'])
+        form.make_usable(request.session['ctnr'])
 
     return render(request, 'cydns/cydns_view.html', {
         'form': form,

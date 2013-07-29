@@ -113,8 +113,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
     if issubclass(type(form), UsabilityFormMixin):
-        form.alphabetize_all()
-        form.filter_by_ctnr_all(request.session['ctnr'])
+        form.make_usable(request.session['ctnr'])
 
     return render(request, template, {
         'form': form,
@@ -220,8 +219,7 @@ def get_update_form(request, get_klasses_fn):
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
     if issubclass(type(form), UsabilityFormMixin):
-        form.alphabetize_all()
-        form.filter_by_ctnr_all(request.session['ctnr'])
+        form.make_usable(request.session['ctnr'])
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))

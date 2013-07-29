@@ -82,7 +82,7 @@ class ObjectUrlMixin(object):
 class UsabilityFormMixin(object):
     def alphabetize_all(self):
         for fieldname, field in self.fields.items():
-            if isinstance(field, ModelChoiceField):
+            if hasattr(field, 'queryset'):
                 self.fields[fieldname].queryset = field.queryset.order_by(
                     *field.queryset.model.display_fields)
 
@@ -93,3 +93,8 @@ class UsabilityFormMixin(object):
                     ctnr=ctnr, objects=field.queryset).distinct()
                 if field.queryset.count() == 1:
                     self.fields[fieldname].initial = field.queryset[0]
+
+    def make_usable(self, ctnr=None):
+        if ctnr:
+            self.filter_by_ctnr_all(ctnr)
+        self.alphabetize_all()
