@@ -3,6 +3,7 @@ from django.forms.util import ErrorDict, ErrorList
 from django.shortcuts import get_object_or_404, redirect, render
 
 import cyder as cy
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
@@ -97,8 +98,9 @@ def cydns_view(request, pk=None):
     page_obj = make_paginator(
         request, do_sort(request, object_list), 50)
 
-    if hasattr(form, 'alphabetize_all'):
+    if issubclass(type(form), UsabilityFormMixin):
         form.alphabetize_all()
+        form.filter_by_ctnr_all(request.session['ctnr'])
 
     return render(request, 'cydns/cydns_view.html', {
         'form': form,
