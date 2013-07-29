@@ -50,6 +50,7 @@ def system_create_view(request):
         system_data['name'] = post_data.pop('name', None)
         system_data['interface_type'] = post_data.pop('interface_type', None)
         system_form = SystemForm(system_data)
+        post_data['ctnr'] = request.session['ctnr'].id
 
         if system_form.is_valid():
             system = system_form.save()
@@ -80,7 +81,6 @@ def system_create_view(request):
                         'dynamic_form': dynamic_form})
 
             if system_data['interface_type'] == 'Dynamic':
-                post_data['ctnr'] = request.session['ctnr'].id
                 dynamic_form = DynamicInterfaceForm(post_data)
 
                 if dynamic_form.is_valid():
