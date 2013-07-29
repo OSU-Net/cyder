@@ -3,6 +3,7 @@ import operator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
@@ -162,7 +163,11 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
 
 
 def _filter(request, Klass):
-    objects = filter_by_ctnr(request.session['ctnr'], Klass)
+    Ctnr = get_model('ctnr', 'ctnr')
+    if Klass is not Ctnr:
+        objects = filter_by_ctnr(request.session['ctnr'], Klass)
+    else:
+        objects = Klass.objects
 
     if request.GET.get('filter'):
         try:

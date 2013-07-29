@@ -10,6 +10,9 @@ class CtnrForm(forms.ModelForm, UsabilityFormMixin):
         model = Ctnr
         exclude = ('users',)
 
+    def filter_by_ctnr_all(self, ctnr):
+        pass
+
 
 class CtnrUserForm(forms.ModelForm):
     level = forms.ChoiceField(widget=forms.RadioSelect,
