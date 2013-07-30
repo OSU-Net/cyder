@@ -144,6 +144,11 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
             try:
                 if perm(request, cy.ACTION_CREATE, obj=obj, obj_class=Klass):
                     obj = form.save()
+                    if obj_type == 'range':
+                        request.session['ctnr'].ranges.add(obj)
+                    if obj_type == 'workgroup':
+                        request.session['ctnr'].workgroups.add(obj)
+
                     return redirect(
                         request.META.get('HTTP_REFERER', obj.get_list_url()))
             except (ValidationError, ValueError) as e:
