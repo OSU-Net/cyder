@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, Group
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework import serializers, viewsets
 
 from cyder.core.system.models import System
@@ -17,10 +17,36 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.view.models import View
 
 
+class FQDNMixin(object):
+    def restore_object(self, attrs, instance=None):
+        if instance:
+            fqdn = attrs.get('fqdn', None)
+            if fqdn:
+                try:
+                    attrs.label, attrs.domain = \
+                            ensure_label_domain(fqdn)
+                except ValidationError, e:
+                    self._errors['fqdn'] = e.messages
+            else:
+                self._errors['fqdn'] = \
+                    "Couldn't determine a label and domain for this record."
+        super(FQDNMixin, self).restore_object(self, attrs, instance)
+        return instance
+
+
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
     domain = serializers.CharField()
     views = serializers.CharField()
+
+    def restore_fields(self, data, files):
+        if 'fqdn' in data:
+            try:
+                data['label'], data['domain'] = \
+                    ensure_label_domain(data['fqdn'])
+            except ValidationError, e:
+                self._errors['fqdn'] = e.messages
+        super(CommonDNSSerializer, self).restore_fields(self, data, files)
 
 
 class CNAMESerializer(CommonDNSSerializer):
@@ -32,6 +58,17 @@ class CNAMESerializer(CommonDNSSerializer):
 class CNAMEViewSet(viewsets.ModelViewSet):
     queryset = CNAME.objects.all()
     serializer_class = CNAMESerializer
+
+
+class DomainSerializer(CommonDNSSerializer):
+    class Meta:
+        model = Domain
+        fields = ['name', 'master_domain', 'soa', 'is_reverse', 'dirty',
+                'purgeable', 'delegated']
+
+class DomainViewSet(viewsets.ModelViewSet):
+    queryset = Domain.objects.all()
+    serializer_class = DomainSerializer
 
 
 class TXTSerializer(CommonDNSSerializer):
