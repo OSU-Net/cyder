@@ -57,6 +57,10 @@ class NetworkForm(forms.ModelForm):
 
 
 class NetworkKeyValueForm(forms.ModelForm):
+    network = forms.ModelChoiceField(
+        queryset=Network.objects.all(),
+        widget=forms.HiddenInput())
+
     class Meta:
         model = NetworkKeyValue
         exclude = ('is_statement', 'is_option', 'is_quoted')
