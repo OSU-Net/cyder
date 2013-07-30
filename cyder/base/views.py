@@ -8,6 +8,7 @@ from django.http import Http404, HttpResponse
 from django.forms import ValidationError
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
+from django.db.models import get_model
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
@@ -205,6 +206,17 @@ def get_update_form(request, get_klasses_fn):
             if related_type and related_pk:
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
+                if FormKlass.__name__ == 'RangeForm':
+                    Network = get_model('network', 'network')
+                    network = Network.objects.get(id=related_pk)
+                    network_str = network.network_str.split('/')
+                    initial = '.'.join(
+                        network_str[0].split('.')[:int(network_str[1])/8])
+                    form = FormKlass(initial=dict(
+                        {'start_str': initial,
+                         'end_str': initial,
+                         related_type: related_pk}.items() + kwargs.items()))
+
             else:
                 form = FormKlass(initial=kwargs)
     except ObjectDoesNotExist:
