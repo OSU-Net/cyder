@@ -50,11 +50,12 @@ class Range(models.Model, ObjectUrlMixin):
     ALLOW_OPTIONS
 
     id = models.AutoField(primary_key=True)
+    network = models.ForeignKey(Network, null=True, blank=True)
 
     ip_type = models.CharField(
-            verbose_name='IP address type', max_length=1,
-            choices=IP_TYPES.items(), default=IP_TYPE_4,
-            validators=[validate_ip_type]
+        verbose_name='IP address type', max_length=1,
+        choices=IP_TYPES.items(), default=IP_TYPE_4,
+        validators=[validate_ip_type]
     )
     start_upper = models.BigIntegerField(null=True)
     start_lower = models.BigIntegerField(null=True)
@@ -64,7 +65,6 @@ class Range(models.Model, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True)
     end_str = models.CharField(max_length=39, editable=True)
 
-    network = models.ForeignKey(Network, null=True, blank=True)
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS.items(),

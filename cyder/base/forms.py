@@ -17,3 +17,14 @@ class BugReportForm(forms.Form):
         label="The actual result",
         widget=forms.Textarea(attrs={'rows': 4, 'cols': 50}), required=False)
     session_data = forms.CharField(widget=forms.HiddenInput())
+
+
+class EditUserForm(forms.Form):
+    user = forms.CharField(
+        widget=forms.TextInput(attrs={'id': 'user-searchbox'}))
+    action = forms.ChoiceField(
+        widget=forms.RadioSelect, choices=(
+            ('Promote', 'Promote to Superuser'),
+            ('Demote', 'Demote from Superuser'),
+            ('Create', 'Create a user'),
+            ('Delete', 'Permanently delete user')))

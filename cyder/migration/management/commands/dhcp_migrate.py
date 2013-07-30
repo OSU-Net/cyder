@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import transaction
 
 from cyder.core.ctnr.models import Ctnr, CtnrUser
-from cyder.core.system.models import System
+from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -20,7 +21,7 @@ from optparse import make_option
 from lib.utilities import long2ip
 
 
-zones = None
+cached = {}
 
 
 allow_all_subnets = [
@@ -49,6 +50,13 @@ connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
                              db=settings.MIGRATION_DB)
 
 cursor = connection.cursor()
+
+
+def clean_zone_name(name):
+    name = name.replace(' ', '')
+    if name[:5] == "zone.":
+        name = name[5:]
+    return name
 
 
 def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
@@ -210,9 +218,7 @@ def migrate_zones():
     migrated = []
     results = cursor.fetchall()
     for name, desc, comment, email_contact, allow_blank_mac in results:
-        name = name.replace(' ', '')
-        if name[:5] == "zone.":
-            name = name[5:]
+        name = clean_zone_name(name)
 
         migrated.append(
             Ctnr.objects.get_or_create(
@@ -228,43 +234,83 @@ def migrate_zones():
                len([y for x, y in migrated if y])))
 
 
+@transaction.commit_on_success
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
     cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
                    "workgroup, zone, enabled, last_seen "
                    "FROM host WHERE ip = 0")
-    res = cursor.fetchall()
-    for (range_id, name, domain_id, mac, loc, workgroup_id, zone_id, en,
-         last_seen) in res:
-        """
-        r = maintain_find_range(range_id)
-        c = maintain_find_zone(zone_id) if zone_id else None
-        d = maintain_find_domain(domain_id) if domain_id else None
-        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
-        s, _ = System.objects.get_or_create(name=name, location=loc)
-        """
-        if not all([range_id, zone_id, domain_id]):
-            print "Trouble migrating host with mac {0}".format(mac)
 
-        r = maintain_find_range(range_id)
-        c = maintain_find_zone(zone_id)
-        d = maintain_find_domain(domain_id)
-        w = maintain_find_workgroup(workgroup_id) if workgroup_id else None
+    sys_value_keys = {"type": "Hardware Type",
+                      "os": "Operating System",
+                      "location": "Location",
+                      "department": "Department",
+                      "serial": "Serial Number",
+                      "other_id": "Other ID",
+                      "purchase_date": "Purchase Date",
+                      "po_number": "PO Number",
+                      "warranty_date": "Warranty Date",
+                      "owning_unit": "Owning Unit",
+                      "user_id": "User ID"}
+
+    keys = ("id", "dynamic_range", "name", "workgroup", "enabled", "ha",
+            "type", "os", "location", "department", "serial", "other_id",
+            "purchase_date", "po_number", "warranty_date", "owning_unit",
+            "user_id", "last_seen", "expire", "ttl", "last_update", "domain",
+            "zone")
+
+    sql = "SELECT %s FROM host WHERE ip = 0" % ", ".join(keys)
+
+    count = 0
+    cursor.execute(sql)
+    for values in cursor.fetchall():
+        items = dict(zip(keys, values))
+
+        r = maintain_find_range(items['dynamic_range'])
+        c = maintain_find_zone(items['zone'])
+        d = maintain_find_domain(items['domain'])
+        w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c, d]):
+            print "Trouble migrating host with mac {0}".format(items['ha'])
             continue
 
-        s, _ = System.objects.get_or_create(name=name, location=loc)
+        s = System(name=items['name'])
+        s.save()
+        for key in sys_value_keys.keys():
+            value = items[key]
+            if not value or value == '0':
+                continue
+
+            try:
+                value.encode('utf-8')
+            except UnicodeDecodeError:
+                print "Encode error (%s: %s)..." % (key, value),
+                value = value.decode('cp1252')
+                print "re-encoding as %s" % value
+
+            kv = SystemKeyValue(system=s, key=sys_value_keys[key],
+                                value=value)
+            kv.clean()
+            kv.save()
+
         if r.allow == 'vrf':
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=mac, system=s, dhcp_enabled=en, dns_enabled=en,
-                last_seen=last_seen)
-            continue
-        intr, _ = DynamicInterface.objects.get_or_create(
-            system=s, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
-            last_seen=last_seen)
+                mac=items['ha'], system=s, dhcp_enabled=items['enabled'],
+                dns_enabled=items['enabled'],
+                last_seen=items['last_seen'])
+        else:
+            intr, _ = DynamicInterface.objects.get_or_create(
+                system=s, range=r, workgroup=w, ctnr=c, domain=d,
+                mac=items['ha'], last_seen=items['last_seen'])
+
+        count += 1
+        if not count % 1000:
+            print "%s valid hosts found so far." % count
+
+    print "%s valid hosts found. Committing transaction." % count
 
 
 def migrate_user():
@@ -305,19 +351,11 @@ def migrate_zone_range():
     cursor.execute("SELECT * FROM zone_range")
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
-        if cursor.execute("SELECT name "
-                          "FROM zone WHERE id={0}".format(zone_id)):
-            zone_name = cursor.fetchone()[0]
-        else:
+        c = maintain_find_zone(zone_id)
+        r = maintain_find_range(range_id)
+        if not (c and r):
             continue
-        if cursor.execute("SELECT start, end "
-                          "FROM `ranges` "
-                          "WHERE id={0}".format(range_id)):
-            r_start, r_end = cursor.fetchone()
-        else:
-            continue
-        c = Ctnr.objects.get(name=zone_name)
-        r = Range.objects.get(start_lower=r_start, end_lower=r_end)
+
         c.ranges.add(r)
         c.save()
 
@@ -353,12 +391,8 @@ def migrate_zone_reverse():
             domain, _ = Domain.objects.get_or_create(name=dname,
                                                      is_reverse=True)
 
-        try:
-            ctnr.domains.add(domain)
-            ctnr.save()
-        except Exception, e:
-            print e
-            raise
+        ctnr.domains.add(domain)
+        ctnr.save()
 
 
 def migrate_zone_workgroup():
@@ -366,63 +400,58 @@ def migrate_zone_workgroup():
     cursor.execute("SELECT * FROM zone_workgroup")
     result = cursor.fetchall()
     for _, workgroup_id, zone_id, _ in result:
-        if cursor.execute("SELECT name "
-                          "FROM zone WHERE id={0}".format(zone_id)):
-            zone_name = cursor.fetchone()[0]
-            if cursor.execute("SELECT * "
-                              "FROM workgroup "
-                              "WHERE id={0}".format(workgroup_id)):
-                _, w_name = cursor.fetchone()
-                c = Ctnr.objects.get(name=zone_name)
-                w = Workgroup.objects.get(name=w_name)
-                c.workgroups.add(w)
-                c.save()
+        c = maintain_find_zone(zone_id)
+        w = maintain_find_workgroup(workgroup_id)
+        if not (c and w):
+            continue
+
+        c.workgroups.add(w)
+        c.save()
 
 
 def maintain_find_range(range_id):
-    if cursor.execute("SELECT start, end "
-                      "FROM `ranges` "
-                      "WHERE id = {0}".format(range_id)):
-        start, end = cursor.fetchone()
+    start, end = maintain_get_cached('ranges', ['start', 'end'], range_id)
+    if start and end:
         return Range.objects.get(start_lower=start, end_lower=end)
-    return None
 
 
 def maintain_find_domain(domain_id):
-    dom = None
-    if cursor.execute("SELECT name "
-                      "FROM `domain` "
-                      "WHERE id = {0}".format(domain_id)):
-        name = cursor.fetchone()[0]
-        try:
-            dom = Domain.objects.get(name=name)
-        except Domain.DoesNotExist:
-            pass
-
-    return dom
-
-
-def maintain_find_zone(zone_id):
-    global zones
-
-    if not zones:
-        cursor.execute('SELECT id,name FROM zone')
-        zones = dict(cursor.fetchall())
-
-    try:
-        name = zones[zone_id]
-        return Ctnr.objects.get(name=name)
-    except (KeyError, Ctnr.DoesNotExist):
-        return None
+    (name,) = maintain_get_cached('domain', ['name'], domain_id)
+    if name:
+        return Domain.objects.get(name=name)
 
 
 def maintain_find_workgroup(workgroup_id):
-    if cursor.execute("SELECT name "
-                      "FROM workgroup "
-                      "WHERE id = {0}".format(workgroup_id)):
-        name = cursor.fetchone()[0]
+    (name,) = maintain_get_cached('workgroup', ['name'], workgroup_id)
+    if name:
         return Workgroup.objects.get(name=name)
-    return None
+
+
+def maintain_find_zone(zone_id):
+    (name,) = maintain_get_cached('zone', ['name'], zone_id)
+    if name:
+        name = clean_zone_name(name)
+        try:
+            return Ctnr.objects.get(name=name)
+        except Ctnr.DoesNotExist:
+            return None
+
+
+def maintain_get_cached(table, columns, object_id):
+    global cached
+    columns = tuple(columns)
+    if (table, columns) not in cached:
+        sql = "SELECT id, %s FROM %s" % (", ".join(columns), table)
+        print "Caching: %s" % sql
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        results = [(r[0], tuple(r[1:])) for r in results]
+        cached[(table, columns)] = dict(results)
+
+    if object_id in cached[(table, columns)]:
+        return cached[(table, columns)][object_id]
+    else:
+        return (None for _ in columns)
 
 
 def migrate_all(skip=False):
