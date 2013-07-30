@@ -25,6 +25,9 @@ def clean_sort_param(request):
 def do_sort(request, qs):
     """Returns an order_by string based on request GET parameters"""
     sort, order = clean_sort_param(request)
+    if sort == "id" and hasattr(qs.model, 'eg_metadata'):
+        fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
+        sort, order = fields[0], 'asc'
 
     if order == 'asc':
         order_by = sort

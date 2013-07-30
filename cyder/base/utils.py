@@ -1,6 +1,6 @@
 import operator
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.db.models.loading import get_model
@@ -32,11 +32,6 @@ def make_paginator(request, qs, num=20, obj_type=None):
     """
     Paginator, returns object_list.
     """
-    if hasattr(qs.model, 'eg_metadata'):
-        fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
-        for field in reversed(fields):
-            qs = qs.order_by(field)
-
     page_name = 'page' if not obj_type else '{0}_page'.format(obj_type)
     paginator = Paginator(qs, num)
     paginator.page_name = page_name
@@ -152,7 +147,8 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         # Build table.
         data.append(row_data)
 
-    data = sorted(data, key=lambda row: row[0]['value'])
+    if not issubclass(type(objects), Page):
+        data = sorted(data, key=lambda row: row[0]['value'])
 
     return {
         'headers': headers,
