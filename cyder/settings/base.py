@@ -70,6 +70,9 @@ MINIFY_BUNDLES = {
         'tables': (
             'js/tables.js',
         ),
+        'admin': (
+            'js/admin.js',
+        ),
         'ctnr': (
             'js/ctnr/ctnr.js',
         )

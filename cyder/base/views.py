@@ -20,8 +20,10 @@ from cyder.base.utils import (_filter, make_megafilter,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
-from cyder.base.forms import BugReportForm
+from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.models import User
+from cyder.core.cyuser.views import edit_user
+from cyder.core.ctnr.models import CtnrUser
 
 import settings
 
@@ -30,6 +32,56 @@ def home(request):
     return render_to_response('base/index.html', {
         'read_only': getattr(request, 'read_only', False),
     })
+
+
+def admin_page(request):
+    if request.POST:
+        if 'user' in request.POST:
+            if 'action' not in request.POST:
+                messages.error(request, 'Select an option')
+            else:
+                edit_user(request, request.POST['user'],
+                          request.POST['action'])
+
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    else:
+        if User.objects.get(
+                id=request.session['_auth_user_id']).is_superuser == 1:
+
+            lost_users = []
+            perma_delete_data = []
+            superusers = []
+            for user in User.objects.all().order_by('username'):
+                if CtnrUser.objects.filter(user_id=user.id).exists() is False:
+                    lost_users.append(user)
+
+                if user.is_superuser:
+                    superusers.append(user)
+
+            extra_cols = [
+                {'header': 'Actions', 'sort_field': 'user'}]
+
+            for user in lost_users:
+                perma_delete_data.append({
+                    'value': ['Delete'],
+                    'url': [reverse('user-delete', kwargs={
+                        'user_id': user.id})],
+                    'img': ['/media/img/delete.png']})
+
+            extra_cols[0]['data'] = perma_delete_data
+            user_table = tablefy(lost_users, extra_cols=extra_cols, users=True)
+
+            superuser_table = tablefy(superusers, users=True)
+            user_form = EditUserForm()
+
+            return render(request, 'base/admin_page.html', {
+                'user_table': user_table,
+                'superuser_table': superuser_table,
+                'users': lost_users,
+                'user_form': user_form})
+        else:
+            return redirect(reverse('core-index'))
 
 
 def send_email(request):
