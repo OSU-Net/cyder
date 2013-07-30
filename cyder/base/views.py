@@ -36,8 +36,11 @@ def home(request):
 def admin_page(request):
     if request.POST:
         if 'user' in request.POST:
-            edit_user(request, request.POST['user'],
-                      request.POST['action'])
+            if 'action' not in request.POST:
+                messages.error(request, 'Select an option')
+            else:
+                edit_user(request, request.POST['user'],
+                          request.POST['action'])
 
         return redirect(request.META.get('HTTP_REFERER', ''))
 
