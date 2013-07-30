@@ -147,6 +147,8 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         # Build table.
         data.append(row_data)
 
+    data = sorted(data, key=lambda row: row[0]['value'])
+
     return {
         'headers': headers,
         'postback_urls': [obj.details()['url'] for obj in objects],
