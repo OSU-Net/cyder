@@ -32,6 +32,11 @@ def make_paginator(request, qs, num=20, obj_type=None):
     """
     Paginator, returns object_list.
     """
+    if hasattr(qs.model, 'eg_metadata'):
+        fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
+        for field in reversed(fields):
+            qs = qs.order_by(field)
+
     page_name = 'page' if not obj_type else '{0}_page'.format(obj_type)
     paginator = Paginator(qs, num)
     paginator.page_name = page_name

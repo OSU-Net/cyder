@@ -81,7 +81,8 @@ class Nameserver(CydnsRecord):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'fqdn', 'datatype': 'string', 'editable': True},
