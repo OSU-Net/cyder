@@ -118,6 +118,11 @@ def edit_user(request, username, action):
             user.is_superuser = True
             user.save()
 
+            ctnruser, _ = CtnrUser.objects.get_or_create(
+                user_id=user.id, ctnr_id=Ctnr.objects.get(name='global').id,
+                level=0)
+            ctnruser.save()
+
         elif action == 'Demote':
             user.is_superuser = False
             user.save()
