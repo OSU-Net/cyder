@@ -189,7 +189,10 @@ def cy_delete(request, pk, get_klasses_fn):
 
     referer = request.META.get('HTTP_REFERER', obj.get_list_url())
     # if there is path beyond obj.get_list_url() remove
-    referer = referer.replace(referer.split(obj.get_list_url())[1], '')
+    try:
+        referer = referer.replace(referer.split(obj.get_list_url())[1], '')
+    except:
+        referer = request.META.get('HTTP_REFERER', '')
     return redirect(referer)
 
 

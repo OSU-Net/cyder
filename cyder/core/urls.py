@@ -28,5 +28,6 @@ urlpatterns = patterns(
 
     url(r'^ctnr/', include('cyder.core.ctnr.urls')),
     url(r'^system/', include('cyder.core.system.urls')),
+    url(r'^system_key_value/', include('cyder.core.system.kv_urls')),
     url(r'^user/', include('cyder.core.cyuser.urls')),
 )
