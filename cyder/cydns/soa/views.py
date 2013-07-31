@@ -38,7 +38,8 @@ class SOADetailView(SOAView, CydnsDetailView):
                                     .select_related()),
             'rdomain_table': tablefy(soa.domain_set.filter(is_reverse=True)
                                      .order_by('master_domain')
-                                     .select_related())
+                                     .select_related()),
+            'attributes': tablefy(SOAKeyValue.objects.filter(obj_id=soa.id))
         }.items() + context.items())
 
         return context
