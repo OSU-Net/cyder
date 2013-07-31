@@ -20,8 +20,6 @@ from cyder.base.utils import (_filter, make_megafilter,
                               qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
-from cyder.cydns.constants import DNS_KEY_VALUES
-from cyder.cydhcp.constants import DHCP_KEY_VALUES
 from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.models import User
 from cyder.core.cyuser.views import edit_user
@@ -240,10 +238,7 @@ def get_update_form(request, get_klasses_fn):
     """
     obj_type = request.GET.get('object_type', '')
     record_pk = request.GET.get('pk', '')
-    if obj_type in DHCP_KEY_VALUES or obj_type in DNS_KEY_VALUES:
-        related_type = "obj"
-    else:
-        related_type = request.GET.get('related_type', '')
+    related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
     kwargs = json.loads(request.GET.get('data', '{}').replace("'", "\""))
     if not obj_type:

@@ -10,7 +10,7 @@ class SOAForm(ModelForm):
 
 
 class SOAKeyValueForm(ModelForm):
-    obj = forms.ModelChoiceField(
+    soa = forms.ModelChoiceField(
         queryset=SOA.objects.all(),
         widget=forms.HiddenInput())
 
