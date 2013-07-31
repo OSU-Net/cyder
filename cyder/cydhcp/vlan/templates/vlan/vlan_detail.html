@@ -1,22 +1,20 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
+{% from "base/utility.html" import create_button %}
+{% block title %}VLAN {{ obj.name }}{% endblock %}
 
-{% set vlan = object %}
-{% block title %}VLAN {{ vlan.name }}{% endblock %}
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-objPk="{{ obj.pk }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('cydhcp-get-record') }}"
+    data-objName="{{ obj.name }}">
+  </span>
+{% endblock %}
 
-{% block content %}
-
-  {{ render_table(request, vlan_table) }}
-
-  {% if attrs %}
-    <h3>VLAN Attributes</h3>
-    {{ render_table(request, attrs_table) }}
-  {% endif %}
-  {% if network_table %}
-    <h3>Networks</h3>
-    {% with page_obj = network_page_obj %}
-      {% include "base/includes/pagination.html" %}
-    {% endwith %}
-    {{ render_table(request, network_table) }}
-  {% endif %}
+{% block extra_action_bar %}
+  {{ create_button('vlan_kv', url('cydhcp-get-record'),
+                   url('vlan_kv'), objName=obj.name,
+                   buttonName="System Attribute") }}
 {% endblock %}
