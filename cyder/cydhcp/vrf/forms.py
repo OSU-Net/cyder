@@ -10,6 +10,10 @@ class VrfForm(forms.ModelForm, AlphabetizeFormMixin):
 
 
 class VrfKeyValueForm(forms.ModelForm):
+    vrf = forms.ModelChoiceField(
+        queryset=Vrf.objects.all(),
+        widget=forms.HiddenInput())
+
     class Meta:
         model = VrfKeyValue
         exclude = ('is_quoted',)

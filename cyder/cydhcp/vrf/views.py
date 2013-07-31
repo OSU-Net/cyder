@@ -6,8 +6,9 @@ from cyder.cydhcp.vrf.models import Vrf
 
 def vrf_detail(request, pk):
     vrf = get_object_or_404(Vrf, pk=pk)
-    return cy_detail(request, Vrf, 'cydhcp/cydhcp_detail.html', {
+
+    return cy_detail(request, Vrf, 'vrf/vrf_detail.html', {
         'Dynamic Hosts': 'dynamicinterface_set',
         'Static Hosts': 'staticinterface_set',
         'Attributes': 'vrfkeyvalue_set',
-    }, pk=pk)
+    }, pk=pk, obj=vrf)
