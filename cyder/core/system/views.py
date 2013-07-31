@@ -69,7 +69,7 @@ def system_create_view(request):
                     static_form.save()
 
                 else:
-                    if static_form._errors['__all__'] == [
+                    if static_form._errors.get('__all__', '') == [
                             u'Mac Address not of valid type.']:
                         static_form._errors['__all__'] = ErrorList()
                         static_form._errors['mac'] += ErrorList([
@@ -93,7 +93,7 @@ def system_create_view(request):
                     dynamic_form.save()
 
                 else:
-                    if dynamic_form._errors['__all__'] == [
+                    if dynamic_form._errors.get('__all__', '') == [
                             u'Mac Address not of valid type.']:
                         dynamic_form._errors['__all__'] = ErrorList()
                         dynamic_form._errors['mac'] += ErrorList([
