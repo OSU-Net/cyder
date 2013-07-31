@@ -1,41 +1,20 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
+{% from "base/utility.html" import create_button %}
+{% block title %}Site {{ obj.name }}{% endblock %}
 
-{% set site = object %}
-{% block title %}Site {{ site.get_full_name() }}{% endblock %}
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-objPk="{{ obj.pk }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('cydhcp-get-record') }}"
+    data-objName="{{ obj.ip_str }}">
+  </span>
+{% endblock %}
 
-{% block content %}
-  {% if site.parent %}
-    Parent:
-    <a href='{{ site.parent.get_detail_url() }}'>
-      {{ site.parent.get_full_name() }}
-    </a>
-  {% endif %}
-
-  {{ render_table(request, site_table) }}
-
-  {% if attrs_table %}
-    <h3>Site Attributes</h3>
-    {{ render_table(request, attrs_table) }}
-  {% endif %}
-
-  {% if child_sites_table %}
-    <h3>Child Sites</h3>
-    {{ render_table(request, child_sites_table) }}
-  {% endif %}
-  {% if networks_table %}
-    <h3>Networks</h3>
-    {% with page_obj = networks_table_page_obj %}
-      {% include "base/includes/pagination.html" %}
-    {% endwith %}
-    {{ render_table(request, networks_table) }}
-  {% endif %}
-
-  {% if vlanless_networks_page_obj %}
-    <h3>Vlan-less Networks</h3>
-    {% with page_obj = vlanless_networks_page_obj %}
-      {% include "base/includes/pagination.html" %}
-    {% endwith %}
-    {{ render_table(request, vlanless_networks_table) }}
-  {% endif %}
+{% block extra_action_bar %}
+  {{ create_button('site_kv', url('cydhcp-get-record'),
+                   url('site_kv'), objName=obj.name,
+                   buttonName="Site Attribute") }}
 {% endblock %}
