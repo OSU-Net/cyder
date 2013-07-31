@@ -14,7 +14,7 @@ def get_klasses(obj_type):
     return {
         'ctnr': (Ctnr, CtnrForm, None),
         'system': (System, SystemForm, None),
-        'system_key_value': (SystemKeyValue, SystemKeyValueForm, None),
+        'system_kv': (SystemKeyValue, SystemKeyValueForm, None),
     }.get(obj_type, (None, None, None))
 
 

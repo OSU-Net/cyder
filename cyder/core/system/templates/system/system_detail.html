@@ -21,8 +21,8 @@
                  url('static_interface'), objName=system.name) }}
   {{ create_button('dynamic_interface', url('cydhcp-get-record'),
                  url('dynamic_interface'), objName=system.name) }}
-  {{ create_button('system_key_value', url('core-get-record'),
-                 url('system_key_value'), objName=system.name,
+  {{ create_button('system_kv', url('core-get-record'),
+                 url('system_kv'), objName=system.name,
                  buttonName="System Attribute") }}
 {% endblock %}
 
