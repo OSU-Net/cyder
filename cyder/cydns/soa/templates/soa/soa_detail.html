@@ -6,8 +6,8 @@
 {% block title %}SOA {{ object.description }}{% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('soa_soakeyvalue', url('cydns-get-record'),
-                   url('soa_soakeyvalue'), objName=object.description,
+  {{ create_button('soa_kv', url('cydns-get-record'),
+                   url('soa_kv'), objName=object.description,
                    buttonName="SOA Attribute") }}
   <a class="btn" href='/dns/bind/build_debug/{{ object.pk }}/'>View BIND file</a>
   <h3>{{ object.name }}</h3>

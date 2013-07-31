@@ -1,1 +1,1 @@
-DNS_KEY_VALUES = ("soa_soakeyvalue",)
+DNS_KEY_VALUES = ("soa_kv",)

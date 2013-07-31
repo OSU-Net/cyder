@@ -51,7 +51,7 @@ def get_klasses(obj_type):
         'nameserver': (Nameserver, NameserverForm, NameserverForm),
         'ptr': (PTR, PTRForm, PTRForm),
         'soa': (SOA, SOAForm, SOAForm),
-        'soa_soakeyvalue': (SOAKeyValue, SOAKeyValueForm, SOAKeyValueForm),
+        'soa_kv': (SOAKeyValue, SOAKeyValueForm, SOAKeyValueForm),
         'srv': (SRV, SRVForm, FQDNSRVForm),
         'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
