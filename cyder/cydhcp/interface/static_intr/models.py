@@ -223,11 +223,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             self.mac = self.mac.lower()
             validate_mac(self.mac)
 
-        if not self.system:
-            raise ValidationError(
-                "An interface means nothing without its system."
-            )
-
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
             raise ValidationError('A PTR already uses this Name and IP')

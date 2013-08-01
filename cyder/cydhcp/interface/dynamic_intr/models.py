@@ -86,11 +86,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             self.mac = self.mac.lower()
             validate_mac(self.mac)
 
-        if not self.system:
-            raise ValidationError(
-                "An interface means nothing without its system."
-            )
-
         super(DynamicInterface, self).clean()
 
 
