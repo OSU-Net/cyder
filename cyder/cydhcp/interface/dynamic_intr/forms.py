@@ -11,6 +11,9 @@ class DynamicInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
 
 
 class DynamicIntrKeyValueForm(forms.ModelForm):
+    dynamic_interface = forms.ModelChoiceField(
+        queryset=DynamicInterface.objects.all(),
+        widget=forms.HiddenInput())
 
     class Meta:
         model = DynamicIntrKeyValue

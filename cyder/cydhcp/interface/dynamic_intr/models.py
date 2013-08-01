@@ -98,8 +98,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
 
 class DynamicIntrKeyValue(CommonOption):
-    intr = models.ForeignKey(DynamicInterface, null=False)
+    dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
 
     class Meta:
         db_table = "dynamic_interface_kv"
-        unique_together = "key", "value", "intr"
+        unique_together = "key", "value", "dynamic_interface"
