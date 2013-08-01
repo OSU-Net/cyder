@@ -91,8 +91,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
-        System, null=True, blank=True,
-        help_text='System to associate the interface with')
+        System, help_text='System to associate the interface with')
 
     vrf = models.ForeignKey(Vrf, null=True, blank=True)
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
