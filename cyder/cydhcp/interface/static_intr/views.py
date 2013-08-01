@@ -6,6 +6,7 @@ from django.forms.util import ErrorList
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from cyder.base.views import cy_detail
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.forms import (
     StaticInterfaceForm, StaticInterfaceQuickForm)
@@ -17,6 +18,15 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.views import (CydhcpListView, CydhcpDetailView,
                                 CydhcpDeleteView, CydhcpCreateView)
+
+
+def static_intr_detail(request, pk):
+    static_interface = get_object_or_404(StaticInterface, pk=pk)
+
+    return cy_detail(request, StaticInterface,
+                     'static_intr/static_intr_detail.html', {
+                     'Attributes': 'staticintrkeyvalue_set',
+                     }, pk=pk, obj=static_interface)
 
 
 class StaticInterfaceView(object):

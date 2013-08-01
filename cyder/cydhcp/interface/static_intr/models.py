@@ -283,8 +283,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
 
 class StaticIntrKeyValue(CommonOption):
-    intr = models.ForeignKey(StaticInterface, null=False)
+    static_interface = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
         db_table = 'static_interface_kv'
-        unique_together = ('key', 'value', 'intr')
+        unique_together = ('key', 'value', 'static_interface')
