@@ -121,7 +121,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return self.fqdn
 
     def update_attrs(self):
-        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'intr')
+        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
 
     def details(self):
         data = super(StaticInterface, self).details()
