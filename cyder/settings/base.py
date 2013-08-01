@@ -67,8 +67,14 @@ MINIFY_BUNDLES = {
             'js/key_value_validators.js',
             'js/views.js',
         ),
+        'rangeform': (
+            'js/rangeform.js',
+        ),
         'tables': (
             'js/tables.js',
+        ),
+        'admin': (
+            'js/admin.js',
         ),
         'ctnr': (
             'js/ctnr/ctnr.js',
