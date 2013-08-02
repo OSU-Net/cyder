@@ -5,6 +5,7 @@ import urllib
 import urlparse
 
 from django.utils.encoding import smart_str
+from django.db.models import ForeignKey
 
 from jingo import register
 
@@ -28,6 +29,12 @@ def do_sort(request, qs):
     if sort == "id" and hasattr(qs.model, 'eg_metadata'):
         fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
         sort, order = fields[0], 'asc'
+
+    if hasattr(qs.model, sort):
+        field = getattr(qs.model, sort).field
+        if isinstance(field, ForeignKey):
+            qs = qs.select_related(sort)
+            sort = "__".join([sort, field.rel.to.display_fields[0]])
 
     if order == 'asc':
         order_by = sort
