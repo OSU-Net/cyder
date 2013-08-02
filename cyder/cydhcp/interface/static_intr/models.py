@@ -8,6 +8,8 @@ import cydns
 import datetime
 import re
 
+from cyder.core.fields import MacAddrField
+
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
@@ -86,9 +88,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     not like the Django ORM where you must call the `save()` function for any
     changes to propagate to the database.
     """
+
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
-    mac = models.CharField(max_length=17, blank=True)
+    mac = MacAddrField(help_text="MAC address with or without colons")
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
@@ -264,9 +267,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)
-        if self.dhcp_enabled:
-            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
-            validate_mac(self.mac)
+
+        if self.dhcp_enabled and self.mac == '':
+            raise ValidationError(
+                "The MAC field is required when DHCP is enabled"
+            )
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():

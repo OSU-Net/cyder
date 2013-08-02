@@ -6,6 +6,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
@@ -20,7 +21,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
-    mac = models.CharField(max_length=19, blank=True)
+    mac = MacAddrField(help_text="MAC address with or without colons")
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True)
@@ -109,11 +110,12 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             return "{0}.{1}".format(self.system.name, self.domain.name)
 
     def clean(self, *args, **kwargs):
-        if self.dhcp_enabled:
-            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
-            validate_mac(self.mac)
+        if self.dhcp_enabled and self.mac == '':
+            raise ValidationError(
+                "The MAC field is required when DHCP is enabled"
+            )
 
-        super(DynamicInterface, self).clean()
+        super(DynamicInterface, self).clean(*args, **kwargs)
 
 
 class DynamicIntrKeyValue(CommonOption):
