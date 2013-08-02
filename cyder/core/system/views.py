@@ -60,67 +60,32 @@ def system_create_view(request):
         else:
             system = None
 
-        if system_data['interface_type'] is not None:
+        if system_data.get('interface_type', '') == 'Static':
+            static_form = StaticInterfaceForm(post_data)
 
-            if system_data['interface_type'] == 'Static':
-                static_form = StaticInterfaceForm(post_data)
+            if static_form.is_valid():
+                static_form.save()
+                return redirect(reverse('system-detail', args=[system.id]))
 
-                if static_form.is_valid():
-                    static_form.save()
+            else:
+                if system:
+                    system.delete()
+                static_form.fields['system'].widget = forms.HiddenInput()
 
-                else:
-                    if static_form._errors.get('__all__', '') == [
-                            u'Mac Address not of valid type.']:
-                        static_form._errors['__all__'] = ErrorList()
-                        static_form._errors['mac'] += ErrorList([
-                            u'Mac Address not of valid type.'])
-                    if system:
-                        system.delete()
-                    static_form.fields['system'].widget = forms.HiddenInput()
-                    dynamic_form = DynamicInterfaceForm()
-                    dynamic_form.fields['system'].widget = forms.HiddenInput()
-                    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+        if system_data.get('interface_type', '') == 'Dynamic':
+            dynamic_form = DynamicInterfaceForm(post_data)
 
-                    return render(request, 'system/system_create.html', {
-                        'system_form': system_form,
-                        'static_form': static_form,
-                        'dynamic_form': dynamic_form})
+            if dynamic_form.is_valid():
+                dynamic_form.save()
+                return redirect(reverse('system-detail', args=[system.id]))
 
-            if system_data['interface_type'] == 'Dynamic':
-                dynamic_form = DynamicInterfaceForm(post_data)
+            else:
+                if system:
+                    system.delete()
+                dynamic_form.fields['system'].widget = forms.HiddenInput()
+                dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
-                if dynamic_form.is_valid():
-                    dynamic_form.save()
-
-                else:
-                    if dynamic_form._errors.get('__all__', '') == [
-                            u'Mac Address not of valid type.']:
-                        dynamic_form._errors['__all__'] = ErrorList()
-                        dynamic_form._errors['mac'] += ErrorList([
-                            u'Mac Address not of valid type.'])
-                    if system:
-                        system.delete()
-                    static_form = StaticInterfaceForm()
-                    static_form.fields['system'].widget = forms.HiddenInput()
-                    dynamic_form.fields['system'].widget = forms.HiddenInput()
-                    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
-
-                    return render(request, 'system/system_create.html', {
-                        'system_form': system_form,
-                        'static_form': static_form,
-                        'dynamic_form': dynamic_form})
-
-            return redirect(reverse('system-detail', args=[system.id]))
-
-        else:
-            return render(request, 'system/system_create.html', {
-                'system_form': system_form,
-                'static_form': static_form,
-                'dynamic_form': dynamic_form})
-
-    else:
-
-        return render(request, 'system/system_create.html', {
-            'system_form': system_form,
-            'static_form': static_form,
-            'dynamic_form': dynamic_form})
+    return render(request, 'system/system_create.html', {
+        'system_form': system_form,
+        'static_form': static_form,
+        'dynamic_form': dynamic_form})
