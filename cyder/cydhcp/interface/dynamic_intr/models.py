@@ -60,7 +60,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'mac', 'datatype': 'string', 'editable': False},
+            {'name': 'system', 'datatype': 'string', 'editable': False},
         ]}
 
     def build_host(self):
