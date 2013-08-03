@@ -9,10 +9,11 @@ class MacAddrField(CharField):
             raise Exception("You cannot specify a max_length. max_length is "
                             "fixed at 12 for MacAddrFields.")
         kwargs['max_length'] = 12
+
         super(MacAddrField, self).__init__(*args, **kwargs)
 
     def clean(self, value, model_instance):
-        if value == '':
+        if self.blank and value == '':
             return value
         value = value.lower().replace(':', '')
         validate_mac(value)
