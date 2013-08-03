@@ -10,6 +10,9 @@ class WorkgroupForm(forms.ModelForm):
 
 
 class WorkgroupKeyValueForm(forms.ModelForm):
+    workgroup = forms.ModelChoiceField(
+        queryset=Workgroup.objects.all(),
+        widget=forms.HiddenInput())
 
     class Meta:
         model = WorkgroupKeyValue
