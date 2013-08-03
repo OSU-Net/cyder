@@ -5,7 +5,11 @@ from cyder.cydhcp.validation import validate_mac
 
 class MacAddrField(CharField):
     def __init__(self, *args, **kwargs):
-        super(MacAddrField, self).__init__(*args, max_length=12, **kwargs)
+        if 'max_length' in kwargs:
+            raise Exception("You cannot specify a max_length. max_length is "
+                            "fixed at 12 for MacAddrFields.")
+        kwargs['max_length'] = 12
+        super(MacAddrField, self).__init__(*args, **kwargs)
 
     def clean(self, value, model_instance):
         if value == '':
