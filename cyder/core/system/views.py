@@ -1,5 +1,4 @@
 from django import forms
-from django.forms.util import ErrorList
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 
