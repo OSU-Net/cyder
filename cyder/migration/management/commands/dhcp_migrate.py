@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -286,46 +287,54 @@ def migrate_dynamic_hosts():
         if mac == "":
             enabled = False
 
-        if not range_id:
+        r = None
+        if not items['dynamic_range']:
             print ("Host with MAC {0} "
-                   "has no dynamic_range in Maintain".format(mac))
-            r = None
+                   "has no dynamic_range in Maintain".format(items['ha']))
         else:
-            r = maintain_find_range(items['dynamic_range'])
-            if not r:
+            try:
+                r = maintain_find_range(items['dynamic_range'])
+            except ObjectDoesNotExist:
                 print ("Host with MAC {0} has "
-                       "no dynamic range in Cyder".format(mac))
+                       "no dynamic range in Cyder".format(items['ha']))
 
-        if not zone_id:
-            print "Host with MAC {0} has no zone in Maintain".format(mac)
-            c = None
+        c = None
+        if not items['zone']:
+            print "Host with MAC {0} has no zone in Maintain".format(
+                item['ha'])
         else:
-            c = maintain_find_zone(items['zone'])
-            if not c:
+            try:
+                c = maintain_find_zone(items['zone'])
+            except ObjectDoesNotExist:
                 print ("Host with MAC {0} has "
-                       "no ctnr in Cyder".format(mac))
-                print "Failed to migrate zone_id {0}".format(zone_id)
+                       "no ctnr in Cyder".format(items['ha']))
+                print "Failed to migrate zone_id {0}".format(items['zone'])
 
-        if not domain_id:
-            print "Host with MAC {0} has no domain in Maintain".format(mac)
-            d = None
+        d = None
+        if not items['domain']:
+            print "Host with MAC {0} has no domain in Maintain".format(
+                items['ha'])
         else:
-            d = maintain_find_domain(items['domain'])
-            if not d:
+            try:
+                d = maintain_find_domain(items['domain'])
+            except ObjectDoesNotExist:
                 print ("Host with MAC {0} has "
-                       "no domain in Cyder".format(mac))
-                print "Failed to migrate domain_id {0}".format(domain_id)
+                       "no domain in Cyder".format(items['ha']))
+                print "Failed to migrate domain_id {0}".format(items['domain'])
 
-        if not workgroup_id:
-            print "Host with MAC {0} has no workgroup in Maintain".format(mac)
-            w = default
+        w = default
+        if not items['workgroup']:
+            print "Host with MAC {0} has no workgroup in Maintain".format(
+                items['ha'])
         else:
-            w = maintain_find_workgroup(items['workgroup'])
-            if not w:
+            try:
+                w = maintain_find_workgroup(items['workgroup'])
+            except ObjectDoesNotExist:
                 print ("Host with MAC {0} has "
-                       "no workgroup in Cyder".format(mac))
+                       "no workgroup in Cyder".format(items['ha']))
                 print ("Failed to migrate workgroup_id {0}\n"
-                       "Adding it to the default group".format(workgroup_id))
+                       "Adding it to the default group".format(
+                            items['workgroup']))
 
         if not all([r, c, d]):
             stderr.write("Trouble migrating host with mac {0}\n"
