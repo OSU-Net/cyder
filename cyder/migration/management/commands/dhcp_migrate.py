@@ -99,8 +99,8 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
 
 def create_range(range_id, start, end, range_type, subnet_id, comment, en, known):
     """
-    Takes a row form the Maintain range table
-    returns a range which is saved in cyder
+    Takes a row from the Maintain range table.
+    Returns a range which is saved in Cyder.
     """
     # Set the allow statement
     n = None
@@ -287,43 +287,43 @@ def migrate_dynamic_hosts():
             enabled = False
 
         if not range_id:
-            print ("Host with mac {0} "
-                   "has no dynamic_range in maintain".format(mac))
+            print ("Host with MAC {0} "
+                   "has no dynamic_range in Maintain".format(mac))
             r = None
         else:
             r = maintain_find_range(items['dynamic_range'])
             if not r:
-                print ("Host with mac {0} has "
-                       "no dynamic range in cyder".format(mac))
+                print ("Host with MAC {0} has "
+                       "no dynamic range in Cyder".format(mac))
 
         if not zone_id:
-            print "Host with mac {0} has no zone id".format(mac)
+            print "Host with MAC {0} has no zone in Maintain".format(mac)
             c = None
         else:
             c = maintain_find_zone(items['zone'])
             if not c:
-                print ("Host with mac {0} has "
-                       "no ctnr in cyder".format(mac))
+                print ("Host with MAC {0} has "
+                       "no ctnr in Cyder".format(mac))
                 print "Failed to migrate zone_id {0}".format(zone_id)
 
         if not domain_id:
-            print "Host with mac {0} has no domain id".format(mac)
+            print "Host with MAC {0} has no domain in Maintain".format(mac)
             d = None
         else:
             d = maintain_find_domain(items['domain'])
             if not d:
-                print ("Host with mac {0} has "
-                       "no domain in cyder".format(mac))
+                print ("Host with MAC {0} has "
+                       "no domain in Cyder".format(mac))
                 print "Failed to migrate domain_id {0}".format(domain_id)
 
         if not workgroup_id:
-            print "Host with mac {0} has no workgroup id".format(mac)
+            print "Host with MAC {0} has no workgroup in Maintain".format(mac)
             w = default
         else:
             w = maintain_find_workgroup(items['workgroup'])
             if not w:
-                print ("Host with mac {0} has "
-                       "no workgroup in cyder".format(mac))
+                print ("Host with MAC {0} has "
+                       "no workgroup in Cyder".format(mac))
                 print ("Failed to migrate workgroup_id {0}\n"
                        "Adding it to the default group".format(workgroup_id))
 
