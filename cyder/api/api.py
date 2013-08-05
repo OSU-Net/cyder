@@ -19,35 +19,17 @@ from cyder.cydns.view.models import View
 
 class FQDNMixin(object):
     def restore_object(self, attrs, instance=None):
-        if instance:
-            fqdn = attrs.get('fqdn', None)
-            if fqdn:
-                try:
-                    attrs.label, attrs.domain = \
-                            ensure_label_domain(fqdn)
-                except ValidationError, e:
-                    self._errors['fqdn'] = e.messages
-            else:
-                self._errors['fqdn'] = \
-                    "Couldn't determine a label and domain for this record."
-        super(FQDNMixin, self).restore_object(self, attrs, instance)
-        return instance
+        if self.fqdn:
+            try:
+                self.label, self.domain = ensure_label_domain(self.fqdn)
+            except ValidationError, e:
+                self._errors['fqdn'] = e.messages
 
 
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
     domain = serializers.CharField()
     views = serializers.CharField()
-
-    def restore_fields(self, data, files):
-        if 'fqdn' in data:
-            try:
-                data['label'], data['domain'] = \
-                    ensure_label_domain(data['fqdn'])
-            except ValidationError, e:
-                self._errors['fqdn'] = e.messages
-        super(CommonDNSSerializer, self).restore_fields(self, data, files)
-
 
 class CNAMESerializer(CommonDNSSerializer):
     class Meta:
