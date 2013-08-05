@@ -25,7 +25,7 @@ HardwareAddress = ws 'hardware ethernet' ws MAC:mac ';'
 HostAttributes = Option(HOST) | HardwareAddress | FixedAddress | Parameter(HOST)
 
 Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:attrs ws '}'
-        -> Host(**prepare_arguments(attrs, fqdn=fqdn, exclude_list=['mac', 'fqdn']))
+        -> Host(**prepare_arguments(attrs, fqdn=fqdn.lower(), exclude_list=['mac', 'fqdn']))
 
 Range = ws 'range' ws IP:start ws IP:end ';'
         -> {'start': start, 'end': end}
