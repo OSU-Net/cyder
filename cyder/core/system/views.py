@@ -39,10 +39,7 @@ def system_detail(request, pk):
 def system_create_view(request):
     system_form = ExtendedSystemForm()
     static_form = StaticInterfaceForm()
-    static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form = DynamicInterfaceForm()
-    dynamic_form.fields['system'].widget = forms.HiddenInput()
-    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
     if request.POST:
         post_data = qd_to_py_dict(request.POST)
@@ -60,29 +57,29 @@ def system_create_view(request):
             system = None
 
         if system_data.get('interface_type', '') == 'Static':
-            static_form = StaticInterfaceForm(post_data)
+            form = StaticInterfaceForm(post_data)
+            static_form = form
+        elif system_data.get('interface_type', '') == 'Dynamic':
+            form = DynamicInterfaceForm(post_data)
+            dynamic_form = form
 
-            if static_form.is_valid():
-                static_form.save()
-                return redirect(reverse('system-detail', args=[system.id]))
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('system-detail', args=[system.id]))
+        else:
+            mac_err = "Mac Address not of valid type."
+            if '__all__' in form.errors and mac_err in form.errors['__all__']:
+                form.errors['__all__'].remove(mac_err)
+                if 'mac' not in form.errors:
+                    form.errors['mac'] = []
+                form.errors['mac'].append(mac_err)
 
-            else:
-                if system:
-                    system.delete()
-                static_form.fields['system'].widget = forms.HiddenInput()
+            if system:
+                system.delete()
 
-        if system_data.get('interface_type', '') == 'Dynamic':
-            dynamic_form = DynamicInterfaceForm(post_data)
-
-            if dynamic_form.is_valid():
-                dynamic_form.save()
-                return redirect(reverse('system-detail', args=[system.id]))
-
-            else:
-                if system:
-                    system.delete()
-                dynamic_form.fields['system'].widget = forms.HiddenInput()
-                dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+    static_form.fields['system'].widget = forms.HiddenInput()
+    dynamic_form.fields['system'].widget = forms.HiddenInput()
+    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
     return render(request, 'system/system_create.html', {
         'system_form': system_form,
