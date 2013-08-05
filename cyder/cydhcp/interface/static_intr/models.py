@@ -134,6 +134,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
         data['data'] = (
             ('Name', 'fqdn', self),
+            ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
             ('MAC', 'mac', self.mac),
             ('Vrf', 'vrf', self.vrf),
