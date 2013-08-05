@@ -144,7 +144,8 @@ class SystemViewSet(viewsets.ModelViewSet):
 class StaticInterfaceSerializer(CommonDNSSerializer):
     class Meta:
         model = StaticInterface
-        fields = StaticInterface.get_api_fields() + ['views', 'system']
+        fields = StaticInterface.get_api_fields() + ['views', 'system',
+            'staticintrkeyvalue_set']
         depth = 1
 
 

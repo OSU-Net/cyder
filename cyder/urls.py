@@ -18,7 +18,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^$', core_index, name='core-index'),
-    url(r'^api/', include(router.urls)),
+    url(r'^api/v1/', include(router.urls)),
     url(r'^admin/',  include(admin.site.urls)),
     url(r'^core/',   include('cyder.core.urls')),
     url(r'^dhcp/',   include('cyder.cydhcp.urls')),

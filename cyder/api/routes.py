@@ -4,6 +4,7 @@ from cyder.api import api
 
 router = routers.DefaultRouter()
 router.register(r'cname', api.CNAMEViewSet)
+router.register(r'domain', api.DomainViewSet)
 router.register(r'txt', api.TXTViewSet)
 router.register(r'srv', api.SRVViewSet)
 router.register(r'mx', api.MXViewSet)
