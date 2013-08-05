@@ -83,7 +83,7 @@ sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
 
 - Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
 
-- Sync the database and run migrations:
+- Sync the database and run migrations (don't create a superuser unless you know what you're doing):
 
     ```
 python manage.py syncdb
