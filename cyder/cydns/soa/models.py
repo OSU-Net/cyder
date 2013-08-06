@@ -130,7 +130,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'description', 'datatype': 'string', 'editable': True},

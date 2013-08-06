@@ -147,6 +147,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         )
         return data
 
+    @staticmethod
+    def eg_metadata():
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': False},
+        ]}
+
     @classmethod
     def get_api_fields(cls):
         return super(StaticInterface, cls).get_api_fields() + \

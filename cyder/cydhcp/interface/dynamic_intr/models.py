@@ -62,6 +62,13 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Last Seen', 'last_seen', date)]
         return data
 
+    @staticmethod
+    def eg_metadata():
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'system', 'datatype': 'string', 'editable': False},
+        ]}
+
     def build_host(self):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
         build_str += "\t\thardware ethernet {0};\n".format(
