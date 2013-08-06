@@ -57,26 +57,31 @@ def system_create_view(request):
         else:
             system = None
 
-        if system_data.get('interface_type', '') == 'Static':
-            form = StaticInterfaceForm(post_data)
-            static_form = form
-        elif system_data.get('interface_type', '') == 'Dynamic':
-            form = DynamicInterfaceForm(post_data)
-            dynamic_form = form
-
-        if form.is_valid():
-            form.save()
-            return redirect(reverse('system-detail', args=[system.id]))
-        else:
-            if '__all__' in form.errors and MAC_ERR in form.errors['__all__']:
-                form.errors['__all__'].remove(MAC_ERR)
-                if 'mac' not in form.errors:
-                    form.errors['mac'] = []
-                if MAC_ERR not in form.errors['mac']:
-                    form.errors['mac'].append(MAC_ERR)
-
+        if system_data.get('interface_type', '') is None:
             if system:
                 system.delete()
+
+        else:
+            if system_data.get('interface_type', '') == 'Static':
+                form = StaticInterfaceForm(post_data)
+                static_form = form
+            elif system_data.get('interface_type', '') == 'Dynamic':
+                form = DynamicInterfaceForm(post_data)
+                dynamic_form = form
+
+            if form.is_valid():
+                form.save()
+                return redirect(reverse('system-detail', args=[system.id]))
+            else:
+                if '__all__' in form.errors and MAC_ERR in form.errors['__all__']:
+                    form.errors['__all__'].remove(MAC_ERR)
+                    if 'mac' not in form.errors:
+                        form.errors['mac'] = []
+                    if MAC_ERR not in form.errors['mac']:
+                        form.errors['mac'].append(MAC_ERR)
+
+                if system:
+                    system.delete()
 
     static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()
