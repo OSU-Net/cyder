@@ -2,6 +2,7 @@ $(document).ready(function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
     var objType = metadata.attr('data-objType');
+    var objName = metadata.attr('data-objName');
     var prettyObjType = metadata.attr('data-prettyObjType');
     var searchUrl = metadata.attr('data-searchUrl');
     var getUrl = metadata.attr('data-getUrl');
@@ -69,11 +70,15 @@ $(document).ready(function() {
 
         e.preventDefault();
         form.action = this.href;
+        var extra_title = ''
+        if(this.href.indexOf(document.location) == -1) {
+            extra_title = ' for ' + objName;
+        };
         var object_type = $(this).attr('data-object_type') || objType;
         $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
-                $('#form-title').html('Updating ' + prettify(object_type));
+                $('#form-title').html('Updating ' + prettify(object_type) + extra_title);
                 $('#hidden-inner-form').empty().append(data.form);
                 initForms();
             }, 150);
