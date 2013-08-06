@@ -73,7 +73,8 @@ def system_create_view(request):
                 form.save()
                 return redirect(reverse('system-detail', args=[system.id]))
             else:
-                if '__all__' in form.errors and MAC_ERR in form.errors['__all__']:
+                if '__all__' in form.errors and (
+                        MAC_ERR in form.errors['__all__']):
                     form.errors['__all__'].remove(MAC_ERR)
                     if 'mac' not in form.errors:
                         form.errors['mac'] = []
