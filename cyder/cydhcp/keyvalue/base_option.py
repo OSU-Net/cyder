@@ -42,6 +42,7 @@ OSU_CUSTOM_OPTIONS = [
     'MSUCClient.WebServerFqdn',
     'MSUCClient.WebServerPort',
     'MSUCClient.CertProvRelPath',
+    'UCSipServer',
     'mitel-125',
     'mitel-128',
     'mitel-129',
