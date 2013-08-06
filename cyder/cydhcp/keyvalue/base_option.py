@@ -684,3 +684,16 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         if not is_ip_or_domain_list(val):
             raise ValidationError("{0} is not a valid "
                                   "list of servers".format(val))
+
+    def _aa_bootfile_name(self):
+        """
+        The bootfile-name option
+
+            option bootfile-name text;
+
+            This option specifies a bootstrap file. (It's not related to the
+            BOOTP protocol.)
+        """
+        self.is_option = True
+        self.is_statement = False
+        self.has_validator = False
