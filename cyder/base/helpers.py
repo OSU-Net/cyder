@@ -28,7 +28,8 @@ def do_sort(request, qs):
     sort, order = clean_sort_param(request)
     if sort == "id" and hasattr(qs.model, 'eg_metadata'):
         fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
-        sort, order = fields[0], 'asc'
+        if hasattr(qs.model, fields[0]):
+            sort, order = fields[0], 'asc'
 
     if hasattr(qs.model, sort):
         field = getattr(qs.model, sort).field
@@ -40,6 +41,7 @@ def do_sort(request, qs):
         order_by = sort
     else:
         order_by = '-%s' % sort
+
     return qs.order_by(order_by)
 
 
