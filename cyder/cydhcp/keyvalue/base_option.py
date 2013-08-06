@@ -7,7 +7,7 @@ from cyder.cydhcp.keyvalue.utils import (is_valid_ip, is_ip_list, is_int32,
                                          is_valid_domain, is_domain_list,
                                          is_int32_list, is_bool_and_ip_list,
                                          is_valid_ip_or_domain,
-                                         is_ip_or_domain_list)
+                                         is_ip_or_domain_list, is_bool)
 
 ### FIXME: The following options are specific to OSU. Remove this hack as soon
 ### as possible.
@@ -698,3 +698,28 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         self.is_option = True
         self.is_statement = False
         self.has_validator = False
+
+    def _aa_tftp_server_name(self):
+        """
+        The tftp-server-name option
+
+            option tftp-server-name text;
+
+        """
+        self.is_option = True
+        self.is_statement = False
+        self.has_validator = False
+
+    def _aa_use_host_decl_names(self):
+        """
+        The use-host-decl-names statement
+
+            use-host-decl-names bool;
+        """
+        self.is_option = False
+        self.is_statement = True
+        self.has_validator = True
+        val = self._get_value()
+        if not is_bool(val):
+            raise ValidationError("{0} is not a valid boolean value."
+                                  .format(val))
