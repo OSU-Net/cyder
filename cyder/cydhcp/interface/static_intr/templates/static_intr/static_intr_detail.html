@@ -1,7 +1,7 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
 {% from "base/utility.html" import create_button %}
-{% block title %}Static Interface {{ obj.name }}{% endblock %}
+{% block title %}Static Interface {{ obj }}{% endblock %}
 
 {% block view_metadata %}
   <span id="view-metadata"
@@ -9,7 +9,7 @@
     data-objPk="{{ obj.pk }}"
     data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
     data-getUrl="{{ url('cydhcp-get-record') }}"
-    data-objName="{{ obj.name }}">
+    data-objName="{{ obj }}">
   </span>
 {% endblock %}
 
