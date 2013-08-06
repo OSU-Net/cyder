@@ -9,6 +9,47 @@ from cyder.cydhcp.keyvalue.utils import (is_valid_ip, is_ip_list, is_int32,
                                          is_valid_ip_or_domain,
                                          is_ip_or_domain_list)
 
+### FIXME: The following options are specific to OSU. Remove this hack as soon
+### as possible.
+OSU_CUSTOM_OPTIONS = [
+    'slp-directory-agent',
+    'slp-scope',
+    'ipphone',
+    'ipphone242',
+    'ftp-server',
+    'ftp-root-path',
+    'wpad-curl',
+    'option-144',
+    'SUNW.root-mount-options',
+    'SUNW.root-server-ip-address',
+    'SUNW.root-server-hostname',
+    'SUNW.root-path-name',
+    'SUNW.swap-server-ip-address',
+    'SUNW.swap-file-path',
+    'SUNW.boot-file-path',
+    'SUNW.posix-timezone-string',
+    'SUNW.boot-read-size',
+    'SUNW.install-server-ip-address',
+    'SUNW.install-server-hostname',
+    'SUNW.install-path',
+    'SUNW.sysid-config-file-server',
+    'SUNW.JumpStart-server',
+    'SUNW.terminal-name',
+    'SUNW.bootURI',
+    'SUNW.HTTPproxy',
+    'MSUCClient.UCIdentifier',
+    'MSUCClient.UCIdentifier',
+    'MSUCClient.WebServerFqdn',
+    'MSUCClient.WebServerPort',
+    'MSUCClient.CertProvRelPath',
+    'mitel-125',
+    'mitel-128',
+    'mitel-129',
+    'mitel-130',
+    'mitel-132-vlan',
+    'mitel-133-pri',
+]
+
 
 class CommonOption(KeyValue, ObjectUrlMixin):
     is_option = models.BooleanField(default=False)
@@ -42,6 +83,14 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         value = value.strip(';')
         value = value.strip()
         return value
+
+    def clean(self, require_validation=True):
+        if self.key in OSU_CUSTOM_OPTIONS: # FIXME because this is a hack.
+            self.is_option = True
+            self.is_statement = False
+            self.has_validator = False
+            require_validation = False
+        super(CommonOption, self).clean(require_validation=require_validation)
 
     def _aa_deny(self):
         """

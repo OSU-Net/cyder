@@ -93,8 +93,11 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
                        "FROM dhcp_options "
                        "WHERE id = {0}".format(dhcp_option))
         name, type = cursor.fetchone()
-        kv, _ = NetworkKeyValue.objects.get_or_create(
+        kv, kv_created = NetworkKeyValue.objects.get_or_create(
             value=str(value), key=name, network=n)
+        if kv_created:
+            kv.clean()
+            kv.save()
     return (n, created)
 
 
@@ -141,9 +144,12 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
             end_lower=end, end_str=ipaddr.IPv4Address(end),
             is_reserved=True, range_type=r_type, allow=allow, ip_type='4')
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-        rk, _ = RangeKeyValue.objects.get_or_create(
+        rk, kv_created = RangeKeyValue.objects.get_or_create(
             range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
             is_option=True, is_quoted=True)
+        if kv_created:
+            rk.clean()
+            rk.save()
     return (r, created)
 
 
@@ -211,8 +217,11 @@ def migrate_workgroups():
                            "FROM dhcp_options "
                            "WHERE id = {0}".format(dhcp_option))
             name, type = cursor.fetchone()
-            kv, _ = WorkgroupKeyValue.objects.get_or_create(
+            kv, kv_created = WorkgroupKeyValue.objects.get_or_create(
                 value=value, key=name, workgroup=w)
+            if kv_created:
+                kv.clean()
+                kv.save()
         migrated.append((w, created))
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
