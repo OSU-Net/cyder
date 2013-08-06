@@ -40,6 +40,9 @@ class StaticInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):
+    static_interface = forms.ModelChoiceField(
+        queryset=StaticInterface.objects.all(),
+        widget=forms.HiddenInput())
 
     class Meta:
         model = StaticIntrKeyValue

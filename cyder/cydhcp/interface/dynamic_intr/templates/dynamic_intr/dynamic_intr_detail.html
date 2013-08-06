@@ -1,7 +1,7 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
 {% from "base/utility.html" import create_button %}
-{% block title %}Site {{ obj.name }}{% endblock %}
+{% block title %}Dynamic Interface {{ obj }}{% endblock %}
 
 {% block view_metadata %}
   <span id="view-metadata"
@@ -9,12 +9,12 @@
     data-objPk="{{ obj.pk }}"
     data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
     data-getUrl="{{ url('cydhcp-get-record') }}"
-    data-objName="{{ obj.name }}">
+    data-objName="{{ obj }}">
   </span>
 {% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('site_kv', url('cydhcp-get-record'),
-                   url('site_kv'), objName=obj.name,
-                   buttonName="Site Attribute") }}
+  {{ create_button('dynamic_interface_kv', url('cydhcp-get-record'),
+                   url('dynamic_interface_kv'), objName=obj.name,
+                   buttonName="Dynamic Interface Attribute") }}
 {% endblock %}

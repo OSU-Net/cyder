@@ -193,7 +193,11 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
 
 class SOAKeyValue(KeyValue):
-    obj = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+    soa = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+
+    class Meta:
+        db_table = 'soa_kv'
+
 
     def _aa_disabled(self):
         """

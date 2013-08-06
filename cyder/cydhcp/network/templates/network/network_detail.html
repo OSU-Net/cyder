@@ -16,5 +16,8 @@
 {% block extra_action_bar %}
   {{ create_button('range', url('cydhcp-get-record'),
                    url('range'), objName=obj.ip_str) }}
+  {{ create_button('network_kv', url('cydhcp-get-record'),
+                   url('network_kv'), objName=obj.ip_str,
+                   buttonName="Network Attribute") }}
   <a class="btn" href="{{ url('build-network', obj.pk) }}">DHCP Build Output</a>
 {% endblock %}

@@ -37,6 +37,12 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     class Meta:
         db_table = 'dynamic_interface'
 
+    def __str__(self):
+        return "{0}".format(self.mac)
+
+    def __repr__(self):
+        return "Interface {0}".format(str(self))
+
     def details(self):
         data = super(DynamicInterface, self).details()
         if self.last_seen == 0:
@@ -48,7 +54,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
         data['data'] = [
             ('System', 'system', self.system),
-            ('Mac', 'mac', self.mac),
+            ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
             ('Vrf', 'vrf', self.vrf),
@@ -98,8 +104,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
 
 class DynamicIntrKeyValue(CommonOption):
-    intr = models.ForeignKey(DynamicInterface, null=False)
+    dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
 
     class Meta:
         db_table = "dynamic_interface_kv"
-        unique_together = "key", "value", "intr"
+        unique_together = "key", "value", "dynamic_interface"

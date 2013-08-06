@@ -27,6 +27,8 @@ EMAIL_HOST = 'mail.oregonstate.edu'
 SASS_PREPROCESS = True
 JINGO_MINIFY_USE_STATIC = False
 
+SOUTH_TESTS_MIGRATE = False
+
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
 # and js files that can be bundled together by the minify app.
 MINIFY_BUNDLES = {

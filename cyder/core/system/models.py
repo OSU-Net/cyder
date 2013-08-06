@@ -33,10 +33,22 @@ class System(BaseModel, ObjectUrlMixin):
         ]}
 
 
-class SystemKeyValue(KeyValue):
+class SystemKeyValue(KeyValue, ObjectUrlMixin):
 
     system = models.ForeignKey(System, null=False)
 
     class Meta:
-        db_table = 'system_key_value'
+        db_table = 'system_kv'
         unique_together = ('key', 'value', 'system')
+
+    def __str__(self):
+        return self.key
+
+    def details(self):
+        """For tables."""
+        data = super(SystemKeyValue, self).details()
+        data['data'] = [
+            ('Key', 'key', self),
+            ('Value', 'value', self.value),
+        ]
+        return data

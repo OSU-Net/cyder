@@ -9,7 +9,7 @@ def site_detail(request, pk):
     obj = get_object_or_404(Site, pk=pk)
     networks = Network.objects.filter(site=obj)
 
-    return cy_detail(request, Site, 'cydhcp/cydhcp_detail.html', {
+    return cy_detail(request, Site, 'site/site_detail.html', {
         'Networks': networks,
         'Attributes': 'sitekeyvalue_set',
         'Children Sites': 'site_set',

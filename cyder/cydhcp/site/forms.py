@@ -10,6 +10,9 @@ class SiteForm(forms.ModelForm):
 
 
 class SiteKeyValueForm(forms.ModelForm):
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        widget=forms.HiddenInput())
 
     class Meta:
         model = SiteKeyValue
