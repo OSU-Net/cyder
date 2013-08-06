@@ -196,7 +196,7 @@ def cy_delete(request, pk, get_klasses_fn):
     try:
         if perm(request, cy.ACTION_DELETE, obj=obj):
             obj.delete()
-            if obj_type == 'ctnr':
+            if Klass.__name__ == 'Ctnr':
                 request = ctnr_delete_session(request, obj)
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
