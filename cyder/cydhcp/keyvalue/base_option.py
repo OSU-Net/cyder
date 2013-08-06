@@ -11,45 +11,45 @@ from cyder.cydhcp.keyvalue.utils import (is_valid_ip, is_ip_list, is_int32,
 
 ### FIXME: The following options are specific to OSU. Remove this hack as soon
 ### as possible.
-OSU_CUSTOM_OPTIONS = [
-    'slp-directory-agent',
-    'slp-scope',
-    'ipphone',
-    'ipphone242',
-    'ftp-server',
-    'ftp-root-path',
-    'wpad-curl',
-    'option-144',
-    'SUNW.root-mount-options',
-    'SUNW.root-server-ip-address',
-    'SUNW.root-server-hostname',
-    'SUNW.root-path-name',
-    'SUNW.swap-server-ip-address',
-    'SUNW.swap-file-path',
-    'SUNW.boot-file-path',
-    'SUNW.posix-timezone-string',
-    'SUNW.boot-read-size',
-    'SUNW.install-server-ip-address',
-    'SUNW.install-server-hostname',
-    'SUNW.install-path',
-    'SUNW.sysid-config-file-server',
-    'SUNW.JumpStart-server',
-    'SUNW.terminal-name',
-    'SUNW.bootURI',
-    'SUNW.HTTPproxy',
-    'MSUCClient.UCIdentifier',
-    'MSUCClient.UCIdentifier',
-    'MSUCClient.WebServerFqdn',
-    'MSUCClient.WebServerPort',
-    'MSUCClient.CertProvRelPath',
-    'UCSipServer',
-    'mitel-125',
-    'mitel-128',
-    'mitel-129',
-    'mitel-130',
-    'mitel-132-vlan',
-    'mitel-133-pri',
-]
+OSU_CUSTOM_OPTIONS = { # key : is_quoted
+    'slp-directory-agent': False,
+    'slp-scope': False,
+    'ipphone': True,
+    'ipphone242': True,
+    'ftp-server': False,
+    'ftp-root-path': True,
+    'wpad-curl': True,
+    'option-144': True,
+    'SUNW.root-mount-options': True,
+    'SUNW.root-server-ip-address': False,
+    'SUNW.root-server-hostname': True,
+    'SUNW.root-path-name': True,
+    'SUNW.swap-server-ip-address': False,
+    'SUNW.swap-file-path': True,
+    'SUNW.boot-file-path': True,
+    'SUNW.posix-timezone-string': True,
+    'SUNW.boot-read-size': False,
+    'SUNW.install-server-ip-address': False,
+    'SUNW.install-server-hostname': True,
+    'SUNW.install-path': True,
+    'SUNW.sysid-config-file-server': True,
+    'SUNW.JumpStart-server': True,
+    'SUNW.terminal-name': True,
+    'SUNW.bootURI': True,
+    'SUNW.HTTPproxy': True,
+    'MSUCClient.UCIdentifier': True,
+    'MSUCClient.UCIdentifier': True,
+    'MSUCClient.WebServerFqdn': True,
+    'MSUCClient.WebServerPort': True,
+    'MSUCClient.CertProvRelPath': True,
+    'UCSipServer': False,
+    'mitel-125': True,
+    'mitel-128': False,
+    'mitel-129': False,
+    'mitel-130': True,
+    'mitel-132-vlan': False,
+    'mitel-133-pri': False,
+}
 
 
 class CommonOption(KeyValue, ObjectUrlMixin):
@@ -86,10 +86,11 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         return value
 
     def clean(self, require_validation=True):
-        if self.key in OSU_CUSTOM_OPTIONS: # FIXME because this is a hack.
+        if self.key in OSU_CUSTOM_OPTIONS.keys(): # FIXME: this is a hack.
             self.is_option = True
             self.is_statement = False
             self.has_validator = False
+            self.is_quoted = OSU_CUSTOM_OPTIONS[self.key]
             require_validation = False
         super(CommonOption, self).clean(require_validation=require_validation)
 
