@@ -24,7 +24,6 @@ from cyder.core.cyuser.models import User
 from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_create_session
 from cyder.cydns.utils import ensure_label_domain
 from cyder.base.forms import BugReportForm, EditUserForm
-from cyder.core.cyuser.models import User
 from cyder.core.cyuser.views import edit_user
 from cyder.core.ctnr.models import CtnrUser
 
@@ -194,11 +193,11 @@ def cy_delete(request, pk, get_klasses_fn):
     obj_type = request.path.split('/')[2]
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
-    if obj_type == 'ctnr':
-        request = ctnr_delete_session(request, obj)
     try:
         if perm(request, cy.ACTION_DELETE, obj=obj):
             obj.delete()
+            if obj_type == 'ctnr':
+                request = ctnr_delete_session(request, obj)
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
 
