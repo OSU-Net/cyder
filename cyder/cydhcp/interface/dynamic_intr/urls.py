@@ -7,4 +7,4 @@ urlpatterns = cydhcp_urls('dynamic_interface') + patterns(
     '',
     url(r'create/$', cydhcp_create, name='dynamic_interface-create'),
     url(r'(?P<pk>[\w-]+)/$', dynamic_intr_detail,
-        name='dynamic_interface-details'),)
+        name='dynamic_interface-detail'),)
