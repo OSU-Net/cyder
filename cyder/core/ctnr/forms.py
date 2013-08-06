@@ -2,9 +2,10 @@ from django import forms
 
 from cyder.base.constants import LEVELS
 from cyder.core.ctnr.models import Ctnr, CtnrUser
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class CtnrForm(forms.ModelForm):
+class CtnrForm(forms.ModelForm, AlphabetizeFormMixin):
     class Meta:
         model = Ctnr
         exclude = ('users',)

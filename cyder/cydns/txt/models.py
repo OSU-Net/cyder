@@ -1,3 +1,4 @@
+from gettext import gettext as _
 from string import Template
 
 from django.db import models
@@ -43,8 +44,9 @@ class TXT(CydnsRecord, LabelDomainMixin):
             {'name': 'txt_data', 'datatype': 'string', 'editable': True},
         ]}
 
-    template = ("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
-                "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
+    template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
+                 "{rdclass:$rdclass_just} "
+                 "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
 
     @classmethod
     def get_api_fields(cls):

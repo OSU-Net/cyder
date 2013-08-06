@@ -9,10 +9,13 @@
 {% endblock %}
 
 {% block action_bar %}
-  <a class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+  <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
 {% endblock %}
 
 {% block form %}
+  {% if pretty_obj_type == 'Range' %}
+    {{ js('rangeform') }}
+  {% endif %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"

@@ -42,7 +42,8 @@ class Nameserver(CydnsRecord):
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
                                   related_name="nameserver_set")
 
-    template = _("{bind_name:$lhs_just} {ttl} {rdclass:$rdclass_just} "
+    template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
+                 "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {server:$rhs_just}.")
 
     search_fields = ("server", "domain__name")

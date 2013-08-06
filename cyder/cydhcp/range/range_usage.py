@@ -58,7 +58,7 @@ def range_usage(start, end, ip_type):
         StaticInterface.objects.filter(ipf_q)),
         key=record_ip)
     contiguous_ip_list, total_used = contiguous_ips(taken_ips)
-    total_ips = end - start
+    total_ips = (end - start) + 1
     range_usage_list = []
     free_range_start = ip_start
     for filled_range in contiguous_ip_list:

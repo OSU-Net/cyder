@@ -1,9 +1,10 @@
 from django import forms
 
 from cyder.cydhcp.vrf.models import Vrf, VrfKeyValue
+from cyder.base.mixins import AlphabetizeFormMixin
 
 
-class VrfForm(forms.ModelForm):
+class VrfForm(forms.ModelForm, AlphabetizeFormMixin):
     class Meta:
         model = Vrf
 

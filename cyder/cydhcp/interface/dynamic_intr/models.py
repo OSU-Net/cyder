@@ -1,5 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac
@@ -10,12 +12,14 @@ from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 
+import datetime
+
 
 class DynamicInterface(models.Model, ObjectUrlMixin):
     ctnr = models.ForeignKey(Ctnr, null=False)
     range = models.ForeignKey(Range, null=False)
     workgroup = models.ForeignKey(Workgroup, null=True)
-    mac = models.CharField(max_length=19,
+    mac = models.CharField(max_length=19, blank=True,
                            help_text="Mac address in format XX:XX:XX:XX:XX:XX")
     system = models.ForeignKey(System,
                                null=True,
@@ -26,6 +30,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     domain = models.ForeignKey(Domain, null=True)
     dhcp_enabled = models.BooleanField(default=True)
     dns_enabled = models.BooleanField(default=True)
+    last_seen = models.PositiveIntegerField(
+        max_length=11, blank=True, default=0)
     search_fields = ('mac')
 
     class Meta:
@@ -33,13 +39,21 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def details(self):
         data = super(DynamicInterface, self).details()
+        if self.last_seen == 0:
+            date = 0
+
+        else:
+            date = datetime.datetime.fromtimestamp(self.last_seen)
+            date = date.strftime('%B %d, %Y, %I:%M %p')
+
         data['data'] = [
             ('System', 'system', self.system),
             ('Mac', 'mac', self.mac),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
             ('Vrf', 'vrf', self.vrf),
-            ('Domain', 'domain', self.domain)]
+            ('Domain', 'domain', self.domain),
+            ('Last Seen', 'last_seen', date)]
         return data
 
     def build_host(self):
@@ -69,6 +83,18 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             return self.domain.name
         else:
             return "{0}.{1}".format(self.system.name, self.domain.name)
+
+    def clean(self, *args, **kwargs):
+        if self.dhcp_enabled:
+            self.mac = self.mac.lower()
+            validate_mac(self.mac)
+
+        if not self.system:
+            raise ValidationError(
+                "An interface means nothing without its system."
+            )
+
+        super(DynamicInterface, self).clean()
 
 
 class DynamicIntrKeyValue(CommonOption):

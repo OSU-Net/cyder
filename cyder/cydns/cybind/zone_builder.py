@@ -38,10 +38,9 @@ def render_soa_only(soa, root_domain):
 
 
 def render_rdtype(rdtype_set, **kwargs):
-    BUILD_STR = ""
-    for obj in rdtype_set:
-        BUILD_STR += _(obj.bind_render_record(**kwargs) + "\n")
-    return BUILD_STR
+    rdtype_set = map(lambda obj: obj.bind_render_record(**kwargs) + "\n",
+                     rdtype_set)
+    return "".join(sorted(rdtype_set))
 
 
 def _render_forward_zone(default_ttl, nameserver_set, mx_set,

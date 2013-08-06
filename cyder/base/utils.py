@@ -1,21 +1,21 @@
 import operator
-import urllib
-import urlparse
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
-from django.utils.encoding import smart_str
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
-from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.vrf.models import Vrf
+
+
+Domain = get_model('domain', 'domain')
+Workgroup = get_model('workgroup', 'workgroup')
+Range = get_model('range', 'range')
+Network = get_model('network', 'network')
+Site = get_model('site', 'site')
+Vlan = get_model('vlan', 'vlan')
+Vrf = get_model('vrf', 'vrf')
 
 
 def find_get_record_url(obj):
@@ -103,7 +103,20 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
             # Manual extra columns.
             for col in extra_cols:
                 d = col['data'][i]
-                row_data.append({'value': [d['value']], 'url': [d['url']]})
+                if isinstance(d['value'], list):
+                    if 'img' in d:
+                        row_data.append({'value': d['value'], 'url': d['url'],
+                                         'img': d['img']})
+                    else:
+                        row_data.append({'value': d['value'], 'url': d['url']})
+                else:
+                    if 'img' in d:
+                        row_data.append({'value': [d['value']],
+                                         'url': [d['url']],
+                                         'img': [d['img']]})
+                    else:
+                        row_data.append({'value': [d['value']],
+                                         'url': [d['url']]})
 
         if views:
             # Another column for views.
@@ -219,76 +232,3 @@ def model_to_post(post, obj):
         if k not in post:
             ret[k] = v
     return ret
-
-
-def clean_sort_param(request):
-    """
-    Handles empty and invalid values for sort and sort order
-    'id' by ascending is the default ordering.
-    """
-    sort = request.GET.get('sort', 'id')
-    order = request.GET.get('order', 'asc')
-
-    if order not in ('desc', 'asc'):
-        order = 'asc'
-    return sort, order
-
-
-def do_sort(request, qs):
-    """Returns an order_by string based on request GET parameters"""
-    sort, order = clean_sort_param(request)
-
-    if order == 'asc':
-        order_by = sort
-    else:
-        order_by = '-%s' % sort
-    return qs.order_by(order_by)
-
-
-def create_sort_link(pretty_name, sort_field, get_params, sort, order):
-    """Generate table header sort links.
-
-    pretty_name -- name displayed on table header
-    sort_field -- name of the sort_type GET parameter for the column
-    get_params -- additional get_params to include in the sort_link
-    sort -- the current sort type
-    order -- the current sort order
-    """
-    get_params.append(('sort', sort_field))
-
-    if sort == sort_field and order == 'asc':
-        # Have link reverse sort order to desc if already sorting by desc.
-        get_params.append(('order', 'desc'))
-    else:
-        # Default to ascending.
-        get_params.append(('order', 'asc'))
-
-    # Show little sorting sprite if sorting by this field.
-    url_class = ''
-    if sort == sort_field:
-        url_class = ' class="sort-icon ed-sprite-sort-%s"' % order
-
-    return u'<a href="?%s"%s>%s</a>' % (urllib.urlencode(get_params),
-                                        url_class, pretty_name)
-
-
-def urlparams(url_, hash=None, **query):
-    """
-    Add a fragment and/or query paramaters to a URL.
-
-    New query params will be appended to exising parameters, except duplicate
-    names, which will be replaced.
-    """
-    url = urlparse.urlparse(url_)
-    fragment = hash if hash is not None else url.fragment
-
-    # Use dict(parse_qsl) so we don't get lists of values.
-    q = url.query
-    query_dict = dict(urlparse.parse_qsl(smart_str(q))) if q else {}
-    query_dict.update((k, v) for k, v in query.items())
-
-    query_string = urllib.urlencode([(k2, v2) for k2, v2 in query_dict.items()
-                                     if v2 is not None])
-    new = urlparse.ParseResult(url.scheme, url.netloc, url.path, url.params,
-                               query_string, fragment)
-    return new.geturl()

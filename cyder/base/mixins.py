@@ -1,6 +1,7 @@
 from string import Template
 
 from django.core.urlresolvers import NoReverseMatch, reverse
+from django.forms import ModelChoiceField
 
 
 class DisplayMixin(object):
@@ -8,11 +9,11 @@ class DisplayMixin(object):
     justs = {
         'pk_just':      10,
         'rhs_just':     1,
-        'ttl_just':     1,
-        'rdtype_just':  4,
+        'ttl_just':     6,
+        'rdtype_just':  7,
         'rdclass_just': 3,
-        'prio_just':    1,
-        'lhs_just':     40,
+        'prio_just':    2,
+        'lhs_just':     39,
         'extra_just':   1
     }
 
@@ -75,3 +76,11 @@ class ObjectUrlMixin(object):
         Return base details with generic postback URL for editable tables.
         """
         return {'url': self.get_table_update_url()}
+
+
+class AlphabetizeFormMixin(object):
+    def alphabetize_all(self, *args, **kwargs):
+        for fieldname, field in self.fields.items():
+            if isinstance(field, ModelChoiceField):
+                self.fields[fieldname].queryset = field.queryset.order_by(
+                    *field.queryset.model.display_fields)

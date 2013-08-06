@@ -39,16 +39,12 @@ class SystemViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'name': 'test_system',
-            'department': 'test_department',
-            'location': 'test_location',
         }
         do_setUp(self, System, test_data)
 
     def post_data(self):
         return {
             'name': 'post_system',
-            'department': 'post_department',
-            'location': 'post_location',
         }
 
 

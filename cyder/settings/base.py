@@ -21,7 +21,7 @@ sys.path.append(site_root + '/vendor')
 EMAIL_SUFFIX = '@onid.oregonstate.edu'
 CAS_SERVER_URL = 'https://login.oregonstate.edu/cas/login'
 CAS_AUTO_CREATE_USERS = True  # Not to be used in production.
-BUG_REPORT_EMAIL = 'minions@net.oregonstate.edu'
+BUG_REPORT_EMAIL = 'CyderProject@oregonstate.edu'
 EMAIL_HOST = 'mail.oregonstate.edu'
 
 SASS_PREPROCESS = True
@@ -67,8 +67,14 @@ MINIFY_BUNDLES = {
             'js/key_value_validators.js',
             'js/views.js',
         ),
+        'rangeform': (
+            'js/rangeform.js',
+        ),
         'tables': (
             'js/tables.js',
+        ),
+        'admin': (
+            'js/admin.js',
         ),
         'ctnr': (
             'js/ctnr/ctnr.js',

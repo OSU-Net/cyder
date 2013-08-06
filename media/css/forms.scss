@@ -41,7 +41,7 @@
     }
     ul.errorlist {
         color: $red;
-        float: right;
+        float: inherit;
         position: relative;
         margin: 8px 400px 0 0;
     }

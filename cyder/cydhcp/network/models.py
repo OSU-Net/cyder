@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -24,8 +25,11 @@ class Network(models.Model, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
 
     # NETWORK/NETMASK FIELDS
-    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items(),
-                               editable=True, validators=[validate_ip_type])
+    ip_type = models.CharField(
+            verbose_name='IP address type', max_length=1,
+            choices=IP_TYPES.items(), default=IP_TYPE_4,
+            validators=[validate_ip_type]
+    )
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
     # This field is here so ES can search this model easier.
@@ -42,13 +46,14 @@ class Network(models.Model, ObjectUrlMixin):
     network = None
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
+    display_fields = ('network_str',)
 
     class Meta:
         db_table = 'network'
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
     def __str__(self):
-        return self.network_str
+        return get_display(self)
 
     def __repr__(self):
         return "<Network {0}>".format(str(self))

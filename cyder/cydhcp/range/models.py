@@ -4,9 +4,11 @@ from django.http import HttpResponse
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.helpers import get_display
 from cyder.cydhcp.constants import (
     ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
 )
+from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
@@ -48,8 +50,13 @@ class Range(models.Model, ObjectUrlMixin):
     ALLOW_OPTIONS
 
     id = models.AutoField(primary_key=True)
+    network = models.ForeignKey(Network, null=True, blank=True)
 
-    ip_type = models.CharField(max_length=1, choices=IP_TYPES.items())
+    ip_type = models.CharField(
+        verbose_name='IP address type', max_length=1,
+        choices=IP_TYPES.items(), default=IP_TYPE_4,
+        validators=[validate_ip_type]
+    )
     start_upper = models.BigIntegerField(null=True)
     start_lower = models.BigIntegerField(null=True)
     start_str = models.CharField(max_length=39, editable=True)
@@ -58,7 +65,6 @@ class Range(models.Model, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True)
     end_str = models.CharField(max_length=39, editable=True)
 
-    network = models.ForeignKey(Network, null=True, blank=True)
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS.items(),
@@ -73,6 +79,7 @@ class Range(models.Model, ObjectUrlMixin):
                                   default=STATIC, editable=False)
 
     search_fields = ('start_str', 'end_str')
+    display_fields = ('start_str', 'end_str')
 
     class Meta:
         db_table = 'range'
@@ -80,7 +87,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return "{0}  -  {1}".format(self.start_str, self.end_str)
+        return get_display(self)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
