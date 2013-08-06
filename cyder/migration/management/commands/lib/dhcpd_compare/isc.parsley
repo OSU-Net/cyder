@@ -20,7 +20,7 @@ FixedAddress = ws 'fixed-address' ws IP:ip ';'
         -> {'ip' : ip}
 
 HardwareAddress = ws 'hardware ethernet' ws MAC:mac ';'
-        -> {'mac': mac}
+        -> {'mac': mac.lower()}
 
 HostAttributes = Option(HOST) | HardwareAddress | FixedAddress | Parameter(HOST)
 
@@ -63,7 +63,7 @@ TopLevelClass = ws 'class' ws '"' (Char | ' ')* ':' IP:start ':' IP:end '"' ws '
                         ws 'match' ws <Char*>:match ';' ws '}'
 
 TopLevelSubClass = ws 'subclass' ws '"' (Char | ' ')* ':' IP:start ':' IP:end '"' ws  '1:' MAC:mac ';'
-        -> self.add_subclass(start, end, mac)
+        -> self.add_subclass(start, end, mac.lower())
 
 
 TopLevelOption = Option(GLOBAL):option -> config.add_option(option)
