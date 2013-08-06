@@ -698,6 +698,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         """
         self.is_option = True
         self.is_statement = False
+        self.is_quoted = True
         self.has_validator = False
 
     def _aa_tftp_server_name(self):
@@ -709,6 +710,7 @@ class CommonOption(KeyValue, ObjectUrlMixin):
         """
         self.is_option = True
         self.is_statement = False
+        self.is_quoted = True
         self.has_validator = False
 
     def _aa_use_host_decl_names(self):
