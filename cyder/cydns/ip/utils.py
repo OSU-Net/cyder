@@ -14,6 +14,7 @@ def check_for_reverse_domain(ip_str, ip_type):
             "No reverse Domain found for {0} ".format(ip_str)
         )
 
+
 def ip_to_dns_form(ip, uppercase=False):
     """
     Convert an ip to dns zone form. The ip is assumed to be in valid
