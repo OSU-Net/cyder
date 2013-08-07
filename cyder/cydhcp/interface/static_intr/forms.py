@@ -34,9 +34,16 @@ class StaticInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
     label = forms.CharField(max_length=128, required=True)
 
+    def __init__(self, *args, **kwargs):
+        super(StaticInterfaceForm, self).__init__(*args, **kwargs)
+        self.fields.keyOrder = ['system', 'description', 'label', 'ip_str',
+                                'ip_type', 'ttl', 'workgroup', 'mac', 'vrf',
+                                'domain', 'dhcp_enabled', 'dns_enabled']
+
     class Meta:
         model = StaticInterface
-        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
+        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
+                   'last_seen')
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):

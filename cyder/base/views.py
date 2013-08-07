@@ -171,6 +171,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     if hasattr(form, 'alphabetize_all'):
         form.alphabetize_all()
 
+    if obj_type == 'system' and len(object_list) == 0:
+        return redirect(reverse('system-create'))
+
     return render(request, template, {
         'form': form,
         'obj': obj,

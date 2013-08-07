@@ -80,6 +80,9 @@ MINIFY_BUNDLES = {
         ),
         'ctnr': (
             'js/ctnr/ctnr.js',
+        ),
+        'systemform': (
+            'js/systemform.js',
         )
     }
 }
