@@ -19,7 +19,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_dns_form
+from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
 from cyder.cydns.domain.models import Domain
 
 
@@ -218,9 +218,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
-        urd = kwargs.pop('update_reverse_domain', True)
-        self.clean_reverse(update_reverse_domain=urd)  # BasePTR
-
+        check_for_reverse_domain(self.ip_str, self.ip_type)
         if self.dhcp_enabled:
             self.mac = self.mac.lower()
             validate_mac(self.mac)
