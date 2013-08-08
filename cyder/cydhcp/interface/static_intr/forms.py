@@ -10,7 +10,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_label
-from cyder.base.mixins import AlphabetizeFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 
 
 def validate_ip(ip):
@@ -28,7 +28,7 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
+class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)

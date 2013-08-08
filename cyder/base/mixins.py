@@ -1,8 +1,10 @@
 from string import Template
 
 from django.core.urlresolvers import NoReverseMatch, reverse
-from django.forms import ModelChoiceField
+from django.db.models.loading import get_model
+from django.forms import ModelChoiceField, HiddenInput
 
+from cyder.base.utils import filter_by_ctnr
 
 class DisplayMixin(object):
     # Knobs
@@ -78,9 +80,37 @@ class ObjectUrlMixin(object):
         return {'url': self.get_table_update_url()}
 
 
-class AlphabetizeFormMixin(object):
-    def alphabetize_all(self, *args, **kwargs):
+class UsabilityFormMixin(object):
+    def alphabetize_all(self):
         for fieldname, field in self.fields.items():
-            if isinstance(field, ModelChoiceField):
+            if hasattr(field, 'queryset'):
                 self.fields[fieldname].queryset = field.queryset.order_by(
                     *field.queryset.model.display_fields)
+
+    def filter_by_ctnr_all(self, ctnr, allow_reverse_domains=False):
+        for fieldname, field in self.fields.items():
+            if hasattr(field, 'queryset'):
+                queryset = self.fields[fieldname].queryset
+                queryset = filter_by_ctnr(ctnr=ctnr,
+                                          objects=field.queryset).distinct()
+
+                if fieldname == 'domain' and not allow_reverse_domains:
+                    queryset = queryset.filter(is_reverse=False)
+
+                if queryset.count() == 1:
+                    self.fields[fieldname].initial = queryset[0]
+
+                self.fields[fieldname].queryset = queryset
+
+    def autoselect_system(self):
+        if 'system' in self.initial:
+            System = get_model('system', 'system')
+            self.fields['system'] = ModelChoiceField(
+                widget=HiddenInput, empty_label=None,
+                queryset=System.objects.filter(pk=int(self.initial['system'])))
+
+    def make_usable(self, ctnr=None):
+        if ctnr:
+            self.filter_by_ctnr_all(ctnr)
+        self.alphabetize_all()
+        self.autoselect_system()

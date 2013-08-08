@@ -32,7 +32,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     dns_enabled = models.BooleanField(default=True)
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
-    search_fields = ('mac')
+    search_fields = ('mac',)
 
     class Meta:
         db_table = 'dynamic_interface'

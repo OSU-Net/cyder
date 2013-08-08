@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.loading import get_model
 from django.core.validators import RegexValidator
 
 from cyder.base.mixins import ObjectUrlMixin
@@ -13,16 +14,28 @@ class Site(models.Model, ObjectUrlMixin):
     parent = models.ForeignKey("self", null=True, blank=True)
 
     search_fields = ('name', 'parent__name')
+    display_fields = ('name',)
 
     class Meta:
         db_table = 'site'
         unique_together = ('name', 'parent')
 
     def __str__(self):
-        return "{0}".format(self.get_full_name())
+        name = self.name.title()
+        if self.parent:
+            return "%s in %s" % (name, self.parent.get_full_name())
+        else:
+            return name
 
     def __repr__(self):
         return "<Site {0}>".format(str(self))
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        Network = get_model('network', 'network')
+        networks = Network.objects.filter(range__in=ctnr.ranges.all())
+        objects = objects or Site.objects
+        return objects.filter(network__in=networks)
 
     def details(self):
         """For tables."""

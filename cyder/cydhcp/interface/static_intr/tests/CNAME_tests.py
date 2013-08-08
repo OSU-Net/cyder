@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -23,6 +24,8 @@ class CNAMEStaticRegTests(TestCase):
         return d
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -40,7 +43,7 @@ class CNAMEStaticRegTests(TestCase):
 
     def do_add_intr(self, mac, label, domain, ip_str, ip_type='4'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.n)
+                            ip_type=ip_type, system=self.n, ctnr=self.ctnr)
         r.clean()
         r.save()
         repr(r)

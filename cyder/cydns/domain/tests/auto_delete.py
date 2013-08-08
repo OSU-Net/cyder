@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.cname.models import CNAME
@@ -16,6 +17,8 @@ from cyder.cydns.tests.utils import create_fake_zone
 class AutoDeleteTests(TestCase):
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         c = Domain(name='poo')
         c.save()
         self.assertFalse(c.purgeable)
@@ -161,7 +164,7 @@ class AutoDeleteTests(TestCase):
         system = System()
         addr = StaticInterface(
             label=label, domain=the_domain, ip_type='4', ip_str="10.2.3.4",
-            mac="00:11:22:33:44:55", system=system
+            mac="00:11:22:33:44:55", system=system, ctnr=self.ctnr,
         )
         addr.save()
         self.assertFalse(prune_tree(the_domain))

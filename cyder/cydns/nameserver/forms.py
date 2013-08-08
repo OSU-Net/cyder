@@ -4,10 +4,10 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.forms import DNSForm
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.base.mixins import AlphabetizeFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class NameserverForm(DNSForm, AlphabetizeFormMixin):
+class NameserverForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = Nameserver
         exclude = ('addr_glue', 'intr_glue')

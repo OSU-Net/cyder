@@ -10,11 +10,14 @@ from cyder.cydhcp.lib.utils import *
 from cyder.cydns.domain.models import Domain
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 
 class LibTestsDomain(TestCase):
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.system = System()
         Domain.objects.get_or_create(name="com")
         Domain.objects.get_or_create(name="mozilla.com")
@@ -23,7 +26,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="", vlan_str="db", site_str="scl3",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("label" in errors)
 
@@ -31,7 +34,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="db", site_str="scl3",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("site" in errors)
 
@@ -40,7 +43,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="db", site_str="scl3",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("site" not in errors)
         self.assertTrue("vlan" in errors)
@@ -51,7 +54,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="db3", site_str="scl33",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -65,7 +68,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="db4", site_str="scl34",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -85,7 +88,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="5db", site_str="5scl3",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -114,25 +117,25 @@ class LibTestsDomain(TestCase):
 
         s = StaticInterface(label="fab", domain=d, ip_type="4",
                             ip_str="11.0.0.0", system=self.system,
-                            mac="00:00:00:00:00:00")
+                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
         s.clean()
         s.save()
 
         s = StaticInterface(label="fab", domain=d, ip_type="4",
                             ip_str="11.0.0.1", system=self.system,
-                            mac="00:00:00:00:00:00")
+                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
         s.clean()
         s.save()
 
         s = StaticInterface(label="fab", domain=d, ip_type="4",
                             ip_str="11.0.0.2", system=self.system,
-                            mac="00:00:00:00:00:00")
+                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
         s.clean()
         s.save()
 
         intr, errors = create_ipv4_interface(
             "foo", "6db", "6scl3", self.system,
-            "11:22:33:44:55:66", "mozilla.com")
+            "11:22:33:44:55:66", "mozilla.com", ctnr=self.ctnr)
         self.assertEqual(intr, None)
         self.assertTrue("vlan" not in errors)
         self.assertTrue("site" not in errors)
@@ -164,7 +167,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="7db", site_str="7scl3",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 
@@ -193,7 +196,7 @@ class LibTestsDomain(TestCase):
         intr, errors = create_ipv4_interface(
             label="foo", vlan_str="8db", site_str="8dmz.8scl3",
             system=self.system, mac="11:22:33:44:55:66",
-            domain_suffix="mozilla.com")
+            domain_suffix="mozilla.com", ctnr=self.ctnr)
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 
@@ -220,7 +223,7 @@ class LibTestsDomain(TestCase):
 
         intr, errors = create_ipv4_intr_from_domain(
             label="foo", domain_name="private.phx1", system=self.system,
-            mac="11:22:33:44:55:66")
+            mac="11:22:33:44:55:66", ctnr=self.ctnr)
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 
@@ -250,7 +253,7 @@ class LibTestsDomain(TestCase):
 
         intr, errors = create_ipv4_intr_from_domain(
             "foo", "private.corp.phx1", self.system,
-            "11:22:33:44:55:66")
+            "11:22:33:44:55:66", ctnr=self.ctnr)
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
 
@@ -287,17 +290,17 @@ class LibTestsDomain(TestCase):
 
         intr, errors = create_ipv4_interface(
             "foo", "12db", "12scl3", self.system,
-            "11:22:33:4e:55:66", "mozilla.com")
+            "11:22:33:4e:55:66", "mozilla.com", ctnr=self.ctnr)
         self.assertTrue('network' in errors)
         self.assertTrue(
             errors['network'][0].find("too many networks associated") != -1)
         # Look for a non-existant network
         intr, errors = create_ipv4_interface(
-            "foo", "12db", "12scl3", self.system,
-            "11:22:33:4e:55:66", "mozilla.com", network_str="12.0.99.0/24")
+            "foo", "12db", "12scl3", self.system, "11:22:33:4e:55:66",
+            "mozilla.com", network_str="12.0.99.0/24", ctnr=self.ctnr)
         self.assertTrue('network' in errors)
         intr, errors = create_ipv4_interface(
-            "foo", "12db", "12scl3", self.system,
-            "11:22:33:4e:55:66", "mozilla.com", network_str="12.0.0.0/24")
+            "foo", "12db", "12scl3", self.system, "11:22:33:4e:55:66",
+            "mozilla.com", network_str="12.0.0.0/24", ctnr=self.ctnr)
         self.assertFalse(errors)
         self.assertTrue(isinstance(intr, StaticInterface))
