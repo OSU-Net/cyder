@@ -3,6 +3,7 @@ from string import Template
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db.models.loading import get_model
 from django.forms import ModelChoiceField, HiddenInput
+from django.conf import settings
 
 from cyder.base.utils import filter_by_ctnr
 
@@ -110,7 +111,7 @@ class UsabilityFormMixin(object):
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
 
     def make_usable(self, ctnr=None):
-        if ctnr:
+        if ctnr and not settings.TESTING:
             self.filter_by_ctnr_all(ctnr)
         self.alphabetize_all()
         self.autoselect_system()
