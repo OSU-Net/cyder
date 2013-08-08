@@ -1,8 +1,9 @@
 import json
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 
 from cyder.base.views import cy_detail
+from cyder.base.utils import make_megafilter
 from cyder.cydns.domain.models import Domain
 
 
@@ -43,4 +44,17 @@ def build_tree(root, domains):
 
 def get_all_domains(request):
     domains = [domain.name for domain in Domain.objects.all()]
+    return HttpResponse(json.dumps(domains))
+
+
+def search(request):
+    print 'testing'
+    """Returns a list of domains matching 'term'."""
+    term = request.GET.get('term', '')
+    print term
+    if not term:
+        raise Http404
+
+    domains = Domain.objects.filter(make_megafilter(Domain, term))[:15]
+    domains = [{'label': str(domain), 'pk': domain.id} for domain in domains]
     return HttpResponse(json.dumps(domains))
