@@ -47,7 +47,8 @@ class MX(CydnsRecord, LabelDomainMixin):
         """For tables."""
         data = super(MX, self).details()
         data['data'] = [
-            ('FQDN', 'fqdn', self.fqdn),
+            ('Label', 'label', self.label),
+            ('Domain', 'domain', self.domain),
             ('Server', 'server', self.server),
             ('Priority', 'priority', self.priority),
             ('TTL', 'ttl', self.ttl)
@@ -58,7 +59,8 @@ class MX(CydnsRecord, LabelDomainMixin):
     def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'server', 'datatype': 'string', 'editable': True},
             {'name': 'priority', 'datatype': 'integer', 'editable': True},
             {'name': 'ttl', 'datatype': 'integer', 'editable': True},
