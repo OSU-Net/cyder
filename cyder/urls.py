@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from funfactory.monkeypatches import patch
 patch()
-from cyder.api.routes import router
+from cyder.api.v1.routes import router
 
 # from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.core.views import core_index

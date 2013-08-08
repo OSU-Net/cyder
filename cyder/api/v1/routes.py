@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from cyder.api import api
+from cyder.api.v1 import api
 
 router = routers.DefaultRouter()
 router.register(r'cname', api.CNAMEViewSet)

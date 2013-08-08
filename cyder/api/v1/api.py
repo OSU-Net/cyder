@@ -35,11 +35,32 @@ class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     views = serializers.CharField()
 
 
+class CommonDNSViewSet(viewsets.ModelViewSet):
+    def list(self, request):
+        return super(CommonDNSViewSet, self).list(self, request)
+
+    def create(self, request):
+        return super(CommonDNSViewSet, self).create(self, request)
+
+    def retrieve(self, request, pk=None):
+        return super(CommonDNSViewSet, self).retrieve(self, request)
+
+    def update(self, request, pk=None):
+        return super(CommonDNSViewSet, self).update(self, request)
+
+    def partial_update(self, request, pk=None):
+        return super(CommonDNSViewSet, self).partial_update(self, request)
+
+    def destroy(self, request, pk=None):
+        return super(CommonDNSViewSet, self).partial_update(self, request)
+
+
 class DomainSerializer(CommonDNSSerializer):
     class Meta:
         model = Domain
         fields = ['name', 'master_domain', 'soa', 'is_reverse', 'dirty',
                 'purgeable', 'delegated']
+
 
 class DomainViewSet(viewsets.ModelViewSet):
     queryset = Domain.objects.all()
