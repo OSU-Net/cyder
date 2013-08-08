@@ -4,6 +4,7 @@ from nose.tools import eq_
 
 import cyder.base.tests
 from cyder.base.tests.test_views_template import build, random_label
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -21,6 +22,7 @@ from cyder.cydns.tests.utils import create_fake_zone
 
 
 def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
+    ctnr = Ctnr.objects.get(name='test_ctnr')
     self.client = Client()
     self.client.login(username='test_superuser', password='password')
     self.test_class = test_class
@@ -29,11 +31,14 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
 
     # Create forward zone.
     self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
+    ctnr.domains.add(self.domain)
     self.soa = self.domain.soa
     self.subdomain = Domain.objects.create(
         name=random_label() + '.' + self.domain.name, soa=self.soa)
+    ctnr.domains.add(self.subdomain)
 
     self.reverse_domain = create_fake_zone('196.in-addr.arpa', suffix='')
+    ctnr.domains.add(self.reverse_domain)
     self.soa2 = self.reverse_domain.soa
 
     # Create test object.
