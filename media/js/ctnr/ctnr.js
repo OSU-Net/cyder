@@ -18,7 +18,7 @@ $(document).ready(function() {
             if (form.lastChild.tagName == 'DIV') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
             };
-            if (this.value == 'User') {
+            if (this.value == 'user') {
                  form.appendChild(user_clone);
             };
             objType = this.value;
@@ -48,7 +48,7 @@ $(document).ready(function() {
             obj_name: objName,
             obj_type: objType,
         };
-        if (objType == 'User') {
+        if (objType == 'user') {
             postData.level = $('#user_clone input[name="level"]:checked')[0].value;
             postData.confirmation = confirmation;
         };
@@ -70,6 +70,9 @@ $(document).ready(function() {
                 forms.innerHTML = "<li><font color='red'>" + data.error +"</font></li>" + forms.innerHTML;
                 $('#object-searchbox').val('');
                 userPk = null;
+            };
+            if (data.redirect) {
+                document.location.reload();
             };
             if (data.user) {
                 $('#add-object-errorlist').empty();

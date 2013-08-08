@@ -21,10 +21,10 @@ class CtnrObjectForm(forms.Form):
         widget=forms.RadioSelect,
         label='Type',
         choices=(
-            ('User', 'User'),
-            ('Domain', 'Domain'),
-            ('Range', 'Range'),
-            ('Workgroup', 'Workgroup')))
+            ('user', 'User'),
+            ('domain', 'Domain'),
+            ('range', 'Range'),
+            ('workgroup', 'Workgroup')))
 
     obj = forms.CharField(
         widget=forms.TextInput(attrs={'id': 'object-searchbox'}),

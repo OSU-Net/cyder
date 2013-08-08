@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.db.models.loading import get_model
 
 import cyder as cy
 from cyder.base.constants import LEVELS
@@ -175,14 +176,33 @@ def update_user_level(request, ctnr_pk, user_pk, lvl):
 def add_object(request, ctnr_pk):
     """Add object to container."""
     ctnr = Ctnr.objects.get(id=ctnr_pk)
-    print request.POST
     pk = request.POST.get('obj_pk', '')
     name = request.POST.get('obj_name', '')
     obj_type = request.POST.get('obj_type', '')
-    if obj_type == 'User':
+    if obj_type == 'user':
         return add_user(request, ctnr, name, pk)
+
     else:
-        print obj_type
+        if pk == 'null':
+            return HttpResponse(json.dumps({
+                'error': '{0} is not a valid {1}'.format(name, obj_type)}))
+
+        Klass = get_model(obj_type, obj_type)
+        obj = Klass.objects.get(id=pk)
+        m2m = getattr(ctnr, (obj_type + 's'), None)
+
+        if m2m is None:
+            return HttpResponse(json.dumps({
+                'error': '{0} is not related to {1}'.format(obj_type, ctnr)}))
+
+        else:
+            if obj in m2m.all():
+                return HttpResponse(json.dumps({
+                    'error': '{0} already exists in {1}'.format(
+                    name, str(ctnr))}))
+
+        m2m.add(obj)
+    return HttpResponse(json.dumps({'redirect': 'yup'}))
 
 
 def add_user(request, ctnr, name, pk):
