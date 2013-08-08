@@ -48,10 +48,8 @@ def get_all_domains(request):
 
 
 def search(request):
-    print 'testing'
     """Returns a list of domains matching 'term'."""
     term = request.GET.get('term', '')
-    print term
     if not term:
         raise Http404
 
