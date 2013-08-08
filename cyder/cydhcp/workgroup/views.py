@@ -1,6 +1,9 @@
-from django.shortcuts import get_object_or_404,  render
+import json
 
-from cyder.base.utils import tablefy, make_paginator
+from django.shortcuts import get_object_or_404,  render
+from django.http import HttpResponse, Http404
+
+from cyder.base.utils import tablefy, make_paginator, make_megafilter
 from cyder.cydhcp.workgroup.models import Workgroup
 
 
@@ -20,3 +23,17 @@ def workgroup_detail(request, workgroup_pk):
         'static_hosts_table': tablefy(static_hosts_paginator),
         'attrs_table': tablefy(attrs),
     })
+
+
+def search(request):
+    """Returns a list of workgroups matching 'term'."""
+    term = request.GET.get('term', '')
+    if not term:
+        raise Http404
+
+    workgroups = Workgroup.objects.filter(
+        make_megafilter(Workgroup, term))[:15]
+    workgroups = [{
+        'label': str(workgroup),
+        'pk': workgroup.id} for workgroup in workgroups]
+    return HttpResponse(json.dumps(workgroups))

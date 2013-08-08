@@ -9,10 +9,10 @@
   <span id="ctnr-data"
         data-ctnr-pk="{{ object.pk }}"
         data-searchUserUrl="{{ url('user-search') }}"
-        data-addObjectUrl="{{ url('ctnr-add-object', object.pk) }}"
         data-searchDomainUrl="{{ url('domain-search') }}"
         data-searchRangeUrl="{{ url('range-search') }}"
-        data-searchWorkgroupUrl="{{ url('cydhcp-search-record') }}">
+        data-searchWorkgroupUrl="{{ url('workgroup-search') }}"
+        data-addObjectUrl="{{ url('ctnr-add-object', object.pk) }}">
   </span>
 
   {% if request.user.is_superuser or
