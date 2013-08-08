@@ -13,7 +13,19 @@ $(document).ready(function() {
     var user_clone = add_user_form.cloneNode(true);
     user_clone.id="user_clone";
     $(user_clone).removeAttr('style');
+
     for(var i = 0; i < obj_select.length; i++) {
+        if (obj_select[i].checked) {
+            if (form.lastChild.tagName == 'DIV') {
+                form.removeChild(form.childNodes[form.childNodes.length -1]);
+            };
+            if (obj_select[i].value == 'user') {
+                 form.appendChild(user_clone);
+            };
+            objType = obj_select[i].value;
+            searchUrl = ctnr.attr(('data-search' + obj_select[i].value + 'Url'));
+            $('label[for="object-searchbox"]').text(obj_select[i].value + ':');
+        };
         obj_select[i].onclick = function() {
             if (form.lastChild.tagName == 'DIV') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
@@ -25,16 +37,16 @@ $(document).ready(function() {
             searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
             $('label[for="object-searchbox"]').text(this.value + ':');
             // Auto complete for object search dialog.
-            $('#object-searchbox').autocomplete({
-                minLength: 1,
-                source: searchUrl,
-                delay: 400,
-                select: function(event, ui) {
-                    objPk = ui.item.pk;
-                    objName = ui.item.label;
-                }
-            });
         };
+        $('#object-searchbox').autocomplete({
+            minLength: 1,
+            source: searchUrl,
+            delay: 400,
+            select: function(event, ui) {
+                objPk = ui.item.pk;
+                objName = ui.item.label;
+            }
+        });
     };
     // Add object to ctnr.
     $('#add-object-ctnr').click(function(event) {
