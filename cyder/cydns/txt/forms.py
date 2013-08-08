@@ -8,6 +8,7 @@ class TXTForm(DNSForm):
     class Meta:
         model = TXT
         exclude = ('fqdn',)
+        fields = ('label', 'domain', 'txt_data', 'views', 'ttl', 'description')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 
