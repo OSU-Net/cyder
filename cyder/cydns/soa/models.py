@@ -136,7 +136,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'description', 'datatype': 'string', 'editable': True},
@@ -199,7 +200,11 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
 
 class SOAKeyValue(KeyValue):
-    obj = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+    soa = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+
+    class Meta:
+        db_table = 'soa_kv'
+
 
     def _aa_disabled(self):
         """

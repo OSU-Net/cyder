@@ -5,6 +5,7 @@ import urllib
 import urlparse
 
 from django.utils.encoding import smart_str
+from django.db.models import ForeignKey
 
 from jingo import register
 
@@ -25,11 +26,22 @@ def clean_sort_param(request):
 def do_sort(request, qs):
     """Returns an order_by string based on request GET parameters"""
     sort, order = clean_sort_param(request)
+    if sort == "id" and hasattr(qs.model, 'eg_metadata'):
+        fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
+        if hasattr(qs.model, fields[0]):
+            sort, order = fields[0], 'asc'
+
+    if hasattr(qs.model, sort):
+        field = getattr(qs.model, sort).field
+        if isinstance(field, ForeignKey):
+            qs = qs.select_related(sort)
+            sort = "__".join([sort, field.rel.to.display_fields[0]])
 
     if order == 'asc':
         order_by = sort
     else:
         order_by = '-%s' % sort
+
     return qs.order_by(order_by)
 
 
@@ -139,6 +151,9 @@ def prettify_obj_type(obj_type, *args, **kwargs):
                 capitalize = True
             else:
                 prettified += obj_type[i]
+        if 'Kv' in prettified:
+            prettified = prettified.split(' ')[0] + ' Attribute'
+            return prettified
         return prettified
 
     return obj_type.upper()

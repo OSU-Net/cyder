@@ -17,17 +17,17 @@ import datetime
 
 class DynamicInterface(models.Model, ObjectUrlMixin):
     ctnr = models.ForeignKey(Ctnr, null=False)
-    range = models.ForeignKey(Range, null=False)
     workgroup = models.ForeignKey(Workgroup, null=True)
-    mac = models.CharField(max_length=19, blank=True,
-                           help_text="Mac address in format XX:XX:XX:XX:XX:XX")
     system = models.ForeignKey(System,
                                null=True,
                                blank=True,
                                help_text="System to associate "
                                          "the interface with")
+    mac = models.CharField(max_length=19,
+                           help_text="Mac address in format XX:XX:XX:XX:XX:XX")
     vrf = models.ForeignKey(Vrf, null=True)
     domain = models.ForeignKey(Domain, null=True)
+    range = models.ForeignKey(Range, null=False)
     dhcp_enabled = models.BooleanField(default=True)
     dns_enabled = models.BooleanField(default=True)
     last_seen = models.PositiveIntegerField(
@@ -36,6 +36,12 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     class Meta:
         db_table = 'dynamic_interface'
+
+    def __str__(self):
+        return "{0}".format(self.mac)
+
+    def __repr__(self):
+        return "Interface {0}".format(str(self))
 
     def details(self):
         data = super(DynamicInterface, self).details()
@@ -48,13 +54,20 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
         data['data'] = [
             ('System', 'system', self.system),
-            ('Mac', 'mac', self.mac),
+            ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
             ('Vrf', 'vrf', self.vrf),
             ('Domain', 'domain', self.domain),
             ('Last Seen', 'last_seen', date)]
         return data
+
+    @staticmethod
+    def eg_metadata():
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'system', 'datatype': 'string', 'editable': False},
+        ]}
 
     def build_host(self):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
@@ -98,8 +111,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
 
 class DynamicIntrKeyValue(CommonOption):
-    intr = models.ForeignKey(DynamicInterface, null=False)
+    dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
 
     class Meta:
         db_table = "dynamic_interface_kv"
-        unique_together = "key", "value", "intr"
+        unique_together = "key", "value", "dynamic_interface"

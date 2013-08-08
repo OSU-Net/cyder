@@ -1,10 +1,24 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
 {% from "base/utility.html" import create_button %}
-
-
 {% block title %}
   Range {{ obj.start_str }} to {{ obj.end_str }}
+{% endblock %}
+
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-objPk="{{ obj.pk }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('cydhcp-get-record') }}"
+    data-objName="{{ obj.ip_str }}">
+  </span>
+{% endblock %}
+
+{% block extra_action_bar %}
+  {{ create_button('range_kv', url('cydhcp-get-record'),
+                   url('range_kv'), objName=obj.start_str,
+                   buttonName="Range Attribute") }}
 {% endblock %}
 
 {% block content %}
@@ -27,7 +41,7 @@
   {% endif %}
 
   {% if attrs_table %}
-    <h3>Range Options</h3>
+    <h3>Range Attributes</h3>
     {{ render_table(request, attrs_table) }}
   {% endif %}
 

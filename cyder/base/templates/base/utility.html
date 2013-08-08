@@ -1,5 +1,5 @@
 {% macro create_button(objType, getUrl, postUrl, objName=None, data = None,
-                       button_prefix="Create ") %}
+                       button_prefix="Create ", buttonName=None) %}
   <a class="btn create-obj" data-objType="{{ objType }}"
      data-prettyObjType="{{ objType|prettify_obj_type }}"
      {% if objName %}
@@ -9,6 +9,10 @@
         data-kwargs='{{ data }}'
      {% endif %}
      href="{{ postUrl }}"
-     data-getUrl="{{ getUrl }}">{{ button_prefix }}{{ objType|prettify_obj_type }}
+     {% if buttonName %}
+       data-getUrl="{{ getUrl }}">{{ button_prefix }}{{ buttonName }}
+     {% else %}
+       data-getUrl="{{ getUrl }}">{{ button_prefix }}{{ objType|prettify_obj_type }}
+     {% endif %}
   </a>
 {% endmacro %}

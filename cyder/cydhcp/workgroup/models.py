@@ -35,7 +35,8 @@ class Workgroup(models.Model, ObjectUrlMixin):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'name', 'datatype': 'string', 'editable': True},

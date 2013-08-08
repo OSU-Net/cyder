@@ -4,6 +4,7 @@ from django.db.models.loading import get_model
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
+from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.models import KeyValue
 
 
@@ -11,11 +12,10 @@ class System(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=255, unique=False)
 
     search_fields = ('name',)
-    display_fields = ('name', 'pk')
+    display_fields = ('name',)
 
     def __str__(self):
-        return "{0} : {1}".format(*(str(getattr(self, f))
-                                    for f in self.display_fields))
+        return get_display(self)
 
     class Meta:
         db_table = 'system'
@@ -39,17 +39,30 @@ class System(BaseModel, ObjectUrlMixin):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
 
-class SystemKeyValue(KeyValue):
+class SystemKeyValue(KeyValue, ObjectUrlMixin):
 
     system = models.ForeignKey(System, null=False)
 
     class Meta:
-        db_table = 'system_key_value'
+        db_table = 'system_kv'
         unique_together = ('key', 'value', 'system')
+
+    def __str__(self):
+        return self.key
+
+    def details(self):
+        """For tables."""
+        data = super(SystemKeyValue, self).details()
+        data['data'] = [
+            ('Key', 'key', self),
+            ('Value', 'value', self.value),
+        ]
+        return data

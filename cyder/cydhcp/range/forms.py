@@ -19,6 +19,10 @@ class RangeForm(forms.ModelForm, UsabilityFormMixin):
 
 
 class RangeKeyValueForm(forms.ModelForm):
+    range = forms.ModelChoiceField(
+        queryset=Range.objects.all(),
+        widget=forms.HiddenInput())
+
     class Meta:
         model = RangeKeyValue
         exclude = ('is_option', 'is_statement', 'is_quoted')

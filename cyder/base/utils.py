@@ -1,6 +1,6 @@
 import operator
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.db.models.loading import get_model
@@ -137,6 +137,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
 
         # Build table.
         data.append(row_data)
+
+    if not issubclass(type(objects), Page):
+        data = sorted(data, key=lambda row: row[0]['value'])
 
     return {
         'headers': headers,
