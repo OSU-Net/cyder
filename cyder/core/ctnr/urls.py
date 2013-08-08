@@ -6,7 +6,8 @@ from cyder.core.urls import core_urls
 
 urlpatterns = core_urls('ctnr') + patterns(
     '',
-    url(r'(?P<pk>[\w-]+)/add_user/$', add_user, name='ctnr-add-user'),
+    url(r'(?P<ctnr_pk>[\w-]+)/add_object/$', add_object,
+        name='ctnr-add-object'),
     url(r'(?P<ctnr_pk>[\w-]+)/remove_user/(?P<user_pk>[\w-]+)/$', remove_user,
         name='ctnr-remove-user'),
     url(r'(?P<ctnr_pk>[\w-]+)/update_user_level/(?P<user_pk>[\w-]+)/'

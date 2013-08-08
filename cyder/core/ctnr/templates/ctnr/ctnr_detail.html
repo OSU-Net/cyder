@@ -9,23 +9,29 @@
   <span id="ctnr-data"
         data-ctnr-pk="{{ object.pk }}"
         data-searchUserUrl="{{ url('user-search') }}"
-        data-addUserUrl="{{ url('ctnr-add-user', object.pk) }}">
+        data-addObjectUrl="{{ url('ctnr-add-object', object.pk) }}"
+        data-searchDomainUrl="{{ url('cydns-search-record') }}"
+        data-searchRangeUrl="{{ url('cydhcp-search-record') }}"
+        data-searchWorkgroupUrl="{{ url('cydhcp-search-record') }}">
   </span>
 
   {% if request.user.is_superuser or
         (request.session.ctnr == object and request.session.level == 2) %}
-    <form class="form" id="add-user">
-      <h3>Add User to Container</h3>
-      <div class="inner-form" id="add-user-inner-form">
-          <ul style="float:top; left:0;" id="add-user-errorlist"></ul>
-          {{ add_user_form.as_p() }}
+    <form class="form" id="add-object">
+      <h3>Add Object to Container</h3>
+      <div class="inner-form" id="add-object-inner-form">
+          <ul style="float:top; left:0;" id="add-object-errorlist"></ul>
+          {{ object_select_form.as_p() }}
       </div>
       <div class="form-btns">
         <hr>
-        <a id="add-user-ctnr" class="btn" href="#">Add</a>
+        <a id="add-object-ctnr" class="btn" href="#">Add</a>
       </div>
     </form>
-  {% endif %}
+    {% endif %}
+  <div id ="add-user-form" style="display: none">
+    {{ add_user_form.as_p() }}
+  </div>
 
   <div id=tables class=tableclass>
     {% if user_table %}
