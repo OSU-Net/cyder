@@ -28,7 +28,7 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     self.private_view = View.objects.get_or_create(name='private')[0]
 
     # Create forward zone.
-    self.domain = create_fake_zone(random_label(), suffix='oregonstate.edu')
+    self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
     self.soa = self.domain.soa
     self.subdomain = Domain.objects.create(
         name=random_label() + '.' + self.domain.name, soa=self.soa)

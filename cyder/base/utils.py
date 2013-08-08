@@ -157,7 +157,7 @@ def make_megafilter(Klass, term):
 
 
 def filter_by_ctnr(ctnr, Klass=None, objects=None):
-    if objects and not Klass:
+    if not Klass and objects is not None:
         Klass = objects.model
 
     if ctnr.name in ['global', 'default']:

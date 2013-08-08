@@ -10,6 +10,7 @@ from cyder.cydhcp.lib.utils import create_ipv4_intr_from_range
 from cyder.cydns.domain.models import Domain
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 from cyder.cydns.tests.utils import create_fake_zone
 
@@ -17,6 +18,8 @@ from cyder.cydns.tests.utils import create_fake_zone
 class LibTestsFreeIP(TestCase):
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.system = System()
         self.system.save()
 
@@ -60,7 +63,7 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 4)
         intr, errors = create_ipv4_intr_from_range(
             "foo", "private.corp.phx1.oregonstate.com", self.system,
-            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -70,7 +73,7 @@ class LibTestsFreeIP(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             "foo", "private.corp.phx1.oregonstate.com", self.system,
-            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -80,7 +83,7 @@ class LibTestsFreeIP(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             "foo", "private.corp.phx1.oregonstate.com", self.system,
-            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -90,7 +93,7 @@ class LibTestsFreeIP(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             "foo", "private.corp.phx1.oregonstate.com", self.system,
-            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204")
+            "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))

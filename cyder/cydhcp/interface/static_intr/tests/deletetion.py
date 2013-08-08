@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.view.models import View
@@ -23,6 +24,8 @@ class DeleteStaticInterTests(TestCase):
         return d
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -41,7 +44,7 @@ class DeleteStaticInterTests(TestCase):
 
     def do_add(self, mac, label, domain, ip_str, system, ip_type='4'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=system)
+                            ip_type=ip_type, system=system, ctnr=self.ctnr)
         r.clean()
         r.save()
         return r
@@ -62,7 +65,7 @@ class DeleteStaticInterTests(TestCase):
         system = System(name='test1_delete_basic')
         system.save()
         kwargs = {'mac': mac, 'label': label, 'domain': domain, 'ip_str':
-                  ip_str, 'system': system}
+                ip_str, 'system': system}
         self.do_add(**kwargs)
         self.assertTrue(StaticInterface.objects.filter(**kwargs))
         system.delete()

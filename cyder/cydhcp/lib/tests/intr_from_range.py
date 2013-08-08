@@ -10,6 +10,7 @@ from cyder.cydhcp.lib.utils import create_ipv4_intr_from_range
 from cyder.cydns.domain.models import Domain
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 from cyder.cydns.tests.utils import create_fake_zone
 
@@ -17,6 +18,8 @@ from cyder.cydns.tests.utils import create_fake_zone
 class LibTestsRange(TestCase):
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.system = System()
         self.system.save()
         d1 = create_fake_zone("oregonstate.com", suffix="")
@@ -54,7 +57,7 @@ class LibTestsRange(TestCase):
     def test1_create_ipv4_interface_from_range(self):
         intr, errors = create_ipv4_intr_from_range(
             label="foo", domain_name="private.corp.phx1.oregonstate.com",
-            system=self.system, mac="11:22:33:44:55:66",
+            system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.1", range_end_str="15.0.0.3")
         intr.save()
         self.assertEqual(errors, None)
@@ -66,7 +69,8 @@ class LibTestsRange(TestCase):
         intr, errors = create_ipv4_intr_from_range(
             label="foo", system=self.system, mac="11:22:33:44:55:66",
             domain_name="superprivate.foo.corp.phx1.oregonstate.com",
-            range_start_str="15.0.0.20", range_end_str="15.0.0.22")
+            range_start_str="15.0.0.20", range_end_str="15.0.0.22",
+            ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
         self.assertTrue(isinstance(intr, StaticInterface))
@@ -82,7 +86,7 @@ class LibTestsRange(TestCase):
         # Test for an error when all the IP's are in use.
         intr, errors = create_ipv4_intr_from_range(
             label="foo", domain_name="private.corp.phx1.oregonstate.com",
-            system=self.system, mac="11:22:33:44:55:66",
+            system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
         self.assertEqual(errors, None)
@@ -91,7 +95,7 @@ class LibTestsRange(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             label="foo", domain_name="private.corp.phx1.oregonstate.com",
-            system=self.system, mac="11:22:33:44:55:66",
+            system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
         self.assertEqual(errors, None)
@@ -100,7 +104,7 @@ class LibTestsRange(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             label="foo", domain_name="private.corp.phx1.oregonstate.com",
-            system=self.system, mac="11:22:33:44:55:66",
+            system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
         self.assertEqual(errors, None)
@@ -109,7 +113,7 @@ class LibTestsRange(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             label="foo", domain_name="private.corp.phx1.oregonstate.com",
-            system=self.system, mac="11:22:33:44:55:66",
+            system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
         self.assertEqual(errors, None)
@@ -118,7 +122,7 @@ class LibTestsRange(TestCase):
 
         intr, errors = create_ipv4_intr_from_range(
             label="foo", domain_name="private.corp.phx1.oregonstate.com",
-            system=self.system, mac="11:22:33:44:55:66",
+            system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         self.assertEqual(intr, None)
         self.assertTrue("ip" in errors)

@@ -47,7 +47,7 @@ class MX(CydnsRecord, LabelDomainMixin):
         """For tables."""
         data = super(MX, self).details()
         data['data'] = [
-            ('Domain', 'domain__name', self.domain),
+            ('FQDN', 'fqdn', self.fqdn),
             ('Server', 'server', self.server),
             ('Priority', 'priority', self.priority),
             ('TTL', 'ttl', self.ttl)

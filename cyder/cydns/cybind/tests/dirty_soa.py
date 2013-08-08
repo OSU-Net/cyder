@@ -13,11 +13,14 @@ from cyder.cydns.tests.utils import create_fake_zone
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from core.task.models import Task
 
 
 class DirtySOATests(TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
         self.sr = self.r1.soa
         self.sr.dirty = False
@@ -99,7 +102,8 @@ class DirtySOATests(TestCase):
             'ip_str': '10.2.3.1',
             'ip_type': '4',
             'system': self.s,
-            'mac': '11:22:33:44:55:66'
+            'mac': '11:22:33:44:55:66',
+            'ctnr': self.ctnr,
         }
         update_data = {
             'label': 'asdfx1',
