@@ -15,6 +15,7 @@ $(document).ready(function() {
     $(user_clone).removeAttr('style');
 
     for(var i = 0; i < obj_select.length; i++) {
+        // Check for type selected on refresh/redirect
         if (obj_select[i].checked) {
             if (form.lastChild.tagName == 'DIV') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
@@ -25,7 +26,9 @@ $(document).ready(function() {
             objType = obj_select[i].value;
             searchUrl = ctnr.attr(('data-search' + obj_select[i].value + 'Url'));
             $('label[for="object-searchbox"]').text(obj_select[i].value + ':');
+            search(searchUrl);
         };
+        // Watch type selector and update related variables
         obj_select[i].onclick = function() {
             if (form.lastChild.tagName == 'DIV') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
@@ -36,8 +39,12 @@ $(document).ready(function() {
             objType = this.value;
             searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
             $('label[for="object-searchbox"]').text(this.value + ':');
-            // Auto complete for object search dialog.
+            search(searchUrl);
         };
+    };
+
+    // Auto complete for object search dialog.
+    function search(searchUrl) {
         $('#object-searchbox').autocomplete({
             minLength: 1,
             source: searchUrl,
@@ -47,7 +54,8 @@ $(document).ready(function() {
                 objName = ui.item.label;
             }
         });
-    };
+    }
+
     // Add object to ctnr.
     $('#add-object-ctnr').click(function(event) {
         if (objName != ($('#object-searchbox').val())) {
@@ -83,6 +91,7 @@ $(document).ready(function() {
                 $('#object-searchbox').val('');
                 userPk = null;
             };
+            // Not going to use ajax for other objects due to users tables being on top
             if (data.redirect) {
                 document.location.reload();
             };
