@@ -229,8 +229,8 @@ class Zone(object):
                     static.views.add(private)
 
                     for key, value in self.get_option_values(items['id']):
-                        kv = StaticIntrKeyValue(intr=static, key=key,
-                                                value=value)
+                        kv = StaticIntrKeyValue(static_interface=static,
+                                                key=key, value=value)
                         kv.clean()
                         kv.save()
 
