@@ -28,14 +28,17 @@ def do_sort(request, qs):
     sort, order = clean_sort_param(request)
     if sort == "id" and hasattr(qs.model, 'eg_metadata'):
         fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
-        if hasattr(qs.model, fields[0]):
+        if fields[0] in [f.name for f in qs.model._meta.fields]:
             sort, order = fields[0], 'asc'
 
-    if hasattr(qs.model, sort):
-        field = getattr(qs.model, sort).field
-        if isinstance(field, ForeignKey):
-            qs = qs.select_related(sort)
-            sort = "__".join([sort, field.rel.to.display_fields[0]])
+    if sort in [f.name for f in qs.model._meta.fields]:
+        try:
+            field = getattr(qs.model, sort).field
+            if isinstance(field, ForeignKey):
+                qs = qs.select_related(sort)
+                sort = "__".join([sort, field.rel.to.display_fields[0]])
+        except AttributeError:
+            pass
 
     if order == 'asc':
         order_by = sort

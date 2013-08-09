@@ -70,17 +70,17 @@ def cydns_view(request, pk=None):
 
     # Get the object if updating.
     record = get_object_or_404(Klass, pk=pk) if pk else None
-    form = FQDNFormKlass(instance=record)
+    form = FormKlass(instance=record)
 
     if request.method == 'POST':
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:
-            fqdn_form = FQDNFormKlass(request.POST)
-            fqdn_form._errors = ErrorDict()
-            fqdn_form._errors['__all__'] = ErrorList(errors)
+            form = FormKlass(request.POST)
+            form._errors = ErrorDict()
+            form._errors['__all__'] = ErrorList(errors)
             return render(request, 'cydns/cydns_view.html', {
-                'form': fqdn_form,
+                'form': form,
                 'obj_type': obj_type,
                 'pk': pk,
                 'obj': record
@@ -98,7 +98,7 @@ def cydns_view(request, pk=None):
                     request.session['ctnr'].domains.add(record)
                     return redirect(record.get_list_url())
         except (ValidationError, ValueError):
-            form = _revert(domain, request.POST, form, FQDNFormKlass)
+            form = _revert(domain, request.POST, form, FormKlass)
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
@@ -117,10 +117,10 @@ def cydns_view(request, pk=None):
     })
 
 
-def _revert(domain, orig_qd, orig_form, FQDNFormKlass):
+def _revert(domain, orig_qd, orig_form, FormKlass):
     """Revert domain if not valid."""
     prune_tree(domain)
-    form = FQDNFormKlass(orig_qd)
+    form = FormKlass(orig_qd)
     form._errors = orig_form._errors
     return form
 

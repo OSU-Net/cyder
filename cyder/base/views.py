@@ -264,10 +264,10 @@ def get_update_form(request, get_klasses_fn):
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
             if perm(request, cy.ACTION_UPDATE, obj=record):
-                if FQDNFormKlass:
-                    form = FQDNFormKlass(instance=record)
-                else:
+                if FormKlass:
                     form = FormKlass(instance=record)
+                else:
+                    form = FQDNFormKlass(instance=record)
         else:
             #  Get form to create a new object and prepopulate
             if related_type and related_pk:

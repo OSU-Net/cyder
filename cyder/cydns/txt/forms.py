@@ -2,12 +2,14 @@ from django import forms
 
 from cyder.cydns.forms import DNSForm
 from cyder.cydns.txt.models import TXT
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class TXTForm(DNSForm):
+class TXTForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = TXT
         exclude = ('fqdn',)
+        fields = ('label', 'domain', 'txt_data', 'views', 'ttl', 'description')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 

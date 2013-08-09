@@ -2,9 +2,10 @@ from django import forms
 
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.forms import DNSForm
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class CNAMEForm(DNSForm):
+class CNAMEForm(DNSForm, UsabilityFormMixin):
 
     class Meta:
         model = CNAME
