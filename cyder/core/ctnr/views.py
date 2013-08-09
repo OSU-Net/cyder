@@ -5,11 +5,12 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.db.models.loading import get_model
 
 import cyder as cy
 from cyder.base.constants import LEVELS
-from cyder.base.utils import qd_to_py_dict, tablefy
-from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm
+from cyder.base.utils import tablefy
+from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm, CtnrObjectForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.backends import _has_perm
 from cyder.core.views import CoreCreateView, CoreDetailView
@@ -49,6 +50,7 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         workgroups = ctnr.workgroups.all()
         workgroup_table = tablefy(workgroups)
 
+        object_form = CtnrObjectForm()
         add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
         return dict({
             'obj_type': 'ctnr',
@@ -57,7 +59,8 @@ class CtnrDetailView(CtnrView, CoreDetailView):
             'rdomain_table': rdomain_table,
             'range_table': range_table,
             'workgroup_table': workgroup_table,
-            'add_user_form': add_user_form
+            'add_user_form': add_user_form,
+            'object_select_form': object_form
         }.items() + context.items())
 
 
@@ -170,46 +173,65 @@ def update_user_level(request, ctnr_pk, user_pk, lvl):
         return redirect(request.META.get('HTTP_REFERER', ''))
 
 
-def add_user(request, pk):
-    """Add user to container."""
-    ctnr = Ctnr.objects.get(id=pk)
-    form = CtnrUserForm(qd_to_py_dict(request.POST))
-    user = request.POST['user']
-    if form.is_valid():
-        # Create table so client can inside new row into user table.
-        form.save()
+def add_object(request, ctnr_pk):
+    """Add object to container."""
+    ctnr = Ctnr.objects.get(id=ctnr_pk)
+    pk = request.POST.get('obj_pk', '')
+    name = request.POST.get('obj_name', '')
+    obj_type = request.POST.get('obj_type', '')
+    if obj_type == 'user':
+        return add_user(request, ctnr, name, pk)
+
+    else:
+        if pk == 'null':
+            return HttpResponse(json.dumps({
+                'error': '{0} is not a valid {1}'.format(name, obj_type)}))
+
+        Klass = get_model(obj_type, obj_type)
+        obj = Klass.objects.get(id=pk)
+        m2m = getattr(ctnr, (obj_type + 's'), None)
+
+        if m2m is None:
+            return HttpResponse(json.dumps({
+                'error': '{0} is not related to {1}'.format(obj_type, ctnr)}))
+
+        else:
+            if obj in m2m.all():
+                return HttpResponse(json.dumps({
+                    'error': '{0} already exists in {1}'.format(
+                    name, str(ctnr))}))
+
+        m2m.add(obj)
+    return HttpResponse(json.dumps({'redirect': 'yup'}))
+
+
+def add_user(request, ctnr, name, pk):
+        confirmation = request.POST.get('confirmation', '')
+        level = request.POST.get('level', '')
+        user, newUser = User.objects.get_or_create(username=name)
+        if newUser is True:
+            if confirmation == 'false':
+                return HttpResponse(json.dumps({
+                    'acknowledge': 'This user is not in any other container. '
+                    'Are you sure you want to create this user?'}))
+            else:
+                user.save()
+
+        ctnruser, newCtnrUser = CtnrUser.objects.get_or_create(
+            user_id=user.id, ctnr_id=ctnr.id, level=level)
+
+        if newCtnrUser is False:
+            print 'error'
+            return HttpResponse(json.dumps({
+                'error': 'This user already exists in this container'}))
+
+        ctnruser.save()
         ctnrusers = [CtnrUser.objects.select_related().get(
             ctnr_id=ctnr.id, user_id=user)]
         extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
         user_table = tablefy(users, users=True, extra_cols=extra_cols)
 
         return HttpResponse(json.dumps({'user': user_table}))
-    else:
-        if request.POST['confirmation'] == 'true':
-            user, _ = User.objects.get_or_create(username=request.POST['name'])
-            user.save()
-
-            ctnruser, _ = CtnrUser.objects.get_or_create(
-                user_id=user.id, ctnr_id=ctnr.id, level=request.POST['level'])
-            ctnruser.save()
-
-            ctnrusers = [CtnrUser.objects.select_related().get(
-                ctnr_id=ctnr.id, user_id=user.id)]
-            extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
-            user_table = tablefy(users, users=True, extra_cols=extra_cols)
-
-            return HttpResponse(json.dumps({'user': user_table}))
-
-        if [u'Select a valid choice. That choice is not one of the available '
-                'choices.'] in [form.errors[err] for err in form.errors]:
-
-            return HttpResponse(json.dumps({
-                'acknowledge': 'This user is not in any other container. Are '
-                'you sure you want to create this user?'}))
-
-        else:
-            return HttpResponse(json.dumps({
-                'error': [form.errors[err] for err in form.errors]}))
 
 
 class CtnrCreateView(CtnrView, CoreCreateView):
