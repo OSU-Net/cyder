@@ -9,7 +9,11 @@
 {% endblock %}
 
 {% block action_bar %}
+{% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
+  <a class="btn submit c" href={{ url('system-create') }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+{% else %}
   <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+{% endif %}
 {% endblock %}
 
 {% block form %}
