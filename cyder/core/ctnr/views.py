@@ -34,21 +34,29 @@ class CtnrDetailView(CtnrView, CoreDetailView):
         if not ctnr:
             return context
 
-        ctnrusers = ctnr.ctnruser_set.select_related('user', 'user__profile')
-        extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
+        ctnrUsers = ctnr.ctnruser_set.select_related('user', 'user__profile')
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
         user_table = tablefy(users, extra_cols=extra_cols, users=True)
 
-        domains = ctnr.domains.filter(is_reverse=False)
-        domain_table = tablefy(domains)
+        ctnrDomains = ctnr.domains.select_related().filter(
+            is_reverse=False)
+        extra_cols, domains = create_obj_extra_cols(
+            ctnr, ctnrDomains, 'domain')
+        domain_table = tablefy(domains, extra_cols=extra_cols)
 
-        rdomains = ctnr.domains.filter(is_reverse=True)
-        rdomain_table = tablefy(rdomains)
+        ctnrRdomains = ctnr.domains.select_related().filter(is_reverse=True)
+        extra_cols, rdomains = create_obj_extra_cols(
+            ctnr, ctnrRdomains, 'domain')
+        rdomain_table = tablefy(rdomains, extra_cols=extra_cols)
 
-        ranges = ctnr.ranges.all()
-        range_table = tablefy(ranges)
+        ctnrRanges = ctnr.ranges.select_related()
+        extra_cols, ranges = create_obj_extra_cols(ctnr, ctnrRanges, 'range')
+        range_table = tablefy(ranges, extra_cols=extra_cols)
 
-        workgroups = ctnr.workgroups.all()
-        workgroup_table = tablefy(workgroups)
+        ctnrWorkgroups = ctnr.workgroups.select_related()
+        extra_cols, workgroups = create_obj_extra_cols(
+            ctnr, ctnrWorkgroups, 'workgroup')
+        workgroup_table = tablefy(workgroups, extra_cols=extra_cols)
 
         object_form = CtnrObjectForm()
         add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
@@ -119,6 +127,29 @@ def create_user_extra_cols(ctnr, ctnrusers):
     return extra_cols, users
 
 
+def create_obj_extra_cols(ctnr, obj_set, obj_type):
+    remove_data = []
+    objs = []
+    if obj_type == 'range':
+        extra_cols = [
+            {'header': 'Remove', 'sort_field': 'range'}]
+    else:
+        extra_cols = [
+            {'header': 'Remove', 'sort_field': 'name'}]
+
+    for obj in obj_set:
+        remove_data.append({
+            'value': 'Delete',
+            'url': reverse('ctnr-remove-object', kwargs={
+                'ctnr_pk': ctnr.id, 'obj_type': obj_type, 'obj_pk': obj.pk}),
+            'img': '/media/img/delete.png'
+        })
+        objs.append(obj)
+    extra_cols[0]['data'] = remove_data
+
+    return extra_cols, objs
+
+
 def remove_user(request, ctnr_pk, user_pk):
     acting_user = request.user
 
@@ -173,6 +204,33 @@ def update_user_level(request, ctnr_pk, user_pk, lvl):
         return redirect(request.META.get('HTTP_REFERER', ''))
 
 
+def remove_object(request, ctnr_pk, obj_type, obj_pk):
+    acting_user = request.user
+    ctnr = Ctnr.objects.get(id=ctnr_pk)
+    if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
+        Klass = get_model(obj_type, obj_type)
+        obj = Klass.objects.get(id=obj_pk)
+        m2m = getattr(ctnr, (obj_type + 's'), None)
+
+        if m2m is None:
+            messages.error(
+                request, '{0} is not related to {1}'.format(obj_type, ctnr))
+
+        else:
+            if obj in m2m.all():
+                m2m.remove(obj)
+            else:
+                messages.error(
+                    request, '{0} does not exist in {1}'.format(
+                        str(obj), ctnr))
+
+    else:
+        messages.error(request,
+                       'You do not have permission to perform this action')
+
+    return redirect(reverse('ctnr-detail', args=[ctnr.id]))
+
+
 def add_object(request, ctnr_pk):
     """Add object to container."""
     acting_user = request.user
@@ -200,7 +258,8 @@ def add_object(request, ctnr_pk):
 
             if m2m is None:
                 return HttpResponse(json.dumps({
-                    'error': '{0} is not related to {1}'.format(obj_type, ctnr)}))
+                    'error': '{0} is not related to {1}'.format(
+                        obj_type, ctnr)}))
 
             else:
                 if obj in m2m.all():
