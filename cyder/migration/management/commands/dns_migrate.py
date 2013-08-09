@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from cyder.core.system.models import System, SystemKeyValue
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -144,6 +145,11 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
+        from dhcp_migrate import maintain_find_zone, migrate_zones
+        if Ctnr.objects.count() <= 2:
+            print "WARNING: Zones not migrated. Attempting to migrate now."
+            migrate_zones()
+
         sys_value_keys = {"type": "Hardware Type",
                           "os": "Operating System",
                           "location": "Location",
@@ -156,7 +162,7 @@ class Zone(object):
                           "owning_unit": "Owning Unit",
                           "user_id": "User ID"}
 
-        keys = ("id", "ip", "name", "workgroup", "enabled", "ha",
+        keys = ("id", "ip", "name", "workgroup", "enabled", "ha", "zone",
                 "type", "os", "location", "department", "serial", "other_id",
                 "purchase_date", "po_number", "warranty_date", "owning_unit",
                 "user_id", "last_seen", "expire", "ttl", "last_update")
@@ -167,6 +173,7 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
+            ctnr = maintain_find_zone(items['zone'])
 
             name = items['name'].lower()
             enabled = bool(items['enabled'])
@@ -207,7 +214,7 @@ class Zone(object):
                     static = StaticInterface(label=name, domain=self.domain,
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
-                                             vrf=v, workgroup=w,
+                                             vrf=v, workgroup=w, ctnr=ctnr,
                                              ttl=items['ttl'],
                                              dns_enabled=enabled,
                                              dhcp_enabled=enabled,
