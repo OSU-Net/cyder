@@ -77,12 +77,7 @@
                                  url('ptr'),
                                  data=obj[-1],
                                  button_prefix="") }}
-                {{ create_button(
-                       'static_interface',
-                       url('cydhcp-get-record'),
-                       url('static_interface'),
-                       data={"ip_str" : obj[1].__str__(), "ip_type" : '4'},
-                       button_prefix="") }}
+                 <a class="btn submit a" href={{ url('system-create', obj[1].__str__()) }}>Static Interface</a>
               <td>
             </tr>
           {% else %}
