@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -229,7 +230,8 @@ class Network(models.Model, ObjectUrlMixin):
                 build_str += "\t# Raw Network Options\n"
                 build_str += join_dhcp_args(self.dhcpd_raw_include.split("\n"))
         for range_ in ranges:
-            build_str += range_.build_range()
+            if range_.range_type == DYNAMIC:
+                build_str += range_.build_range()
         build_str += "}\n"
         return build_str
 
