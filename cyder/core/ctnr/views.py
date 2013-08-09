@@ -175,33 +175,44 @@ def update_user_level(request, ctnr_pk, user_pk, lvl):
 
 def add_object(request, ctnr_pk):
     """Add object to container."""
+    acting_user = request.user
     ctnr = Ctnr.objects.get(id=ctnr_pk)
     pk = request.POST.get('obj_pk', '')
     name = request.POST.get('obj_name', '')
     obj_type = request.POST.get('obj_type', '')
     if obj_type == 'user':
-        return add_user(request, ctnr, name, pk)
+        if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=CtnrUser):
+            return add_user(request, ctnr, name, pk)
+        else:
+            messages.error(request,
+                           'You do not have permission to perform this action')
+            return HttpResponse(json.dumps({'redirect': 'yup'}))
 
     else:
-        if pk == 'null':
-            return HttpResponse(json.dumps({
-                'error': '{0} is not a valid {1}'.format(name, obj_type)}))
+        if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
+            if pk == 'null':
+                return HttpResponse(json.dumps({
+                    'error': '{0} is not a valid {1}'.format(name, obj_type)}))
 
-        Klass = get_model(obj_type, obj_type)
-        obj = Klass.objects.get(id=pk)
-        m2m = getattr(ctnr, (obj_type + 's'), None)
+            Klass = get_model(obj_type, obj_type)
+            obj = Klass.objects.get(id=pk)
+            m2m = getattr(ctnr, (obj_type + 's'), None)
 
-        if m2m is None:
-            return HttpResponse(json.dumps({
-                'error': '{0} is not related to {1}'.format(obj_type, ctnr)}))
+            if m2m is None:
+                return HttpResponse(json.dumps({
+                    'error': '{0} is not related to {1}'.format(obj_type, ctnr)}))
+
+            else:
+                if obj in m2m.all():
+                    return HttpResponse(json.dumps({
+                        'error': '{0} already exists in {1}'.format(
+                        name, str(ctnr))}))
+
+            m2m.add(obj)
 
         else:
-            if obj in m2m.all():
-                return HttpResponse(json.dumps({
-                    'error': '{0} already exists in {1}'.format(
-                    name, str(ctnr))}))
-
-        m2m.add(obj)
+            messages.error(request,
+                           'You do not have permission to perform this action')
     return HttpResponse(json.dumps({'redirect': 'yup'}))
 
 
@@ -221,7 +232,6 @@ def add_user(request, ctnr, name, pk):
             user_id=user.id, ctnr_id=ctnr.id, level=level)
 
         if newCtnrUser is False:
-            print 'error'
             return HttpResponse(json.dumps({
                 'error': 'This user already exists in this container'}))
 

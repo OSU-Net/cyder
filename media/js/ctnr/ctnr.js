@@ -83,6 +83,7 @@ $(document).ready(function() {
                 }
             }
             if (data.error) {
+                $('.error').empty();
                 $('#add-object-errorlist').empty();
                 // Put error message.
                 console.log(data.error);
@@ -93,9 +94,11 @@ $(document).ready(function() {
             };
             // Not going to use ajax for other objects due to users tables being on top
             if (data.redirect) {
+                $('.error').empty();
                 document.location.reload();
             };
             if (data.user) {
+                $('.error').empty();
                 $('#add-object-errorlist').empty();
                 // Append row to user table.
                 if ($('.user-table tbody')[0]) {
