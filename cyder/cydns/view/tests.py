@@ -5,6 +5,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 
@@ -21,6 +22,9 @@ class ViewTests(TestCase):
         * clean, save, ValidationError raised
     """
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
+
         self.o = Domain(name="org")
         self.o.save()
         self.f_o = Domain(name="foo.org")
@@ -57,7 +61,7 @@ class ViewTests(TestCase):
     def test_private_view_case_1_intr(self):
         intr = StaticInterface(label="asf", domain=self.f_o, ip_str="10.0.0.1",
                                ip_type="4", mac="00:11:22:33:44:55",
-                               system=self.s)
+                               system=self.s, ctnr=self.ctnr)
         intr.clean()
         intr.save()
         # Object has to exist before views can be assigned.
