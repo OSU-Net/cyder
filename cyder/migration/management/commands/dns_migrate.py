@@ -52,23 +52,6 @@ class Zone(object):
             self.domain.save()
             self.walk_zone()
 
-    def get_option_values(self, host_id):
-        if Zone.option_values is None:
-            Zone.option_values = {}
-            sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
-                   "INNER JOIN {2} ON {2}.object_id = {0}.id "
-                   "INNER JOIN {1} ON {1}.id = {2}.dhcp_option")
-            cursor.execute(sql.format("host", "dhcp_options", "object_option"))
-            results = cursor.fetchall()
-            for h_id, name, value in results:
-                if h_id not in Zone.option_values:
-                    Zone.option_values[h_id] = set([])
-                Zone.option_values[h_id].add((name, value))
-
-        if host_id in Zone.option_values:
-            return Zone.option_values[host_id]
-        else:
-            return []
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -145,7 +128,8 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import maintain_find_zone, migrate_zones
+        from dhcp_migrate import (maintain_find_zone, migrate_zones,
+                                  get_option_values)
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
             migrate_zones()
@@ -228,7 +212,7 @@ class Zone(object):
                     static.views.add(public)
                     static.views.add(private)
 
-                    for key, value in self.get_option_values(items['id']):
+                    for key, value in get_option_values(items['id']):
                         kv = StaticIntrKeyValue(static_interface=static,
                                                 key=key, value=value)
                         kv.clean()
