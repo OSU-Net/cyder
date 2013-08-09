@@ -3,13 +3,12 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.cydns.models import ViewMixin, DisplayMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
-from cyder.cydns.validation import validate_fqdn, validate_ttl
-from cyder.base.mixins import ObjectUrlMixin
+from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.cname.models import CNAME
+from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 
 
 class BasePTR(object):
@@ -73,7 +72,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
+class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
     """
     A PTR is used to map an IP to a domain name.
 
@@ -81,16 +80,13 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
 
     """
     id = models.AutoField(primary_key=True)
-    reverse_domain = models.ForeignKey(Domain, null=False, blank=True)
+    reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
+                                       related_name='reverse')
 
     name = models.CharField(
         max_length=255, validators=[validate_fqdn], help_text="The name that "
         "this record points to."
     )
-    ttl = models.PositiveIntegerField(
-        default=3600, blank=True, null=True, validators=[validate_ttl]
-    )
-    description = models.CharField(max_length=1000, blank=True)
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {name:1}.")
