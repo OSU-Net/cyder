@@ -17,7 +17,7 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.view.models import View
 
 
-standard_fields = ['id', 'domain']
+standard_fields = ['id']
 
 
 class FQDNMixin(object):
@@ -32,7 +32,7 @@ class FQDNMixin(object):
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
     domain = serializers.CharField()
-    views = serializers.CharField()
+    views = serializers.PrimaryKeyRelatedField(many=True)
 
 
 class CommonDNSViewSet(viewsets.ModelViewSet):
@@ -70,7 +70,7 @@ class DomainViewSet(viewsets.ModelViewSet):
 class CNAMESerializer(CommonDNSSerializer, FQDNMixin):
     class Meta:
         model = CNAME
-        fields = CNAME.get_api_fields() + standard_fields
+        fields = standard_fields + CNAME.get_api_fields()
 
 
 class CNAMEViewSet(viewsets.ModelViewSet):
@@ -81,7 +81,7 @@ class CNAMEViewSet(viewsets.ModelViewSet):
 class TXTSerializer(CommonDNSSerializer):
     class Meta:
         model = TXT
-        fields = TXT.get_api_fields() + standard_fields
+        fields = standard_fields + TXT.get_api_fields()
 
 
 class TXTViewSet(viewsets.ModelViewSet):
@@ -92,7 +92,7 @@ class TXTViewSet(viewsets.ModelViewSet):
 class SRVSerializer(CommonDNSSerializer):
     class Meta:
         model = TXT
-        fields = TXT.get_api_fields() + standard_fields
+        fields = standard_fields + TXT.get_api_fields()
 
 
 class SRVViewSet(viewsets.ModelViewSet):
@@ -103,7 +103,7 @@ class SRVViewSet(viewsets.ModelViewSet):
 class MXSerializer(CommonDNSSerializer):
     class Meta:
         model = MX
-        fields = MX.get_api_fields() + standard_fields
+        fields = standard_fields + MX.get_api_fields()
 
 
 class MXViewSet(viewsets.ModelViewSet):
@@ -114,7 +114,7 @@ class MXViewSet(viewsets.ModelViewSet):
 class SSHFPSerializer(CommonDNSSerializer):
     class Meta:
         model = SSHFP
-        fields = SSHFP.get_api_fields() + standard_fields
+        fields = standard_fields + SSHFP.get_api_fields()
 
 
 class SSHFPViewSet(viewsets.ModelViewSet):
@@ -125,7 +125,7 @@ class SSHFPViewSet(viewsets.ModelViewSet):
 class AddressRecordSerializer(CommonDNSSerializer):
     class Meta:
         model = AddressRecord
-        fields = AddressRecord.get_api_fields() + standard_fields
+        fields = standard_fields + AddressRecord.get_api_fields()
 
 
 class AddressRecordViewSet(viewsets.ModelViewSet):
@@ -136,7 +136,7 @@ class AddressRecordViewSet(viewsets.ModelViewSet):
 class NameserverSerializer(CommonDNSSerializer):
     class Meta:
         models = Nameserver
-        fields = Nameserver.get_api_fields() + standard_fields
+        fields = standard_fields + Nameserver.get_api_fields()
 
 
 class NameserverViewSet(viewsets.ModelViewSet):
@@ -147,7 +147,7 @@ class NameserverViewSet(viewsets.ModelViewSet):
 class PTRSerializer(CommonDNSSerializer):
     class Meta:
         models = PTR
-        fields = PTR.get_api_fields() + standard_fields
+        fields = standard_fields + PTR.get_api_fields()
 
 
 class PTRViewSet(viewsets.ModelViewSet):
@@ -177,7 +177,7 @@ class StaticIntrKeyValueSerializer(CommonDNSSerializer):
 class StaticInterfaceSerializer(CommonDNSSerializer):
     class Meta:
         model = StaticInterface
-        fields = StaticInterface.get_api_fields() + standard_fields + ['system',
+        fields = standard_fields + StaticInterface.get_api_fields() + ['system',
             'staticintrkeyvalue_set']
         depth = 1
 
@@ -185,3 +185,12 @@ class StaticInterfaceSerializer(CommonDNSSerializer):
 class StaticInterfaceViewSet(viewsets.ModelViewSet):
     queryset = StaticInterface.objects.all()
     serializer_class = StaticInterfaceSerializer
+
+    def create(self, request):
+        super(StaticInterfaceViewSet, self).create(request)
+
+    def update(self, request, pk=None):
+        super(StaticInterfaceViewSet, self).update(request, pk)
+
+    def partial_update(self, request, pk=None):
+        super(StaticInterfaceViewSet, self).partial_update(request, pk)
