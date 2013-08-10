@@ -36,7 +36,6 @@ cursor = connection.cursor()
 
 
 class Zone(object):
-    option_values = None
 
     def __init__(self, domain_id=None, dname=None, soa=None):
         self.domain_id = 541 if domain_id is None else domain_id
@@ -129,7 +128,7 @@ class Zone(object):
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
         from dhcp_migrate import (maintain_find_zone, migrate_zones,
-                                  get_option_values)
+                                  get_host_option_values)
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
             migrate_zones()
@@ -212,7 +211,7 @@ class Zone(object):
                     static.views.add(public)
                     static.views.add(private)
 
-                    for key, value in get_option_values(items['id']):
+                    for key, value in get_host_option_values(items['id']):
                         kv = StaticIntrKeyValue(static_interface=static,
                                                 key=key, value=value)
                         kv.clean()

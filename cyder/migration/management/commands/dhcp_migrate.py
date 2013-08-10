@@ -23,7 +23,7 @@ from lib.utilities import long2ip
 
 
 cached = {}
-option_values = None
+host_option_values = None
 
 
 allow_all_subnets = [
@@ -308,7 +308,7 @@ def migrate_dynamic_hosts():
                 system=s, range=r, workgroup=w, ctnr=c, domain=d,
                 mac=items['ha'], last_seen=items['last_seen'])
 
-        for key, value in get_option_values(items['id']):
+        for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,
                                      key=key, value=value)
             kv.clean()
@@ -462,22 +462,25 @@ def maintain_get_cached(table, columns, object_id):
         return (None for _ in columns)
 
 
-def get_option_values(host_id):
-    global option_values
-    if option_values is None:
-        option_values = {}
+def get_host_option_values(host_id):
+    global host_option_values
+    if host_option_values is None:
+        host_option_values = {}
         sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
                "INNER JOIN {2} ON {2}.object_id = {0}.id "
-               "INNER JOIN {1} ON {1}.id = {2}.dhcp_option")
-        cursor.execute(sql.format("host", "dhcp_options", "object_option"))
+               "INNER JOIN {1} ON {1}.id = {2}.dhcp_option "
+               "WHERE {2}.type = '{3}'")
+        sql = sql.format("host", "dhcp_options", "object_option", "host")
+        print "Caching: %s" % sql
+        cursor.execute(sql)
         results = cursor.fetchall()
         for h_id, name, value in results:
-            if h_id not in option_values:
-                option_values[h_id] = set([])
-            option_values[h_id].add((name, value))
+            if h_id not in host_option_values:
+                host_option_values[h_id] = set([])
+            host_option_values[h_id].add((name, value))
 
-    if host_id in option_values:
-        return option_values[host_id]
+    if host_id in host_option_values:
+        return host_option_values[host_id]
     else:
         return []
 
