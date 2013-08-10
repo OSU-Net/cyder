@@ -3,6 +3,7 @@ from django.forms.util import ErrorDict, ErrorList
 from django.shortcuts import get_object_or_404, redirect, render
 
 import cyder as cy
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
@@ -10,6 +11,10 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               cy_delete, get_update_form, search_obj,
                               table_update)
 from cyder.core.cyuser.utils import perm
+
+from cyder.cydhcp.constants import DHCP_KEY_VALUES
+
+from cyder.cydns.constants import DNS_KEY_VALUES
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
 from cyder.cydns.address_record.models import AddressRecord
@@ -23,8 +28,8 @@ from cyder.cydns.nameserver.forms import NameserverForm
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.forms import PTRForm
 from cyder.cydns.ptr.models import PTR
-from cyder.cydns.soa.forms import SOAForm
-from cyder.cydns.soa.models import SOA
+from cyder.cydns.soa.forms import SOAForm, SOAKeyValueForm
+from cyder.cydns.soa.models import SOA, SOAKeyValue
 from cyder.cydns.sshfp.forms import FQDNSSHFPForm, SSHFPForm
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.srv.forms import SRVForm, FQDNSRVForm
@@ -47,6 +52,7 @@ def get_klasses(obj_type):
         'nameserver': (Nameserver, NameserverForm, NameserverForm),
         'ptr': (PTR, PTRForm, PTRForm),
         'soa': (SOA, SOAForm, SOAForm),
+        'soa_kv': (SOAKeyValue, SOAKeyValueForm, SOAKeyValueForm),
         'srv': (SRV, SRVForm, FQDNSRVForm),
         'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
@@ -64,17 +70,17 @@ def cydns_view(request, pk=None):
 
     # Get the object if updating.
     record = get_object_or_404(Klass, pk=pk) if pk else None
-    form = FQDNFormKlass(instance=record)
+    form = FormKlass(instance=record)
 
     if request.method == 'POST':
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:
-            fqdn_form = FQDNFormKlass(request.POST)
-            fqdn_form._errors = ErrorDict()
-            fqdn_form._errors['__all__'] = ErrorList(errors)
+            form = FormKlass(request.POST)
+            form._errors = ErrorDict()
+            form._errors['__all__'] = ErrorList(errors)
             return render(request, 'cydns/cydns_view.html', {
-                'form': fqdn_form,
+                'form': form,
                 'obj_type': obj_type,
                 'pk': pk,
                 'obj': record
@@ -86,18 +92,20 @@ def cydns_view(request, pk=None):
             if perm(request, cy.ACTION_CREATE, obj=record, obj_class=Klass):
                 record = form.save()
                 # If domain, add to current ctnr.
+                if obj_type in DNS_KEY_VALUES or obj_type in DHCP_KEY_VALUES:
+                    return redirect(request.META.get('HTTP_REFERER', ''))
                 if obj_type == 'domain':
                     request.session['ctnr'].domains.add(record)
                     return redirect(record.get_list_url())
         except (ValidationError, ValueError):
-            form = _revert(domain, request.POST, form, FQDNFormKlass)
+            form = _revert(domain, request.POST, form, FormKlass)
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
         request, do_sort(request, object_list), 50)
 
-    if hasattr(form, 'alphabetize_all'):
-        form.alphabetize_all()
+    if issubclass(type(form), UsabilityFormMixin):
+        form.make_usable(request.session['ctnr'])
 
     return render(request, 'cydns/cydns_view.html', {
         'form': form,
@@ -109,10 +117,10 @@ def cydns_view(request, pk=None):
     })
 
 
-def _revert(domain, orig_qd, orig_form, FQDNFormKlass):
+def _revert(domain, orig_qd, orig_form, FormKlass):
     """Revert domain if not valid."""
     prune_tree(domain)
-    form = FQDNFormKlass(orig_qd)
+    form = FormKlass(orig_qd)
     form._errors = orig_form._errors
     return form
 

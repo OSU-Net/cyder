@@ -1,0 +1,20 @@
+{% extends "cydhcp/cydhcp_detail.html" %}
+{% from "base/tables.html" import render_table %}
+{% from "base/utility.html" import create_button %}
+{% block title %}Static Interface {{ obj }}{% endblock %}
+
+{% block view_metadata %}
+  <span id="view-metadata"
+    data-objType="{{ obj_type }}"
+    data-objPk="{{ obj.pk }}"
+    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-getUrl="{{ url('cydhcp-get-record') }}"
+    data-objName="{{ obj }}">
+  </span>
+{% endblock %}
+
+{% block extra_action_bar %}
+  {{ create_button('static_interface_kv', url('cydhcp-get-record'),
+                   url('static_interface_kv'), objName=obj.name,
+                   buttonName="Static Interface Attribute") }}
+{% endblock %}

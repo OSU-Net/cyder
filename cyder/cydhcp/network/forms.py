@@ -4,13 +4,14 @@ from django.core.exceptions import ValidationError
 import ipaddr
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cydns.ip.models import ipv6_to_longs
 
 
-class NetworkForm(forms.ModelForm):
+class NetworkForm(forms.ModelForm, UsabilityFormMixin):
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         empty_label="(Defaults to parent's site.)",
@@ -57,6 +58,10 @@ class NetworkForm(forms.ModelForm):
 
 
 class NetworkKeyValueForm(forms.ModelForm):
+    network = forms.ModelChoiceField(
+        queryset=Network.objects.all(),
+        widget=forms.HiddenInput())
+
     class Meta:
         model = NetworkKeyValue
         exclude = ('is_statement', 'is_option', 'is_quoted')

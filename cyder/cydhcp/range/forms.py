@@ -1,10 +1,10 @@
 from django import forms
 
 from cyder.cydhcp.range.models import Range, RangeKeyValue
-from cyder.base.mixins import AlphabetizeFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class RangeForm(forms.ModelForm, AlphabetizeFormMixin):
+class RangeForm(forms.ModelForm, UsabilityFormMixin):
     class Meta:
         model = Range
         exclude = ('start_upper', 'start_lower', 'end_upper', 'end_lower')
@@ -19,6 +19,10 @@ class RangeForm(forms.ModelForm, AlphabetizeFormMixin):
 
 
 class RangeKeyValueForm(forms.ModelForm):
+    range = forms.ModelChoiceField(
+        queryset=Range.objects.all(),
+        widget=forms.HiddenInput())
+
     class Meta:
         model = RangeKeyValue
         exclude = ('is_option', 'is_statement', 'is_quoted')

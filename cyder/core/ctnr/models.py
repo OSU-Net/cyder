@@ -35,6 +35,10 @@ class Ctnr(models.Model, ObjectUrlMixin):
     def __str__(self):
         return get_display(self)
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        return Ctnr.objects.filter(pk=ctnr.pk)
+
     def details(self):
         data = super(Ctnr, self).details()
         data['data'] = (
@@ -43,7 +47,8 @@ class Ctnr(models.Model, ObjectUrlMixin):
         )
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'name', 'datatype': 'string', 'editable': True},

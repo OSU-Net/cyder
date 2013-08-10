@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
@@ -25,6 +26,8 @@ class StaticInterTests(TestCase):
         return d
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -43,7 +46,7 @@ class StaticInterTests(TestCase):
 
     def do_add(self, mac, label, domain, ip_str, ip_type='4'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.n)
+                            ip_type=ip_type, system=self.n, ctnr=self.ctnr)
         r.clean()
         r.save()
         r.details()
@@ -214,5 +217,6 @@ class StaticInterTests(TestCase):
         ip_str = "10.0.0.1"
         ip_type = '4'
         r = StaticInterface(label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=None, mac=mac)
+                            ip_type=ip_type, system=None, mac=mac,
+                            ctnr=self.ctnr)
         self.assertRaises(ValidationError, r.clean)

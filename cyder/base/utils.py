@@ -1,21 +1,12 @@
 import operator
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
-
-
-Domain = get_model('domain', 'domain')
-Workgroup = get_model('workgroup', 'workgroup')
-Range = get_model('range', 'range')
-Network = get_model('network', 'network')
-Site = get_model('site', 'site')
-Vlan = get_model('vlan', 'vlan')
-Vrf = get_model('vrf', 'vrf')
 
 
 def find_get_record_url(obj):
@@ -147,6 +138,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
         # Build table.
         data.append(row_data)
 
+    if not issubclass(type(objects), Page):
+        data = sorted(data, key=lambda row: row[0]['value'])
+
     return {
         'headers': headers,
         'postback_urls': [obj.details()['url'] for obj in objects],
@@ -165,44 +159,31 @@ def make_megafilter(Klass, term):
     return reduce(operator.or_, megafilter)
 
 
-def filter_by_ctnr(request, Klass):
-    if Klass is Domain:
-        objects = request.session['ctnr'].domains
-    elif Klass is Workgroup:
-        objects = request.session['ctnr'].workgroups
-    elif Klass is Range:
-        objects = request.session['ctnr'].ranges
-    elif Klass is Vrf:
-        # TODO: filter vrfs by container
-        objects = Vrf.objects
-    elif Klass is Network:
-        objects = Network.objects.filter(
-            range__in=request.session['ctnr'].ranges.all())
-    elif Klass is Vlan:
-        networks = Network.objects.filter(
-            range__in=request.session['ctnr'].ranges.all())
-        objects = Vlan.objects.filter(network__in=networks)
-    elif Klass is Site:
-        networks = Network.objects.filter(
-            range__in=request.session['ctnr'].ranges.all())
-        objects = Site.objects.filter(network__in=networks)
+def filter_by_ctnr(ctnr, Klass=None, objects=None):
+    if not Klass and objects is not None:
+        Klass = objects.model
+
+    if ctnr.name in ['global', 'default']:
+        return objects or Klass.objects
+
+    if hasattr(Klass, 'filter_by_ctnr'):
+        return Klass.filter_by_ctnr(ctnr, objects)
     else:
-        objects = Klass.objects
+        objects = objects or Klass.objects
         if hasattr(Klass, 'domain'):
-            objects = objects.filter(
-                domain__in=request.session['ctnr'].domains.all())
+            objects = objects.filter(domain__in=ctnr.domains.all())
         elif hasattr(Klass, 'reverse_domain'):
-            objects = objects.filter(
-                reverse_domain__in=request.session['ctnr'].domains.all())
+            objects = objects.filter(reverse_domain__in=ctnr.domains.all())
 
     return objects
 
 
 def _filter(request, Klass):
-    if request.session['ctnr'].name == 'global' or Klass.__name__ == 'Site':
-        objects = Klass.objects
+    Ctnr = get_model('ctnr', 'ctnr')
+    if Klass is not Ctnr:
+        objects = filter_by_ctnr(request.session['ctnr'], Klass)
     else:
-        objects = filter_by_ctnr(request, Klass)
+        objects = Klass.objects
 
     if request.GET.get('filter'):
         try:

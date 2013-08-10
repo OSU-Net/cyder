@@ -60,17 +60,20 @@ class SSHFP(CydnsRecord, LabelDomainMixin):
         """For tables."""
         data = super(SSHFP, self).details()
         data['data'] = [
-            ('Domain', 'fqdn', self.fqdn),
+            ('Label', 'label', self.label),
+            ('Domain', 'domain', self.domain),
             ('Algorithm', 'algorithm_number', self.algorithm_number),
             ('Fingerprint Type', 'fingerprint_type', self.fingerprint_type),
             ('Key', 'key', self.key),
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'algorithm', 'datatype': 'integer', 'editable': True},
             {'name': 'fingerprint_type', 'datatype': 'integer',
              'editable': True},

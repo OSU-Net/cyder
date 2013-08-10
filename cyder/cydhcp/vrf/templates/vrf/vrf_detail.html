@@ -1,31 +1,20 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
 {% from "base/tables.html" import render_table %}
+{% from "base/utility.html" import create_button %}
+{% block title %}VRF {{ obj.name }}{% endblock %}
 
-{% set vrf = object %}
-{% set obj_type = object._meta.db_table %}
+{% block view_metadata %}
+<span id="view-metadata"
+  data-objType="{{ obj_type }}"
+  data-objPk="{{ obj.pk }}"
+  data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+  data-getUrl="{{ url('cydhcp-get-record') }}"
+  data-objName="{{ obj.name }}">
+</span>
+{% endblock %}
 
-{% block title %}VRF {{ vrf.name }}{% endblock %}
-
-{% block content %}
-  {{ render_table(request, vrf_table ) }}
-  {% if attrs %}
-    <h3>VRF Attributes</h4>
-    {{ render_table(request, attrs_table) }}
-  {% endif %}
-  {% if dynamic_hosts_table %}
-    <h3>Dynamic Hosts in {{ vrf.name }}</h3>
-    {% with page_obj = dynamic_hosts_page_obj %}
-      {% include "base/includes/pagination.html" %}
-    {% endwith %}
-    {{ render_table(request, dynamic_hosts_table) }}
-  {% endif %}
-
-  {% if static_hosts_table %}
-    <h3>Static Hosts in {{ vrf.name }}</h3>
-    {% with page_obj = static_hosts_page_obj %}
-      {% include "base/includes/pagination.html" %}
-    {% endwith %}
-    {{ render_table(request, static_hosts_table) }}
-  {% endif %}
-
+{% block extra_action_bar %}
+  {{ create_button('vrf_kv', url('cydhcp-get-record'),
+                   url('vrf_kv'), objName=obj.name,
+                   buttonName="VRF Attribute") }}
 {% endblock %}

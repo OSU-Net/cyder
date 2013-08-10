@@ -91,7 +91,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     return (n, created)
 
 
-def create_range(range_id, start, end, type, subnet_id, comment, en, known):
+def create_range(range_id, start, end, range_type, subnet_id, comment, en, known):
     """
     Takes a row form the Maintain range table
     returns a range which is saved in cyder
@@ -99,7 +99,7 @@ def create_range(range_id, start, end, type, subnet_id, comment, en, known):
     # Set the allow statement
     n = None
     r = None
-    r_type = 'st' if type is 'static' else 'dy'
+    r_type = 'st' if range_type == 'static' else 'dy'
     allow = 'legacy'
     if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
         id, name, subnet, netmask, status, vlan = cursor.fetchone()

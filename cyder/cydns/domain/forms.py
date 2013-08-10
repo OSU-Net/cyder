@@ -1,10 +1,10 @@
 from django.forms import ModelForm
 
 from cyder.cydns.domain.models import Domain
-from cyder.base.mixins import AlphabetizeFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class DomainForm(ModelForm, AlphabetizeFormMixin):
+class DomainForm(ModelForm, UsabilityFormMixin):
     class Meta:
         model = Domain
         exclude = ('master_domain', 'is_reverse', 'dirty', 'purgeable')

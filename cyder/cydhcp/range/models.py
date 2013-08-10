@@ -92,6 +92,13 @@ class Range(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        if objects:
+            return ctnr.ranges.filter(pk__in=objects)
+        else:
+            return ctnr.ranges
+
     def update_attrs(self):
         self.attrs = AuxAttr(RangeKeyValue, self, "range")
 
@@ -113,7 +120,8 @@ class Range(models.Model, ObjectUrlMixin):
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'start_str', 'datatype': 'string', 'editable': False},

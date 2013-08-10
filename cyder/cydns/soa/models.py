@@ -104,6 +104,12 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     def __repr__(self):
         return "<'{0}'>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or SOA.objects
+        domains = ctnr.domains.values_list('soa')
+        return objects.filter(id__in=domains)
+
     @property
     def rdtype(self):
         return 'SOA'
@@ -130,7 +136,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'description', 'datatype': 'string', 'editable': True},
@@ -193,7 +200,11 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
 
 class SOAKeyValue(KeyValue):
-    obj = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+    soa = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+
+    class Meta:
+        db_table = 'soa_kv'
+
 
     def _aa_disabled(self):
         """

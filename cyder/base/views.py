@@ -5,10 +5,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, BadHeaderError
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
-from django.forms import ValidationError
+from django.forms import ValidationError, ModelChoiceField, HiddenInput
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
-from django.db.models import get_model
+from django.db.models.loading import get_model
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
@@ -19,6 +19,7 @@ from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, model_to_post, tablefy,
                               qd_to_py_dict)
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.cydns.utils import ensure_label_domain
 from cyder.base.forms import BugReportForm, EditUserForm
@@ -168,8 +169,11 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
-    if hasattr(form, 'alphabetize_all'):
-        form.alphabetize_all()
+    if issubclass(type(form), UsabilityFormMixin):
+        form.make_usable(request.session['ctnr'])
+
+    if obj_type == 'system' and len(object_list) == 0:
+        return redirect(reverse('system-create'))
 
     return render(request, template, {
         'form': form,
@@ -195,7 +199,10 @@ def cy_delete(request, pk, get_klasses_fn):
 
     referer = request.META.get('HTTP_REFERER', obj.get_list_url())
     # if there is path beyond obj.get_list_url() remove
-    referer = referer.replace(referer.split(obj.get_list_url())[1], '')
+    try:
+        referer = referer.replace(referer.split(obj.get_list_url())[1], '')
+    except:
+        referer = request.META.get('HTTP_REFERER', '')
     return redirect(referer)
 
 
@@ -244,6 +251,9 @@ def get_update_form(request, get_klasses_fn):
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
     kwargs = json.loads(request.GET.get('data', '{}').replace("'", "\""))
+    if kwargs:
+        print kwargs
+
     if not obj_type:
         raise Http404
 
@@ -254,15 +264,16 @@ def get_update_form(request, get_klasses_fn):
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
             if perm(request, cy.ACTION_UPDATE, obj=record):
-                if FQDNFormKlass:
-                    form = FQDNFormKlass(instance=record)
-                else:
+                if FormKlass:
                     form = FormKlass(instance=record)
+                else:
+                    form = FQDNFormKlass(instance=record)
         else:
             #  Get form to create a new object and prepopulate
             if related_type and related_pk:
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
+
                 if FormKlass.__name__ == 'RangeForm':
                     Network = get_model('network', 'network')
                     network = Network.objects.get(id=related_pk)
@@ -276,11 +287,18 @@ def get_update_form(request, get_klasses_fn):
 
             else:
                 form = FormKlass(initial=kwargs)
+
     except ObjectDoesNotExist:
         raise Http404
 
-    if hasattr(form, 'alphabetize_all'):
-        form.alphabetize_all()
+    if related_type in form.fields:
+        RelatedKlass = get_model(related_type, related_type)
+        form.fields[related_type] = ModelChoiceField(
+            widget=HiddenInput, empty_label=None,
+            queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
+
+    if issubclass(type(form), UsabilityFormMixin):
+        form.make_usable(request.session['ctnr'])
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))

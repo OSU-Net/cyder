@@ -10,7 +10,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_label
-from cyder.base.mixins import AlphabetizeFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 
 
 def validate_ip(ip):
@@ -28,18 +28,29 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(forms.ModelForm, AlphabetizeFormMixin):
+class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
     label = forms.CharField(max_length=128, required=True)
 
+    def __init__(self, *args, **kwargs):
+        super(StaticInterfaceForm, self).__init__(*args, **kwargs)
+        self.fields.keyOrder = ['system', 'description', 'label', 'ip_str',
+                                'ip_type', 'ttl', 'workgroup', 'mac', 'vrf',
+                                'domain', 'dhcp_enabled', 'dns_enabled',
+                                'ctnr']
+
     class Meta:
         model = StaticInterface
-        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
+        exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
+                   'last_seen')
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):
+    static_interface = forms.ModelChoiceField(
+        queryset=StaticInterface.objects.all(),
+        widget=forms.HiddenInput())
 
     class Meta:
         model = StaticIntrKeyValue

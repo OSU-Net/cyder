@@ -32,15 +32,18 @@ class TXT(CydnsRecord, LabelDomainMixin):
         """For tables."""
         data = super(TXT, self).details()
         data['data'] = [
+            ('Label', 'label', self.label),
             ('Domain', 'domain__name', self.domain),
             ('Text', 'txt_data', self.txt_data)
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'txt_data', 'datatype': 'string', 'editable': True},
         ]}
 

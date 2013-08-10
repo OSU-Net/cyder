@@ -12,6 +12,7 @@ from cyder.cydns.tests.utils import create_fake_zone
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 
 class NSTestsModels(TestCase):
@@ -28,6 +29,8 @@ class NSTestsModels(TestCase):
         return d
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -119,7 +122,7 @@ class NSTestsModels(TestCase):
 
     def test_disallow_name_update_of_glue_Intr(self):
         # Glue records should not be allowed to change their name.
-        glue = StaticInterface(label='ns24', domain=self.f_r,
+        glue = StaticInterface(label='ns24', domain=self.f_r, ctnr=self.ctnr,
                                ip_str='128.193.99.10', ip_type='4',
                                system=self.s, mac="11:22:33:44:55:66")
         glue.clean()
@@ -134,7 +137,7 @@ class NSTestsModels(TestCase):
 
     def test_disallow_delete_of_glue_intr(self):
         # Interface glue records should not be allowed to be deleted.
-        glue = StaticInterface(label='ns24', domain=self.f_r,
+        glue = StaticInterface(label='ns24', domain=self.f_r, ctnr=self.ctnr,
                                ip_str='128.193.99.10', ip_type='4',
                                system=self.s, mac="11:22:33:44:55:66")
         glue.clean()
@@ -149,7 +152,7 @@ class NSTestsModels(TestCase):
     def test_manual_assign_of_glue(self):
         # Test that assigning a different glue record doesn't get overriden by
         # the auto assinging during the Nameserver's clean function.
-        glue = StaticInterface(label='ns25', domain=self.f_r,
+        glue = StaticInterface(label='ns25', domain=self.f_r, ctnr=self.ctnr,
                                ip_str='128.193.99.10', ip_type='4',
                                system=self.s, mac="11:22:33:44:55:66")
         glue.clean()
@@ -184,7 +187,7 @@ class NSTestsModels(TestCase):
 
     def testtest_add_ns_in_domain_intr(self):
         # Use an Interface as a glue record.
-        glue = StaticInterface(label='ns232', domain=self.r,
+        glue = StaticInterface(label='ns232', domain=self.r, ctnr=self.ctnr,
                                ip_str='128.193.99.10', ip_type='4',
                                system=self.s, mac="12:23:45:45:45:45")
         glue.clean()
@@ -195,7 +198,7 @@ class NSTestsModels(TestCase):
         self.assertEqual(ns.server, ns.glue.fqdn)
         self.assertRaises(ValidationError, glue.delete)
 
-        glue = StaticInterface(label='ns332', domain=self.f_r,
+        glue = StaticInterface(label='ns332', domain=self.f_r, ctnr=self.ctnr,
                                ip_str='128.193.1.10', ip_type='4',
                                system=self.s, mac="11:22:33:44:55:66")
         glue.clean()
@@ -211,7 +214,7 @@ class NSTestsModels(TestCase):
         self.assertFalse(ns.glue)
 
     def test_update_glue_to_no_intr(self):
-        glue = StaticInterface(label='ns34', domain=self.r,
+        glue = StaticInterface(label='ns34', domain=self.r, ctnr=self.ctnr,
                                ip_str='128.193.1.10', ip_type='4',
                                system=self.s, mac="11:22:33:44:55:66")
         glue.save()
@@ -225,7 +228,7 @@ class NSTestsModels(TestCase):
 
     def test_update_glue_record_intr(self):
         # Glue records can't change their name.
-        glue = StaticInterface(label='ns788', domain=self.r,
+        glue = StaticInterface(label='ns788', domain=self.r, ctnr=self.ctnr,
                                ip_str='128.193.1.10', ip_type='4',
                                system=self.s, mac="11:22:33:44:55:66")
         glue.save()
@@ -383,7 +386,7 @@ class NSTestsModels(TestCase):
         # the zone's root domain.
         intr = StaticInterface(
             label="asdf", domain=root_domain, ip_str="14.10.1.1", ip_type="4",
-            mac="11:22:33:44:55:66", system=self.s)
+            mac="11:22:33:44:55:66", system=self.s, ctnr=self.ctnr)
         self.assertRaises(ValidationError, intr.save)
 
     # See record.tests for the case a required view is deleted.

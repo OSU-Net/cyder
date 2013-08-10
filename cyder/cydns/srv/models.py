@@ -48,6 +48,7 @@ class SRV(CydnsRecord):
         """For tables."""
         data = super(SRV, self).details()
         data['data'] = [
+            ('Label', 'label', self.label),
             ('Domain', 'domain__name', self.domain),
             ('Target', 'target', self.target),
             ('Port', 'port', self.port),
@@ -56,10 +57,12 @@ class SRV(CydnsRecord):
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'target', 'datatype': 'string', 'editable': True},
             {'name': 'port', 'datatype': 'integer', 'editable': True},
             {'name': 'priority', 'datatype': 'integer', 'editable': True},

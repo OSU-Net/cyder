@@ -42,15 +42,18 @@ class CNAME(CydnsRecord, LabelDomainMixin):
         """For tables."""
         data = super(CNAME, self).details()
         data['data'] = [
-            ('Alias', 'fqdn', self.fqdn),
+            ('Label', 'label', self.label),
+            ('Domain', 'domain', self.domain),
             ('Target', 'target', self.target)
         ]
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'target', 'datatype': 'string', 'editable': True},
         ]}
 

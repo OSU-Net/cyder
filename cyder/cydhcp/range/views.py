@@ -1,12 +1,12 @@
 import json
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 
 import ipaddr
 
-from cyder.base.utils import make_paginator, tablefy
+from cyder.base.utils import make_paginator, tablefy, make_megafilter
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
 from cyder.cydhcp.range.models import Range, RangeKeyValue
@@ -88,3 +88,14 @@ def redirect_to_range_from_ip(request):
         return HttpResponse(json.dumps(
             {'success': True,
              'redirect_url': range_[0].get_detail_url()}))
+
+
+def search(request):
+    """Returns a list of ranges matching 'term'."""
+    term = request.GET.get('term', '')
+    if not term:
+        raise Http404
+
+    ranges = Range.objects.filter(make_megafilter(Range, term))[:15]
+    ranges = [{'label': str(rng), 'pk': rng.id} for rng in ranges]
+    return HttpResponse(json.dumps(ranges))

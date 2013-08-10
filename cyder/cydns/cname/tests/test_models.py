@@ -15,6 +15,7 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.tests.utils import create_fake_zone
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 
 class CNAMETests(cyder.base.tests.TestCase):
@@ -32,6 +33,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         return d
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.g = create_fake_zone("gz", suffix="")
         self.c_g = create_fake_zone("coo.gz", suffix="")
         self.d = create_fake_zone("dz", suffix="")
@@ -288,7 +291,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
         intr = StaticInterface(label=label, domain=dom, ip_str="10.0.0.1",
-                               ip_type='4', system=self.s,
+                               ip_type='4', system=self.s, ctnr=self.ctnr,
                                mac="11:22:33:44:55:66")
         intr.clean()
         intr.save()
@@ -310,7 +313,7 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         intr = StaticInterface(
             label=label, domain=dom, ip_str="10.0.0.2", ip_type='4',
-            system=self.s, mac="00:11:22:33:44:55"
+            system=self.s, mac="00:11:22:33:44:55", ctnr=self.ctnr,
         )
 
         self.assertRaises(ValidationError, intr.clean)

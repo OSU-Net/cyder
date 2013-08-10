@@ -21,12 +21,15 @@ from cyder.cydns.soa.models import SOA
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 import ipaddr
 
 
 class ReverseDomainTests(TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -41,7 +44,7 @@ class ReverseDomainTests(TestCase):
     def add_intr_ipv4(self, ip):
         intr = StaticInterface(
             label=random_label(), domain=self.domain, ip_str=ip, ip_type='4',
-            system=self.s, mac='11:22:33:44:55:66'
+            system=self.s, mac='11:22:33:44:55:66', ctnr=self.ctnr,
         )
         intr.clean()
         intr.save()

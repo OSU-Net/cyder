@@ -19,9 +19,8 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_dns_form
+from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.validation import validate_hostname_label
 
 
 class StaticInterface(BaseAddressRecord, BasePTR):
@@ -86,6 +85,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     changes to propagate to the database.
     """
     id = models.AutoField(primary_key=True)
+    ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
     mac = models.CharField(max_length=17, blank=True,
                            help_text='MAC address in format XX:XX:XX:XX:XX:XX')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
@@ -94,8 +94,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         System, null=True, blank=True,
         help_text='System to associate the interface with')
 
-    vrf = models.ForeignKey(Vrf, null=True, blank=True)
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+
+    vrf = models.ForeignKey(Vrf, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
         default=True, help_text='Enable DHCP for this interface?')
@@ -121,7 +122,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return self.fqdn
 
     def update_attrs(self):
-        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'intr')
+        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
 
     def details(self):
         data = super(StaticInterface, self).details()
@@ -146,6 +147,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('Last Seen', 'last_seen', date),
         )
         return data
+
+    @staticmethod
+    def eg_metadata():
+        """EditableGrid metadata."""
+        return {'metadata': [
+            {'name': 'fqdn', 'datatype': 'string', 'editable': False},
+        ]}
 
     @classmethod
     def get_api_fields(cls):
@@ -219,8 +227,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
-        validate_hostname_label(self.label)
-
+        check_for_reverse_domain(self.ip_str, self.ip_type)
         if self.dhcp_enabled:
             self.mac = self.mac.lower()
             validate_mac(self.mac)
@@ -284,8 +291,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
 
 class StaticIntrKeyValue(CommonOption):
-    intr = models.ForeignKey(StaticInterface, null=False)
+    static_interface = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
         db_table = 'static_interface_kv'
-        unique_together = ('key', 'value', 'intr')
+        unique_together = ('key', 'value', 'static_interface')

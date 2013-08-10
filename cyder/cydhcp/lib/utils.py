@@ -25,7 +25,7 @@ is_mozilla_tld = re.compile(".*mozilla\.(org|net|ru|co|it|me|de|hu|pt|"
 
 
 def create_ipv4_intr_from_domain(label, domain_name, system, mac,
-                                 network_str=None):
+                                 network_str=None, ctnr=None):
     """A wrapper for :func:`create_ipv4_interface`."""
     if is_mozilla_tld.match(domain_name):
         d = domain_name.split('.')[:-2]
@@ -40,11 +40,11 @@ def create_ipv4_intr_from_domain(label, domain_name, system, mac,
     datacenter = ".".join(d[1:])
 
     return create_ipv4_interface(label, vlan_str, datacenter, system, mac,
-                                 domain_suffix, network_str)
+                                 domain_suffix, network_str, ctnr=ctnr)
 
 
 def create_ipv4_interface(label, vlan_str, site_str, system,
-                          mac, domain_suffix, network_str=None):
+                          mac, domain_suffix, network_str=None, ctnr=None):
     """This is an api for creating an interface.
 
     :param label: The label of the interface.
@@ -243,11 +243,12 @@ def create_ipv4_interface(label, vlan_str, site_str, system,
                                         system,
                                         mac,
                                         range_.start_lower,
-                                        range_.end_lower)
+                                        range_.end_lower,
+                                        ctnr=ctnr)
 
 
 def create_ipv4_intr_from_range(label, domain_name, system, mac,
-                                range_start_str, range_end_str):
+                                range_start_str, range_end_str, ctnr):
     """This function creates an interface using the first free ip in the
     specified range. This function will also ensure that a :class:`Domain` with
     the name=``domain_name`` exists in the database. If a new domain is created
@@ -283,11 +284,11 @@ def create_ipv4_intr_from_range(label, domain_name, system, mac,
         errors['ip'] = ErrorList(["Invalid IPv4 ip {0}".format(range_end_str)])
         return None, errors
     return _create_ipv4_intr_from_range(label, domain_name, system, mac,
-                                        int(start), int(end))
+                                        int(start), int(end), ctnr)
 
 
 def _create_ipv4_intr_from_range(label, domain_name, system, mac, range_start,
-                                 range_end):
+                                 range_end, ctnr):
     if range_start >= range_end - 1:
         errors = {}
         errors['ip'] = ErrorList(["The start ip must be less than end ip."])
@@ -303,7 +304,7 @@ def _create_ipv4_intr_from_range(label, domain_name, system, mac, range_start,
     domain = ensure_domain(domain_name, inherit_soa=True)
     try:
         intr = StaticInterface(label=label, domain=domain, ip_str=str(ip),
-                               ip_type='4', system=system, mac=mac)
+                               ip_type='4', system=system, mac=mac, ctnr=ctnr)
         intr.clean()
     except ValidationError, e:
         errors['interface'] = ErrorList(e.messages)

@@ -58,6 +58,11 @@ class Network(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Network {0}>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or Network.objects
+        return objects.filter(range__in=ctnr.ranges.all())
+
     def details(self):
         """For tables."""
         data = super(Network, self).details()
@@ -68,7 +73,8 @@ class Network(models.Model, ObjectUrlMixin):
         )
         return data
 
-    def eg_metadata(self):
+    @staticmethod
+    def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
             {'name': 'network_str', 'datatype': 'string', 'editable': True},

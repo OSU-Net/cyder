@@ -6,11 +6,14 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 
 
 class V4RangeTests(TestCase):
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.d = Domain(name="com")
         self.d.save()
         Domain(name="arpa").save()
@@ -396,19 +399,19 @@ class V4RangeTests(TestCase):
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
         s = StaticInterface(label="foo", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:00")
+                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
         s.clean()
         s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.2")
         s = StaticInterface(label="foo", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:00")
+                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
         s.clean()
         s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.3")
         s = StaticInterface(label="foo", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:00")
+                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
         s.clean()
         s.save()
         self.assertEqual(r.get_next_ip(), None)

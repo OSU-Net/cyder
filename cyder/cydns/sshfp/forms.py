@@ -2,12 +2,15 @@ from django import forms
 
 from cyder.cydns.forms import DNSForm
 from cyder.cydns.sshfp.models import SSHFP
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class SSHFPForm(DNSForm):
+class SSHFPForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = SSHFP
         exclude = ('fqdn',)
+        fields = ('label', 'domain', 'key', 'algorithm_number',
+                  'fingerprint_type', 'views', 'ttl', 'description')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 

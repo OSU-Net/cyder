@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 
@@ -24,6 +25,8 @@ class AuxAttrTests(TestCase):
         return d
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -42,7 +45,7 @@ class AuxAttrTests(TestCase):
     def do_add(self, mac, label, domain, ip_str, ip_type='4'):
         self.n = System()
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.n)
+                            ip_type=ip_type, system=self.n, ctnr=self.ctnr)
         r.clean()
         r.save()
         repr(r)
@@ -68,12 +71,14 @@ class AuxAttrTests(TestCase):
         def bad_get():
             intr.attrs.primary
         self.assertRaises(AttributeError, bad_get)
-        x = StaticIntrKeyValue.objects.filter(key='primary', intr=intr)
+        x = StaticIntrKeyValue.objects.filter(key='primary',
+                                              static_interface=intr)
         self.assertFalse(x)
         intr.attrs.primary = '1'
         self.assertEqual(intr.attrs.cache['primary'], '1')
         self.assertEqual(intr.attrs.primary, '1')
-        x = StaticIntrKeyValue.objects.filter(key='primary', intr=intr)
+        x = StaticIntrKeyValue.objects.filter(key='primary',
+                                              static_interface=intr)
         self.assertEqual(x[0].value, '1')
 
     def test6_create(self):
@@ -174,10 +179,12 @@ class AuxAttrTests(TestCase):
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         intr = self.do_add(**kwargs)
-        StaticIntrKeyValue(key="foo", value="bar", intr=intr).save()
+        StaticIntrKeyValue(key="foo", value="bar",
+                           static_interface=intr).save()
         StaticIntrKeyValue(
-            key="interface_type", value="eth0", intr=intr).save()
-        StaticIntrKeyValue(key="alias", value="5", intr=intr).save()
+            key="interface_type", value="eth0", static_interface=intr).save()
+        StaticIntrKeyValue(key="alias", value="5",
+                           static_interface=intr).save()
         intr.update_attrs()
         self.assertEqual(intr.attrs.alias, '5')
         self.assertEqual(intr.attrs.cache['alias'], '5')
