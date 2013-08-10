@@ -38,7 +38,8 @@ class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['system', 'description', 'label', 'ip_str',
                                 'ip_type', 'ttl', 'workgroup', 'mac', 'vrf',
-                                'domain', 'dhcp_enabled', 'dns_enabled']
+                                'domain', 'dhcp_enabled', 'dns_enabled',
+                                'ctnr']
 
     class Meta:
         model = StaticInterface
