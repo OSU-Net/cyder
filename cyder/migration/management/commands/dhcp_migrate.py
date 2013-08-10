@@ -61,8 +61,8 @@ cursor = connection.cursor()
 
 def clean_zone_name(name):
     name = name.replace(' ', '')
-    if name[:5] == "zone.":
-        name = name[5:]
+    #if name[:5] == "zone.":
+        #name = name[5:]
     return name
 
 
