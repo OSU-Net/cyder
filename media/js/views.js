@@ -78,6 +78,9 @@ $(document).ready(function() {
         $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
+                if (objType.indexOf('interface') != -1) {
+                    extra_title = ' for ' + data.form.split('title=')[1].split('/')[0].replace(/"/g, "");
+                };
                 $('#form-title').html('Updating ' + prettify(object_type) + extra_title);
                 $('#hidden-inner-form').empty().append(data.form);
                 initForms();
