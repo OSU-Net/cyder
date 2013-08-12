@@ -6,6 +6,7 @@ from django.forms import ModelChoiceField, HiddenInput
 
 from cyder.base.utils import filter_by_ctnr
 
+
 class DisplayMixin(object):
     # Knobs
     justs = {
@@ -105,8 +106,11 @@ class UsabilityFormMixin(object):
     def autoselect_system(self):
         if 'system' in self.initial:
             System = get_model('system', 'system')
+            system_name = System.objects.get(
+                pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(
-                widget=HiddenInput, empty_label=None,
+                widget=HiddenInput(attrs={'title': system_name}),
+                empty_label='',
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
 
     def make_usable(self, ctnr=None):
