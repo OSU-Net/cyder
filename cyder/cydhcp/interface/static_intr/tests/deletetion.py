@@ -58,7 +58,7 @@ class DeleteStaticInterTests(TestCase):
 
     def test1_delete_basic(self):
         # Does deleting a system delete it's interfaces?
-        mac = "11:22:33:44:55:66"
+        mac = "112233445566"
         label = "foo"
         domain = self.f_c
         ip_str = "10.0.0.2"

@@ -23,8 +23,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
                                blank=True,
                                help_text="System to associate "
                                          "the interface with")
-    mac = models.CharField(max_length=19,
-                           help_text="Mac address in format XX:XX:XX:XX:XX:XX")
+    mac = models.CharField(max_length=19, blank=True)
     vrf = models.ForeignKey(Vrf, null=True)
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, null=False)
@@ -99,7 +98,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         if self.dhcp_enabled:
-            self.mac = self.mac.lower()
+            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
 
         if not self.system:

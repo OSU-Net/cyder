@@ -20,7 +20,7 @@ def ip2long(ip):
 
 
 def clean_mac(mac):
-    return ":".join([mac[x: x + 2] for x in range(0, 11, 2)])
+    return mac.lower().replace(':', '')
 
 
 def calc_prefixlen(netmask):
