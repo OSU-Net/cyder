@@ -86,8 +86,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     """
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
-    mac = models.CharField(max_length=17, blank=True,
-                           help_text='MAC address in format XX:XX:XX:XX:XX:XX')
+    mac = models.CharField(max_length=17, blank=True)
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
@@ -229,7 +228,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)
         if self.dhcp_enabled:
-            self.mac = self.mac.lower()
+            self.mac = self.mac.lower().replace(':', '')
             validate_mac(self.mac)
 
         if not self.system:

@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 import re
 
 
-mac_match = "(([0-9a-f]){2}:){5}([0-9a-f]){2}$"
+mac_match = "[0-9a-f]{12}$"
 is_mac = re.compile(mac_match)
 
 MAC_ERR = "Mac Address not of valid type."
