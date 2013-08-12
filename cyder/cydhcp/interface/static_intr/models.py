@@ -228,7 +228,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)
         if self.dhcp_enabled:
-            self.mac = self.mac.lower().replace(':', '')
+            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
 
         if not self.system:

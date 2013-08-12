@@ -98,7 +98,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         if self.dhcp_enabled:
-            self.mac = self.mac.lower().replace(':', '')
+            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
 
         if not self.system:
