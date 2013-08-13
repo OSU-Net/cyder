@@ -98,6 +98,9 @@ class UsabilityFormMixin(object):
             queryset = self.fields[fieldname].queryset
             if queryset.model is Ctnr:
                 ctnrs = set(c.pk for c in request.session['ctnrs'])
+                for pk in [1,2]:
+                    if pk in ctnrs: ctnrs.remove(pk)
+
                 if self.fields[fieldname].initial:
                     ctnrs.add(self.fields[fieldname].initial.pk)
 
