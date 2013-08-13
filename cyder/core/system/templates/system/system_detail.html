@@ -49,9 +49,13 @@
       <h3>Dynamic Interface</h3>
       {{ render_table(request, table[0]) }}
       {% if table[1] %}
-        <h3>Static Interface Attrs</h4>
+        <h3>Dynamic Interface Attrs</h4>
         {{render_table(request, table[1]) }}
       {% endif %}
     {% endfor %}
+    {% endif %}
+  {% if related_systems_table %}
+    <h3>Related Systems</h3>
+    {{ render_table(request, related_systems_table) }}
   {% endif %}
 {% endblock %}

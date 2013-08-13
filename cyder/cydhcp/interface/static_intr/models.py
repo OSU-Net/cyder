@@ -163,6 +163,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def rdtype(self):
         return 'INTR'
 
+    def get_related_systems(self):
+        related_interfaces = StaticInterface.objects.filter(mac=self.mac)
+        related_systems = set()
+        for interface in related_interfaces:
+            related_systems.update([interface.system])
+        return related_systems
+
     def save(self, *args, **kwargs):
         urd = kwargs.pop('update_reverse_domain', True)
         self.clean_reverse(update_reverse_domain=urd)  # BasePTR

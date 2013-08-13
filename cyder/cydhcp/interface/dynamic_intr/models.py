@@ -90,6 +90,13 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             allowed, self.range.start_str, self.range.end_str,
             format_mac(self.mac))
 
+    def get_related_systems(self):
+        related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
+        related_systems = set()
+        for interface in related_interfaces:
+            related_systems.update([interface.system])
+        return related_systems
+
     def get_fqdn(self):
         if not self.system.name:
             return self.domain.name
