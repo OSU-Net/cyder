@@ -1,4 +1,5 @@
 # Jingo helpers (Jinja2 custom filters)
+import re
 import json
 import string
 import urllib
@@ -8,6 +9,14 @@ from django.utils.encoding import smart_str
 from django.db.models import ForeignKey
 
 from jingo import register
+
+mac_re = re.compile("(([0-9a-f]){2}:){5}([0-9a-f]){2}$")
+
+
+def strip_if_mac_with_colons(word):
+    if mac_re.match(word):
+        word = word.replace(':', '')
+    return word
 
 
 def clean_sort_param(request):

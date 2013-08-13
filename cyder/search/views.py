@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from search.compiler.django_compile import compile_to_django
 
 from cyder.base.utils import tablefy
+from cyder.base.helpers import strip_if_mac_with_colons
 from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.cydns.utils import get_zones
 
@@ -32,26 +33,27 @@ def search(request):
 
 
 def _search(request):
-    search = request_to_search(request)
+    search = request_to_search(request).split(' ')
+    search = ' '.join([strip_if_mac_with_colons(word) for word in search])
 
     objs, error_resp = compile_to_django(search)
     if not objs:
         return ([], [])
     (addrs, cnames, domains, intrs, mxs, nss, ptrs, soas, srvs, sshfps, sys,
      txts, misc) = (
-         objs['A'],
-         objs['CNAME'],
-         objs['DOMAIN'],
-         objs['INTR'],
-         objs['MX'],
-         objs['NS'],
-         objs['PTR'],
-         objs['SOA'],
-         objs['SRV'],
-         objs['SSHFP'],
-         objs['SYSTEM'],
-         objs['TXT'],
-         [])
+        objs['A'],
+        objs['CNAME'],
+        objs['DOMAIN'],
+        objs['INTR'],
+        objs['MX'],
+        objs['NS'],
+        objs['PTR'],
+        objs['SOA'],
+        objs['SRV'],
+        objs['SSHFP'],
+        objs['SYSTEM'],
+        objs['TXT'],
+        [])
 
     meta = [
         (soas.count() if soas else 0, 'soa', 'SOA Records'),
