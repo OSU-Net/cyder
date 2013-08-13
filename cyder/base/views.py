@@ -170,7 +170,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
     if issubclass(type(form), UsabilityFormMixin):
-        form.make_usable(request.session['ctnr'])
+        form.make_usable(request)
 
     if obj_type == 'system' and len(object_list) == 0:
         return redirect(reverse('system-create'))
@@ -298,7 +298,7 @@ def get_update_form(request, get_klasses_fn):
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
     if issubclass(type(form), UsabilityFormMixin):
-        form.make_usable(request.session['ctnr'])
+        form.make_usable(request)
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
