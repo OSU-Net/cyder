@@ -26,14 +26,20 @@ def clean_sort_param(request):
 def do_sort(request, qs):
     """Returns an order_by string based on request GET parameters"""
     sort, order = clean_sort_param(request)
+    sort2 = None
     if sort == "id" and hasattr(qs.model, 'eg_metadata'):
         fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
         if fields[0] in [f.name for f in qs.model._meta.fields]:
             sort, order = fields[0], 'asc'
-
+    if sort in ['ip_str', 'network_str']:
+        sort = 'ip_lower'
+    if sort == 'start_str':
+        sort = 'start_lower'
+        sort2 = 'end_lower'
     if sort in [f.name for f in qs.model._meta.fields]:
         try:
             field = getattr(qs.model, sort).field
+
             if isinstance(field, ForeignKey):
                 qs = qs.select_related(sort)
                 sort = "__".join([sort, field.rel.to.display_fields[0]])
@@ -42,8 +48,13 @@ def do_sort(request, qs):
 
     if order == 'asc':
         order_by = sort
+        order_by2 = sort2
     else:
         order_by = '-%s' % sort
+        order_by2 = '-%s' % sort2
+
+    if sort2 is not None:
+        return qs.order_by(order_by, order_by2)
 
     return qs.order_by(order_by)
 
