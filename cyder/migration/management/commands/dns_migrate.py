@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from cyder.core.system.models import System, SystemKeyValue
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -35,7 +36,6 @@ cursor = connection.cursor()
 
 
 class Zone(object):
-    option_values = None
 
     def __init__(self, domain_id=None, dname=None, soa=None):
         self.domain_id = 541 if domain_id is None else domain_id
@@ -51,23 +51,6 @@ class Zone(object):
             self.domain.save()
             self.walk_zone()
 
-    def get_option_values(self, host_id):
-        if Zone.option_values is None:
-            Zone.option_values = {}
-            sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
-                   "INNER JOIN {2} ON {2}.object_id = {0}.id "
-                   "INNER JOIN {1} ON {1}.id = {2}.dhcp_option")
-            cursor.execute(sql.format("host", "dhcp_options", "object_option"))
-            results = cursor.fetchall()
-            for h_id, name, value in results:
-                if h_id not in Zone.option_values:
-                    Zone.option_values[h_id] = set([])
-                Zone.option_values[h_id].add((name, value))
-
-        if host_id in Zone.option_values:
-            return Zone.option_values[host_id]
-        else:
-            return []
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -144,6 +127,12 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
+        from dhcp_migrate import (maintain_find_zone, migrate_zones,
+                                  get_host_option_values)
+        if Ctnr.objects.count() <= 2:
+            print "WARNING: Zones not migrated. Attempting to migrate now."
+            migrate_zones()
+
         sys_value_keys = {"type": "Hardware Type",
                           "os": "Operating System",
                           "location": "Location",
@@ -156,7 +145,7 @@ class Zone(object):
                           "owning_unit": "Owning Unit",
                           "user_id": "User ID"}
 
-        keys = ("id", "ip", "name", "workgroup", "enabled", "ha",
+        keys = ("id", "ip", "name", "workgroup", "enabled", "ha", "zone",
                 "type", "os", "location", "department", "serial", "other_id",
                 "purchase_date", "po_number", "warranty_date", "owning_unit",
                 "user_id", "last_seen", "expire", "ttl", "last_update")
@@ -167,6 +156,7 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
+            ctnr = maintain_find_zone(items['zone'])
 
             name = items['name'].lower()
             enabled = bool(items['enabled'])
@@ -207,7 +197,7 @@ class Zone(object):
                     static = StaticInterface(label=name, domain=self.domain,
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
-                                             vrf=v, workgroup=w,
+                                             vrf=v, workgroup=w, ctnr=ctnr,
                                              ttl=items['ttl'],
                                              dns_enabled=enabled,
                                              dhcp_enabled=enabled,
@@ -221,9 +211,9 @@ class Zone(object):
                     static.views.add(public)
                     static.views.add(private)
 
-                    for key, value in self.get_option_values(items['id']):
-                        kv = StaticIntrKeyValue(intr=static, key=key,
-                                                value=value)
+                    for key, value in get_host_option_values(items['id']):
+                        kv = StaticIntrKeyValue(static_interface=static,
+                                                key=key, value=value)
                         kv.clean()
                         kv.save()
 
