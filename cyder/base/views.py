@@ -173,7 +173,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
         form.make_usable(request)
 
     if obj_type == 'system' and len(object_list) == 0:
-        return redirect(reverse('system-create'))
+        return redirect(reverse('system-create', args=[None]))
 
     if Klass.__name__ in [
             "StaticInterface", "DynamicInterface"] and pk is None:
