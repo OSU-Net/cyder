@@ -28,7 +28,7 @@ def system_detail(request, pk):
                              tablefy(intr.dynamicintrkeyvalue_set.all())))
     return render(request, 'system/system_detail.html', {
         'system': system,
-        'system_table': tablefy([system]),
+        'system_table': tablefy([system], info=False),
         'attrs_table': tablefy(attrs),
         'static_intr_tables': static_intr,
         'dynamic_intr_tables': dynamic_intr,
