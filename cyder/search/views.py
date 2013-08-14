@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from search.compiler.django_compile import compile_to_django
 
 from cyder.base.utils import tablefy
+from cyder.base.helpers import strip_if_mac_with_colons
 from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.cydns.utils import get_zones
 
@@ -32,33 +33,36 @@ def search(request):
 
 
 def _search(request):
-    search = request_to_search(request)
+    search = request_to_search(request).split(' ')
+    search = ' '.join([strip_if_mac_with_colons(word) for word in search])
 
     objs, error_resp = compile_to_django(search)
     if not objs:
         return ([], [])
-    (addrs, cnames, domains, intrs, mxs, nss, ptrs, soas, srvs, sshfps, sys,
-     txts, misc) = (
-         objs['A'],
-         objs['CNAME'],
-         objs['DOMAIN'],
-         objs['INTR'],
-         objs['MX'],
-         objs['NS'],
-         objs['PTR'],
-         objs['SOA'],
-         objs['SRV'],
-         objs['SSHFP'],
-         objs['SYSTEM'],
-         objs['TXT'],
-         [])
+    (addrs, cnames, domains, static, dynamic, mxs, nss, ptrs, soas, srvs,
+     sshfps, sys, txts, misc) = (
+        objs['A'],
+        objs['CNAME'],
+        objs['DOMAIN'],
+        objs['STATIC'],
+        objs['DYNAMIC'],
+        objs['MX'],
+        objs['NS'],
+        objs['PTR'],
+        objs['SOA'],
+        objs['SRV'],
+        objs['SSHFP'],
+        objs['SYSTEM'],
+        objs['TXT'],
+        [])
 
     meta = [
         (soas.count() if soas else 0, 'soa', 'SOA Records'),
         (addrs.count() if addrs else 0, 'address', 'Address Records'),
         (cnames.count() if cnames else 0, 'cname', 'CNAMEs'),
         (domains.count() if domains else 0, 'domain', 'Domains'),
-        (intrs.count() if intrs else 0, 'interface', 'Interfaces'),
+        (static.count() if static else 0, 'static', 'Static Interfaces'),
+        (dynamic.count() if dynamic else 0, 'dynamic', 'Dynamic Interfaces'),
         (mxs.count() if mxs else 0, 'mx', 'MXs'),
         (nss.count() if nss else 0, 'nameserver', 'Nameservers'),
         (ptrs.count() if ptrs else 0, 'ptr', 'PTRs'),
@@ -72,7 +76,8 @@ def _search(request):
         (tablefy(addrs), 'address', 'Address Records'),
         (tablefy(cnames), 'cname', 'CNAMEs'),
         (tablefy(domains), 'domain', 'Domains'),
-        (tablefy(intrs), 'interface', 'Interfaces'),
+        (tablefy(static), 'static', 'Static Interfaces'),
+        (tablefy(dynamic), 'dynamic', 'Dynamic Interfaces'),
         (tablefy(mxs), 'mx', 'MXs'),
         (tablefy(nss), 'nameserver', 'Nameservers'),
         (tablefy(ptrs), 'ptr', 'PTRs'),

@@ -8,6 +8,7 @@ from django.db.models import Q
 
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.utils import IPFilter
 from cyder.cydhcp.utils import start_end_filter
@@ -29,7 +30,8 @@ searchables = (
     ('A', AddressRecord),
     ('CNAME', CNAME),
     ('DOMAIN', Domain),
-    ('INTR', StaticInterface),
+    ('STATIC', StaticInterface),
+    ('DYNAMIC', DynamicInterface),
     ('MX', MX),
     ('NS', Nameserver),
     ('PTR', PTR),
@@ -195,7 +197,7 @@ def build_ipf_qsets(q):
     """
     q_sets = []
     for name, Klass in searchables:
-        if name == 'A' or name == 'INTR' or name == 'PTR':
+        if name == 'A' or name == 'STATIC' or name == 'PTR':
             q_sets.append(q)
         else:
             q_sets.append(None)

@@ -155,6 +155,9 @@ def make_megafilter(Klass, term):
     """
     megafilter = []
     for field in Klass.search_fields:
+        if field == 'mac':
+            megafilter.append(Q(**{"mac__icontains": term.replace(':', '')}))
+        else:
             megafilter.append(Q(**{"{0}__icontains".format(field): term}))
     return reduce(operator.or_, megafilter)
 
