@@ -10,6 +10,12 @@ function enableEditableGrid() {
         $('td:last-child').remove();
     }
 
+    // Remove Info column.
+    if ($('th:contains("Info")')) {
+        $('th:contains("Info")').remove();
+        $('td:first-child').remove();
+    }
+
     // Strip links and paragraph tags, remove table cell markdown until
     // we do CellRenderers.
     $('#egtable').find('td, th').each(function (i, td) {
