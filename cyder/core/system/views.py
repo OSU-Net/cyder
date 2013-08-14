@@ -95,8 +95,8 @@ def system_create_view(request):
     dynamic_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
-    static_form.make_usable(request.session['ctnr'])
-    dynamic_form.make_usable(request.session['ctnr'])
+    static_form.make_usable(request)
+    dynamic_form.make_usable(request)
 
     return render(request, 'system/system_create.html', {
         'system_form': system_form,

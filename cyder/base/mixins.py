@@ -88,20 +88,34 @@ class UsabilityFormMixin(object):
                 self.fields[fieldname].queryset = field.queryset.order_by(
                     *field.queryset.model.display_fields)
 
-    def filter_by_ctnr_all(self, ctnr, allow_reverse_domains=False):
+    def filter_by_ctnr_all(self, request, allow_reverse_domains=False):
+        from cyder.core.ctnr.models import Ctnr
+        ctnr = request.session['ctnr']
         for fieldname, field in self.fields.items():
-            if hasattr(field, 'queryset'):
-                queryset = self.fields[fieldname].queryset
+            if not hasattr(field, 'queryset'):
+                continue
+
+            queryset = self.fields[fieldname].queryset
+            if queryset.model is Ctnr:
+                ctnrs = set(c.pk for c in request.session['ctnrs'])
+                for pk in [1,2]:
+                    if pk in ctnrs: ctnrs.remove(pk)
+
+                if self.fields[fieldname].initial:
+                    ctnrs.add(self.fields[fieldname].initial.pk)
+
+                queryset = queryset.filter(pk__in=ctnrs)
+            else:
                 queryset = filter_by_ctnr(ctnr=ctnr,
                                           objects=field.queryset).distinct()
 
-                if fieldname == 'domain' and not allow_reverse_domains:
-                    queryset = queryset.filter(is_reverse=False)
+            if fieldname == 'domain' and not allow_reverse_domains:
+                queryset = queryset.filter(is_reverse=False)
 
-                if queryset.count() == 1:
-                    self.fields[fieldname].initial = queryset[0]
+            if queryset.count() == 1:
+                self.fields[fieldname].initial = queryset[0]
 
-                self.fields[fieldname].queryset = queryset
+            self.fields[fieldname].queryset = queryset
 
     def autoselect_system(self):
         if 'system' in self.initial:
@@ -113,8 +127,8 @@ class UsabilityFormMixin(object):
                 empty_label='',
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
 
-    def make_usable(self, ctnr=None):
-        if ctnr:
-            self.filter_by_ctnr_all(ctnr)
+    def make_usable(self, request):
+        if 'ctnr' in request.session:
+            self.filter_by_ctnr_all(request)
         self.alphabetize_all()
         self.autoselect_system()
