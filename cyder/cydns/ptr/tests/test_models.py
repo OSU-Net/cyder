@@ -49,7 +49,7 @@ class PTRTests(cyder.base.tests.TestCase):
         ip = Ip(ip_str=ip_str, ip_type=ip_type)
         ip.clean_ip()
         ptr = PTR.objects.filter(
-            name=fqdn, ip_upper=ip.ip_upper, ip_lower=ip.ip_lower)
+            fqdn=fqdn, ip_upper=ip.ip_upper, ip_lower=ip.ip_lower)
         ptr.__repr__()
         self.assertTrue(ptr)
         ip_str = ip_str.lower()
@@ -198,7 +198,7 @@ class PTRTests(cyder.base.tests.TestCase):
 
         ip = Ip(ip_str=ip, ip_type=ip_type)
         ip.clean_ip()
-        ptr = PTR.objects.filter(name=fqdn, ip_upper=ip.ip_upper,
+        ptr = PTR.objects.filter(fqdn=fqdn, ip_upper=ip.ip_upper,
                                  ip_lower=ip.ip_lower)
         self.assertFalse(ptr)
 
@@ -247,7 +247,7 @@ class PTRTests(cyder.base.tests.TestCase):
         ptr.full_clean()
         ptr.save()
 
-        ptr = PTR.objects.filter(name=new_fqdn, ip_upper=ptr.ip_upper,
+        ptr = PTR.objects.filter(fqdn=new_fqdn, ip_upper=ptr.ip_upper,
                                  ip_lower=ptr.ip_lower)
         self.assertTrue(ptr)
         self.assertEqual(new_fqdn, ptr[0].name)

@@ -262,8 +262,9 @@ class Zone(object):
 
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(
-                        name=name, ip_str=long2ip(ip)).exists():
-                    ptr = PTR(name=name, ip_str=long2ip(ip), ip_type='4')
+                        fqdn=hostname, ip_str=long2ip(ip)).exists():
+                    ptr = PTR(label=label, domain=self.domain,
+                              ip_str=long2ip(ip), ip_type='4')
 
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)

@@ -184,7 +184,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
+        if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
             raise ValidationError("A PTR already uses this Name and IP")
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
@@ -244,7 +244,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             )
 
         from cyder.cydns.ptr.models import PTR
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
+        if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
             raise ValidationError('A PTR already uses this Name and IP')
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
