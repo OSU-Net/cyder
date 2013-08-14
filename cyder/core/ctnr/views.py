@@ -99,7 +99,8 @@ def create_user_extra_cols(ctnr, ctnrusers):
                     reverse('update-user-level', kwargs={
                         'ctnr_pk': ctnr.id, 'user_pk': user.id,
                         'lvl': 1})],
-                'img': ['', '/media/img/minus.png', '/media/img/plus.png']
+                'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
+                'class': ['', 'minus', 'plus']
             }
 
             if level['value'][0] == 'Admin':
@@ -118,7 +119,8 @@ def create_user_extra_cols(ctnr, ctnrusers):
             'value': 'Delete',
             'url': reverse('ctnr-remove-user', kwargs={
                 'ctnr_pk': ctnr.id, 'user_pk': user.id}),
-            'img': '/media/img/delete.png'
+            'img': '/media/img/delete.png',
+            'class': 'delete'
         })
 
     extra_cols[0]['data'] = level_data
@@ -142,7 +144,8 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
             'value': 'Delete',
             'url': reverse('ctnr-remove-object', kwargs={
                 'ctnr_pk': ctnr.id, 'obj_type': obj_type, 'obj_pk': obj.pk}),
-            'img': '/media/img/delete.png'
+            'img': '/media/img/delete.png',
+            'class': 'delete'
         })
         objs.append(obj)
     extra_cols[0]['data'] = remove_data

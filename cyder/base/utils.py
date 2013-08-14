@@ -86,7 +86,7 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
             # Build data.
             try:
                 url = value.get_detail_url()
-                if value == obj and info == True:
+                if value == obj and info is True:
                     row_data[0]['url'] = [url]
                     url = None
             except AttributeError:
@@ -102,14 +102,16 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
                 if isinstance(d['value'], list):
                     if 'img' in d:
                         row_data.append({'value': d['value'], 'url': d['url'],
-                                         'img': d['img']})
+                                         'img': d['img'], 'class': d['class']})
                     else:
                         row_data.append({'value': d['value'], 'url': d['url']})
                 else:
                     if 'img' in d:
                         row_data.append({'value': [d['value']],
                                          'url': [d['url']],
-                                         'img': [d['img']]})
+                                         'img': [d['img']],
+                                         'class': [d['class']]})
+
                     else:
                         row_data.append({'value': [d['value']],
                                          'url': [d['url']]})
@@ -141,7 +143,6 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
                                      '/media/img/delete.png']})
 
         # Build table.
-        print row_data[0]['url']
         if row_data[0]['url'] in [['info'], ['']]:
             del row_data[0]
 
