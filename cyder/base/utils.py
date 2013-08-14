@@ -37,7 +37,7 @@ def make_paginator(request, qs, num=20, obj_type=None):
         return paginator.page(paginator.num_pages)
 
 
-def tablefy(objects, views=False, users=False, extra_cols=None):
+def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
     """Make list of table headers, rows of table data, list of urls
     that may be associated with table data, and postback urls.
 
@@ -78,12 +78,17 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
 
     for i, obj in enumerate(objects):
         row_data = []
-
+        row_data.append({
+            'value': ['Info'], 'url': ['info'], 'class': ['info'],
+            'img': ['/media/img/magnify.png']})
         # Columns.
         for title, field, value in obj.details()['data']:
             # Build data.
             try:
                 url = value.get_detail_url()
+                if value == obj and info == True:
+                    row_data[0]['url'] = [url]
+                    url = None
             except AttributeError:
                 url = None
             if value == obj:
@@ -136,7 +141,14 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                                      '/media/img/delete.png']})
 
         # Build table.
+        print row_data[0]['url']
+        if row_data[0]['url'] in [['info'], ['']]:
+            del row_data[0]
+
         data.append(row_data)
+
+    if data[0][0]['value'] == ['Info']:
+        headers.insert(0, ['Info', None])
 
     if not issubclass(type(objects), Page):
         data = sorted(data, key=lambda row: row[0]['value'])
