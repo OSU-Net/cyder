@@ -86,8 +86,9 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
             # Build data.
             try:
                 url = value.get_detail_url()
-                if value == obj and info is True:
-                    row_data[0]['url'] = [url]
+                if value == obj:
+                    if info is True:
+                        row_data[0]['url'] = [url]
                     url = None
             except AttributeError:
                 url = None

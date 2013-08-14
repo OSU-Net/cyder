@@ -236,7 +236,7 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
 
     return render(request, template, dict({
         'obj': obj,
-        'obj_table': tablefy((obj,)),
+        'obj_table': tablefy((obj,), info=False),
         'obj_type': obj_type,
         'tables': tables
     }.items() + kwargs.items()))
