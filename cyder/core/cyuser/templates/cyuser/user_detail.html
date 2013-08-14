@@ -34,9 +34,11 @@
       <h3>Containers</h3>
       {{ render_table(request, ctnr_table, 'ctnr-table') }}
     {% endif %}
-    {% if api_token_table %}
-      <h3>API Tokens</h3>
-      {{ render_table(request, api_token_table, 'api-token-table') }}
+    {% if request.user.is_superuser or request.user.username == user.username %}
+        {% if api_token_table %}
+            <h3>API Tokens</h3>
+            {{ render_table(request, api_token_table, 'api-token-table') }}
+        {% endif %}
     {% endif %}
 {% endblock %}
 

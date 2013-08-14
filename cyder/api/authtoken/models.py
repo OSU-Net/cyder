@@ -19,8 +19,10 @@ class Token(models.Model, ObjectUrlMixin):
     purpose = models.CharField(max_length=100) # purpose of token
     created = models.DateTimeField(auto_now_add=True)
 
+    """
     class Meta:
-        abstract = 'cyder.api.authtoken' not in settings.INSTALLED_APPS
+        abstract = 'api.authtoken' not in settings.INSTALLED_APPS
+    """
 
     def save(self, *args, **kwargs):
         if not self.key:
