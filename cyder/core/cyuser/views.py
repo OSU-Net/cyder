@@ -9,6 +9,7 @@ from django.http import Http404, HttpResponse
 from django.db.models import Q
 from django.conf import settings
 
+from cyder.api.authtoken.models import Token
 from cyder.base.utils import tablefy
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
@@ -215,9 +216,13 @@ def user_detail(request, pk):
         ctnrs += [Ctnr.objects.get(id=pk)]
 
     user_table = tablefy([user], users=True, info=False)
+    api_tokens = Token.objects.filter(user=user)
+
     ctnr_table = tablefy(ctnrs)
     contact_table = tablefy(contacts)
+    api_token_table = tablefy(api_tokens)
 
     return render(request, 'cyuser/user_detail.html',
                   {'user': user, 'user_table': user_table,
-                   'ctnr_table': ctnr_table, 'contact_table': contact_table})
+                   'ctnr_table': ctnr_table, 'contact_table': contact_table,
+                   'api_token_table': api_token_table})

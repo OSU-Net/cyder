@@ -16,7 +16,12 @@
       Unbecome User
       </a>
     {% endif %}
-  {% endif %}
+    {% endif %}
+    {% if request.user.username == user.username %}
+        <a class="btn btn-primary" href="/api/authtoken/request/">
+        Request API Token
+        </a>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -28,6 +33,10 @@
     {% if ctnr_table %}
       <h3>Containers</h3>
       {{ render_table(request, ctnr_table, 'ctnr-table') }}
+    {% endif %}
+    {% if api_token_table %}
+      <h3>API Tokens</h3>
+      {{ render_table(request, api_token_table, 'api-token-table') }}
     {% endif %}
 {% endblock %}
 

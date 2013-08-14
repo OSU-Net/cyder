@@ -31,28 +31,45 @@ class FQDNMixin(object):
 
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
-    domain = serializers.CharField()
     views = serializers.PrimaryKeyRelatedField(many=True)
 
 
 class CommonDNSViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        queryset = self.model.objects.all()
+        query_kwargs = {
+            key + '__iexact': value
+            for (key, value)
+            in self.request.QUERY_PARAMS
+            if key in self.model.search_fields
+        }
+
+        if len(query_kwargs):
+            queryset = queryset.filter(**query_kwargs)
+
+        return queryset
+
     def list(self, request):
         return super(CommonDNSViewSet, self).list(self, request)
 
     def create(self, request):
-        return super(CommonDNSViewSet, self).create(self, request)
+        # return super(CommonDNSViewSet, self).create(self, request)
+        pass
 
     def retrieve(self, request, pk=None):
         return super(CommonDNSViewSet, self).retrieve(self, request)
 
     def update(self, request, pk=None):
-        return super(CommonDNSViewSet, self).update(self, request)
+        # return super(CommonDNSViewSet, self).update(self, request)
+        pass
 
     def partial_update(self, request, pk=None):
-        return super(CommonDNSViewSet, self).partial_update(self, request)
+        # return super(CommonDNSViewSet, self).partial_update(self, request)
+        pass
 
     def destroy(self, request, pk=None):
-        return super(CommonDNSViewSet, self).partial_update(self, request)
+        # return super(CommonDNSViewSet, self).partial_update(self, request)
+        pass
 
 
 class DomainSerializer(CommonDNSSerializer):
@@ -62,8 +79,8 @@ class DomainSerializer(CommonDNSSerializer):
                 'purgeable', 'delegated']
 
 
-class DomainViewSet(viewsets.ModelViewSet):
-    queryset = Domain.objects.all()
+class DomainViewSet(CommonDNSViewSet):
+    model = Domain
     serializer_class = DomainSerializer
 
 
@@ -73,8 +90,8 @@ class CNAMESerializer(CommonDNSSerializer, FQDNMixin):
         fields = standard_fields + CNAME.get_api_fields()
 
 
-class CNAMEViewSet(viewsets.ModelViewSet):
-    queryset = CNAME.objects.all()
+class CNAMEViewSet(CommonDNSViewSet):
+    model = CNAME
     serializer_class = CNAMESerializer
 
 
@@ -84,7 +101,7 @@ class TXTSerializer(CommonDNSSerializer):
         fields = standard_fields + TXT.get_api_fields()
 
 
-class TXTViewSet(viewsets.ModelViewSet):
+class TXTViewSet(CommonDNSViewSet):
     queryset = TXT.objects.all()
     serializer_class = TXTSerializer
 
@@ -95,7 +112,7 @@ class SRVSerializer(CommonDNSSerializer):
         fields = standard_fields + TXT.get_api_fields()
 
 
-class SRVViewSet(viewsets.ModelViewSet):
+class SRVViewSet(CommonDNSViewSet):
     queryset = SRV.objects.all()
     serializer_class = SRVSerializer
 
@@ -106,7 +123,7 @@ class MXSerializer(CommonDNSSerializer):
         fields = standard_fields + MX.get_api_fields()
 
 
-class MXViewSet(viewsets.ModelViewSet):
+class MXViewSet(CommonDNSViewSet):
     queryset = MX.objects.all()
     serializer_class = MXSerializer
 
@@ -187,10 +204,16 @@ class StaticInterfaceViewSet(viewsets.ModelViewSet):
     serializer_class = StaticInterfaceSerializer
 
     def create(self, request):
-        super(StaticInterfaceViewSet, self).create(request)
+        # super(StaticInterfaceViewSet, self).create(request)
+        pass
 
     def update(self, request, pk=None):
-        super(StaticInterfaceViewSet, self).update(request, pk)
+        # super(StaticInterfaceViewSet, self).update(request, pk)
+        pass
 
     def partial_update(self, request, pk=None):
-        super(StaticInterfaceViewSet, self).partial_update(request, pk)
+        # super(StaticInterfaceViewSet, self).partial_update(request, pk)
+        pass
+
+    def destroy(self, request, pk=None):
+        pass

@@ -1,0 +1,16 @@
+{% extends "core/core_base.html" %}
+
+{% block title %} Token for {{ user.username }} {% endblock %}
+{% block header %} Token for {{ user.username }} {% endblock %}
+
+{% block action_bar %}
+<a class="btn btn-primary" href="/api/authtoken/revoke/{{ token.pk }}">
+    Revoke Token
+</a>
+{% endblock %}
+
+{% block content %}
+    <p><b>Key:</b> {{ token.key }}</p>
+    <p><b>Purpose:</b> {{ token.purpose }}</p>
+    <p><b>Created:</b> {{ token.created }}</p>
+{% endblock %}
