@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
-from cyder.cydns.validation import validate_fqdn
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 
@@ -38,10 +37,7 @@ class BasePTR(object):
             1.1.193.128     PTR         FOO.BAR.COM
             ^-- PTR's shouldn't point to CNAMES
         """
-        if hasattr(self, 'name'):
-            name = self.name
-        else:
-            name = self.fqdn
+        name = self.fqdn
 
         if CNAME.objects.filter(fqdn=name).exists():
             raise ValidationError(
@@ -76,35 +72,31 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
     """
     A PTR is used to map an IP to a domain name.
 
-    >>> PTR(ip_str=ip_str, name=fqdn, ip_type=ip_type)
+    >>> PTR(ip_str=ip_str, fqdn=fqdn, ip_type=ip_type)
 
     """
     id = models.AutoField(primary_key=True)
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
                                        related_name='reverse')
 
-    name = models.CharField(
-        max_length=255, validators=[validate_fqdn], help_text="The name that "
-        "this record points to."
-    )
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
-                 "{rdtype:$rdtype_just} {name:1}.")
-    search_fields = ('ip_str', 'name')
+                 "{rdtype:$rdtype_just} {fqdn:1}.")
+    search_fields = ('ip_str', 'fqdn')
 
     class Meta:
         db_table = 'ptr'
-        unique_together = ('ip_str', 'ip_type', 'name')
+        unique_together = ('ip_str', 'ip_type', 'fqdn')
 
     def __str__(self):
-        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.name)
+        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.fqdn)
 
     def __repr__(self):
         return "<{0}>".format(str(self))
 
     @classmethod
     def get_api_fields(cls):
-        return ['ip_str', 'ip_type', 'name', 'ttl', 'description']
+        return ['ip_str', 'ip_type', 'fqdn', 'ttl', 'description']
 
     @property
     def rdtype(self):
@@ -127,10 +119,10 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
         # because that registration will generate a ptr record.
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         if (StaticInterface.objects.filter(
-                fqdn=self.name, ip_upper=self.ip_upper,
+                fqdn=self.fqdn, ip_upper=self.ip_upper,
                 ip_lower=self.ip_lower).exists()):
             raise ValidationError(
-                "An registration has already used this IP and Name."
+                "An registration has already used this IP and FQDN."
             )
         self.clean_reverse(update_reverse_domain=update_reverse_domain)
 
@@ -138,7 +130,8 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
         """For tables."""
         data = super(PTR, self).details()
         data['data'] = [
-            ('Name', 'name', self.name),
+            ('Label', 'label', self.label),
+            ('Domain', 'domain', self.domain),
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
@@ -147,7 +140,8 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
     def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
 

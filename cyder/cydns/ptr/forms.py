@@ -12,6 +12,7 @@ class PTRForm(DNSForm):
         model = PTR
         exclude = ('ip', 'reverse_domain', 'ip_upper',
                    'ip_lower')
-        fields = ('name', 'ip_type', 'ip_str', 'views', 'ttl', 'description')
+        fields = ('label', 'domain', 'ip_type', 'ip_str', 'views', 'ttl',
+                  'description')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'ip_type': forms.RadioSelect}
