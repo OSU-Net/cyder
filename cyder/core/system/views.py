@@ -1,3 +1,5 @@
+import socket
+
 from django import forms
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -44,10 +46,26 @@ def system_detail(request, pk):
     })
 
 
-def system_create_view(request):
-    system_form = ExtendedSystemForm()
+def system_create_view(request, initial):
     static_form = StaticInterfaceForm()
     dynamic_form = DynamicInterfaceForm()
+    if initial == 'static_interface':
+        initialForm = dict({'interface_type': 'Static'})
+
+    elif initial == 'dynamic_interface':
+        initialForm = dict({'interface_type': 'Dynamic'})
+
+    else:
+        try:
+            socket.inet_aton(initial)
+            initialForm = dict({'interface_type': 'Static'})
+            static_form = StaticInterfaceForm(
+                initial=dict({'ip_str': initial, 'ip_type': '4'}))
+
+        except socket.error:
+            initialForm = dict()
+
+    system_form = ExtendedSystemForm(initial=initialForm)
 
     if request.POST:
         post_data = qd_to_py_dict(request.POST)
