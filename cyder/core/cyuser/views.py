@@ -214,7 +214,7 @@ def user_detail(request, pk):
     for pk in ctnr_pks:
         ctnrs += [Ctnr.objects.get(id=pk)]
 
-    user_table = tablefy([user], users=True)
+    user_table = tablefy([user], users=True, info=False)
     ctnr_table = tablefy(ctnrs)
     contact_table = tablefy(contacts)
 
