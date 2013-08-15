@@ -37,7 +37,7 @@ def make_paginator(request, qs, num=20, obj_type=None):
         return paginator.page(paginator.num_pages)
 
 
-def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
+def tablefy(objects, users=False, extra_cols=None, info=True):
     """Make list of table headers, rows of table data, list of urls
     that may be associated with table data, and postback urls.
 
@@ -52,9 +52,12 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
     if not objects:
         return None
 
+    first_obj = objects[0]
+    views = hasattr(first_obj, 'views')
+
     try:
         can_update = True
-        objects[0].get_update_url()
+        first_obj.get_update_url()
     except:
         can_update = False
 
@@ -65,13 +68,20 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
     data = []
 
     # Build headers.
-    for title, sort_field, value in objects[0].details()['data']:
+    for title, sort_field, value in first_obj.details()['data']:
         headers.append([title, sort_field])
+
     if extra_cols:
         for col in extra_cols:
             headers.append([col['header'], col['sort_field']])
+
+    if isinstance(objects, Page):
+        foreign_keys = [j for _, j in headers if j]
+        objects.object_list = objects.object_list.select_related(*foreign_keys)
+
     if views:
         headers.append(['Views', None])
+        objects.object_list = objects.object_list.prefetch_related('views')
 
     if can_update:
         headers.append(['Actions', None])
