@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from rest_framework import serializers, viewsets
 
-from cyder.core.system.models import System
+from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.cydns.address_record.models import AddressRecord
@@ -29,12 +29,18 @@ class FQDNMixin(object):
                 self._errors['fqdn'] = e.messages
 
 
+class ViewMixin(object):
+    views = serializers.PrimaryKeyRelatedField(many=True)
+
+
+
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
     views = serializers.PrimaryKeyRelatedField(many=True)
 
 
 class CommonDNSViewSet(viewsets.ModelViewSet):
+    """
     def get_queryset(self):
         queryset = self.model.objects.all()
         query_kwargs = {
@@ -48,34 +54,16 @@ class CommonDNSViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(**query_kwargs)
 
         return queryset
-
-    def list(self, request):
-        return super(CommonDNSViewSet, self).list(self, request)
-
-    def create(self, request):
-        # return super(CommonDNSViewSet, self).create(self, request)
-        pass
-
-    def retrieve(self, request, pk=None):
-        return super(CommonDNSViewSet, self).retrieve(self, request)
-
-    def update(self, request, pk=None):
-        # return super(CommonDNSViewSet, self).update(self, request)
-        pass
-
-    def partial_update(self, request, pk=None):
-        # return super(CommonDNSViewSet, self).partial_update(self, request)
-        pass
-
-    def destroy(self, request, pk=None):
-        # return super(CommonDNSViewSet, self).partial_update(self, request)
-        pass
+    """
 
 
-class DomainSerializer(CommonDNSSerializer):
+class DomainSerializer(serializers.HyperlinkedModelSerializer):
+    master_domain = serializers.HyperlinkedRelatedField(
+        many=False, read_only=True, view_name='domain-detail')
+
     class Meta:
         model = Domain
-        fields = ['name', 'master_domain', 'soa', 'is_reverse', 'dirty',
+        fields = ['id', 'name', 'master_domain', 'soa', 'is_reverse', 'dirty',
                 'purgeable', 'delegated']
 
 
@@ -163,7 +151,7 @@ class NameserverViewSet(viewsets.ModelViewSet):
 
 class PTRSerializer(CommonDNSSerializer):
     class Meta:
-        models = PTR
+        model = PTR
         fields = standard_fields + PTR.get_api_fields()
 
 
@@ -172,9 +160,17 @@ class PTRViewSet(viewsets.ModelViewSet):
     serializer_class = PTRSerializer
 
 
+class SystemKeyValueSerializer(CommonDNSSerializer):
+    system = serializers.HyperlinkedRelatedField(
+            read_only=True, view_name="system")
+
+    class Meta:
+        model = SystemKeyValue
+
+
 class SystemSerializer(CommonDNSSerializer):
     class Meta:
-        models = System
+        model = System
         depth = 1
 
 

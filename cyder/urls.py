@@ -6,7 +6,6 @@ from funfactory.monkeypatches import patch
 patch()
 from cyder.api.v1.routes import router
 
-# from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.core.views import core_index
 from cyder.core.cyuser import views as cyuser_views
 from cyder.base.views import send_email, admin_page

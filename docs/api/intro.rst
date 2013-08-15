@@ -6,9 +6,9 @@ Introduction to The Cyder API
 :Version: 0.1 (draft)
 :API Version: 1
 
-The Cyder API allows read-only access to DNS records and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.
+The Cyder API allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.
 
-This document's examples are written in Python and make use of the urllib2 library, but any language and library that can make HTTP requests may also be used.
+This document's examples are written in Python and make use of the urllib2 standard Python library, but any language and library that can make HTTP requests may also be used.
 
 For readability, API responses in this tutorial will be formatted with linebreaks and indentation. Actual API responses will differ.
 
@@ -36,22 +36,24 @@ You will now see a page with your token's key, purpose, and date of creation. Fr
 
 **Note:** It is strongly recommended that you generate a new key for each application that will be accessing the API.
 
-Accessing the API
------------------
+API Basics
+----------
 
-To begin with, let's do a simple example.
+In this section, we'll do a low level overview of the data provided by the API using only Python and the urllib2 library.
+
+First, let's look at a basic function to submit requests to the API:
 
 .. code:: python
 
     import urllib2
     
-    def api_connect(token):
-        req = urllib2.Request("http://127.0.0.1:8000/api/v1/")
+    def api_connect(url, token):
+        req = urllib2.Request(url)
         req.add_header('HTTP-Accept', 'application/json')
         req.add_header('Authorization', 'Token ' + token)
         return urllib2.urlopen(req).read()
 
-This function illustrates a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. If a valid token is passed to the function, it returns the following:
+This function illustrates a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. If the API root URL and a valid token are passed to the function, it returns the following as a string:
 
 .. code:: json
 
@@ -68,3 +70,58 @@ This function illustrates a very basic request to the Cyder API. It creates a re
         "ptr": "http://127.0.0.1:8000/api/v1/ptr/"
     }
 
+This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided for ease of navigation. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.
+
+Let's see what happens when we pass one of these URLs to ``api_connect``.
+
+.. code:: python
+
+    print api_connect("http://127.0.0.1:8000/api/v1/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+
+This gives a list view of Domain objects:
+
+.. code:: json
+
+    {
+        "count": 2068,
+        "next": "http://127.0.0.1:8000/api/v1/domain/?page=2",
+        "previous": null,
+        "results": [
+            {
+                "id": 6,
+                "name": "arpa",
+                "master_domain": null,
+                "soa": null,
+                "is_reverse": true,
+                "dirty": false,
+                "purgeable": false,
+                "delegated": false
+            },
+            {
+                "id": 7,
+                "name": "in-addr.arpa",
+                "master_domain": "http://127.0.0.1:8000/api/v1/domain/6/",
+                "soa": null,
+                "is_reverse": true,
+                "dirty": false,
+                "purgeable": false,
+                "delegated": false
+            },
+            ...
+        ]
+    }
+
+This list has been truncated for brevity.
+
+There are a few important things to note here:
+
+1. *count*, *next*, and *previous* all provide data that can help simplify API interaction.
+   - *count* gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.
+   - *next* and *previous* each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be ``null`` if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be fewer pages than there were at the beginning.
+2. As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name ``in-addr.arpa``, you could simply pass the value of ``master_domain`` to api_connect and retrieve the appropriate record.
+
+Now we know how to retrieve general lists of objects, but what if we want to access a specific record? Since our previous response contained a URL pointing directly to a record, let's see what happens when we follow that URL.
+
+.. code:: python
+
+    print api_connect("http://127.0.0.1:8000/api/v1/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
