@@ -90,7 +90,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
-        System, help_text='System to associate the interface with')
+        System, null=True, blank=True,
+        help_text='System to associate the interface with')
 
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
@@ -236,6 +237,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if self.dhcp_enabled:
             self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
+
+        if not self.system:
+            raise ValidationError(
+                "An interface means nothing without its system."
+            )
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
