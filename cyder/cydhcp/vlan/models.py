@@ -72,9 +72,6 @@ class Vlan(models.Model, ObjectUrlMixin):
 
         return None
 
-    def get_related_sites(self, related_networks):
-        return set([network.site for network in related_networks])
-
 
 class VlanKeyValue(KeyValue):
     vlan = models.ForeignKey(Vlan, null=False)
