@@ -114,6 +114,7 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
         super(PTR, self).delete(*args, **kwargs)
 
     def clean(self, update_reverse_domain=True):
+        super(PTR, self).clean()
         self.clean_ip()
         # We need to check if there is a registration using our ip and name
         # because that registration will generate a ptr record.
