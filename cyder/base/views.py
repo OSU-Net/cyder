@@ -1,5 +1,6 @@
 import simplejson as json
 
+from django import forms
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, BadHeaderError
@@ -177,7 +178,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
 
     if Klass.__name__ in [
             "StaticInterface", "DynamicInterface"] and pk is None:
-        form = 'none'
+        form.fields['system'].widget = forms.HiddenInput()
 
     return render(request, template, {
         'form': form,
