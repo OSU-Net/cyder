@@ -2,7 +2,7 @@ import operator
 
 from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Q, query
 from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
@@ -53,7 +53,8 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
         return None
 
     if users:
-        objects = [user.get_profile() for user in objects]
+        from cyder.core.cyuser.models import UserProfile
+        objects = UserProfile.objects.filter(user__in=objects)
 
     first_obj = objects[0]
     views = hasattr(first_obj, 'views')
@@ -75,9 +76,11 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
         for col in extra_cols:
             headers.append([col['header'], col['sort_field']])
 
+    foreign_keys = [j for _, j in headers if j]
     if isinstance(objects, Page):
-        foreign_keys = [j for _, j in headers if j]
         objects.object_list = objects.object_list.select_related(*foreign_keys)
+    elif isinstance(objects, query.QuerySet):
+        objects = objects.select_related(*foreign_keys)
 
     if views:
         headers.append(['Views', None])

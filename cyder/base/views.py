@@ -54,8 +54,9 @@ def admin_page(request):
             lost_users = []
             perma_delete_data = []
             superusers = []
+            nonlost_users = CtnrUser.objects.values_list('user')
             for user in User.objects.all().order_by('username'):
-                if CtnrUser.objects.filter(user_id=user.id).exists() is False:
+                if (user.pk,) not in nonlost_users:
                     lost_users.append(user)
 
                 if user.is_superuser:
