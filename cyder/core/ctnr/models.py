@@ -79,13 +79,16 @@ class CtnrUser(models.Model, ObjectUrlMixin):
         db_table = 'ctnr_users'
         unique_together = ('ctnr', 'user')
 
+    def __str__(self):
+        return self.ctnr.name
+
     def get_detail_url(self):
         return self.ctnr.get_detail_url()
 
     def details(self):
         data = super(CtnrUser, self).details()
         data['data'] = (
-            ('Container', 'ctnr', self.ctnr),
+            ('Container', 'ctnr', self),
             ('User', 'user', self.user),
             ('Level', 'level', LEVELS[self.level]),
         )
