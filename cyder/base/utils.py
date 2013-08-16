@@ -156,7 +156,8 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
         col_index = 0
 
     if data and not issubclass(type(objects), Page):
-        data = sorted(data, key=lambda row: row[col_index]['value'][0].lower())
+        data = sorted(
+            data, key=lambda row: str(row[col_index]['value'][0]).lower())
 
     return {
         'headers': headers,
