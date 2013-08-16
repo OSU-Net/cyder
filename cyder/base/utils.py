@@ -110,22 +110,13 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
             # Manual extra columns.
             for col in extra_cols:
                 d = col['data'][i]
+                data_fields = ['value', 'url', 'img', 'class']
                 if isinstance(d['value'], list):
-                    if 'img' in d:
-                        row_data.append({'value': d['value'], 'url': d['url'],
-                                         'img': d['img'], 'class': d['class']})
-                    else:
-                        row_data.append({'value': d['value'], 'url': d['url']})
+                    row_data.append(dict((key, value) for (key, value) in
+                                         d.items() if key in data_fields))
                 else:
-                    if 'img' in d:
-                        row_data.append({'value': [d['value']],
-                                         'url': [d['url']],
-                                         'img': [d['img']],
-                                         'class': [d['class']]})
-
-                    else:
-                        row_data.append({'value': [d['value']],
-                                         'url': [d['url']]})
+                    row_data.append(dict((key, [value]) for (key, value) in
+                                         d.items() if key in data_fields))
 
         if views:
             # Another column for views.
