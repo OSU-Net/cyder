@@ -52,6 +52,9 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
     if not objects:
         return None
 
+    if users:
+        objects = [user.get_profile() for user in objects]
+
     first_obj = objects[0]
     views = hasattr(first_obj, 'views')
 
@@ -60,9 +63,6 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
         first_obj.get_update_url()
     except:
         can_update = False
-
-    if users:
-        objects = [user.get_profile() for user in objects]
 
     headers = []
     data = []
