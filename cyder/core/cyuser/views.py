@@ -1,6 +1,6 @@
 import json
 
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -9,7 +9,6 @@ from django.http import Http404, HttpResponse
 from django.db.models import Q
 from django.conf import settings
 
-from cyder.base.utils import tablefy
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
@@ -54,19 +53,20 @@ def login_session(request, username):
                                                     ctnr=default_ctnr).level
 
     try:
-        # Set ctnr list (to switch between).
-        global_ctnr = CtnrUser.objects.get(user=request.user, ctnr=1)
-        if global_ctnr:
-            request.session['ctnrs'] = (list(
-                Ctnr.objects.filter(Q(id=1) | Q(id=2))) +
-                list(Ctnr.objects.exclude(Q(id=1) | Q(id=2)).order_by("name")))
+        CtnrUser.objects.get(user=request.user, ctnr=1)
+        ctnrs = Ctnr.objects.order_by("name")
 
     except CtnrUser.DoesNotExist:
         # Set ctnr list (to switch between).
         ctnrs_user = CtnrUser.objects.filter(user=request.user)
-        ctnrs = [Ctnr.objects.get(id=ctnr_pk) for ctnr_pk in
-                 ctnrs_user.values_list('ctnr', flat=True)]
-        request.session['ctnrs'] = ctnrs
+        ctnrs = ctnrs_user.values_list('ctnr', flat=True)
+        ctnrs = Ctnr.objects.filter(id__in=ctnrs).order_by('name')
+
+    global_ctnr = Ctnr.objects.get(id=1)
+    ctnrs = ctnrs.exclude(Q(id=2) | Q(id=1))
+    ctnrs = [global_ctnr] + list(ctnrs)
+
+    request.session['ctnrs'] = ctnrs
 
     return request
 
@@ -202,20 +202,18 @@ def unbecome_user(request):
 
 
 def user_detail(request, pk):
-    user = User.objects.get(id=pk)
-    email = user.email
+    from cyder.base.views import cy_detail
+
+    user = UserProfile.objects.get(id=pk)
+    email = User.objects.get(id=pk).email
+    contacts = []
     if email:
-        contacts = Ctnr.objects.filter(email_contact=email)
+        contacts = (Ctnr.objects.filter(email_contact__contains=email))
     else:
         contacts = []
-    ctnr_pks = [ctnr_user.ctnr_id for ctnr_user in CtnrUser.objects.filter(
-        user_id=user.id)]
-    ctnrs = Ctnr.objects.filter(pk__in=ctnr_pks)
 
-    user_table = tablefy([user], users=True, info=False)
-    ctnr_table = tablefy(ctnrs)
-    contact_table = tablefy(contacts)
-
-    return render(request, 'cyuser/user_detail.html',
-                  {'user': user, 'user_table': user_table,
-                   'ctnr_table': ctnr_table, 'contact_table': contact_table})
+    ctnrs = CtnrUser.objects.filter(user_id=user)
+    return cy_detail(request, UserProfile, 'cyuser/user_detail.html', {
+        'Containers': ctnrs,
+        'Contact For': contacts,
+    }, obj=user)

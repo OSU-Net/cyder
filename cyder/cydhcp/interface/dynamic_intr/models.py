@@ -17,11 +17,14 @@ import datetime
 
 class DynamicInterface(models.Model, ObjectUrlMixin):
     ctnr = models.ForeignKey(Ctnr, null=False)
-    workgroup = models.ForeignKey(Workgroup, null=True)
+    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+    system = models.ForeignKey(System,
+                               null=True,
+                               blank=True,
+                               help_text="System to associate "
+                                         "the interface with")
     mac = models.CharField(max_length=19, blank=True)
-    system = models.ForeignKey(System, help_text="System to associate "
-                                                 "the interface with")
-    vrf = models.ForeignKey(Vrf, null=True)
+    vrf = models.ForeignKey(Vrf, null=True, blank=True)
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, null=False)
     dhcp_enabled = models.BooleanField(default=True)
@@ -104,6 +107,11 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         if self.dhcp_enabled:
             self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
+
+        if not self.system:
+            raise ValidationError(
+                "An interface means nothing without its system."
+            )
 
         super(DynamicInterface, self).clean()
 

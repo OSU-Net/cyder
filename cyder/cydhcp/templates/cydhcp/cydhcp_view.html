@@ -17,7 +17,6 @@
 {% endblock %}
 
 {% block form %}
-  {% if form != 'none' %}
     {% if pretty_obj_type == 'Range' %}
       {{ js('rangeform') }}
     {% endif %}
@@ -40,5 +39,4 @@
         </div>
       </form>
     </div>
-  {% endif %}
 {% endblock %}
