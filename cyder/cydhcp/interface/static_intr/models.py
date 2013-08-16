@@ -121,6 +121,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         #        self.fqdn, self.mac)
         return self.fqdn
 
+    @property
     def mac_str(self):
         return (':').join(re.findall('..', self.mac))
 
@@ -140,7 +141,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
-            ('MAC', 'mac', self.mac_str()),
+            ('MAC', 'mac', self.mac_str),
             ('Vrf', 'vrf', self.vrf),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',
