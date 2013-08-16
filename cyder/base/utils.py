@@ -151,9 +151,12 @@ def tablefy(objects, views=False, users=False, extra_cols=None, info=True):
 
     if data[0][0]['value'] == ['Info']:
         headers.insert(0, ['Info', None])
+        col_index = 1
+    else:
+        col_index = 0
 
-    if not issubclass(type(objects), Page):
-        data = sorted(data, key=lambda row: row[0]['value'])
+    if data and not issubclass(type(objects), Page):
+        data = sorted(data, key=lambda row: row[col_index]['value'][0].lower())
 
     return {
         'headers': headers,
