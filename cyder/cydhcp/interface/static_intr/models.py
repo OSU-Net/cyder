@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 import cydns
 import datetime
+import re
 
 from cyder.core.system.models import System
 
@@ -120,6 +121,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         #        self.fqdn, self.mac)
         return self.fqdn
 
+    def mac_str(self):
+        return (':').join(re.findall('..', self.mac))
+
     def update_attrs(self):
         self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
 
@@ -136,7 +140,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
-            ('MAC', 'mac', self.mac),
+            ('MAC', 'mac', self.mac_str()),
             ('Vrf', 'vrf', self.vrf),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',
