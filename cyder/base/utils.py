@@ -84,7 +84,8 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
 
     if views:
         headers.append(['Views', None])
-        objects.object_list = objects.object_list.prefetch_related('views')
+        if hasattr(objects, 'object_list'):
+            objects.object_list = objects.object_list.prefetch_related('views')
 
     if can_update:
         headers.append(['Actions', None])
