@@ -210,9 +210,7 @@ def user_detail(request, pk):
         contacts = []
     ctnr_pks = [ctnr_user.ctnr_id for ctnr_user in CtnrUser.objects.filter(
         user_id=user.id)]
-    ctnrs = []
-    for pk in ctnr_pks:
-        ctnrs += [Ctnr.objects.get(id=pk)]
+    ctnrs = Ctnr.objects.filter(pk__in=ctnr_pks)
 
     user_table = tablefy([user], users=True, info=False)
     ctnr_table = tablefy(ctnrs)
