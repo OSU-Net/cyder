@@ -54,19 +54,20 @@ def login_session(request, username):
                                                     ctnr=default_ctnr).level
 
     try:
-        # Set ctnr list (to switch between).
-        global_ctnr = CtnrUser.objects.get(user=request.user, ctnr=1)
-        if global_ctnr:
-            request.session['ctnrs'] = (list(
-                Ctnr.objects.filter(Q(id=1) | Q(id=2))) +
-                list(Ctnr.objects.exclude(Q(id=1) | Q(id=2)).order_by("name")))
+        CtnrUser.objects.get(user=request.user, ctnr=1)
+        ctnrs = Ctnr.objects.order_by("name")
 
     except CtnrUser.DoesNotExist:
         # Set ctnr list (to switch between).
         ctnrs_user = CtnrUser.objects.filter(user=request.user)
-        ctnrs = [Ctnr.objects.get(id=ctnr_pk) for ctnr_pk in
-                 ctnrs_user.values_list('ctnr', flat=True)]
-        request.session['ctnrs'] = ctnrs
+        ctnrs = ctnrs_user.values_list('ctnr', flat=True)
+        ctnrs = Ctnr.objects.filter(id__in=ctnrs).order_by('name')
+
+    global_ctnr = Ctnr.objects.get(id=1)
+    ctnrs = ctnrs.exclude(Q(id=2) | Q(id=1))
+    ctnrs = [global_ctnr] + list(ctnrs)
+
+    request.session['ctnrs'] = ctnrs
 
     return request
 
