@@ -18,7 +18,8 @@ class LibTestsDomain(TestCase):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
-        self.system = System()
+        self.system = System(name='foobar')
+        self.system.save()
         Domain.objects.get_or_create(name="com")
         Domain.objects.get_or_create(name="mozilla.com")
 
