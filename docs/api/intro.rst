@@ -8,7 +8,7 @@ Introduction to The Cyder API
 
 The Cyder API allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.
 
-This document's examples are written in Python and make use of the urllib2 standard Python library, but any language and library that can make HTTP requests may also be used.
+This document's examples are written in Python and make use of the urllib2 standard Python library, but anything that can make HTTP requests may also be used, including command line tools.
 
 For readability, API responses in this tutorial will be formatted with linebreaks and indentation. Actual API responses will differ.
 
@@ -53,7 +53,7 @@ First, let's look at a basic function to submit requests to the API:
         req.add_header('Authorization', 'Token ' + token)
         return urllib2.urlopen(req).read()
 
-This function illustrates a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. If the API root URL and a valid token are passed to the function, it returns the following as a string:
+This function illustrates the structure of a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. At a minimum, you must pass headers containing the desired response format (``application/json`` is the only currently supported format, but if you don't send it the server will return an HTML response instead) and your API token. If the API root URL, response format, and a valid token are passed to the function, it returns the following as a string:
 
 .. code:: json
 
@@ -78,7 +78,7 @@ Let's see what happens when we pass one of these URLs to ``api_connect``.
 
     print api_connect("http://127.0.0.1:8000/api/v1/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
 
-This gives a list view of Domain objects:
+This returns a **list view** of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and client. Here is a truncated version of a possible response to the above query:
 
 .. code:: json
 
@@ -88,40 +88,57 @@ This gives a list view of Domain objects:
         "previous": null,
         "results": [
             {
-                "id": 6,
-                "name": "arpa",
-                "master_domain": null,
-                "soa": null,
-                "is_reverse": true,
+                "delegated": false,
                 "dirty": false,
+                "id": 1,
+                "is_reverse": true,
+                "master_domain": null,
+                "name": "arpa",
                 "purgeable": false,
-                "delegated": false
+                "soa": null
             },
             {
-                "id": 7,
-                "name": "in-addr.arpa",
-                "master_domain": "http://127.0.0.1:8000/api/v1/domain/6/",
-                "soa": null,
-                "is_reverse": true,
+                "delegated": false,
                 "dirty": false,
+                "id": 2,
+                "is_reverse": true,
+                "master_domain": "http://127.0.0.1:8000/dns/domain/1/",
+                "name": "in-addr.arpa",
                 "purgeable": false,
-                "delegated": false
+                "soa": null
             },
             ...
         ]
     }
 
-This list has been truncated for brevity.
-
 There are a few important things to note here:
 
 1. *count*, *next*, and *previous* all provide data that can help simplify API interaction.
+
    - *count* gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.
    - *next* and *previous* each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be ``null`` if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be fewer pages than there were at the beginning.
+   
 2. As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name ``in-addr.arpa``, you could simply pass the value of ``master_domain`` to api_connect and retrieve the appropriate record.
 
 Now we know how to retrieve general lists of objects, but what if we want to access a specific record? Since our previous response contained a URL pointing directly to a record, let's see what happens when we follow that URL.
 
 .. code:: python
 
-    print api_connect("http://127.0.0.1:8000/api/v1/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+    print api_connect("http://127.0.0.1:8000/api/v1/domain/2/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+    
+This returns a **detail view** of the Domain record with an ``id`` of 2. 
+
+    {
+        "delegated": false,
+        "dirty": false,
+        "id": 2,
+        "is_reverse": true,
+        "master_domain": "http://127.0.0.1:8000/dns/domain/1/",
+        "name": "in-addr.arpa",
+        "purgeable": false,
+        "soa": null
+    }
+
+[Put some stuff about the response and detail views here.]
+
+Domain records are simple, but some objects, such as Static Interfaces, are more complex. In addition to a variety of predefined fields, Static Interface records can have user defined key-value pairs 

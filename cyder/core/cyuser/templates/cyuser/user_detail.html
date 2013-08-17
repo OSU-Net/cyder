@@ -18,7 +18,7 @@
     {% endif %}
     {% endif %}
     {% if request.user.username == user.username %}
-        <a class="btn btn-primary" href="/api/authtoken/request/">
+    <a class="btn btn-primary" href="{{ url('request-token') }}">
         Request API Token
         </a>
     {% endif %}

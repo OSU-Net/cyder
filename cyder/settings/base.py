@@ -236,4 +236,5 @@ REST_FRAMEWORK = {
         'cyder.api.authtoken.authentication.CyderTokenAuthentication',
     ),
     'PAGINATE_BY': 25,
+    'DEFAULT_FILTER_BACKENDS': ('cyder.api.filter.SearchFieldFilter',),
 }

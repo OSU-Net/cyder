@@ -10,7 +10,8 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'Token'
         db.create_table('authtoken_token', (
-            ('key', self.gf('django.db.models.fields.CharField')(max_length=40, primary_key=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=40)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('purpose', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -56,7 +57,8 @@ class Migration(SchemaMigration):
         'authtoken.token': {
             'Meta': {'object_name': 'Token'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'key': ('django.db.models.fields.CharField', [], {'max_length': '40', 'primary_key': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'}),
             'purpose': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },

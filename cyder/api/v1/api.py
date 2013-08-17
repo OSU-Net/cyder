@@ -4,6 +4,8 @@ from rest_framework import serializers, viewsets
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicIntrKeyValue
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -29,37 +31,21 @@ class FQDNMixin(object):
                 self._errors['fqdn'] = e.messages
 
 
-class ViewMixin(object):
-    views = serializers.PrimaryKeyRelatedField(many=True)
-
-
-
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
-    views = serializers.PrimaryKeyRelatedField(many=True)
+    views = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field='name')
 
 
 class CommonDNSViewSet(viewsets.ModelViewSet):
-    """
-    def get_queryset(self):
-        queryset = self.model.objects.all()
-        query_kwargs = {
-            key + '__iexact': value
-            for (key, value)
-            in self.request.QUERY_PARAMS
-            if key in self.model.search_fields
-        }
-
-        if len(query_kwargs):
-            queryset = queryset.filter(**query_kwargs)
-
-        return queryset
-    """
+    def __init__(self, *args, **kwargs):
+        self.search_fields = self.model.search_fields
+        super(CommonDNSViewSet,self).__init__(*args, **kwargs)
 
 
 class DomainSerializer(serializers.HyperlinkedModelSerializer):
     master_domain = serializers.HyperlinkedRelatedField(
-        many=False, read_only=True, view_name='domain-detail')
+        many=False, read_only=True, view_name='api-domain-detail')
 
     class Meta:
         model = Domain
@@ -162,36 +148,46 @@ class PTRViewSet(viewsets.ModelViewSet):
 
 class SystemKeyValueSerializer(CommonDNSSerializer):
     system = serializers.HyperlinkedRelatedField(
-            read_only=True, view_name="system")
+            read_only=True, view_name="api-system-detail")
 
     class Meta:
         model = SystemKeyValue
 
 
-class SystemSerializer(CommonDNSSerializer):
+class SystemSerializer(serializers.HyperlinkedModelSerializer):
+    systemkeyvalue_set = SystemKeyValueSerializer(
+        many=True, read_only=True)
+
     class Meta:
         model = System
         depth = 1
+        fields = standard_fields + ['name', 'systemkeyvalue_set']
 
 
 class SystemViewSet(viewsets.ModelViewSet):
     queryset = System.objects.all()
     serializer_class = SystemSerializer
+    search_fields = ['name']
 
 
 class StaticIntrKeyValueSerializer(CommonDNSSerializer):
     static_interface = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name="staticinterface")
+        read_only=True, view_name="api-staticinterface-detail")
 
     class Meta:
         model = StaticIntrKeyValue
 
 
+class StaticIntrKeyValueViewSet(viewsets.ModelViewSet):
+    queryset = StaticIntrKeyValue.objects.all()
+    serializer_class = StaticIntrKeyValueSerializer
+
+
 class StaticInterfaceSerializer(CommonDNSSerializer):
     class Meta:
         model = StaticInterface
-        fields = standard_fields + StaticInterface.get_api_fields() + ['system',
-            'staticintrkeyvalue_set']
+        fields = (standard_fields + StaticInterface.get_api_fields() +
+            ['system', 'staticintrkeyvalue_set'])
         depth = 1
 
 
@@ -199,17 +195,27 @@ class StaticInterfaceViewSet(viewsets.ModelViewSet):
     queryset = StaticInterface.objects.all()
     serializer_class = StaticInterfaceSerializer
 
-    def create(self, request):
-        # super(StaticInterfaceViewSet, self).create(request)
-        pass
 
-    def update(self, request, pk=None):
-        # super(StaticInterfaceViewSet, self).update(request, pk)
-        pass
+class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
+    dynamic_interface = serializers.HyperlinkedRelatedField(
+            read_only=True, view_name="api-dynamicinterface")
 
-    def partial_update(self, request, pk=None):
-        # super(StaticInterfaceViewSet, self).partial_update(request, pk)
-        pass
+    class Meta:
+        model = DynamicIntrKeyValue
 
-    def destroy(self, request, pk=None):
-        pass
+
+class DynamicIntrKeyValueViewSet(viewsets.ModelViewSet):
+    queryset = DynamicIntrKeyValue.objects.all()
+    serializer_class = DynamicIntrKeyValueSerializer
+
+
+class DynamicInterfaceSerializer(CommonDNSSerializer):
+    class Meta:
+        model = DynamicInterface
+        fields = ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf',
+            'domain', 'range', 'dhcp_enabled', 'dns_enabled', 'last_seen']
+
+
+class DynamicInterfaceViewSet(viewsets.ModelViewSet):
+    queryset = DynamicInterface.objects.all()
+    serializer_class= DynamicInterfaceSerializer

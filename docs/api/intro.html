@@ -385,7 +385,7 @@ ul.auto-toc {
     <span class="name">req</span><span class="operator">.</span><span class="name">add_header</span><span class="punctuation">(</span><span class="literal string">'Authorization'</span><span class="punctuation">,</span> <span class="literal string">'Token '</span> <span class="operator">+</span> <span class="name">token</span><span class="punctuation">)</span>
     <span class="keyword">return</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">urlopen</span><span class="punctuation">(</span><span class="name">req</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">read</span><span class="punctuation">()</span>
 </pre>
-<p>This function illustrates a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. If the API root URL and a valid token are passed to the function, it returns the following as a string:</p>
+<p>This function illustrates the structure of a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. At a minimum, you must pass headers containing the desired response format (<tt class="docutils literal">application/json</tt> is the only currently supported format, but if you don't send it the server will return an HTML response instead) and your API token. If the API root URL, response format, and a valid token are passed to the function, it returns the following as a string:</p>
 <pre class="code json literal-block">
 <span class="punctuation">{</span>
     <span class="name tag">&quot;staticinterface&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/staticinterface/&quot;</span><span class="punctuation">,</span>
@@ -439,15 +439,21 @@ ul.auto-toc {
 <p>This list has been truncated for brevity.</p>
 <p>There are a few important things to note here:</p>
 <ol class="arabic simple">
-<li><em>count</em>, <em>next</em>, and <em>previous</em> all provide data that can help simplify API interaction.
-- <em>count</em> gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.
-- <em>next</em> and <em>previous</em> each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be <tt class="docutils literal">null</tt> if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be fewer pages than there were at the beginning.</li>
+<li><em>count</em>, <em>next</em>, and <em>previous</em> all provide data that can help simplify API interaction.<ul>
+<li><em>count</em> gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.</li>
+<li><em>next</em> and <em>previous</em> each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be <tt class="docutils literal">null</tt> if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be fewer pages than there were at the beginning.</li>
+</ul>
+</li>
 <li>As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name <tt class="docutils literal"><span class="pre">in-addr.arpa</span></tt>, you could simply pass the value of <tt class="docutils literal">master_domain</tt> to api_connect and retrieve the appropriate record.</li>
 </ol>
 <p>Now we know how to retrieve general lists of objects, but what if we want to access a specific record? Since our previous response contained a URL pointing directly to a record, let's see what happens when we follow that URL.</p>
 <pre class="code python literal-block">
-<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/domain/&quot;</span><span class="punctuation">,</span>  <span class="literal string">&quot;fa4a19797dc9f920c7ae096f4474531c86aaaa0a&quot;</span><span class="punctuation">)</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/domain/6/&quot;</span><span class="punctuation">,</span>  <span class="literal string">&quot;fa4a19797dc9f920c7ae096f4474531c86aaaa0a&quot;</span><span class="punctuation">)</span>
 </pre>
+<p>This returns the following:</p>
+<div class="section" id="todo-insert-response-here">
+<h3>TODO: Insert Response Here</h3>
+</div>
 </div>
 </div>
 </div>

@@ -2,17 +2,24 @@ from rest_framework import routers
 
 from cyder.api.v1 import api
 
+
+"""All base names are prefixed with 'api-' to disambiguate API views from
+standard Django/Jinja2 views.
+"""
 router = routers.DefaultRouter()
-router.register(r'cname', api.CNAMEViewSet, base_name='cname')
-router.register(r'domain', api.DomainViewSet, base_name='domain')
-router.register(r'txt', api.TXTViewSet, base_name='txt')
-router.register(r'srv', api.SRVViewSet, base_name='srv')
-router.register(r'mx', api.MXViewSet, base_name='mx')
+router.register(r'cname', api.CNAMEViewSet, base_name='api-cname')
+router.register(r'domain', api.DomainViewSet, base_name='api-domain')
+router.register(r'txt', api.TXTViewSet, base_name='api-txt')
+router.register(r'srv', api.SRVViewSet, base_name='api-srv')
+router.register(r'mx', api.MXViewSet, base_name='api-mx')
 router.register(r'addressrecord', api.AddressRecordViewSet,
-                base_name='addressrecord')
-router.register(r'nameserver', api.NameserverViewSet, base_name='nameserver')
-router.register(r'ptr', api.PTRViewSet, base_name='ptr')
-router.register(r'system', api.SystemViewSet, base_name='system')
+                base_name='api-addressrecord')
+router.register(r'nameserver', api.NameserverViewSet,
+                base_name='api-nameserver')
+router.register(r'ptr', api.PTRViewSet, base_name='api-ptr')
+router.register(r'system', api.SystemViewSet, base_name='api-system')
 router.register(r'staticinterface', api.StaticInterfaceViewSet,
-                base_name='staticinterface')
+                base_name='api-staticinterface')
+router.register(r'dynamicinterface', api.DynamicInterfaceViewSet,
+                base_name='api-dynamicinterface')
 urlpatterns = router.urls
