@@ -107,16 +107,16 @@ class Network(models.Model, ObjectUrlMixin):
         self.update_network()
         super(Network, self).save(*args, **kwargs)
 
-        if (self.pk is None and
-                not self.networkkeyvalue_set.filter(key='routers').exists()):
-            if self.ip_type == IP_TYPE_4:
-                router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
-            else:
-                router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
+        #if (self.pk is None and
+                #not self.networkkeyvalue_set.filter(key='routers').exists()):
+            #if self.ip_type == IP_TYPE_4:
+                #router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
+            #else:
+                #router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
 
-            kv = NetworkKeyValue(key="routers", value=router, network=self)
-            kv.clean()
-            kv.save()
+            #kv = NetworkKeyValue(key="routers", value=router, network=self)
+            #kv.clean()
+            #kv.save()
 
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
