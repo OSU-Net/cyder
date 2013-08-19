@@ -1,4 +1,5 @@
 import json
+from django.core import management
 from django.contrib.auth.models import User
 from django.test.client import Client, FakePayload
 
@@ -46,25 +47,30 @@ class APITests(object):
     f_object_url = "/api/v{0}/{1}/{2}/"
 
     def __init__(self):
+        management.call_command('flush')
         self.domain = build_sample_domain()
+        self.token = Token.objects.create(
+            user=User.objects.get(username="test_superuser")).key
+        self.authheader = {'HTTP_AUTHORIZATION': 'Token ' + self.token}
+        management.call_command('flush') # flush the db between tests
+        self.domain = build_sample_domain()
+        self.token = Token.objects.create(
+            user=User.objects.get(username="test_superuser")).key
+        self.authheader = {'HTTP_AUTHORIZATION': 'Token ' + self.token}
         self.root_url = self.f_root_url.format(API_VERSION)
         self.object_list_url = self.f_object_list_url.format(
             API_VERSION, str(self.model.__name__).lower())
         self.object_url = lambda n: self.f_object_url.format(
             API_VERSION, str(self.model.__name__).lower(), n)
-        self.token = Token.objects.create(
-            user=User.objects.get(username="test_superuser")).key
-        self.authheader = {'HTTP_AUTHORIZATION': 'Token ' + self.token}
 
     def setUp(self):
-        pass
+        """Set up the tests.
 
-    def generic_create(self, post_data):
-        obj_count = self.model.objects.count()
-        resp = self.client.post(self.object_list_url, data=post_data)
-        self.assertHttpCreated(resp)
-        assert self.model.objects.count() == obj_count + 1
-        return resp, post_data
+        Note for future maintainers: Do not assume like I did that setUp
+        runs only once, at the start of tests. In fact, it runs between every
+        test.
+        """
+        pass
 
     def assertEqualKeys(self, a, b):
         for key in a:
@@ -84,36 +90,51 @@ class APITests(object):
 
     def metatest_unauthorized(self, url):
         resp = self.client.get(url)
-        self.assertHttpUnauthorized(401)
-        assert json.loads(resp.content)['details'] == \
+        self.assertHttpUnauthorized(resp)
+        assert json.loads(resp.content)['detail'] == \
                 "Authentication credentials were not provided."
 
     def test_unauthorized_root(self):
+        """Test that unauthorized users can't access root."""
         self.metatest_unauthorized(self.root_url)
 
     def test_unauthorized_list(self):
+        """Test that unauthorized users can't access the list view."""
         self.metatest_unauthorized(self.object_list_url)
 
     def test_unauthorized_detail(self):
+        """Test that unauthorized users can't access the detail view."""
         self.metatest_unauthorized(self.object_url(1))
 
     def test_nonexistent(self):
-        resp = self.client.get(self.object_url(1), **self.authheader)
+        """Test that nonexistent records return 404 and are not found.
+
+        This should probably be changed because it currently has a very low
+        probability of returning a false negative.
+        """
+        resp = self.client.get(
+            self.object_url(random_byte()), **self.authheader)
         self.assertHttpNotFound(resp)
-        assert json.loads(resp.content)['details'] == "Not found"
+        assert json.loads(resp.content)['detail'] == "Not found"
 
     def test_existing(self):
+        """Check that existing records get returned properly.
+
+        This might need to be converted into a separate test for each model.
+        Checking that the data used to create the record is properly returned
+        in the API is somewhat difficult and may require a bit of creativity.
+        """
         obj, _ = self.model.objects.get_or_create(**self.setup_data)
         resp = self.client.get(self.object_url(obj.id),
                                **self.authheader)
         self.assertHttpOK(resp)
 
 
-class AddressRecordV4APITests(APITests):
+class AddressRecordV4API_Test(APITests):
     model = AddressRecord
 
     def setUp(self):
-        super(AddressRecordV4APITests, self).setUp()
+        super(AddressRecordV4API_Test, self).setUp()
         self.setup_data = {
             'description': 'IPv4 address record.',
             'ttl': 3600,
@@ -123,13 +144,13 @@ class AddressRecordV4APITests(APITests):
         }
 
 
-class AddressRecordV6APITests(APITests):
+class AddressRecordV6API_Test(APITests):
     model = AddressRecord
 
     def setUp(self):
-        super(AddressRecordV6APITests, self).setUp()
+        super(AddressRecordV6API_Test, self).setUp()
         self.setup_data = {
-            'decription': 'IPv6 address record.',
+            'description': 'IPv6 address record.',
             'ttl': 3600,
             'fqdn': 'subdomain.' + self.domain.name,
             'ip_str': "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
@@ -137,11 +158,11 @@ class AddressRecordV6APITests(APITests):
         }
 
 
-class CNAMEAPITests(APITests):
+class CNAMEAPI_Test(APITests):
     model = CNAME
 
     def setUp(self):
-        super(CNAMEAPITests, self).setUp()
+        super(CNAMEAPI_Test, self).setUp()
         self.setup_data = {
             'description': 'CNAME record',
             'ttl': 3600,
@@ -150,11 +171,11 @@ class CNAMEAPITests(APITests):
         }
 
 
-class DomainAPITests(APITests):
+class DomainAPI_Test(APITests):
     model = Domain
 
     def setUp(self):
-        super(DomainAPITests, self).setUp()
+        super(DomainAPI_test, self).setUp()
         self.setup_data = {
             'name': random_label() + '.' + self.domain.name,
             'master_domain': self.domain,
@@ -172,7 +193,6 @@ class DomainAPITests(APITests):
 
         # try to retrieve the master domain
         data = json.loads(resp.content)
-        # import pdb; pdb.set_trace()
         master_resp = self.client.get(data['master_domain'], **self.authheader)
 
         # check the response
