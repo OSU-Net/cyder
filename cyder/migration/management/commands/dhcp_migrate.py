@@ -133,7 +133,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en,
             n.vrf = v
             n.save()
 
-        if int(n.network.network) < start < end < int(n.network.broadcast):
+        if int(n.network.network) < start <= end < int(n.network.broadcast):
             r, created = Range.objects.get_or_create(
                 start_lower=start, start_str=ipaddr.IPv4Address(start),
                 end_lower=end, end_str=ipaddr.IPv4Address(end),
