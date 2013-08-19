@@ -31,7 +31,8 @@ API_VERSION = '1'
 def build_sample_domain():
     soa, _ = SOA.objects.get_or_create(
         primary="ns{0}.oregonstate.edu".format(random_byte()),
-        contact="hostmaster.oregonstate.edu", description="Test SOA")
+        contact="hostmaster{0}.oregonstate.edu".format(random_label()),
+        description="Test SOA " + random_label())
     domain_name = "domain-" + random_label()
     domain, _ = Domain.objects.get_or_create(name=domain_name, soa=soa)
     return domain
@@ -47,7 +48,7 @@ class APITests(object):
     f_object_url = "/api/v{0}/{1}/{2}/"
 
     def __init__(self):
-        management.call_command('flush') # flush the db between tests
+        # management.call_command('flush') # flush the db between tests
         self.domain = build_sample_domain()
         self.token = Token.objects.create(
             user=User.objects.get(username="test_superuser")).key
@@ -170,7 +171,7 @@ class DomainAPI_Test(APITests):
     model = Domain
 
     def setUp(self):
-        super(DomainAPI_test, self).setUp()
+        super(DomainAPI_Test, self).setUp()
         self.setup_data = {
             'name': random_label() + '.' + self.domain.name,
             'master_domain': self.domain,
