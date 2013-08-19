@@ -101,7 +101,8 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment, en, known):
+def create_range(range_id, start, end, range_type, subnet_id, comment, en,
+        known):
     """
     Takes a row from the Maintain range table.
     Returns a range which is saved in Cyder.
