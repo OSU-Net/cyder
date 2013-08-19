@@ -47,11 +47,6 @@ class APITests(object):
     f_object_url = "/api/v{0}/{1}/{2}/"
 
     def __init__(self):
-        management.call_command('flush')
-        self.domain = build_sample_domain()
-        self.token = Token.objects.create(
-            user=User.objects.get(username="test_superuser")).key
-        self.authheader = {'HTTP_AUTHORIZATION': 'Token ' + self.token}
         management.call_command('flush') # flush the db between tests
         self.domain = build_sample_domain()
         self.token = Token.objects.create(
