@@ -36,17 +36,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             return 'AAAA'
         return 'A'
 
-    def details(self):
-        """For tables."""
-        data = super(BaseAddressRecord, self).details()
-        data['data'] = [
-            ('Label', 'label', self.label),
-            ('Domain', 'domain__name', self.domain),
-            ('Record Type', 'obj_type', self.rdtype),
-            ('IP', 'ip_str', str(self.ip_str)),
-        ]
-        return data
-
     @staticmethod
     def eg_metadata():
         """EditableGrid metadata."""
@@ -164,3 +153,14 @@ class AddressRecord(BaseAddressRecord):
         db_table = "address_record"
         unique_together = ("label", "domain", "fqdn", "ip_upper", "ip_lower",
                            "ip_type")
+
+    def details(self):
+        """For tables."""
+        data = super(AddressRecord, self).details()
+        data['data'] = [
+            ('Label', 'label', self.label),
+            ('Domain', 'domain__name', self.domain),
+            ('Record Type', 'obj_type', self.rdtype),
+            ('IP', 'ip_str', str(self.ip_str)),
+        ]
+        return data

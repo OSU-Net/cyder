@@ -208,7 +208,9 @@ def user_detail(request, pk):
     email = User.objects.get(id=pk).email
     contacts = []
     if email:
-        contacts = (Ctnr.objects.filter(email_contact=email))
+        contacts = (Ctnr.objects.filter(email_contact__contains=email))
+    else:
+        contacts = []
 
     ctnrs = CtnrUser.objects.filter(user_id=user)
     return cy_detail(request, UserProfile, 'cyuser/user_detail.html', {
