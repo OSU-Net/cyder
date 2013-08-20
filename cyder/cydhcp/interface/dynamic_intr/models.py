@@ -13,6 +13,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 
 import datetime
+import re
 
 
 class DynamicInterface(models.Model, ObjectUrlMixin):
@@ -34,7 +35,11 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         db_table = 'dynamic_interface'
 
     def __str__(self):
-        return "{0}".format(self.mac)
+        return "{0}".format(self.mac_str)
+
+    @property
+    def mac_str(self):
+        return (':').join(re.findall('..', self.mac))
 
     def __repr__(self):
         return "Interface {0}".format(str(self))
