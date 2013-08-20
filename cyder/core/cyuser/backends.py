@@ -91,7 +91,10 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     if obj:
         obj_type = obj.__class__.__name__
     elif obj_class:
-        obj_type = obj_class.__name__
+        if 'KeyValue' in obj_class.__name__:
+            obj_type = obj_class.__name__.split('KeyValue')[0]
+        else:
+            obj_type = obj_class.__name__
     else:
         return False
 
