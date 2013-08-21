@@ -9,6 +9,7 @@ from django.http import Http404, HttpResponse
 from django.db.models import Q
 from django.conf import settings
 
+from cyder.api.authtoken.models import Token
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
@@ -213,7 +214,9 @@ def user_detail(request, pk):
         contacts = []
 
     ctnrs = CtnrUser.objects.filter(user_id=user)
+    tokens = Token.objects.filter(user=user)
     return cy_detail(request, UserProfile, 'cyuser/user_detail.html', {
         'Containers': ctnrs,
         'Contact For': contacts,
+        'API Tokens': tokens,
     }, obj=user)
