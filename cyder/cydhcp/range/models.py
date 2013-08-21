@@ -199,8 +199,8 @@ class Range(models.Model, ObjectUrlMixin):
     def get_allowed_clients(self):
         allow = []
         if self.allow == 'vrf':
-            allow = "allow members of \"{0}:{1}:{2}\"".format(
-                self.network.vrf.name, self.start_str, self.end_str)
+            allow = ["allow members of \"{0}:{1}:{2}\"".format(
+                self.network.vrf.name, self.start_str, self.end_str)]
         elif self.allow == 'known-clients':
             allow = ['allow known clients']
         elif self.allow == 'legacy':
