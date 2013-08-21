@@ -26,9 +26,9 @@ class Network(models.Model, ObjectUrlMixin):
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
-            verbose_name='IP address type', max_length=1,
-            choices=IP_TYPES.items(), default=IP_TYPE_4,
-            validators=[validate_ip_type]
+        verbose_name='IP address type', max_length=1,
+        choices=IP_TYPES.items(), default=IP_TYPE_4,
+        validators=[validate_ip_type]
     )
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
@@ -123,6 +123,10 @@ class Network(models.Model, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         self.check_valid_range()
+        if (Network.objects.filter(
+                ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()
+                and not self.id):
+            raise ValidationError("This network has already been allocated.")
         super(Network, self).clean(*args, **kwargs)
 
     def check_valid_range(self):

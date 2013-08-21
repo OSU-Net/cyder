@@ -51,9 +51,6 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
             raise ValidationError("Bad Ip address {0}".format(e))
         except ipaddr.NetmaskValueError, e:
             raise ValidationError("Bad Netmask {0}".format(e))
-        if (Network.objects.filter(ip_upper=ip_upper,
-                                   ip_lower=ip_lower).exists()):
-            raise ValidationError("This network has already been allocated.")
         return cleaned_data
 
 
