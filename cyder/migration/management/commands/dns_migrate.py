@@ -165,8 +165,11 @@ class Zone(object):
             if ip == 0:
                 continue
 
-            if len(ha) != 12:
-                ha = "0" * 12
+            if len(ha) != 12 or ha == '0' * 12:
+                ha = ""
+
+            if ha == "":
+                enabled = False
 
             system = System(name=name)
             system.save()

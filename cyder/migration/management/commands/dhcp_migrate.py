@@ -267,6 +267,14 @@ def migrate_dynamic_hosts():
     cursor.execute(sql)
     for values in cursor.fetchall():
         items = dict(zip(keys, values))
+        enabled = items['enabled']
+        mac = items['ha']
+
+        if len(mac) != 12 or mac == '0' * 12:
+            mac = ""
+
+        if mac == "":
+            enabled = False
 
         r = maintain_find_range(items['dynamic_range'])
         c = maintain_find_zone(items['zone'])
@@ -300,13 +308,12 @@ def migrate_dynamic_hosts():
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=items['ha'], system=s, dhcp_enabled=items['enabled'],
-                dns_enabled=items['enabled'],
-                last_seen=items['last_seen'])
+                mac=mac, system=s, dhcp_enabled=enabled,
+                dns_enabled=enabled, last_seen=items['last_seen'])
         else:
             intr, _ = DynamicInterface.objects.get_or_create(
                 system=s, range=r, workgroup=w, ctnr=c, domain=d,
-                mac=items['ha'], last_seen=items['last_seen'])
+                mac=mac, last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,

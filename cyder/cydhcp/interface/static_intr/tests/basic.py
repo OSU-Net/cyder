@@ -130,7 +130,7 @@ class StaticInterTests(TestCase):
         self.do_add(**kwargs)
 
     def test5_create_basic(self):
-        mac = "00:00:00:00:00:00"
+        mac = "00:00:00:00:00:01"
         label = "foo1"
         domain = self.f_c
         ip_str = "10.0.0.2"
@@ -139,7 +139,7 @@ class StaticInterTests(TestCase):
         self.do_add(**kwargs)
 
         # Change the mac by one.
-        mac = "00:00:00:00:00:01"
+        mac = "00:00:00:00:00:02"
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
