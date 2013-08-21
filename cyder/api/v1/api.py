@@ -40,6 +40,7 @@ class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
 class CommonDNSViewSet(viewsets.ModelViewSet):
     def __init__(self, *args, **kwargs):
         self.search_fields = self.model.search_fields
+        self.queryset = self.model.objects.all()
         super(CommonDNSViewSet,self).__init__(*args, **kwargs)
 
 
@@ -76,18 +77,18 @@ class TXTSerializer(CommonDNSSerializer):
 
 
 class TXTViewSet(CommonDNSViewSet):
-    queryset = TXT.objects.all()
+    model = TXT
     serializer_class = TXTSerializer
 
 
 class SRVSerializer(CommonDNSSerializer):
     class Meta:
-        model = TXT
-        fields = standard_fields + TXT.get_api_fields()
+        model = SRV
+        fields = standard_fields + SRV.get_api_fields()
 
 
 class SRVViewSet(CommonDNSViewSet):
-    queryset = SRV.objects.all()
+    model = SRV
     serializer_class = SRVSerializer
 
 
@@ -98,7 +99,7 @@ class MXSerializer(CommonDNSSerializer):
 
 
 class MXViewSet(CommonDNSViewSet):
-    queryset = MX.objects.all()
+    model = MX
     serializer_class = MXSerializer
 
 
@@ -109,7 +110,7 @@ class SSHFPSerializer(CommonDNSSerializer):
 
 
 class SSHFPViewSet(viewsets.ModelViewSet):
-    queryset = SSHFP.objects.all()
+    model = SSHFP
     serializer_class = SSHFPSerializer
 
 
@@ -120,18 +121,21 @@ class AddressRecordSerializer(CommonDNSSerializer):
 
 
 class AddressRecordViewSet(viewsets.ModelViewSet):
-    queryset = AddressRecord.objects.all()
+    model = AddressRecord
     serializer_class = AddressRecordSerializer
 
 
 class NameserverSerializer(CommonDNSSerializer):
+    domain = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name="api-domain-detail")
+
     class Meta:
-        models = Nameserver
+        model = Nameserver
         fields = standard_fields + Nameserver.get_api_fields()
 
 
 class NameserverViewSet(viewsets.ModelViewSet):
-    queryset = Nameserver.objects.all()
+    model = Nameserver
     serializer_class = NameserverSerializer
 
 
@@ -142,11 +146,11 @@ class PTRSerializer(CommonDNSSerializer):
 
 
 class PTRViewSet(viewsets.ModelViewSet):
-    queryset = PTR.objects.all()
+    model = PTR
     serializer_class = PTRSerializer
 
 
-class SystemKeyValueSerializer(CommonDNSSerializer):
+class SystemKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     system = serializers.HyperlinkedRelatedField(
             read_only=True, view_name="api-system-detail")
 
@@ -154,10 +158,13 @@ class SystemKeyValueSerializer(CommonDNSSerializer):
         model = SystemKeyValue
 
 
-class SystemSerializer(serializers.HyperlinkedModelSerializer):
-    systemkeyvalue_set = SystemKeyValueSerializer(
-        many=True, read_only=True)
+class SystemKeyValueViewSet(viewsets.ModelViewSet):
+    queryset = SystemKeyValue.objects.all()
+    serializer_class = SystemKeyValueSerializer
 
+
+
+class SystemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = System
         depth = 1
@@ -198,7 +205,7 @@ class StaticInterfaceViewSet(viewsets.ModelViewSet):
 
 class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     dynamic_interface = serializers.HyperlinkedRelatedField(
-            read_only=True, view_name="api-dynamicinterface")
+            read_only=True, view_name="api-dynamicinterface-detail")
 
     class Meta:
         model = DynamicIntrKeyValue
@@ -213,7 +220,9 @@ class DynamicInterfaceSerializer(CommonDNSSerializer):
     class Meta:
         model = DynamicInterface
         fields = ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf',
-            'domain', 'range', 'dhcp_enabled', 'dns_enabled', 'last_seen']
+            'domain', 'range', 'dhcp_enabled', 'dns_enabled', 'last_seen',
+            'dynamicintrkeyvalue_set']
+        depth = 1
 
 
 class DynamicInterfaceViewSet(viewsets.ModelViewSet):

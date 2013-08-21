@@ -17,6 +17,8 @@ router.register(r'addressrecord', api.AddressRecordViewSet,
 router.register(r'nameserver', api.NameserverViewSet,
                 base_name='api-nameserver')
 router.register(r'ptr', api.PTRViewSet, base_name='api-ptr')
+router.register(r'sshfp', api.SSHFPViewSet, base_name='api-sshfp')
+router.register(r'srv', api.SRVViewSet, base_name='api-srv')
 router.register(r'system', api.SystemViewSet, base_name='api-system')
 router.register(r'staticinterface', api.StaticInterfaceViewSet,
                 base_name='api-staticinterface')
