@@ -124,21 +124,14 @@ class VrfViewTests(cyder.base.tests.TestCase):
     name = 'vrf'
 
     def setUp(self):
-        self.test_nw = Network.objects.create(ip_type=IP_TYPE_4,
-                                              network_str='192.168.1.100')
-        self.post_nw = Network.objects.create(ip_type=IP_TYPE_4,
-                                              network_str='192.168.2.100')
-
         test_data = {
             'name': 'test_vrf',
-            'network': self.test_nw
         }
         do_setUp(self, Vrf, test_data)
 
     def post_data(self):
         return {
             'name': 'post_vrf',
-            'network': self.post_nw.pk,
         }
 
 

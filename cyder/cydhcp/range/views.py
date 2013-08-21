@@ -31,7 +31,7 @@ def range_detail(request, pk):
     allow = None
     if mrange.allow == ALLOW_OPTION_VRF:
         try:
-            allow = [Vrf.objects.get(network=mrange.network)]
+            allow = list(Vrf.objects.filter(network=mrange.network))
         except ObjectDoesNotExist:
             allow = []
     elif mrange.allow == ALLOW_OPTION_KNOWN:

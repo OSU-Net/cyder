@@ -200,8 +200,7 @@ class Range(models.Model, ObjectUrlMixin):
         allow = []
         if self.allow == 'vrf':
             allow = ["allow members of \"{0}:{1}:{2}\"".format(
-                vrf.name, self.start_str, self.end_str)
-                for vrf in self.network.vrf_set.all()]
+                self.network.vrf.name, self.start_str, self.end_str)]
         elif self.allow == 'known-clients':
             allow = ['allow known clients']
         elif self.allow == 'legacy':

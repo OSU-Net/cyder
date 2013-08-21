@@ -114,10 +114,14 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
             allow = 'known-client'
         if '128.193.177.71' == str(ipaddr.IPv4Address(start)):
             allow = 'vrf'
-            v, _ = Vrf.objects.get_or_create(name="ip-phones-hack", network=n)
+            v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
+            n.vrf = v
+            n.save()
         if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
             allow = 'vrf'
-            v, _ = Vrf.objects.get_or_create(name="avaya-hack", network=n)
+            v, _ = Vrf.objects.get_or_create(name="avaya-hack")
+            n.vrf = v
+            n.save()
 
         if int(n.network.network) < start < end < int(n.network.broadcast):
             r, created = Range.objects.get_or_create(
