@@ -1,11 +1,15 @@
-ALLOW_OPTION_VRF = 'vrf'
-ALLOW_OPTION_KNOWN = 'known-client'
-ALLOW_OPTION_LEGACY = 'legacy'
+ALLOW_ANY = 'any'
+ALLOW_KNOWN = 'known'
+ALLOW_VRF = 'vrf'
+ALLOW_LEGACY = 'legacy'
+ALLOW_VRF_AND_LEGACY = 'vrf_legacy'
 
 ALLOW_OPTIONS = {
-    ALLOW_OPTION_VRF: 'Allow members of VRF',
-    ALLOW_OPTION_KNOWN: 'Allow known-clients',
-    ALLOW_OPTION_LEGACY: 'Allow Ctnr: Legacy Option',
+    ALLOW_ANY: 'Allow any client',
+    ALLOW_KNOWN: 'Allow known clients',
+    ALLOW_VRF: 'Allow members of VRF',
+    ALLOW_LEGACY: 'Legacy (allow Ctnrs)',
+    ALLOW_VRF_AND_LEGACY: 'Allow members of VRF and Ctnrs',
 }
 
 # Some ranges have no allow statements so this option should be able to be

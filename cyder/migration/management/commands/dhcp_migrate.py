@@ -6,6 +6,8 @@ from django.db import transaction
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
+                                    ALLOW_LEGACY, ALLOW_VRF_AND_LEGACY)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -102,23 +104,23 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
     n = None
     r = None
     r_type = 'st' if range_type == 'static' else 'dy'
-    allow = 'legacy'
+    allow = ALLOW_LEGACY
     if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
         id, name, subnet, netmask, status, vlan = cursor.fetchone()
         n = Network.objects.get(ip_lower=subnet,
                                 prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
         if str(ipaddr.IPv4Address(start)) in allow_all_subnets:
-            allow = ''
+            allow = ALLOW_ANY
         if known:
-            allow = 'known-client'
+            allow = ALLOW_KNOWN
         if '128.193.177.71' == str(ipaddr.IPv4Address(start)):
-            allow = 'vrf'
+            allow = ALLOW_VRF_AND_LEGACY
             v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
             n.vrf = v
             n.save()
         if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-            allow = 'vrf'
+            allow = ALLOW_VRF_AND_LEGACY
             v, _ = Vrf.objects.get_or_create(name="avaya-hack")
             n.vrf = v
             n.save()
@@ -308,7 +310,7 @@ def migrate_dynamic_hosts():
             kv.clean()
             kv.save()
 
-        if r.allow == 'vrf':
+        if r.allow == ALLOW_VRF or r.allow == ALLOW_VRF_AND_LEGACY:
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,

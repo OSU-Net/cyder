@@ -9,6 +9,8 @@ from cyder.cydhcp.constants import (
     ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
 )
 from cyder.cydns.validation import validate_ip_type
+from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
+                                    ALLOW_LEGACY)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
@@ -198,12 +200,12 @@ class Range(models.Model, ObjectUrlMixin):
 
     def get_allowed_clients(self):
         allow = []
-        if self.allow == 'vrf':
+        if self.allow == ALLOW_VRF:
             allow = ["allow members of \"{0}:{1}:{2}\"".format(
                 self.network.vrf.name, self.start_str, self.end_str)]
-        elif self.allow == 'known-clients':
+        elif self.allow == ALLOW_KNOWN:
             allow = ['allow known clients']
-        elif self.allow == 'legacy':
+        elif self.allow == ALLOW_LEGACY:
             allow = ["allow members of \"{0}:{1}:{2}\"".format(
                 ctnr.name, self.start_str, self.end_str)
                 for ctnr in self.ctnr_set.all()]
