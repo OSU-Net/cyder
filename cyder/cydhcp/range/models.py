@@ -14,6 +14,7 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydhcp.range.range_usage import range_usage
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -87,7 +88,8 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return get_display(self)
+        _, use = range_usage(self.start_lower, self.end_lower, self.ip_type)
+        return get_display(self) + " ({0}% used)".format(str(use))
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
