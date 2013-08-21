@@ -9,19 +9,19 @@ from django.forms import ValidationError
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
 from django.db.models import get_model
-from django.shortcuts import (get_object_or_404, redirect, render,
-                              render_to_response)
-from django.views.generic import (CreateView, DeleteView, DetailView,
-                                  ListView, UpdateView)
+from django.shortcuts import (
+    get_object_or_404, redirect, render, render_to_response)
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, ListView, UpdateView)
 
 import cyder as cy
 from cyder.base.helpers import do_sort
-from cyder.base.utils import (_filter, make_megafilter,
-                              make_paginator, model_to_post, tablefy,
-                              qd_to_py_dict)
+from cyder.base.utils import (
+    _filter, make_megafilter, make_paginator, model_to_post, tablefy,
+    qd_to_py_dict)
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
-from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_create_session
+from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_update_session
 from cyder.cydns.utils import ensure_label_domain
 from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.views import edit_user
@@ -138,7 +138,6 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     form = FormKlass(instance=obj)
-
     if request.method == 'POST':
         form = FormKlass(request.POST, instance=obj)
 
@@ -148,7 +147,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                     obj = form.save()
 
                     if Klass.__name__ == 'Ctnr':
-                        request = ctnr_create_session(request, obj)
+                        request = ctnr_update_session(request, obj)
 
                     if obj_type == 'range':
                         request.session['ctnr'].ranges.add(obj)
@@ -195,9 +194,10 @@ def cy_delete(request, pk, get_klasses_fn):
     obj = get_object_or_404(Klass, pk=pk)
     try:
         if perm(request, cy.ACTION_DELETE, obj=obj):
-            obj.delete()
             if Klass.__name__ == 'Ctnr':
                 request = ctnr_delete_session(request, obj)
+
+            obj.delete()
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
 
