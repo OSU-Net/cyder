@@ -1,44 +1,20 @@
-{% extends "core/core_base.html" %}
+{% extends "core/core_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% block title %} User  {{ user.username }} {% endblock %}
-{% block header %} User {{ user.username }} {% endblock %}
+{% block title %} User  {{ obj.user.username }} {% endblock %}
+{% block header %} User {{ obj.user.username }} {% endblock %}
 
 {% block action_bar %}
-  {% if request.user.is_superuser and request.user.username != user.username %}
+  {% if request.user.is_superuser and request.user.username != obj.user.username %}
     <a class="btn btn-primary" href="{{ url('become-user',
-                                            username=user.username) }}">
+                                            username=obj.user.username) }}">
       Become User
     </a>
   {% else %}
-    {% if request.session.become_user_stack and request.user.username == user.username %}
+    {% if request.session.become_user_stack and request.user.username == obj.user.username %}
       <a class="btn btn-primary" href="{{ url('unbecome-user') }}">
       Unbecome User
       </a>
     {% endif %}
-    {% endif %}
-    {% if request.user.username == user.username %}
-    <a class="btn btn-primary" href="{{ url('request-token') }}">
-        Request API Token
-        </a>
-    {% endif %}
+  {% endif %}
 {% endblock %}
-
-{% block content %}
-    {{ render_table(request, user_table, 'user-table') }}
-    {% if contact_table %}
-      <h3>Listed as contact for:</h3>
-      {{ render_table(request, contact_table, 'contact-table') }}
-    {% endif %}
-    {% if ctnr_table %}
-      <h3>Containers</h3>
-      {{ render_table(request, ctnr_table, 'ctnr-table') }}
-    {% endif %}
-    {% if request.user.is_superuser or request.user.username == user.username %}
-        {% if api_token_table %}
-            <h3>API Tokens</h3>
-            {{ render_table(request, api_token_table, 'api-token-table') }}
-        {% endif %}
-    {% endif %}
-{% endblock %}
-
