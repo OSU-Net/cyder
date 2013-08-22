@@ -254,6 +254,10 @@ def add_object(request, ctnr_pk):
             Klass = get_model(obj_type, obj_type)
             if pk == 'null':
                 try:
+                    if Klass.__name__ == 'Range':
+                        return HttpResponse(json.dumps({
+                            'error': 'Please select ranges from the '
+                            'dropdown'}))
                     obj = Klass.objects.get(name=name)
                 except Klass.DoesNotExist:
                     return HttpResponse(
