@@ -7,7 +7,7 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_VRF_AND_LEGACY)
+                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -115,12 +115,12 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
         # generates allow statements. Be careful when modifying this section.
 
         if '128.193.177.71' == str(ipaddr.IPv4Address(start)):
-            allow = ALLOW_VRF_AND_LEGACY
+            allow = ALLOW_LEGACY_AND_VRF
             v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
             n.vrf = v
             n.save()
         if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-            allow = ALLOW_VRF_AND_LEGACY
+            allow = ALLOW_LEGACY_AND_VRF
             v, _ = Vrf.objects.get_or_create(name="avaya-hack")
             n.vrf = v
             n.save()
@@ -314,7 +314,7 @@ def migrate_dynamic_hosts():
             kv.clean()
             kv.save()
 
-        if r.allow == ALLOW_VRF or r.allow == ALLOW_VRF_AND_LEGACY:
+        if r.allow == ALLOW_VRF or r.allow == ALLOW_LEGACY_AND_VRF:
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,

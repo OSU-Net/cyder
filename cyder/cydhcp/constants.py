@@ -1,15 +1,15 @@
-ALLOW_ANY = 'any'
-ALLOW_KNOWN = 'known'
-ALLOW_VRF = 'vrf'
-ALLOW_LEGACY = 'legacy'
-ALLOW_VRF_AND_LEGACY = 'vrf_legacy'
+ALLOW_ANY = 'a'
+ALLOW_KNOWN = 'k'
+ALLOW_VRF = 'v'
+ALLOW_LEGACY = 'l'
+ALLOW_LEGACY_AND_VRF = 'b'
 
 ALLOW_OPTIONS = {
-    ALLOW_ANY: 'Allow any client',
-    ALLOW_KNOWN: 'Allow known clients',
-    ALLOW_VRF: 'Allow members of VRF',
-    ALLOW_LEGACY: 'Legacy (allow Ctnrs)',
-    ALLOW_VRF_AND_LEGACY: 'Allow members of VRF and Ctnrs',
+    ALLOW_ANY: 'ANY: Allow any client',
+    ALLOW_KNOWN: 'KNOWN: Allow known clients',
+    ALLOW_LEGACY: "LEGACY: Allow any client that shares at least one of this range's containers",
+    ALLOW_VRF: "VRF: Allow any client that shares this range's VRF",
+    ALLOW_LEGACY_AND_VRF: 'LEGACY+VRF: Allow any client that shares either a VRF or a container',
 }
 
 # Some ranges have no allow statements so this option should be able to be
