@@ -49,8 +49,6 @@ class Range(models.Model, ObjectUrlMixin):
             range does not overlap.
     """
 
-    ALLOW_OPTIONS
-
     id = models.AutoField(primary_key=True)
     network = models.ForeignKey(Network, null=True, blank=True)
 
