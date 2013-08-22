@@ -44,7 +44,7 @@ class Vrf(models.Model, ObjectUrlMixin):
     def get_related_networks(self, vrfs):
         networks = set()
         for vrf in vrfs:
-            for network in vrf.network_set:
+            for network in vrf.network_set.all():
                 networks.update(network.get_related_networks())
         return networks
 
