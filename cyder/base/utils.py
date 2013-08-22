@@ -77,7 +77,7 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
             headers.append([col['header'], col['sort_field']])
 
     foreign_keys = [j for _, j in headers if j]
-    if isinstance(objects, Page):
+    if isinstance(objects, Page) and type(objects.object_list) is not list:
         objects.object_list = objects.object_list.select_related(*foreign_keys)
     elif isinstance(objects, query.QuerySet):
         objects = objects.select_related(*foreign_keys)
