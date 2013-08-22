@@ -68,7 +68,7 @@ class Range(models.Model, ObjectUrlMixin):
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=20, choices=ALLOW_OPTIONS.items(),
-                             blank=True)
+                             default=ALLOW_LEGACY)
     deny = models.CharField(max_length=20, choices=DENY_OPTIONS.items(),
                             blank=True)
 
