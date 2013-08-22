@@ -75,6 +75,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     network = str(ipaddr.IPv4Address(subnet & netmask))
     s, _ = Site.objects.get_or_create(name='Campus')
     v = None
+    enabled = (status == 'visible')
     if cursor.execute("SELECT * "
                       "FROM vlan "
                       "WHERE vlan_id = %s" % vlan):
@@ -82,7 +83,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
         v = Vlan.objects.get(name=vlan_name)
     n, created = Network.objects.get_or_create(
         network_str=network + '/' + prefixlen, ip_type='4',
-        site=s, vlan=v)
+        site=s, vlan=v, enabled=enabled)
     cursor.execute("SELECT dhcp_option, value "
                    "FROM object_option "
                    "WHERE object_id = {0} "
