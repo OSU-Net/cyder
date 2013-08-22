@@ -123,11 +123,13 @@ class Network(models.Model, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         self.check_valid_range()
-        if (Network.objects.filter(prefixlen=self.prefixlen,
-                                   ip_upper=self.ip_upper,
-                                   ip_lower=self.ip_lower).exists()
-                and not self.id):
-            raise ValidationError("This network has already been allocated.")
+        allocated = Network.objects.filter(prefixlen=self.prefixlen,
+                                           ip_upper=self.ip_upper,
+                                           ip_lower=self.ip_lower)
+        if allocated:
+            if not self.id or self not in allocated:
+                raise ValidationError(
+                    "This network has already been allocated.")
 
         super(Network, self).clean(*args, **kwargs)
 
