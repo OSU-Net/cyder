@@ -111,23 +111,20 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
                                 prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
 
-        # The allow options here are a specific order to match the way Maintain
-        # generates allow statements. Be careful when modifying this section.
-
-        if '128.193.177.71' == str(ipaddr.IPv4Address(start)):
+        if str(ipaddr.IPv4Address(start)) in allow_all_subnets:
+            allow = ALLOW_ANY
+        elif known:
+            allow = ALLOW_KNOWN
+        elif '128.193.177.71' == str(ipaddr.IPv4Address(start)):
             allow = ALLOW_LEGACY_AND_VRF
             v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
             n.vrf = v
             n.save()
-        if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
+        elif '128.193.166.81' == str(ipaddr.IPv4Address(start)):
             allow = ALLOW_LEGACY_AND_VRF
             v, _ = Vrf.objects.get_or_create(name="avaya-hack")
             n.vrf = v
             n.save()
-        if known:
-            allow = ALLOW_KNOWN
-        if str(ipaddr.IPv4Address(start)) in allow_all_subnets:
-            allow = ALLOW_ANY
 
         if int(n.network.network) < start < end < int(n.network.broadcast):
             r, created = Range.objects.get_or_create(
