@@ -50,8 +50,8 @@ class Workgroup(models.Model, ObjectUrlMixin):
             workgroup=self, dhcp_enabled=True)
         static_clients = StaticInterface.objects.filter(
             workgroup=self, dhcp_enabled=True)
-        if not (static_clients or dynamic_clients):
-            return build_str
+        #if not (static_clients or dynamic_clients):
+            #return build_str
         build_str += "group {{ #{0}\n".format(self.name)
         statements = self.workgroupkeyvalue_set.filter(is_statement=True)
         options = self.workgroupkeyvalue_set.filter(is_option=True)
