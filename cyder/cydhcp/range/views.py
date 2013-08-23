@@ -41,6 +41,8 @@ def range_detail(request, pk):
                 or mrange.allow == ALLOW_LEGACY_AND_VRF):
             allow += list(Ctnr.objects.filter(ranges=mrange))
 
+    allow.sort(key=lambda x: x.lower())
+
     start_upper = mrange.start_upper
     start_lower = mrange.start_lower
     end_upper = mrange.end_upper
