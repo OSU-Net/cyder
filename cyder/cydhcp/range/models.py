@@ -201,6 +201,9 @@ class Range(models.Model, ObjectUrlMixin):
         elif self.allow == ALLOW_KNOWN:
             # FIXME: add hyphen once compatibility with Maintain is established
             allow = ['allow known clients']
+            allow += ['allow members of "{0}:{1}:{2}"'.format(
+                ctnr.name, self.start_str, self.end_str)
+                for ctnr in self.ctnr_set.all()]
         else:
             allow = []
             if (self.allow == ALLOW_VRF or
