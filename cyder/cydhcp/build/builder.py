@@ -50,7 +50,7 @@ class DHCPBuilder(SVNBuilderMixin):
             try:
                 for ctnr in Ctnr.objects.all():
                     f.write(ctnr.build_legacy_class())
-                for network in Network.objects.all():
+                for network in Network.objects.filter(enabled=True):
                     f.write(network.build_subnet())
                 for workgroup in Workgroup.objects.all():
                     f.write(workgroup.build_workgroup())
