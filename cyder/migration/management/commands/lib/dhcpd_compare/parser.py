@@ -8,6 +8,7 @@ from utils import prepare_arguments, is_mac, is_ip
 import sys
 from bisect import insort_left, bisect_left
 from ipaddr import IPv4Address, IPv6Address
+from sys import stdout
 
 
 def strip_comments(content):
@@ -21,6 +22,8 @@ class DhcpConfigContext(
         OMeta.makeGrammar(
             grammar,
             name='DhcpConfigContext').createParserClass(OMetaBase, globals())):
+
+    stdout = stdout
 
     def __init__(self, *args, **kwargs):
         self.hosts = set()
@@ -76,29 +79,29 @@ class DhcpConfigContext(
             first_groups = self.groups - other.groups
             second_groups = other.groups - self.groups
             if first_subnets:
-                print "Subnets found in the first config and not in the second"
+                print '### Subnets found only in the first config ###'
                 for subnet in first_subnets:
-                    print subnet
+                    stdout.write(str(subnet))
             if second_subnets:
-                print "Subnets found in the second config and not in the first"
+                print '### Subnets found only in the second config ###'
                 for subnet in second_subnets:
-                    print subnet
+                    stdout.write(str(subnet))
             if first_hosts:
-                print "Hosts found in the first config and not in the second"
+                print '### Hosts found only in the first config ###'
                 for host in first_hosts:
-                    print host
+                    stdout.write(str(host))
             if second_hosts:
-                print "Hosts found in the second config and not in the first"
+                print '### Hosts found only in the second config ###'
                 for host in second_hosts:
-                    print host
+                    stdout.write(str(host))
             if first_groups:
-                print "Groups found in the first config and not in the second"
-                for groups in first_groups:
-                    print groups
+                print '### Groups found only in the first config ###'
+                for group in first_groups:
+                    stdout.write(str(group))
             if second_groups:
-                print "Groups found in the second config and not in the first"
-                for groups in second_groups:
-                    print groups
+                print '### Groups found only in the second config ###'
+                for group in second_groups:
+                    stdout.write(str(group))
 
 
 

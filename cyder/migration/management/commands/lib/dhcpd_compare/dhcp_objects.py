@@ -3,6 +3,13 @@ from itertools import chain
 from functools import total_ordering
 from bisect import insort_left, bisect_left
 
+def join_p(xs, d=1):
+    if not xs:
+        return ''
+    lines = "".join(str(x) for x in xs).split('\n')
+    while not lines[-1]:
+        lines.pop(-1)
+    return "".join('\t' * d + line + '\n' for line in lines)
 
 @total_ordering
 class Attribute(object):
@@ -31,13 +38,13 @@ class Attribute(object):
 class Option(Attribute):
 
     def __str__(self):
-        return "option {0} {1};".format(self.key, self.value)
+        return "option {0} {1};\n".format(self.key, self.value)
 
 
 class Parameter(Attribute):
 
     def __str__(self):
-        return "{0} {1};".format(self.key, self.value)
+        return "{0} {1};\n".format(self.key, self.value)
 
 
 @total_ordering
@@ -104,13 +111,11 @@ class Host(object):
         return hash(self.__str__())
 
     def __str__(self):
-        join_p = lambda xs, d=1: "".join('\t' * d + "%s\n"%x for x in xs)
         return ("host {0} {{\n"
                 "\thardware-address {1};\n"
                 "\tfixed-address {2};\n"
-                "{3}"
-                "{4}"
-                "}}".format(
+                "{3}{4}"
+                "}}\n".format(
                     self.fqdn,
                     self.mac,
                     self.ip,
@@ -181,13 +186,15 @@ class Pool(ScopeForHost):
         return self.start < other.start
 
     def __str__(self):
-        join_p = lambda xs, d=1: "".join('\t' * d + "%s\n"%x for x in xs)
-        return "pool {{\n{0}{1}{2}{3}\t\trange {4} {5};\n}}".format(
-            join_p(sorted(self.options), d=2),
-            join_p(sorted(self.parameters), d=2),
-            join_p(sorted(self.allow), d=2),
-            join_p(sorted(self.deny), d=2),
-            self.start, self.end)
+        return ("pool {{\n"
+                "{0}{1}{2}{3}"
+                "\trange {4} {5};\n"
+                "}}\n".format(
+                    join_p(sorted(self.options)),
+                    join_p(sorted(self.parameters)),
+                    join_p(sorted(self.allow)),
+                    join_p(sorted(self.deny)),
+                    self.start, self.end))
 
     def __hash__(self):
         return hash(self.__str__())
@@ -209,9 +216,9 @@ class Subnet(ScopeForHost):
         return sorted(self.pools) == sorted(other.pools)
 
     def __str__(self):
-        join_p = lambda xs, d=1: "".join('\t' * d + "%s\n"%x for x in xs)
         return ("subnet {0} netmask {1} {{\n"
-                "{2}{3}{4}\n}}".format(
+                "{2}{3}{4}"
+                "}}\n".format(
                    self.network.network,
                    self.network.netmask,
                    join_p(sorted(self.options)),
@@ -262,12 +269,13 @@ class Group(ScopeForHost):
         return len(self.groups) < len(other.groups)
 
     def __str__(self):
-        join_p = lambda xs, d=1: "".join('\t' * d + "%s\n"%x for x in xs)
-        return "group {{\n{0}{1}{2}{3}\n}}".format(
-            join_p(sorted(self.options)),
-            join_p(sorted(self.parameters)),
-            join_p(sorted(self.groups)),
-            join_p(sorted(self.hosts)))
+        return ("group {{\n"
+                "{0}{1}{2}{3}"
+                "}}\n".format(
+                    join_p(sorted(self.options)),
+                    join_p(sorted(self.parameters)),
+                    join_p(sorted(self.groups)),
+                    join_p(sorted(self.hosts))))
 
     def __hash__(self):
         return hash(self.__str__())
@@ -286,7 +294,6 @@ class ClientClass(object):
         self.subclass = []
 
     def __str__(self):
-        join_p = lambda xs, d=1: "".join('\t' * d + "%s\n"%x for x in xs)
         # This is specific to the way that our dhcp config class names are
         # labeled
         return "class {1}:{2} {{\n{3}{4}{6}\n\tmatch {7};\n}}".format(
