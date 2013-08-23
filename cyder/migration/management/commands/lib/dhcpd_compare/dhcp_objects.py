@@ -108,6 +108,8 @@ class Host(object):
         return ("host {0} {{\n"
                 "\thardware-address {1};\n"
                 "\tfixed-address {2};\n"
+                "{3}"
+                "{4}"
                 "}}".format(
                     self.fqdn,
                     self.mac,
