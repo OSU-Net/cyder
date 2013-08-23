@@ -20,8 +20,14 @@ router.register(r'ptr', api.PTRViewSet, base_name='api-ptr')
 router.register(r'sshfp', api.SSHFPViewSet, base_name='api-sshfp')
 router.register(r'srv', api.SRVViewSet, base_name='api-srv')
 router.register(r'system', api.SystemViewSet, base_name='api-system')
+router.register(r'system-keyvalues', api.SystemKeyValueViewSet,
+                base_name='api-system-keyvalues')
 router.register(r'staticinterface', api.StaticInterfaceViewSet,
                 base_name='api-staticinterface')
+router.register(r'staticinterface-keyvalues', api.StaticIntrKeyValueViewSet,
+                base_name='api-staticinterface-keyvalues')
 router.register(r'dynamicinterface', api.DynamicInterfaceViewSet,
                 base_name='api-dynamicinterface')
+router.register(r'dynamicinterface-keyvalues', api.DynamicIntrKeyValueViewSet,
+                base_name='api-dynamicinterface-keyvalues')
 urlpatterns = router.urls

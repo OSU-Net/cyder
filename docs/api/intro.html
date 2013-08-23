@@ -4,8 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
-<title>Introduction to The Cyder API</title>
-<meta name="author" content="Zane Salvatore" />
+<title></title>
 <style type="text/css">
 
 /*
@@ -339,34 +338,66 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="introduction-to-the-cyder-api">
-<h1 class="title">Introduction to The Cyder API</h1>
-<table class="docinfo" frame="void" rules="none">
-<col class="docinfo-name" />
-<col class="docinfo-content" />
+<div class="document">
+
+
+<div class="section" id="introduction-to-the-cyder-api">
+<h1>Introduction to The Cyder API</h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
 <tbody valign="top">
-<tr><th class="docinfo-name">Author:</th>
-<td>Zane Salvatore</td></tr>
-<tr><th class="docinfo-name">Version:</th>
-<td>0.1 (draft)</td></tr>
-<tr class="field"><th class="docinfo-name">API Version:</th><td class="field-body">1</td>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body">0.1 (draft)</td>
+</tr>
+<tr class="field"><th class="field-name">API Version:</th><td class="field-body">1</td>
 </tr>
 </tbody>
 </table>
-<p>The Cyder API allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.</p>
-<p>This document's examples are written in Python and make use of the urllib2 standard Python library, but any language and library that can make HTTP requests may also be used.</p>
-<p>For readability, API responses in this tutorial will be formatted with linebreaks and indentation. Actual API responses will differ.</p>
+<p>The Cyder API currently allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.</p>
+<p>This document's examples are written in Python, using version 2.7.4, and make use of the <a class="reference external" href="http://docs.python.org/2/library/urllib.html">urllib</a> and <a class="reference external" href="http://docs.python.org/2/library/urllib2.html">urllib2</a> standard Python libraries, but anything that can make HTTP requests may also be used. While this tutorial is fairly elementary, some understanding of urllib2 is expected. You may want to read the Python HOWTO <a class="reference external" href="http://docs.python.org/2/howto/urllib2.html">&quot;Fetch Internet Resources Using urllib2&quot;</a> before starting this tutorial.</p>
+<p>For readability, all API responses in this tutorial will be formatted with linebreaks and indentation, and some may be abbreviated. Actual API responses, including field values and record IDs, may differ.</p>
+<div class="section" id="document-conventions">
+<h2>Document Conventions</h2>
+<p>The following conventions are used throughout this document:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="39%" />
+<col width="61%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Convention</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><strong>bold text</strong></td>
+<td>Key words or the beginning of important paragraphs.</td>
+</tr>
+<tr><td><em>italic text</em></td>
+<td>Interface text.</td>
+</tr>
+<tr><td><tt class="docutils literal">monospace text</tt></td>
+<td><div class="first last line-block">
+<div class="line">Inline: Names from code or serialized data.</div>
+<div class="line">Paragraph: Example code or code output.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div class="section" id="getting-started">
 <h1>Getting Started</h1>
 <p>This section will lead you through the first steps of using the Cyder API.</p>
 <div class="section" id="requesting-your-api-token">
 <h2>Requesting Your API Token</h2>
-<p>API access is restricted to those with a token. A token is a randomly-generated 40 character hex string that is associated with your username. All API requests must be accompanied by a valid token or the request will be ignored.</p>
+<p>API access is restricted to those with a <strong>token</strong>. A token is a randomly-generated 40 character hex string that is associated with your username. All API requests must be accompanied by a valid token or the request will be ignored.</p>
 <p>Generating your token is simple:</p>
 <ol class="arabic simple">
 <li>Log into Cyder.</li>
 <li>Go to your user profile (click your username at the top of the screen).</li>
-<li>Click <strong>Request API Token</strong>.</li>
+<li>Click <em>Request API Token</em>.</li>
 <li>Enter the token's intended purpose.</li>
 </ol>
 <p>You will now see a page with your token's key, purpose, and date of creation. From this page you can also revoke your token, should it be compromised or no longer needed.</p>
@@ -381,11 +412,10 @@ ul.auto-toc {
 
 <span class="keyword">def</span> <span class="name function">api_connect</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">,</span> <span class="name">token</span><span class="punctuation">):</span>
     <span class="name">req</span> <span class="operator">=</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">Request</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">)</span>
-    <span class="name">req</span><span class="operator">.</span><span class="name">add_header</span><span class="punctuation">(</span><span class="literal string">'HTTP-Accept'</span><span class="punctuation">,</span> <span class="literal string">'application/json'</span><span class="punctuation">)</span>
     <span class="name">req</span><span class="operator">.</span><span class="name">add_header</span><span class="punctuation">(</span><span class="literal string">'Authorization'</span><span class="punctuation">,</span> <span class="literal string">'Token '</span> <span class="operator">+</span> <span class="name">token</span><span class="punctuation">)</span>
     <span class="keyword">return</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">urlopen</span><span class="punctuation">(</span><span class="name">req</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">read</span><span class="punctuation">()</span>
 </pre>
-<p>This function illustrates the structure of a very basic request to the Cyder API. It creates a request object, adds the necessary headers, and then returns the response from the server. At a minimum, you must pass headers containing the desired response format (<tt class="docutils literal">application/json</tt> is the only currently supported format, but if you don't send it the server will return an HTML response instead) and your API token. If the API root URL, response format, and a valid token are passed to the function, it returns the following as a string:</p>
+<p>This function illustrates the structure of a very basic <strong>request object</strong> used to access the Cyder API. A request object is used by urllib2 to structure your request to the server. In order to access the API, you must include an HTTP <tt class="docutils literal">Authorization</tt> header with a valid API token. If the API root URL and a valid token are passed to the function, it returns the following as a string:</p>
 <pre class="code json literal-block">
 <span class="punctuation">{</span>
     <span class="name tag">&quot;staticinterface&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/staticinterface/&quot;</span><span class="punctuation">,</span>
@@ -401,59 +431,171 @@ ul.auto-toc {
 <span class="punctuation">}</span>
 </pre>
 <p>This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided for ease of navigation. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.</p>
-<p>Let's see what happens when we pass one of these URLs to <tt class="docutils literal">api_connect</tt>.</p>
+<p>Let's see what happens when we pass one of these URLs to <tt class="docutils literal">api_connect</tt>:</p>
 <pre class="code python literal-block">
-<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/domain/&quot;</span><span class="punctuation">,</span>  <span class="literal string">&quot;fa4a19797dc9f920c7ae096f4474531c86aaaa0a&quot;</span><span class="punctuation">)</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/domain/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
 </pre>
-<p>This gives a list view of Domain objects:</p>
+<p>This returns a <strong>list view</strong> of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and client. Here is a truncated version of a possible response to the above query:</p>
 <pre class="code json literal-block">
 <span class="punctuation">{</span>
-    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2068</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2068</span><span class="punctuation">,</span><span class="error">9911</span>
     <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/domain/?page=2&quot;</span><span class="punctuation">,</span>
     <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
     <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
         <span class="punctuation">{</span>
-            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">6</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;arpa&quot;</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
             <span class="name tag">&quot;dirty&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;arpa&quot;</span><span class="punctuation">,</span>
             <span class="name tag">&quot;purgeable&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span>
+            <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span>
         <span class="punctuation">},</span>
         <span class="punctuation">{</span>
-            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">7</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;in-addr.arpa&quot;</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/domain/6/&quot;</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
             <span class="name tag">&quot;dirty&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/dns/domain/1/&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;in-addr.arpa&quot;</span><span class="punctuation">,</span>
             <span class="name tag">&quot;purgeable&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
-            <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span>
+            <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span>
         <span class="punctuation">},</span>
         <span class="error">...</span>
     <span class="punctuation">]</span>
 <span class="punctuation">}</span>
 </pre>
-<p>This list has been truncated for brevity.</p>
 <p>There are a few important things to note here:</p>
 <ol class="arabic simple">
-<li><em>count</em>, <em>next</em>, and <em>previous</em> all provide data that can help simplify API interaction.<ul>
-<li><em>count</em> gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.</li>
-<li><em>next</em> and <em>previous</em> each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be <tt class="docutils literal">null</tt> if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be fewer pages than there were at the beginning.</li>
+<li><tt class="docutils literal">count</tt>, <tt class="docutils literal">next</tt>, and <tt class="docutils literal">previous</tt> all provide data that can help simplify API interaction.<ul>
+<li><tt class="docutils literal">count</tt> gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.</li>
+<li><tt class="docutils literal">next</tt> and <tt class="docutils literal">previous</tt> each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be <tt class="docutils literal">null</tt> if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be a different number of pages than there were at the beginning of the operation.</li>
 </ul>
 </li>
 <li>As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name <tt class="docutils literal"><span class="pre">in-addr.arpa</span></tt>, you could simply pass the value of <tt class="docutils literal">master_domain</tt> to api_connect and retrieve the appropriate record.</li>
 </ol>
 <p>Now we know how to retrieve general lists of objects, but what if we want to access a specific record? Since our previous response contained a URL pointing directly to a record, let's see what happens when we follow that URL.</p>
 <pre class="code python literal-block">
-<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/domain/6/&quot;</span><span class="punctuation">,</span>  <span class="literal string">&quot;fa4a19797dc9f920c7ae096f4474531c86aaaa0a&quot;</span><span class="punctuation">)</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/domain/2/&quot;</span><span class="punctuation">,</span>  <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
 </pre>
-<p>This returns the following:</p>
-<div class="section" id="todo-insert-response-here">
-<h3>TODO: Insert Response Here</h3>
+<p>This returns a <strong>detail view</strong> of the Domain record with an <tt class="docutils literal">id</tt> of 2.</p>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dirty&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/domain/1/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;in-addr.arpa&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;purgeable&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span>
+<span class="punctuation">}</span>
+</pre>
+<p>You can see that the structure of this record is the same as it was in the list view. Once again, the <tt class="docutils literal">master_domain</tt> field contains a hyperlink to the related record.</p>
 </div>
+</div>
+<div class="section" id="diving-in">
+<h1>Diving In</h1>
+<p>Now that we've seen how to access data from the API, let's try some more advanced functionality.</p>
+<div class="section" id="filtering-records">
+<h2>Filtering Records</h2>
+<p>Most of the time, you will be using the API to find records matching different search queries. The Cyder API has very powerful search functionality that allows you to query the database by passing your search parameters in the query string. Here's an updated version of our <tt class="docutils literal">api_connect</tt> function with added support for query parameters:</p>
+<pre class="code python literal-block">
+<span class="keyword namespace">import</span> <span class="name namespace">urllib</span>
+<span class="keyword namespace">import</span> <span class="name namespace">urllib2</span>
+
+<span class="keyword">def</span> <span class="name function">api_connect</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">,</span> <span class="name">token</span><span class="punctuation">,</span> <span class="name">params</span><span class="operator">=</span><span class="name builtin pseudo">None</span><span class="punctuation">):</span>
+    <span class="keyword">if</span> <span class="name">params</span><span class="punctuation">:</span>
+        <span class="name">url</span> <span class="operator">+=</span> <span class="name">urllib</span><span class="operator">.</span><span class="name">urlencode</span><span class="punctuation">(</span><span class="name">params</span><span class="punctuation">)</span>
+    <span class="name">req</span> <span class="operator">=</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">Request</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">)</span>
+    <span class="name">req</span><span class="operator">.</span><span class="name">add_header</span><span class="punctuation">(</span><span class="literal string">'Authorization'</span><span class="punctuation">,</span> <span class="literal string">'Token '</span> <span class="operator">+</span> <span class="name">token</span><span class="punctuation">)</span>
+    <span class="keyword">return</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">urlopen</span><span class="punctuation">(</span><span class="name">req</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">read</span><span class="punctuation">()</span>
+</pre>
+<p>This function is very simple and doesn't support adding query parameters to a URL which already has them, but it is sufficient for our purposes.</p>
+<p>Let's say we want to query for every CNAME that aliases a non <tt class="docutils literal">orst.edu</tt> domain to <tt class="docutils literal">www.orst.edu</tt>. First, we need to determine the structure of CNAME records, so let's look at the CNAME list view.</p>
+<pre class="code python literal-block">
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/cname/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
+</pre>
+<p>Here's the first record we get back:</p>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.emt.orst.edu&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="literal string double">&quot;public&quot;</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>Any of the fields listed here can be queried. Let's try building our query. Cyder API queries are very powerful and support a variety of flexible matching based on Django's <a class="reference external" href="https://docs.djangoproject.com/en/1.5/topics/db/queries/#field-lookups">field lookups</a>.</p>
+<p>Before we can write our query, however, we need to know the basic structure of each request. At its core, each request contains the selection mode, field to query, and the query type. The exact structure can be easily described with Extended Backus-Naur Form:</p>
+<pre class="code literal-block">
+mode       = &quot;f_&quot; | &quot;e_&quot;
+
+query type = &quot;exact&quot; | &quot;iexact&quot; | &quot;contains&quot; | &quot;icontains&quot; | &quot;gt&quot;
+           | &quot;gte&quot; | &quot;lt&quot; | &quot;lte&quot; | &quot;startswith&quot; | &quot;istartswith&quot;
+           | &quot;endswith&quot; | &quot;iendswith&quot; | &quot;isnull&quot; | &quot;search&quot;
+
+request    = mode, &quot;_&quot;, field, &quot;__&quot;, query type
+</pre>
+</div>
+<div class="section" id="complex-records">
+<h2>Complex Records</h2>
+<p>Domain records are simple, but some objects are more complex. Some DNS records include a <tt class="docutils literal">views</tt> field that lists which DNS views the record is available under, rather than containing a single value, and Static Interface, Dynamic Interface, and System records include user-defined <strong>key-value pairs</strong> that allow custom data to be associated with them. Let's look at a basic example of records with key-value pairs.</p>
+<pre class="code python literal-block">
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/system/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
+</pre>
+<p>This returns a list of systems.</p>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">88143</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/system/?page=2&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;sc8000-2&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;systemkeyvalue_set&quot;</span><span class="punctuation">:</span> <span class="punctuation">[]</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;rattusdev&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;systemkeyvalue_set&quot;</span><span class="punctuation">:</span> <span class="punctuation">[]</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;oldstargate&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;systemkeyvalue_set&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="punctuation">{</span>
+                    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;is_quoted&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;key&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;Warranty Date&quot;</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;system&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;value&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;expired 5/25/06&quot;</span>
+                <span class="punctuation">},</span>
+                <span class="punctuation">{</span>
+                    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;is_quoted&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;key&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;Hardware Type&quot;</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;system&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;value&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;Dell PowerEdge 2650&quot;</span>
+                <span class="punctuation">},</span>
+                <span class="punctuation">{</span>
+                    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;is_quoted&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;key&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;Operating System&quot;</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;system&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3</span><span class="punctuation">,</span>
+                    <span class="name tag">&quot;value&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;win2k&quot;</span>
+                <span class="punctuation">}</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="error">...</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
 </div>
 </div>
 </div>

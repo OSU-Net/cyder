@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from rest_framework import serializers, viewsets
+from rest_framework import decorators, response, serializers, viewsets
 
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -39,7 +39,6 @@ class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
 
 class CommonDNSViewSet(viewsets.ModelViewSet):
     def __init__(self, *args, **kwargs):
-        self.search_fields = self.model.search_fields
         self.queryset = self.model.objects.all()
         super(CommonDNSViewSet,self).__init__(*args, **kwargs)
 
@@ -151,9 +150,6 @@ class PTRViewSet(viewsets.ModelViewSet):
 
 
 class SystemKeyValueSerializer(serializers.HyperlinkedModelSerializer):
-    system = serializers.HyperlinkedRelatedField(
-            read_only=True, view_name="api-system-detail")
-
     class Meta:
         model = SystemKeyValue
 
@@ -163,12 +159,23 @@ class SystemKeyValueViewSet(viewsets.ModelViewSet):
     serializer_class = SystemKeyValueSerializer
 
 
+class SystemNestedKeyValueSerializer(serializers.ModelSerializer):
+    id = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name='api-system-keyvalues-detail')
 
-class SystemSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = SystemKeyValue
+        # fields = ['id', 'key', 'value']
+
+
+class SystemSerializer(serializers.ModelSerializer):
+    keyvalues = serializers.HyperlinkedIdentityField(
+        view_name="api-system-keyvalues-detail",
+        lookup_field="systemkeyvalue_set")
+
     class Meta:
         model = System
-        depth = 1
-        fields = standard_fields + ['name', 'systemkeyvalue_set']
+        fields = ['id', 'name', 'keyvalues']
 
 
 class SystemViewSet(viewsets.ModelViewSet):
@@ -177,7 +184,7 @@ class SystemViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
 
 
-class StaticIntrKeyValueSerializer(CommonDNSSerializer):
+class StaticIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     static_interface = serializers.HyperlinkedRelatedField(
         read_only=True, view_name="api-staticinterface-detail")
 
@@ -216,7 +223,7 @@ class DynamicIntrKeyValueViewSet(viewsets.ModelViewSet):
     serializer_class = DynamicIntrKeyValueSerializer
 
 
-class DynamicInterfaceSerializer(CommonDNSSerializer):
+class DynamicInterfaceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = DynamicInterface
         fields = ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf',
