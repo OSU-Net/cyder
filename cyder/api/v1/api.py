@@ -149,33 +149,36 @@ class PTRViewSet(viewsets.ModelViewSet):
     serializer_class = PTRSerializer
 
 
-class SystemKeyValueSerializer(serializers.HyperlinkedModelSerializer):
+class SystemKeyValueSerializer(serializers.ModelSerializer):
+    id = serializers.Field(source='id')
+    system = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name='api-system-detail')
+
     class Meta:
         model = SystemKeyValue
 
 
 class SystemKeyValueViewSet(viewsets.ModelViewSet):
+    model = SystemKeyValue
     queryset = SystemKeyValue.objects.all()
     serializer_class = SystemKeyValueSerializer
 
 
 class SystemNestedKeyValueSerializer(serializers.ModelSerializer):
     id = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-system-keyvalues-detail')
+        read_only=True, view_name='api-system_keyvalues-detail')
 
     class Meta:
         model = SystemKeyValue
-        # fields = ['id', 'key', 'value']
+        fields = ['id', 'key', 'value', 'is_quoted']
 
 
 class SystemSerializer(serializers.ModelSerializer):
-    keyvalues = serializers.HyperlinkedIdentityField(
-        view_name="api-system-keyvalues-detail",
-        lookup_field="systemkeyvalue_set")
+    systemkeyvalue_set = SystemNestedKeyValueSerializer(many=True)
 
     class Meta:
         model = System
-        fields = ['id', 'name', 'keyvalues']
+        fields = ['id', 'name', 'systemkeyvalue_set']
 
 
 class SystemViewSet(viewsets.ModelViewSet):

@@ -21,7 +21,7 @@ router.register(r'sshfp', api.SSHFPViewSet, base_name='api-sshfp')
 router.register(r'srv', api.SRVViewSet, base_name='api-srv')
 router.register(r'system', api.SystemViewSet, base_name='api-system')
 router.register(r'system-keyvalues', api.SystemKeyValueViewSet,
-                base_name='api-system-keyvalues')
+                base_name='api-system_keyvalues')
 router.register(r'staticinterface', api.StaticInterfaceViewSet,
                 base_name='api-staticinterface')
 router.register(r'staticinterface-keyvalues', api.StaticIntrKeyValueViewSet,
