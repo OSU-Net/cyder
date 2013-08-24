@@ -36,10 +36,10 @@ def range_detail(request, pk):
         allow = []
         if (mrange.allow == ALLOW_VRF
                 or mrange.allow == ALLOW_LEGACY_AND_VRF):
-            allow += list(Vrf.objects.filter(network=mrange.network))
+            allow += map(str, Vrf.objects.filter(network=mrange.network))
         if (mrange.allow == ALLOW_LEGACY
                 or mrange.allow == ALLOW_LEGACY_AND_VRF):
-            allow += list(Ctnr.objects.filter(ranges=mrange))
+            allow += map(str, Ctnr.objects.filter(ranges=mrange))
 
     allow.sort(key=lambda x: x.lower())
 
