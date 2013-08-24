@@ -61,7 +61,7 @@ class Workgroup(models.Model, ObjectUrlMixin):
         build_str += "\t# Workgroup Statements\n"
         if statements:
             build_str += join_dhcp_args(statements)
-        build_str += "\t# Static Hosts in Workgorup\n"
+        build_str += "\t# Static Hosts in Workgroup\n"
         for client in chain(dynamic_clients, static_clients):
             build_str += client.build_host()
         build_str += "}\n"
