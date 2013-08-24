@@ -8,11 +8,13 @@ class DevAuthenticationMiddleware(object):
 
     def process_request(self, request):
         # Log in as development user.
-        if 'ctnr' not in request.session:
+        if not request.user.is_authenticated():
+            user = 'test_superuser'
             if '_auth_user_id' in request.session:
-                user = User.objects.get(pk=request.session['_auth_user_id'])
-            else:
-                user = 'test_superuser'
+                try:
+                    user = User.objects.get(pk=request.session['_auth_user_id'])
+                except User.DoesNotExist:
+                    pass
             request = login_session(request, user)
 
         if request.path == '/logout/':
