@@ -69,7 +69,7 @@ class Accessable(object):
 class Allow(Accessable):
 
     def __str__(self):
-        return "allow {0};".format(self.value)
+        return "allow {0};\n".format(self.value)
 
     def is_allowed(self, host):
         # implement later
@@ -79,7 +79,7 @@ class Allow(Accessable):
 class Deny(Accessable):
 
     def __str__(self):
-        return "deny {0};".format(self.value)
+        return "deny {0};\n".format(self.value)
 
     def is_allowed(self, host):
         # implement later
