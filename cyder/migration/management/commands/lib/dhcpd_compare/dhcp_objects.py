@@ -112,7 +112,7 @@ class Host(object):
 
     def __str__(self):
         return ("host {0} {{\n"
-                "\thardware-address {1};\n"
+                "\thardware ethernet {1};\n"
                 "\tfixed-address {2};\n"
                 "{3}{4}"
                 "}}\n".format(
