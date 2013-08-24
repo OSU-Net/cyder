@@ -1,16 +1,7 @@
-from django.db import models
 from rest_framework import filters
 
 class SearchFieldFilter(filters.BaseFilterBackend):
     """Filter based on record attributes."""
-
-    def is_related(self, field):
-        """Checks if the given field is a related record."""
-        return isinstance(
-            field,
-            (models.ForeignKey, models.ManyToManyField,
-                models.OneToOneFields)
-            )
 
     def filter_queryset(self, request, queryset, view):
         ALLOWED_ENDINGS = ('__exact', '__iexact', '__contains', '__icontains',
