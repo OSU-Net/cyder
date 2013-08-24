@@ -25,9 +25,9 @@ router.register(r'system-keyvalues', api.SystemKeyValueViewSet,
 router.register(r'staticinterface', api.StaticInterfaceViewSet,
                 base_name='api-staticinterface')
 router.register(r'staticinterface-keyvalues', api.StaticIntrKeyValueViewSet,
-                base_name='api-staticinterface-keyvalues')
+                base_name='api-staticinterface_keyvalues')
 router.register(r'dynamicinterface', api.DynamicInterfaceViewSet,
                 base_name='api-dynamicinterface')
 router.register(r'dynamicinterface-keyvalues', api.DynamicIntrKeyValueViewSet,
-                base_name='api-dynamicinterface-keyvalues')
+                base_name='api-dynamicinterface_keyvalues')
 urlpatterns = router.urls

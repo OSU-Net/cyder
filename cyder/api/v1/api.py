@@ -165,8 +165,8 @@ class SystemKeyValueViewSet(viewsets.ModelViewSet):
 
 
 class SystemNestedKeyValueSerializer(serializers.ModelSerializer):
-    id = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-system_keyvalues-detail')
+    id = serializers.HyperlinkedIdentityField(
+        view_name='api-system_keyvalues-detail')
 
     class Meta:
         model = SystemKeyValue
@@ -188,6 +188,7 @@ class SystemViewSet(viewsets.ModelViewSet):
 
 
 class StaticIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field(source='id')
     static_interface = serializers.HyperlinkedRelatedField(
         read_only=True, view_name="api-staticinterface-detail")
 
@@ -196,16 +197,27 @@ class StaticIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class StaticIntrKeyValueViewSet(viewsets.ModelViewSet):
+    model = StaticIntrKeyValue
     queryset = StaticIntrKeyValue.objects.all()
     serializer_class = StaticIntrKeyValueSerializer
 
 
+class StaticIntrNestedKeyValueSerializer(serializers.ModelSerializer):
+    id = serializers.HyperlinkedIdentityField(
+            view_name='api-staticinterface_keyvalues-detail')
+
+    class Meta:
+        model = StaticIntrKeyValue
+        fields = ['id', 'key', 'value', 'is_quoted']
+
+
 class StaticInterfaceSerializer(CommonDNSSerializer):
+    staticintrkeyvalue_set = StaticIntrNestedKeyValueSerializer(many=True)
+
     class Meta:
         model = StaticInterface
         fields = (standard_fields + StaticInterface.get_api_fields() +
             ['system', 'staticintrkeyvalue_set'])
-        depth = 1
 
 
 class StaticInterfaceViewSet(viewsets.ModelViewSet):
@@ -214,6 +226,7 @@ class StaticInterfaceViewSet(viewsets.ModelViewSet):
 
 
 class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field(source='id')
     dynamic_interface = serializers.HyperlinkedRelatedField(
             read_only=True, view_name="api-dynamicinterface-detail")
 
@@ -222,11 +235,23 @@ class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class DynamicIntrKeyValueViewSet(viewsets.ModelViewSet):
+    model = DynamicIntrKeyValue
     queryset = DynamicIntrKeyValue.objects.all()
     serializer_class = DynamicIntrKeyValueSerializer
 
 
+class DynamicIntrNestedKeyValueSerializer(serializers.ModelSerializer):
+    id = serializers.HyperlinkedIdentityField(
+            view_name='api-dynamicinterface_keyvalues-detail')
+
+    class Meta:
+        model = DynamicIntrKeyValue
+        fields = ['id', 'key', 'value', 'is_quoted']
+
+
 class DynamicInterfaceSerializer(serializers.HyperlinkedModelSerializer):
+    dynamicintrkeyvalue_set = DynamicIntrNestedKeyValueSerializer(many=True)
+
     class Meta:
         model = DynamicInterface
         fields = ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf',
