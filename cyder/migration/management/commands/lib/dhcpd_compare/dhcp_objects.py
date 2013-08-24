@@ -275,7 +275,7 @@ class Group(ScopeForHost):
                     join_p(sorted(self.options)),
                     join_p(sorted(self.parameters)),
                     join_p(sorted(self.groups)),
-                    join_p(sorted(self.hosts))))
+                    join_p(sorted(self.hosts, key=lambda x: x.fqdn))))
 
     def __hash__(self):
         return hash(self.__str__())
