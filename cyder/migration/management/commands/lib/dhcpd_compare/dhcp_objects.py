@@ -111,14 +111,14 @@ class Host(object):
         return hash(self.__str__())
 
     def __str__(self):
+        ip_line = "\tfixed-address {0};\n".format(self.ip) if self.ip else ""
         return ("host {0} {{\n"
                 "\thardware ethernet {1};\n"
-                "\tfixed-address {2};\n"
-                "{3}{4}"
+                "{2}{3}{4}"
                 "}}\n".format(
                     self.fqdn,
                     self.mac,
-                    self.ip,
+                    ip_line,
                     join_p(sorted(self.options)),
                     join_p(sorted(self.parameters))))
 
