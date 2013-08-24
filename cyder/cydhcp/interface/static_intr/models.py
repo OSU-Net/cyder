@@ -268,7 +268,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\t# Host Statements\n'
             build_str += join_dhcp_args(statements, depth=2)
         """
-        build_str += '\t}\n\n'
+        build_str += '\t}\n'
         return build_str
 
     def build_subclass(self, contained_range, allowed):

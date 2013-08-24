@@ -98,7 +98,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             build_str += "\t\t# Host Statemets\n"
             build_str += join_dhcp_args(statements, depth=2)
         """
-        build_str += "\t}\n\n"
+        build_str += "\t}\n"
         return build_str
 
     def build_subclass(self, allowed):
