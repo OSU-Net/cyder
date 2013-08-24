@@ -185,6 +185,7 @@ class SystemViewSet(viewsets.ModelViewSet):
     queryset = System.objects.all()
     serializer_class = SystemSerializer
     search_fields = ['name']
+    keyvaluemodel = SystemKeyValue
 
 
 class StaticIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
@@ -223,6 +224,7 @@ class StaticInterfaceSerializer(CommonDNSSerializer):
 class StaticInterfaceViewSet(viewsets.ModelViewSet):
     queryset = StaticInterface.objects.all()
     serializer_class = StaticInterfaceSerializer
+    keyvaluemodel = StaticIntrKeyValue
 
 
 class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
@@ -263,3 +265,4 @@ class DynamicInterfaceSerializer(serializers.HyperlinkedModelSerializer):
 class DynamicInterfaceViewSet(viewsets.ModelViewSet):
     queryset = DynamicInterface.objects.all()
     serializer_class= DynamicInterfaceSerializer
+    keyvaluemodel = DynamicIntrKeyValue
