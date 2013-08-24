@@ -3,7 +3,7 @@ from django.db import models
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.utils import format_mac
+from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.fields import MacAddrField
@@ -74,10 +74,20 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             {'name': 'system', 'datatype': 'string', 'editable': False},
         ]}
 
-    def build_host(self):
+    def format_host_option(self, option):
+        s = str(option)
+        s = s.replace('%h', self.system.name)
+        s = s.replace('%i', self.ip_str)
+        s = s.replace('%m', self.mac)
+        s = s.replace('%6m', self.mac[0:6])
+        return s
+
+    def build_host(self, options=None):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
         build_str += "\t\thardware ethernet {0};\n".format(
             format_mac(self.mac))
+        build_str += join_dhcp_args(map(self.format_host_option, options),
+                                    depth=2)
         """
         options = self.dynamicintrkeyvalue_set.filter(is_option=True)
         statements = self.dynamicintrkeyvalue_set.filter(is_statement=True)

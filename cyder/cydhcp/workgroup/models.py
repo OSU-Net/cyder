@@ -54,7 +54,15 @@ class Workgroup(models.Model, ObjectUrlMixin):
             #return build_str
         build_str += "group {{ #{0}\n".format(self.name)
         statements = self.workgroupkeyvalue_set.filter(is_statement=True)
-        options = self.workgroupkeyvalue_set.filter(is_option=True)
+        options = list(self.workgroupkeyvalue_set.filter(is_option=True))
+
+        def is_host_option(option):
+            return any(x in option.value for x in ['%h', '%i', '%m', '%6m'])
+
+        host_options = filter(is_host_option, options)
+        for x in host_options:
+            options.remove(x)
+
         build_str += "\t# Workgroup Options\n"
         if options:
             build_str += join_dhcp_args(options)
@@ -63,7 +71,7 @@ class Workgroup(models.Model, ObjectUrlMixin):
             build_str += join_dhcp_args(statements)
         build_str += "\t# Static Hosts in Workgroup\n"
         for client in chain(dynamic_clients, static_clients):
-            build_str += client.build_host()
+            build_str += client.build_host(host_options)
         build_str += "}\n"
         return build_str
 

@@ -17,7 +17,7 @@ from cyder.base.constants import IP_TYPE_6
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydhcp.utils import format_mac
+from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 
@@ -240,7 +240,15 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         else:
             return '{0}{1}.{2}'.format(itype, primary, alias)
 
-    def build_host(self):
+    def format_host_option(self, option):
+        s = str(option)
+        s = s.replace('%h', self.label)
+        s = s.replace('%i', self.ip_str)
+        s = s.replace('%m', self.mac)
+        s = s.replace('%6m', self.mac[0:6])
+        return s
+
+    def build_host(self, options=None):
         build_str = '\thost {0} {{\n'.format(self.fqdn)
         build_str += '\t\thardware ethernet {0};\n'.format(
             format_mac(self.mac))
@@ -248,6 +256,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address6 {0};\n'.format(self.ip_str)
         else:
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
+        build_str += join_dhcp_args(map(self.format_host_option, options),
+                                    depth=2)
         """
         options = self.staticintrkeyvalue_set.filter(is_option=True)
         statements = self.staticintrkeyvalue_set.filter(is_statement=True)
