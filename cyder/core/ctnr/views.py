@@ -251,12 +251,21 @@ def add_object(request, ctnr_pk):
 
     else:
         if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
-            if pk == 'null':
-                return HttpResponse(json.dumps({
-                    'error': '{0} is not a valid {1}'.format(name, obj_type)}))
-
             Klass = get_model(obj_type, obj_type)
-            obj = Klass.objects.get(id=pk)
+            if pk == 'null':
+                try:
+                    if Klass.__name__ == 'Range':
+                        return HttpResponse(json.dumps({
+                            'error': 'Please select ranges from the '
+                            'dropdown'}))
+                    obj = Klass.objects.get(name=name)
+                except Klass.DoesNotExist:
+                    return HttpResponse(
+                        json.dumps({'error': '{0} is not a valid {1}'.format(
+                            name, obj_type)}))
+            else:
+                obj = Klass.objects.get(id=pk)
+
             m2m = getattr(ctnr, (obj_type + 's'), None)
 
             if m2m is None:
