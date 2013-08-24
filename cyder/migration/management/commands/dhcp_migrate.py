@@ -261,9 +261,6 @@ def migrate_zones():
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
     default, _ = Workgroup.objects.get_or_create(name='default')
-    cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
-                   "workgroup, zone, enabled, last_seen "
-                   "FROM host WHERE ip = 0")
 
     sys_value_keys = {"type": "Hardware Type",
                       "os": "Operating System",
