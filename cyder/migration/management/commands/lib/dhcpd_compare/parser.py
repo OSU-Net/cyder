@@ -78,6 +78,8 @@ class DhcpConfigContext(
             second_hosts = other.hosts - self.hosts
             first_groups = self.groups - other.groups
             second_groups = other.groups - self.groups
+            first_classes = self.classes - other.classes
+            second_classes = other.classes - self.classes
             if first_subnets:
                 print '### Subnets found only in the first config ###'
                 for subnet in first_subnets:
@@ -102,6 +104,15 @@ class DhcpConfigContext(
                 print '### Groups found only in the second config ###'
                 for group in second_groups:
                     stdout.write(str(group))
+            if first_classes:
+                print '### Classes found only in the first config ###'
+                for klass in first_classes:
+                    stdout.write(str(klass))
+            if second_classes:
+                print '### Classes found only in the second config ###'
+                for klass in second_classes:
+                    stdout.write(str(klass))
+
 
 
 

@@ -305,30 +305,36 @@ class ClientClass(object):
         self.name = name
         self.start = IPv4Address(start) if start else None
         self.end = IPv4Address(end) if start else None
-        self.options = options or []
-        self.parameters = parameters or []
+        self.options = set(options or [])
+        self.parameters = set(parameters or [])
         self.match = match
-        self.subclass = []
+        self.subclass = set()
 
     def __str__(self):
         # This is specific to the way that our dhcp config class names are
         # labeled
-        return "class {1}:{2} {{\n{3}{4}{6}\n\tmatch {7};\n}}".format(
-            self.start, self.end,
-            join_p(sorted(self.options)),
-            join_p(sorted(self.parameters)),
-            join_p(sorted(self.subclass)),
-            self.match)
+        return ('class "{0}:{1}:{2}" {{\n'
+                '{3}{4}'
+                '\tmatch {5};\n'
+                '}}\n'.format(
+                    self.name, self.start, self.end,
+                    join_p(sorted(self.options)),
+                    join_p(sorted(self.parameters)),
+                    self.match) +
+                ''.join(['subclass "{0}:{1}:{2}" 1:{3};\n'
+                         .format(self.name, self.start, self.end, mac)
+                         for mac in self.subclass]))
 
     def __hash__(self):
         return hash(self.__str__())
 
     def add_subclass(self, mac):
-        self.subclass.append(mac)
+        self.subclass.update([mac])
 
     def __eq__(self, other):
         return (self.start, self.end, self.name) == \
-               (other.start, other.end, self.name)
+               (other.start, other.end, self.name) and \
+               self.subclass == other.subclass
 
     def __ne__(self, other):
         return not self == other

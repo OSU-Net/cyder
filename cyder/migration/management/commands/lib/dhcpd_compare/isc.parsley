@@ -59,8 +59,10 @@ TopLevelGroup = Group:group -> self.add_group(group)
 
 TopLevelHost = Host:host -> self.add_host(host)
 
-TopLevelClass = ws 'class' ws '"' (Char | ' ')* ':' IP:start ':' IP:end '"' ws '{'
-                        ws 'match' ws <Char*>:match ';' ws '}'
+Class = ws 'class' ws '"' <(Char | ' ')*>:name ':' IP:start ':' IP:end '"' ws '{'
+        ws 'match' ws <Char*>:match ';' ws '}' -> ClientClass(start=start, end=end, name=name, match=match)
+
+TopLevelClass = Class:klass -> self.add_class(klass)
 
 TopLevelSubClass = ws 'subclass' ws '"' (Char | ' ')* ':' IP:start ':' IP:end '"' ws  '1:' MAC:mac ';'
         -> self.add_subclass(start, end, mac.lower())
