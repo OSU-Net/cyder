@@ -91,7 +91,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
-    mac = MacAddrField(blank=True,
+    mac = MacAddrField(dhcp_enabled='dhcp_enabled',
                        help_text="MAC address with or without colons")
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
@@ -276,11 +276,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)
-
-        if self.dhcp_enabled and self.mac == '':
-            raise ValidationError(
-                "The MAC field is required when DHCP is enabled"
-            )
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():

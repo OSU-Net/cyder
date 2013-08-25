@@ -1,21 +1,46 @@
 from django.db.models import CharField
+from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.validation import validate_mac
 
 
 class MacAddrField(CharField):
+    """A general purpose MAC address field
+    This field holds a MAC address. clean() removes colons and hyphens from the
+    field value, raising an exception if the value is invalid or empty.
+
+    Arguments:
+
+    dhcp_enabled (string): The name of another attribute (possibly a field) in
+                           the model that holds a boolean specifying whether to
+                           validate this MacAddrField; if not specified, always
+                           validate.
+    """
+
     def __init__(self, *args, **kwargs):
-        if 'max_length' in kwargs:
-            raise Exception("You cannot specify a max_length. max_length is "
-                            "fixed at 12 for MacAddrFields.")
+        if 'dhcp_enabled' in kwargs:
+            self.dhcp_enabled = kwargs.pop('dhcp_enabled')
+        else:
+            self.dhcp_enabled = None # always validate
+
+        for option in ['max_length', 'blank']:
+            if option in kwargs:
+                raise Exception('You cannot specify the {0} option.'
+                                .format(option))
+
         kwargs['max_length'] = 12
+        kwargs['blank'] = True
 
         super(MacAddrField, self).__init__(*args, **kwargs)
 
     def clean(self, value, model_instance):
-        if self.blank and value == '':
-            return value
-        value = value.lower().replace(':', '')
-        validate_mac(value)
+        # [   always validate   ]  [             DHCP is enabled              ]
+        if not self.dhcp_enabled or getattr(model_instance, self.dhcp_enabled):
+            if value == '':
+                raise ValidationError(
+                    "This field is required when DHCP is enabled")
+            value = value.lower().replace(':', '')
+            validate_mac(value)
+
         value = super(CharField, self).clean(value, model_instance)
         return value

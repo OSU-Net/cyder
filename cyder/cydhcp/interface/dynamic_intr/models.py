@@ -21,7 +21,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
-    mac = MacAddrField(blank=True,
+    mac = MacAddrField(dhcp_enabled='dhcp_enabled',
                        help_text="MAC address with or without colons")
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
@@ -119,11 +119,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             return "{0}.{1}".format(self.system.name, self.domain.name)
 
     def clean(self, *args, **kwargs):
-        if self.dhcp_enabled and self.mac == '':
-            raise ValidationError(
-                "The MAC field is required when DHCP is enabled"
-            )
-
         super(DynamicInterface, self).clean(*args, **kwargs)
 
 
