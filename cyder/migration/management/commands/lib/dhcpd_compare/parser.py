@@ -56,10 +56,9 @@ class DhcpConfigContext(
     def add_class(self, dhcp_class):
         self.classes.add(dhcp_class)
 
-    def add_subclass(self, start, end, mac):
-        start = IPv4Address(start)
+    def add_subclass(self, name, mac):
         for _class in self.classes:
-            if _class.start == start:
+            if _class.name == name:
                 _class.add_subclass(mac)
                 return True
         return False

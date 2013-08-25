@@ -300,30 +300,26 @@ class Group(ScopeForHost):
 @total_ordering
 class ClientClass(object):
 
-    def __init__(self, start=None, end=None, name=None, options=None,
+    def __init__(self, name=None, options=None,
                  parameters=None, match=None):
         self.name = name
-        self.start = IPv4Address(start) if start else None
-        self.end = IPv4Address(end) if start else None
         self.options = set(options or [])
         self.parameters = set(parameters or [])
         self.match = match
         self.subclass = set()
 
     def __str__(self):
-        # This is specific to the way that our dhcp config class names are
-        # labeled
-        return ('class "{0}:{1}:{2}" {{\n'
-                '{3}{4}'
-                '\tmatch {5};\n'
+        return ('class "{0}" {{\n'
+                '{1}{2}'
+                '\tmatch {3};\n'
                 '}}\n'.format(
-                    self.name, self.start, self.end,
+                    self.name,
                     join_p(sorted(self.options)),
                     join_p(sorted(self.parameters)),
                     self.match) +
-                ''.join(['subclass "{0}:{1}:{2}" 1:{3};\n'
-                         .format(self.name, self.start, self.end, mac)
-                         for mac in self.subclass]))
+                ''.join(['subclass "{0}" 1:{1};\n'
+                         .format(self.name, mac)
+                         for mac in sorted(self.subclass)]))
 
     def __hash__(self):
         return hash(self.__str__())
@@ -332,8 +328,7 @@ class ClientClass(object):
         self.subclass.update([mac])
 
     def __eq__(self, other):
-        return (self.start, self.end, self.name) == \
-               (other.start, other.end, self.name) and \
+        return self.name == other.name and \
                self.subclass == other.subclass
 
     def __ne__(self, other):
