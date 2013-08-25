@@ -258,7 +258,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        """
         options = self.staticintrkeyvalue_set.filter(is_option=True)
         statements = self.staticintrkeyvalue_set.filter(is_statement=True)
         if options:
@@ -267,7 +266,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if statements:
             build_str += '\t\t# Host Statements\n'
             build_str += join_dhcp_args(statements, depth=2)
-        """
         build_str += '\t}\n'
         return build_str
 

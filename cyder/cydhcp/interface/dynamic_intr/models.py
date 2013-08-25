@@ -88,7 +88,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             format_mac(self.mac))
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        """
         options = self.dynamicintrkeyvalue_set.filter(is_option=True)
         statements = self.dynamicintrkeyvalue_set.filter(is_statement=True)
         if options:
@@ -97,7 +96,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         if statements:
             build_str += "\t\t# Host Statemets\n"
             build_str += join_dhcp_args(statements, depth=2)
-        """
         build_str += "\t}\n"
         return build_str
 
