@@ -275,8 +275,8 @@ class Group(ScopeForHost):
     def __eq__(self, other):
         return self.compare_options(other) and \
                self.compare_parameters(other) and \
-               sorted(self.hosts) == sorted(other.hosts) and \
-               sorted(self.groups) == sorted(other.groups)
+               self.hosts == other.hosts and \
+               self.groups == other.groups
 
     def __ne__(self, other):
         return not self == other
