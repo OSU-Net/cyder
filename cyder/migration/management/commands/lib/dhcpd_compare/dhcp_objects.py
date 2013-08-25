@@ -22,6 +22,9 @@ class Attribute(object):
     def __eq__(self, other):
         return (self.key, self.value)  == (other.key, other.value)
 
+    def __ne__(self, other):
+        return not self == other
+
     def __lt__(self, other):
         return (self.key, self.value) < (other.key, other.value)
 
@@ -55,6 +58,9 @@ class Accessable(object):
 
     def __eq__(self, other):
         return self.value == other.value
+
+    def __ne__(self, other):
+        return not self == other
 
     def __lt__(self, other):
         return self.value < other.value
@@ -103,6 +109,9 @@ class Host(object):
                self.mac == other.mac and \
                self.options == other.options and \
                self.parameters == other.parameters
+
+    def __ne__(self, other):
+        return not self == other
 
     def __lt__(self, other):
         return int(self.ip or 0) < int(other.ip or 0)
@@ -181,6 +190,8 @@ class Pool(ScopeForHost):
                 self.allow == other.allow and \
                 self.deny == other.deny
 
+    def __ne__(self, other):
+        return not self == other
 
     def __lt__(self, other):
         return self.start < other.start
@@ -234,6 +245,9 @@ class Subnet(ScopeForHost):
                self.pools == other.pools and \
                self.network == other.network
 
+    def __ne__(self, other):
+        return not self == other
+
     def __lt__(self, other):
         if isinstance(other, Host):
             return self.network < other.ip
@@ -263,6 +277,9 @@ class Group(ScopeForHost):
                self.compare_parameters(other) and \
                sorted(self.hosts) == sorted(other.hosts) and \
                sorted(self.groups) == sorted(other.groups)
+
+    def __ne__(self, other):
+        return not self == other
 
     def __lt__(self, other):
         # lol wut
@@ -312,6 +329,9 @@ class ClientClass(object):
     def __eq__(self, other):
         return (self.start, self.end, self.name) == \
                (other.start, other.end, self.name)
+
+    def __ne__(self, other):
+        return not self == other
 
     def __lt__(self, other):
         return self.start < other.start
