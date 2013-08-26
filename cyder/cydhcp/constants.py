@@ -1,12 +1,16 @@
-ALLOW_OPTION_VRF = 'vrf'
-ALLOW_OPTION_KNOWN = 'known-client'
-ALLOW_OPTION_LEGACY = 'legacy'
+ALLOW_ANY = 'a'
+ALLOW_KNOWN = 'k'
+ALLOW_LEGACY = 'l'
+ALLOW_VRF = 'v'
+ALLOW_LEGACY_AND_VRF = 'b'
 
-ALLOW_OPTIONS = {
-    ALLOW_OPTION_VRF: 'Allow members of VRF',
-    ALLOW_OPTION_KNOWN: 'Allow known-clients',
-    ALLOW_OPTION_LEGACY: 'Allow Ctnr: Legacy Option',
-}
+ALLOW_OPTIONS = [
+    (ALLOW_ANY, 'ANY: Allow any client'),
+    (ALLOW_KNOWN, 'KNOWN: Allow known clients'),
+    (ALLOW_LEGACY, "LEGACY: Allow any client that shares at least one of this range's containers"),
+    (ALLOW_VRF, "VRF: Allow any client that shares this range's VRF"),
+    (ALLOW_LEGACY_AND_VRF, 'LEGACY+VRF: Allow any client that shares either a VRF or a container'),
+]
 
 # Some ranges have no allow statements so this option should be able to be
 # null. There are a collection of such subnets documented in the migration.

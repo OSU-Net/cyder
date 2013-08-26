@@ -3,7 +3,7 @@ from django.test.client import Client
 from cyder.base.constants import IP_TYPE_4
 import cyder.base.tests
 from cyder.base.tests.test_views_template import build
-from cyder.cydhcp.constants import (ALLOW_OPTION_VRF, DENY_OPTION_UNKNOWN,
+from cyder.cydhcp.constants import (ALLOW_VRF, DENY_OPTION_UNKNOWN,
                                     STATIC)
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
@@ -51,7 +51,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'start_str': '196.168.1.1',
             'end_str': '196.168.1.2',
             'is_reserved': True,
-            'allow': ALLOW_OPTION_VRF,
+            'allow': ALLOW_VRF,
             'deny': DENY_OPTION_UNKNOWN,
             'range_type': STATIC,
         }
@@ -63,7 +63,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'start_str': '196.168.1.3',
             'end_str': '196.168.1.4',
             'is_reserved': True,
-            'allow': ALLOW_OPTION_VRF,
+            'allow': ALLOW_VRF,
             'deny': DENY_OPTION_UNKNOWN,
             'range_type': STATIC,
         }
