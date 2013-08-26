@@ -102,19 +102,18 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment, en,
+def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
         known):
     """
     Takes a row from the Maintain range table.
     Returns a range which is saved in Cyder.
     """
-    # Set the allow statement
-    n = None
-    r = None
+
     r_type = 'st' if range_type == 'static' else 'dy'
     allow = ALLOW_LEGACY
-    if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
-        id, name, subnet, netmask, status, vlan = cursor.fetchone()
+    if cursor.execute("SELECT subnet, netmask "
+                      "FROM subnet WHERE id = {0}".format(subnet_id)):
+        subnet, netmask = cursor.fetchone()
         n = Network.objects.get(ip_lower=subnet,
                                 prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
@@ -134,17 +133,30 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en,
             n.vrf = v
             n.save()
 
-        if int(n.network.network) < start <= end < int(n.network.broadcast):
-            r, created = Range.objects.get_or_create(
-                start_lower=start, start_str=ipaddr.IPv4Address(start),
-                end_lower=end, end_str=ipaddr.IPv4Address(end),
-                range_type=r_type, allow=allow, ip_type='4',
-                network=n)
-    if not r:
-        r, created = Range.objects.get_or_create(
-            start_lower=start, start_str=ipaddr.IPv4Address(start),
-            end_lower=end, end_str=ipaddr.IPv4Address(end),
-            is_reserved=True, range_type=r_type, allow=allow, ip_type='4')
+        range_str = "{0}-{1}".format(ipaddr.IPv4Address(start),
+                                     ipaddr.IPv4Address(end))
+
+        valid = True
+        if not int(n.network.network) < start:
+            print ('Range {0} in network {1} has an invalid start address.'
+                   .format(range_str, n))
+            valid = False
+        if not start <= end < int(n.network.broadcast):
+            print ('Range {0} in network {1} has an invalid end address.'
+                   .format(range_str, n))
+            valid = False
+
+        dhcp_enabled = enabled and valid
+    else: # the Range doesn't have a Network
+        n = None
+        dhcp_enabled = False
+
+    r, created = Range.objects.get_or_create(
+        start_lower=start, start_str=ipaddr.IPv4Address(start),
+        end_lower=end, end_str=ipaddr.IPv4Address(end),
+        range_type=r_type, allow=allow, ip_type='4',
+        network=n, dhcp_enabled=dhcp_enabled, is_reserved=not dhcp_enabled)
+
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         rk, kv_created = RangeKeyValue.objects.get_or_create(
             range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
