@@ -343,10 +343,7 @@ def migrate_dynamic_hosts():
                 print "Failed to migrate domain_id {0}".format(items['domain'])
 
         w = default
-        if not items['workgroup']:
-            print "Host with MAC {0} has no workgroup in Maintain".format(
-                items['ha'])
-        else:
+        if items['workgroup']:
             try:
                 w = maintain_find_workgroup(items['workgroup'])
             except ObjectDoesNotExist:
