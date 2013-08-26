@@ -50,12 +50,12 @@ class DHCPBuilder(SVNBuilderMixin):
             try:
                 for ctnr in Ctnr.objects.all():
                     f.write(ctnr.build_legacy_class())
+                for vrf in Vrf.objects.all():
+                    f.write(vrf.build_vrf())
                 for network in Network.objects.filter(enabled=True):
                     f.write(network.build_subnet())
                 for workgroup in Workgroup.objects.all():
                     f.write(workgroup.build_workgroup())
-                for vrf in Vrf.objects.all():
-                    f.write(vrf.build_vrf())
             except (OSError, ValueError), e:
                 if self.DEBUG:
                     print str(e)
