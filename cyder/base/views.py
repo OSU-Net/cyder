@@ -298,7 +298,13 @@ def get_update_form(request, get_klasses_fn):
         raise Http404
 
     if related_type in form.fields:
-        RelatedKlass = get_model(related_type, related_type)
+        if 'interface' in related_type:
+            app_label = related_type.replace('interface', 'intr')
+            related_type = related_type.replace('_', '')
+        else:
+            app_label = related_type
+
+        RelatedKlass = get_model(app_label, related_type)
         form.fields[related_type] = ModelChoiceField(
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
