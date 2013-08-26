@@ -14,10 +14,17 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         q_keyvalues = {}
 
         parent_model = queryset.model
+        parent_name = parent_model.__name__.lower()
         keyvalue_model = getattr(view, 'keyvaluemodel', None)
 
         kv_queryset = None
         f_queryset = None
+
+        matching = lambda k, v: set(
+            keyvalue_model.objects.filter(key=k, value=v).values_list(
+                parent_name, flat=True
+            )
+        )
 
         for q in request.QUERY_PARAMS:
             if q.startswith("i_") and q.endswith(ALLOWED_ENDINGS):
@@ -32,13 +39,10 @@ class SearchFieldFilter(filters.BaseFilterBackend):
             return queryset
 
         if len(q_keyvalues):
-            things = parent_model.objects.all()
-            kv_queryset = keyvalue_model.objects.all()
-            for key in q_keyvalues:
-                x = kv_queryset.filter(key=key, value=q_keyvalues[key])
-                things = things & x.values_list
-
-        kv_queryset = set(kv_queryset.values_list('system', flat=True))
+            parent_set_list = (
+                matching(k, q_keyvalues[k]) for k in q_keyvalues)
+            parent_ids = reduce((lambda x, y: x & y), parent_set_list)
+            kv_queryset = parent_model.objects.filter(id__in=parent_ids)
 
         if len(q_include) or len(q_exclude):
             f_queryset = set(queryset.filter(**q_include).exclude(**q_exclude))
