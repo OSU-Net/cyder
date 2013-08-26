@@ -370,9 +370,9 @@ def change_ctnr(request, pk=None):
     except CtnrUser.DoesNotExist:
         ctnr_user = None
 
-    if ctnr_user or global_ctnr_user:
+    prev = request.session['ctnr']
+    if ctnr_user or global_ctnr_user or ctnr.pk == 1:
         # Set session ctnr and level.
-        prev = request.session['ctnr']
         request.session['ctnr'] = ctnr
 
         # Higher level overrides.
