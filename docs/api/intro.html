@@ -438,7 +438,7 @@ ul.auto-toc {
 <p>This returns a <strong>list view</strong> of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and client. Here is a truncated version of a possible response to the above query:</p>
 <pre class="code json literal-block">
 <span class="punctuation">{</span>
-    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2068</span><span class="punctuation">,</span><span class="error">9911</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2068</span><span class="punctuation">,</span>
     <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/domain/?page=2&quot;</span><span class="punctuation">,</span>
     <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
     <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
@@ -531,17 +531,102 @@ ul.auto-toc {
 <span class="punctuation">}</span>
 </pre>
 <p>Any of the fields listed here can be queried. Let's try building our query. Cyder API queries are very powerful and support a variety of flexible matching based on Django's <a class="reference external" href="https://docs.djangoproject.com/en/1.5/topics/db/queries/#field-lookups">field lookups</a>.</p>
-<p>Before we can write our query, however, we need to know the basic structure of each request. At its core, each request contains the selection mode, field to query, and the query type. The exact structure can be easily described with Extended Backus-Naur Form:</p>
+<p>Before we can write our query, however, we need to know the basic structure of each filter. Each filter must contain a selection mode, the field to query, and the field lookup type. The exact structure can be easily described with Extended Backus-Naur Form:</p>
 <pre class="code literal-block">
-mode       = &quot;f_&quot; | &quot;e_&quot;
+mode         = &quot;i_&quot; | &quot;e_&quot;
 
-query type = &quot;exact&quot; | &quot;iexact&quot; | &quot;contains&quot; | &quot;icontains&quot; | &quot;gt&quot;
-           | &quot;gte&quot; | &quot;lt&quot; | &quot;lte&quot; | &quot;startswith&quot; | &quot;istartswith&quot;
-           | &quot;endswith&quot; | &quot;iendswith&quot; | &quot;isnull&quot; | &quot;search&quot;
+field        = ? any valid field name ?
 
-request    = mode, &quot;_&quot;, field, &quot;__&quot;, query type
+field lookup = &quot;exact&quot; | &quot;iexact&quot; | &quot;contains&quot; | &quot;icontains&quot; | &quot;gt&quot;
+             | &quot;gte&quot; | &quot;lt&quot; | &quot;lte&quot; | &quot;startswith&quot; | &quot;istartswith&quot;
+             | &quot;endswith&quot; | &quot;iendswith&quot; | &quot;isnull&quot; | &quot;search&quot;
+
+filter       = mode, &quot;_&quot;, field, &quot;__&quot;, field lookup
 </pre>
+<p>Here, <tt class="docutils literal">mode</tt> sets whether records matching the rest of the query should be included (<tt class="docutils literal">i_</tt>) or excluded (<tt class="docutils literal">e_</tt>). <tt class="docutils literal">field</tt> must contain the name of a field in the record, including related fields. <tt class="docutils literal">field lookup</tt> is used to decide how records should be matched. Each of the supported query types is described in Django's <a class="reference external" href="https://docs.djangoproject.com/en/1.5/ref/models/querysets/#field-lookups">field lookups reference</a>. Note that the field lookups <tt class="docutils literal">in</tt>, <tt class="docutils literal">range</tt>, <tt class="docutils literal">year</tt>, <tt class="docutils literal">month</tt>, <tt class="docutils literal">day</tt>, <tt class="docutils literal">week_day</tt>, <tt class="docutils literal">regex</tt>, and <tt class="docutils literal">iregex</tt> are not supported.</p>
+<p>Multiple filters can be combined in a single query to further refine the results.</p>
+<p>With this basic format, let's write our query. Remember, we want every CNAME that aliases a non <tt class="docutils literal">orst.edu</tt> domain to <tt class="docutils literal">www.orst.edu</tt>. This means that we want all records where <tt class="docutils literal">target</tt> equals <tt class="docutils literal">www.orst.edu</tt>, but where <tt class="docutils literal">fqdn</tt> doesn't contain <tt class="docutils literal">orst.edu</tt>. First, let's only retrieve results matching the first critera, so we have a baseline to compare our results against.</p>
+<pre class="code python literal-block">
+<span class="name builtin">filter</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="literal string">'i_target__exact'</span><span class="punctuation">:</span> <span class="literal string">'www.orst.edu'</span><span class="punctuation">}</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/cname/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">,</span> <span class="name builtin">filter</span><span class="punctuation">)</span>
+</pre>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">233</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/cname/?i_target__exact=www.orst.edu&amp;page=2&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.emt.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;emt.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">7</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;diversity.oregonstate.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">56</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="error">...</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>Here we can see the first two results are both domains under <tt class="docutils literal">orst.edu</tt>. Let's try filtering them out.</p>
+<pre class="code python literal-block">
+<span class="name builtin">filter</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="literal string">'i_target__exact'</span><span class="punctuation">:</span> <span class="literal string">'www.orst.edu'</span><span class="punctuation">,</span> <span class="literal string">'e_fqdn__contains'</span><span class="punctuation">:</span> <span class="literal string">'orst.edu'</span><span class="punctuation">}</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/cname/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">,</span> <span class="name builtin">filter</span><span class="punctuation">)</span>
+</pre>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">182</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/cname/?i_target__exact=www.orst.edu&amp;e_fqdn__contains=orst.edu&amp;page=2&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;diversity.oregonstate.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">56</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="error">...</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>Now we've got exactly what we're looking for. We can see that the extra filter caused 51 records to be excluded from the results, and that the API conveniently includes our filter terms in it's <tt class="docutils literal">next</tt> field.</p>
+<p>This sort of querying can easily be done on any record type and with any field. Let's try filtering systems by their key-value pairs. ###########################################################################################</p>
+<hr class="docutils" />
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">intro.rst</tt>, line 311)</p>
+At least one body element must separate transitions; adjacent transitions are not allowed.</div>
+<hr class="docutils" />
+<div class="system-message">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">intro.rst</tt>, line 313)</p>
+At least one body element must separate transitions; adjacent transitions are not allowed.</div>
 </div>
+<hr class="docutils" />
 <div class="section" id="complex-records">
 <h2>Complex Records</h2>
 <p>Domain records are simple, but some objects are more complex. Some DNS records include a <tt class="docutils literal">views</tt> field that lists which DNS views the record is available under, rather than containing a single value, and Static Interface, Dynamic Interface, and System records include user-defined <strong>key-value pairs</strong> that allow custom data to be associated with them. Let's look at a basic example of records with key-value pairs.</p>

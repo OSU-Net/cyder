@@ -21,8 +21,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         f_queryset = None
 
         matching = lambda k, v: set(
-            keyvalue_model.objects.filter(key=k, value=v).values_list(
-                parent_name, flat=True
+            keyvalue_model.objects.filter(
+                    key__iexact=k,
+                    value__iexact=v
+                ).values_list(
+                    parent_name, flat=True
             )
         )
 
@@ -45,7 +48,7 @@ class SearchFieldFilter(filters.BaseFilterBackend):
             kv_queryset = parent_model.objects.filter(id__in=parent_ids)
 
         if len(q_include) or len(q_exclude):
-            f_queryset = set(queryset.filter(**q_include).exclude(**q_exclude))
+            f_queryset = queryset.filter(**q_include).exclude(**q_exclude)
 
         if kv_queryset and f_queryset:
             return kv_queryset & f_queryset

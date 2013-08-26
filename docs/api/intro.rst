@@ -98,7 +98,7 @@ This returns a **list view** of Domain records. List views allow you to navigate
 .. code:: json
 
     {
-        "count": 2068,9911
+        "count": 2068,
         "next": "http://127.0.0.1:8000/api/v1/domain/?page=2",
         "previous": null,
         "results": [
@@ -302,18 +302,10 @@ Here we can see the first two results are both domains under ``orst.edu``. Let's
         ]
     }
 
-Now we've got exactly what we're looking for. We can see that the extra filter caused 51 records to be excluded from the results, and that the API conveniently includes our filter terms in it's ``next`` field.
+Now we've got exactly what we're looking for. We can see that the extra filter caused 51 records to be excluded from the results, and that the API conveniently includes our filter terms in its ``next`` field. This sort of querying can easily be done on any record type and with any field.
 
-This sort of querying can easily be done on any record type and with any field. Let's try filtering systems by their key-value pairs. ###########################################################################################
-
-#########################
-
-#########################
-
-#########################
-
-Complex Records
----------------
+Filtering Complex Records
+-------------------------
 Domain records are simple, but some objects are more complex. Some DNS records include a ``views`` field that lists which DNS views the record is available under, rather than containing a single value, and Static Interface, Dynamic Interface, and System records include user-defined **key-value pairs** that allow custom data to be associated with them. Let's look at a basic example of records with key-value pairs.
 
 .. code:: python
@@ -370,3 +362,12 @@ This returns a list of systems.
         ]
     }
 
+Let's say we want to find every machine running Linux. We can see that our first query returned a record with key-value pairs, including one defining the relevant system's OS, so let's use that to form the basis of our query. Like basic field filtering, key-value filtering is done via the query string, but unlike basic filtering, key-value filtering is somewhat more limited and only allows for case-insensitive, strict filtering based on each key-value pair.
+
+Generating this query is pretty straightforward. We simply prefix the key with ``k_`` and then pass the value with the key.
+
+.. code:: python
+
+    print api_connect("http://127.0.0.1:8000/api/v1/system/?k_Operating+System=Linux", MY_TOKEN)
+
+This returns a list of systems that have a key-value pair with the key "operating system" and value "linux", regardless of capitalization. 
