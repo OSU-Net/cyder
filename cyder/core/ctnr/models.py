@@ -5,6 +5,7 @@ from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.validation import validate_ctnr_name
@@ -58,7 +59,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
     def build_legacy_class(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
-        for range_ in self.ranges.all():
+        for range_ in self.ranges.filter(range_type=DYNAMIC):
             build_str += ("class \"{0}:{1}:{2}\" {{"
                           "\n\tmatch hardware;\n}}\n".format(
                               self.name, range_.start_str, range_.end_str))
