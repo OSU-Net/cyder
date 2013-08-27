@@ -151,7 +151,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
                    "10.255.255.255.")
             valid = True
 
-        dhcp_enabled = enabled and valid
+        dhcp_enabled = bool(enabled and valid)
     else: # the Range doesn't have a Network
         n = None
         dhcp_enabled = False
