@@ -310,7 +310,8 @@ def add_user(request, ctnr, name, pk):
         ctnrusers = [CtnrUser.objects.select_related().get(
             ctnr_id=ctnr.id, user_id=user)]
         extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
-        user_table = tablefy(users, users=True, extra_cols=extra_cols)
+        user_table = tablefy(users, users=True, extra_cols=extra_cols,
+                             request=request)
 
         return HttpResponse(json.dumps({'user': user_table}))
 

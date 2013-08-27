@@ -7,6 +7,7 @@ from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
+import cyder as cy
 
 
 def find_get_record_url(obj):
@@ -37,7 +38,7 @@ def make_paginator(request, qs, num=20, obj_type=None):
         return paginator.page(paginator.num_pages)
 
 
-def tablefy(objects, users=False, extra_cols=None, info=True):
+def tablefy(objects, users=False, extra_cols=None, info=True, request=False):
     """Make list of table headers, rows of table data, list of urls
     that may be associated with table data, and postback urls.
 
@@ -58,11 +59,19 @@ def tablefy(objects, users=False, extra_cols=None, info=True):
 
     first_obj = objects[0]
     views = hasattr(first_obj, 'views')
-
     try:
-        can_update = True
-        first_obj.get_update_url()
+        Klass = objects.object_list.model
     except:
+        Klass = objects[0].__class__
+
+    if request is not False and request.user.get_profile().has_perm(
+            request, cy.ACTION_UPDATE, obj_class=Klass):
+        try:
+            first_obj.get_update_url()
+            can_update = True
+        except:
+            can_update = False
+    else:
         can_update = False
 
     headers = []

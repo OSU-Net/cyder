@@ -1,5 +1,4 @@
 import cyder as cy
-from cyder.core.ctnr.models import CtnrUser
 
 
 def has_perm(self, request, action, obj=None, obj_class=None):
@@ -52,6 +51,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         >>> perm = request.user.get_profile().has_perm(request, \'update\',
         ... obj=domain)
     """
+    from cyder.core.ctnr.models import CtnrUser
     user_level = None
 
     # Get user level.
@@ -102,6 +102,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         # Administrative.
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
+        'UserProfile': has_administrative_perm,
         'CtnrUser': has_ctnruser_perm,
 
         'SOA': has_soa_perm,
@@ -140,6 +141,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
     }.get(obj_type, False)
+
     return handling_function(user_level, obj, ctnr, action)
 
 
