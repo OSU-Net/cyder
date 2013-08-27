@@ -232,10 +232,12 @@ class DynamicIntrKeyValueViewSet(viewsets.ModelViewSet):
 class DynamicInterfaceSerializer(CommonDNSSerializer):
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name="api-system-detail")
+    domain = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name="api-domain-detail")
 
     class Meta:
         model = DynamicInterface
-        fields = ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf',
+        fields = ['id', 'workgroup', 'system', 'mac', 'vrf',
             'domain', 'range', 'dhcp_enabled', 'dns_enabled', 'last_seen',
             'dynamicintrkeyvalue_set']
         depth = 1
