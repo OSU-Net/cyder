@@ -160,7 +160,7 @@ class Zone(object):
             items = dict(zip(keys, values))
             ctnr = maintain_find_zone(items['zone'])
 
-            name = items['name'].lower()
+            name = items['name']
             enabled = bool(items['enabled'])
             ip = items['ip']
             ha = items['ha']
