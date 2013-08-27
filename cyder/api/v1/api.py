@@ -191,6 +191,9 @@ class StaticIntrKeyValueViewSet(viewsets.ModelViewSet):
 
 
 class StaticInterfaceSerializer(CommonDNSSerializer):
+    system = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name="api-system-detail")
+
     class Meta:
         model = StaticInterface
         fields = (standard_fields + StaticInterface.get_api_fields() +
@@ -217,6 +220,9 @@ class DynamicIntrKeyValueViewSet(viewsets.ModelViewSet):
 
 
 class DynamicInterfaceSerializer(CommonDNSSerializer):
+    system = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name="api-system-detail")
+
     class Meta:
         model = DynamicInterface
         fields = ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf',
