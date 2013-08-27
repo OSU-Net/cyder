@@ -133,7 +133,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
             n.vrf = v
             n.save()
 
-        range_str = "{0}-{1}".format(ipaddr.IPv4Address(start),
+        range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                      ipaddr.IPv4Address(end))
 
         valid = True
@@ -145,6 +145,11 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
             print ('Range {0} in network {1} has an invalid end address.'
                    .format(range_str, n))
             valid = False
+
+        if not valid and range_str == '10.255.255.255 - 10.255.255.255':
+            print ("Setting it enabled anyway because it's 10.255.255.255 - "
+                   "10.255.255.255.")
+            valid = True
 
         dhcp_enabled = enabled and valid
     else: # the Range doesn't have a Network
