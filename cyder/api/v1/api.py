@@ -31,6 +31,12 @@ class FQDNMixin(object):
                 self._errors['fqdn'] = e.messages
 
 
+class LabelDomainMixin(object):
+    label = serializers.CharField()
+    domain = serializers.HyperlinkedRelatedField(
+        many=False, read_only=True, view_name='api-domain-detail')
+
+
 class CommonDNSSerializer(serializers.HyperlinkedModelSerializer):
     comment = serializers.CharField()
     views = serializers.SlugRelatedField(
@@ -59,10 +65,10 @@ class DomainViewSet(CommonDNSViewSet):
     serializer_class = DomainSerializer
 
 
-class CNAMESerializer(CommonDNSSerializer, FQDNMixin):
+class CNAMESerializer(CommonDNSSerializer, FQDNMixin, LabelDomainMixin):
     class Meta:
         model = CNAME
-        fields = standard_fields + CNAME.get_api_fields()
+        fields = standard_fields + CNAME.get_api_fields() + ['label', 'domain']
 
 
 class CNAMEViewSet(CommonDNSViewSet):
@@ -70,10 +76,10 @@ class CNAMEViewSet(CommonDNSViewSet):
     serializer_class = CNAMESerializer
 
 
-class TXTSerializer(CommonDNSSerializer):
+class TXTSerializer(CommonDNSSerializer, LabelDomainMixin):
     class Meta:
         model = TXT
-        fields = standard_fields + TXT.get_api_fields()
+        fields = standard_fields + TXT.get_api_fields() + ['label', 'domain']
 
 
 class TXTViewSet(CommonDNSViewSet):
@@ -81,7 +87,7 @@ class TXTViewSet(CommonDNSViewSet):
     serializer_class = TXTSerializer
 
 
-class SRVSerializer(CommonDNSSerializer):
+class SRVSerializer(CommonDNSSerializer, LabelDomainMixin):
     class Meta:
         model = SRV
         fields = standard_fields + SRV.get_api_fields()
@@ -92,10 +98,10 @@ class SRVViewSet(CommonDNSViewSet):
     serializer_class = SRVSerializer
 
 
-class MXSerializer(CommonDNSSerializer):
+class MXSerializer(CommonDNSSerializer, LabelDomainMixin):
     class Meta:
         model = MX
-        fields = standard_fields + MX.get_api_fields()
+        fields = standard_fields + MX.get_api_fields() + ['label', 'domain']
 
 
 class MXViewSet(CommonDNSViewSet):
@@ -103,10 +109,10 @@ class MXViewSet(CommonDNSViewSet):
     serializer_class = MXSerializer
 
 
-class SSHFPSerializer(CommonDNSSerializer):
+class SSHFPSerializer(CommonDNSSerializer, LabelDomainMixin):
     class Meta:
         model = SSHFP
-        fields = standard_fields + SSHFP.get_api_fields()
+        fields = standard_fields + SSHFP.get_api_fields() + ['label', 'domain']
 
 
 class SSHFPViewSet(viewsets.ModelViewSet):
@@ -114,10 +120,11 @@ class SSHFPViewSet(viewsets.ModelViewSet):
     serializer_class = SSHFPSerializer
 
 
-class AddressRecordSerializer(CommonDNSSerializer):
+class AddressRecordSerializer(CommonDNSSerializer, LabelDomainMixin):
     class Meta:
         model = AddressRecord
-        fields = standard_fields + AddressRecord.get_api_fields()
+        fields = standard_fields + AddressRecord.get_api_fields() + [
+            'label', 'domain']
 
 
 class AddressRecordViewSet(viewsets.ModelViewSet):
@@ -131,7 +138,7 @@ class NameserverSerializer(CommonDNSSerializer):
 
     class Meta:
         model = Nameserver
-        fields = standard_fields + Nameserver.get_api_fields()
+        fields = standard_fields + Nameserver.get_api_fields() + ['domain']
 
 
 class NameserverViewSet(viewsets.ModelViewSet):
@@ -140,9 +147,12 @@ class NameserverViewSet(viewsets.ModelViewSet):
 
 
 class PTRSerializer(CommonDNSSerializer):
+    reverse_domain = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name="api-domain-detail")
+
     class Meta:
         model = PTR
-        fields = standard_fields + PTR.get_api_fields()
+        fields = standard_fields + PTR.get_api_fields() + ['reverse_domain']
 
 
 class PTRViewSet(viewsets.ModelViewSet):
