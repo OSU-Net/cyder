@@ -4,13 +4,19 @@
 {% block header %} Token for {{ user.username }} {% endblock %}
 
 {% block action_bar %}
+{% if request.user.is_superuser or request.user.id == user.id %}
 <a class="btn btn-primary" href="/api/authtoken/revoke/{{ token.pk }}">
     Revoke Token
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}
+{% if request.user.is_superuser or request.user.id == user.id %}
     <p><b>Key:</b> {{ token.key }}</p>
     <p><b>Purpose:</b> {{ token.purpose }}</p>
     <p><b>Created:</b> {{ token.created }}</p>
+{% else %}
+Only superusers can view other user's tokens.
+{% endif %}
 {% endblock %}

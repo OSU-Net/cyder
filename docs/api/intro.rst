@@ -2,7 +2,6 @@
 Introduction to The Cyder API
 =============================
 
-:Author: Zane Salvatore
 :Version: 0.1 (draft)
 :API Version: 1
 
@@ -58,16 +57,18 @@ This function illustrates the structure of a very basic request to the Cyder API
 .. code:: json
 
     {
-        "staticinterface": "http://127.0.0.1:8000/api/v1/staticinterface/",
-        "domain": "http://127.0.0.1:8000/api/v1/domain/",
-        "addressrecord": "http://127.0.0.1:8000/api/v1/addressrecord/",
-        "system": "http://127.0.0.1:8000/api/v1/system/",
-        "mx": "http://127.0.0.1:8000/api/v1/mx/",
-        "cname": "http://127.0.0.1:8000/api/v1/cname/",
-        "srv": "http://127.0.0.1:8000/api/v1/srv/",
-        "nameserver": "http://127.0.0.1:8000/api/v1/nameserver/",
-        "txt": "http://127.0.0.1:8000/api/v1/txt/",
-        "ptr": "http://127.0.0.1:8000/api/v1/ptr/"
+        "dns/srv": "http://127.0.0.1:8000/api/v1/dns/srv/", 
+        "core/system": "http://127.0.0.1:8000/api/v1/core/system/", 
+        "dhcp/static_interface": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/", 
+        "dns/sshfp": "http://127.0.0.1:8000/api/v1/dns/sshfp/", 
+        "dns/mx": "http://127.0.0.1:8000/api/v1/dns/mx/", 
+        "dns/address_record": "http://127.0.0.1:8000/api/v1/dns/address_record/", 
+        "dns/txt": "http://127.0.0.1:8000/api/v1/dns/txt/", 
+        "dns/nameserver": "http://127.0.0.1:8000/api/v1/dns/nameserver/", 
+        "dns/ptr": "http://127.0.0.1:8000/api/v1/dns/ptr/", 
+        "dns/cname": "http://127.0.0.1:8000/api/v1/dns/cname/", 
+        "dns/domain": "http://127.0.0.1:8000/api/v1/dns/domain/", 
+        "dhcp/dynamic_interface": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/"
     }
 
 This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided for ease of navigation. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.
@@ -76,7 +77,7 @@ Let's see what happens when we pass one of these URLs to ``api_connect``.
 
 .. code:: python
 
-    print api_connect("http://127.0.0.1:8000/api/v1/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+    print api_connect("http://127.0.0.1:8000/api/v1/dns/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
 
 This returns a **list view** of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and client. Here is a truncated version of a possible response to the above query:
 
@@ -84,7 +85,7 @@ This returns a **list view** of Domain records. List views allow you to navigate
 
     {
         "count": 2068,
-        "next": "http://127.0.0.1:8000/api/v1/domain/?page=2",
+        "next": "http://127.0.0.1:8000/api/v1/dns/domain/?page=2",
         "previous": null,
         "results": [
             {
@@ -102,7 +103,7 @@ This returns a **list view** of Domain records. List views allow you to navigate
                 "dirty": false,
                 "id": 2,
                 "is_reverse": true,
-                "master_domain": "http://127.0.0.1:8000/dns/domain/1/",
+                "master_domain": "http://127.0.0.1:8000/api/v1/dns/domain/1/",
                 "name": "in-addr.arpa",
                 "purgeable": false,
                 "soa": null
@@ -124,7 +125,7 @@ Now we know how to retrieve general lists of objects, but what if we want to acc
 
 .. code:: python
 
-    print api_connect("http://127.0.0.1:8000/api/v1/domain/2/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+    print api_connect("http://127.0.0.1:8000/api/v1/dns/domain/2/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
     
 This returns a **detail view** of the Domain record with an ``id`` of 2. 
 
@@ -133,7 +134,7 @@ This returns a **detail view** of the Domain record with an ``id`` of 2.
         "dirty": false,
         "id": 2,
         "is_reverse": true,
-        "master_domain": "http://127.0.0.1:8000/dns/domain/1/",
+        "master_domain": "http://127.0.0.1:8000/api/v1/dns/domain/1/",
         "name": "in-addr.arpa",
         "purgeable": false,
         "soa": null

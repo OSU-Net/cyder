@@ -12,7 +12,7 @@ router.register(r'dns/domain', api.DomainViewSet, base_name='api-domain')
 router.register(r'dns/txt', api.TXTViewSet, base_name='api-txt')
 router.register(r'dns/srv', api.SRVViewSet, base_name='api-srv')
 router.register(r'dns/mx', api.MXViewSet, base_name='api-mx')
-router.register(r'dns/addressrecord', api.AddressRecordViewSet,
+router.register(r'dns/address_record', api.AddressRecordViewSet,
                 base_name='api-addressrecord')
 router.register(r'dns/nameserver', api.NameserverViewSet,
                 base_name='api-nameserver')
