@@ -370,4 +370,13 @@ Generating this query is pretty straightforward. We simply prefix the key with `
 
     print api_connect("http://127.0.0.1:8000/api/v1/system/?k_Operating+System=Linux", MY_TOKEN)
 
-This returns a list of systems that have a key-value pair with the key "operating system" and value "linux", regardless of capitalization. 
+This returns a list of systems that have a key-value pair with the key "operating system" and value "linux", regardless of capitalization. Multiple key-value pair queries can be chained together for more precise filtering.
+
+You can also do more advanced filtering on one key-value pair at a time by using the key-value endpoints provided by the API. These endpoints are ``/api/v1/system-keyvalues``, ``/api/v1/staticinterface-keyvalues``, and ``/api/v1/dynamicinterface-keyvalues``. Each endpoint provides direct access to the table containing the key-value pairs for its associated record type, so you can filter the key-value pairs in the same way as you would filter other records. For example, let's find every system with its warranty information stored in the database. We want as much data as possible, so let's query for any system key-value pair where the key contains the word "Warranty", with any capitalization.
+
+.. code:: python
+
+    print api_connect("http://127.0.0.1:8000/api/v1/system-keyvalues/?i_key__icontains=warranty", MY_TOKEN)
+
+This returns the following set of results:
+
