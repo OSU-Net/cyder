@@ -91,7 +91,10 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     if obj:
         obj_type = obj.__class__.__name__
     elif obj_class:
-        obj_type = obj_class.__name__
+        if isinstance(obj_class, str):
+            obj_type = obj_class
+        else:
+            obj_type = obj_class.__name__
     else:
         return False
 
@@ -103,7 +106,8 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
         'UserProfile': has_administrative_perm,
-        'CtnrUser': has_ctnruser_perm,
+        'CtnrUser': has_ctnr_object_perm,
+        'CtnrObject': has_ctnr_object_perm,
 
         'SOA': has_soa_perm,
 
@@ -155,7 +159,7 @@ def has_administrative_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_ctnruser_perm(user_level, obj, ctnr, action):
+def has_ctnr_object_perm(user_level, obj, ctnr, action):
     """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
     return {
         'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
@@ -242,7 +246,6 @@ def has_range_perm(user_level, obj, ctnr, action):
     """Permissions for ranges. Ctnrs have ranges."""
     if obj and not obj in ctnr.ranges.all():
         return False
-
     return {
         'cyder_admin': True,  # ?
         'ctnr_admin': action in [cy.ACTION_VIEW],
