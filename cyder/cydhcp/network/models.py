@@ -214,7 +214,7 @@ class Network(models.Model, ObjectUrlMixin):
         self.update_network()
         statements = self.networkkeyvalue_set.filter(is_statement=True)
         options = self.networkkeyvalue_set.filter(is_option=True)
-        ranges = self.range_set.all()
+        ranges = self.range_set.filter(range_type=DYNAMIC, dhcp_enabled=True)
         if self.ip_type == IP_TYPE_4:
             build_str = "\nsubnet {0} netmask {1} {{\n".format(
                 self.network.network, self.network.netmask)
@@ -230,8 +230,7 @@ class Network(models.Model, ObjectUrlMixin):
                 build_str += "\t# Raw Network Options\n"
                 build_str += join_dhcp_args(self.dhcpd_raw_include.split("\n"))
         for range_ in ranges:
-            if range_.range_type == DYNAMIC:
-                build_str += range_.build_range()
+            build_str += range_.build_range()
         build_str += "}\n"
         return build_str
 

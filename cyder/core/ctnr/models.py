@@ -59,7 +59,8 @@ class Ctnr(models.Model, ObjectUrlMixin):
     def build_legacy_class(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
-        for range_ in self.ranges.filter(range_type=DYNAMIC):
+        for range_ in self.ranges.filter(range_type=DYNAMIC,
+                                         dhcp_enabled=True):
             clients = (DynamicInterface.objects.filter(range=range_,
                                                        ctnr=self,
                                                        dhcp_enabled=True)
