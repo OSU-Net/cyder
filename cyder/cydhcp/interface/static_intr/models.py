@@ -15,7 +15,7 @@ from cyder.base.constants import IP_TYPE_6
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydhcp.utils import format_mac, two_to_one
+from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
