@@ -1,6 +1,7 @@
 from gettext import gettext as _
 
 from django.db import models
+from django.db.models import Q, get_model
 from django.core.exceptions import ValidationError
 
 import cydns
@@ -11,9 +12,10 @@ from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
 
+from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
-from cyder.cydhcp.utils import format_mac
+from cyder.cydhcp.utils import format_mac, two_to_one
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -123,6 +125,18 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     @property
     def mac_str(self):
         return (':').join(re.findall('..', self.mac))
+
+    @property
+    def range(self):
+        Range = get_model('range', 'range')
+        q_start = (Q(start_upper__lt=self.ip_upper) |
+                   Q(start_upper=self.ip_upper,
+                     start_lower__lte=self.ip_lower))
+        q_end = (Q(end_upper__gt=self.ip_upper) |
+                 Q(end_upper=self.ip_upper,
+                   end_lower__gte=self.ip_lower))
+        return Range.objects.get(q_start, q_end)
+
 
     def update_attrs(self):
         self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
@@ -254,6 +268,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
+
+        if self.dhcp_enabled:
+            if not (self.range and self.range.range_type == STATIC):
+                raise ValidationError('DHCP is enabled for this interface, so '
+                                      'its IP must be in a static range.')
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
