@@ -6,9 +6,7 @@ from bisect import insort_left, bisect_left
 def join_p(xs, d=1):
     if not xs:
         return ''
-    lines = "".join(str(x) for x in xs).split('\n')
-    while not lines[-1]:
-        lines.pop(-1)
+    lines = "".join(map(str, xs)).splitlines()
     return "".join('\t' * d + line + '\n' for line in lines)
 
 @total_ordering
