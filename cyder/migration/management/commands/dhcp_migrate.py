@@ -9,7 +9,8 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
+                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF,
+                                    STATIC, DYNAMIC)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -109,7 +110,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
     Returns a range which is saved in Cyder.
     """
 
-    r_type = 'st' if range_type == 'static' else 'dy'
+    r_type = STATIC if range_type == 'static' else DYNAMIC
     allow = ALLOW_LEGACY
     if cursor.execute("SELECT subnet, netmask "
                       "FROM subnet WHERE id = {0}".format(subnet_id)):
