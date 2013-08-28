@@ -7,10 +7,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
     """Filter based on record attributes."""
 
     def filter_queryset(self, request, queryset, view):
-        ALLOWED_ENDINGS = ('__exact', '__iexact', '__contains', '__icontains',
-                '__gt', '__gte', '__lt', '__lte', '__startswith',
-                '__istartswith', '__endswith', '__iendswith', '__isnull',
-                '__search',)
+        ALLOWED_ENDINGS = (
+            '__exact', '__iexact', '__contains', '__icontains', '__gt',
+            '__gte', '__lt', '__lte', '__startswith', '__istartswith',
+            '__endswith', '__iendswith', '__isnull', '__search',
+        )
 
         q_include = {}
         q_exclude = {}
@@ -25,10 +26,10 @@ class SearchFieldFilter(filters.BaseFilterBackend):
 
         matching = lambda k, v: set(
             keyvalue_model.objects.filter(
-                    key__iexact=k,
-                    value__iexact=v
-                ).values_list(
-                    parent_name, flat=True
+                key__iexact=k,
+                value__iexact=v
+            ).values_list(
+                parent_name, flat=True
             )
         )
 

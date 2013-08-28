@@ -16,7 +16,7 @@ class Token(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     key = models.CharField(max_length=40, unique=True)
     user = models.ForeignKey(AUTH_USER_MODEL)
-    purpose = models.CharField(max_length=100) # purpose of token
+    purpose = models.CharField(max_length=100)  # purpose of token
     created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
