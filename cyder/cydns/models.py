@@ -50,6 +50,12 @@ class LabelDomainMixin(models.Model):
     class Meta:
         abstract = True
 
+    @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        objects = objects or cls.objects
+        objects = objects.filter(domain__in=ctnr.domains.all())
+        return objects
+
 
 class ViewMixin(models.Model):
     def validate_views(instance, views):
