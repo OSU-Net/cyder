@@ -137,20 +137,30 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                      ipaddr.IPv4Address(end))
 
-        valid = True
-        if not int(n.network.network) < start:
-            print ('Range {0} in network {1} has an invalid start address.'
-                   .format(range_str, n))
-            valid = False
-        if not start <= end < int(n.network.broadcast):
-            print ('Range {0} in network {1} has an invalid end address.'
-                   .format(range_str, n))
-            valid = False
+        valid_start = int(n.network.network) < start < int(n.network.broadcast)
+        valid_order = start <= end
+        valid_end = int(n.network.network) < end < int(n.network.broadcast)
 
-        if not valid and range_str == '10.255.255.255 - 10.255.255.255':
-            print ("Setting it enabled anyway because it's 10.255.255.255 - "
-                   "10.255.255.255.")
-            valid = True
+        valid = all((valid_start, valid_order, valid_end))
+
+        # If the range is disabled, we don't need to print warnings.
+        if not valid and enabled:
+            print 'Range {0} in network {1} is invalid:'.format(range_str,
+                                                                n)
+
+            if not valid_start:
+                print ('\tStart is not inside network'
+                       .format(n.network.network))
+            if not valid_order:
+                print '\tStart and end are out of order'
+            if not valid_end:
+                print ('\tEnd is not inside network'
+                       .format(n.network.broadcast))
+
+            if range_str == '10.255.255.255 - 10.255.255.255':
+                print ("(Enabling it anyway because it's "
+                       "10.255.255.255 - 10.255.255.255.)")
+                valid = True
 
         dhcp_enabled = bool(enabled and valid)
     else: # the Range doesn't have a Network
