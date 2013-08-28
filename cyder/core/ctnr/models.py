@@ -61,10 +61,9 @@ class Ctnr(models.Model, ObjectUrlMixin):
         build_str = ""
         for range_ in self.ranges.filter(range_type=DYNAMIC,
                                          dhcp_enabled=True):
-            clients = (DynamicInterface.objects.filter(range=range_,
-                                                       ctnr=self,
-                                                       dhcp_enabled=True)
-                                               .exclude(mac=''))
+            clients = (range_.dynamicinterface_set.filter(ctnr=self,
+                                                          dhcp_enabled=True)
+                                                  .exclude(mac=''))
             build_str += ("class \"{0}:{1}:{2}\" {{"
                           "\n\tmatch hardware;\n}}\n".format(
                               self.name, range_.start_str, range_.end_str))
