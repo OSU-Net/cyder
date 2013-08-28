@@ -205,6 +205,7 @@ class StaticIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = StaticIntrKeyValue
+        fields = ['id', 'key', 'value', 'is_quoted', 'static_interface']
 
 
 class StaticIntrKeyValueViewSet(viewsets.ModelViewSet):
@@ -225,11 +226,13 @@ class StaticIntrNestedKeyValueSerializer(serializers.ModelSerializer):
 class StaticInterfaceSerializer(CommonDNSSerializer):
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name="api-system-detail")
+    staticintrkeyvalue_set = StaticIntrNestedKeyValueSerializer(many=True)
+    ctnr = serializers.SlugRelatedField(read_only=True, slug_field='name')
 
     class Meta:
         model = StaticInterface
         fields = (standard_fields + StaticInterface.get_api_fields() +
-            ['system', 'staticintrkeyvalue_set'])
+            ['system', 'staticintrkeyvalue_set', 'ctnr'])
 
 
 class StaticInterfaceViewSet(viewsets.ModelViewSet):
@@ -245,6 +248,7 @@ class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = DynamicIntrKeyValue
+        fields = ['id', 'key', 'value', 'is_quoted', 'dynamic_interface']
 
 
 class DynamicIntrKeyValueViewSet(viewsets.ModelViewSet):
@@ -268,12 +272,13 @@ class DynamicInterfaceSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True, view_name="api-system-detail")
     domain = serializers.HyperlinkedRelatedField(
         read_only=True, view_name="api-domain-detail")
+    ctnr = serializers.SlugRelatedField(read_only=True, slug_field='name')
 
     class Meta:
         model = DynamicInterface
         fields = ['id', 'workgroup', 'system', 'mac', 'vrf',
             'domain', 'range', 'dhcp_enabled', 'dns_enabled', 'last_seen',
-            'dynamicintrkeyvalue_set']
+            'dynamicintrkeyvalue_set', 'ctnr']
         depth = 1
 
 
