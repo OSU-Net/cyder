@@ -29,7 +29,8 @@ class ViewTests(TestCase):
         self.o.save()
         self.f_o = Domain(name="foo.org")
         self.f_o.save()
-        self.s = System()
+        self.s = System(name='foobar')
+        self.s.save()
 
         Domain.objects.get_or_create(name="arpa")
         Domain.objects.get_or_create(name="in-addr.arpa")

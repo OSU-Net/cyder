@@ -13,18 +13,16 @@ from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 
 import datetime
+import re
 
 
 class DynamicInterface(models.Model, ObjectUrlMixin):
     ctnr = models.ForeignKey(Ctnr, null=False)
-    workgroup = models.ForeignKey(Workgroup, null=True)
-    system = models.ForeignKey(System,
-                               null=True,
-                               blank=True,
-                               help_text="System to associate "
-                                         "the interface with")
+    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+    system = models.ForeignKey(System, help_text="System to associate "
+                                                 "the interface with")
     mac = models.CharField(max_length=19, blank=True)
-    vrf = models.ForeignKey(Vrf, null=True)
+    vrf = models.ForeignKey(Vrf, null=True, blank=True)
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, null=False)
     dhcp_enabled = models.BooleanField(default=True)
@@ -37,7 +35,11 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         db_table = 'dynamic_interface'
 
     def __str__(self):
-        return "{0}".format(self.mac)
+        return "{0}".format(self.mac_str)
+
+    @property
+    def mac_str(self):
+        return (':').join(re.findall('..', self.mac))
 
     def __repr__(self):
         return "Interface {0}".format(str(self))
@@ -107,11 +109,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         if self.dhcp_enabled:
             self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
-
-        if not self.system:
-            raise ValidationError(
-                "An interface means nothing without its system."
-            )
 
         super(DynamicInterface, self).clean()
 
