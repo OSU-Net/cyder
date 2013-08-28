@@ -124,7 +124,10 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         # function
         self.set_fqdn()
         self.check_TLD_condition()
-        self.check_no_ns_soa_condition(self.domain)
+        try:
+            self.check_no_ns_soa_condition(self.domain)
+        except:
+            raise ValidationError("DNS records require a domain")
         self.check_for_delegation()
         if self.rdtype != 'CNAME':
             self.check_for_cname()
