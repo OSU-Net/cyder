@@ -114,6 +114,10 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         return "<{0} '{1}'>".format(self.rdtype, str(self))
 
     @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        return objects or cls.objects
+
+    @classmethod
     def get_api_fields(cls):
         """
         The purpose of this is to help the API decide which fields to expose
