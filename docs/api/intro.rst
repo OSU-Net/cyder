@@ -5,6 +5,8 @@ Introduction to The Cyder API
 :Version: 0.1 (draft)
 :API Version: 1
 
+.. contents:: 
+
 The Cyder API currently allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.
 
 This document's examples are written in Python, using version 2.7.4, and make use of the urllib_ and urllib2_ standard Python libraries, but anything that can make HTTP requests may also be used. While this tutorial is fairly elementary, some understanding of urllib2 is expected. You may want to read the Python HOWTO `"Fetch Internet Resources Using urllib2"`_ before starting this tutorial.
@@ -13,22 +15,24 @@ This document's examples are written in Python, using version 2.7.4, and make us
 .. _urllib2: http://docs.python.org/2/library/urllib2.html
 .. _"Fetch Internet Resources Using urllib2": http://docs.python.org/2/howto/urllib2.html
 
-For readability, all API responses in this tutorial will be formatted with linebreaks and indentation, and some may be abbreviated. Actual API responses, including field values and record IDs, may differ.
+For readability, all API responses in this tutorial will be formatted with linebreaks and indentation, and some may be abbreviated. Actual API responses may differ.
+
+Through this tutorial, the placeholder ``MY_TOKEN`` will be used instead of an actual API token. Anywhere you see ``MY_TOKEN`` used, you should replace it with your own token.
 
 Document Conventions
 --------------------
 The following conventions are used throughout this document:
 
-+---------------------------------+----------------------------------------------------+
-|Convention                       | Meaning                                            |
-+=================================+====================================================+
-| **bold text**                   | Key words or the beginning of important paragraphs.|
-+---------------------------------+----------------------------------------------------+
-|*italic text*                    | Interface text.                                    |
-+---------------------------------+----------------------------------------------------+
-| ``monospace text``              | | Inline: Names from code or serialized data.      |
-|                                 | | Paragraph: Example code or code output.          |
-+---------------------------------+----------------------------------------------------+
++---------------------------------+-----------------------------------------------------------------------+
+|Convention                       | Meaning                                                               |
++=================================+=======================================================================+
+| **bold text**                   | Key words or the beginning of important paragraphs.                   |
++---------------------------------+-----------------------------------------------------------------------+
+|*italic text*                    | Interface text.                                                       |
++---------------------------------+-----------------------------------------------------------------------+
+| ``monospace text``              | | Inline: Names from code or serialized data.                         |
+|                                 | | Paragraph: Example code or code output.                             |
++---------------------------------+-----------------------------------------------------------------------+
 
 ===============
 Getting Started
@@ -73,27 +77,30 @@ This function illustrates the structure of a very basic **request object** used 
 .. code:: json
 
     {
-        "dns/srv": "http://127.0.0.1:8000/api/v1/dns/srv/", 
-        "core/system": "http://127.0.0.1:8000/api/v1/core/system/", 
-        "dhcp/static_interface": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/", 
-        "dns/sshfp": "http://127.0.0.1:8000/api/v1/dns/sshfp/", 
-        "dns/mx": "http://127.0.0.1:8000/api/v1/dns/mx/", 
-        "dns/address_record": "http://127.0.0.1:8000/api/v1/dns/address_record/", 
-        "dns/txt": "http://127.0.0.1:8000/api/v1/dns/txt/", 
-        "dns/nameserver": "http://127.0.0.1:8000/api/v1/dns/nameserver/", 
-        "dns/ptr": "http://127.0.0.1:8000/api/v1/dns/ptr/", 
-        "dns/cname": "http://127.0.0.1:8000/api/v1/dns/cname/", 
-        "dns/domain": "http://127.0.0.1:8000/api/v1/dns/domain/", 
-        "dhcp/dynamic_interface": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/"
+        "core/system": "http://127.0.0.1:8000/api/v1/core/system/",
+        "core/system/keyvalues": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/",
+        "dhcp/dynamic_interface": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/",
+        "dhcp/dynamic_interface/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/keyvalues/",
+        "dhcp/static_interface": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/",
+        "dhcp/static_interface/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/keyvalues/",
+        "dns/address_record": "http://127.0.0.1:8000/api/v1/dns/address_record/",
+        "dns/cname": "http://127.0.0.1:8000/api/v1/dns/cname/",
+        "dns/domain": "http://127.0.0.1:8000/api/v1/dns/domain/",
+        "dns/mx": "http://127.0.0.1:8000/api/v1/dns/mx/",
+        "dns/nameserver": "http://127.0.0.1:8000/api/v1/dns/nameserver/",
+        "dns/ptr": "http://127.0.0.1:8000/api/v1/dns/ptr/",
+        "dns/srv": "http://127.0.0.1:8000/api/v1/dns/srv/",
+        "dns/sshfp": "http://127.0.0.1:8000/api/v1/dns/sshfp/",
+        "dns/txt": "http://127.0.0.1:8000/api/v1/dns/txt/"
     }
 
-This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided for ease of navigation. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.
+This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided in place of data from the records themselves. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.
 
 Let's see what happens when we pass one of these URLs to ``api_connect``:
 
 .. code:: python
 
-    print api_connect("http://127.0.0.1:8000/api/v1/dns/domain/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+    print api_connect("http://127.0.0.1:8000/api/v1/dns/domain/",  MY_TOKEN)
 
 This returns a **list view** of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and client. Here is a truncated version of a possible response to the above query:
 
@@ -141,7 +148,7 @@ Now we know how to retrieve general lists of objects, but what if we want to acc
 
 .. code:: python
 
-    print api_connect("http://127.0.0.1:8000/api/v1/dns/domain/2/",  "fa4a19797dc9f920c7ae096f4474531c86aaaa0a")
+    print api_connect("http://127.0.0.1:8000/api/v1/dns/domain/2/",  MY_TOKEN)
     
 This returns a **detail view** of the Domain record with an ``id`` of 2.
 
