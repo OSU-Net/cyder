@@ -389,7 +389,8 @@ class V4RangeTests(TestCase):
         network = self.s
         rtype = 's'
         ip_type = '4'
-        system = System()
+        system = System(name='foobar')
+        system.save()
 
         kwargs = {'start_str': start_str, 'end_str': end_str,
                   'default_domain': default_domain, 'network': network,

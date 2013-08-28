@@ -40,9 +40,16 @@ def do_sort(request, qs):
         if fields[0] in [f.name for f in qs.model._meta.fields]:
             sort, order = fields[0], 'asc'
 
+    if sort in ['ip_str', 'network_str']:
+        sort = 'ip_lower'
+
+    if sort == 'start_str':
+        sort = 'start_lower'
+
     if sort in [f.name for f in qs.model._meta.fields]:
         try:
             field = getattr(qs.model, sort).field
+
             if isinstance(field, ForeignKey):
                 qs = qs.select_related(sort)
                 sort = "__".join([sort, field.rel.to.display_fields[0]])

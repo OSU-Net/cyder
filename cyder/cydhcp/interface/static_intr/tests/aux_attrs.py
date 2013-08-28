@@ -38,14 +38,12 @@ class AuxAttrTests(TestCase):
         self.f_c.save()
         self.r1 = self.create_domain(name="10")
         self.r1.save()
-        self.n = System()
-        self.n.clean()
-        self.n.save()
+        self.s = System(name='foobar')
+        self.s.save()
 
     def do_add(self, mac, label, domain, ip_str, ip_type='4'):
-        self.n = System()
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.n, ctnr=self.ctnr)
+                            ip_type=ip_type, system=self.s, ctnr=self.ctnr)
         r.clean()
         r.save()
         repr(r)
