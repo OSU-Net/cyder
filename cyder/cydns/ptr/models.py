@@ -10,6 +10,7 @@ from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
 from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.cname.models import CNAME
+from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
 class BasePTR(object):
@@ -17,7 +18,7 @@ class BasePTR(object):
         # This indirection is so StaticInterface can call this function
         if update_reverse_domain:
             self.update_reverse_domain()
-        self.check_no_ns_soa_condition(self.reverse_domain)
+        check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
 
     def reverse_validate_no_cname(self):
