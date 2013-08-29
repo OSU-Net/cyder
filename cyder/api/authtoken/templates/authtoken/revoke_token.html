@@ -1,0 +1,16 @@
+{% extends "core/core_base.html" %}
+
+{% block title %} Revoke Token for {{ token.user.username }} {% endblock %}
+{% block header %} Revoke Token for {{ token.user.username }} {% endblock %}
+
+{% block content %}
+    <p>Do you really want to revoke this token?</p>
+    <h2>Token details:</h2>
+    <p><b>Key:</b> {{ token.key }}</p>
+    <p><b>Purpose:</b> {{ token.purpose }}</p>
+    <p><b>Created:</b> {{ token.created }}</p>
+    <form method="post">
+        {{ form.as_p() }}
+        <input type="submit" value="Permanently Revoke Token" />
+    </form>
+{% endblock %}

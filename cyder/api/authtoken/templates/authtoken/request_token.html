@@ -1,0 +1,14 @@
+{% extends "core/core_base.html" %}
+
+{% block title %} Request Token {% endblock %}
+{% block header %} Request Token {% endblock %}
+
+{% block content %}
+    <p>[Insert rant about privileges and responsibility here.] Please enter 
+    the purpose of this key below and then submit.
+    </p>
+    <form method="post">
+        {{ form.as_p() }}
+        <input type="submit" value="Request Token" />
+    </form>
+{% endblock %}

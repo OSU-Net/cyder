@@ -88,6 +88,7 @@ MINIFY_BUNDLES = {
 }
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
+    'api.authtoken',
     'base',
     'search',
     'core',
@@ -131,8 +132,7 @@ INSTALLED_APPS = list(INSTALLED_APPS) + [
     'django_extensions',
     'django_nose',
     'jingo_minify',
-    'tastypie',
-    'tastytools',
+    'rest_framework',
 
     # Django contrib apps
     'django.contrib.sessions',
@@ -177,7 +177,8 @@ AUTHENTICATION_BACKENDS = (
 JINGO_EXCLUDE_APPS = [
     'admin',
     'debug_toolbar',
-    'tastytools',
+    'rest_framework',
+    'cyder.api.authtoken',
 ]
 
 DJANGO_TEMPLATE_APPS = ['admin']
@@ -226,3 +227,14 @@ VERIFICATION_SERVER = "ns1.oregonstate.edu"
 ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
 ZONE_PATH = "cyder/migration/management/commands/lib/zones"
 ZONE_BLACKLIST = []
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'cyder.api.permissions.ReadOnlyIfAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'cyder.api.authtoken.authentication.CyderTokenAuthentication',
+    ),
+    'PAGINATE_BY': 25,
+    'DEFAULT_FILTER_BACKENDS': ('cyder.api.filter.SearchFieldFilter',),
+}
