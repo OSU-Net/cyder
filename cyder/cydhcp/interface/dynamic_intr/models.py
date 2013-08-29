@@ -23,7 +23,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
     mac = models.CharField(max_length=19, blank=True)
-    vrf = models.ForeignKey(Vrf, null=True, blank=True)
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True)

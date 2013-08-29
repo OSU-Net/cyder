@@ -97,8 +97,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
-    vrf = models.ForeignKey(Vrf, null=True, blank=True)
-
     dhcp_enabled = models.BooleanField(
         default=True, help_text='Enable DHCP for this interface?')
     dns_enabled = models.BooleanField(
