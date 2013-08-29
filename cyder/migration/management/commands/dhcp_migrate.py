@@ -6,6 +6,8 @@ from django.db import transaction
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
+                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -102,22 +104,27 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
     n = None
     r = None
     r_type = 'st' if range_type == 'static' else 'dy'
-    allow = 'legacy'
+    allow = ALLOW_LEGACY
     if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
         id, name, subnet, netmask, status, vlan = cursor.fetchone()
         n = Network.objects.get(ip_lower=subnet,
                                 prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
+
         if str(ipaddr.IPv4Address(start)) in allow_all_subnets:
-            allow = ''
-        if known:
-            allow = 'known-client'
-        if '128.193.177.71' == str(ipaddr.IPv4Address(start)):
-            allow = 'vrf'
-            v, _ = Vrf.objects.get_or_create(name="ip-phones-hack", network=n)
-        if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-            allow = 'vrf'
-            v, _ = Vrf.objects.get_or_create(name="avaya-hack", network=n)
+            allow = ALLOW_ANY
+        elif known:
+            allow = ALLOW_KNOWN
+        elif '128.193.177.71' == str(ipaddr.IPv4Address(start)):
+            allow = ALLOW_LEGACY_AND_VRF
+            v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
+            n.vrf = v
+            n.save()
+        elif '128.193.166.81' == str(ipaddr.IPv4Address(start)):
+            allow = ALLOW_LEGACY_AND_VRF
+            v, _ = Vrf.objects.get_or_create(name="avaya-hack")
+            n.vrf = v
+            n.save()
 
         if int(n.network.network) < start < end < int(n.network.broadcast):
             r, created = Range.objects.get_or_create(
@@ -267,6 +274,14 @@ def migrate_dynamic_hosts():
     cursor.execute(sql)
     for values in cursor.fetchall():
         items = dict(zip(keys, values))
+        enabled = items['enabled']
+        mac = items['ha']
+
+        if len(mac) != 12 or mac == '0' * 12:
+            mac = ""
+
+        if mac == "":
+            enabled = False
 
         r = maintain_find_range(items['dynamic_range'])
         c = maintain_find_zone(items['zone'])
@@ -296,17 +311,16 @@ def migrate_dynamic_hosts():
             kv.clean()
             kv.save()
 
-        if r.allow == 'vrf':
+        if r.allow == ALLOW_VRF or r.allow == ALLOW_LEGACY_AND_VRF:
             v = Vrf.objects.get(network=r.network)
             intr, _ = DynamicInterface.objects.get_or_create(
                 range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=items['ha'], system=s, dhcp_enabled=items['enabled'],
-                dns_enabled=items['enabled'],
-                last_seen=items['last_seen'])
+                mac=mac, system=s, dhcp_enabled=enabled,
+                dns_enabled=enabled, last_seen=items['last_seen'])
         else:
             intr, _ = DynamicInterface.objects.get_or_create(
                 system=s, range=r, workgroup=w, ctnr=c, domain=d,
-                mac=items['ha'], last_seen=items['last_seen'])
+                mac=mac, last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,

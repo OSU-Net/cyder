@@ -3,7 +3,7 @@ from django.test.client import Client
 from cyder.base.constants import IP_TYPE_4
 import cyder.base.tests
 from cyder.base.tests.test_views_template import build
-from cyder.cydhcp.constants import (ALLOW_OPTION_VRF, DENY_OPTION_UNKNOWN,
+from cyder.cydhcp.constants import (ALLOW_VRF, DENY_OPTION_UNKNOWN,
                                     STATIC)
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
@@ -51,7 +51,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'start_str': '196.168.1.1',
             'end_str': '196.168.1.2',
             'is_reserved': True,
-            'allow': ALLOW_OPTION_VRF,
+            'allow': ALLOW_VRF,
             'deny': DENY_OPTION_UNKNOWN,
             'range_type': STATIC,
         }
@@ -63,7 +63,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'start_str': '196.168.1.3',
             'end_str': '196.168.1.4',
             'is_reserved': True,
-            'allow': ALLOW_OPTION_VRF,
+            'allow': ALLOW_VRF,
             'deny': DENY_OPTION_UNKNOWN,
             'range_type': STATIC,
         }
@@ -124,21 +124,14 @@ class VrfViewTests(cyder.base.tests.TestCase):
     name = 'vrf'
 
     def setUp(self):
-        self.test_nw = Network.objects.create(ip_type=IP_TYPE_4,
-                                              network_str='192.168.1.100')
-        self.post_nw = Network.objects.create(ip_type=IP_TYPE_4,
-                                              network_str='192.168.2.100')
-
         test_data = {
             'name': 'test_vrf',
-            'network': self.test_nw
         }
         do_setUp(self, Vrf, test_data)
 
     def post_data(self):
         return {
             'name': 'post_vrf',
-            'network': self.post_nw.pk,
         }
 
 

@@ -28,16 +28,20 @@ def delete_range_attr(request, attr_pk):
 def range_detail(request, pk):
     mrange = get_object_or_404(Range, pk=pk)
 
-    allow = None
-    if mrange.allow == ALLOW_OPTION_VRF:
-        try:
-            allow = [Vrf.objects.get(network=mrange.network)]
-        except ObjectDoesNotExist:
-            allow = []
-    elif mrange.allow == ALLOW_OPTION_KNOWN:
-        allow = [ALLOW_OPTION_KNOWN]
-    elif mrange.allow == ALLOW_OPTION_LEGACY:
-        allow = [ctnr for ctnr in Ctnr.objects.filter(ranges=mrange)]
+    if mrange.allow == ALLOW_ANY:
+        allow = ['Any client']
+    elif mrange.allow == ALLOW_KNOWN:
+        allow = ['Known clients']
+    else:
+        allow = []
+        if (mrange.allow == ALLOW_VRF
+                or mrange.allow == ALLOW_LEGACY_AND_VRF):
+            allow += map(str, Vrf.objects.filter(network=mrange.network))
+        if (mrange.allow == ALLOW_LEGACY
+                or mrange.allow == ALLOW_LEGACY_AND_VRF):
+            allow += map(str, Ctnr.objects.filter(ranges=mrange))
+
+    allow.sort(key=lambda x: x.lower())
 
     start_upper = mrange.start_upper
     start_lower = mrange.start_lower

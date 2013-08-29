@@ -10,7 +10,6 @@ from cyder.cydhcp.keyvalue.models import KeyValue
 class Vrf(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
-    network = models.ForeignKey(Network, null=True)
 
     search_fields = ('name',)
     display_fields = ('name',)
@@ -32,18 +31,20 @@ class Vrf(models.Model, ObjectUrlMixin):
         data = super(Vrf, self).details()
         data['data'] = (
             ('Name', 'name', self),
-            ('Network', 'network', self.network),
         )
         return data
 
+    # NOTE: The following comment was written when Network had a one-to-many
+    #       relationship with Vrf (which was wrong). The schema has been fixed,
+    #       as has this function. However, the comment was not fixed because I
+    #       can't understand it.
     # vrfs will have one masked network,
     # but that may change when they are expanding
     # eg: network_id's in vrf
     def get_related_networks(self, vrfs):
         networks = set()
         for vrf in vrfs:
-            root_networks = Network.objects.filter(id=vrf.network_id)
-            for network in root_networks:
+            for network in vrf.network_set.all():
                 networks.update(network.get_related_networks())
         return networks
 
@@ -57,19 +58,20 @@ class Vrf(models.Model, ObjectUrlMixin):
 
     def build_vrf(self):
         build_str = ''
-        for range_ in self.network.range_set.all():
-            dynamic_clients = range_.dynamicinterface_set.filter(
-                dhcp_enabled=True)
-            if not dynamic_clients:
-                continue
-            build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(
-                self.name, range_.start_str, range_.end_str)
-            build_str += "\n# {0} for range {1}:{2}\n".format(
-                self.name, range_.start_str, range_.end_str)
-            build_str += "\tmatch hardware;\n"
-            build_str += "}\n"
-            for client in dynamic_clients:
-                build_str += client.build_subclass(self.name)
+        for network_ in self.network_set.all():
+            for range_ in network_.range_set.all():
+                dynamic_clients = range_.dynamicinterface_set.filter(
+                    dhcp_enabled=True)
+                if not dynamic_clients:
+                    continue
+                build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(
+                    self.name, range_.start_str, range_.end_str)
+                build_str += "\n# {0} for range {1}:{2}\n".format(
+                    self.name, range_.start_str, range_.end_str)
+                build_str += "\tmatch hardware;\n"
+                build_str += "}\n"
+                for client in dynamic_clients:
+                    build_str += client.build_subclass(self.name)
         return build_str
 
 

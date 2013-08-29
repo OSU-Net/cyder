@@ -400,19 +400,19 @@ class V4RangeTests(TestCase):
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
         s = StaticInterface(label="foo", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
+                            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         s.clean()
         s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.2")
         s = StaticInterface(label="foo", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
+                            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         s.clean()
         s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.3")
         s = StaticInterface(label="foo", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:00", ctnr=self.ctnr)
+                            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         s.clean()
         s.save()
         self.assertEqual(r.get_next_ip(), None)

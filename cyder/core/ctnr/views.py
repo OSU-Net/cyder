@@ -251,12 +251,21 @@ def add_object(request, ctnr_pk):
 
     else:
         if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
-            if pk == 'null':
-                return HttpResponse(json.dumps({
-                    'error': '{0} is not a valid {1}'.format(name, obj_type)}))
-
             Klass = get_model(obj_type, obj_type)
-            obj = Klass.objects.get(id=pk)
+            if pk == 'null':
+                try:
+                    if Klass.__name__ == 'Range':
+                        return HttpResponse(json.dumps({
+                            'error': 'Please select ranges from the '
+                            'dropdown'}))
+                    obj = Klass.objects.get(name=name)
+                except Klass.DoesNotExist:
+                    return HttpResponse(
+                        json.dumps({'error': '{0} is not a valid {1}'.format(
+                            name, obj_type)}))
+            else:
+                obj = Klass.objects.get(id=pk)
+
             m2m = getattr(ctnr, (obj_type + 's'), None)
 
             if m2m is None:
@@ -344,7 +353,11 @@ def change_ctnr(request, pk=None):
         else:
             ctnr = Ctnr.objects.get(id=pk)
     except:
+        for ctnr in request.session['ctnrs']:
+            if ctnr.name == request.POST['ctnr_name']:
+                request.session['ctnrs'].remove(ctnr)
         messages.error(request, "Could not change container, does not exist")
+        request.session.modified = True
         return redirect(referer)
 
     # Check if user has access to ctnr.
@@ -357,9 +370,9 @@ def change_ctnr(request, pk=None):
     except CtnrUser.DoesNotExist:
         ctnr_user = None
 
-    if ctnr_user or global_ctnr_user:
+    prev = request.session['ctnr']
+    if ctnr_user or global_ctnr_user or ctnr.pk == 1:
         # Set session ctnr and level.
-        prev = request.session['ctnr']
         request.session['ctnr'] = ctnr
 
         # Higher level overrides.
