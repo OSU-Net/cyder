@@ -189,10 +189,8 @@ class Zone(object):
                                "WHERE id = {0}".format(items['workgroup']))
                 wname = cursor.fetchone()[0]
                 w, _ = Workgroup.objects.get_or_create(name=wname)
-                v, _ = Vrf.objects.get_or_create(name="{0}-".format(wname))
             else:
                 w = None
-                v = None
 
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
@@ -201,7 +199,7 @@ class Zone(object):
                     static = StaticInterface(label=name, domain=self.domain,
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
-                                             vrf=v, workgroup=w, ctnr=ctnr,
+                                             workgroup=w, ctnr=ctnr,
                                              ttl=items['ttl'],
                                              dns_enabled=enabled,
                                              dhcp_enabled=enabled,
