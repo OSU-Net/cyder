@@ -128,6 +128,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     @property
     def range(self):
+        if not self.ip_str:
+            return None
+
+        self.clean_ip()
+
         Range = get_model('range', 'range')
         q_start = (Q(start_upper__lt=self.ip_upper) |
                    Q(start_upper=self.ip_upper,
@@ -135,7 +140,12 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         q_end = (Q(end_upper__gt=self.ip_upper) |
                  Q(end_upper=self.ip_upper,
                    end_lower__gte=self.ip_lower))
-        return Range.objects.get(q_start, q_end)
+        r = Range.objects.filter(q_start, q_end)
+
+        if r.exists():
+            return r.get()
+        else:
+            return None
 
 
     def update_attrs(self):
