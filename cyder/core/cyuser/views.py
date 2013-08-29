@@ -9,6 +9,7 @@ from django.http import Http404, HttpResponse
 from django.db.models import Q
 from django.conf import settings
 
+from cyder.api.authtoken.models import Token
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
@@ -213,7 +214,15 @@ def user_detail(request, pk):
         contacts = []
 
     ctnrs = CtnrUser.objects.filter(user_id=user)
-    return cy_detail(request, UserProfile, 'cyuser/user_detail.html', {
+
+    tables = {
         'Containers': ctnrs,
         'Contact For': contacts,
-    }, obj=user)
+    }
+
+    if request.user.id == user.id or request.user.is_superuser:
+        tokens = Token.objects.filter(user=user)
+        tables.update({'API Tokens': tokens})
+
+    return cy_detail(request, UserProfile, 'cyuser/user_detail.html',
+                     tables, obj=user)

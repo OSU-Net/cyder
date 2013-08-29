@@ -112,6 +112,7 @@ class Zone(object):
                                                  ttl=ttl)
                 if enabled:
                     mx.views.add(public)
+                    mx.views.add(private)
             except ValidationError, e:
                 print "Error generating MX. %s" % e
                 exit(1)
@@ -165,8 +166,11 @@ class Zone(object):
             if ip == 0:
                 continue
 
-            if len(ha) != 12:
-                ha = "0" * 12
+            if len(ha) != 12 or ha == '0' * 12:
+                ha = ""
+
+            if ha == "":
+                enabled = False
 
             system = System(name=name)
             system.save()
@@ -259,6 +263,7 @@ class Zone(object):
                     ip_str=long2ip(ip), ip_type='4')
                 if enabled:
                     arec.views.add(public)
+                    arec.views.add(private)
 
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(
@@ -271,6 +276,7 @@ class Zone(object):
                     ptr.save()
                     if enabled:
                         ptr.views.add(public)
+                        ptr.views.add(private)
 
     def gen_NS(self):
         """
@@ -287,6 +293,7 @@ class Zone(object):
                 ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
                                                          server=name)
                 ns.views.add(public)
+                ns.views.add(private)
             except ValidationError, e:
                 print "Error generating NS. %s" % e
                 exit(1)
@@ -373,6 +380,7 @@ def gen_CNAME():
         cn.save()
         if enabled:
             cn.views.add(public)
+            cn.views.add(private)
 
 
 def gen_reverses():
