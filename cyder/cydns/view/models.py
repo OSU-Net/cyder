@@ -31,4 +31,4 @@ class View(models.Model, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        return objects or View.objects
+        return objects or View.objects.all()

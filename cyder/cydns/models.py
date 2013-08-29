@@ -115,7 +115,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
 
     @classmethod
     def filter_by_ctnr(cls, ctnr, objects=None):
-        return objects or cls.objects
+        return objects or cls.objects.all()
 
     @classmethod
     def get_api_fields(cls):
