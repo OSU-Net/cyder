@@ -24,4 +24,5 @@ router.register(r'dhcp/static_interface', api.StaticInterfaceViewSet,
                 base_name='api-staticinterface')
 router.register(r'dhcp/dynamic_interface', api.DynamicInterfaceViewSet,
                 base_name='api-dynamicinterface')
+router.register(r'dhcp/range', api.RangeViewSet, base_name='api-range')
 urlpatterns = router.urls

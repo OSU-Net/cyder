@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from rest_framework import serializers, viewsets
 
 from cyder.core.system.models import System, SystemKeyValue
@@ -6,6 +6,7 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.models import StaticIntrKeyValue
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicIntrKeyValue
+from cyder.cydhcp.range.models import Range
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -15,8 +16,7 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.txt.models import TXT
-from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.view.models import View
+from cyder.cydns.utils import ensure_label_domain
 
 
 standard_fields = ['id']
@@ -47,7 +47,7 @@ class CommonDNSViewSet(viewsets.ModelViewSet):
     def __init__(self, *args, **kwargs):
         self.search_fields = self.model.search_fields
         self.queryset = self.model.objects.all()
-        super(CommonDNSViewSet,self).__init__(*args, **kwargs)
+        super(CommonDNSViewSet, self).__init__(*args, **kwargs)
 
 
 class DomainSerializer(serializers.HyperlinkedModelSerializer):
@@ -57,7 +57,7 @@ class DomainSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Domain
         fields = ['id', 'name', 'master_domain', 'soa', 'is_reverse', 'dirty',
-                'purgeable', 'delegated']
+                  'purgeable', 'delegated']
 
 
 class DomainViewSet(CommonDNSViewSet):
@@ -162,7 +162,7 @@ class PTRViewSet(viewsets.ModelViewSet):
 
 class SystemKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     system = serializers.HyperlinkedRelatedField(
-            read_only=True, view_name="api-system-detail")
+        read_only=True, view_name="api-system-detail")
 
     class Meta:
         model = SystemKeyValue
@@ -171,7 +171,6 @@ class SystemKeyValueSerializer(serializers.HyperlinkedModelSerializer):
 class SystemKeyValueViewSet(viewsets.ModelViewSet):
     queryset = SystemKeyValue.objects.all()
     serializer_class = SystemKeyValueSerializer
-
 
 
 class SystemSerializer(serializers.HyperlinkedModelSerializer):
@@ -207,7 +206,7 @@ class StaticInterfaceSerializer(CommonDNSSerializer):
     class Meta:
         model = StaticInterface
         fields = (standard_fields + StaticInterface.get_api_fields() +
-            ['system', 'staticintrkeyvalue_set'])
+                  ['system', 'staticintrkeyvalue_set'])
         depth = 1
 
 
@@ -216,9 +215,23 @@ class StaticInterfaceViewSet(viewsets.ModelViewSet):
     serializer_class = StaticInterfaceSerializer
 
 
+class RangeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Range
+        fields = ['id', 'network', 'ip_type', 'start_upper', 'start_lower',
+                  'start_str', 'end_lower', 'end_upper', 'end_str',
+                  'is_reserved', 'allow', 'deny', 'dhcpd_raw_include',
+                  'dhcp_enabled', 'range_type', ]
+
+
+class RangeViewSet(viewsets.ModelViewSet):
+    queryset = Range.objects.all()
+    serializer_class = RangeSerializer
+
+
 class DynamicIntrKeyValueSerializer(serializers.HyperlinkedModelSerializer):
     dynamic_interface = serializers.HyperlinkedRelatedField(
-            read_only=True, view_name="api-dynamicinterface-detail")
+        read_only=True, view_name="api-dynamicinterface-detail")
 
     class Meta:
         model = DynamicIntrKeyValue
@@ -234,15 +247,17 @@ class DynamicInterfaceSerializer(CommonDNSSerializer):
         read_only=True, view_name="api-system-detail")
     domain = serializers.HyperlinkedRelatedField(
         read_only=True, view_name="api-domain-detail")
+    range = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name="api-range-detail")
 
     class Meta:
         model = DynamicInterface
         fields = ['id', 'workgroup', 'system', 'mac', 'vrf',
-            'domain', 'range', 'dhcp_enabled', 'dns_enabled', 'last_seen',
-            'dynamicintrkeyvalue_set']
+                  'domain', 'range', 'dhcp_enabled', 'dns_enabled',
+                  'last_seen', 'dynamicintrkeyvalue_set']
         depth = 1
 
 
 class DynamicInterfaceViewSet(viewsets.ModelViewSet):
     queryset = DynamicInterface.objects.all()
-    serializer_class= DynamicInterfaceSerializer
+    serializer_class = DynamicInterfaceSerializer
