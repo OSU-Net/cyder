@@ -3,10 +3,12 @@ from rest_framework import routers
 from cyder.api.v1 import api
 
 
-"""All base names are prefixed with 'api-' to disambiguate API views from
+"""All base names are prefixed with 'api-' to disambiguate API views and
 standard Django/Jinja2 views.
 """
 router = routers.DefaultRouter()
+
+
 router.register(r'dns/cname', api.CNAMEViewSet, base_name='api-cname')
 router.register(r'dns/domain', api.DomainViewSet, base_name='api-domain')
 router.register(r'dns/txt', api.TXTViewSet, base_name='api-txt')
@@ -19,10 +21,24 @@ router.register(r'dns/nameserver', api.NameserverViewSet,
 router.register(r'dns/ptr', api.PTRViewSet, base_name='api-ptr')
 router.register(r'dns/sshfp', api.SSHFPViewSet, base_name='api-sshfp')
 router.register(r'dns/srv', api.SRVViewSet, base_name='api-srv')
+
+
+router.register(r'core/system/keyvalues', api.SystemKeyValueViewSet,
+                base_name='api-system_keyvalues')
 router.register(r'core/system', api.SystemViewSet, base_name='api-system')
+
+
+router.register(r'dhcp/static_interface/keyvalues',
+                api.StaticIntrKeyValueViewSet,
+                base_name='api-staticinterface_keyvalues')
 router.register(r'dhcp/static_interface', api.StaticInterfaceViewSet,
                 base_name='api-staticinterface')
+router.register(r'dhcp/dynamic_interface/keyvalues',
+                api.DynamicIntrKeyValueViewSet,
+                base_name='api-dynamicinterface_keyvalues')
 router.register(r'dhcp/dynamic_interface', api.DynamicInterfaceViewSet,
                 base_name='api-dynamicinterface')
 router.register(r'dhcp/range', api.RangeViewSet, base_name='api-range')
+
+
 urlpatterns = router.urls

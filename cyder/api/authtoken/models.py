@@ -2,7 +2,6 @@ import hmac
 import uuid
 from hashlib import sha1
 
-from django.conf import settings
 from django.db import models
 from rest_framework.compat import AUTH_USER_MODEL
 
@@ -17,13 +16,8 @@ class Token(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     key = models.CharField(max_length=40, unique=True)
     user = models.ForeignKey(AUTH_USER_MODEL)
-    purpose = models.CharField(max_length=100) # purpose of token
+    purpose = models.CharField(max_length=100)  # purpose of token
     created = models.DateTimeField(auto_now_add=True)
-
-    """
-    class Meta:
-        abstract = 'api.authtoken' not in settings.INSTALLED_APPS
-    """
 
     def save(self, *args, **kwargs):
         if not self.key:

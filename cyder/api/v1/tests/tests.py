@@ -83,9 +83,9 @@ class APITests(object):
                 return obj
 
     More complex implmentations are possible. For example, for records that
-    are mostly similar except for small differences (such as address records, 
-    PTR records, and interfaces), I have created abstract base classes that 
-    inherit from this class and define basic setup data, while allowing the 
+    are mostly similar except for small differences (such as address records,
+    PTR records, and interfaces), I have created abstract base classes that
+    inherit from this class and define basic setup data, while allowing the
     classes that inherit from it to define the case-specific data.
     """
     fixtures = ['test_users/test_users.json']
@@ -132,7 +132,7 @@ class APITests(object):
         resp = self.client.get(url)
         self.assertHttpUnauthorized(resp)
         assert json.loads(resp.content)['detail'] == \
-                "Authentication credentials were not provided."
+            "Authentication credentials were not provided."
 
     def test_unauthorized_root(self):
         self.metatest_unauthorized(self.root_url)
@@ -153,7 +153,7 @@ class APITests(object):
         assert json.loads(resp.content)['detail'] == "Not found"
 
     def test_existing(self):
-        obj  = self.setup_data()
+        obj = self.setup_data()
         resp = self.client.get(self.object_url(obj.id),
                                **self.authheader)
         self.assertHttpOK(resp)
@@ -434,7 +434,6 @@ class StaticInterfaceBase(APITests):
         keyvalues = json.loads(resp.content)['staticintrkeyvalue_set'][0]
         assert keyvalues['key'] == 'domain-name'
         assert keyvalues['value'] == 'foo.oregonstate.edu'
-
 
 
 class StaticInterfaceV4API_Test(StaticInterfaceBase):
