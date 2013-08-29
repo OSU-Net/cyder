@@ -76,7 +76,6 @@ cd vendor/src/jingo-minify && git pull origin master && cd -
 
     ```
 cp cyder/settings/local.py-dist cyder/settings/local.py
-cp cyder/settings/dhcpbuilds.py-dist cyder/settings/dhcpbuilds.py
 sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
     ```
 
