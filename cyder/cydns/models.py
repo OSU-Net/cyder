@@ -8,6 +8,7 @@ from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_first_label, validate_fqdn
 from cyder.cydns.validation import validate_ttl
+from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
 class LabelDomainMixin(models.Model):
@@ -52,9 +53,9 @@ class LabelDomainMixin(models.Model):
 
 
 class ViewMixin(models.Model):
+
     def validate_views(instance, views):
-        for view in views:
-            instance.clean_views(views)
+        instance.clean_views(views)
 
     views = models.ManyToManyField(
         View, blank=True, validators=[validate_views]
@@ -70,24 +71,9 @@ class ViewMixin(models.Model):
         """
         for view in views:
             if hasattr(self, 'domain'):
-                self.check_no_ns_soa_condition(self.domain, view=view)
+                check_no_ns_soa_condition(self.domain, view=view)
             if hasattr(self, 'reverse_domain'):
-                self.check_no_ns_soa_condition(self.reverse_domain, view=view)
-
-    def check_no_ns_soa_condition(self, domain, view=None):
-        if domain.soa:
-            fail = False
-            root_domain = domain.soa.root_domain
-            if root_domain and not root_domain.nameserver_set.exists():
-                fail = True
-            elif (view and
-                  not root_domain.nameserver_set.filter(views=view).exists()):
-                fail = True
-            if fail:
-                raise ValidationError(
-                    "The zone you are trying to assign this record into does "
-                    "not have an NS record, thus cannnot support other "
-                    "records.")
+                check_no_ns_soa_condition(self.reverse_domain, view=view)
 
 
 class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
@@ -124,7 +110,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         # function
         self.set_fqdn()
         self.check_TLD_condition()
-        self.check_no_ns_soa_condition(self.domain)
+        check_no_ns_soa_condition(self.domain)
         self.check_for_delegation()
         if self.rdtype != 'CNAME':
             self.check_for_cname()
