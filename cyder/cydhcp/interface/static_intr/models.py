@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 import cydns
 import datetime
+import re
 
 from cyder.core.system.models import System
 
@@ -90,8 +91,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
-        System, null=True, blank=True,
-        help_text='System to associate the interface with')
+        System, help_text='System to associate the interface with')
 
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
@@ -120,6 +120,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         #        self.fqdn, self.mac)
         return self.fqdn
 
+    @property
+    def mac_str(self):
+        return (':').join(re.findall('..', self.mac))
+
     def update_attrs(self):
         self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
 
@@ -136,7 +140,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
-            ('MAC', 'mac', self.mac),
+            ('MAC', 'mac', self.mac_str),
             ('Vrf', 'vrf', self.vrf),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',
@@ -239,11 +243,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if self.dhcp_enabled:
             self.mac = self.mac.lower().replace(':', '').replace(' ', '')
             validate_mac(self.mac)
-
-        if not self.system:
-            raise ValidationError(
-                "An interface means nothing without its system."
-            )
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():

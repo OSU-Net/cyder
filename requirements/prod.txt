@@ -1,4 +1,4 @@
-django-tastypie
+djangorestframework
 ipaddr
 mimeparse
 python-ldap

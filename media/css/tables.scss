@@ -5,6 +5,27 @@ table.table {
     margin-bottom: 13px;
     padding: 13px 0;
     width: 100%;
+    .minus:hover {
+        position: relative;
+        top: 2px;
+    }
+    .plus:hover {
+        position: relative;
+        top: 2px;
+    }
+    .update:hover {
+        position: relative;
+        top: 2px;
+    }
+    .delete:hover {
+        position: relative;
+        top: 2px;
+    }
+    .info:hover {
+        position: relative;
+        top: 2px;
+        right: 2px;
+    }
     td, th {
         padding: 5px 0;
     }
@@ -115,6 +136,13 @@ table {
             -webkit-transform: scale(3,3);
         }
         .delete:focus {
+            transition: all .25s;
+            position: absolute;
+            right: 300px;
+            transform: scale(3,3);
+            -webkit-transform: scale(3,3);
+        }
+        .detail:focus {
             transition: all .25s;
             position: absolute;
             right: 300px;

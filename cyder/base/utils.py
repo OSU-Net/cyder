@@ -2,7 +2,7 @@ import operator
 
 from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Q, query
 from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
@@ -37,7 +37,7 @@ def make_paginator(request, qs, num=20, obj_type=None):
         return paginator.page(paginator.num_pages)
 
 
-def tablefy(objects, views=False, users=False, extra_cols=None):
+def tablefy(objects, users=False, extra_cols=None, info=True):
     """Make list of table headers, rows of table data, list of urls
     that may be associated with table data, and postback urls.
 
@@ -52,38 +52,58 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
     if not objects:
         return None
 
+    if users:
+        from cyder.core.cyuser.models import UserProfile
+        objects = UserProfile.objects.filter(user__in=objects)
+
+    first_obj = objects[0]
+    views = hasattr(first_obj, 'views')
+
     try:
         can_update = True
-        objects[0].get_update_url()
+        first_obj.get_update_url()
     except:
         can_update = False
-
-    if users:
-        objects = [user.get_profile() for user in objects]
 
     headers = []
     data = []
 
     # Build headers.
-    for title, sort_field, value in objects[0].details()['data']:
+    for title, sort_field, value in first_obj.details()['data']:
         headers.append([title, sort_field])
+
     if extra_cols:
         for col in extra_cols:
             headers.append([col['header'], col['sort_field']])
+
+    foreign_keys = [j for _, j in headers if j]
+    if isinstance(objects, Page) and type(objects.object_list) is not list:
+        objects.object_list = objects.object_list.select_related(*foreign_keys)
+    elif isinstance(objects, query.QuerySet):
+        objects = objects.select_related(*foreign_keys)
+
     if views:
         headers.append(['Views', None])
+        if hasattr(objects, 'object_list'):
+            objects.object_list = objects.object_list.prefetch_related('views')
 
     if can_update:
         headers.append(['Actions', None])
 
     for i, obj in enumerate(objects):
         row_data = []
-
+        row_data.append({
+            'value': ['Info'], 'url': ['info'], 'class': ['info'],
+            'img': ['/media/img/magnify.png']})
         # Columns.
         for title, field, value in obj.details()['data']:
             # Build data.
             try:
                 url = value.get_detail_url()
+                if value == obj:
+                    if info is True:
+                        row_data[0]['url'] = [url]
+                    url = None
             except AttributeError:
                 url = None
             if value == obj:
@@ -94,20 +114,13 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
             # Manual extra columns.
             for col in extra_cols:
                 d = col['data'][i]
+                data_fields = ['value', 'url', 'img', 'class']
                 if isinstance(d['value'], list):
-                    if 'img' in d:
-                        row_data.append({'value': d['value'], 'url': d['url'],
-                                         'img': d['img']})
-                    else:
-                        row_data.append({'value': d['value'], 'url': d['url']})
+                    row_data.append(dict((key, value) for (key, value) in
+                                         d.items() if key in data_fields))
                 else:
-                    if 'img' in d:
-                        row_data.append({'value': [d['value']],
-                                         'url': [d['url']],
-                                         'img': [d['img']]})
-                    else:
-                        row_data.append({'value': [d['value']],
-                                         'url': [d['url']]})
+                    row_data.append(dict((key, [value]) for (key, value) in
+                                         d.items() if key in data_fields))
 
         if views:
             # Another column for views.
@@ -136,10 +149,20 @@ def tablefy(objects, views=False, users=False, extra_cols=None):
                                      '/media/img/delete.png']})
 
         # Build table.
+        if row_data[0]['url'] in [['info'], ['']]:
+            del row_data[0]
+
         data.append(row_data)
 
-    if not issubclass(type(objects), Page):
-        data = sorted(data, key=lambda row: row[0]['value'])
+    if data[0][0]['value'] == ['Info']:
+        headers.insert(0, ['Info', None])
+        col_index = 1
+    else:
+        col_index = 0
+
+    if data and not issubclass(type(objects), Page):
+        data = sorted(
+            data, key=lambda row: str(row[col_index]['value'][0]).lower())
 
     return {
         'headers': headers,

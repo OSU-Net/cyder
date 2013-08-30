@@ -11,9 +11,7 @@ def get_vrfs(networks):
     vrfs = set()
     if len(networks) > 0:
         for network in networks:
-            vrfs.update(Vrf.objects.filter(network_id=network.id))
-    if len(vrfs) == 0:
-        return []
+            vrfs.update(network.vrf)
     return vrfs
 
 

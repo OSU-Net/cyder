@@ -23,12 +23,13 @@ class Network(models.Model, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
+    vrf = models.ForeignKey('vrf.Vrf', null=True, blank=True)
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
-            verbose_name='IP address type', max_length=1,
-            choices=IP_TYPES.items(), default=IP_TYPE_4,
-            validators=[validate_ip_type]
+        verbose_name='IP address type', max_length=1,
+        choices=IP_TYPES.items(), default=IP_TYPE_4,
+        validators=[validate_ip_type]
     )
     ip_upper = models.BigIntegerField(null=False, blank=True)
     ip_lower = models.BigIntegerField(null=False, blank=True)
@@ -123,6 +124,14 @@ class Network(models.Model, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         self.check_valid_range()
+        allocated = Network.objects.filter(prefixlen=self.prefixlen,
+                                           ip_upper=self.ip_upper,
+                                           ip_lower=self.ip_lower)
+        if allocated:
+            if not self.id or self not in allocated:
+                raise ValidationError(
+                    "This network has already been allocated.")
+
         super(Network, self).clean(*args, **kwargs)
 
     def check_valid_range(self):

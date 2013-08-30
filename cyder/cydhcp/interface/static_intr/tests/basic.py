@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from functools import partial
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
@@ -129,7 +130,7 @@ class StaticInterTests(TestCase):
         self.do_add(**kwargs)
 
     def test5_create_basic(self):
-        mac = "00:00:00:00:00:00"
+        mac = "00:00:00:00:00:01"
         label = "foo1"
         domain = self.f_c
         ip_str = "10.0.0.2"
@@ -138,7 +139,7 @@ class StaticInterTests(TestCase):
         self.do_add(**kwargs)
 
         # Change the mac by one.
-        mac = "00:00:00:00:00:01"
+        mac = "00:00:00:00:00:02"
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
@@ -216,7 +217,8 @@ class StaticInterTests(TestCase):
         domain = self.f_c
         ip_str = "10.0.0.1"
         ip_type = '4'
-        r = StaticInterface(label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=None, mac=mac,
-                            ctnr=self.ctnr)
-        self.assertRaises(ValidationError, r.clean)
+
+        create = partial(StaticInterface, label=label, domain=domain,
+                         ip_str=ip_str, ip_type=ip_type, system=None, mac=mac,
+                         ctnr=self.ctnr)
+        self.assertRaises(ValueError, create)

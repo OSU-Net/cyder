@@ -4,8 +4,8 @@ from django.contrib import admin
 
 from funfactory.monkeypatches import patch
 patch()
+from cyder.api.v1.routes import router
 
-from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.core.views import core_index
 from cyder.core.cyuser import views as cyuser_views
 from cyder.base.views import send_email, admin_page
@@ -17,11 +17,14 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^$', core_index, name='core-index'),
+    url(r'^api/authtoken/', include('cyder.api.authtoken.urls')),
+    url(r'^api/v1/', include(router.urls)),
     url(r'^admin/',  include(admin.site.urls)),
     url(r'^core/',   include('cyder.core.urls')),
     url(r'^dhcp/',   include('cyder.cydhcp.urls')),
     url(r'^dns/',    include('cyder.cydns.urls')),
-    url(r'^api/',    include(v1_dns_api.urls)),
+    url(r'^api/api', include('rest_framework.urls',
+        namespace='rest_framework')),
     url(r'^search/', include('cyder.search.urls')),
     url(r'^bug/$', send_email, name='bug-report'),
     url(r'^administration/$', admin_page, name='admin-page'),
