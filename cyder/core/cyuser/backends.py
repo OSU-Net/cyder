@@ -106,7 +106,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
         'UserProfile': has_administrative_perm,
-        'CtnrUser': has_ctnr_object_perm,
+        'CtnrUser': has_ctnr_user_perm,
         'CtnrObject': has_ctnr_object_perm,
 
         'SOA': has_soa_perm,
@@ -118,7 +118,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'AddressRecord': has_domain_record_perm,
         'CNAME': has_domain_record_perm,
         'MX': has_domain_record_perm,
-        'Nameserver': has_domain_record_perm,
+        'Nameserver': has_name_server_perm,
         'SRV': has_domain_record_perm,
         'SSHFP': has_domain_record_perm,
         'TXT': has_domain_record_perm,
@@ -128,7 +128,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'ReverseNameserver': has_reverse_domain_record_perm,
 
         # DHCP.
-        'Network': has_generic_dhcp_perm,
+        'Network': has_network_perm,
         'Range': has_range_perm,
         'Site': has_generic_dhcp_perm,
         'System': has_system_perm,
@@ -163,6 +163,17 @@ def has_ctnr_object_perm(user_level, obj, ctnr, action):
     """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
     return {
         'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
+
+
+def has_ctnr_user_perm(user_level, obj, ctnr, action):
+    """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
+    return {
+        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'user': action in [cy.ACTION_VIEW],
@@ -191,8 +202,8 @@ def has_domain_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'user': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
@@ -209,6 +220,18 @@ def has_domain_record_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
+
+
+def has_name_server_perm(user_level, obj, ctnr, action):
+    if obj and obj.domain not in ctnr.domains.all():
+        return False
+
+    return {
+        'cyder_admin': True,
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
@@ -262,7 +285,7 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW],  # ?
+        'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],  # ?
         'user': action in [cy.ACTION_VIEW],  # ?
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
@@ -289,6 +312,15 @@ def has_generic_dhcp_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
+
+
+def has_network_perm(user_level, obj, ctnr, action):
+    return {
+        'cyder_admin': True,
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
 
