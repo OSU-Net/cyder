@@ -120,10 +120,9 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
         # because that registration will generate a ptr record.
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         if (StaticInterface.objects.filter(
-                fqdn=self.fqdn, ip_upper=self.ip_upper,
-                ip_lower=self.ip_lower).exists()):
+                ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()):
             raise ValidationError(
-                "An registration has already used this IP and FQDN."
+                "A static interface has already used %s" % self.ip_str
             )
         self.clean_reverse(update_reverse_domain=update_reverse_domain)
 
