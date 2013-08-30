@@ -82,9 +82,19 @@ class Command(BaseCommand):
             dns_migrate.gen_reverses()
             dhcp_migrate.migrate_zones()
             dhcp_migrate.migrate_zone_reverse()
+            dhcp_migrate.migrate_vlans()
+            dhcp_migrate.migrate_workgroups()
+            dhcp_migrate.migrate_subnets()
+            dhcp_migrate.migrate_ranges()
             dns_migrate.gen_DNS(skip_edu=False)
             dns_migrate.gen_CNAME()
-            dhcp_migrate.migrate_all(skip=False)
+            dhcp_migrate.migrate_dynamic_hosts()
+            dhcp_migrate.migrate_zone_range()
+            dhcp_migrate.migrate_zone_workgroup()
+            dhcp_migrate.migrate_zone_domain()
+            dhcp_migrate.migrate_zone_reverse()
+            dhcp_migrate.migrate_user()
+            dhcp_migrate.migrate_zone_user()
 
         if options['dns']:
             print "Migrating DNS objects."
