@@ -285,7 +285,7 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],  # ?
+        'ctnr_admin': True,  # ?
         'user': action in [cy.ACTION_VIEW],  # ?
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
