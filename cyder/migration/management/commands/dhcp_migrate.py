@@ -300,13 +300,6 @@ def migrate_dynamic_hosts():
             if not value or value == '0':
                 continue
 
-            try:
-                value.encode('utf-8')
-            except UnicodeDecodeError:
-                print "Encode error (%s: %s)..." % (key, value),
-                value = value.decode('cp1252')
-                print "re-encoding as %s" % value
-
             kv = SystemKeyValue(system=s, key=sys_value_keys[key],
                                 value=value)
             kv.clean()

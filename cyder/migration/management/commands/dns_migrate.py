@@ -180,7 +180,7 @@ class Zone(object):
                 if not value or value == '0':
                     continue
                 kv = SystemKeyValue(system=system, key=sys_value_keys[key],
-                                    value=str(value))
+                                    value=value)
                 kv.clean()
                 kv.save()
 
