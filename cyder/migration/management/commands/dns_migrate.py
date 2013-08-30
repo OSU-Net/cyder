@@ -2,6 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from sys import stderr
 
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.core.ctnr.models import Ctnr
@@ -114,8 +115,7 @@ class Zone(object):
                     mx.views.add(public)
                     mx.views.add(private)
             except ValidationError, e:
-                print "Error generating MX. %s" % e
-                exit(1)
+                stderr.write("Error generating MX. %s\n" % e)
 
     def gen_static(self):
         """
@@ -220,8 +220,9 @@ class Zone(object):
                         kv.save()
 
                 except ValidationError, e:
-                    print "Error generating static interface. %s" % e
-                    exit(1)
+                    stderr.write("Error generating static interface for host "
+                           "with IP {0}\n".format(static.ip_str))
+                    stderr.write("Original exception: {0}\n".format(e))
 
     def gen_AR(self):
         """
@@ -293,8 +294,7 @@ class Zone(object):
                 ns.views.add(public)
                 ns.views.add(private)
             except ValidationError, e:
-                print "Error generating NS. %s" % e
-                exit(1)
+                stderr.write("Error generating NS. %s\n" % e)
 
     def walk_zone(self):
         """

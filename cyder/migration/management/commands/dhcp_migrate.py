@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
+from sys import stderr
 
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
@@ -289,7 +290,8 @@ def migrate_dynamic_hosts():
         w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c, d]):
-            print "Trouble migrating host with mac {0}".format(items['ha'])
+            stderr.write("Trouble migrating host with mac {0}\n"
+                         .format(items['ha']))
             continue
 
         s = System(name=items['name'])
@@ -302,9 +304,7 @@ def migrate_dynamic_hosts():
             try:
                 value.encode('utf-8')
             except UnicodeDecodeError:
-                print "Encode error (%s: %s)..." % (key, value),
-                value = value.decode('cp1252')
-                print "re-encoding as %s" % value
+                stderr.write("Encode error (%s: %s)\n" % (key, old_value))
 
             kv = SystemKeyValue(system=s, key=sys_value_keys[key],
                                 value=value)
