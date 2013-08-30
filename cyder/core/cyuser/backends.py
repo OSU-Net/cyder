@@ -91,8 +91,8 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     if obj:
         obj_type = obj.__class__.__name__
     elif obj_class:
-        if isinstance(obj_class, str):
-            obj_type = obj_class
+        if isinstance(obj_class, basestring):
+            obj_type = str(obj_class)
         else:
             obj_type = obj_class.__name__
     else:
