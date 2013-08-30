@@ -311,16 +311,10 @@ def migrate_dynamic_hosts():
             kv.clean()
             kv.save()
 
-        if r.allow == ALLOW_VRF or r.allow == ALLOW_LEGACY_AND_VRF:
-            v = Vrf.objects.get(network=r.network)
-            intr, _ = DynamicInterface.objects.get_or_create(
-                range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=mac, system=s, dhcp_enabled=enabled,
-                dns_enabled=enabled, last_seen=items['last_seen'])
-        else:
-            intr, _ = DynamicInterface.objects.get_or_create(
-                system=s, range=r, workgroup=w, ctnr=c, domain=d,
-                mac=mac, last_seen=items['last_seen'])
+        intr, _ = DynamicInterface.objects.get_or_create(
+            range=r, workgroup=w, ctnr=c, domain=d, mac=mac, system=s,
+            dhcp_enabled=enabled, dns_enabled=enabled,
+            last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,
