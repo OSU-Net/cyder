@@ -184,9 +184,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
-        if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
-            raise ValidationError("A PTR already uses '%s' and '%s'" %
-                                  (self.fqdn, self.ip_str))
+        if PTR.objects.filter(ip_str=self.ip_str).exists():
+            raise ValidationError("A PTR already uses '%s'" %
+                                  self.ip_str)
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
             raise ValidationError("An A record already uses '%s' and '%s'" %

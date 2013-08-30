@@ -102,6 +102,7 @@ class Zone(object):
                                  domain=self.domain,
                                  server=server,
                                  priority=priority).exists():
+                print "Ignoring MX %s; MX already exists." % server
                 continue
 
             try:
@@ -220,6 +221,8 @@ class Zone(object):
                 except ValidationError, e:
                     print "Error generating static interface. %s" % e
                     exit(1)
+            else:
+                print "Ignoring host %s: already exists." % items['id']
 
     def gen_AR(self):
         """
@@ -250,8 +253,16 @@ class Zone(object):
             if dname != name:
                 continue
 
-            if StaticInterface.objects.filter(ip_str=long2ip(ip)).exists():
-                continue
+            dup_stats = StaticInterface.objects.filter(ip_str=long2ip(ip))
+            if dup_stats.exists():
+                if ptr_type == 'reverse':
+                    print "Ignoring PTR %s; Static intr exists." % long2ip(ip)
+                    continue
+                elif dup_stats.filter(fqdn=hostname).exists():
+                    print "Ignoring AR %s; Static intr exists." % hostname
+                    continue
+                else:
+                    pass
 
             if ptr_type == 'forward':
                 arec, _ = AddressRecord.objects.get_or_create(
@@ -261,8 +272,7 @@ class Zone(object):
                     arec.views.add(public)
 
             elif ptr_type == 'reverse':
-                if not PTR.objects.filter(
-                        fqdn=hostname, ip_str=long2ip(ip)).exists():
+                if not PTR.objects.filter(ip_str=long2ip(ip)).exists():
                     ptr = PTR(label=label, domain=self.domain,
                               ip_str=long2ip(ip), ip_type='4')
 
@@ -272,6 +282,8 @@ class Zone(object):
                     ptr.save()
                     if enabled:
                         ptr.views.add(public)
+                else:
+                    print "Ignoring PTR %s; already exists." % long2ip(ip)
 
     def gen_NS(self):
         """
@@ -362,13 +374,22 @@ def gen_CNAME():
         elif Domain.objects.filter(name=dname).exists():
             domain = Domain.objects.get(name=dname)
         else:
+            print "Ignoring CNAME %s: No domain." % fqdn
             continue
 
         if server == ".".join([name, domain.name]):
             # In maintain, at least one CNAME is a loop: biosys.bioe.orst.edu
+            print "Ignoring CNAME %s: Is a loop." % server
             continue
 
+
         cn = CNAME(label=name, domain=domain, target=server)
+        cn.set_fqdn()
+        dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
+        if dup_ptrs:
+            print "Removing duplicate PTR for %s" % cn.fqdn
+            dup_ptrs.delete()
+
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
         cn.save()
