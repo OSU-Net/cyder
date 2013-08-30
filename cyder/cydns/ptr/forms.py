@@ -2,9 +2,10 @@ from django import forms
 
 from cyder.cydns.forms import DNSForm
 from cyder.cydns.ptr.models import PTR
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class PTRForm(DNSForm):
+class PTRForm(DNSForm, UsabilityFormMixin):
     def delete_instance(self, instance):
         instance.delete()
 
