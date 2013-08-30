@@ -432,7 +432,7 @@ def dump_maintain():
 
 def delete_DNS():
     for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
-                  StaticInterface, System, Vrf, Workgroup]:
+                  StaticInterface, System, Workgroup]:
         thing.objects.all().delete()
 
 
