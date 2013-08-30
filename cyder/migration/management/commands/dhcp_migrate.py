@@ -51,7 +51,8 @@ def calc_prefixlen(netmask):
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
                              user=settings.MIGRATION_USER,
                              passwd=settings.MIGRATION_PASSWD,
-                             db=settings.MIGRATION_DB)
+                             db=settings.MIGRATION_DB,
+                             charset='utf8')
 
 cursor = connection.cursor()
 
