@@ -163,7 +163,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
             ('MAC', 'mac', self.mac_str),
-            ('Vrf', 'vrf', self.vrf),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),

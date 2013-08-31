@@ -37,7 +37,7 @@ class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['system', 'description', 'label', 'ip_str',
-                                'ip_type', 'ttl', 'workgroup', 'mac', 'vrf',
+                                'ip_type', 'ttl', 'workgroup', 'mac',
                                 'domain', 'dhcp_enabled', 'dns_enabled',
                                 'ctnr']
 

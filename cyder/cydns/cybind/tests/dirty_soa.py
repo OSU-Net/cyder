@@ -10,7 +10,10 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.tests.utils import create_fake_zone
 
+from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
@@ -38,6 +41,13 @@ class DirtySOATests(TestCase):
 
         self.s = System()
         self.s.save()
+
+        self.net = Network(network_str='10.2.3.0/30')
+        self.net.update_network()
+        self.net.save()
+        self.range = Range(network=self.net, range_type=STATIC,
+                        start_str='10.2.3.1', end_str='10.2.3.2')
+        self.range.save()
 
     def test_print_soa(self):
         self.assertTrue(self.soa.bind_render_record() not in ('', None))
