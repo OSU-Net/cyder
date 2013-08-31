@@ -250,7 +250,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         return {
-            'label': random_label(),
+            'fqdn': random_label() + '.' + self.domain.name,
             'ip_type': '4',
             'ip_str': '196.168.1.3',
             'description': 'yo',
