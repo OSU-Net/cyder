@@ -26,5 +26,5 @@ def check_no_ns_soa_condition(domain, view=None):
                 error = 'zone'
             raise ValidationError(
                 "The {0} you are trying to assign this record into does "
-                "not have an NS record, thus cannnot support other "
+                "not have an NS record, thus cannot support other "
                 "records.".format(error))
