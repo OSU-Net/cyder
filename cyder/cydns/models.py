@@ -110,9 +110,9 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         # function
         self.set_fqdn()
         self.check_TLD_condition()
-        try:
+        if hasattr(self, 'domain'):
             check_no_ns_soa_condition(self.domain)
-        except:
+        else:
             raise ValidationError("DNS records require a domain")
 
         self.check_for_delegation()
