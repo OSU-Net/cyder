@@ -2,10 +2,17 @@ from django import forms
 from django.forms import ModelForm
 from django.forms.models import construct_instance
 from django.core.exceptions import ValidationError
+from cyder.cydns.view.validation import validate_views
 
 
 class DNSForm(ModelForm):
     comment = forms.CharField(widget=forms.HiddenInput, required=False)
+
+    def clean(self):
+        super(DNSForm, self).clean()
+        validate_views(self.cleaned_data)
+
+        return self.cleaned_data
 
     def save(self, commit=True):
         """
@@ -19,6 +26,7 @@ class DNSForm(ModelForm):
             fail_message = 'created'
         else:
             fail_message = 'changed'
+
         return self.save_instance(
             self.instance, self._meta.fields, fail_message, commit,
             construct=False
@@ -68,12 +76,12 @@ class DNSForm(ModelForm):
             try:
                 save_m2m(instance)
                 # ^-- pass instance so we can validate it's views
-            except ValidationError:
+            except ValidationError, e:
                 if rollback:
                     self.delete_instance(instance)
                     # we didn't call ensure_label_domain so it's not our
                     # responsibility to call prune_tree
-                raise
+                raise e
         else:
             # we're not committing. add a method to the form to allow deferred
             # saving of m2m data.
