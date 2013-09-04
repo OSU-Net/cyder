@@ -1,5 +1,3 @@
-import json
-
 from cyder.api.v1.endpoints.dhcp.tests import DHCPAPITests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
