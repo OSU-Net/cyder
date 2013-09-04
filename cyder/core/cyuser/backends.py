@@ -149,6 +149,8 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     handling_function = handling_functions.get(obj_type, False)
 
     if not handling_function:
+        if '_' in obj_type:
+            obj_type = obj_type.replace('_', '')
         for key in handling_functions.keys():
             if obj_type.lower() == key.lower():
                 handling_function = handling_functions[key]
