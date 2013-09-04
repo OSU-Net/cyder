@@ -147,7 +147,6 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     }
 
     handling_function = handling_functions.get(obj_type, False)
-
     if not handling_function:
         if '_' in obj_type:
             obj_type = obj_type.replace('_', '')
@@ -171,7 +170,7 @@ def has_administrative_perm(user_level, obj, ctnr, action):
 
 
 def has_ctnr_object_perm(user_level, obj, ctnr, action):
-    """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
+    """Permissions for ctnr object relationships."""
     return {
         'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'ctnr_admin': action in [cy.ACTION_VIEW],
@@ -182,7 +181,7 @@ def has_ctnr_object_perm(user_level, obj, ctnr, action):
 
 
 def has_ctnr_user_perm(user_level, obj, ctnr, action):
-    """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
+    """Permissions for ctnr users."""
     return {
         'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
         'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],

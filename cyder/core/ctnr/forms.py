@@ -29,6 +29,12 @@ class CtnrObjectForm(forms.Form):
             ('range', 'Range'),
             ('workgroup', 'Workgroup')))
 
+    def __init__(self, *args, **kwargs):
+        obj_perm = kwargs.pop('obj_perm', False)
+        super(CtnrObjectForm, self).__init__(*args, **kwargs)
+        if not obj_perm:
+            self.fields['obj_type'].choices = (('user', 'User'),)
+
     obj = forms.CharField(
         widget=forms.TextInput(attrs={'id': 'object-searchbox'}),
         label='Search')

@@ -34,9 +34,6 @@ def ctnr_detail(request, pk):
 
     if request.user.get_profile().has_perm(
             request, cy.ACTION_UPDATE, obj_class='CtnrObject'):
-        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
-        user_table = tablefy(users, extra_cols=extra_cols, users=True,
-                             request=request)
 
         extra_cols, domains = create_obj_extra_cols(
             ctnr, ctnrDomains, 'domain')
@@ -55,14 +52,24 @@ def ctnr_detail(request, pk):
         workgroup_table = tablefy(workgroups, extra_cols=extra_cols,
                                   request=request)
 
+        object_form = CtnrObjectForm(obj_perm=True)
+
     else:
-        user_table = tablefy(ctnrUsers, users=True, request=request)
         domain_table = tablefy(ctnrDomains, request=request)
         rdomain_table = tablefy(ctnrRdomains, request=request)
         range_table = tablefy(ctnrRanges, request=request)
         workgroup_table = tablefy(ctnrWorkgroups, request=request)
+        object_form = CtnrObjectForm()
 
-    object_form = CtnrObjectForm()
+    if request.user.get_profile().has_perm(
+            request, cy.ACTION_UPDATE, obj_class='CtnrUser'):
+
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
+        user_table = tablefy(users, extra_cols=extra_cols, users=True,
+                             request=request)
+    else:
+        user_table = tablefy(ctnrUsers, users=True, request=request)
+
     add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
 
     return render(request, 'ctnr/ctnr_detail.html', {
