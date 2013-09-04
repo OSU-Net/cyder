@@ -12,9 +12,11 @@
 {% endblock %}
 
 {% block action_bar %}
-  <a class="btn" href="{{ Model.get_create_url() }}">
-    Create {{ model_name|humanized_model_name }}
-  </a>
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+    <a class="btn" href="{{ Model.get_create_url() }}">
+      Create {{ model_name|humanized_model_name }}
+    </a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -22,6 +24,7 @@
     {% include "base/includes/pagination.html" %}
   {% endif %}
 
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
   {% if page_obj and has_attr(page_obj[0], 'eg_metadata') %}
     <div class="editable-grid">
       <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
@@ -36,6 +39,7 @@
         </a>
       </div>
     </div>
+  {% endif %}
   {% endif %}
 
   {% if object_table %}
