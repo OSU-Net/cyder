@@ -3,6 +3,7 @@ import json
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.forms import ChoiceField, HiddenInput
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.db.models.loading import get_model
@@ -60,6 +61,8 @@ def ctnr_detail(request, pk):
         range_table = tablefy(ctnrRanges, request=request)
         workgroup_table = tablefy(ctnrWorkgroups, request=request)
         object_form = CtnrObjectForm()
+        object_form.fields['obj_type'] = ChoiceField(widget=HiddenInput,
+                                                     initial='user')
 
     if request.user.get_profile().has_perm(
             request, cy.ACTION_UPDATE, obj_class='CtnrUser'):
