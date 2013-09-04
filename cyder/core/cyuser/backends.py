@@ -101,7 +101,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     if obj_type and 'KeyValue' in obj_type:
         obj_type = obj_type.split('KeyValue')[0]
 
-    handling_function = {
+    handling_functions = {
         # Administrative.
         'Ctnr': has_administrative_perm,
         'User': has_administrative_perm,
@@ -144,7 +144,14 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
-    }.get(obj_type, False)
+    }
+
+    handling_function = handling_functions.get(obj_type, False)
+
+    if not handling_function:
+        for key in handling_functions.keys():
+            if obj_type.lower() == key.lower():
+                handling_function = handling_functions[key]
 
     return handling_function(user_level, obj, ctnr, action)
 
