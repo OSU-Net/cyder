@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% set obj_type_perm request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
 {% block title %}{{ model_name|humanized_model_name + 's'}}{% endblock %}
 
