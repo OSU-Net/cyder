@@ -14,10 +14,14 @@
 {% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('range', url('cydhcp-get-record'),
-                   url('range'), objName=obj.ip_str) }}
-  {{ create_button('network_kv', url('cydhcp-get-record'),
-                   url('network_kv'), objName=obj.ip_str,
-                   buttonName="Network Attribute") }}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class='range') %}
+    {{ create_button('range', url('cydhcp-get-record'),
+    url('range'), objName=obj.ip_str) }}
+  {% endif %}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+    {{ create_button('network_kv', url('cydhcp-get-record'),
+                     url('network_kv'), objName=obj.ip_str,
+                     buttonName="Network Attribute") }}
+  {% endif %}
   <a class="btn" href="{{ url('build-network', obj.pk) }}">DHCP Build Output</a>
 {% endblock %}
