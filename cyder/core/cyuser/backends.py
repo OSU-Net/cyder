@@ -133,7 +133,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         # DHCP.
         'Network': has_network_perm,
         'Range': has_range_perm,
-        'Site': has_generic_dhcp_perm,
+        'Site': has_site_perm,
         'System': has_system_perm,
         'Vlan': has_vlan_perm,
         'Vrf': has_vrf_perm,
@@ -340,6 +340,15 @@ def has_generic_dhcp_perm(user_level, obj, ctnr, action):
 
 
 def has_vrf_perm(user_level, obj, ctnr, action):
+    return {
+        'cyder_admin': True,
+        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'user': action in [cy.ACTION_VIEW],
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
+
+
+def has_site_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,
         'ctnr_admin': action in [cy.ACTION_VIEW],
