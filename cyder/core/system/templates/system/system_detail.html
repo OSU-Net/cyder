@@ -2,6 +2,8 @@
 {% from "base/tables.html" import render_table %}
 {% from "base/utility.html" import create_button %}
 
+{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+
 {% block title %}System {{ system.name }}{% endblock %}
 
 {% block view_metadata %}
@@ -17,13 +19,19 @@
 
 
 {% block extra_action_bar %}
-  {{ create_button('static_interface', url('cydhcp-get-record'),
-                 url('static_interface'), objName=system.name) }}
-  {{ create_button('dynamic_interface', url('cydhcp-get-record'),
-                 url('dynamic_interface'), objName=system.name) }}
-  {{ create_button('system_kv', url('core-get-record'),
-                 url('system_kv'), objName=system.name,
-                 buttonName="System Attribute") }}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class='static_interface') %}
+    {{ create_button('static_interface', url('cydhcp-get-record'),
+                   url('static_interface'), objName=system.name) }}
+  {% endif %}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamic_interface') %}
+    {{ create_button('dynamic_interface', url('cydhcp-get-record'),
+    url('dynamic_interface'), objName=system.name) }}
+  {% endif %}
+  {% if obj_type_perm %}
+    {{ create_button('system_kv', url('core-get-record'),
+                   url('system_kv'), objName=system.name,
+                   buttonName="System Attribute") }}
+  {% endif %}
 {% endblock %}
 
 {% block content %}
