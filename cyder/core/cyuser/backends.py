@@ -99,7 +99,10 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         return False
 
     if obj_type and 'KeyValue' in obj_type:
-        obj_type = obj_type.split('KeyValue')[0]
+        if 'Workgroup' in obj_type:
+            obj_type = 'GroupOption'
+        else:
+            obj_type = obj_type.split('KeyValue')[0]
 
     handling_functions = {
         # Administrative.
@@ -140,7 +143,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'SubnetOption': has_generic_dhcp_perm,
         'ClassOption': has_generic_dhcp_perm,
         'PoolOption': has_generic_dhcp_perm,
-        'GroupOption': has_generic_dhcp_perm,
+        'GroupOption': has_workgroup_option_perm,
 
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
@@ -296,6 +299,16 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,  # ?
         'ctnr_admin': action in [cy.ACTION_VIEW],  # ?
+        'user': action in [cy.ACTION_VIEW],  # ?
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
+
+
+def has_workgroup_option_perm(user_level, obj, ctnr, action):
+    """Permissions for group options."""
+    return {
+        'cyder_admin': True,  # ?
+        'ctnr_admin': True,  # ?
         'user': action in [cy.ACTION_VIEW],  # ?
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
