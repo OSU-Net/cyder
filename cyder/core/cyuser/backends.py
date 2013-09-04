@@ -256,7 +256,7 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,
-        'ctnr_admin': True,
+        'ctnr_admin': action in [cy.ACTION_VIEW],
         'user': True,
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
@@ -295,7 +295,7 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': True,  # ?
+        'ctnr_admin': action in [cy.ACTION_VIEW],  # ?
         'user': action in [cy.ACTION_VIEW],  # ?
         'guest': action in [cy.ACTION_VIEW],
     }.get(user_level, False)
@@ -356,4 +356,9 @@ def has_static_registration_perm(user_level, obj, ctnr, action):
 
 def has_dynamic_registration_perm(user_level, obj, ctnr, action):
     """Permissions for static registrations."""
-    return True
+    return {
+        'cyder_admin': True,  # ?
+        'ctnr_admin': True,  # ?
+        'user': True,  # ?
+        'guest': action in [cy.ACTION_VIEW],
+    }.get(user_level, False)
