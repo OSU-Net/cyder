@@ -160,8 +160,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     @classmethod
     def get_api_fields(cls):
-        return super(StaticInterface, cls).get_api_fields() + \
-            ['mac', 'dhcp_enabled', 'dns_enabled']
+        return (['id'] + super(StaticInterface, cls).get_api_fields()
+                + ['mac', 'dhcp_enabled', 'dns_enabled', 'ctnr',
+                   'reverse_domain', 'system', 'workgroup', 'vrf'])
 
     @property
     def rdtype(self):

@@ -1,6 +1,14 @@
-from rest_framework import filters
+from rest_framework import exceptions, filters
 
 from cyder.core.ctnr.models import Ctnr
+
+
+class InvalidQuery(exceptions.APIException):
+    status_code = 400
+
+    def __init__(self, detail):
+        self.detail = detail
+        super(InvalidQuery, self).__init__(self)
 
 
 class SearchFieldFilter(filters.BaseFilterBackend):
@@ -51,20 +59,23 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 queryset = parent_model.filter_by_ctnr(
                     Ctnr.objects.get(name=request.QUERY_PARAMS[q]))
 
-        if getattr(view, 'keyvaluemodel', None) and q_keyvalues:
-            parent_set_list = (
-                matching(k, q_keyvalues[k]) for k in q_keyvalues)
-            parent_ids = reduce((lambda x, y: x & y), parent_set_list)
-            kv_queryset = parent_model.objects.filter(id__in=parent_ids)
+        if q_keyvalues:
+            if getattr(view, 'keyvaluemodel', None):
+                parent_set_list = (
+                    matching(k, q_keyvalues[k]) for k in q_keyvalues)
+                parent_ids = reduce((lambda x, y: x & y), parent_set_list)
+                kv_queryset = parent_model.objects.filter(id__in=parent_ids)
+            else:
+                raise InvalidQuery("This field does not have key-values.")
 
         if q_include or q_exclude:
             f_queryset = queryset.filter(**q_include).exclude(**q_exclude)
 
         if kv_queryset and f_queryset:
-            return kv_queryset & f_queryset
+            return (kv_queryset & f_queryset).all()
         elif kv_queryset:
-            return kv_queryset
+            return kv_queryset.all()
         elif f_queryset:
-            return f_queryset
+            return f_queryset.all()
         else:
-            return queryset
+            return queryset.all()
