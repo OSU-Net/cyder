@@ -33,6 +33,20 @@ def build_domain(label, domain_obj):
     return domain
 
 
+class APIKVTestMixin(object):
+    """Mixin to test endpoints with key-value support."""
+    def test_keyvalues(self):
+        """Test key-value retrieval."""
+        obj = self.create_data()
+        getattr(obj, self.keyvalue_attr).get_or_create(
+            key='Test Key', value='Test Value')
+        resp = self.http_get(self.object_url(obj.id))
+        keyvalues = json.loads(resp.content)[self.keyvalue_attr][0]
+        assert keyvalues['key'] == 'Test Key'
+        assert keyvalues['value'] == 'Test Value'
+        self.model.objects.filter(id=obj.id).delete()
+
+
 class APITests(object):
     """Base class for API Tests. This contains a lot of helpful methods,
     the core tests to run on every object, and the code that starts off
@@ -94,6 +108,9 @@ class APITests(object):
             API_VERSION, root, urlname)
         self.object_url = lambda n: self.f_object_url.format(
             API_VERSION, root, urlname, n)
+
+    def http_get(self, url):
+        return self.client.get(url, **self.authheader)
 
     def assertEqualKeys(self, a, b):
         for key in a:
