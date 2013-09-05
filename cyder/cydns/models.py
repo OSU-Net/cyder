@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import models
 
 import cydns
@@ -8,6 +8,10 @@ from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_first_label, validate_fqdn
 from cyder.cydns.validation import validate_ttl
+
+
+DOMAIN_FQDN_CONFLICT = ("Please specify either fqdn or "
+                        "label and domain, not both.")
 
 
 class LabelDomainMixin(models.Model):
@@ -146,6 +150,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             prune_tree(objs_domain)
 
     def save(self, *args, **kwargs):
+        self.fqdn_kwargs_check(kwargs)
         self.full_clean()
 
         if self.pk:
@@ -171,15 +176,44 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             from cyder.cydns.utils import prune_tree
             prune_tree(db_domain)
 
+    def fqdn_kwargs_check(self, kwargs):
+        fqdn = kwargs.pop('fqdn', None)
+        if fqdn:
+            if 'label' in kwargs or 'domain' in kwargs:
+                raise ValidationError(DOMAIN_FQDN_CONFLICT)
+            self.label_domain_from_fqdn()
+
+    def label_domain_from_fqdn(self):
+        validate_fqdn(self.fqdn)
+        try:
+            label, domain = self.fqdn.split('.', 1)
+        except ValueError:
+            raise ValidationError("PTR to a top-level domain not allowed.")
+        domain = Domain.objects.get(name=domain)
+        self.label, self.domain = label, domain
+
     def set_fqdn(self):
+        try:
+            Klass = type(self)
+            old = Klass.objects.get(pk=self.pk)
+        except Klass.DoesNotExist:
+            old = None
+
+        if (old and old.fqdn != self.fqdn and
+                ".".join([self.label, self.domain.name]) != self.fqdn):
+            if old.label != self.label or old.domain != self.domain:
+                raise ValidationError(DOMAIN_FQDN_CONFLICT)
+            self.label_domain_from_fqdn()
+
         try:
             if self.label == '':
                 self.fqdn = self.domain.name
             else:
                 self.fqdn = "{0}.{1}".format(self.label,
                                              self.domain.name)
-        except ObjectDoesNotExist:
-            return
+        except Domain.DoesNotExist:
+            if self.fqdn:
+                self.label_domain_from_fqdn()
 
     def check_for_cname(self):
         """
@@ -219,7 +253,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             )
 
     def check_TLD_condition(self):
-        domain = Domain.objects.filter(name=self.fqdn)
+        domain = Domain.objects.filter(name=self.fqdn, master_domain=None)
         if not domain:
             return
         if self.label == '' and domain[0] == self.domain:
