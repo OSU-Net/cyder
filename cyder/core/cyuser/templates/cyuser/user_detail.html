@@ -16,5 +16,10 @@
       Unbecome User
       </a>
     {% endif %}
+    {% if request.user.username == obj.user.username or request.user.is_superuser %}
+      <a class="btn btn-primary" href="{{ url('request-token') }}">
+        Request API Token
+      </a>
+    {% endif %}
   {% endif %}
 {% endblock %}

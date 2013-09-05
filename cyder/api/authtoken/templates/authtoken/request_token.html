@@ -4,11 +4,18 @@
 {% block header %} Request Token {% endblock %}
 
 {% block content %}
-    <p>[Insert rant about privileges and responsibility here.] Please enter 
-    the purpose of this key below and then submit.
-    </p>
-    <form method="post">
-        {{ form.as_p() }}
-        <input type="submit" value="Request Token" />
+    <form class="form" method="post">
+        <div class="inner-form">
+            <h3>Request Token</h3>
+            <p>[Insert rant about privileges and responsibility here.] Please enter 
+            the purpose of this key below and then submit.
+            </p>
+            <ul style="float:top; left:0;" id="add-object-errorlist"></ul>
+            {{ form.as_p() }}
+        </div>
+        <div class="form-btns">
+            <hr>
+            <a class="btn submit c">Request Token</a>
+        </div>
     </form>
 {% endblock %}
