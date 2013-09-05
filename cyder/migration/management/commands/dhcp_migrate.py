@@ -51,7 +51,8 @@ def calc_prefixlen(netmask):
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
                              user=settings.MIGRATION_USER,
                              passwd=settings.MIGRATION_PASSWD,
-                             db=settings.MIGRATION_DB)
+                             db=settings.MIGRATION_DB,
+                             charset='utf8')
 
 cursor = connection.cursor()
 
@@ -298,13 +299,6 @@ def migrate_dynamic_hosts():
             value = items[key]
             if not value or value == '0':
                 continue
-
-            try:
-                value.encode('utf-8')
-            except UnicodeDecodeError:
-                print "Encode error (%s: %s)..." % (key, value),
-                value = value.decode('cp1252')
-                print "re-encoding as %s" % value
 
             kv = SystemKeyValue(system=s, key=sys_value_keys[key],
                                 value=value)

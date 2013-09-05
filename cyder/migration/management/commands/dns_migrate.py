@@ -31,7 +31,8 @@ BAD_DNAMES = ['', '.', '_']
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
                              user=settings.MIGRATION_USER,
                              passwd=settings.MIGRATION_PASSWD,
-                             db=settings.MIGRATION_DB)
+                             db=settings.MIGRATION_DB,
+                             charset='utf8')
 cursor = connection.cursor()
 
 
@@ -179,7 +180,7 @@ class Zone(object):
                 if not value or value == '0':
                     continue
                 kv = SystemKeyValue(system=system, key=sys_value_keys[key],
-                                    value=str(value))
+                                    value=value)
                 kv.clean()
                 kv.save()
 
