@@ -51,13 +51,13 @@ class ReverseDomainTests(TestCase):
         return intr
 
     def add_ptr_ipv4(self, ip):
-        ptr = PTR(name=random_label(), ip_str=ip, ip_type='4')
+        ptr = PTR(fqdn=random_label(), ip_str=ip, ip_type='4')
         ptr.full_clean()
         ptr.save()
         return ptr
 
     def add_ptr_ipv6(self, ip):
-        ptr = PTR(name=random_label(), ip_str=ip, ip_type='6')
+        ptr = PTR(fqdn=random_label(), ip_str=ip, ip_type='6')
         ptr.full_clean()
         ptr.save()
         return ptr

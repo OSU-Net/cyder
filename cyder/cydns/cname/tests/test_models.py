@@ -328,7 +328,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="cd")
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
-        rec = PTR(ip_str="10.193.1.1", ip_type='4', name='testyfoo.what.cd')
+        rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd')
         rec.full_clean()
         rec.save()
 
@@ -342,7 +342,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
         CNAME.objects.get_or_create(label=label, domain=dom, target=data)
-        rec = PTR(ip_str="10.193.1.1", ip_type='4', name='testyfoo.what.cd')
+        rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd')
 
         self.assertRaises(ValidationError, rec.clean)
 
