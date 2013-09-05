@@ -2,7 +2,7 @@ from django.conf.urls.defaults import patterns, url
 
 from cyder.core.ctnr.views import (add_object, remove_object, remove_user,
                                    update_user_level, change_ctnr,
-                                   CtnrDetailView)
+                                   ctnr_detail)
 from cyder.core.urls import core_urls
 
 
@@ -18,5 +18,5 @@ urlpatterns = core_urls('ctnr') + patterns(
         '(?P<lvl>[\w-]+)/$',
         update_user_level, name='update-user-level'),
     url(r'(?P<pk>[\w-]+)?/?change/$', change_ctnr, name='ctnr-change'),
-    url(r'(?P<pk>[\w-]+)/$', CtnrDetailView.as_view(), name='ctnr-detail'),
+    url(r'(?P<pk>[\w-]+)/$', ctnr_detail, name='ctnr-detail'),
 )

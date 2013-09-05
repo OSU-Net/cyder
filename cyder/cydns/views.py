@@ -111,7 +111,7 @@ def cydns_view(request, pk=None):
         'form': form,
         'obj': record,
         'page_obj': page_obj,
-        'object_table': tablefy(page_obj),
+        'object_table': tablefy(page_obj, request=request),
         'obj_type': obj_type,
         'pk': pk,
     })

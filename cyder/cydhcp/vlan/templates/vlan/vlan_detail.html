@@ -14,7 +14,9 @@
 {% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('vlan_kv', url('cydhcp-get-record'),
-                   url('vlan_kv'), objName=obj.name,
-                   buttonName="VLAN Attribute") }}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+    {{ create_button('vlan_kv', url('cydhcp-get-record'),
+                     url('vlan_kv'), objName=obj.name,
+                     buttonName="VLAN Attribute") }}
+  {% endif %}
 {% endblock %}

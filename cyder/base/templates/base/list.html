@@ -1,6 +1,8 @@
 {% extends "base/base.html" %}
 {% from "base/tables.html" import render_table %}
 
+{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+
 {% block title %}{{ model_name|humanized_model_name + 's'}}{% endblock %}
 
 {% block filter_bar %}
@@ -12,9 +14,11 @@
 {% endblock %}
 
 {% block action_bar %}
-  <a class="btn" href="{{ Model.get_create_url() }}">
-    Create {{ model_name|humanized_model_name }}
-  </a>
+  {% if obj_type_perm %}
+    <a class="btn" href="{{ Model.get_create_url() }}">
+      Create {{ model_name|humanized_model_name }}
+    </a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -22,20 +26,22 @@
     {% include "base/includes/pagination.html" %}
   {% endif %}
 
-  {% if page_obj and has_attr(page_obj[0], 'eg_metadata') %}
-    <div class="editable-grid">
-      <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
-      <form id="enable-eg">
-        <input type="checkbox" name="eg" id="enable-eg-check">
-        <label for="enable-eg-check">Enter spreadsheet mode</label>
-      </form>
-      <div class="spreadsheet-mode hidden">
-        Click table cells below to directly modify data |
-        <a href="{{ request.path }}" class="exit-spreadsheet">
-          Exit spreadsheet mode
-        </a>
+  {% if obj_type_perm %}
+    {% if page_obj and has_attr(page_obj[0], 'eg_metadata') %}
+      <div class="editable-grid">
+        <span id="eg" data-metadata="{{ page_obj[0].eg_metadata()|to_json }}"></span>
+        <form id="enable-eg">
+          <input type="checkbox" name="eg" id="enable-eg-check">
+          <label for="enable-eg-check">Enter spreadsheet mode</label>
+        </form>
+        <div class="spreadsheet-mode hidden">
+          Click table cells below to directly modify data |
+          <a href="{{ request.path }}" class="exit-spreadsheet">
+            Exit spreadsheet mode
+          </a>
+        </div>
       </div>
-    </div>
+    {% endif %}
   {% endif %}
 
   {% if object_table %}

@@ -16,9 +16,11 @@
 {% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('range_kv', url('cydhcp-get-record'),
-                   url('range_kv'), objName=obj.start_str,
-                   buttonName="Range Attribute") }}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+    {{ create_button('range_kv', url('cydhcp-get-record'),
+                     url('range_kv'), objName=obj.start_str,
+                     buttonName="Range Attribute") }}
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -67,18 +69,24 @@
               {% endif %}
               <td>Free</td>
               <td>
-                {{ create_button('address_record',
-                                 url('cydns-get-record'),
-                                 url('address_record'),
-                                 data=obj[-1],
-                                 button_prefix="") }}
-                {{ create_button('ptr',
-                                 url('cydns-get-record'),
-                                 url('ptr'),
-                                 data=obj[-1],
-                                 button_prefix="") }}
-                 <a class="btn submit a" href={{ url('system-create', obj[1].__str__()) }}>Static Interface</a>
-              <td>
+                {% if request.user.get_profile().has_perm(request, 2, obj_class='address_record') %}
+                  {{ create_button('address_record',
+                                   url('cydns-get-record'),
+                                   url('address_record'),
+                                   data=obj[-1],
+                                   button_prefix="") }}
+                {% endif %}
+                {% if request.user.get_profile().has_perm(request, 2, obj_class='ptr') %}
+                  {{ create_button('ptr',
+                                   url('cydns-get-record'),
+                                   url('ptr'),
+                                   data=obj[-1],
+                                   button_prefix="") }}
+                                   {% endif %}
+                {% if request.user.get_profile().has_perm(request, 2, obj_class='staticinterface') %}
+                  <a class="btn submit a" href={{ url('system-create', obj[1].__str__()) }}>Static Interface</a>
+                {% endif %}
+                <td>
             </tr>
           {% else %}
             {% for record_ip, record_set in obj %}
