@@ -2,6 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from sys import stderr
 
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.core.ctnr.models import Ctnr
@@ -356,7 +357,7 @@ def gen_CNAME():
         server, name = server.lower(), name.lower()
         if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
                               % domain_id):
-            stderr.write('Ignoring CNAME {0}; domain does not exist.'
+            stderr.write('Ignoring CNAME {0}; domain does not exist.\n'
                          .format(name))
             continue
         dname, = cursor.fetchone()
