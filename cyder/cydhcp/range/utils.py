@@ -2,6 +2,12 @@ from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
+from cyder.base.utils import qd_to_py_dict
+
+from django.db.models.loading import get_model
+from django.http import HttpResponse
+
+import json
 
 
 def pretty_ranges(ranges):
@@ -124,3 +130,41 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
         'used': int(iend) - int(istart) - unused + 1,
         'free_ranges': free_ranges,
     }
+
+
+def range_wizard(request):
+    from cyder.cydhcp.network.utils import get_ranges
+    vrf_networks = set()
+    site_networks = set()
+    if request.POST:
+        data = qd_to_py_dict(request.POST)
+        if data['range']:
+            Range = get_model('range', 'range')
+            rng = Range.objects.get(id=data['range'])
+            ip_type = rng.ip_type
+            ip_str = '.'.join(rng.start_str.split('.')[:-1])
+            ip_info = [ip_type, ip_str]
+            return HttpResponse(json.dumps({'ip': ip_info}))
+
+        if data['vrf']:
+            Vrf = get_model('vrf', 'vrf')
+            vrf = Vrf.objects.get(id=data['vrf'])
+            vrf_networks = vrf.get_related_networks([vrf])
+
+        if data['site']:
+            Site = get_model('site', 'site')
+            site = Site.objects.get(id=data['site'])
+            if site.name != 'Campus':
+                site_networks = site.get_related_networks([site])
+
+        if len(vrf_networks) > 0 and len(site_networks) > 0:
+            networks = vrf_networks.intersection(site_networks)
+        else:
+            networks = vrf_networks.union(site_networks)
+
+        ranges = get_ranges(networks)
+        ranges = [(pretty_ranges(ranges)), ([r.id for r in ranges])]
+        return HttpResponse(json.dumps({'ranges': ranges}))
+
+    else:
+        return None

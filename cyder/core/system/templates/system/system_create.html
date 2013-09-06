@@ -5,6 +5,12 @@
     {% include "core/includes/core_sidebar.html" %}
 {% endblock %}
 
+{% block content %}
+  <span id="rangeWizard"
+        data-rangeWizard="{{ url('range-wizard') }}">
+  </span>
+{% endblock %}
+
 {% block form %}
 <form class="form" id="main-form" method="POST">
     <h3>Create a System</h3>

@@ -8,6 +8,8 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
+from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.view.models import View
 from cyder.cydns.validation import validate_label
 from cyder.base.mixins import UsabilityFormMixin
@@ -33,13 +35,24 @@ class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
     label = forms.CharField(max_length=128, required=True)
+    vrf = forms.ModelChoiceField(
+        queryset=Vrf.objects.all(),
+        widget=forms.Select(attrs={'class': 'wizard'}))
+    site = forms.ModelChoiceField(
+        queryset=Site.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'wizard'}))
+    range = forms.ModelChoiceField(
+        queryset=Range.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'wizard'}))
 
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['system', 'description', 'label', 'ip_str',
-                                'ip_type', 'ttl', 'workgroup', 'mac', 'vrf',
-                                'domain', 'dhcp_enabled', 'dns_enabled',
-                                'ctnr']
+        self.fields.keyOrder = ['system', 'label', 'domain', 'mac', 'vrf',
+                                'site', 'range', 'ip_type', 'ip_str', 'ttl',
+                                'workgroup', 'dhcp_enabled', 'dns_enabled',
+                                'ctnr', 'description']
 
     class Meta:
         model = StaticInterface
