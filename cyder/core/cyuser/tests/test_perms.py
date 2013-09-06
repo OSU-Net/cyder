@@ -171,8 +171,8 @@ class PermissionsTest(TestCase):
 
         perm_table = {
             'cyder_admin': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-            'admin': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-            'user': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
+            'admin': [cy.ACTION_VIEW],
+            'user': [cy.ACTION_VIEW],
             'guest': [cy.ACTION_VIEW],
         }
 
@@ -198,6 +198,12 @@ class PermissionsTest(TestCase):
             'user': ['all'],
             'guest': [cy.ACTION_VIEW],
         }
+        ns_perm_table = {
+            'cyder_admin': ['all'],
+            'admin': [cy.ACTION_VIEW],
+            'user': [cy.ACTION_VIEW],
+            'guest': [cy.ACTION_VIEW],
+        }
 
         # Initialize objs into ctnrs.
         domain = Domain(id=None, name='foo')
@@ -212,7 +218,8 @@ class PermissionsTest(TestCase):
         domain_records.append(MX(domain=domain))
         domain_records.append(SRV(domain=domain))
         domain_records.append(TXT(domain=domain))
-        domain_records.append(Nameserver(domain=domain))
+
+        self.check_perms_each_user(Nameserver(domain=domain), ns_perm_table)
 
         for obj in domain_records:
             self.check_perms_each_user(obj, perm_table)

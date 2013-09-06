@@ -16,7 +16,7 @@ $(document).ready(function() {
 
     for(var i = 0; i < obj_select.length; i++) {
         // Check for type selected on refresh/redirect
-        if (obj_select[i].checked) {
+        if (obj_select[i].checked || obj_select.length == 1) {
             if (form.lastChild.tagName == 'DIV') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
             };

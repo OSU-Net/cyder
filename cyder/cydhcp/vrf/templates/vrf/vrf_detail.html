@@ -14,7 +14,9 @@
 {% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('vrf_kv', url('cydhcp-get-record'),
-                   url('vrf_kv'), objName=obj.name,
-                   buttonName="VRF Attribute") }}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+    {{ create_button('vrf_kv', url('cydhcp-get-record'),
+                     url('vrf_kv'), objName=obj.name,
+                     buttonName="VRF Attribute") }}
+  {% endif %}
 {% endblock %}

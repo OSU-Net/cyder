@@ -40,8 +40,7 @@ def request_token(request):
                 '/api/authtoken/{0}'.format(str(token.pk)))
     else:
         form = TokenRequestForm()
-        return render(request, 'authtoken/request_token.html',
-                      {'form': form, })
+    return render(request, 'authtoken/request_token.html', {'form': form})
 
 
 class TokenRevokeForm(forms.Form):

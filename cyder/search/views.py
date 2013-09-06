@@ -41,20 +41,20 @@ def _search(request):
         return ([], [])
     (addrs, cnames, domains, static, dynamic, mxs, nss, ptrs, soas, srvs,
      sshfps, sys, txts, misc) = (
-        objs['A'],
-        objs['CNAME'],
-        objs['DOMAIN'],
-        objs['STATIC'],
-        objs['DYNAMIC'],
-        objs['MX'],
-        objs['NS'],
-        objs['PTR'],
-        objs['SOA'],
-        objs['SRV'],
-        objs['SSHFP'],
-        objs['SYSTEM'],
-        objs['TXT'],
-        [])
+         objs['A'],
+         objs['CNAME'],
+         objs['DOMAIN'],
+         objs['STATIC'],
+         objs['DYNAMIC'],
+         objs['MX'],
+         objs['NS'],
+         objs['PTR'],
+         objs['SOA'],
+         objs['SRV'],
+         objs['SSHFP'],
+         objs['SYSTEM'],
+         objs['TXT'],
+         [])
 
     meta = [
         (soas.count() if soas else 0, 'soa', 'SOA Records'),
@@ -72,18 +72,18 @@ def _search(request):
     ]
 
     tables = [
-        (tablefy(soas), 'soa', 'SOA Records'),
-        (tablefy(addrs), 'address', 'Address Records'),
-        (tablefy(cnames), 'cname', 'CNAMEs'),
-        (tablefy(domains), 'domain', 'Domains'),
-        (tablefy(static), 'static', 'Static Interfaces'),
-        (tablefy(dynamic), 'dynamic', 'Dynamic Interfaces'),
-        (tablefy(mxs), 'mx', 'MXs'),
-        (tablefy(nss), 'nameserver', 'Nameservers'),
-        (tablefy(ptrs), 'ptr', 'PTRs'),
-        (tablefy(srvs), 'srv', 'SRVs'),
-        (tablefy(sys), 'sys', 'Systems'),
-        (tablefy(txts), 'txt', 'TXTs'),
+        (tablefy(soas, request=request), 'soa', 'SOA Records'),
+        (tablefy(addrs, request=request), 'address', 'Address Records'),
+        (tablefy(cnames, request=request), 'cname', 'CNAMEs'),
+        (tablefy(domains, request=request), 'domain', 'Domains'),
+        (tablefy(static, request=request), 'static', 'Static Interfaces'),
+        (tablefy(dynamic, request=request), 'dynamic', 'Dynamic Interfaces'),
+        (tablefy(mxs, request=request), 'mx', 'MXs'),
+        (tablefy(nss, request=request), 'nameserver', 'Nameservers'),
+        (tablefy(ptrs, request=request), 'ptr', 'PTRs'),
+        (tablefy(srvs, request=request), 'srv', 'SRVs'),
+        (tablefy(sys, request=request), 'sys', 'Systems'),
+        (tablefy(txts, request=request), 'txt', 'TXTs'),
     ]
 
     return (meta, tables)
