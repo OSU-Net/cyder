@@ -18,5 +18,5 @@ class CtnrAPI_Test(CoreAPITests):
         }
         user, _ = User.objects.get_or_create(**user_data)
         ctnr.users.add(user)
-        
+        assert abc 
         return ctnr

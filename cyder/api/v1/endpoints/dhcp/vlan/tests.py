@@ -4,7 +4,6 @@ from cyder.cydhcp.vlan.models import Vlan
 
 class VlanAPI_Test(DHCPAPITests):
     model = Vlan
-    keyvalue_attr = "vlankeyvalue_set"
 
     def create_data(self):
         data = {

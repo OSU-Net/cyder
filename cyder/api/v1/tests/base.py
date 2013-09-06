@@ -35,15 +35,23 @@ def build_domain(label, domain_obj):
 
 class APIKVTestMixin(object):
     """Mixin to test endpoints with key-value support."""
+    def __init__(self, *args, **kwargs):
+        if not hasattr(self, "keyvalue_attr"):
+            self.keyvalue_attr = self.model.__name__.lower() + "keyvalue_set"
+
     def test_keyvalues(self):
         """Test key-value retrieval."""
         obj = self.create_data()
         getattr(obj, self.keyvalue_attr).get_or_create(
             key='Test Key', value='Test Value')
         resp = self.http_get(self.object_url(obj.id))
-        keyvalues = json.loads(resp.content)[self.keyvalue_attr][0]
-        assert keyvalues['key'] == 'Test Key'
-        assert keyvalues['value'] == 'Test Value'
+        keyvalues = json.loads(resp.content)[self.keyvalue_attr]
+        for kv in keyvalues:
+            if kv['key'] == 'Test Key':
+                assert kv['value'] == 'Test Value'
+                break
+        else:
+            assert 1 == 0, "The test key-value pair could not be found."
         self.model.objects.filter(id=obj.id).delete()
 
 

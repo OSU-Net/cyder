@@ -1,11 +1,11 @@
-import json
-
 from cyder.api.v1.endpoints.core.tests import CoreAPITests
+from cyder.api.v1.tests.base import APIKVTestMixin
 from cyder.core.system.models import System
 
 
-class SystemAPI_Test(CoreAPITests):
+class SystemAPI_Test(CoreAPITests, APIKVTestMixin):
     model = System
+    keyvalue_attr = "systemkeyvalue_set"
 
     def create_data(self):
         data = {
@@ -13,12 +13,3 @@ class SystemAPI_Test(CoreAPITests):
         }
         obj, _ = self.model.objects.get_or_create(**data)
         return obj
-
-    def test_keyvalues(self):
-        obj = self.create_data()
-        obj.systemkeyvalue_set.get_or_create(
-            key='Test Key', value='Test Value')
-        resp = self.http_get(self.object_url(obj.id))
-        keyvalues = json.loads(resp.content)['systemkeyvalue_set'][0]
-        assert keyvalues['key'] == 'Test Key'
-        assert keyvalues['value'] == 'Test Value'

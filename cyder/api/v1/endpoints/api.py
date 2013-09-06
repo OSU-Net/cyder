@@ -10,7 +10,8 @@ class CommonAPISerializer(serializers.ModelSerializer):
 
 class CommonAPIMeta:
     def __init__(self):
-        self.fields = self.model.get_api_fields()
+        if hasattr(self.model, "get_api_fields"):
+            self.fields = self.model.get_api_fields()
 
 
 class CommonAPIViewSet(viewsets.ModelViewSet):
