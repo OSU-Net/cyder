@@ -18,14 +18,14 @@ $(document).ready(function() {
                     $('#id_range').find('option').end().append('<option value=' + data.ranges[1][i] + '>' + data.ranges[0][i] + '</option>');
                 };
             };
-            if(data.ip) {
-                if(data.ip[0] == $('#id_ip_type_0').val()) {
+            if(data.ip_type) {
+                if(data.ip_type == $('#id_ip_type_0').val()) {
                     $('#id_ip_type_0').attr('checked', 'checked');
                 } else {
                     $('#id_ip_type_1').attr('checked', 'checked');
                 };
 
-                $('#id_ip_str').val(data.ip[1]);
+                $('#id_ip_str').val(data.ip_str);
             }
         }, 'json');
     });

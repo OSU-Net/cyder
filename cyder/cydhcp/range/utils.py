@@ -141,10 +141,9 @@ def range_wizard(request):
         if data['range']:
             Range = get_model('range', 'range')
             rng = Range.objects.get(id=data['range'])
-            ip_type = rng.ip_type
-            ip_str = '.'.join(rng.start_str.split('.')[:-1])
-            ip_info = [ip_type, ip_str]
-            return HttpResponse(json.dumps({'ip': ip_info}))
+            return HttpResponse(json.dumps({
+                'ip_type': rng.ip_type,
+                'ip_str': '.'.join(rng.start_str.split('.')[:-1])}))
 
         if data['vrf']:
             Vrf = get_model('vrf', 'vrf')
