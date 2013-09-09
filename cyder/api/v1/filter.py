@@ -64,7 +64,7 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 parent_set_list = (
                     matching(k, q_keyvalues[k]) for k in q_keyvalues)
                 parent_ids = reduce((lambda x, y: x & y), parent_set_list)
-                kv_queryset = parent_model.objects.filter(id__in=parent_ids)
+                kv_queryset = queryset.filter(id__in=parent_ids)
             else:
                 raise InvalidQuery("This field does not have key-values.")
 
