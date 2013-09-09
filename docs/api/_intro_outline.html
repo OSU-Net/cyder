@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
+<title>Introduction to The Cyder API</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7614 2013-02-21 15:55:51Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="introduction-to-the-cyder-api">
+<h1 class="title">Introduction to The Cyder API</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr><th class="docinfo-name">Version:</th>
+<td>0.1 (draft)</td></tr>
+<tr class="field"><th class="docinfo-name">API Version:</th><td class="field-body">1</td>
+</tr>
+</tbody>
+</table>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#id1" id="id3">Introduction to the Cyder API</a><ul>
+<li><a class="reference internal" href="#recommended-reading" id="id4">Recommended Reading</a></li>
+<li><a class="reference internal" href="#document-conventions" id="id5">Document Conventions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#getting-started" id="id6">Getting Started</a><ul>
+<li><a class="reference internal" href="#requesting-your-api-token" id="id7">Requesting Your API Token</a></li>
+<li><a class="reference internal" href="#api-basics" id="id8">API Basics</a><ul>
+<li><a class="reference internal" href="#request-objects" id="id9">Request Objects</a></li>
+<li><a class="reference internal" href="#api-root-view" id="id10">API Root View</a></li>
+<li><a class="reference internal" href="#list-views" id="id11">List Views</a></li>
+<li><a class="reference internal" href="#detail-views" id="id12">Detail Views</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#diving-in" id="id13">Diving In</a><ul>
+<li><a class="reference internal" href="#filtering" id="id14">Filtering</a><ul>
+<li><a class="reference internal" href="#filtering-by-fields" id="id15">Filtering by Fields</a></li>
+<li><a class="reference internal" href="#querying-fields" id="id16">Querying Fields</a></li>
+<li><a class="reference internal" href="#querying-related-fields" id="id17">Querying Related Fields</a></li>
+<li><a class="reference internal" href="#filtering-by-container" id="id18">Filtering by Container</a></li>
+<li><a class="reference internal" href="#filtering-by-key-values" id="id19">Filtering by Key-Values</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#appendicies" id="id20">Appendicies</a><ul>
+<li><a class="reference internal" href="#summary-of-field-lookups" id="id21">Summary of Field Lookups</a><ul>
+<li><a class="reference internal" href="#exact" id="id22">exact</a></li>
+<li><a class="reference internal" href="#iexact" id="id23">iexact</a></li>
+<li><a class="reference internal" href="#contains" id="id24">contains</a></li>
+<li><a class="reference internal" href="#icontains" id="id25">icontains</a></li>
+<li><a class="reference internal" href="#gt" id="id26">gt</a></li>
+<li><a class="reference internal" href="#gte" id="id27">gte</a></li>
+<li><a class="reference internal" href="#lt" id="id28">lt</a></li>
+<li><a class="reference internal" href="#lte" id="id29">lte</a></li>
+<li><a class="reference internal" href="#startswith" id="id30">startswith</a></li>
+<li><a class="reference internal" href="#istartswith" id="id31">istartswith</a></li>
+<li><a class="reference internal" href="#endswith" id="id32">endswith</a></li>
+<li><a class="reference internal" href="#iendswith" id="id33">iendswith</a></li>
+<li><a class="reference internal" href="#isnull" id="id34">isnull</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h1><a class="toc-backref" href="#id3">Introduction to the Cyder API</a></h1>
+<p>The Cyder API currently allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.</p>
+<p>This document's examples are written in Python, using version 2.7.4, and make use of the <a class="reference external" href="http://docs.python.org/2/library/urllib.html">urllib</a> and <a class="reference external" href="http://docs.python.org/2/library/urllib2.html">urllib2</a> standard Python libraries, but anything that can make HTTP requests may also be used. While this tutorial is fairly elementary, some understanding of urllib2 is expected. You may want to read the Python HOWTO <a class="reference external" href="http://docs.python.org/2/howto/urllib2.html">&quot;Fetch Internet Resources Using urllib2&quot;</a> before starting this tutorial.</p>
+<p>For readability, all API responses in this tutorial will be formatted with linebreaks and indentation, and some may be abbreviated. Actual API responses may differ.</p>
+<p>Through this tutorial, the placeholder <tt class="docutils literal">MY_TOKEN</tt> will be used instead of an actual API token. Anywhere you see <tt class="docutils literal">MY_TOKEN</tt> used, you should replace it with your own token.</p>
+<div class="section" id="recommended-reading">
+<h2><a class="toc-backref" href="#id4">Recommended Reading</a></h2>
+<p>Before reading this tutorial, it is recommended that you read the following:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://docs.python.org/2/library/urllib.html">&quot;urllib -- Open arbitrary resources by URL -- Python 2.7.5 documentation&quot;</a></li>
+<li><a class="reference external" href="http://docs.python.org/2/library/urllib2.html">&quot;urllib2 -- extensible library for opening URLs -- Python 2.7.5 documentation&quot;</a></li>
+<li><a class="reference external" href="http://docs.python.org/2/howto/urllib2.html">&quot;Fetch Internet Resources Using urllib2&quot;</a></li>
+</ul>
+</div>
+<div class="section" id="document-conventions">
+<h2><a class="toc-backref" href="#id5">Document Conventions</a></h2>
+<p>The following conventions are used throughout this document:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Convention</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><strong>bold text</strong></td>
+<td>Key words or the beginning of important paragraphs.</td>
+</tr>
+<tr><td><em>italic text</em></td>
+<td>Interface text.</td>
+</tr>
+<tr><td><tt class="docutils literal">monospace text</tt></td>
+<td><div class="first last line-block">
+<div class="line">Inline: Names from code or serialized data.</div>
+<div class="line">Paragraph: Example code or code output.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="getting-started">
+<h1><a class="toc-backref" href="#id6">Getting Started</a></h1>
+<p>This section covers some basic features and terminology of the Cyder API. You'll learn how to get API access, structure a basic request, authenticate to the server, differentiate between the endpoints provided by the API, and traverse relations between records.</p>
+<div class="section" id="requesting-your-api-token">
+<h2><a class="toc-backref" href="#id7">Requesting Your API Token</a></h2>
+<p>API access is restricted to those with a <strong>token</strong>. A token is a randomly-generated 40 character hex string that is associated with your username. All API requests must be accompanied by a valid token or the request will be ignored.</p>
+<p>Generating your token is simple:</p>
+<ol class="arabic simple">
+<li>Log into Cyder.</li>
+<li>Go to your user profile (click your username at the top of the screen).</li>
+<li>Click <em>Request API Token</em>.</li>
+<li>Enter the token's intended purpose.</li>
+</ol>
+<p>You will now see a page with your token's key, purpose, and date of creation. From this page you can also revoke your token, should it be compromised or no longer needed.</p>
+<p><strong>Note:</strong> It is strongly recommended that you generate a new key for each application that will be accessing the API.</p>
+</div>
+<div class="section" id="api-basics">
+<h2><a class="toc-backref" href="#id8">API Basics</a></h2>
+<p>In this section, we'll do a low level overview of the data provided by the API using only Python and the urllib2 library.</p>
+<div class="section" id="request-objects">
+<h3><a class="toc-backref" href="#id9">Request Objects</a></h3>
+<p>First, let's look at a basic function to submit requests to the API:</p>
+<pre class="code python literal-block">
+<span class="keyword namespace">import</span> <span class="name namespace">urllib2</span>
+
+<span class="keyword">def</span> <span class="name function">api_connect</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">,</span> <span class="name">token</span><span class="punctuation">):</span>
+    <span class="name">req</span> <span class="operator">=</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">Request</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">)</span>
+    <span class="name">req</span><span class="operator">.</span><span class="name">add_header</span><span class="punctuation">(</span><span class="literal string">'Authorization'</span><span class="punctuation">,</span> <span class="literal string">'Token '</span> <span class="operator">+</span> <span class="name">token</span><span class="punctuation">)</span>
+    <span class="keyword">return</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">urlopen</span><span class="punctuation">(</span><span class="name">req</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">read</span><span class="punctuation">()</span>
+</pre>
+<p>This function illustrates the structure of a very basic <strong>request object</strong> used to access the Cyder API. A request object is used by urllib2 to structure your request to the server. In order to access the API, you must include an HTTP <tt class="docutils literal">Authorization</tt> header with a valid API token.</p>
+</div>
+<div class="section" id="api-root-view">
+<h3><a class="toc-backref" href="#id10">API Root View</a></h3>
+<blockquote>
+If the API root URL and a valid token are passed to the function, it returns the following as a string:</blockquote>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;core/system&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/core/system/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;core/system/keyvalues&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/core/system/keyvalues/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dhcp/dynamic_interface&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dhcp/dynamic_interface/keyvalues&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/keyvalues/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dhcp/static_interface&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dhcp/static_interface/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dhcp/static_interface/keyvalues&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dhcp/static_interface/keyvalues/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/address_record&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/address_record/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/cname&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/cname/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/domain&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/domain/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/mx&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/mx/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/nameserver&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/nameserver/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/ptr&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/ptr/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/srv&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/srv/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/sshfp&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/sshfp/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dns/txt&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/txt/&quot;</span>
+<span class="punctuation">}</span>
+</pre>
+<p>This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided in place of data from the records themselves. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.</p>
+</div>
+<div class="section" id="list-views">
+<h3><a class="toc-backref" href="#id11">List Views</a></h3>
+<p>Let's see what happens when we pass one of these URLs to <tt class="docutils literal">api_connect</tt>:</p>
+<pre class="code python literal-block">
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/dns/domain/&quot;</span><span class="punctuation">,</span>  <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
+</pre>
+<p>This returns a <strong>list view</strong> of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and client. Here is a truncated version of a possible response to the above query:</p>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2068</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/domain/?page=2&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;dirty&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;arpa&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;purgeable&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;dirty&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/domain/1/&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;in-addr.arpa&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;purgeable&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span>
+        <span class="punctuation">},</span>
+        <span class="error">...</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>There are a few important things to note here:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal">count</tt>, <tt class="docutils literal">next</tt>, and <tt class="docutils literal">previous</tt> all provide data that can help simplify API interaction.<ul>
+<li><tt class="docutils literal">count</tt> gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.</li>
+<li><tt class="docutils literal">next</tt> and <tt class="docutils literal">previous</tt> each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be <tt class="docutils literal">null</tt> if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be a different number of pages than there were at the beginning of the operation.</li>
+</ul>
+</li>
+<li>As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name <tt class="docutils literal"><span class="pre">in-addr.arpa</span></tt>, you could simply pass the value of <tt class="docutils literal">master_domain</tt> to api_connect and retrieve the appropriate record.</li>
+</ol>
+</div>
+<div class="section" id="detail-views">
+<h3><a class="toc-backref" href="#id12">Detail Views</a></h3>
+<p>Now we know how to retrieve general lists of objects, but what if we want to access a specific record? Since our previous response contained a URL pointing directly to a record, let's see what happens when we follow that URL.</p>
+<pre class="code python literal-block">
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/dns/domain/2/&quot;</span><span class="punctuation">,</span>  <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
+</pre>
+<p>This returns a <strong>detail view</strong> of the Domain record with an <tt class="docutils literal">id</tt> of 2.</p>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;delegated&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;dirty&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">2</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;is_reverse&quot;</span><span class="punctuation">:</span> <span class="keyword constant">true</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;master_domain&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/dns/domain/1/&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;in-addr.arpa&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;purgeable&quot;</span><span class="punctuation">:</span> <span class="keyword constant">false</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;soa&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span>
+<span class="punctuation">}</span>
+</pre>
+<p>You can see that the structure of this record is the same as it was in the list view. Once again, the <tt class="docutils literal">master_domain</tt> field contains a hyperlink to the related record.</p>
+</div>
+</div>
+</div>
+<div class="section" id="diving-in">
+<h1><a class="toc-backref" href="#id13">Diving In</a></h1>
+<p>This section covers more advanced API topics. You'll learn how to filter results in a variety of ways, including by basic fields, related fields, container, and key-value pairs.</p>
+<div class="section" id="filtering">
+<h2><a class="toc-backref" href="#id14">Filtering</a></h2>
+<p>Most of the time, you will be using the API to find records matching different search queries. The Cyder API has very powerful search functionality that allows you to query the database by passing your search parameters in the query string. Here's an updated version of our <tt class="docutils literal">api_connect</tt> function with added support for query parameters:</p>
+<pre class="code python literal-block">
+<span class="keyword namespace">import</span> <span class="name namespace">urllib</span>
+<span class="keyword namespace">import</span> <span class="name namespace">urllib2</span>
+
+<span class="keyword">def</span> <span class="name function">api_connect</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">,</span> <span class="name">token</span><span class="punctuation">,</span> <span class="name">params</span><span class="operator">=</span><span class="name builtin pseudo">None</span><span class="punctuation">):</span>
+    <span class="keyword">if</span> <span class="name">params</span><span class="punctuation">:</span>
+        <span class="name">url</span> <span class="operator">+=</span> <span class="name">urllib</span><span class="operator">.</span><span class="name">urlencode</span><span class="punctuation">(</span><span class="name">params</span><span class="punctuation">)</span>
+    <span class="name">req</span> <span class="operator">=</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">Request</span><span class="punctuation">(</span><span class="name">url</span><span class="punctuation">)</span>
+    <span class="name">req</span><span class="operator">.</span><span class="name">add_header</span><span class="punctuation">(</span><span class="literal string">'Authorization'</span><span class="punctuation">,</span> <span class="literal string">'Token '</span> <span class="operator">+</span> <span class="name">token</span><span class="punctuation">)</span>
+    <span class="keyword">return</span> <span class="name">urllib2</span><span class="operator">.</span><span class="name">urlopen</span><span class="punctuation">(</span><span class="name">req</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">read</span><span class="punctuation">()</span>
+</pre>
+<p>This function is very simple and doesn't support adding query parameters to a URL which already has them, but it is sufficient for our purposes.</p>
+<div class="section" id="filtering-by-fields">
+<h3><a class="toc-backref" href="#id15">Filtering by Fields</a></h3>
+<p>Let's say we want to query for every CNAME that aliases a non <tt class="docutils literal">orst.edu</tt> domain to <tt class="docutils literal">www.orst.edu</tt>. First, we need to determine the structure of CNAME records, so let's look at the CNAME list view.</p>
+<pre class="code python literal-block">
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/cname/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">)</span>
+</pre>
+<p>Here's the first record we get back:</p>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.emt.orst.edu&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="literal string double">&quot;public&quot;</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>Any of the fields listed here can be queried. Let's try building our query. Cyder API queries are very powerful and support a variety of flexible matching based on Django's <a class="reference external" href="https://docs.djangoproject.com/en/1.5/topics/db/queries/#field-lookups">field lookups</a>.</p>
+</div>
+<div class="section" id="querying-fields">
+<h3><a class="toc-backref" href="#id16">Querying Fields</a></h3>
+<p>Before we can write our query, however, we need to know the basic structure of each filter. Each filter must contain a selection mode, the field to query, and the field lookup type. The exact structure can be easily described with Extended Backus-Naur Form:</p>
+<pre class="code literal-block">
+mode         = &quot;i_&quot; | &quot;e_&quot;
+
+field        = ? any valid field name ?
+
+field lookup = &quot;exact&quot; | &quot;iexact&quot; | &quot;contains&quot; | &quot;icontains&quot; | &quot;gt&quot;
+             | &quot;gte&quot; | &quot;lt&quot; | &quot;lte&quot; | &quot;startswith&quot; | &quot;istartswith&quot;
+             | &quot;endswith&quot; | &quot;iendswith&quot; | &quot;isnull&quot;
+
+filter       = mode, &quot;_&quot;, field, &quot;__&quot;, field lookup
+</pre>
+<p>Here, <tt class="docutils literal">mode</tt> sets whether records matching the query should be included (<tt class="docutils literal">i_</tt>) or excluded (<tt class="docutils literal">e_</tt>). <tt class="docutils literal">field</tt> must contain the name of a field in the record, including related fields. <tt class="docutils literal">field lookup</tt> is used to decide how records should be matched. Each of the supported query types is described in Django's <a class="reference external" href="https://docs.djangoproject.com/en/1.4/ref/models/querysets/#field-lookups">field lookups reference</a> and this document's <a class="reference internal" href="#summary-of-field-lookups">Summary of Field Lookups</a>. Note that the field lookups <tt class="docutils literal">in</tt>, <tt class="docutils literal">range</tt>, <tt class="docutils literal">year</tt>, <tt class="docutils literal">month</tt>, <tt class="docutils literal">day</tt>, <tt class="docutils literal">week_day</tt>, <tt class="docutils literal">regex</tt>, and <tt class="docutils literal">iregex</tt> are not supported.</p>
+<p>Multiple filters can be combined in a single query to further refine the results.</p>
+<p>With this basic format, let's write our query. Remember, we want every CNAME that aliases a non <tt class="docutils literal">orst.edu</tt> domain to <tt class="docutils literal">www.orst.edu</tt>. This means that we want all records where <tt class="docutils literal">target</tt> equals <tt class="docutils literal">www.orst.edu</tt>, but where <tt class="docutils literal">fqdn</tt> doesn't contain <tt class="docutils literal">orst.edu</tt>. First, let's only retrieve results matching the first critera, so we have a baseline to compare our results against.</p>
+<pre class="code python literal-block">
+<span class="name">query</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="literal string">'i_target__exact'</span><span class="punctuation">:</span> <span class="literal string">'www.orst.edu'</span><span class="punctuation">}</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/cname/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">,</span> <span class="name">query</span><span class="punctuation">)</span>
+</pre>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">233</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/cname/?i_target__exact=www.orst.edu&amp;page=2&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.emt.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">1</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;emt.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">7</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;diversity.oregonstate.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">56</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="error">...</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>Here we can see the first two results are both domains under <tt class="docutils literal">orst.edu</tt>. Let's try filtering them out. We know we don't want any domain including <tt class="docutils literal">orst.edu</tt>, so let's use an exclusion filter to remove any result where the field <tt class="docutils literal">fqdn</tt> has <tt class="docutils literal">orst.edu</tt> in it.</p>
+<pre class="code python literal-block">
+<span class="name builtin">filter</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="literal string">'i_target__exact'</span><span class="punctuation">:</span> <span class="literal string">'www.orst.edu'</span><span class="punctuation">,</span> <span class="literal string">'e_fqdn__contains'</span><span class="punctuation">:</span> <span class="literal string">'orst.edu'</span><span class="punctuation">}</span>
+<span class="keyword">print</span> <span class="name">api_connect</span><span class="punctuation">(</span><span class="literal string">&quot;http://127.0.0.1:8000/api/v1/cname/&quot;</span><span class="punctuation">,</span> <span class="name">MY_TOKEN</span><span class="punctuation">,</span> <span class="name builtin">filter</span><span class="punctuation">)</span>
+</pre>
+<pre class="code json literal-block">
+<span class="punctuation">{</span>
+    <span class="name tag">&quot;count&quot;</span><span class="punctuation">:</span> <span class="literal number integer">182</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;next&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;http://127.0.0.1:8000/api/v1/cname/?i_target__exact=www.orst.edu&amp;e_fqdn__contains=orst.edu&amp;page=2&quot;</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;previous&quot;</span><span class="punctuation">:</span> <span class="keyword constant">null</span><span class="punctuation">,</span>
+    <span class="name tag">&quot;results&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+        <span class="punctuation">{</span>
+            <span class="name tag">&quot;description&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;fqdn&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;diversity.oregonstate.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span> <span class="literal number integer">56</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;target&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;www.orst.edu&quot;</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;ttl&quot;</span><span class="punctuation">:</span> <span class="literal number integer">3600</span><span class="punctuation">,</span>
+            <span class="name tag">&quot;views&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span>
+                <span class="literal string double">&quot;public&quot;</span>
+            <span class="punctuation">]</span>
+        <span class="punctuation">},</span>
+        <span class="error">...</span>
+    <span class="punctuation">]</span>
+<span class="punctuation">}</span>
+</pre>
+<p>Now we've got exactly what we're looking for. We can see that the extra filter caused 51 records to be excluded from the results, and that the API conveniently includes our filter terms in its <tt class="docutils literal">next</tt> field. This sort of querying can easily be done on any record type and with any field.</p>
+</div>
+<div class="section" id="querying-related-fields">
+<h3><a class="toc-backref" href="#id17">Querying Related Fields</a></h3>
+<p>Basic queries are not only limited to top-level fields. As you may have noticed in the previous example, CNAME records (and others) have a field titled <tt class="docutils literal">views</tt> which has its contents enclosed with brackets.</p>
+</div>
+<div class="section" id="filtering-by-container">
+<h3><a class="toc-backref" href="#id18">Filtering by Container</a></h3>
+</div>
+<div class="section" id="filtering-by-key-values">
+<h3><a class="toc-backref" href="#id19">Filtering by Key-Values</a></h3>
+</div>
+</div>
+</div>
+<div class="section" id="appendicies">
+<h1><a class="toc-backref" href="#id20">Appendicies</a></h1>
+<div class="section" id="summary-of-field-lookups">
+<h2><a class="toc-backref" href="#id21">Summary of Field Lookups</a></h2>
+<div class="section" id="exact">
+<h3><a class="toc-backref" href="#id22">exact</a></h3>
+<p>Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter <tt class="docutils literal">i_field__exact=Go+Beavs</tt>, it will match fields that contain the value &quot;Go Beavs&quot;, but not &quot;go beavs&quot; or &quot;go Beavs&quot;.</p>
+</div>
+<div class="section" id="iexact">
+<h3><a class="toc-backref" href="#id23">iexact</a></h3>
+<p>Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter <tt class="docutils literal">i_field__iexact=Go+Beavs</tt>, it will match fields that contain the value &quot;Go Beavs&quot;, &quot;go beavs&quot;, and &quot;go Beavs&quot;, as well as any other capitalizations of the string &quot;Go Beavs&quot;.</p>
+</div>
+<div class="section" id="contains">
+<h3><a class="toc-backref" href="#id24">contains</a></h3>
+<p>Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter <tt class="docutils literal">i_field__contains=Beav</tt>, it will match fields that contain the value &quot;Go Beavs&quot;, &quot;I love the Beavs&quot;, and &quot;Go Beavers!&quot;, but not &quot;go beavs&quot;, &quot;I love the beavs&quot;, or &quot;Go beavers!&quot;</p>
+</div>
+<div class="section" id="icontains">
+<h3><a class="toc-backref" href="#id25">icontains</a></h3>
+<p>Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter <tt class="docutils literal">i_field__icontains=Beav</tt>, it will match fields that contain the value &quot;Go Beavs&quot;, &quot;I love the Beavs&quot;, &quot;Go Beavers!&quot;, &quot;go beavs&quot;, &quot;I love the beavs&quot;, and &quot;Go beavers!&quot;, as well as any other string containing the search value, regardless of case.</p>
+</div>
+<div class="section" id="gt">
+<h3><a class="toc-backref" href="#id26">gt</a></h3>
+<p>Find all rows where the queried field contains a value that is greater than the search value.</p>
+<p>Example query:</p>
+<pre class="code literal-block">
+?i_field_gt=10
+</pre>
+</div>
+<div class="section" id="gte">
+<h3><a class="toc-backref" href="#id27">gte</a></h3>
+<p>Find all rows where the queried field contains a value that is greater than or equal to the search value.</p>
+<p>Example query:</p>
+<pre class="code literal-block">
+?i_field_gte=10
+</pre>
+</div>
+<div class="section" id="lt">
+<h3><a class="toc-backref" href="#id28">lt</a></h3>
+<p>Find all rows where the queried field contains a value that is less than the search value.</p>
+<p>Example query:</p>
+<pre class="code literal-block">
+?i_field_lt=10
+</pre>
+</div>
+<div class="section" id="lte">
+<h3><a class="toc-backref" href="#id29">lte</a></h3>
+<p>Find all rows where the queried field contains a value that is less than or equal to the search value.</p>
+<p>Example query:</p>
+<pre class="code literal-block">
+?i_field_lte=10
+</pre>
+</div>
+<div class="section" id="startswith">
+<h3><a class="toc-backref" href="#id30">startswith</a></h3>
+<p>Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter <tt class="docutils literal">i_field__startswith=Go</tt>, it would match &quot;Go Beavs!&quot; and &quot;Go Beavers!&quot;, but not &quot;go beavs&quot;, &quot;GO BEAVS!&quot;, or &quot;Let's go Beavers!&quot;</p>
+</div>
+<div class="section" id="istartswith">
+<h3><a class="toc-backref" href="#id31">istartswith</a></h3>
+<p>Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter <tt class="docutils literal">i_field__istartswith=Go</tt>, it would match &quot;Go Beavs!&quot;, &quot;Go Beavers!&quot;, &quot;go beavs&quot;, and &quot;GO BEAVS!&quot;, but not &quot;Let's go Beavers!&quot;</p>
+</div>
+<div class="section" id="endswith">
+<h3><a class="toc-backref" href="#id32">endswith</a></h3>
+<p>Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter <tt class="docutils literal">i_field__endswith=Beavers</tt>, it would match &quot;Go Beavers&quot; and &quot;I love the Beavers&quot;, but not &quot;GO BEAVERS&quot;, &quot;Go Beavers!&quot;, or &quot;I love the Beavers.&quot;</p>
+</div>
+<div class="section" id="iendswith">
+<h3><a class="toc-backref" href="#id33">iendswith</a></h3>
+<p>Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter <tt class="docutils literal">i_field__iendswith=Beavers</tt>, it would match &quot;Go Beavers&quot;, &quot;I love the Beavers&quot;, and &quot;GO BEAVERS&quot;, but not &quot;Go Beavers!&quot; or &quot;I love the Beavers.&quot;</p>
+</div>
+<div class="section" id="isnull">
+<h3><a class="toc-backref" href="#id34">isnull</a></h3>
+<p>Find all rows where the queried field is null or not null. If you pass the query string parameter <tt class="docutils literal">i_field__isnull=False</tt>, it would only match rows where <tt class="docutils literal">field</tt> has a value.</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

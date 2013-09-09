@@ -2,11 +2,15 @@
 Introduction to The Cyder API
 =============================
 
+
 :Version: 0.1 (draft)
 :API Version: 1
 
 .. contents:: 
 
+-----------------------------
+Introduction to the Cyder API
+-----------------------------
 The Cyder API currently allows read-only access to DNS records, systems, and static interfaces stored in the database. In the future, it will also provide read-write access to these resources.
 
 This document's examples are written in Python, using version 2.7.4, and make use of the urllib_ and urllib2_ standard Python libraries, but anything that can make HTTP requests may also be used. While this tutorial is fairly elementary, some understanding of urllib2 is expected. You may want to read the Python HOWTO `"Fetch Internet Resources Using urllib2"`_ before starting this tutorial.
@@ -18,6 +22,18 @@ This document's examples are written in Python, using version 2.7.4, and make us
 For readability, all API responses in this tutorial will be formatted with linebreaks and indentation, and some may be abbreviated. Actual API responses may differ.
 
 Through this tutorial, the placeholder ``MY_TOKEN`` will be used instead of an actual API token. Anywhere you see ``MY_TOKEN`` used, you should replace it with your own token.
+
+Recommended Reading
+-------------------
+Before reading this tutorial, it is recommended that you read the following:
+
+* `"urllib -- Open arbitrary resources by URL -- Python 2.7.5 documentation"`_
+* `"urllib2 -- extensible library for opening URLs -- Python 2.7.5 documentation"`_
+* `"Fetch Internet Resources Using urllib2"`_
+
+.. _"urllib -- Open arbitrary resources by URL -- Python 2.7.5 documentation": http://docs.python.org/2/library/urllib.html
+.. _"urllib2 -- extensible library for opening URLs -- Python 2.7.5 documentation": http://docs.python.org/2/library/urllib2.html
+.. _"Fetch Internet Resources Using urllib2": http://docs.python.org/2/howto/urllib2.html
 
 Document Conventions
 --------------------
@@ -34,10 +50,10 @@ The following conventions are used throughout this document:
 |                                 | | Paragraph: Example code or code output.                             |
 +---------------------------------+-----------------------------------------------------------------------+
 
-===============
+---------------
 Getting Started
-===============
-This section will lead you through the first steps of using the Cyder API.
+---------------
+This section covers some basic features and terminology of the Cyder API. You'll learn how to get API access, structure a basic request, authenticate to the server, differentiate between the endpoints provided by the API, and traverse relations between records.
 
 Requesting Your API Token
 -------------------------
@@ -61,6 +77,9 @@ API Basics
 ----------
 In this section, we'll do a low level overview of the data provided by the API using only Python and the urllib2 library.
 
+~~~~~~~~~~~~~~~
+Request Objects
+~~~~~~~~~~~~~~~
 First, let's look at a basic function to submit requests to the API:
 
 .. code:: python
@@ -72,7 +91,12 @@ First, let's look at a basic function to submit requests to the API:
         req.add_header('Authorization', 'Token ' + token)
         return urllib2.urlopen(req).read()
 
-This function illustrates the structure of a very basic **request object** used to access the Cyder API. A request object is used by urllib2 to structure your request to the server. In order to access the API, you must include an HTTP ``Authorization`` header with a valid API token. If the API root URL and a valid token are passed to the function, it returns the following as a string:
+This function illustrates the structure of a very basic **request object** used to access the Cyder API. A request object is used by urllib2 to structure your request to the server. In order to access the API, you must include an HTTP ``Authorization`` header with a valid API token.
+
+~~~~~~~~~~~~~
+API Root View
+~~~~~~~~~~~~~
+ If the API root URL and a valid token are passed to the function, it returns the following as a string:
 
 .. code:: json
 
@@ -96,6 +120,9 @@ This function illustrates the structure of a very basic **request object** used 
 
 This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided in place of data from the records themselves. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.
 
+~~~~~~~~~~
+List Views
+~~~~~~~~~~
 Let's see what happens when we pass one of these URLs to ``api_connect``:
 
 .. code:: python
@@ -144,6 +171,9 @@ There are a few important things to note here:
    
 2. As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name ``in-addr.arpa``, you could simply pass the value of ``master_domain`` to api_connect and retrieve the appropriate record.
 
+~~~~~~~~~~~~
+Detail Views
+~~~~~~~~~~~~
 Now we know how to retrieve general lists of objects, but what if we want to access a specific record? Since our previous response contained a URL pointing directly to a record, let's see what happens when we follow that URL.
 
 .. code:: python
@@ -167,13 +197,13 @@ This returns a **detail view** of the Domain record with an ``id`` of 2.
 
 You can see that the structure of this record is the same as it was in the list view. Once again, the ``master_domain`` field contains a hyperlink to the related record.
 
-=========
+---------
 Diving In
-=========
-Now that we've seen how to access data from the API, let's try some more advanced functionality.
+---------
+This section covers more advanced API topics. You'll learn how to filter results in a variety of ways, including by basic fields, related fields, container, and key-value pairs.
 
-Filtering Records
------------------
+Filtering
+---------
 Most of the time, you will be using the API to find records matching different search queries. The Cyder API has very powerful search functionality that allows you to query the database by passing your search parameters in the query string. Here's an updated version of our ``api_connect`` function with added support for query parameters:
 
 .. code:: python
@@ -190,6 +220,9 @@ Most of the time, you will be using the API to find records matching different s
 
 This function is very simple and doesn't support adding query parameters to a URL which already has them, but it is sufficient for our purposes.
 
+~~~~~~~~~~~~~~~~~~~
+Filtering by Fields
+~~~~~~~~~~~~~~~~~~~
 Let's say we want to query for every CNAME that aliases a non ``orst.edu`` domain to ``www.orst.edu``. First, we need to determine the structure of CNAME records, so let's look at the CNAME list view.
 
 .. code:: python
@@ -215,6 +248,9 @@ Any of the fields listed here can be queried. Let's try building our query. Cyde
 
 .. _field lookups: https://docs.djangoproject.com/en/1.5/topics/db/queries/#field-lookups
 
+~~~~~~~~~~~~~~~
+Querying Fields
+~~~~~~~~~~~~~~~
 Before we can write our query, however, we need to know the basic structure of each filter. Each filter must contain a selection mode, the field to query, and the field lookup type. The exact structure can be easily described with Extended Backus-Naur Form:
 
 .. code::
@@ -225,13 +261,13 @@ Before we can write our query, however, we need to know the basic structure of e
     
     field lookup = "exact" | "iexact" | "contains" | "icontains" | "gt"
                  | "gte" | "lt" | "lte" | "startswith" | "istartswith"
-                 | "endswith" | "iendswith" | "isnull" | "search"
+                 | "endswith" | "iendswith" | "isnull"
 
     filter       = mode, "_", field, "__", field lookup
 
-Here, ``mode`` sets whether records matching the rest of the query should be included (``i_``) or excluded (``e_``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
+Here, ``mode`` sets whether records matching the query should be included (``i_``) or excluded (``e_``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
 
-.. _field lookups reference: https://docs.djangoproject.com/en/1.5/ref/models/querysets/#field-lookups
+.. _field lookups reference: https://docs.djangoproject.com/en/1.4/ref/models/querysets/#field-lookups
 
 Multiple filters can be combined in a single query to further refine the results.
 
@@ -239,8 +275,8 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
 
 .. code:: python
 
-    filter = {'i_target__exact': 'www.orst.edu'}
-    print api_connect("http://127.0.0.1:8000/api/v1/cname/", MY_TOKEN, filter)
+    query = {'i_target__exact': 'www.orst.edu'}
+    print api_connect("http://127.0.0.1:8000/api/v1/cname/", MY_TOKEN, query)
     
 .. code:: json
 
@@ -283,7 +319,7 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
         ]
     }
 
-Here we can see the first two results are both domains under ``orst.edu``. Let's try filtering them out.
+Here we can see the first two results are both domains under ``orst.edu``. Let's try filtering them out. We know we don't want any domain including ``orst.edu``, so let's use an exclusion filter to remove any result where the field ``fqdn`` has ``orst.edu`` in it.
 
 .. code:: python
 
@@ -313,80 +349,110 @@ Here we can see the first two results are both domains under ``orst.edu``. Let's
 
 Now we've got exactly what we're looking for. We can see that the extra filter caused 51 records to be excluded from the results, and that the API conveniently includes our filter terms in its ``next`` field. This sort of querying can easily be done on any record type and with any field.
 
-Filtering Complex Records
--------------------------
-Domain records are simple, but some objects are more complex. Some DNS records include a ``views`` field that lists which DNS views the record is available under, rather than containing a single value, and Static Interface, Dynamic Interface, and System records include user-defined **key-value pairs** that allow custom data to be associated with them. Let's look at a basic example of records with key-value pairs.
+~~~~~~~~~~~~~~~~~~~~~~~
+Querying Related Fields
+~~~~~~~~~~~~~~~~~~~~~~~
+Basic queries are not only limited to top-level fields. Sometime it is desirable to search based on related fields.
 
-.. code:: python
+~~~~~~~~~~~~~~~~~~~~~~
+Filtering by Container
+~~~~~~~~~~~~~~~~~~~~~~
 
-    print api_connect("http://127.0.0.1:8000/api/v1/system/", MY_TOKEN)
+~~~~~~~~~~~~~~~~~~~~~~~
+Filtering by Key-Values
+~~~~~~~~~~~~~~~~~~~~~~~
 
-This returns a list of systems.
+-----------
+Appendicies
+-----------
 
-.. code:: json
+Summary of Field Lookups
+------------------------
+~~~~~
+exact
+~~~~~
+Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter ``i_field__exact=Go+Beavs``, it will match fields that contain the value "Go Beavs", but not "go beavs" or "go Beavs".
 
-    {
-        "count": 88143,
-        "next": "http://127.0.0.1:8000/api/v1/system/?page=2",
-        "previous": null,
-        "results": [
-            {
-                "id": 1,
-                "name": "sc8000-2",
-                "systemkeyvalue_set": []
-            },
-            {
-                "id": 2,
-                "name": "rattusdev",
-                "systemkeyvalue_set": []
-            },
-            {
-                "id": 3,
-                "name": "oldstargate",
-                "systemkeyvalue_set": [
-                    {
-                        "id": 1,
-                        "is_quoted": false,
-                        "key": "Warranty Date",
-                        "system": 3,
-                        "value": "expired 5/25/06"
-                    },
-                    {
-                        "id": 2,
-                        "is_quoted": false,
-                        "key": "Hardware Type",
-                        "system": 3,
-                        "value": "Dell PowerEdge 2650"
-                    },
-                    {
-                        "id": 3,
-                        "is_quoted": false,
-                        "key": "Operating System",
-                        "system": 3,
-                        "value": "win2k"
-                    }
-                ]
-            },
-            ...
-        ]
-    }
+~~~~~~
+iexact
+~~~~~~
+Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter ``i_field__iexact=Go+Beavs``, it will match fields that contain the value "Go Beavs", "go beavs", and "go Beavs", as well as any other capitalizations of the string "Go Beavs".
 
-Let's say we want to find every machine running Linux. We can see that our first query returned a record with key-value pairs, including one defining the relevant system's OS, so let's use that to form the basis of our query. Like basic field filtering, key-value filtering is done via the query string, but unlike basic filtering, key-value filtering is somewhat more limited and only allows for case-insensitive, strict filtering based on each key-value pair.
+~~~~~~~~
+contains
+~~~~~~~~
+Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i_field__contains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", and "Go Beavers!", but not "go beavs", "I love the beavs", or "Go beavers!"
 
-Generating this query is pretty straightforward. We simply prefix the key with ``k_`` and then pass the value with the key.
+~~~~~~~~~
+icontains
+~~~~~~~~~
+Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i_field__icontains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", "Go Beavers!", "go beavs", "I love the beavs", and "Go beavers!", as well as any other string containing the search value, regardless of case.
 
-.. code:: python
+~~
+gt
+~~
+Find all rows where the queried field contains a value that is greater than the search value.
 
-    print api_connect("http://127.0.0.1:8000/api/v1/system/?k_Operating+System=Linux", MY_TOKEN)
+Example query:
 
-This returns a list of systems that have a key-value pair with the key "operating system" and value "linux", regardless of capitalization. Multiple key-value pair queries can be chained together for more precise filtering.
+.. code::
 
-You can also do more advanced filtering on one key-value pair at a time by using the key-value endpoints provided by the API. These endpoints are ``/api/v1/system-keyvalues``, ``/api/v1/staticinterface-keyvalues``, and ``/api/v1/dynamicinterface-keyvalues``. Each endpoint provides direct access to the table containing the key-value pairs for its associated record type, so you can filter the key-value pairs in the same way as you would filter other records. For example, let's find every system with its warranty information stored in the database. We want as much data as possible, so let's query for any system key-value pair where the key contains the word "Warranty", with any capitalization.
+    ?i_field_gt=10
 
-.. code:: python
+~~~
+gte
+~~~
+Find all rows where the queried field contains a value that is greater than or equal to the search value.
 
-    print api_connect("http://127.0.0.1:8000/api/v1/system-keyvalues/?i_key__icontains=warranty", MY_TOKEN)
+Example query:
 
-This returns the following set of results:
+.. code::
 
-Domain records are simple, but some objects, such as Static Interfaces, are more complex. In addition to a variety of predefined fields, Static Interface records can have user defined key-value pairs 
+    ?i_field_gte=10
+
+~~
+lt
+~~
+Find all rows where the queried field contains a value that is less than the search value.
+
+Example query:
+
+.. code::
+
+    ?i_field_lt=10
+
+~~~
+lte
+~~~
+Find all rows where the queried field contains a value that is less than or equal to the search value.
+
+Example query:
+
+.. code::
+
+    ?i_field_lte=10
+
+~~~~~~~~~~
+startswith
+~~~~~~~~~~
+Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter ``i_field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
+
+~~~~~~~~~~~
+istartswith
+~~~~~~~~~~~
+Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter ``i_field__istartswith=Go``, it would match "Go Beavs!", "Go Beavers!", "go beavs", and "GO BEAVS!", but not "Let's go Beavers!"
+
+~~~~~~~~
+endswith
+~~~~~~~~
+Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter ``i_field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
+
+~~~~~~~~~
+iendswith
+~~~~~~~~~
+Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter ``i_field__iendswith=Beavers``, it would match "Go Beavers", "I love the Beavers", and "GO BEAVERS", but not "Go Beavers!" or "I love the Beavers."
+
+~~~~~~
+isnull
+~~~~~~
+Find all rows where the queried field is null or not null. If you pass the query string parameter ``i_field__isnull=False``, it would only match rows where ``field`` has a value.
