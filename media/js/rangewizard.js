@@ -21,7 +21,12 @@ $(document).ready(function() {
                 };
             };
             if(data.ip) {
-                $('#id_ip_type').val(data.ip[0]).trigger('change');
+                if(data.ip[0] == $('#id_ip_type_0').val()) {
+                    $('#id_ip_type_0').attr('checked', 'checked');
+                } else {
+                    $('#id_ip_type_1').attr('checked', 'checked');
+                };
+
                 $('#id_ip_str').val(data.ip[1]);
             }
         }, 'json');

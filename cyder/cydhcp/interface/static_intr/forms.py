@@ -46,6 +46,7 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
                    'last_seen')
+        widgets = {'ip_type': forms.RadioSelect}
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):
