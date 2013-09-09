@@ -113,9 +113,10 @@ def system_create_view(request, initial):
                     system.delete()
 
     static_form.fields['system'].widget = forms.HiddenInput()
-    static_form.fields['ctnr'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()
-    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+    if request.session['ctnr'].name != 'global':
+        dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
+        static_form.fields['ctnr'].widget = forms.HiddenInput()
 
     static_form.make_usable(request)
     dynamic_form.make_usable(request)
