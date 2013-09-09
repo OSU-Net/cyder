@@ -37,6 +37,7 @@ class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
     label = forms.CharField(max_length=128, required=True)
     vrf = forms.ModelChoiceField(
         queryset=Vrf.objects.all(),
+        required=False,
         widget=forms.Select(attrs={'class': 'wizard'}))
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
