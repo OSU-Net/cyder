@@ -1,6 +1,5 @@
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.vrf.models import Vrf
 
 
 def pretty_networks(networks):
@@ -15,11 +14,16 @@ def get_vrfs(networks):
     return vrfs
 
 
-def get_ranges(networks):
+def get_ranges(networks, ctnr=None):
     ranges = set()
     if len(networks) > 0:
         for network in networks:
-            ranges.update(Range.objects.filter(network_id=network.id))
+            if ctnr and ctnr.name != 'global':
+                ranges.update(Range.objects.filter(network_id=network.id,
+                                                   cntr_id=ctnr.id))
+            else:
+                ranges.update(Range.objects.filter(network_id=network.id))
+
     return ranges
 
 

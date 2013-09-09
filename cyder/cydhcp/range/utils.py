@@ -160,8 +160,7 @@ def range_wizard(request):
             networks = vrf_networks.intersection(site_networks)
         else:
             networks = vrf_networks.union(site_networks)
-
-        ranges = get_ranges(networks)
+        ranges = get_ranges(networks, ctnr=request.session['ctnr'])
         ranges = [(pretty_ranges(ranges)), ([r.id for r in ranges])]
         return HttpResponse(json.dumps({'ranges': ranges}))
 
