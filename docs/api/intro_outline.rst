@@ -200,7 +200,7 @@ You can see that the structure of this record is the same as it was in the list 
 ---------
 Diving In
 ---------
-This section covers more advanced API topics. You'll learn how to filter results, [AND DO OTHER THINGS TOO, I SWEAR. I JUST HAVE TO FIGURE OUT WHAT THEY ARE.]
+This section covers more advanced API topics. You'll learn how to filter results in a variety of ways, including by basic fields, related fields, container, and key-value pairs.
 
 Filtering
 ---------
@@ -261,13 +261,13 @@ Before we can write our query, however, we need to know the basic structure of e
     
     field lookup = "exact" | "iexact" | "contains" | "icontains" | "gt"
                  | "gte" | "lt" | "lte" | "startswith" | "istartswith"
-                 | "endswith" | "iendswith" | "isnull" | "search"
+                 | "endswith" | "iendswith" | "isnull"
 
     filter       = mode, "_", field, "__", field lookup
 
-Here, ``mode`` sets whether records matching the query should be included (``i_``) or excluded (``e_``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
+Here, ``mode`` sets whether records matching the query should be included (``i_``) or excluded (``e_``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
 
-.. _field lookups reference: https://docs.djangoproject.com/en/1.5/ref/models/querysets/#field-lookups
+.. _field lookups reference: https://docs.djangoproject.com/en/1.4/ref/models/querysets/#field-lookups
 
 Multiple filters can be combined in a single query to further refine the results.
 
@@ -275,8 +275,8 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
 
 .. code:: python
 
-    filter = {'i_target__exact': 'www.orst.edu'}
-    print api_connect("http://127.0.0.1:8000/api/v1/cname/", MY_TOKEN, filter)
+    query = {'i_target__exact': 'www.orst.edu'}
+    print api_connect("http://127.0.0.1:8000/api/v1/cname/", MY_TOKEN, query)
     
 .. code:: json
 
@@ -319,7 +319,7 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
         ]
     }
 
-Here we can see the first two results are both domains under ``orst.edu``. Let's try filtering them out.
+Here we can see the first two results are both domains under ``orst.edu``. Let's try filtering them out. We know we don't want any domain including ``orst.edu``, so let's use an exclusion filter to remove any result where the field ``fqdn`` has ``orst.edu`` in it.
 
 .. code:: python
 
@@ -352,7 +352,7 @@ Now we've got exactly what we're looking for. We can see that the extra filter c
 ~~~~~~~~~~~~~~~~~~~~~~~
 Querying Related Fields
 ~~~~~~~~~~~~~~~~~~~~~~~
-Basic queries are not only limited to top-level fields. As you may have noticed in the previous example, CNAME records (and others) have a field titled ``views`` which has its contents enclosed with brackets.
+Basic queries are not only limited to top-level fields. Sometime it is desirable to search based on related fields.
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Filtering by Container
@@ -361,3 +361,98 @@ Filtering by Container
 ~~~~~~~~~~~~~~~~~~~~~~~
 Filtering by Key-Values
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+-----------
+Appendicies
+-----------
+
+Summary of Field Lookups
+------------------------
+~~~~~
+exact
+~~~~~
+Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter ``i_field__exact=Go+Beavs``, it will match fields that contain the value "Go Beavs", but not "go beavs" or "go Beavs".
+
+~~~~~~
+iexact
+~~~~~~
+Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter ``i_field__iexact=Go+Beavs``, it will match fields that contain the value "Go Beavs", "go beavs", and "go Beavs", as well as any other capitalizations of the string "Go Beavs".
+
+~~~~~~~~
+contains
+~~~~~~~~
+Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i_field__contains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", and "Go Beavers!", but not "go beavs", "I love the beavs", or "Go beavers!"
+
+~~~~~~~~~
+icontains
+~~~~~~~~~
+Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i_field__icontains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", "Go Beavers!", "go beavs", "I love the beavs", and "Go beavers!", as well as any other string containing the search value, regardless of case.
+
+~~
+gt
+~~
+Find all rows where the queried field contains a value that is greater than the search value.
+
+Example query:
+
+.. code::
+
+    ?i_field_gt=10
+
+~~~
+gte
+~~~
+Find all rows where the queried field contains a value that is greater than or equal to the search value.
+
+Example query:
+
+.. code::
+
+    ?i_field_gte=10
+
+~~
+lt
+~~
+Find all rows where the queried field contains a value that is less than the search value.
+
+Example query:
+
+.. code::
+
+    ?i_field_lt=10
+
+~~~
+lte
+~~~
+Find all rows where the queried field contains a value that is less than or equal to the search value.
+
+Example query:
+
+.. code::
+
+    ?i_field_lte=10
+
+~~~~~~~~~~
+startswith
+~~~~~~~~~~
+Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter ``i_field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
+
+~~~~~~~~~~~
+istartswith
+~~~~~~~~~~~
+Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter ``i_field__istartswith=Go``, it would match "Go Beavs!", "Go Beavers!", "go beavs", and "GO BEAVS!", but not "Let's go Beavers!"
+
+~~~~~~~~
+endswith
+~~~~~~~~
+Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter ``i_field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
+
+~~~~~~~~~
+iendswith
+~~~~~~~~~
+Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter ``i_field__iendswith=Beavers``, it would match "Go Beavers", "I love the Beavers", and "GO BEAVERS", but not "Go Beavers!" or "I love the Beavers."
+
+~~~~~~
+isnull
+~~~~~~
+Find all rows where the queried field is null or not null. If you pass the query string parameter ``i_field__isnull=False``, it would only match rows where ``field`` has a value.
