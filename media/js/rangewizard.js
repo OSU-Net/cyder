@@ -1,6 +1,4 @@
 $(document).ready(function() {
-    var rangeWizard = $('#rangeWizard');
-    var rangeWizardUrl = rangeWizard.attr('data-rangeWizard');
     $('.wizard').live('change', function() {
         var rng;
         if(this.id == 'id_range') {
@@ -13,7 +11,7 @@ $(document).ready(function() {
             site: $('#id_site').val(),
             range: rng,
         };
-        $.post(rangeWizardUrl, postData, function(data) {
+        $.post('/dhcp/range/range_wizard/', postData, function(data) {
             if(data.ranges) {
                 $('#id_range').find('option').remove().end();
                 for(i in data.ranges[0]) {
