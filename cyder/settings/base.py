@@ -83,6 +83,9 @@ MINIFY_BUNDLES = {
         ),
         'systemform': (
             'js/systemform.js',
+        ),
+        'rangewizard': (
+            'js/rangewizard.js',
         )
     }
 }
