@@ -113,6 +113,7 @@ def system_create_view(request, initial):
                     system.delete()
 
     static_form.fields['system'].widget = forms.HiddenInput()
+    static_form.fields['ctnr'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
 
