@@ -8,9 +8,8 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.view.models import View
+from cyder.cydhcp.forms import RangeWizard
 from cyder.cydns.validation import validate_label
 from cyder.base.mixins import UsabilityFormMixin
 
@@ -30,23 +29,11 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
+class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
     label = forms.CharField(max_length=128, required=True)
-    vrf = forms.ModelChoiceField(
-        queryset=Vrf.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
-    site = forms.ModelChoiceField(
-        queryset=Site.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
-    range = forms.ModelChoiceField(
-        queryset=Range.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
 
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)

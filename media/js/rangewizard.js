@@ -1,7 +1,7 @@
 $(document).ready(function() {
     var rangeWizard = $('#rangeWizard');
     var rangeWizardUrl = rangeWizard.attr('data-rangeWizard');
-    $('.wizard').change(function() {
+    $('.wizard').live('change', function() {
         var rng;
         if(this.id == 'id_range') {
             rng = $('#id_range').val();

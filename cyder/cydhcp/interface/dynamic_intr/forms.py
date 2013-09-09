@@ -2,24 +2,10 @@ from django import forms
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.base.mixins import UsabilityFormMixin
-from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.forms import RangeWizard
 
 
-class DynamicInterfaceForm(forms.ModelForm, UsabilityFormMixin):
-    vrf = forms.ModelChoiceField(
-        queryset=Vrf.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
-    site = forms.ModelChoiceField(
-        queryset=Site.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
-    range = forms.ModelChoiceField(
-        queryset=Range.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
+class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(DynamicInterfaceForm, self).__init__(*args, **kwargs)
