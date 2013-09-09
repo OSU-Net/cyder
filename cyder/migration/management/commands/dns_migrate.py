@@ -220,10 +220,17 @@ class Zone(object):
                         kv.clean()
                         kv.save()
 
-                except ValidationError, e:
-                    stderr.write("Error generating static interface for host "
-                           "with IP {0}\n".format(static.ip_str))
-                    stderr.write("Original exception: {0}\n".format(e))
+                except ValidationError:
+                    try:
+                        static.dhcp_enabled = False
+                        static.dns_enabled = False
+                        static.full_clean()
+                        static.save()
+                    except ValidationError, e:
+                        stderr.write("Error generating static interface for "
+                                     "host with IP {0}\n"
+                                     .format(static.ip_str))
+                        stderr.write("Original exception: {0}\n".format(e))
 
     def gen_AR(self):
         """
