@@ -12,6 +12,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
         self.fields.keyOrder = ['system', 'domain', 'mac', 'vrf',
                                 'site', 'range', 'workgroup', 'dhcp_enabled',
                                 'dns_enabled', 'ctnr']
+        self.fields['range'].required = True
 
     class Meta:
         model = DynamicInterface
