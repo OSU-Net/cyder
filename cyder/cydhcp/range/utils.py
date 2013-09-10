@@ -144,7 +144,7 @@ def range_wizard(request):
 
             if data['free_ip'] and rng and rng.ip_type == '4':
                 ip_str = rng.get_next_ip()
-                if ip_str == 'None':
+                if ip_str is None:
                     ip_str = 'This range is full!'
 
                 if isinstance(ip_str, HttpResponse):
