@@ -5,6 +5,7 @@ from cyder.cydns.domain.models import Domain
 
 
 class DomainSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.Field()
     master_domain = serializers.HyperlinkedRelatedField(
         many=False, read_only=True, view_name='api-dns-domain-detail')
 
