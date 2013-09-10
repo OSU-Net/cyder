@@ -163,7 +163,10 @@ def range_wizard(request):
             Site = get_model('site', 'site')
             site = Site.objects.get(id=data['site'])
             # Right now campus will return a result of all networks
-            if site.name != 'Campus':
+            if site.name == 'Campus':
+                Network = get_model('network', 'network')
+                site_networks = Network.objects.all()
+            else:
                 site_networks = site.get_related_networks([site])
 
         if len(vrf_networks) > 0 and len(site_networks) > 0:
