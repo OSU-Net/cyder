@@ -4,6 +4,9 @@ $(document).ready(function() {
         var free_ip;
         if(this.id == 'id_range' || (this.id == 'id_next_ip' && $('#id_range').val() != '')) {
             rng = $('#id_range').val();
+           if(rng == null) {
+               rng = '';
+           };
         } else {
             rng = '';
         };
@@ -18,7 +21,7 @@ $(document).ready(function() {
             range: rng,
             free_ip: free_ip,
         };
-        if(this.id == 'id_next_ip' && $('#id_range').val() != '' || this.id != 'id_next_ip') {
+        if(this.id == 'id_next_ip' && rng != '' || this.id != 'id_next_ip') {
             $.post('/dhcp/range/range_wizard/', postData, function(data) {
                 if(data.ranges) {
                     $('#id_range').find('option').remove().end();
