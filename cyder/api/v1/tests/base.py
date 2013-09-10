@@ -169,4 +169,3 @@ class APITests(object):
                                **self.authheader)
         self.assertHttpOK(resp)
         self.model.objects.filter(id=obj.id).delete()
-

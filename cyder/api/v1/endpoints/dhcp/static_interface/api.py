@@ -53,4 +53,3 @@ class StaticInterfaceViewSet(api.CommonDHCPViewSet):
     model = StaticInterface
     serializer_class = StaticInterfaceSerializer
     keyvaluemodel = StaticIntrKeyValue
-

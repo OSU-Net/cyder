@@ -4,6 +4,7 @@ from rest_framework import serializers
 from cyder.api.v1.endpoints.core import api
 from cyder.core.cyuser.models import UserProfile
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

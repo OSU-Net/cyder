@@ -12,4 +12,3 @@ class VlanAPI_Test(DHCPAPITests):
         }
         obj, _ = self.model.objects.get_or_create(**data)
         return obj
-

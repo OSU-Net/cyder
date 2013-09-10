@@ -60,4 +60,3 @@ class StaticInterfaceV6API_Test(StaticInterfaceBase):
         })
         obj, _ = self.model.objects.get_or_create(**data)
         return obj
-

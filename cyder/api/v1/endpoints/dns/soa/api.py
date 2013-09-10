@@ -9,7 +9,7 @@ class SOAKeyValueSerializer(serializers.ModelSerializer):
     soa = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dns-soa-detail')
 
-    class Meta: # don't import from api.CommonDNSMeta so we get all fields
+    class Meta:  # don't import from api.CommonDNSMeta so we get all fields
         model = SOAKeyValue
 
 

@@ -7,4 +7,3 @@ class VrfAPI_Test(DHCPAPITests):
 
     def create_data(self):
         return self.model.objects.get_or_create(name='vrf')[0]
-

@@ -4,6 +4,7 @@ from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 
+
 class DynamicIntrKeyValueSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     dynamic_interface = serializers.HyperlinkedRelatedField(

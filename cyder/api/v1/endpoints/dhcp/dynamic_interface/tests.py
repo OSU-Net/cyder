@@ -41,4 +41,4 @@ class DynamicInterfaceV6API_Test(DynamicInterfaceBase):
         self.range, _ = Range.objects.get_or_create(
             start_str="2001:0db8:0000:0000:0000:0000:0000:0000",
             end_str="2001:0db8:0000:0000:0000:0000:0000:0001",
-            ip_type = '6', is_reserved=True)
+            ip_type='6', is_reserved=True)

@@ -1,5 +1,6 @@
 from cyder.api.v1.endpoints import api
 
+
 class CommonCoreSerializer(api.CommonAPISerializer):
     pass
 

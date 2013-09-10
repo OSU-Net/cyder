@@ -1,4 +1,4 @@
-from rest_framework import serializers, viewsets
+from rest_framework import serializers
 
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue

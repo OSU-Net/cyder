@@ -58,7 +58,6 @@ class CtnrAPI_Test(CoreAPITests):
 
         self.workgroup = Workgroup.objects.get_or_create(name='workgroup')[0]
 
-
     def create_data(self):
         self.ctnr = self.model.objects.get_or_create(name='ctnr')[0]
         self.ctnruser = CtnrUser.objects.get_or_create(
@@ -110,8 +109,9 @@ class CtnrAPI_Test(CoreAPITests):
         range_data = json.loads(resp.content)['results']
 
         for r in range_data:
-            if (r['start_str'] == self.range.start_str
-                and r['end_str'] == self.range.end_str):
+            if (
+                    r['start_str'] == self.range.start_str
+                    and r['end_str'] == self.range.end_str):
                 break
         else:
             assert 1 == 0, "Could not filter ranges by ctnr."

@@ -27,8 +27,10 @@ class CommonDNSSerializer(api.CommonAPISerializer):
     views = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field='name')
 
+
 class CommonDNSMeta(api.CommonAPIMeta):
     pass
+
 
 class CommonDNSViewSet(api.CommonAPIViewSet):
     pass

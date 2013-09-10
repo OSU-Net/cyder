@@ -37,4 +37,3 @@ class DomainAPI_Test(DNSAPITests):
         self.assertHttpOK(master_resp)
         master_data = json.loads(master_resp.content)
         assert master_data['name'] == self.domain.name
-
