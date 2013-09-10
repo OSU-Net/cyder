@@ -27,5 +27,6 @@ class RangeWizard(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'wizard'}))
     next_ip = forms.ChoiceField(
         label='Select Free IPv4 IP?',
+        choices=(('on', 'on'), ('False', 'False')),
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'wizard'}))
