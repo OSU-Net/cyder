@@ -20,7 +20,7 @@ def get_ranges(networks, ctnr=None):
         for network in networks:
             if ctnr and ctnr.name != 'global':
                 ranges.update(Range.objects.filter(network_id=network.id,
-                                                   cntr_id=ctnr.id))
+                                                   cntr__id=ctnr.id))
             else:
                 ranges.update(Range.objects.filter(network_id=network.id))
 
