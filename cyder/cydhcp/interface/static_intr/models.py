@@ -98,9 +98,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     vrf = models.ForeignKey(Vrf, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
-        default=True, help_text='Enable DHCP for this interface?')
+        default=True)
     dns_enabled = models.BooleanField(
-        default=True, help_text='Enable DNS for this interface?')
+        default=True)
 
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)

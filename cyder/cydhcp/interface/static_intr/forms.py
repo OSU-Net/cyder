@@ -41,6 +41,9 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
                                 'site', 'range', 'ip_type', 'next_ip',
                                 'ip_str', 'ttl', 'workgroup', 'dhcp_enabled',
                                 'dns_enabled', 'ctnr', 'description']
+        self.fields['mac'].help_text = 'Required if DHCP is enabled'
+        self.fields['dhcp_enabled'].label = 'Enable DHCP?'
+        self.fields['dns_enabled'].label = 'Enable DNS?'
 
     class Meta:
         model = StaticInterface
