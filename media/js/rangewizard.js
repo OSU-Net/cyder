@@ -4,7 +4,8 @@ $(document).ready(function() {
         var free_ip;
         if(this.id == 'id_range' || (this.id == 'id_next_ip' && $('#id_range').val() != '')) {
             rng = $('#id_range').val();
-           if(rng == null) {
+
+            if(rng == null) {
                rng = '';
            };
         } else {
@@ -25,8 +26,12 @@ $(document).ready(function() {
             $.post('/dhcp/range/range_wizard/', postData, function(data) {
                 if(data.ranges) {
                     $('#id_range').find('option').remove().end();
-                    for(i in data.ranges[0]) {
+                    if(data.ranges[0].length == 0) {
+                        $('#id_range').find('option').end().append("<option value=''>No ranges in " + $('#id_vrf option:selected').text() + " and " + $('#id_site option:selected').text() + '</option>');
+                    } else {
+                        for(i in data.ranges[0]) {
                         $('#id_range').find('option').end().append('<option value=' + data.ranges[1][i] + '>' + data.ranges[0][i] + '</option>');
+                        };
                     };
                 };
                 if(data.ip_type) {
