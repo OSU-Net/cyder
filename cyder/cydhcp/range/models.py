@@ -294,7 +294,7 @@ class Range(models.Model, ObjectUrlMixin):
 
             :returns: ipaddr.IPv4Address
         """
-        if self.network.ip_type is not '4':
+        if self.network.ip_type != '4':
             return None
         start = self.start_lower
         end = self.end_lower

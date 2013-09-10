@@ -38,9 +38,9 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['system', 'label', 'domain', 'mac', 'vrf',
-                                'site', 'range', 'ip_type', 'ip_str', 'ttl',
-                                'workgroup', 'dhcp_enabled', 'dns_enabled',
-                                'ctnr', 'description']
+                                'site', 'range', 'ip_type', 'next_ip',
+                                'ip_str', 'ttl', 'workgroup', 'dhcp_enabled',
+                                'dns_enabled', 'ctnr', 'description']
 
     class Meta:
         model = StaticInterface

@@ -25,3 +25,7 @@ class RangeWizard(forms.ModelForm):
         queryset=Range.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'wizard'}))
+    next_ip = forms.ChoiceField(
+        label='Select Free IPv4 IP?',
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'wizard'}))

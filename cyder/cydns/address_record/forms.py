@@ -9,7 +9,7 @@ class AddressRecordForm(DNSForm, RangeWizard, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(AddressRecordForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['label', 'domain', 'vrf', 'site', 'range',
-                                'ip_type', 'ip_str', 'views', 'ttl',
+                                'ip_type', 'next_ip', 'ip_str', 'views', 'ttl',
                                 'description']
 
     class Meta:

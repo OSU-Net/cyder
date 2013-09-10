@@ -141,9 +141,21 @@ def range_wizard(request):
         if data['range']:
             Range = get_model('range', 'range')
             rng = Range.objects.get(id=data['range'])
+
+            if data['free_ip'] and rng and rng.ip_type == '4':
+                ip_str = rng.get_next_ip()
+                if ip_str == 'None':
+                    ip_str = 'This range is full!'
+
+                if isinstance(ip_str, HttpResponse):
+                    ip_str = 'This range is too small'
+
+            else:
+                ip_str = '.'.join(rng.start_str.split('.')[:-1])
+
             return HttpResponse(json.dumps({
                 'ip_type': rng.ip_type,
-                'ip_str': '.'.join(rng.start_str.split('.')[:-1])}))
+                'ip_str': str(ip_str), }))
 
         if data['vrf']:
             Vrf = get_model('vrf', 'vrf')
