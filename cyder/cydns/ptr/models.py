@@ -79,9 +79,9 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
                                        related_name='reverse')
 
-    template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
+    template = _("{ip_str:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
-                 "{rdtype:$rdtype_just} {fqdn:1}.")
+                 "{rdtype:$rdtype_just} {bind_name:1}")
     search_fields = ('ip_str', 'fqdn')
 
     class Meta:
@@ -144,7 +144,3 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
             {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
-
-    def bind_render_record(self, pk=False, **kwargs):
-        self.fqdn = self.dns_name().strip('.')
-        return super(PTR, self).bind_render_record(pk=pk, **kwargs)

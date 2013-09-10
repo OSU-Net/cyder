@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import get_model
 
 import cydns
 from cyder.base.models import BaseModel
@@ -137,8 +138,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             self.check_for_cname()
 
     def delete(self, *args, **kwargs):
-        if self.domain.soa:
-            self.domain.soa.schedule_rebuild()
+        self.schedule_rebuild_check()
 
         from cyder.cydns.utils import prune_tree
         call_prune_tree = kwargs.pop('call_prune_tree', True)
@@ -168,20 +168,32 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         if no_build:
             pass
         else:
-            # Mark the soa
-            if self.domain.soa:
-                self.domain.soa.schedule_rebuild()
+            self.schedule_rebuild_check()
 
         if db_domain:
             from cyder.cydns.utils import prune_tree
             prune_tree(db_domain)
 
+
+    def schedule_rebuild_check(self):
+        PTR = get_model('ptr', 'ptr')
+        if self.domain.soa and not isinstance(self, PTR):
+            # Mark the soa
+            self.domain.soa.schedule_rebuild()
+
+
     def fqdn_kwargs_check(self, kwargs):
         fqdn = kwargs.pop('fqdn', None)
         if fqdn:
-            if 'label' in kwargs or 'domain' in kwargs:
+            if 'label' in kwargs and 'domain' in kwargs:
+                label, domain = kwargs['label'], kwargs['domain']
+                if fqdn != self.generate_fqdn(label, domain):
+                    raise ValidationError(DOMAIN_FQDN_CONFLICT)
+
+            elif 'label' in kwargs or 'domain' in kwargs:
                 raise ValidationError(DOMAIN_FQDN_CONFLICT)
-            self.label_domain_from_fqdn()
+            else:
+                self.label_domain_from_fqdn()
 
     def label_domain_from_fqdn(self):
         validate_fqdn(self.fqdn)
@@ -200,20 +212,25 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             old = None
 
         if (old and old.fqdn != self.fqdn and
-                ".".join([self.label, self.domain.name]) != self.fqdn):
+                self.generate_fqdn() != self.fqdn):
             if old.label != self.label or old.domain != self.domain:
                 raise ValidationError(DOMAIN_FQDN_CONFLICT)
-            self.label_domain_from_fqdn()
+            else:
+                self.label_domain_from_fqdn()
 
         try:
-            if self.label == '':
-                self.fqdn = self.domain.name
-            else:
-                self.fqdn = "{0}.{1}".format(self.label,
-                                             self.domain.name)
+            self.fqdn = self.generate_fqdn()
         except Domain.DoesNotExist:
             if self.fqdn:
                 self.label_domain_from_fqdn()
+
+    def generate_fqdn(self, label=None, domain=None):
+        label = label or self.label
+        domain = domain or self.domain
+        if label == '':
+            return domain.name
+        else:
+            return "{0}.{1}".format(label, domain.name)
 
     def check_for_cname(self):
         """
@@ -253,11 +270,14 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             )
 
     def check_TLD_condition(self):
-        domain = Domain.objects.filter(name=self.fqdn, master_domain=None)
-        if not domain:
-            return
-        if self.label == '' and domain[0] == self.domain:
-            return  # This is allowed
-        else:
-            raise ValidationError("You cannot create an record that points "
-                                  "to the top level of another domain.")
+        domains = Domain.objects.filter(name=self.fqdn)
+        if domains:
+            domain = domains[0]
+            if not domain.master_domain:
+                raise ValidationError("You cannot create an record that points"
+                                      " to the top level of another domain.")
+            elif self.label:
+                # blank label allowed
+                self.label = ''
+                self.domain = domain
+                self.save()
