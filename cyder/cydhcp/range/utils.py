@@ -141,14 +141,11 @@ def range_wizard(request):
         data = qd_to_py_dict(request.POST)
         if data['range']:
             rng = Range.objects.get(id=data['range'])
-
             if data['free_ip'] and rng and rng.ip_type == '4':
                 ip_str = rng.get_next_ip()
+
                 if ip_str is None:
                     ip_str = 'This range is full!'
-
-                if isinstance(ip_str, HttpResponse):
-                    ip_str = 'This range is too small'
 
             else:
                 ip_str = '.'.join(rng.start_str.split('.')[:-1])
