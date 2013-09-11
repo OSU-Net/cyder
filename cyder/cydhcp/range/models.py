@@ -52,19 +52,22 @@ class Range(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     network = models.ForeignKey(Network, null=True, blank=True)
 
+    range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
+                                  default=STATIC)
+
     ip_type = models.CharField(
         verbose_name='IP address type', max_length=1,
         choices=IP_TYPES.items(), default=IP_TYPE_4,
         validators=[validate_ip_type]
     )
 
-    start_upper = models.BigIntegerField(null=True)
-    start_lower = models.BigIntegerField(null=True)
-    start_str = models.CharField(max_length=39, editable=True)
+    start_upper = models.BigIntegerField(null=True, editable=False)
+    start_lower = models.BigIntegerField(null=True, editable=False)
+    start_str = models.CharField(max_length=39)
 
-    end_lower = models.BigIntegerField(null=True)
-    end_upper = models.BigIntegerField(null=True)
-    end_str = models.CharField(max_length=39, editable=True)
+    end_lower = models.BigIntegerField(null=True, editable=False)
+    end_upper = models.BigIntegerField(null=True, editable=False)
+    end_str = models.CharField(max_length=39)
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
@@ -76,8 +79,6 @@ class Range(models.Model, ObjectUrlMixin):
     attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
-    range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
-                                  default=STATIC)
 
     search_fields = ('start_str', 'end_str')
     display_fields = ('start_str', 'end_str')

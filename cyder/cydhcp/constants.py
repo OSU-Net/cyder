@@ -21,10 +21,10 @@ DENY_OPTIONS = {
 
 STATIC = "st"
 DYNAMIC = "dy"
-RANGE_TYPE = {
-    STATIC: 'Static',
-    DYNAMIC: 'Dynamic',
-}
+RANGE_TYPE = (
+    (STATIC, 'Static'),
+    (DYNAMIC, 'Dynamic'),
+)
 
 DHCP_KEY_VALUES = ("static_interface_kv", "dynamic_interface_kv", "range_kv",
                    "network_kv", "workgroup_kv", "vlan_kv", "vrf_kv",
