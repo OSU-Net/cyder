@@ -13,7 +13,8 @@ from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
                                     ALLOW_LEGACY)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
+from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
+                                start_end_filter)
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
@@ -76,7 +77,7 @@ class Range(models.Model, ObjectUrlMixin):
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
-                                  default=STATIC, editable=False)
+                                  default=STATIC)
 
     search_fields = ('start_str', 'end_str')
     display_fields = ('start_str', 'end_str')
@@ -180,6 +181,17 @@ class Range(models.Model, ObjectUrlMixin):
         if start > end:
             raise ValidationError("The start of a range cannot be greater than"
                                   " or equal to the end of the range.")
+
+        if self.range_type == STATIC:
+            if self.dynamicinterface_set.exists():
+                raise ValidationError('A dynamic range cannot contain static '
+                                      'interfaces')
+        else:
+            if StaticInterface.objects.filter(
+                    start_end_filter(start, end, self.ip_type)[2]).exists():
+                raise ValidationError('A static range cannot contain dynamic '
+                                      'interfaces')
+
         if not self.is_reserved:
             self.network.update_network()
             if self.network.ip_type == IP_TYPE_4:
