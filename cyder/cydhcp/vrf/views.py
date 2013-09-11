@@ -15,9 +15,8 @@ def get_static_intr_q(vrf):
         for range_ in network_.range_set.filter(range_type=STATIC):
             two = four_to_two(range_.start_upper, range_.start_lower,
                               range_.end_upper, range_.end_lower)
-            q_list += [start_end_filter(two[0], two[1], range_.ip_type)]
+            q_list += [start_end_filter(two[0], two[1], range_.ip_type)[2]]
 
-    q_list = [x[2] for x in q_list]
     q = reduce(lambda x, y: x | y, q_list, Q())
     return q
 
