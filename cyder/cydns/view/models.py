@@ -14,6 +14,10 @@ class View(models.Model, ObjectUrlMixin):
 
     display_fields = ('name',)
 
+    class Meta:
+        db_table = 'view'
+        unique_together = ('name',)
+
     def details(self):
         return (
             ('Name', self.name),
@@ -25,6 +29,6 @@ class View(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<View: {0}>".format(self)
 
-    class Meta:
-        db_table = 'view'
-        unique_together = ('name',)
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        return objects or View.objects.all()
