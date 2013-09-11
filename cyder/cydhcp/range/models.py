@@ -5,9 +5,8 @@ from django.http import HttpResponse
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.cydhcp.constants import (
-    ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
-)
+from cyder.cydhcp.constants import (ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE,
+                                    STATIC)
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
                                     ALLOW_LEGACY)
@@ -58,6 +57,7 @@ class Range(models.Model, ObjectUrlMixin):
         choices=IP_TYPES.items(), default=IP_TYPE_4,
         validators=[validate_ip_type]
     )
+
     start_upper = models.BigIntegerField(null=True)
     start_lower = models.BigIntegerField(null=True)
     start_str = models.CharField(max_length=39, editable=True)
