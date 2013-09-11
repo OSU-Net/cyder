@@ -85,10 +85,10 @@ class UsabilityFormMixin(object):
     def append_required_all(self):
         for fieldname, field in self.fields.items():
             if self.fields[fieldname].required is True:
-                if self.fields[fieldname].help_text != '':
-                    self.fields[fieldname].help_text += ', required*'
+                if self.fields[fieldname].label is None:
+                    self.fields[fieldname].label = fieldname.capitalize() + '*'
                 else:
-                    self.fields[fieldname].help_text = 'required*'
+                    self.fields[fieldname].label += '*'
 
     def alphabetize_all(self):
         for fieldname, field in self.fields.items():
