@@ -21,7 +21,10 @@ def find_range(ip_str):
     q_end = (Q(end_upper__gt=ip_upper) |
              Q(end_upper=ip_upper,
                end_lower__gte=ip_lower))
-    return Range.objects.filter(q_start, q_end)[0]
+    try:
+        return Range.objects.filter(q_start, q_end)[0]
+    except:
+        return None
 
 
 def ip_taken(ip, records):
