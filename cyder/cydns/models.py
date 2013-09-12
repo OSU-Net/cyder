@@ -200,7 +200,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         try:
             label, domain = self.fqdn.split('.', 1)
         except ValueError:
-            raise ValidationError("PTR to a top-level domain not allowed.")
+            label, domain = "", self.fqdn
         domain = Domain.objects.get(name=domain)
         self.label, self.domain = label, domain
 
@@ -273,7 +273,8 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         domains = Domain.objects.filter(name=self.fqdn)
         if domains:
             domain = domains[0]
-            if not domain.master_domain:
+            PTR = get_model('ptr', 'ptr')
+            if not domain.master_domain and not isinstance(self, PTR):
                 raise ValidationError("You cannot create an record that points"
                                       " to the top level of another domain.")
             elif self.label:

@@ -44,6 +44,7 @@ class NSTestsModels(TestCase):
         self.f_r.save()
         self.b_f_r = Domain(name="bar.foo.ru")
         self.b_f_r.save()
+        Domain(name="asdf").save()
 
         self.f = Domain(name="fam")
         self.f.save()
