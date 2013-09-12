@@ -8,6 +8,17 @@ def pretty_ranges(ranges):
     return [(rng.start_str + " - " + rng.end_str) for rng in ranges]
 
 
+def find_range(ip_str):
+    from cyder.cydhcp.range.models import Range
+    ranges = Range.objects.filter(
+        start_str__startswith='.'.join(ip_str.split('.')[:-1]))
+    for rng in ranges:
+        if (int(ip_str.split('.')[-1]) >= int(rng.start_str.split('.')[-1]) and
+                int(ip_str.split('.')[-1]) <= int(rng.end_str.split('.')[-1])):
+            return rng
+    return None
+
+
 def ip_taken(ip, records):
     """
     Given an ip as an integer and a queryset find an object in the queryset
