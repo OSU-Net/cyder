@@ -153,7 +153,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                         request = ctnr_update_session(request, obj)
 
                     if (hasattr(obj, 'ctnr_set') and
-                            len(obj.ctnr_set.all()) == 0):
+                            not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
                     return redirect(

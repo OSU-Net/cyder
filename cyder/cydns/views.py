@@ -96,7 +96,7 @@ def cydns_view(request, pk=None):
                     return redirect(request.META.get('HTTP_REFERER', ''))
 
                 if (hasattr(record, 'ctnr_set') and
-                        len(record.ctnr_set.all()) == 0):
+                        not record.ctnr_set.all().exists()):
                     record.ctnr_set.add(request.session['ctnr'])
                     return redirect(record.get_list_url())
 
