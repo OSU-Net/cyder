@@ -11,10 +11,13 @@ from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 
 
 class BasePTR(object):
-    def clean_reverse(self, update_reverse_domain=True):
+    urd = True
+
+    def clean_reverse(self, update_reverse_domain=None):
         # This indirection is so StaticInterface can call this function
-        if update_reverse_domain:
+        if self.urd or update_reverse_domain:
             self.update_reverse_domain()
+            self.urd = False
         self.check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
 
@@ -77,7 +80,7 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
     """
     id = models.AutoField(primary_key=True)
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
-                                       related_name='reverse')
+                                       related_name='reverse_ptr_set')
 
     template = _("{ip_str:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
@@ -103,8 +106,8 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
         return 'PTR'
 
     def save(self, *args, **kwargs):
-        urd = kwargs.pop('update_reverse_domain', True)
-        self.clean(update_reverse_domain=urd)
+        self.urd = kwargs.pop('update_reverse_domain', True)
+        self.clean()
         super(PTR, self).save(*args, **kwargs)
         self.rebuild_reverse()
 
@@ -113,7 +116,7 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
             self.reverse_domain.soa.schedule_rebuild()
         super(PTR, self).delete(*args, **kwargs)
 
-    def clean(self, update_reverse_domain=True):
+    def clean(self):
         super(PTR, self).clean()
         self.clean_ip()
         # We need to check if there is a registration using our ip and name
@@ -124,7 +127,7 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
             raise ValidationError(
                 "A static interface has already used %s" % self.ip_str
             )
-        self.clean_reverse(update_reverse_domain=update_reverse_domain)
+        self.clean_reverse()
 
     def details(self):
         """For tables."""

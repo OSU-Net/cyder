@@ -175,8 +175,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return related_systems
 
     def save(self, *args, **kwargs):
-        urd = kwargs.pop('update_reverse_domain', True)
-        self.clean_reverse(update_reverse_domain=urd)  # BasePTR
+        self.urd = kwargs.pop('update_reverse_domain', True)
+        self.clean_reverse()  # BasePTR
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
 

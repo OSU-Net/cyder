@@ -51,13 +51,13 @@ class ReverseDomainTests(TestCase):
         return intr
 
     def add_ptr_ipv4(self, ip):
-        ptr = PTR(fqdn=random_label(), ip_str=ip, ip_type='4')
+        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='4')
         ptr.full_clean()
         ptr.save()
         return ptr
 
     def add_ptr_ipv6(self, ip):
-        ptr = PTR(fqdn=random_label(), ip_str=ip, ip_type='6')
+        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='6')
         ptr.full_clean()
         ptr.save()
         return ptr
@@ -203,12 +203,12 @@ class ReverseDomainTests(TestCase):
         )[0]
         self.assertEqual(ptr2.reverse_domain, rd1)
         ptr3 = StaticInterface.objects.filter(
-            ip_lower=int(ipaddr.IPv4Address('127.193.8.2')),
+            ip_lower=int(ipaddr.IPv4Address('127.193.8.3')),
             ip_type='4'
         )[0]
         self.assertEqual(ptr3.reverse_domain, rd1)
         ptr4 = StaticInterface.objects.filter(
-            ip_lower=int(ipaddr.IPv4Address('127.193.8.3')),
+            ip_lower=int(ipaddr.IPv4Address('127.193.8.4')),
             ip_type='4'
         )[0]
         self.assertEqual(ptr4.reverse_domain, rd1)

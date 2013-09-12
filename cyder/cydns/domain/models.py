@@ -222,7 +222,7 @@ class Domain(models.Model, ObjectUrlMixin):
             self.sshfp_set,
             self.staticinterface_set,
             self.txt_set,
-            self.ptr_set
+            self.reverse_ptr_set
         ]
         if not view:
             for object_set in object_sets:
@@ -258,7 +258,7 @@ class Domain(models.Model, ObjectUrlMixin):
                 obj.reverse_domain = self.master_domain
                 obj.save(update_reverse_domain=False)
 
-        reassign(self.ptr_set.iterator())
+        reassign(self.reverse_ptr_set.iterator())
         reassign(self.reverse_staticintr_set.iterator())
 
 
@@ -322,7 +322,7 @@ def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
                 obj.reverse_domain = correct_reverse_domain
                 obj.save()
 
-    ptrs = reverse_domain_2.ptr_set.iterator()
+    ptrs = reverse_domain_2.reverse_ptr_set.iterator()
     intrs = reverse_domain_2.reverse_staticintr_set.iterator()
 
     reassign(ptrs)
