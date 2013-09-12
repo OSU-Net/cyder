@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.keyvalue.base_option import CommonOption
@@ -111,6 +110,13 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             validate_mac(self.mac)
 
         super(DynamicInterface, self).clean()
+
+    def delete(self):
+        if (not self.system.dynamicinterface_set.all().exclude(
+                id=self.id).exists() and
+                not self.system.staticinterface_set.all().exists()):
+            self.system.delete()
+        super(DynamicInterface, self).delete()
 
 
 class DynamicIntrKeyValue(CommonOption):
