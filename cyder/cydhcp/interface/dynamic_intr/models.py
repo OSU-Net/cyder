@@ -6,7 +6,6 @@ from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
-from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
@@ -58,7 +57,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('Vrf', 'vrf', self.vrf),
             ('Domain', 'domain', self.domain),
             ('Last Seen', 'last_seen', date)]
         return data
