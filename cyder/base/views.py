@@ -74,9 +74,10 @@ def admin_page(request):
                     'img': ['/media/img/delete.png']})
 
             extra_cols[0]['data'] = perma_delete_data
-            user_table = tablefy(lost_users, extra_cols=extra_cols, users=True)
+            user_table = tablefy(lost_users, extra_cols=extra_cols, users=True,
+                                 request=request)
 
-            superuser_table = tablefy(superusers, users=True)
+            superuser_table = tablefy(superusers, users=True, request=request)
             user_form = EditUserForm()
 
             return render(request, 'base/admin_page.html', {
@@ -190,7 +191,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
         'form': form,
         'obj': obj,
         'page_obj': page_obj,
-        'object_table': tablefy(page_obj),
+        'object_table': tablefy(page_obj, request=request),
         'obj_type': obj_type,
         'pk': pk,
     })
@@ -244,12 +245,12 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
         tables.append({
             'name': name,
             'page_obj': page_obj,
-            'table': tablefy(page_obj)
+            'table': tablefy(page_obj, request=request)
         })
 
     return render(request, template, dict({
         'obj': obj,
-        'obj_table': tablefy((obj,), info=False),
+        'obj_table': tablefy((obj,), info=False, request=request),
         'obj_type': obj_type,
         'tables': tables
     }.items() + kwargs.items()))

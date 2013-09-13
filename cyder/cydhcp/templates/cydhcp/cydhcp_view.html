@@ -1,6 +1,7 @@
 {% extends "base/list.html" %}
 
 {% set pretty_obj_type = obj_type|prettify_obj_type %}
+{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
 {% block title %} {{ pretty_obj_type + "s" }} {% endblock %}
 
@@ -9,28 +10,31 @@
 {% endblock %}
 
 {% block action_bar %}
-{% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
-  <a class="btn submit c" href={{ url('system-create', obj_type) }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
-{% else %}
-  <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
-{% endif %}
+  {% if obj_type_perm %}
+    {% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
+      <a class="btn submit c" href={{ url('system-create', obj_type) }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+    {% else %}
+      <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+    {% endif %}
+  {% endif %}
 {% endblock %}
 
 {% block form %}
-    {% if pretty_obj_type == 'Range' %}
-      {{ js('rangeform') }}
-    {% endif %}
-    <span id="view-metadata"
-          data-objType="{{ obj_type }}"
-          data-prettyObjType="{{ pretty_obj_type }}"
-          data-searchUrl="{{ url('cydhcp-search-record') }}"
-          data-getUrl="{{ url('cydhcp-get-record') }}">
-    </span>
+  {% if pretty_obj_type == 'Range' %}
+    {{ js('rangeform') }}
+  {% endif %}
+  <span id="view-metadata"
+        data-objType="{{ obj_type }}"
+        data-prettyObjType="{{ pretty_obj_type }}"
+        data-searchUrl="{{ url('cydhcp-search-record') }}"
+        data-getUrl="{{ url('cydhcp-get-record') }}">
+  </span>
+  {% if obj_type_perm %}
     <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">
       <form class="form" method="POST">
         <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_obj_type }}</h2>
         <div class="inner-form" id="hidden-inner-form">
-              {{ form.as_p() }}
+          {{ form.as_p() }}
         </div>
         <div class="form-btns">
           <hr>
@@ -39,4 +43,5 @@
         </div>
       </form>
     </div>
+  {% endif %}
 {% endblock %}

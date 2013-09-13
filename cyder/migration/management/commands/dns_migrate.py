@@ -2,6 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from sys import stderr
 
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.core.ctnr.models import Ctnr
@@ -31,7 +32,8 @@ BAD_DNAMES = ['', '.', '_']
 connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
                              user=settings.MIGRATION_USER,
                              passwd=settings.MIGRATION_PASSWD,
-                             db=settings.MIGRATION_DB)
+                             db=settings.MIGRATION_DB,
+                             charset='utf8')
 cursor = connection.cursor()
 
 
@@ -180,7 +182,7 @@ class Zone(object):
                 if not value or value == '0':
                     continue
                 kv = SystemKeyValue(system=system, key=sys_value_keys[key],
-                                    value=str(value))
+                                    value=value)
                 kv.clean()
                 kv.save()
 
@@ -366,7 +368,11 @@ def gen_CNAME():
 
     for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
         server, name = server.lower(), name.lower()
-        cursor.execute("SELECT name FROM domain WHERE id = '%s'" % domain_id)
+        if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
+                              % domain_id):
+            stderr.write('Ignoring CNAME {0}; domain does not exist.\n'
+                         .format(name))
+            continue
         dname, = cursor.fetchone()
         if not dname:
             continue

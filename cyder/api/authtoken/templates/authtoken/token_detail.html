@@ -16,6 +16,10 @@
     <p><b>Key:</b> {{ token.key }}</p>
     <p><b>Purpose:</b> {{ token.purpose }}</p>
     <p><b>Created:</b> {{ token.created }}</p>
+    <p><b>Owner:</b> 
+    <a href="{{ url('auth_user_profile-detail', user.id) }}">
+    {{ user.username }}
+    </a></p>
 {% else %}
 Only superusers can view other user's tokens.
 {% endif %}

@@ -3,6 +3,7 @@ import json
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.forms import ChoiceField, HiddenInput
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.db.models.loading import get_model
@@ -13,7 +14,7 @@ from cyder.base.utils import tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm, CtnrObjectForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.backends import _has_perm
-from cyder.core.views import CoreCreateView, CoreDetailView
+from cyder.core.views import CoreCreateView
 
 
 class CtnrView(object):
@@ -22,54 +23,69 @@ class CtnrView(object):
     form_class = CtnrForm
 
 
-class CtnrDetailView(CtnrView, CoreDetailView):
-    """
-    Shows users, domains, and reverse domains within ctnr.
-    """
-    template_name = 'ctnr/ctnr_detail.html'
+def ctnr_detail(request, pk):
+    ctnr = Ctnr.objects.get(id=pk)
 
-    def get_context_data(self, **kwargs):
-        context = super(CoreDetailView, self).get_context_data(**kwargs)
-        ctnr = kwargs.get('object', False)
-        if not ctnr:
-            return context
+    ctnrUsers = ctnr.ctnruser_set.select_related('user', 'user__profile')
+    ctnrDomains = ctnr.domains.select_related().filter(
+        is_reverse=False)
+    ctnrRdomains = ctnr.domains.select_related().filter(is_reverse=True)
+    ctnrRanges = ctnr.ranges.select_related()
+    ctnrWorkgroups = ctnr.workgroups.select_related()
 
-        ctnrUsers = ctnr.ctnruser_set.select_related('user', 'user__profile')
-        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
-        user_table = tablefy(users, extra_cols=extra_cols, users=True)
+    if request.user.get_profile().has_perm(
+            request, cy.ACTION_UPDATE, obj_class='CtnrObject'):
 
-        ctnrDomains = ctnr.domains.select_related().filter(
-            is_reverse=False)
         extra_cols, domains = create_obj_extra_cols(
             ctnr, ctnrDomains, 'domain')
-        domain_table = tablefy(domains, extra_cols=extra_cols)
+        domain_table = tablefy(domains, extra_cols=extra_cols, request=request)
 
-        ctnrRdomains = ctnr.domains.select_related().filter(is_reverse=True)
         extra_cols, rdomains = create_obj_extra_cols(
             ctnr, ctnrRdomains, 'domain')
-        rdomain_table = tablefy(rdomains, extra_cols=extra_cols)
+        rdomain_table = tablefy(rdomains, extra_cols=extra_cols,
+                                request=request)
 
-        ctnrRanges = ctnr.ranges.select_related()
         extra_cols, ranges = create_obj_extra_cols(ctnr, ctnrRanges, 'range')
-        range_table = tablefy(ranges, extra_cols=extra_cols)
+        range_table = tablefy(ranges, extra_cols=extra_cols, request=request)
 
-        ctnrWorkgroups = ctnr.workgroups.select_related()
         extra_cols, workgroups = create_obj_extra_cols(
             ctnr, ctnrWorkgroups, 'workgroup')
-        workgroup_table = tablefy(workgroups, extra_cols=extra_cols)
+        workgroup_table = tablefy(workgroups, extra_cols=extra_cols,
+                                  request=request)
 
+        object_form = CtnrObjectForm(obj_perm=True)
+
+    else:
+        domain_table = tablefy(ctnrDomains, request=request)
+        rdomain_table = tablefy(ctnrRdomains, request=request)
+        range_table = tablefy(ctnrRanges, request=request)
+        workgroup_table = tablefy(ctnrWorkgroups, request=request)
         object_form = CtnrObjectForm()
-        add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
-        return dict({
-            'obj_type': 'ctnr',
-            'user_table': user_table,
-            'domain_table': domain_table,
-            'rdomain_table': rdomain_table,
-            'range_table': range_table,
-            'workgroup_table': workgroup_table,
-            'add_user_form': add_user_form,
-            'object_select_form': object_form
-        }.items() + context.items())
+        object_form.fields['obj_type'] = ChoiceField(widget=HiddenInput,
+                                                     initial='user')
+
+    if request.user.get_profile().has_perm(
+            request, cy.ACTION_UPDATE, obj_class='CtnrUser'):
+
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
+        user_table = tablefy(users, extra_cols=extra_cols, users=True,
+                             request=request)
+    else:
+        user_table = tablefy(ctnrUsers, users=True, request=request)
+
+    add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
+
+    return render(request, 'ctnr/ctnr_detail.html', {
+        'object': ctnr,
+        'obj_type': 'ctnr',
+        'user_table': user_table,
+        'domain_table': domain_table,
+        'rdomain_table': rdomain_table,
+        'range_table': range_table,
+        'workgroup_table': workgroup_table,
+        'add_user_form': add_user_form,
+        'object_select_form': object_form
+    })
 
 
 def create_user_extra_cols(ctnr, ctnrusers):
@@ -78,7 +94,7 @@ def create_user_extra_cols(ctnr, ctnrusers):
     users = []
     extra_cols = [
         {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'},
-        {'header': 'Actions', 'sort_field': 'user'}]
+        {'header': 'Remove', 'sort_field': 'user'}]
 
     for ctnruser in ctnrusers:
         user = ctnruser.user
@@ -310,7 +326,8 @@ def add_user(request, ctnr, name, pk):
         ctnrusers = [CtnrUser.objects.select_related().get(
             ctnr_id=ctnr.id, user_id=user)]
         extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
-        user_table = tablefy(users, users=True, extra_cols=extra_cols)
+        user_table = tablefy(users, users=True, extra_cols=extra_cols,
+                             request=request)
 
         return HttpResponse(json.dumps({'user': user_table}))
 

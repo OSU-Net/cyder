@@ -26,21 +26,24 @@ def system_detail(request, pk):
     dynamic_intr = []
     for intr in static:
         related_systems.update(intr.get_related_systems())
-        static_intr.append((tablefy((intr,)),
-                            tablefy(intr.staticintrkeyvalue_set.all())))
+        static_intr.append((tablefy((intr,), request=request),
+                            tablefy(intr.staticintrkeyvalue_set.all(),
+                                    request=request)))
     for intr in dynamic:
         related_systems.update(intr.get_related_systems())
-        dynamic_intr.append((tablefy((intr,)),
-                             tablefy(intr.dynamicintrkeyvalue_set.all())))
+        dynamic_intr.append((tablefy((intr,), request=request),
+                             tablefy(intr.dynamicintrkeyvalue_set.all(),
+                                     request=request)))
 
     related_systems.discard(system)
     return render(request, 'system/system_detail.html', {
         'system': system,
-        'system_table': tablefy([system], info=False),
-        'attrs_table': tablefy(attrs),
+        'system_table': tablefy([system], info=False, request=request),
+        'attrs_table': tablefy(attrs, request=request),
         'static_intr_tables': static_intr,
         'dynamic_intr_tables': dynamic_intr,
-        'related_systems_table': tablefy(list(related_systems)),
+        'related_systems_table': tablefy(list(related_systems),
+                                         request=request),
         'obj_type': 'system',
         'obj': system,
     })

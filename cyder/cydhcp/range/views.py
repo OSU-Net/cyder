@@ -54,9 +54,10 @@ def range_detail(request, pk):
     return render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
-        'ranges_table': tablefy((mrange,), info=False),
+        'ranges_table': tablefy((mrange,), info=False, request=request),
         'range_data': make_paginator(request, range_data, 50),
-        'attrs_table': tablefy(mrange.rangekeyvalue_set.all()),
+        'attrs_table': tablefy(mrange.rangekeyvalue_set.all(),
+                               request=request),
         'allow_list': allow,
         'range_used': "{0}%".format(ip_usage_percent)
     })

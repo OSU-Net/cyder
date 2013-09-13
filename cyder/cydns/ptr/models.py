@@ -8,6 +8,7 @@ from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
+from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
 class BasePTR(object):
@@ -18,7 +19,7 @@ class BasePTR(object):
         if self.urd or update_reverse_domain:
             self.update_reverse_domain()
             self.urd = False
-        self.check_no_ns_soa_condition(self.reverse_domain)
+        check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
 
     def reverse_validate_no_cname(self):

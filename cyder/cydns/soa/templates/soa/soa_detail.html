@@ -3,30 +3,14 @@
 {% from "base/utility.html" import create_button %}
 
 
-{% block title %}SOA {{ object.description }}{% endblock %}
+{% block title %}{{ obj.description }}{% endblock %}
 
 {% block extra_action_bar %}
-  {{ create_button('soa_kv', url('cydns-get-record'),
-                   url('soa_kv'), objName=object.description,
-                   buttonName="SOA Attribute") }}
-  <a class="btn" href='/dns/bind/build_debug/{{ object.pk }}/'>View BIND file</a>
-  <h3>{{ object.name }}</h3>
-{% endblock %}
-
-{% block content %}
-
-  {% if attributes %}
-    <h3>Attributes</h3>
-    {{ render_table(request, attributes) }}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+    {{ create_button('soa_kv', url('cydns-get-record'),
+                     url('soa_kv'), objName=obj.description,
+                     buttonName="SOA Attribute") }}
   {% endif %}
-
-  {% if domain_table %}
-    <h3>Domains</h3>
-    {{ render_table(request, domain_table) }}
-  {% endif %}
-
-  {% if rdomain_table %}
-    <h3>Reverse Domains</h3>
-    {{ render_table(request, rdomain_table) }}
-  {% endif %}
+  <a class="btn" href='/dns/bind/build_debug/{{ obj.pk }}/'>View BIND file</a>
+  <h3>{{ obj.name }}</h3>
 {% endblock %}
