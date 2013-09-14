@@ -116,8 +116,7 @@ class Zone(object):
                     mx.views.add(public)
                     mx.views.add(private)
             except ValidationError, e:
-                print "Error generating MX. %s" % e
-                exit(1)
+                stderr.write("Error generating MX. %s\n" % e)
 
     def gen_static(self):
         """
@@ -191,10 +190,8 @@ class Zone(object):
                                "WHERE id = {0}".format(items['workgroup']))
                 wname = cursor.fetchone()[0]
                 w, _ = Workgroup.objects.get_or_create(name=wname)
-                v, _ = Vrf.objects.get_or_create(name="{0}-".format(wname))
             else:
                 w = None
-                v = None
 
             if not (StaticInterface.objects.filter(
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
@@ -203,7 +200,7 @@ class Zone(object):
                     static = StaticInterface(label=name, domain=self.domain,
                                              mac=clean_mac(ha), system=system,
                                              ip_str=long2ip(ip), ip_type='4',
-                                             vrf=v, workgroup=w, ctnr=ctnr,
+                                             workgroup=w, ctnr=ctnr,
                                              ttl=items['ttl'],
                                              dns_enabled=enabled,
                                              dhcp_enabled=enabled,
@@ -224,8 +221,9 @@ class Zone(object):
                         kv.save()
 
                 except ValidationError, e:
-                    print "Error generating static interface. %s" % e
-                    exit(1)
+                    stderr.write("Error generating static interface for host "
+                           "with IP {0}\n".format(static.ip_str))
+                    stderr.write("Original exception: {0}\n".format(e))
 
     def gen_AR(self):
         """
@@ -297,8 +295,7 @@ class Zone(object):
                 ns.views.add(public)
                 ns.views.add(private)
             except ValidationError, e:
-                print "Error generating NS. %s" % e
-                exit(1)
+                stderr.write("Error generating NS. %s\n" % e)
 
     def walk_zone(self):
         """
@@ -440,7 +437,7 @@ def dump_maintain():
 
 def delete_DNS():
     for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
-                  StaticInterface, System, Vrf, Workgroup]:
+                  StaticInterface, System, Workgroup]:
         thing.objects.all().delete()
 
 
