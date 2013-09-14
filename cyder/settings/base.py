@@ -67,7 +67,6 @@ MINIFY_BUNDLES = {
             'js/utils.js',
             'js/application.js',
             'js/dhcp_raw_include.js',
-            'js/key_value_validators.js',
             'js/views.js',
             'js/rangewizard.js',
         ),
