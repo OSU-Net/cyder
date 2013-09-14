@@ -1,6 +1,7 @@
 $(document).ready(function() {
     $('.wizard').live('change', function() {
         var rng;
+        var rng_type = $("input[type='radio'][name='interface_type']:checked").val();
         var free_ip;
         if(this.id == 'id_range' || (this.id == 'id_next_ip' && $('#id_range').val() != '')) {
             rng = $('#id_range').val();
@@ -20,6 +21,7 @@ $(document).ready(function() {
             vrf: $('#id_vrf').val(),
             site: $('#id_site').val(),
             range: rng,
+            range_type: rng_type,
             free_ip: free_ip,
         };
         if(this.id == 'id_next_ip' && rng != '' || this.id != 'id_next_ip') {
