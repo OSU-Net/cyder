@@ -170,27 +170,27 @@ def range_wizard(request):
                 site_networks = site.get_related_networks([site])
 
         if data.get('range_type', None):
-            range_type = [data.get('range_type')[:2]]
+            range_types = [data.get('range_type')[:2]]
         else:
-            range_type = ['st', 'dy']
+            range_types = ['st', 'dy']
 
         if data['site'] and data['vrf']:
             networks = vrf_networks.intersection(site_networks)
             ranges = get_ranges(
-                networks, ctnr=request.session['ctnr'], range_type=range_type)
+                networks, ctnr=request.session['ctnr'], range_types=range_types)
 
         elif data['site'] or data['vrf']:
             networks = vrf_networks.union(site_networks)
             ranges = get_ranges(
-                networks, ctnr=request.session['ctnr'], range_type=range_type)
+                networks, ctnr=request.session['ctnr'], range_types=range_types)
 
         else:
             if request.session['ctnr'].name == 'global':
-                ranges = Range.objects.filter(range_type__in=range_type)
+                ranges = Range.objects.filter(range_type__in=range_types)
             else:
                 ranges = Range.objects.filter(
                     ctnr__id=request.session['ctnr'].id,
-                    range_type__in=range_type)
+                    range_type__in=range_types)
 
         ranges = [(pretty_ranges(ranges)), ([r.id for r in ranges])]
         return HttpResponse(json.dumps({'ranges': ranges}))
