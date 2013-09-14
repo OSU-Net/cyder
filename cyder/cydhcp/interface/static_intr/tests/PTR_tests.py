@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
@@ -30,6 +33,12 @@ class PTRStaticRegTests(TestCase):
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
         self.i_arpa.save()
+        self.net = Network(network_str='10.0.0.0/29')
+        self.net.update_network()
+        self.net.save()
+        self.sr = Range(network=self.net, range_type=STATIC,
+                        start_str='10.0.0.1', end_str='10.0.0.3')
+        self.sr.save()
 
         self.c = Domain(name="ccc")
         self.c.save()

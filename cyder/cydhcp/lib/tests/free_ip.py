@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -51,8 +52,12 @@ class LibTestsFreeIP(TestCase):
         n.vlan = v
         n.save()
 
-        r = Range(start_str="15.0.0.0", end_str="15.0.0.10",
-                  network=n, ip_type='4')
+        self.net = Network(network_str='15.0.0.200/28')
+        self.net.update_network()
+        self.net.save()
+
+        r = Range(start_str="15.0.0.200", end_str="15.0.0.204",
+                  network=n, ip_type='4', range_type=STATIC)
         r.clean()
         r.save()
 

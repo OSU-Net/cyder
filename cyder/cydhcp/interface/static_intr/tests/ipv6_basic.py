@@ -2,7 +2,10 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from functools import partial
 
+from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
@@ -44,9 +47,18 @@ class V6StaticInterTests(TestCase):
         self.s = System(name='foobar')
         self.s.save()
 
+        self.net = Network(network_str='1000::/16', ip_type='6')
+        self.net.update_network()
+        self.net.save()
+        self.range = Range(network=self.net, range_type=STATIC,
+                           ip_type='6', start_str='1000::1',
+                           end_str='1000:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
+        self.range.save()
+
     def do_add(self, mac, label, domain, ip_str, ip_type='6'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.s, ctnr=self.ctnr)
+                            ip_type=ip_type, system=self.s, ctnr=self.ctnr,
+                            range=self.range)
         r.clean()
         r.save()
         repr(r)
@@ -63,7 +75,7 @@ class V6StaticInterTests(TestCase):
         mac = "11:22:33:44:55:66"
         label = "foo"
         domain = self.f_c
-        ip_str = "12::" + mac
+        ip_str = "1000:12:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
@@ -72,7 +84,7 @@ class V6StaticInterTests(TestCase):
         mac = "20:22:33:44:55:66"
         label = "foo1"
         domain = self.f_c
-        ip_str = "123::" + mac
+        ip_str = "1000:123:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
@@ -81,7 +93,7 @@ class V6StaticInterTests(TestCase):
         mac = "11:22:33:44:55:66"
         label = "foo1"
         domain = self.f_c
-        ip_str = "1234::" + mac
+        ip_str = "1000:1234:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
@@ -90,7 +102,7 @@ class V6StaticInterTests(TestCase):
         mac = "12:22:33:44:55:66"
         label = "foo1"
         domain = self.f_c
-        ip_str = "11::" + mac
+        ip_str = "1000:11:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
@@ -99,7 +111,7 @@ class V6StaticInterTests(TestCase):
         mac = "12:22:33:44:55:66"
         label = "foo1"
         domain = self.f_c
-        ip_str = "112::" + mac
+        ip_str = "1000:112:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         r = self.do_add(**kwargs)
@@ -109,7 +121,7 @@ class V6StaticInterTests(TestCase):
         mac = "11:22:33:44:55:66"
         label = "foo3"
         domain = self.f_c
-        ip_str = "1123::" + mac
+        ip_str = "1000:1123:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)
@@ -120,7 +132,7 @@ class V6StaticInterTests(TestCase):
         mac = "11:22:33:44:55:6e"
         label = "9988fooddfdf"
         domain = self.c
-        ip_str = "111::" + mac
+        ip_str = "1000:111:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         ip_type = '6'
@@ -138,7 +150,7 @@ class V6StaticInterTests(TestCase):
         mac = "11:22:33:44:55:66"
         label = "9988fdfood"
         domain = self.c
-        ip_str = "1112::" + mac
+        ip_str = "1000:1112:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         ip_type = '6'
@@ -155,7 +167,7 @@ class V6StaticInterTests(TestCase):
         mac = "11:22:33:44:55:66"
         label = "8888foo"
         domain = self.f_c
-        ip_str = "115::" + mac
+        ip_str = "1000:115:" + mac
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         i = self.do_add(**kwargs)
@@ -166,7 +178,7 @@ class V6StaticInterTests(TestCase):
         mac = "15:22:33:44:55:66"
         label = "8888foo"
         domain = self.f_c
-        ip_str = "188::" + mac
+        ip_str = "1000:188:" + mac
         ip_type = '6'
 
         create = partial(StaticInterface, label=label, domain=domain,

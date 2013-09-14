@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
+from sys import stderr
 
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
@@ -290,7 +291,8 @@ def migrate_dynamic_hosts():
         w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c, d]):
-            print "Trouble migrating host with mac {0}".format(items['ha'])
+            stderr.write("Trouble migrating host with mac {0}\n"
+                         .format(items['ha']))
             continue
 
         s = System(name=items['name'])
@@ -305,16 +307,10 @@ def migrate_dynamic_hosts():
             kv.clean()
             kv.save()
 
-        if r.allow == ALLOW_VRF or r.allow == ALLOW_LEGACY_AND_VRF:
-            v = Vrf.objects.get(network=r.network)
-            intr, _ = DynamicInterface.objects.get_or_create(
-                range=r, workgroup=w, ctnr=c, domain=d, vrf=v,
-                mac=mac, system=s, dhcp_enabled=enabled,
-                dns_enabled=enabled, last_seen=items['last_seen'])
-        else:
-            intr, _ = DynamicInterface.objects.get_or_create(
-                system=s, range=r, workgroup=w, ctnr=c, domain=d,
-                mac=mac, last_seen=items['last_seen'])
+        intr, _ = DynamicInterface.objects.get_or_create(
+            range=r, workgroup=w, ctnr=c, domain=d, mac=mac, system=s,
+            dhcp_enabled=enabled, dns_enabled=enabled,
+            last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,
@@ -513,6 +509,7 @@ def delete_all():
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()
+    Vrf.objects.all().delete()
     Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     DynamicInterface.objects.all().delete()
     Workgroup.objects.all().delete()

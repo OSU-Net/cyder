@@ -19,6 +19,9 @@ from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.network.models import Network
 
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
@@ -40,6 +43,13 @@ class ReverseDomainTests(TestCase):
 
         self.domain = create_fake_zone('foo.mozilla.com', suffix='')
         self.s = System.objects.create(name='mozilla.com')
+
+        self.net = Network(network_str='127.193.8.0/29')
+        self.net.update_network()
+        self.net.save()
+        self.sr = Range(network=self.net, range_type=STATIC,
+                        start_str='127.193.8.1', end_str='127.193.8.4')
+        self.sr.save()
 
     def add_intr_ipv4(self, ip):
         intr = StaticInterface(

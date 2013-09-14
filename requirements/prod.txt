@@ -5,7 +5,7 @@ python-ldap
 django-reversion==1.5
 ply
 simplejson
-south
+South>=0.8.1
 Parsley
 
 -e git://github.com/KTHse/django-cas2#egg=django-cas2
