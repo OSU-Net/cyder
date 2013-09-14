@@ -224,7 +224,8 @@ class Zone(object):
                                  "with IP {0}\n".format(static.ip_str))
                     stderr.write("Original exception: {0}\n".format(e))
             else:
-                stderr.write("Ignoring host %s: already exists." % items['id'])
+                stderr.write("Ignoring host %s: already exists.\n"
+                             % items['id'])
 
     def gen_AR(self):
         """
