@@ -136,17 +136,16 @@ def range_wizard(request):
     from cyder.cydhcp.network.utils import get_ranges
     vrf_networks = set()
     site_networks = set()
-    Range = get_model('range', 'range')
     if request.POST:
         data = qd_to_py_dict(request.POST)
         if data['range']:
+            Range = get_model('range', 'range')
             rng = Range.objects.get(id=data['range'])
+
             if data['free_ip'] and rng and rng.ip_type == '4':
                 ip_str = rng.get_next_ip()
-
-                if ip_str is None:
+                if not ip_str:
                     ip_str = 'This range is full!'
-
             else:
                 ip_str = '.'.join(rng.start_str.split('.')[:-1])
 
@@ -174,24 +173,20 @@ def range_wizard(request):
         else:
             range_types = ['st', 'dy']
 
+        all_networks = False
+
         if data['site'] and data['vrf']:
             networks = vrf_networks.intersection(site_networks)
-            ranges = get_ranges(
-                networks, ctnr=request.session['ctnr'], range_types=range_types)
 
         elif data['site'] or data['vrf']:
             networks = vrf_networks.union(site_networks)
-            ranges = get_ranges(
-                networks, ctnr=request.session['ctnr'], range_types=range_types)
 
         else:
-            if request.session['ctnr'].name == 'global':
-                ranges = Range.objects.filter(range_type__in=range_types)
-            else:
-                ranges = Range.objects.filter(
-                    ctnr__id=request.session['ctnr'].id,
-                    range_type__in=range_types)
+            all_networks = True
 
+        ranges = get_ranges(
+            networks, ctnr=request.session['ctnr'],
+            range_types=range_types, all_networks=all_networks)
         ranges = [(pretty_ranges(ranges)), ([r.id for r in ranges])]
         return HttpResponse(json.dumps({'ranges': ranges}))
 
