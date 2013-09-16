@@ -6,7 +6,7 @@ from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.constants import (
-    ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
+    ALLOW_OPTIONS, RANGE_TYPE, STATIC
 )
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
@@ -69,8 +69,6 @@ class Range(models.Model, ObjectUrlMixin):
 
     allow = models.CharField(max_length=1, choices=ALLOW_OPTIONS,
                              default=ALLOW_LEGACY)
-    deny = models.CharField(max_length=20, choices=DENY_OPTIONS.items(),
-                            blank=True)
 
     attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
