@@ -23,7 +23,7 @@ def find_range(ip_str):
                end_lower__gte=ip_lower))
     try:
         return Range.objects.filter(q_start, q_end)[0]
-    except:
+    except IndexError:
         return None
 
 
