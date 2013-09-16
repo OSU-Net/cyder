@@ -1,14 +1,14 @@
 $(document).ready(function() {
     $('.wizard').live('change', function() {
-        var rng;
-        var rng_type = $("input[type='radio'][name='interface_type']:checked").val();
-        var free_ip;
-        if(this.id == 'id_range' || (this.id == 'id_next_ip' && $('#id_range').val() != '')) {
+        var rng, free_ip;
+        var rng_type = $(
+            "input[type='radio'][name='interface_type']:checked").val();
+        if(this.id == 'id_range' || (this.id == 'id_next_ip' &&
+                $('#id_range').val() != '')) {
             rng = $('#id_range').val();
-
             if(rng == null) {
                rng = '';
-           };
+            };
         } else {
             rng = '';
         };
@@ -29,10 +29,15 @@ $(document).ready(function() {
                 if(data.ranges) {
                     $('#id_range').find('option').remove().end();
                     if(data.ranges[0].length == 0) {
-                        $('#id_range').find('option').end().append("<option value=''>No ranges in " + $('#id_vrf option:selected').text() + " and " + $('#id_site option:selected').text() + '</option>');
+                        $('#id_range').find('option').end().append(
+                            "<option value=''>No ranges in "
+                            + $('#id_vrf option:selected').text() + " and "
+                            + $('#id_site option:selected').text() + '</option>');
                     } else {
                         for(i in data.ranges[0]) {
-                        $('#id_range').find('option').end().append('<option value=' + data.ranges[1][i] + '>' + data.ranges[0][i] + '</option>');
+                        $('#id_range').find('option').end().append(
+                            '<option value=' + data.ranges[1][i] + '>'
+                            + data.ranges[0][i] + '</option>');
                         };
                     };
                 };
