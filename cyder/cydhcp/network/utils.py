@@ -33,7 +33,7 @@ def get_ranges(networks, ctnr, range_types=['st', 'dy'], all_networks=False):
                 network_id__in=[network.id for network in networks],
                 range_type__in=range_types))
 
-    return ranges
+    return sorted(ranges, key=lambda rng: rng.start_lower)
 
 
 def calc_networks(network):
