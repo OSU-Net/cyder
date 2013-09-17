@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from fieldtest3.eav import validators as v
+from cyder.base.eav import validators as v
 
 
 class TestValidators(TestCase):

@@ -3,7 +3,7 @@ import re
 from django.core.exceptions import ValidationError
 
 from cyder.cydns.validation import validate_domain_name
-from .utils import strip_and_get_base, validate_list
+from cyder.base.eav.utils import strip_and_get_base, validate_list
 
 
 ### Naming conventions in this module:

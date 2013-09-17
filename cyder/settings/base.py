@@ -94,6 +94,7 @@ MINIFY_BUNDLES = {
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'api.authtoken',
     'base',
+    'base.eav',
     'search',
     'core',
     'core.ctnr',

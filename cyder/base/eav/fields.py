@@ -1,9 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from . import validators
-from .constants import (ATTRIBUTE_INFORMATIONAL, ATTRIBUTE_OPTION,
-                        ATTRIBUTE_STATEMENT)
+from cyder.base.eav import validators
+from cyder.base.eav.constants import (ATTRIBUTE_INFORMATIONAL,
+                                      ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
 
 
 class AttributeValueTypeField(models.CharField):

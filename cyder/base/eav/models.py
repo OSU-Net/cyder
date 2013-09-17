@@ -1,12 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from . import validators
-from .constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
-                        ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
-from .fields import AttributeValueTypeField, EAVValueField
-from .utils import is_hex_byte_sequence
-from .validators import VALUE_TYPES
+from cyder.base.eav import validators
+from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
+                                      ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
+from cyder.base.eav.fields import AttributeValueTypeField, EAVValueField
+from cyder.base.eav.utils import is_hex_byte_sequence
+from cyder.base.eav.validators import VALUE_TYPES
 
 
 class Attribute(models.Model):
