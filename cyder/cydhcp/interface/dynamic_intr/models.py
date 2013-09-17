@@ -111,11 +111,13 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
         super(DynamicInterface, self).clean()
 
-    def delete(self):
-        if (not self.system.dynamicinterface_set.all().exclude(
-                id=self.id).exists() and
-                not self.system.staticinterface_set.all().exists()):
-            self.system.delete()
+    def delete(self, *args, **kwargs):
+        delete_system = kwargs.pop('delete_system', True)
+        if delete_system:
+            if (not self.system.dynamicinterface_set.all().exclude(
+                    id=self.id).exists() and
+                    not self.system.staticinterface_set.all().exists()):
+                self.system.delete()
         super(DynamicInterface, self).delete()
 
 

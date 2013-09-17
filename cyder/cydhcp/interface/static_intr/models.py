@@ -181,14 +181,16 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         self.rebuild_reverse()
 
     def delete(self, *args, **kwargs):
+        delete_system = kwargs.pop('delete_system', True)
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
             # The reverse_domain field is in the Ip class.
 
-        if(not self.system.staticinterface_set.all().exclude(
-                id=self.id).exists() and
-                not self.system.dynamicinterface_set.all().exists()):
-            self.system.delete()
+        if delete_system:
+            if(not self.system.staticinterface_set.all().exclude(
+                    id=self.id).exists() and
+                    not self.system.dynamicinterface_set.all().exists()):
+                self.system.delete()
 
         super(StaticInterface, self).delete(*args, **kwargs)
         # ^ goes to BaseAddressRecord
