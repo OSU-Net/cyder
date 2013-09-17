@@ -81,6 +81,9 @@ MINIFY_BUNDLES = {
         'ctnr': (
             'js/ctnr/ctnr.js',
         ),
+        'interface_delete': (
+            'js/interface_delete.js',
+        ),
         'systemform': (
             'js/systemform.js',
         )
