@@ -136,6 +136,7 @@ def range_wizard(request):
     from cyder.cydhcp.network.utils import get_ranges
     vrf_networks = set()
     site_networks = set()
+    networks = []
     if request.POST:
         data = qd_to_py_dict(request.POST)
         if data['range']:
