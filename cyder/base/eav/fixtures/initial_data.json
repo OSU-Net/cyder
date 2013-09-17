@@ -1,0 +1,1667 @@
+[
+  {
+    "pk": 1,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "subnet-mask",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "time-offset",
+      "attribute_type": "o",
+      "value_type": "int32"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "routers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "time-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ien116-name-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "domain-name-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 7,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "log-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 8,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "cookie-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 9,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "lpr-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 10,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "impress-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 11,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "resource-location-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 12,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "host-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 13,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "boot-size",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 14,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "merit-dump",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 15,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "domain-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 16,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "swap-server",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 17,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "root-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 18,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "extensions-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 19,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ip-forwarding",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 20,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "non-local-source-routing",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 21,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "policy-filter",
+      "attribute_type": "o",
+      "value_type": "host_pair_list"
+    }
+  },
+  {
+    "pk": 22,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "max-dgram-reassembly",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 23,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "default-ip-ttl",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 24,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "path-mtu-aging-timeout",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 25,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "path-mtu-plateau-table",
+      "attribute_type": "o",
+      "value_type": "uint16_list"
+    }
+  },
+  {
+    "pk": 26,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "interface-mtu",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 27,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "all-subnets-local",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 28,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "broadcast-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 29,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "perform-mask-discovery",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 30,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mask-supplier",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 31,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "router-discovery",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 32,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "router-solicitation-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 33,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "static-routes",
+      "attribute_type": "o",
+      "value_type": "host_pair_list"
+    }
+  },
+  {
+    "pk": 34,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "trailer-encapsulation",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 35,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "arp-cache-timeout",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 36,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ieee802-3-encapsulation",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 37,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "default-tcp-ttl",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 38,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "tcp-keepalive-interval",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 39,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "tcp-keepalive-garbage",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 40,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nis-domain",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 41,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nis-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 42,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ntp-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 43,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "vendor-encapsulated-options",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 44,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "netbios-name-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 45,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "netbios-dd-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 46,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "netbios-node-type",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 47,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "netbios-scope",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 48,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "font-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 49,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "x-display-manager",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 50,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-requested-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 51,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-lease-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 52,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-option-overload",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 53,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-message-type",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 54,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-server-identifier",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 55,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-parameter-request-list",
+      "attribute_type": "o",
+      "value_type": "uint8_list"
+    }
+  },
+  {
+    "pk": 56,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-message",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 57,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-max-message-size",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 58,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-renewal-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 59,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-rebinding-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 60,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "vendor-class-identifier",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 61,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcp-client-identifier",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 62,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nwip-domain",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 63,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nwip-suboptions",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 64,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nisplus-domain",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 65,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nisplus-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 66,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "tftp-server-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 67,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "bootfile-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 68,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mobile-ip-home-agent",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 69,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "smtp-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 70,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "pop-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 71,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nntp-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 72,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "www-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 73,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "finger-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 74,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "irc-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 75,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "streettalk-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 76,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "streettalk-directory-assistance-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 77,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "user-class",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 78,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "slp-directory-agent",
+      "attribute_type": "o",
+      "value_type": "flag_host_list"
+    }
+  },
+  {
+    "pk": 79,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "slp-service-scope",
+      "attribute_type": "o",
+      "value_type": "flag_optional_text"
+    }
+  },
+  {
+    "pk": 81,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "fqdn",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 82,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "relay-agent-information",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 85,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nds-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 86,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nds-tree-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 87,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "nds-context",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 88,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "bcms-controller-names",
+      "attribute_type": "o",
+      "value_type": "domain_list"
+    }
+  },
+  {
+    "pk": 89,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "bcms-controller-address",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 91,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "client-last-transaction-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 92,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "associated-ip",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 98,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "uap-servers",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 112,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "netinfo-server-address",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 113,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "netinfo-server-tag",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 114,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "default-url",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 118,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "subnet-selection",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 119,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "domain-search",
+      "attribute_type": "o",
+      "value_type": "domain_list"
+    }
+  },
+  {
+    "pk": 124,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "vivco",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 125,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "vivso",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 201,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "default-lease-time",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 202,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "max-lease-time",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 203,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "min-lease-time",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 204,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dynamic-bootp-lease-cutoff",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 205,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dynamic-bootp-lease-length",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 206,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "boot-unknown-clients",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 207,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dynamic-bootp",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 208,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "allow-bootp",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 209,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "allow-booting",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 210,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "one-lease-per-client",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 211,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "get-lease-hostnames",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 212,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "use-host-decl-names",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 213,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "use-lease-addr-for-default-route",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 214,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "min-secs",
+      "attribute_type": "s",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 215,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "filename",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 216,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "server-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 217,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "next-server",
+      "attribute_type": "s",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 218,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "authoritative",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 219,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "vendor-option-space",
+      "attribute_type": "s",
+      "value_type": "identifier"
+    }
+  },
+  {
+    "pk": 220,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "always-reply-rfc1048",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 221,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "site-option-space",
+      "attribute_type": "s",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 222,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "always-broadcast",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 223,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ddns-domainname",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 224,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ddns-hostname",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 225,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ddns-rev-domainname",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 226,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "lease-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 227,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "pid-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 228,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "duplicates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 229,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "declines",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 230,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ddns-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 231,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "omapi-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 232,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "local-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 233,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "limited-broadcast-address",
+      "attribute_type": "s",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 234,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "remote-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 235,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "local-address",
+      "attribute_type": "s",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 236,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "omapi-key",
+      "attribute_type": "s",
+      "value_type": "domain"
+    }
+  },
+  {
+    "pk": 237,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "stash-agent-options",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 238,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ddns-ttl",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 239,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ddns-update-style",
+      "attribute_type": "s",
+      "value_type": "ddnsstyle"
+    }
+  },
+  {
+    "pk": 240,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "client-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 241,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "update-optimization",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 242,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ping-check",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 243,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "update-static-leases",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 244,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "log-facility",
+      "attribute_type": "s",
+      "value_type": "syslogfacility"
+    }
+  },
+  {
+    "pk": 245,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "do-forward-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 246,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ping-timeout",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 247,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "infinite-is-reserved",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 248,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "update-conflict-detection",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 249,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "leasequery",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 250,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "adaptive-lease-time-threshold",
+      "attribute_type": "s",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 251,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "do-reverse-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 252,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "fqdn-reply",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 253,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "preferred-lifetime",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 254,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcpv6-lease-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 255,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "dhcpv6-pid-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 256,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "limit-addrs-per-ia",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 257,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "limit-prefs-per-ia",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 258,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "delayed-ack",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 259,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "max-ack-delay",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 260,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-server",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 261,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 262,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-username",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 263,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-password",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 264,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-base-dn",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 265,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-method",
+      "attribute_type": "s",
+      "value_type": "ldapmethod"
+    }
+  },
+  {
+    "pk": 266,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-debug-file",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 267,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-dhcp-server-cn",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 268,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-referrals",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 269,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-ssl",
+      "attribute_type": "s",
+      "value_type": "ldapsslusage"
+    }
+  },
+  {
+    "pk": 270,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-reqcert",
+      "attribute_type": "s",
+      "value_type": "ldaptlsreqcert"
+    }
+  },
+  {
+    "pk": 271,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-ca-file",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 272,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-ca-dir",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 273,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-cert",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 274,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-key",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 275,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-crlcheck",
+      "attribute_type": "s",
+      "value_type": "ldaptlscrlcheck"
+    }
+  },
+  {
+    "pk": 276,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-ciphers",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 277,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ldap-tls-randfile",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 301,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "server-identifier",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 401,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Hardware type",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 402,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Operating system",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 403,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Location",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 404,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Department",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 405,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Serial number",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 406,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Other ID",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 407,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Purchase date",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 408,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "PO number",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 409,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Warranty date",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 410,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "Owning unit",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 411,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "User ID",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  }
+]
