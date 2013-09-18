@@ -14,9 +14,9 @@ def get_vrfs(networks):
     return vrfs
 
 
-def get_ranges(networks, ctnr, range_types=['st', 'dy'], all_networks=False):
+def get_ranges(networks, ctnr, range_types=['st', 'dy'], all_ranges=False):
     ranges = set()
-    if all_networks:
+    if all_ranges:
         if ctnr.name != 'global':
             ranges.update(Range.objects.filter(
                 ctnr__id=ctnr.id, range_type__in=range_types))

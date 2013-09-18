@@ -174,7 +174,7 @@ def range_wizard(request):
         else:
             range_types = ['st', 'dy']
 
-        all_networks = False
+        all_ranges = False
 
         if data['site'] and data['vrf']:
             networks = vrf_networks.intersection(site_networks)
@@ -183,11 +183,11 @@ def range_wizard(request):
             networks = vrf_networks.union(site_networks)
 
         else:
-            all_networks = True
+            all_ranges = True
 
         ranges = get_ranges(
             networks, ctnr=request.session['ctnr'],
-            range_types=range_types, all_networks=all_networks)
+            range_types=range_types, all_ranges=all_ranges)
         ranges = [(pretty_ranges(ranges)), ([r.id for r in ranges])]
         return HttpResponse(json.dumps({'ranges': ranges}))
 
