@@ -111,6 +111,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         db_table = 'static_interface'
         unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or StaticInterface.objects
+        return objects.filter(ctnr=ctnr)
+
     def __repr__(self):
         return '<StaticInterface: {0}>'.format(str(self))
 

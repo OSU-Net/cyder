@@ -51,6 +51,12 @@ class LabelDomainMixin(models.Model):
     class Meta:
         abstract = True
 
+    @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        objects = objects or cls.objects
+        objects = objects.filter(domain__in=ctnr.domains.all())
+        return objects
+
 
 class ViewMixin(models.Model):
 
@@ -92,6 +98,10 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
 
     def __repr__(self):
         return "<{0} '{1}'>".format(self.rdtype, str(self))
+
+    @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        return objects or cls.objects.all()
 
     @classmethod
     def get_api_fields(cls):

@@ -107,6 +107,12 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
     def __repr__(self):
         return "<{0}>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or PTR.objects
+        objects = objects.filter(reverse_domain__in=ctnr.domains.all())
+        return objects
+
     @classmethod
     def get_api_fields(cls):
         return ['ip_str', 'ip_type', 'name', 'ttl', 'description']
