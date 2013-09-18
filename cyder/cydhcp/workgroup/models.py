@@ -2,6 +2,7 @@ from itertools import chain
 
 from django.db import models
 
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.base_option import CommonOption
@@ -76,14 +77,10 @@ class Workgroup(models.Model, ObjectUrlMixin):
         return build_str
 
 
-class WorkgroupKeyValue(CommonOption):
-    workgroup = models.ForeignKey(Workgroup, null=False)
-    aux_attrs = (('description', 'A description of the workgroup'))
+class WorkgroupAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = 'workgroup_av'
 
-    class Meta:
-        db_table = 'workgroup_kv'
-        unique_together = ('key', 'value', 'workgroup')
 
-    def save(self, *args, **kwargs):
-        self.clean()
-        super(WorkgroupKeyValue, self).save(*args, **kwargs)
+    entity = models.ForeignKey(Workgroup)
+    attribute = models.ForeignKey(Attribute)

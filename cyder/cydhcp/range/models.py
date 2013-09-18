@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydns.validation import validate_ip_type
@@ -357,25 +358,14 @@ def find_free_ip(start, end, ip_type='4'):
 # reversion.(Range)
 
 
-class RangeKeyValue(CommonOption):
-    range = models.ForeignKey(Range, null=False)
-
+class RangeAV(EAVBase):
     class Meta:
-        db_table = 'range_kv'
-        unique_together = ('key', 'value', 'range')
+        db_table = 'range_av'
 
-    def _aa_failover(self):
-        self.is_statement = True
-        self.is_option = False
-        if self.value != "peer \"dhcp-failover\"":
-            raise ValidationError("Invalid failover option. Try `peer "
-                                  "\"dhcp-failover\"`")
 
-    def _aa_routers(self):
-        self._routers(self.range.network.ip_type)
+    entity = models.ForeignKey(Range)
+    attribute = models.ForeignKey(Attribute)
 
-    def _aa_ntp_servers(self):
-        self._ntp_servers(self.range.network.ip_type)
 
 # reversion.(RangeKeyValue)
 

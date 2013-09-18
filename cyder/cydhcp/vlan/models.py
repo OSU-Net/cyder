@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.loading import get_model
 from django.core.exceptions import ObjectDoesNotExist
 
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
@@ -73,12 +74,10 @@ class Vlan(models.Model, ObjectUrlMixin):
         return None
 
 
-class VlanKeyValue(KeyValue):
-    vlan = models.ForeignKey(Vlan, null=False)
+class VlanAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = 'vlan_av'
 
-    class Meta:
-        db_table = "vlan_kv"
-        unique_together = ("key", "value")
 
-    def _aa_description(self):
-        return
+    entity = models.ForeignKey(Vlan)
+    attribute = models.ForeignKey(Attribute)

@@ -1,5 +1,6 @@
 from django.db import models
 
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
@@ -131,9 +132,10 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         super(DynamicInterface, self).delete()
 
 
-class DynamicIntrKeyValue(CommonOption):
-    dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
+class DynamicInterfaceAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = "dynamic_interface_av"
 
-    class Meta:
-        db_table = "dynamic_interface_kv"
-        unique_together = "key", "value", "dynamic_interface"
+
+    entity = models.ForeignKey(DynamicInterface)
+    attribute = models.ForeignKey(Attribute)

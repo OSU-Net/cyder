@@ -4,6 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.constants import DYNAMIC
@@ -260,27 +261,10 @@ class Network(models.Model, ObjectUrlMixin):
         self.prefixlen = self.network.prefixlen
 
 
-class NetworkKeyValue(CommonOption):
-    """
-    The NetworkOption Class.
+class NetworkAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = 'network_av'
 
-    DHCP option statements always start with the option keyword, followed
-    by an option name, followed by option data." -- The man page for
-    dhcpd-options
 
-    In this class, options are stored without the 'option' keyword. If it
-    is an option, is option should be set.
-    """
-    network = models.ForeignKey(Network, null=False)
-
-    class Meta:
-        db_table = 'network_kv'
-        unique_together = ('key', 'value', 'network')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super(NetworkKeyValue, self).save(*args, **kwargs)
-
-    def _aa_description(self):
-        """A descrition of this network"""
-        pass
+    entity = models.ForeignKey(Network)
+    attribute = models.ForeignKey(Attribute)

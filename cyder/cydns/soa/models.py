@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q, F
 from django.db import models
 
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.models import KeyValue
@@ -193,29 +194,10 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
             self.schedule_rebuild(commit=False)
 
 
-class SOAKeyValue(KeyValue):
-    soa = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
-
-    class Meta:
-        db_table = 'soa_kv'
+class SOAAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = 'soa_av'
 
 
-    def _aa_disabled(self):
-        """
-        Disabled - The Value of this Key determines whether or not an SOA will
-        be asked to build a zone file. Values that represent true are 'True,
-        TRUE, true, 1' and 'yes'. Values that represent false are 'False,
-        FALSE, false, 0' and 'no'.
-        """
-        true_values = ["true", "1", "yes"]
-        false_values = ["false", "0", "no"]
-        if self.value.lower() in true_values:
-            self.value = "True"
-        elif self.value.lower() in false_values:
-            self.value = "False"
-        else:
-            raise ValidationError(
-                "Disabled should be set to either {0} OR {1}".format(
-                    ", ".join(true_values), ", ".join(false_values)
-                )
-            )
+    entity = models.ForeignKey(SOA)
+    attribute = models.ForeignKey(Attribute)

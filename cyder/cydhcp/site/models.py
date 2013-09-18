@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.loading import get_model
 from django.core.validators import RegexValidator
 
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.utils import networks_to_Q
@@ -106,16 +107,10 @@ class Site(models.Model, ObjectUrlMixin):
         return networks_to_Q(self.network_set.all())
 
 
-class SiteKeyValue(KeyValue):
-    site = models.ForeignKey(Site, null=False)
-
+class SiteAV(EAVBase):
     class Meta:
-        db_table = 'site_kv'
-        unique_together = ('key', 'value')
+        db_table = 'site_av'
 
-    def _aa_address(self):
-        # Everything is valid
-        return
 
-    def _aa_description(self):
-        return
+    entity = models.ForeignKey(Site)
+    attribute = models.ForeignKey(Attribute)

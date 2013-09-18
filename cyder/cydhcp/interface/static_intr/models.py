@@ -13,6 +13,7 @@ from cyder.core.fields import MacAddrField
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
+from cyder.base.eav.models import Attribute, EAVBase
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
@@ -270,9 +271,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return 'A/PTR'
 
 
-class StaticIntrKeyValue(CommonOption):
-    static_interface = models.ForeignKey(StaticInterface, null=False)
+class StaticInterfaceAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = 'static_interface_av'
 
-    class Meta:
-        db_table = 'static_interface_kv'
-        unique_together = ('key', 'value', 'static_interface')
+
+    entity = models.ForeignKey(StaticInterface)
+    attribute = models.ForeignKey(Attribute)

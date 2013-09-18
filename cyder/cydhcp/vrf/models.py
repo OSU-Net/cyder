@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.loading import get_model
 
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.network.models import Network
@@ -73,11 +74,10 @@ class Vrf(models.Model, ObjectUrlMixin):
         return build_str
 
 
-class VrfKeyValue(KeyValue):
-    vrf = models. ForeignKey(Vrf, null=False)
+class VrfAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        db_table = 'vrf_av'
 
-    class Meta:
-        db_table = "vrf_kv"
 
-    def _aa_decription(self):
-        return
+    entity = models.ForeignKey(Vrf)
+    attribute = models.ForeignKey(Attribute)
