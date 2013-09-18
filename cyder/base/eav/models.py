@@ -7,6 +7,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
 from cyder.base.eav.fields import AttributeValueTypeField, EAVValueField
 from cyder.base.eav.utils import is_hex_byte_sequence
 from cyder.base.eav.validators import VALUE_TYPES
+from cyder.base.mixins import ObjectUrlMixin
 
 
 class Attribute(models.Model):
@@ -24,7 +25,7 @@ class Attribute(models.Model):
         return self.name
 
 
-class EAVBase(models.Model):
+class EAVBase(models.Model, ObjectUrlMixin):
     """The entity-attribute-value base model
     When you inherit from this model, you must define the following fields::
         entity = ForeignKey(ENTITY)
@@ -63,3 +64,13 @@ class EAVBase(models.Model):
 
         return (kv_formats[self.attribute.attribute_type]
                 .format(self.attribute.name, value))
+
+
+    def details(self):
+        """For tables."""
+        data = super(EAVBase, self).details()
+        data['data'] = [
+            ('Attribute', 'attribute__name', self.attribute),
+            ('Value', 'value', self.value),
+        ]
+        return data
