@@ -189,6 +189,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def get_related_systems(self):
         related_interfaces = StaticInterface.objects.filter(mac=self.mac)
+        related_interfaces = related_interfaces.select_related('system')
         related_systems = set()
         for interface in related_interfaces:
             related_systems.update([interface.system])
