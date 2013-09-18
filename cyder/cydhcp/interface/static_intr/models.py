@@ -97,9 +97,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
-        default=True, help_text='Enable DHCP for this interface?')
+        default=True)
     dns_enabled = models.BooleanField(
-        default=True, help_text='Enable DNS for this interface?')
+        default=True)
 
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
@@ -110,6 +110,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     class Meta:
         db_table = 'static_interface'
         unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or StaticInterface.objects
+        return objects.filter(ctnr=ctnr)
 
     def __repr__(self):
         return '<StaticInterface: {0}>'.format(str(self))
@@ -189,6 +194,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def get_related_systems(self):
         related_interfaces = StaticInterface.objects.filter(mac=self.mac)
+        related_interfaces = related_interfaces.select_related('system')
         related_systems = set()
         for interface in related_interfaces:
             related_systems.update([interface.system])

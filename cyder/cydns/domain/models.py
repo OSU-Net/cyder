@@ -109,7 +109,7 @@ class Domain(models.Model, ObjectUrlMixin):
         if objects:
             return ctnr.domains.filter(pk__in=objects)
         else:
-            return ctnr.domains
+            return ctnr.domains.all()
 
     @property
     def rdtype(self):

@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models import ForeignKey
 
 from cyder.base.mixins import ObjectUrlMixin
 
@@ -50,6 +51,14 @@ class KeyValue(models.Model, ObjectUrlMixin):
 
     def __str__(self):
         return "Key: {0} Value {1}".format(self.key, self.value)
+
+    @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        objects = objects or cls.objects
+        field = [f for f in cls._meta.fields if isinstance(f, ForeignKey)][0]
+        result = field.rel.to.filter_by_ctnr(ctnr)
+        result = result.values_list(cls.__name__.lower(), flat=True)
+        return objects.filter(pk__in=result)
 
     def details(self):
         """For tables."""

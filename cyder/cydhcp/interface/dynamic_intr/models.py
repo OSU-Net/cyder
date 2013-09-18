@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.keyvalue.base_option import CommonOption
@@ -31,6 +30,11 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     class Meta:
         db_table = 'dynamic_interface'
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or DynamicInterface.objects
+        return objects.filter(ctnr=ctnr)
 
     def __str__(self):
         return "{0}".format(self.mac_str)
@@ -91,6 +95,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def get_related_systems(self):
         related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
+        related_interfaces = related_interfaces.select_related('system')
         related_systems = set()
         for interface in related_interfaces:
             related_systems.update([interface.system])
