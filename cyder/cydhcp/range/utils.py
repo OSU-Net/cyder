@@ -1,3 +1,5 @@
+from django.db.models import get_model, Q
+
 from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
@@ -9,9 +11,26 @@ from django.http import HttpResponse
 
 import json
 
+import ipaddr
+
 
 def pretty_ranges(ranges):
     return [(rng.start_str + " - " + rng.end_str) for rng in ranges]
+
+
+def find_range(ip_str):
+    Range = get_model('range', 'range')
+    ip_upper, ip_lower = one_to_two(int(ipaddr.IPAddress(ip_str)))
+    q_start = (Q(start_upper__lt=ip_upper) |
+               Q(start_upper=ip_upper,
+                 start_lower__lte=ip_lower))
+    q_end = (Q(end_upper__gt=ip_upper) |
+             Q(end_upper=ip_upper,
+               end_lower__gte=ip_lower))
+    try:
+        return Range.objects.filter(q_start, q_end)[0]
+    except IndexError:
+        return None
 
 
 def ip_taken(ip, records):
