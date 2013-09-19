@@ -65,7 +65,7 @@ def system_create_view(request, initial):
             initialForm = dict({'interface_type': 'Static'})
             static_form = StaticInterfaceForm(
                 initial=dict({'ip_str': initial, 'ip_type': ip_type}))
-            for field in ['vrf', 'site', 'range', 'ip_type', 'next_ip']:
+            for field in ['vrf', 'site', 'range', 'next_ip']:
                 static_form.fields[field].widget = forms.HiddenInput()
 
         except ValueError:

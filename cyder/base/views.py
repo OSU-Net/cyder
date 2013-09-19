@@ -286,7 +286,7 @@ def get_update_form(request, get_klasses_fn):
                     {related_type: related_pk}.items() + kwargs.items()))
 
                 if related_type == 'range' and 'kv' not in obj_type:
-                    for field in ['vrf', 'site', 'ip_type', 'next_ip']:
+                    for field in ['vrf', 'site', 'next_ip']:
                         form.fields[field].widget = forms.HiddenInput()
 
                 if FormKlass.__name__ == 'RangeForm':
