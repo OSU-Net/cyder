@@ -1,4 +1,4 @@
-import socket
+import ipaddr
 
 from django import forms
 from django.core.urlresolvers import reverse
@@ -60,12 +60,15 @@ def system_create_view(request, initial):
 
     else:
         try:
-            socket.inet_aton(initial)
+            ipaddr.IPAddress(initial)
+            ip_type = ipaddr.IPAddress(initial).version
             initialForm = dict({'interface_type': 'Static'})
             static_form = StaticInterfaceForm(
-                initial=dict({'ip_str': initial, 'ip_type': '4'}))
+                initial=dict({'ip_str': initial, 'ip_type': ip_type}))
+            for field in ['vrf', 'site', 'range', 'ip_type', 'next_ip']:
+                static_form.fields[field].widget = forms.HiddenInput()
 
-        except socket.error:
+        except ValueError:
             initialForm = dict()
 
     system_form = ExtendedSystemForm(initial=initialForm)
