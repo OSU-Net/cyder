@@ -45,6 +45,8 @@ table.table {
         tr {
             td {
                 text-align: center;
+                word-wrap: break-word;
+                max-width: 150px;
             }
             &:hover {
                 background: darken($white, 10%);
