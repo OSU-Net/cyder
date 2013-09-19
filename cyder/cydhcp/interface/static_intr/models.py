@@ -93,7 +93,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
     mac = MacAddrField(dhcp_enabled='dhcp_enabled',
-                       help_text="MAC address with or without colons")
+                       help_text='MAC address with or without colons '
+                                 '(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
@@ -101,10 +102,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
-    dhcp_enabled = models.BooleanField(
-        default=True)
-    dns_enabled = models.BooleanField(
-        default=True)
+    dhcp_enabled = models.BooleanField(verbose_name='Enable DHCP?',
+                                       default=True)
+    dns_enabled = models.BooleanField(verbose_name='Enable DNS?',
+                                      default=True)
 
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
