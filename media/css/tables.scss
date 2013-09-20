@@ -46,7 +46,7 @@ table.table {
             td {
                 text-align: center;
                 word-wrap: break-word;
-                max-width: 150px;
+                max-width: 120px;
             }
             &:hover {
                 background: darken($white, 10%);
