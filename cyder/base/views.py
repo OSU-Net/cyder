@@ -288,6 +288,8 @@ def get_update_form(request, get_klasses_fn):
                 if related_type == 'range' and 'kv' not in obj_type:
                     for field in ['vrf', 'site', 'next_ip']:
                         form.fields[field].widget = forms.HiddenInput()
+                    form.fields['ip_str'].widget.attrs['disabled'] = True
+                    form.fields['ip_type'].widget.attrs['disabled'] = True
 
                 if FormKlass.__name__ == 'RangeForm':
                     Network = get_model('network', 'network')

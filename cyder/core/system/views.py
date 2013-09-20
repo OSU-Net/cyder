@@ -67,7 +67,8 @@ def system_create_view(request, initial):
                 initial=dict({'ip_str': initial, 'ip_type': ip_type}))
             for field in ['vrf', 'site', 'range', 'next_ip']:
                 static_form.fields[field].widget = forms.HiddenInput()
-
+            static_form.fields['ip_str'].widget.attrs['disabled'] = True
+            static_form.fields['ip_type'].widget.attrs['disabled'] = True
         except ValueError:
             initialForm = dict()
 
