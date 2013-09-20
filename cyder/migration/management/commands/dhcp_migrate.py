@@ -2,12 +2,11 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
-from sys import stderr
 
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
@@ -18,6 +17,8 @@ from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
 
+from sys import stderr
+from random import choice
 import ipaddr
 import MySQLdb
 from optparse import make_option
@@ -97,7 +98,8 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment, en, known):
+def create_range(range_id, start, end, range_type,
+                 subnet_id, comment, en, known):
     """
     Takes a row form the Maintain range table
     returns a range which is saved in cyder
@@ -105,6 +107,11 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
     # Set the allow statement
     n = None
     r = None
+    d = maintain_find_range_domain(range_id)
+    if not d and range_type == "dynamic":
+        stderr.write("Ignoring range %s: No default domain.\n" % range_id)
+        return None
+
     r_type = 'st' if range_type == 'static' else 'dy'
     allow = ALLOW_LEGACY
     if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
@@ -133,12 +140,12 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
                 start_lower=start, start_str=ipaddr.IPv4Address(start),
                 end_lower=end, end_str=ipaddr.IPv4Address(end),
                 range_type=r_type, allow=allow, ip_type='4',
-                network=n)
+                network=n, domain=d)
     if not r:
         r, created = Range.objects.get_or_create(
             start_lower=start, start_str=ipaddr.IPv4Address(start),
-            end_lower=end, end_str=ipaddr.IPv4Address(end),
-            is_reserved=True, range_type=r_type, allow=allow, ip_type='4')
+            end_lower=end, end_str=ipaddr.IPv4Address(end), is_reserved=True,
+            range_type=r_type, allow=allow, ip_type='4', domain=d)
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         rk, _ = RangeKeyValue.objects.get_or_create(
             range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
@@ -168,8 +175,10 @@ def migrate_ranges():
                    "FROM `ranges`")
     results = cursor.fetchall()
     migrated = []
-    for row in results:
-        migrated.append(create_range(*row))
+    for row in sorted(results):
+        r = create_range(*row)
+        if r:
+            migrated.append(r)
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
            "Records created {2}".format(
@@ -287,10 +296,9 @@ def migrate_dynamic_hosts():
 
         r = maintain_find_range(items['dynamic_range'])
         c = maintain_find_zone(items['zone'])
-        d = maintain_find_domain(items['domain'])
         w = maintain_find_workgroup(items['workgroup'])
 
-        if not all([r, c, d]):
+        if not all([r, c]):
             stderr.write("Trouble migrating host with mac {0}\n"
                          .format(items['ha']))
             continue
@@ -308,7 +316,7 @@ def migrate_dynamic_hosts():
             kv.save()
 
         intr, _ = DynamicInterface.objects.get_or_create(
-            range=r, workgroup=w, ctnr=c, domain=d, mac=mac, system=s,
+            range=r, workgroup=w, ctnr=c, mac=mac, system=s,
             dhcp_enabled=enabled, dns_enabled=enabled,
             last_seen=items['last_seen'])
 
@@ -419,6 +427,17 @@ def migrate_zone_workgroup():
 
         c.workgroups.add(w)
         c.save()
+
+
+def maintain_find_range_domain(range_id):
+    sql = ("SELECT default_domain FROM zone_range WHERE `range` = %s;"
+           % range_id)
+    cursor.execute(sql)
+    results = [r[0] for r in cursor.fetchall() if r[0] is not None]
+    if results:
+        return maintain_find_domain(choice(results))
+    else:
+        return None
 
 
 def maintain_find_range(range_id):

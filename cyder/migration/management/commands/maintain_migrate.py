@@ -79,7 +79,7 @@ class Command(BaseCommand):
             dns_migrate.delete_DNS()
             dns_migrate.delete_CNAME()
             dhcp_migrate.delete_all()
-            dns_migrate.gen_reverses()
+            dns_migrate.gen_domains_only()
             dhcp_migrate.migrate_zones()
             dhcp_migrate.migrate_zone_reverse()
             dhcp_migrate.migrate_vlans()

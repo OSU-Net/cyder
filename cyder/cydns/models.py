@@ -206,11 +206,13 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             )
 
     def check_TLD_condition(self):
-        domain = Domain.objects.filter(name=self.fqdn)
-        if not domain:
-            return
-        if self.label == '' and domain[0] == self.domain:
-            return  # This is allowed
-        else:
-            raise ValidationError("You cannot create an record that points "
-                                  "to the top level of another domain.")
+        domains = Domain.objects.filter(name=self.fqdn)
+        if domains:
+            domain = domains[0]
+            if not domain.master_domain:
+                raise ValidationError("You cannot create an record that points"
+                                      " to the top level of another domain.")
+            elif self.label:
+                # blank label allowed
+                self.label = ''
+                self.domain = domain
