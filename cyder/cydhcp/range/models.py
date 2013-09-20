@@ -16,6 +16,7 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -64,6 +65,8 @@ class Range(models.Model, ObjectUrlMixin):
     end_lower = models.BigIntegerField(null=True)
     end_upper = models.BigIntegerField(null=True)
     end_str = models.CharField(max_length=39, editable=True)
+
+    domain = models.ForeignKey(Domain, null=True)
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
@@ -115,6 +118,7 @@ class Range(models.Model, ObjectUrlMixin):
         has_net = self.network is not None
         data['data'] = [
             ('Range', 'start_str', self),
+            ('Domain', 'domain', self.domain),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]

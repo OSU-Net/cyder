@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.keyvalue.base_option import CommonOption
@@ -9,7 +8,6 @@ from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 
 import datetime
@@ -22,7 +20,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
     mac = models.CharField(max_length=19, blank=True)
-    domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True)
     dns_enabled = models.BooleanField(default=True)
