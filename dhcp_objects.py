@@ -21,7 +21,10 @@ class Option(EqualityMixin):
         self.value = value
 
     def __eq__(self, other):
-        return self.option == other.option and self.value == other.value
+        if not isinstance(other, Option):
+            return NotImplemented
+        else:
+            return self.option == other.option and self.value == other.value
 
     def __hash__(self):
         return hash(self.option + self.value)
@@ -37,7 +40,10 @@ class Statement(EqualityMixin):
         self.statement = statement
 
     def __eq__(self, other):
-        return self.statement == other.statement
+        if not isinstance(other, Statement):
+            return NotImplemented
+        else:
+            return self.statement == other.statement
 
     def __hash__(self):
         return hash(self.statement)
@@ -57,17 +63,20 @@ class Pool(EqualityMixin):
     friendly_name = 'pool'
 
     def __init__(self, contents):
-        contents = set()
+        self.contents = set()
         for item in contents:
             if isinstance(item, RangeStmt):
                 self.start, self.end = item.start, item.end
             self.contents.update([item])
 
     def __eq__(self, other):
-        return (self.start, self.end) == (other.start, other.end)
+        if not isinstance(other, Pool):
+            return NotImplemented
+        else:
+            return (self.start, self.end) == (other.start, other.end)
 
     def __hash__(self):
-        return hash(self.contents)
+        return hash(self.start + self.end)
 
     def __str__(self):
         return ('pool {{\n'
@@ -85,7 +94,10 @@ class Subnet(EqualityMixin):
         self.contents = set(contents or [])
 
     def __eq__(self, other):
-        return (self.netaddr, self.netmask) == (other.netaddr, other.netmask)
+        if not isinstance(other, Subnet):
+            return NotImplemented
+        else:
+            return (self.netaddr, self.netmask) == (other.netaddr, other.netmask)
 
     def __hash__(self):
         return hash(self.netaddr + self.netmask)
@@ -106,7 +118,10 @@ class Class(EqualityMixin):
         self.contents = set(contents or [])
 
     def __eq__(self, other):
-        return self.name == other.name
+        if not isinstance(other, Class):
+            return NotImplemented
+        else:
+            return self.name == other.name
 
     def __hash__(self):
         return hash(self.name)
@@ -131,6 +146,13 @@ class Subclass(EqualityMixin):
         self.match = match
         self.contents = set(contents or [])
 
+    def __eq__(self, other):
+        if not isinstance(other, Subclass):
+            return NotImplemented
+        else:
+            return ((self.classname, self.match)
+                    == (other.classname, other.match))
+
     def __str__(self):
         if self.contents:
             end = (' {{\n'
@@ -151,7 +173,10 @@ class Group(EqualityMixin):
         self.contents = set(contents or [])
 
     def __eq__(self, other):
-        return self.name == other.name
+        if not isinstance(other, Group):
+            return NotImplemented
+        else:
+            return self.name == other.name
 
     def __hash__(self):
         return hash(self.name)
@@ -171,7 +196,10 @@ class Host(EqualityMixin):
         self.contents = contents
 
     def __eq__(self, other):
-        return self.name == other.name
+        if not isinstance(other, Host):
+            return NotImplemented
+        else:
+            return self.name == other.name
 
     def __hash__(self):
         return hash(self.name)

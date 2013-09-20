@@ -19,10 +19,10 @@ statement = <word (ws word)*>:stmt ws ';' -> Statement(stmt)
 rangeStmt = 'range' ws word:start ws word:end ws ';' -> RangeStmt(start, end)
 
 poolItem = (option | rangeStmt | statement):item ws -> item
-pool = 'pool' ws '{' ws poolItem*:items '}'
+pool = 'pool' ws '{' ws poolItem*:contents '}' -> Pool(contents)
 
 subnetItem = (option | pool | statement):item ws -> item
-subnet = 'subnet' ws word:netaddr ws 'netmask' ws word:netmask '{' ws
+subnet = 'subnet' ws word:netaddr ws 'netmask' ws word:netmask ws '{' ws
          subnetItem*:contents '}' -> Subnet(netaddr, netmask, contents)
 
 classItem = (option | statement):item ws -> item
