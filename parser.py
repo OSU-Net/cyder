@@ -60,18 +60,17 @@ def find_in(obj, xs):
 
 
 def add_all(x, diff, side):
+    #if isinstance(x, Host):
+        #import pdb; pdb.set_trace()
     cx = deepcopy(x)
     cx.side = side
     diff.contents.update([cx]) # add immediately
-    if hasattr(x, 'contents'):
-        for n in x.contents:
-            add_all(n, cx, side)
+    #if hasattr(x, 'contents'):
+        #for n in x.contents:
+            #add_all(n, cx, side)
 
 
 def compare(left, right, diff):
-    if isinstance(left, Host) and left.name == 'google.com':
-        import pdb; pdb.set_trace()
-
     if hasattr(left, 'contents'):
         same = True
 

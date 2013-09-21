@@ -29,8 +29,8 @@ class Option(DHCPMixin):
         if not isinstance(other, Option):
             return NotImplemented
         else:
-            return (self.side, self.option, self.value ==
-                    other.side, other.option, other.value)
+            return ((self.side, self.option, self.value) ==
+                    (other.side, other.option, other.value))
 
     def __hash__(self):
         return hash(self.option + self.value)
@@ -49,8 +49,8 @@ class Statement(DHCPMixin):
         if not isinstance(other, Statement):
             return NotImplemented
         else:
-            return (self.side, self.statement ==
-                    other.side, other.statement)
+            return ((self.side, self.statement) ==
+                    (other.side, other.statement))
 
     def __hash__(self):
         return hash(self.statement)
@@ -78,8 +78,8 @@ class Pool(DHCPMixin):
         if not isinstance(other, Pool):
             return NotImplemented
         else:
-            return (self.side, self.start, self.end ==
-                    other.side, other.start, other.end)
+            return ((self.side, self.start, self.end) ==
+                    (other.side, other.start, other.end))
 
     def __hash__(self):
         return hash(self.start + self.end)
@@ -103,8 +103,8 @@ class Subnet(DHCPMixin):
         if not isinstance(other, Subnet):
             return NotImplemented
         else:
-            return (self.side, self.netaddr, self.netmask ==
-                    other.side, other.netaddr, other.netmask)
+            return ((self.side, self.netaddr, self.netmask) ==
+                    (other.side, other.netaddr, other.netmask))
 
     def __hash__(self):
         return hash(self.netaddr + self.netmask)
@@ -129,8 +129,8 @@ class Subclass(DHCPMixin):
         if not isinstance(other, Subclass):
             return NotImplemented
         else:
-            return (self.side, self.classname, self.match ==
-                    other.side, other.classname, other.match)
+            return ((self.side, self.classname, self.match) ==
+                    (other.side, other.classname, other.match))
 
     def __str__(self):
         if self.contents:
@@ -155,8 +155,8 @@ class Class(DHCPMixin):
         if not isinstance(other, Class):
             return NotImplemented
         else:
-            return (self.side, self.name ==
-                    other.side, other.name)
+            return ((self.side, self.name) ==
+                    (other.side, other.name))
 
     def __hash__(self):
         return hash(self.name)
@@ -193,8 +193,8 @@ class Group(DHCPMixin):
         if not isinstance(other, Group):
             return NotImplemented
         else:
-            return (self.side, self.name ==
-                    other.side, other.name)
+            return ((self.side, self.name) ==
+                    (other.side, other.name))
 
     def __hash__(self):
         return hash(self.name)
@@ -217,8 +217,8 @@ class Host(DHCPMixin):
         if not isinstance(other, Host):
             return NotImplemented
         else:
-            return (self.side, self.name ==
-                    other.side, other.name)
+            return ((self.side, self.name) ==
+                    (other.side, other.name))
 
     def __hash__(self):
         return hash(self.name)
@@ -238,7 +238,6 @@ class ConfigFile(DHCPMixin):
 
     def __eq__(self, other):
         return NotImplemented
-
 
     def __hash__(self):
         return NotImplemented
