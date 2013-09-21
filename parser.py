@@ -19,11 +19,8 @@ comment = re.compile(r'(?:"(?:[^"\\]|\\.)*"|[^"#])*(#|$)')
 
 
 def parsefile(name):
-    config = ConfigFile()
-
     bindings = {
         'symbols': symbols,
-        'config': config,
         'Statement': Statement,
         'RangeStmt': RangeStmt,
         'Pool': Pool,
@@ -32,6 +29,7 @@ def parsefile(name):
         'Subclass': Subclass,
         'Group': Group,
         'Host': Host,
+        'ConfigFile': ConfigFile,
     }
 
     with open('dhcp.parsley') as f:
@@ -47,11 +45,7 @@ def parsefile(name):
             fStr += line
 
     g = grammar(fStr)
-    g.configFile()
-
-    #import pdb; pdb.set_trace()
-
-    return config
+    return g.configFile()
 
 
 def find_in(obj, xs):

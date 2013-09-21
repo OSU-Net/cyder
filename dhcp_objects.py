@@ -143,26 +143,12 @@ class Class(DHCPMixin):
     def __hash__(self):
         return hash(self.side + self.name)
 
-    def add_subclass(self, match, contents):
-        self.contents.update([Subclass(self.name, match, contents)])
-
-    @property
-    def subclasses(self):
-        return set(ifilter(lambda x: isinstance(x, Subclass), self.contents))
-
-    @property
-    def truecontents(self):
-        return set(ifilter(lambda x: not isinstance(x, Subclass),
-                   self.contents))
-
     def __str__(self):
         return self.join_side(
             'class "{0}" {{\n'
             '{1}'
             '}}\n'
-            '{2}'
-            .format(self.name, join_p(self.truecontents),
-                    join_p(self.subclasses, 0))
+            .format(self.name, join_p(self.contents))
         )
 
 
@@ -215,23 +201,14 @@ class Host(DHCPMixin):
 
 
 class ConfigFile(DHCPMixin):
-    def __init__(self):
-        self.contents = set()
+    def __init__(self, contents=None):
+        self.contents = set(contents or [])
 
     def __eq__(self, other):
         return NotImplemented
 
     def __hash__(self):
         return NotImplemented
-
-    def add(self, item):
-        if item:
-            self.contents.update([item])
-
-    def get_class(self, name):
-        classes = ifilter(lambda x: isinstance(x, Class) and x.name == name,
-                          self.contents)
-        return next(classes)
 
     def __str__(self):
         return join_p(self.contents, 0)

@@ -31,10 +31,10 @@ group = 'group' ws '{' ws '#' ws word:name ws groupItem*:contents '}'
 
 subclassItem = statement:item ws -> item
 subclassEnd = ('{' ws subclassItem*:contents '}' -> contents) | (';' -> None)
-subclass = 'subclass' ws quotedString:klass ws word:match ws
+subclass = 'subclass' ws quotedString:classname ws word:match ws
            subclassEnd:contents
-           -> config.get_class(klass).add_subclass(match, contents)
+           -> Subclass(classname, match, contents)
 
 configFileItem = (subnet | class | subclass | host | group | statement):item ws
-                 -> config.add(item)
-configFile = ws configFileItem*:contents -> None
+                 -> item
+configFile = ws configFileItem*:contents -> ConfigFile(contents)
