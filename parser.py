@@ -42,7 +42,7 @@ def parsefile(name):
         for line in f:
             if not line.startswith('group'):
                 line = line[:comment.match(line).start(1)]
-                if line[-1] != '\n':
+                if not line or line[-1] != '\n':
                     line += '\n' # not strictly necessary
             fStr += line
 
