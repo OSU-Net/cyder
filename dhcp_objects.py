@@ -32,7 +32,7 @@ class Statement(DHCPMixin):
                     (other.side, other.statement))
 
     def __hash__(self):
-        return hash(self.statement)
+        return hash(self.side + self.statement)
 
     def __str__(self):
         return self.join_side(self.statement + ';\n')
@@ -61,7 +61,7 @@ class Pool(DHCPMixin):
                     (other.side, other.start, other.end))
 
     def __hash__(self):
-        return hash(self.start + self.end)
+        return hash(self.side + self.start + self.end)
 
     def __str__(self):
         return self.join_side(
@@ -86,7 +86,7 @@ class Subnet(DHCPMixin):
                     (other.side, other.netaddr, other.netmask))
 
     def __hash__(self):
-        return hash(self.netaddr + self.netmask)
+        return hash(self.side + self.netaddr + self.netmask)
 
     def __str__(self):
         return self.join_side(
@@ -110,6 +110,9 @@ class Subclass(DHCPMixin):
         else:
             return ((self.side, self.classname, self.match) ==
                     (other.side, other.classname, other.match))
+
+    def __hash__(self):
+        return hash(self.side + self.classname + self.match)
 
     def __str__(self):
         if self.contents:
@@ -138,7 +141,7 @@ class Class(DHCPMixin):
                     (other.side, other.name))
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self.side + self.name)
 
     def add_subclass(self, match, contents):
         self.contents.update([Subclass(self.name, match, contents)])
@@ -176,7 +179,7 @@ class Group(DHCPMixin):
                     (other.side, other.name))
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self.side + self.name)
 
     def __str__(self):
         return self.join_side(
@@ -200,7 +203,7 @@ class Host(DHCPMixin):
                     (other.side, other.name))
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self.side + self.name)
 
     def __str__(self):
         return self.join_side(

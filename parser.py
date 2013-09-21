@@ -59,39 +59,36 @@ def find_in(obj, xs):
 
 
 def add_all(x, diff, side):
-    #if isinstance(x, Host):
-        #import pdb; pdb.set_trace()
     cx = deepcopy(x)
     cx.side = side
     diff.contents.update([cx]) # add immediately
-    #if hasattr(x, 'contents'):
-        #for n in x.contents:
-            #add_all(n, cx, side)
 
 
 def compare(left, right, diff):
-    if hasattr(left, 'contents'):
-        same = True
+    same = True
 
-        # set intersection is broken, but there's no way to fix it
-        for x in left.contents:
-            if x in right.contents: # both left and right
-                cx = deepcopy(x)
-                cx.contents = set()
-                cx.side = ' '
-                y = find_in(x, right.contents)
-                if not compare(x, y, cx): # if they're not the same
-                    diff.contents.update([cx])
+    # set intersection is broken, but there's no way to fix it
+    for x in left.contents:
+        if x in right.contents: # both left and right
+            y = find_in(x, right.contents)
+            if not hasattr(x, 'contents') or not (x.contents or y.contents):
+                if not x == y:
+                    diff.contents.update([deepcopy(x), deepcopy(y)])
                     same = False
-            else: # only left
-                add_all(x, diff, '<')
+                continue
+            cx = deepcopy(x)
+            cx.contents = set()
+            cx.side = ' '
+            if not compare(x, y, cx): # if they're not the same
+                diff.contents.update([cx])
                 same = False
-
-        for y in right.contents - left.contents: # only right
-            add_all(y, diff, '>')
+        else: # only left
+            add_all(x, diff, '<')
             same = False
-    else:
-        same = (left == right) # simple comparison
+
+    for y in right.contents - left.contents: # only right
+        add_all(y, diff, '>')
+        same = False
 
     stdout.write('================================\n')
     stdout.write(str(left))
