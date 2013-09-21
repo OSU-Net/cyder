@@ -1,6 +1,7 @@
 ascii = letterOrDigit | (anything:x ?(x in symbols) -> x)
 asciiNoQuote = ascii:x ?(x != '"') -> x
 asciiSafe = ascii:x ?(x not in '"{};') -> x
+wsNoNewline = <(' ' | '\t')*>
 
 quotedString = '"' <(~'"' ('\\"' | asciiNoQuote | ws))+>:x '"' -> x
 word = <quotedString | asciiSafe+>
@@ -25,8 +26,9 @@ hostItem = statement:item ws -> item
 host = 'host' ws word:name ws '{' ws hostItem*:contents '}'
        -> Host(name, contents)
 
+groupName = <asciiSafe+ (wsNoNewline asciiSafe+)*>
 groupItem = (host | statement):item ws -> item
-group = 'group' ws '{' ws '#' ws word:name ws groupItem*:contents '}'
+group = 'group' ws '{' ws '#' ws groupName:name ws groupItem*:contents '}'
         -> Group(name, contents)
 
 subclassItem = statement:item ws -> item
