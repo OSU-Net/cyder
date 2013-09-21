@@ -2,7 +2,7 @@ ascii = letterOrDigit | (anything:x ?(x in symbols) -> x)
 asciiNoQuote = ascii:x ?(x != '"') -> x
 asciiSafe = ascii:x ?(x not in '"{};') -> x
 
-quotedString = '"' <(~'"' ('\\"' | asciiNoQuote))+>:x '"' -> x
+quotedString = '"' <(~'"' ('\\"' | asciiNoQuote | ws))+>:x '"' -> x
 word = <quotedString | asciiSafe+>
 
 
