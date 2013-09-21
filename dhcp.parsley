@@ -6,43 +6,35 @@ quotedString = '"' <(~'"' ('\\"' | asciiNoQuote))+>:x '"' -> x
 word = <quotedString | asciiSafe+>
 
 
-
-optionName = <(letterOrDigit | '-')+>
-
-optionValue = <word (ws word)*>
-
-option = 'option' ws optionName:option ws optionValue:value ws ';'
-         -> Option(option, value)
-
 statement = <word (ws word)*>:stmt ws ';' -> Statement(stmt)
 
 rangeStmt = 'range' ws word:start ws word:end ws ';' -> RangeStmt(start, end)
 
-poolItem = (option | rangeStmt | statement):item ws -> item
+poolItem = (rangeStmt | statement):item ws -> item
 pool = 'pool' ws '{' ws poolItem*:contents '}' -> Pool(contents)
 
-subnetItem = (option | pool | statement):item ws -> item
+subnetItem = (pool | statement):item ws -> item
 subnet = 'subnet' ws word:netaddr ws 'netmask' ws word:netmask ws '{' ws
          subnetItem*:contents '}' -> Subnet(netaddr, netmask, contents)
 
-classItem = (option | statement):item ws -> item
+classItem = statement:item ws -> item
 class = 'class' ws quotedString:name ws '{' ws classItem*:contents '}'
         -> Class(name, contents)
 
-hostItem = (option | statement):item ws -> item
+hostItem = statement:item ws -> item
 host = 'host' ws word:name ws '{' ws hostItem*:contents '}'
        -> Host(name, contents)
 
-groupItem = (host | option | statement):item ws -> item
+groupItem = (host | statement):item ws -> item
 group = 'group' ws '{' ws '#' ws word:name ws groupItem*:contents '}'
         -> Group(name, contents)
 
-subclassItem = (option | statement):item ws -> item
+subclassItem = statement:item ws -> item
 subclassEnd = ('{' ws subclassItem*:contents '}' -> contents) | (';' -> None)
 subclass = 'subclass' ws quotedString:klass ws word:match ws
            subclassEnd:contents
            -> config.get_class(klass).add_subclass(match, contents)
 
-configFileItem = (subnet | class | subclass | host | group | option
-                  | statement):item ws -> config.add(item)
+configFileItem = (subnet | class | subclass | host | group | statement):item ws
+                 -> config.add(item)
 configFile = configFileItem*:contents -> None

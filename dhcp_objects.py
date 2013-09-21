@@ -20,27 +20,6 @@ class DHCPMixin(object):
         return join_p(x, self.side)
 
 
-class Option(DHCPMixin):
-    def __init__(self, option, value):
-        self.option = option
-        self.value = value
-
-    def __eq__(self, other):
-        if not isinstance(other, Option):
-            return NotImplemented
-        else:
-            return ((self.side, self.option, self.value) ==
-                    (other.side, other.option, other.value))
-
-    def __hash__(self):
-        return hash(self.option + self.value)
-
-    def __str__(self):
-        return self.join_side(
-            'option {0} {1};\n'.format(self.option, self.value)
-        )
-
-
 class Statement(DHCPMixin):
     def __init__(self, statement):
         self.statement = statement

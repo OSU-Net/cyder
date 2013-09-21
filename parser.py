@@ -4,8 +4,8 @@ from itertools import ifilter
 from parsley import makeGrammar
 from sys import stdout
 
-from dhcp_objects import (Option, Statement, RangeStmt, Pool, Subnet, Class,
-                          Subclass, Group, Host, ConfigFile)
+from dhcp_objects import (Statement, RangeStmt, Pool, Subnet, Class, Subclass,
+                          Group, Host, ConfigFile)
 
 
 
@@ -24,7 +24,6 @@ def parsefile(name):
     bindings = {
         'symbols': symbols,
         'config': config,
-        'Option': Option,
         'Statement': Statement,
         'RangeStmt': RangeStmt,
         'Pool': Pool,
