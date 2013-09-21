@@ -2,9 +2,16 @@ from django import forms
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.forms import DNSForm
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.cydhcp.forms import RangeWizard
 
 
-class AddressRecordForm(DNSForm, UsabilityFormMixin):
+class AddressRecordForm(DNSForm, RangeWizard, UsabilityFormMixin):
+    def __init__(self, *args, **kwargs):
+        super(AddressRecordForm, self).__init__(*args, **kwargs)
+        self.fields.keyOrder = ['label', 'domain', 'vrf', 'site', 'range',
+                                'ip_type', 'next_ip', 'ip_str', 'views', 'ttl',
+                                'description']
+
     class Meta:
         model = AddressRecord
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')

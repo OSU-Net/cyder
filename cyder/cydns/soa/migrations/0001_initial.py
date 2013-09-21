@@ -14,12 +14,12 @@ class Migration(SchemaMigration):
             ('ttl', self.gf('django.db.models.fields.PositiveIntegerField')(default=3600, null=True, blank=True)),
             ('primary', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('contact', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('serial', self.gf('django.db.models.fields.PositiveIntegerField')(default=1368820998)),
+            ('serial', self.gf('django.db.models.fields.PositiveIntegerField')(default=1377739578)),
             ('expire', self.gf('django.db.models.fields.PositiveIntegerField')(default=1209600)),
             ('retry', self.gf('django.db.models.fields.PositiveIntegerField')(default=86400)),
             ('refresh', self.gf('django.db.models.fields.PositiveIntegerField')(default=180)),
             ('minimum', self.gf('django.db.models.fields.PositiveIntegerField')(default=180)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
             ('dirty', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('is_signed', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
@@ -29,12 +29,12 @@ class Migration(SchemaMigration):
         db.create_unique('soa', ['primary', 'contact', 'description'])
 
         # Adding model 'SOAKeyValue'
-        db.create_table('soa_soakeyvalue', (
+        db.create_table('soa_kv', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('key', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('is_quoted', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('obj', self.gf('django.db.models.fields.related.ForeignKey')(related_name='keyvalue_set', to=orm['soa.SOA'])),
+            ('soa', self.gf('django.db.models.fields.related.ForeignKey')(related_name='keyvalue_set', to=orm['soa.SOA'])),
         ))
         db.send_create_signal('soa', ['SOAKeyValue'])
 
@@ -47,14 +47,14 @@ class Migration(SchemaMigration):
         db.delete_table('soa')
 
         # Deleting model 'SOAKeyValue'
-        db.delete_table('soa_soakeyvalue')
+        db.delete_table('soa_kv')
 
 
     models = {
         'soa.soa': {
             'Meta': {'unique_together': "(('primary', 'contact', 'description'),)", 'object_name': 'SOA', 'db_table': "'soa'"},
             'contact': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'dirty': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'expire': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1209600'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -63,15 +63,15 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1368820998'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1377739578'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'soa.soakeyvalue': {
-            'Meta': {'object_name': 'SOAKeyValue'},
+            'Meta': {'object_name': 'SOAKeyValue', 'db_table': "'soa_kv'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_quoted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'key': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'obj': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'keyvalue_set'", 'to': "orm['soa.SOA']"}),
+            'soa': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'keyvalue_set'", 'to': "orm['soa.SOA']"}),
             'value': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         }
     }

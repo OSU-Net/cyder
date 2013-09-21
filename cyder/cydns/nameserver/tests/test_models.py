@@ -11,6 +11,9 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.tests.utils import create_fake_zone
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.network.models import Network
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
 
@@ -53,6 +56,23 @@ class NSTestsModels(TestCase):
 
         self.s = System()
         self.s.save()
+
+        self.net1 = Network(network_str='128.193.0.0/17')
+        self.net1.update_network()
+        self.net1.save()
+        self.sr1 = Range(network=self.net1, range_type=STATIC,
+                         start_str='128.193.99.2', end_str='128.193.99.14')
+        self.sr1.save()
+        self.sr2 = Range(network=self.net1, range_type=STATIC,
+                         start_str='128.193.1.2', end_str='128.193.1.14')
+        self.sr2.save()
+
+        self.net2 = Network(network_str='14.10.1.0/30')
+        self.net2.update_network()
+        self.net2.save()
+        self.sr3 = Range(network=self.net2, range_type=STATIC,
+                        start_str='14.10.1.1', end_str='14.10.1.2')
+        self.sr3.save()
 
     def do_add(self, domain, server):
         ns = Nameserver(domain=domain, server=server)

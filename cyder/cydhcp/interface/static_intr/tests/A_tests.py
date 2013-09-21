@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
@@ -41,9 +44,17 @@ class AStaticRegTests(TestCase):
         self.n.clean()
         self.n.save()
 
+        self.net = Network(network_str='10.0.0.0/29')
+        self.net.update_network()
+        self.net.save()
+        self.sr = Range(network=self.net, range_type=STATIC,
+                        start_str='10.0.0.1', end_str='10.0.0.3')
+        self.sr.save()
+
     def do_add_intr(self, mac, label, domain, ip_str, ip_type='4'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.n, ctnr=self.ctnr)
+                            ip_type=ip_type, system=self.n, ctnr=self.ctnr,
+                            range=self.sr)
         r.clean()
         r.save()
         repr(r)

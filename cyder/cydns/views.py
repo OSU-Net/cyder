@@ -94,9 +94,12 @@ def cydns_view(request, pk=None):
                 # If domain, add to current ctnr.
                 if obj_type in DNS_KEY_VALUES or obj_type in DHCP_KEY_VALUES:
                     return redirect(request.META.get('HTTP_REFERER', ''))
-                if obj_type == 'domain':
-                    request.session['ctnr'].domains.add(record)
+
+                if (hasattr(record, 'ctnr_set') and
+                        not record.ctnr_set.all().exists()):
+                    record.ctnr_set.add(request.session['ctnr'])
                     return redirect(record.get_list_url())
+
         except (ValidationError, ValueError):
             form = _revert(domain, request.POST, form, FormKlass)
 

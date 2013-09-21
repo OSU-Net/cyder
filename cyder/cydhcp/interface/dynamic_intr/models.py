@@ -1,11 +1,10 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
-from cyder.cydhcp.validation import validate_mac
+from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac
-from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
@@ -22,9 +21,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
     mac = models.CharField(max_length=19, blank=True)
-    vrf = models.ForeignKey(Vrf, null=True, blank=True)
     domain = models.ForeignKey(Domain, null=True)
-    range = models.ForeignKey(Range, null=False)
+    range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True)
     dns_enabled = models.BooleanField(default=True)
     last_seen = models.PositiveIntegerField(
@@ -33,6 +31,11 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     class Meta:
         db_table = 'dynamic_interface'
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or DynamicInterface.objects
+        return objects.filter(ctnr=ctnr)
 
     def __str__(self):
         return "{0}".format(self.mac_str)
@@ -58,7 +61,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('Vrf', 'vrf', self.vrf),
             ('Domain', 'domain', self.domain),
             ('Last Seen', 'last_seen', date)]
         return data
@@ -94,6 +96,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def get_related_systems(self):
         related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
+        related_interfaces = related_interfaces.select_related('system')
         related_systems = set()
         for interface in related_interfaces:
             related_systems.update([interface.system])

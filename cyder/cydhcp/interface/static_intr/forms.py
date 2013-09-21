@@ -9,6 +9,7 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
+from cyder.cydhcp.forms import RangeWizard
 from cyder.cydns.validation import validate_label
 from cyder.base.mixins import UsabilityFormMixin
 
@@ -28,7 +29,7 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
+class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
@@ -36,15 +37,19 @@ class StaticInterfaceForm(forms.ModelForm, UsabilityFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['system', 'description', 'label', 'ip_str',
-                                'ip_type', 'ttl', 'workgroup', 'mac', 'vrf',
-                                'domain', 'dhcp_enabled', 'dns_enabled',
-                                'ctnr']
+        self.fields.keyOrder = ['system', 'description', 'label', 'domain',
+                                'mac', 'vrf', 'site', 'range', 'ip_type',
+                                'next_ip', 'ip_str', 'ttl', 'workgroup',
+                                'dhcp_enabled', 'dns_enabled', 'ctnr']
+        self.fields['mac'].help_text = 'Required if DHCP is enabled'
+        self.fields['dhcp_enabled'].label = 'Enable DHCP?'
+        self.fields['dns_enabled'].label = 'Enable DNS?'
 
     class Meta:
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
                    'last_seen')
+        widgets = {'ip_type': forms.RadioSelect}
 
 
 class StaticIntrKeyValueForm(forms.ModelForm):

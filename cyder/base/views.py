@@ -152,11 +152,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                     if Klass.__name__ == 'Ctnr':
                         request = ctnr_update_session(request, obj)
 
-                    if obj_type == 'range':
-                        request.session['ctnr'].ranges.add(obj)
-
-                    if obj_type == 'workgroup':
-                        request.session['ctnr'].workgroups.add(obj)
+                    if (hasattr(obj, 'ctnr_set') and
+                            not obj.ctnr_set.all().exists()):
+                        obj.ctnr_set.add(request.session['ctnr'])
 
                     return redirect(
                         request.META.get('HTTP_REFERER', obj.get_list_url()))
@@ -272,7 +270,6 @@ def get_update_form(request, get_klasses_fn):
         raise Http404
 
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
-
     try:
         # Get the object if updating.
         if record_pk:

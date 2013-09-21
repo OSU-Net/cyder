@@ -68,6 +68,7 @@ MINIFY_BUNDLES = {
             'js/dhcp_raw_include.js',
             'js/key_value_validators.js',
             'js/views.js',
+            'js/rangewizard.js',
         ),
         'rangeform': (
             'js/rangeform.js',
@@ -83,7 +84,7 @@ MINIFY_BUNDLES = {
         ),
         'systemform': (
             'js/systemform.js',
-        )
+        ),
     }
 }
 
