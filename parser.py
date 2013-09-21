@@ -2,7 +2,7 @@ import re
 from copy import deepcopy
 from itertools import ifilter
 from parsley import makeGrammar
-from sys import argv, stdout
+from sys import argv, stderr, stdout
 
 from dhcp_objects import (Statement, RangeStmt, Pool, Subnet, Class, Subclass,
                           Group, Host, ConfigFile)
@@ -95,15 +95,20 @@ def compare(left, right, diff):
     return same
 
 
-diffFile = None
-def do_it():
-    global diffFile
-    one = parsefile(argv[1])
-    two = parsefile(argv[2])
-    diffFile = ConfigFile()
+def compare_files(filename1, filename2, verbose=False):
+    if verbose:
+        stderr.write('## Parsing {0}...\n'.format(filename1))
+    one = parsefile(filename1)
 
+    if verbose:
+        stderr.write('## Parsing {0}...\n'.format(filename2))
+    two = parsefile(filename2)
+
+    diffFile = ConfigFile()
+    if verbose:
+        stderr.write('## Comparing...\n')
     compare(one, two, diffFile)
-    stdout.write(diffFile)
+    return str(diffFile)
 
 if __name__ == '__main__':
-    do_it()
+    stdout.write(compare_files(argv[1], argv[2], verbose=True))
