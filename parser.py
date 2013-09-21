@@ -2,7 +2,7 @@ import re
 from copy import deepcopy
 from itertools import ifilter
 from parsley import makeGrammar
-from sys import stdout
+from sys import argv, stdout
 
 from dhcp_objects import (Statement, RangeStmt, Pool, Subnet, Class, Subclass,
                           Group, Host, ConfigFile)
@@ -84,13 +84,13 @@ def compare(left, right, diff):
         add_all(y, diff, '>')
         same = False
 
-    stdout.write('================================\n')
-    stdout.write(str(left))
-    stdout.write('=========== l & r ==============\n')
-    stdout.write(str(right))
-    stdout.write('=========== diff ===============\n')
-    stdout.write(str(diff))
-    stdout.write('================================\n')
+    #stdout.write('================================\n')
+    #stdout.write(str(left))
+    #stdout.write('=========== l & r ==============\n')
+    #stdout.write(str(right))
+    #stdout.write('=========== diff ===============\n')
+    #stdout.write(str(diff))
+    #stdout.write('================================\n')
 
     return same
 
@@ -98,11 +98,12 @@ def compare(left, right, diff):
 diffFile = None
 def do_it():
     global diffFile
-    one = parsefile('dhcpd1.conf')
-    two = parsefile('dhcpd2.conf')
+    one = parsefile(argv[1])
+    two = parsefile(argv[2])
     diffFile = ConfigFile()
 
     compare(one, two, diffFile)
+    stdout.write(diffFile)
 
 if __name__ == '__main__':
     do_it()
