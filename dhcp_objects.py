@@ -198,15 +198,9 @@ class Host(DHCPMixin):
         )
 
 
-class ConfigFile(DHCPMixin):
+class ConfigFile(object):
     def __init__(self, contents=None):
         self.contents = set(contents or [])
-
-    def __eq__(self, other):
-        return NotImplemented
-
-    def __hash__(self):
-        return NotImplemented
 
     def __str__(self):
         return join_p(self.contents, 0)
