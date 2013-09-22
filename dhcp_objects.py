@@ -1,5 +1,4 @@
 from itertools import ifilter
-from numbers import Number
 
 
 def is_rangestmt(x):
@@ -10,7 +9,7 @@ def join_p(xs, d=1):
     if not xs:
         return ''
     lines = "".join(map(str, xs)).splitlines()
-    prefix = '    ' * d if isinstance(d, Number) else d
+    prefix = '    ' * d if isinstance(d, int) else d
     return "".join(prefix + line + '\n' for line in lines)
 
 
