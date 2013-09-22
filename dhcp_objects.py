@@ -2,6 +2,10 @@ from itertools import ifilter
 from numbers import Number
 
 
+def is_rangestmt(x):
+    return isinstance(x, RangeStmt)
+
+
 def join_p(xs, d=1):
     if not xs:
         return ''
@@ -47,11 +51,10 @@ class RangeStmt(Statement):
 
 class Pool(DHCPMixin):
     def __init__(self, contents):
-        self.contents = set()
-        for item in contents:
-            if isinstance(item, RangeStmt):
-                self.start, self.end = item.start, item.end
-            self.contents.update([item])
+        self.contents = set(contents)
+
+        rs = next(ifilter(is_rangestmt, contents), None)
+        self.start, self.end = rs.start, rs.end
 
     def __eq__(self, other):
         if not isinstance(other, Pool):
