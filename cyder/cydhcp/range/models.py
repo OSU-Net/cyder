@@ -87,7 +87,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return get_display(self)
+        return get_display(self) + " ({0}% Used)".format(str(self.range_usage))
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -132,6 +132,9 @@ class Range(models.Model, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         self.clean()
+        update_usage = kwargs.pop('update_usage', True)
+        if update_usage:
+            self.range_usage = self.get_usage()
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
@@ -286,6 +289,12 @@ class Range(models.Model, ObjectUrlMixin):
         return "{0} - {1} - ({2}) {3} to {4}".format(
             site_name, vlan_name,
             self.network, self.start_str, self.end_str)
+
+    def get_usage(self):
+        from cyder.cydhcp.range.range_usage import range_usage
+        _, usage = range_usage(self.start_lower, self.end_lower,
+                               self.ip_type)
+        return usage
 
     def get_next_ip(self):
         """Find's the most appropriate ip address within a range. If it can't
