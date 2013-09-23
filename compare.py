@@ -90,20 +90,23 @@ def deep_compare(x, y, zs):
     if has_contents(x) or has_contents(y):
         if not compare(x, y, z, 'contents'):
             same = False
-            zs.update([z])
 
     if has_related(x) or has_related(y):
         if not compare(x, y, z, 'related'):
             same = False
-            zs.update([z])
+
+    if not same:
+        zs.add(z)
 
     return same
 
 
 def shallow_compare(x, y, zs):
     if not x == y:
-        zs.update([deepcopy(x), deepcopy(y)])
-        same = False
+        zs.update((deepcopy(x), deepcopy(y)))
+        return False
+    else:
+        return True
 
 
 def compare(left, right, diff, childtype):

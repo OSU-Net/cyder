@@ -142,7 +142,7 @@ class Class(DHCPMixin):
         return self.format_struct('class "{0}"'.format(self.name))
 
     def add_subclass(self, match, contents):
-        self.related.update([Subclass(self.name, match, contents)])
+        self.related.add(Subclass(self.name, match, contents))
 
 
 class Group(DHCPMixin):
@@ -190,7 +190,7 @@ class ConfigFile(object):
 
     def add(self, obj):
         if obj:
-            self.related.update((obj,))
+            self.related.add(obj)
 
     def get_class(self, name):
         classes = ifilter(lambda x: isinstance(x, Class) and x.name == name,
