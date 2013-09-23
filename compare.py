@@ -43,7 +43,7 @@ def parsefile(name):
             if not line.startswith('group'):
                 line = line[:comment.match(line).start(1)]
                 if not line or line[-1] != '\n':
-                    line += '\n' # not strictly necessary
+                    line += '\n'
             fStr += line
 
     g = grammar(fStr)
@@ -74,7 +74,7 @@ def add_all(x, zs, side):
     if hasattr(z, 'related') and z.related:
         for a in z.related:
             a.side = side
-    zs.update([z]) # deep add
+    zs.update([z])
 
 
 def deep_compare(x, y, zs):
