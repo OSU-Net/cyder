@@ -19,11 +19,14 @@ class DHCPMixin(object):
     def __ne__(self, other):
         return not self == other
 
-    def format_struct(self, firstline, comment=''):
+    def __str__(self):
         s = ''
         if hasattr(self, 'contents') and self.contents:
-            comment = (' # ' + comment) if comment else ''
-            s += self.side + firstline + ' {' + comment + '\n'
+            if hasattr(self, 'comment') and self.comment:
+                comment = ' # ' + self.comment
+            else:
+                comment = ''
+            s += self.side + self.firstline + ' {' + comment + '\n'
             s += join_p(self.contents, prefix=self.side)
             s += self.side + '}\n'
         if hasattr(self, 'related') and self.related:
@@ -58,6 +61,7 @@ class RangeStmt(Statement):
 class Pool(DHCPMixin):
     def __init__(self, contents=None):
         self.contents = set(contents)
+        self.firstline = 'pool'
 
         rs = next(ifilter(is_rangestmt, contents), None)
         self.start, self.end = rs.start, rs.end
@@ -72,15 +76,14 @@ class Pool(DHCPMixin):
     def __hash__(self):
         return hash(self.start + self.end)
 
-    def __str__(self):
-        return self.format_struct('pool')
-
 
 class Subnet(DHCPMixin):
     def __init__(self, netaddr, netmask, contents=None):
         self.netaddr = netaddr
         self.netmask = netmask
         self.contents = set(contents or [])
+        self.firstline = 'subnet {0} netmask {1}'.format(self.netaddr,
+                                                         self.netmask)
 
     def __eq__(self, other):
         if not isinstance(other, Subnet):
@@ -92,17 +95,14 @@ class Subnet(DHCPMixin):
     def __hash__(self):
         return hash(self.netaddr + self.netmask)
 
-    def __str__(self):
-        return self.format_struct('subnet {0} netmask {1}'.format(self.netaddr,
-                                                                self.netmask))
-
-
 
 class Subclass(DHCPMixin):
     def __init__(self, classname, match, contents=None):
         self.classname = classname
         self.match = match
         self.contents = set(contents or [])
+        self.firstline = 'subclass "{0}" {1}'.format(self.classname,
+                                                     self.match)
 
     def __eq__(self, other):
         if not isinstance(other, Subclass):
@@ -115,12 +115,10 @@ class Subclass(DHCPMixin):
         return hash(self.classname + self.match)
 
     def __str__(self):
-        firstline = 'subclass "{0}" {1}'.format(self.classname, self.match)
-
         if self.contents:
-            return self.format_struct(firstline)
+            return super(Subclass, self).__str__()
         else:
-            return self.side + firstline + ';\n'
+            return self.side + self.firstline + ';\n'
 
 
 class Class(DHCPMixin):
@@ -128,6 +126,7 @@ class Class(DHCPMixin):
         self.name = name
         self.contents = set(contents or [])
         self.related = set(related or [])
+        self.firstline = 'class "{0}"'.format(self.name)
 
     def __eq__(self, other):
         if not isinstance(other, Class):
@@ -138,9 +137,6 @@ class Class(DHCPMixin):
     def __hash__(self):
         return hash(self.name)
 
-    def __str__(self):
-        return self.format_struct('class "{0}"'.format(self.name))
-
     def add_subclass(self, match, contents):
         self.related.add(Subclass(self.name, match, contents))
 
@@ -149,6 +145,8 @@ class Group(DHCPMixin):
     def __init__(self, name, contents=None):
         self.name = name
         self.contents = set(contents or [])
+        self.firstline = 'group'
+        self.comment = self.name
 
     def __eq__(self, other):
         if not isinstance(other, Group):
@@ -159,14 +157,12 @@ class Group(DHCPMixin):
     def __hash__(self):
         return hash(self.name)
 
-    def __str__(self):
-        return self.format_struct('group', comment=self.name)
-
 
 class Host(DHCPMixin):
     def __init__(self, name, contents=None):
         self.name = name
         self.contents = set(contents or [])
+        self.firstline = 'host ' + self.name
 
     def __eq__(self, other):
         if not isinstance(other, Host):
@@ -177,16 +173,10 @@ class Host(DHCPMixin):
     def __hash__(self):
         return hash(self.name)
 
-    def __str__(self):
-        return self.format_struct('host ' + self.name)
 
-
-class ConfigFile(object):
+class ConfigFile(DHCPMixin):
     def __init__(self, related=None):
         self.related = set(related or [])
-
-    def __str__(self):
-        return join_p(self.related, indent=0)
 
     def add(self, obj):
         if obj:
