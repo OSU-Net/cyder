@@ -74,6 +74,7 @@ class Range(models.Model, ObjectUrlMixin):
     attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
+    range_usage = models.IntegerField(max_length=3, null=True, blank=True)
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE.items(),
                                   default=STATIC, editable=False)
 
@@ -137,7 +138,7 @@ class Range(models.Model, ObjectUrlMixin):
         if self.network is None and not self.is_reserved:
             raise ValidationError("ERROR: Range {0}-{1} is not associated "
                                   "with a network and is not reserved".format(
-                                  self.start_str, self.end_str))
+                                      self.start_str, self.end_str))
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
