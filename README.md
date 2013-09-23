@@ -1,7 +1,7 @@
 # Installation
 
 - Clone the repo and cd into it.
-- (*optional*) Create and activate a virtualenv:
+- (<em>optional</em>) Create and activate a virtualenv:
 
     ```bash
 virtualenv .env
@@ -16,7 +16,7 @@ pip install -r requirements/prod.txt
     
 # Usage
 
-- (*if you use a virtualenv and haven't activated it in this shell session*) Activate the virtualenv:
+- (<em>if you use a virtualenv and haven't activated it in this shell session</em>) Activate the virtualenv:
 
     ```bash
 source .env/bin/activate
