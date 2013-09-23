@@ -116,18 +116,28 @@ def compare(left, right, diff, childtype):
     ys = getattr(right, childtype)
     zs = getattr(diff, childtype)
 
+    # WARNING: Because of the way the DHCP object `==` operator was designed,
+    # two objects x and y where `x == y` may contain unequal attributes. This
+    # is intentional. In this function, x and y come from different sets; if
+    # we found the intersection of xs and ys by doing `xs & ys`, we would not
+    # know whether each item in the intersection was from xs or ys, requiring
+    # an extra find_in call (which is slightly expensive). We work around this
+    # limitation by finding the set intersection manually. This is slightly
+    # slower than doing `xs & ys` but enables us to guarantee that every
+    # object in the intersection came from xs, saving us an extra find_in call
+    # and resulting in better speed overall.
     for x in xs:
-        if x in ys: # <>
+        if x in ys: # both
             y = find_in(x, ys)
             if has_children(x) or has_children(y): # non-terminal
                 same = deep_compare(x, y, zs)
             else: # terminal
                 same = shallow_compare(x, y, zs)
-        else: # <
+        else: # left
             add_all(x, zs, '<')
             same = False
 
-    for y in ys - xs: # >
+    for y in ys - xs: # right
         add_all(y, zs, '>')
         same = False
 
