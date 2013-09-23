@@ -12,15 +12,17 @@ from dhcp_objects import (Statement, RangeStmt, Pool, Subnet, Class, Subclass,
 def first(it):
     return next(it, None)
 
-symbols = reduce(lambda x,y: x + y,
-                 (chr(i) for i in xrange(0x21, 0x7E + 1)))
+symbols = ''.join(chr(i) for i in xrange(0x21, 0x7E + 1))
 
 comment = re.compile(r'(?:"(?:[^"\\]|\\.)*"|[^"#])*(#|$)')
 
 
 def parsefile(name):
+    config = ConfigFile()
+
     bindings = {
         'symbols': symbols,
+        'config': config,
         'Statement': Statement,
         'RangeStmt': RangeStmt,
         'Pool': Pool,
@@ -32,8 +34,8 @@ def parsefile(name):
         'ConfigFile': ConfigFile,
     }
 
-    with open('dhcp.parsley') as f:
-        grammar = makeGrammar(f.read(), bindings)
+    with open('dhcp.parsley') as g:
+        grammar = makeGrammar(g.read(), bindings)
 
     with open(name) as f:
         fStr = ''
@@ -45,52 +47,94 @@ def parsefile(name):
             fStr += line
 
     g = grammar(fStr)
-    return g.configFile()
+    g.configFile()
+
+    return config
 
 
 def find_in(obj, xs):
     return first(ifilter(lambda x: x == obj, xs))
 
 
-def add_all(x, diff, side):
-    cx = deepcopy(x)
-    cx.side = side
-    diff.contents.update([cx]) # add immediately
+def has_contents(x):
+    return hasattr(x, 'contents') and x.contents
 
 
-def compare(left, right, diff):
+def has_related(x):
+    return hasattr(x, 'related') and x.related
+
+
+def has_children(x):
+    return has_contents(x) or has_related(x)
+
+
+def add_all(x, zs, side):
+    z = deepcopy(x)
+    z.side = side
+    if hasattr(z, 'related') and z.related:
+        for a in z.related:
+            a.side = side
+    zs.update([z]) # deep add
+
+
+def deep_compare(x, y, zs):
     same = True
 
-    # set intersection is broken, but there's no way to fix it
-    for x in left.contents:
-        if x in right.contents: # both left and right
-            y = find_in(x, right.contents)
-            if not hasattr(x, 'contents') or not (x.contents or y.contents):
-                if not x == y:
-                    diff.contents.update([deepcopy(x), deepcopy(y)])
-                    same = False
-                continue
-            cx = deepcopy(x)
-            cx.contents = set()
-            cx.side = ' '
-            if not compare(x, y, cx): # if they're not the same
-                diff.contents.update([cx])
-                same = False
-        else: # only left
-            add_all(x, diff, '<')
-            same = False
+    z = deepcopy(x)
+    z.side = ' '
+    if hasattr(z, 'contents'):
+        z.contents = set()
+    if hasattr(z, 'related'):
+        z.related = set()
 
-    for y in right.contents - left.contents: # only right
-        add_all(y, diff, '>')
+    if has_contents(x) or has_contents(y):
+        if not compare(x, y, z, 'contents'):
+            same = False
+            zs.update([z])
+
+    if has_related(x) or has_related(y):
+        if not compare(x, y, z, 'related'):
+            same = False
+            zs.update([z])
+
+    return same
+
+
+def shallow_compare(x, y, zs):
+    if not x == y:
+        zs.update([deepcopy(x), deepcopy(y)])
         same = False
 
-    #stdout.write('================================\n')
-    #stdout.write(str(left))
-    #stdout.write('=========== l & r ==============\n')
-    #stdout.write(str(right))
-    #stdout.write('=========== diff ===============\n')
-    #stdout.write(str(diff))
-    #stdout.write('================================\n')
+
+def compare(left, right, diff, childtype):
+    same = True
+
+    xs = getattr(left, childtype)
+    ys = getattr(right, childtype)
+    zs = getattr(diff, childtype)
+
+    for x in xs:
+        if x in ys: # <>
+            y = find_in(x, ys)
+            if has_children(x) or has_children(y): # non-terminal
+                same = deep_compare(x, y, zs)
+            else: # terminal
+                same = shallow_compare(x, y, zs)
+        else: # <
+            add_all(x, zs, '<')
+            same = False
+
+    for y in ys - xs: # >
+        add_all(y, zs, '>')
+        same = False
+
+    #stderr.write('================================\n')
+    #stderr.write(str(left))
+    #stderr.write('--------------------------------\n')
+    #stderr.write(str(right))
+    #stderr.write('------------- diff -------------\n')
+    #stderr.write(str(diff))
+    #stderr.write('================================\n')
 
     return same
 
@@ -107,7 +151,7 @@ def compare_files(filename1, filename2, verbose=False):
     diffFile = ConfigFile()
     if verbose:
         stderr.write('## Comparing...\n')
-    compare(one, two, diffFile)
+    compare(one, two, diffFile, 'related')
     return str(diffFile)
 
 if __name__ == '__main__':

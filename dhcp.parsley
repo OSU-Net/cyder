@@ -37,8 +37,8 @@ subclassItem = statement:item ws -> item
 subclassEnd = ('{' ws subclassItem*:contents '}' -> contents) | (';' -> None)
 subclass = 'subclass' ws quotedString:classname ws word:match ws
            subclassEnd:contents
-           -> Subclass(classname, match, contents)
+           -> config.get_class(classname).add_subclass(match, contents)
 
 configFileItem = (subnet | class | subclass | host | group | statement):item ws
-                 -> item
-configFile = ws configFileItem*:contents -> ConfigFile(contents)
+                 -> config.add(item)
+configFile = ws configFileItem*:contents -> None
