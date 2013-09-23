@@ -7,13 +7,13 @@
 virtualenv .env
 source .env/bin/activate
     ```
-    
+
 - Install dependencies:
 
     ```bash
 pip install -r requirements/prod.txt
     ```
-    
+
 # Usage
 
 - (<em>if you use a virtualenv and haven't activated it in this shell session</em>) Activate the virtualenv:
@@ -21,7 +21,7 @@ pip install -r requirements/prod.txt
     ```bash
 source .env/bin/activate
     ```
-    
+
 - Compare some files:
 
     ```bash
