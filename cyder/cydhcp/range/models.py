@@ -310,6 +310,36 @@ class Range(models.Model, ObjectUrlMixin):
         else:
             return None
 
+    def bind_render_record(self, **kwargs):
+        if self.range_type == STATIC or self.ip_type == IP_TYPE_6:
+            return ""
+
+        DEFAULT_TTL = 3600
+        if kwargs.pop('reverse', False):
+            template = ("$GENERATE {3:>3}-{4:<3} {0}.{1}.{2}.$     "
+                        "{6} IN  PTR  {5}.")
+        else:
+            template = ("$GENERATE {3:>3}-{4:<3} {0}-{1}-{2}-$.{5}.     "
+                        "{6} IN  A    {0}.{1}.{2}.$")
+
+        built = ""
+        start = map(int, self.start_str.split("."))
+        end = map(int, self.end_str.split("."))
+        for a in range(start[0], end[0] + 1):
+            b1 = start[1] if a == start[0] else 0
+            b2 = end[1] if a == end[0] else 255
+            for b in range(b1, b2 + 1):
+                c1 = start[2] if (a, b) == tuple(start[:2]) else 0
+                c2 = end[2] if (a, b) == tuple(end[:2]) else 255
+                for c in range(c1, c2 + 1):
+                    d1 = start[3] if (a, b, c) == tuple(start[:3]) else 0
+                    d2 = end[3] if (a, b, c) == tuple(end[:3]) else 255
+                    rec = template.format(a, b, c, d1, d2,
+                                          self.domain, DEFAULT_TTL)
+                    built = "\n".join([built, rec]).strip()
+
+        return built
+
 
 def find_free_ip(start, end, ip_type='4'):
     """Given start and end numbers, find a free ip.
