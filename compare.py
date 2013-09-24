@@ -129,9 +129,9 @@ def compare(left, right, diff, childtype):
     for x in xs:
         if x in ys: # both
             y = find_in(x, ys)
-            if has_children(x) or has_children(y): # non-terminal
+            if has_children(x) or has_children(y):
                 same = deep_compare(x, y, zs)
-            else: # terminal
+            else:
                 same = shallow_compare(x, y, zs)
         else: # left
             add_all(x, zs, '<')
