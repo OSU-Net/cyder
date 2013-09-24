@@ -191,6 +191,7 @@ def make_megafilter(Klass, term):
     Builds a query string that searches over fields in model's
     search_fields.
     """
+    term = term.strip()
     megafilter = []
     for field in Klass.search_fields:
         if field == 'mac':
