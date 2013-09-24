@@ -12,13 +12,6 @@ ALLOW_OPTIONS = [
     (ALLOW_LEGACY_AND_VRF, 'LEGACY+VRF: Allow any client that shares either a VRF or a container'),
 ]
 
-# Some ranges have no allow statements so this option should be able to be
-# null. There are a collection of such subnets documented in the migration.
-DENY_OPTION_UNKNOWN = 'deny-unknown'
-DENY_OPTIONS = {
-    DENY_OPTION_UNKNOWN: 'Deny dynamic unknown-clients',
-}
-
 STATIC = "st"
 DYNAMIC = "dy"
 RANGE_TYPE = {
