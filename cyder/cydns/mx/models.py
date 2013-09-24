@@ -70,10 +70,6 @@ class MX(CydnsRecord, LabelDomainMixin):
     def rdtype(self):
         return 'MX'
 
-    @classmethod
-    def get_api_fields(cls):
-        return super(MX, cls).get_api_fields() + ['server', 'priority']
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super(MX, self).save(*args, **kwargs)

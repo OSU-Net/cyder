@@ -46,11 +46,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
 
-    @classmethod
-    def get_api_fields(cls):
-        return super(BaseAddressRecord, cls).get_api_fields() + ['ip_str',
-                                                                 'ip_type']
-
     def clean(self, *args, **kwargs):
         self.clean_ip()
         ignore_intr = kwargs.pop("ignore_intr", False)

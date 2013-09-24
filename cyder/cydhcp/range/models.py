@@ -92,13 +92,6 @@ class Range(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
 
-    @classmethod
-    def get_api_fields(cls):
-        return (['id', 'network', 'ip_type', 'start_upper', 'start_lower',
-                 'start_str', 'end_lower', 'end_upper', 'end_str',
-                 'is_reserved', 'allow', 'deny', 'dhcpd_raw_include',
-                 'dhcp_enabled', 'range_type'])
-
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         if objects:

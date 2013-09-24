@@ -107,10 +107,6 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
     def __repr__(self):
         return "<{0}>".format(str(self))
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['ip_str', 'ip_type', 'name', 'ttl', 'description']
-
     @property
     def rdtype(self):
         return 'PTR'

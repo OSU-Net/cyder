@@ -59,12 +59,6 @@ class Network(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Network {0}>".format(str(self))
 
-    @classmethod
-    def get_api_fields(cls):
-        return (['id', 'vlan', 'site', 'vrf', 'ip_type', 'ip_upper',
-                 'ip_lower', 'network_str', 'prefixlen', 'enabled',
-                 'dhcpd_raw_include'])
-
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         objects = objects or Network.objects

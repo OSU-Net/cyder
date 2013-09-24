@@ -105,11 +105,6 @@ class Site(models.Model, ObjectUrlMixin):
         """Compile a Django Q that will match any IP inside this site."""
         return networks_to_Q(self.network_set.all())
 
-    @classmethod
-    def get_api_fields(cls):
-        return (['id', 'name'] + super(Site, cls).get_api_fields()
-                + ['parent'])
-
 
 class SiteKeyValue(KeyValue):
     site = models.ForeignKey(Site, null=False)

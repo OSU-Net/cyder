@@ -51,11 +51,6 @@ class TXT(CydnsRecord, LabelDomainMixin):
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
 
-    @classmethod
-    def get_api_fields(cls):
-        data = super(TXT, cls).get_api_fields() + ['txt_data']
-        return data
-
     @property
     def rdtype(self):
         return 'TXT'

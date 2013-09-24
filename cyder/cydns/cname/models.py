@@ -61,10 +61,6 @@ class CNAME(CydnsRecord, LabelDomainMixin):
     def rdtype(self):
         return 'CNAME'
 
-    @classmethod
-    def get_api_fields(cls):
-        return super(CNAME, cls).get_api_fields() + ['target']
-
     def save(self, *args, **kwargs):
         self.clean()
         super(CNAME, self).save(*args, **kwargs)

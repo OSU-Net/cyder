@@ -46,10 +46,6 @@ class System(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['id', 'name', 'systemkeyvalue_set']
-
 
 class SystemKeyValue(KeyValue, ObjectUrlMixin):
 

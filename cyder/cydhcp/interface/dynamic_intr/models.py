@@ -37,11 +37,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     def __str__(self):
         return "{0}".format(self.mac_str)
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['id', 'ctnr', 'workgroup', 'system', 'mac', 'vrf', 'domain',
-                'range', 'dhcp_enabled', 'dns_enabled', 'last_seen']
-
     @property
     def mac_str(self):
         return (':').join(re.findall('..', self.mac))

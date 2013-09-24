@@ -20,10 +20,6 @@ class Vrf(models.Model, ObjectUrlMixin):
     def __str__(self):
         return get_display(self)
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['id', 'name'] + super(Vrf, cls).get_api_fields()
-
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         Network = get_model('network', 'network')

@@ -69,11 +69,6 @@ class Ctnr(models.Model, ObjectUrlMixin):
                     build_str += client.build_subclass(self.name)
         return build_str
 
-    @classmethod
-    def get_api_fields(cls):
-        return ['id', 'name', 'users', 'domains', 'ranges', 'workgroups',
-                'description', 'email_contact']
-
 
 class CtnrUser(models.Model, ObjectUrlMixin):
     user = models.ForeignKey(User)

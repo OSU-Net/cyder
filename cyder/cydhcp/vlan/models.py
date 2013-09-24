@@ -27,11 +27,6 @@ class Vlan(models.Model, ObjectUrlMixin):
     def __repr__(self):
         return "<Vlan {0}>".format(str(self))
 
-    @classmethod
-    def get_api_fields(cls):
-        return (['id', 'name'] + super(Vlan, cls).get_api_fields()
-                + ['number'])
-
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         Network = get_model('network', 'network')
