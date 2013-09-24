@@ -95,9 +95,15 @@
                   <td>{{ record_ip }}</td>
                   <td>{{ record._meta.db_table|prettify_obj_type }}</td>
                   {% if record.get_detail_url() %}
-                    <td><a href="{{ record.get_detail_url() }}">{{record.fqdn}}</a></td>
+                    <td><a href="{{ record.get_detail_url() }}">{{record}}</a></td>
                   {% else %}
-                    <td><a href="{{ record.domain.get_detail_url() }}">{{record.fqdn}}</a></td>
+                    {% if record.domain %}
+                      <td><a href="{{ record.domain.get_detail_url() }}">{{record}}</a></td>
+                    {% elif record.reverse_domain %}
+                      <td><a href="{{ record.reverse_domain.get_detail_url() }}">{{record}}</a></td>
+                    {% else %}
+                      <td>{{record}}</td>
+                    {% endif %}
                   {% endif %}
                 </tr>
               {% endfor %}

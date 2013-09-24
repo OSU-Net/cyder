@@ -13,6 +13,7 @@ from cyder.api.authtoken.models import Token
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
+from cyder import LEVEL_GUEST
 
 
 def login_session(request, username):
@@ -49,9 +50,18 @@ def login_session(request, username):
     else:
         request.session['ctnr'] = Ctnr.objects.get(id=2)
 
+    if request.session['ctnr'].name == "default":
+        default_ctnr = Ctnr.objects.get(name="global")
+        request.session['ctnr'] = default_ctnr
+
     # Set session ctnr level.
-    request.session['level'] = CtnrUser.objects.get(user=request.user,
-                                                    ctnr=default_ctnr).level
+    try:
+        level = CtnrUser.objects.get(user=request.user,
+                                     ctnr=default_ctnr).level
+    except CtnrUser.DoesNotExist:
+        level = LEVEL_GUEST
+
+    request.session['level'] = level
 
     try:
         CtnrUser.objects.get(user=request.user, ctnr=1)

@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -49,10 +50,16 @@ class LibTestsRange(TestCase):
         n.vlan = v
         n.save()
 
-        r = Range(start_str="15.0.0.0", end_str="15.0.0.10",
-                  network=n, ip_type='4')
-        r.clean()
-        r.save()
+
+        r1 = Range(start_str="15.0.0.0", end_str="15.0.0.10",
+                   network=n, ip_type='4', range_type=STATIC)
+        r1.clean()
+        r1.save()
+
+        r2 = Range(start_str="15.0.0.20", end_str="15.0.0.22",
+                   network=n, ip_type='4', range_type=STATIC)
+        r2.clean()
+        r2.save()
 
     def test1_create_ipv4_interface_from_range(self):
         intr, errors = create_ipv4_intr_from_range(

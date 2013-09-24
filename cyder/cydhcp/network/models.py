@@ -71,6 +71,7 @@ class Network(models.Model, ObjectUrlMixin):
             ('Network', 'network_str', self),
             ('Site', 'site', self.site),
             ('Vlan', 'vlan', self.vlan),
+            ('Vrf', 'vrf', self.vrf),
         )
         return data
 

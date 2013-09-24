@@ -12,14 +12,14 @@ class Migration(SchemaMigration):
         db.create_table('dynamic_interface', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('ctnr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ctnr.Ctnr'])),
-            ('range', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['range.Range'])),
-            ('workgroup', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['workgroup.Workgroup'], null=True)),
-            ('mac', self.gf('django.db.models.fields.CharField')(max_length=19)),
-            ('system', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['system.System'], null=True, blank=True)),
-            ('vrf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['vrf.Vrf'], null=True)),
+            ('workgroup', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['workgroup.Workgroup'], null=True, blank=True)),
+            ('system', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['system.System'])),
+            ('mac', self.gf('django.db.models.fields.CharField')(max_length=19, blank=True)),
             ('domain', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['domain.Domain'], null=True)),
+            ('range', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['range.Range'])),
             ('dhcp_enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('dns_enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('last_seen', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, max_length=11, blank=True)),
         ))
         db.send_create_signal('dynamic_intr', ['DynamicInterface'])
 
@@ -32,17 +32,17 @@ class Migration(SchemaMigration):
             ('is_option', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('is_statement', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('has_validator', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('intr', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
+            ('dynamic_interface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
         ))
         db.send_create_signal('dynamic_intr', ['DynamicIntrKeyValue'])
 
-        # Adding unique constraint on 'DynamicIntrKeyValue', fields ['key', 'value', 'intr']
-        db.create_unique('dynamic_interface_kv', ['key', 'value', 'intr_id'])
+        # Adding unique constraint on 'DynamicIntrKeyValue', fields ['key', 'value', 'dynamic_interface']
+        db.create_unique('dynamic_interface_kv', ['key', 'value', 'dynamic_interface_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'DynamicIntrKeyValue', fields ['key', 'value', 'intr']
-        db.delete_unique('dynamic_interface_kv', ['key', 'value', 'intr_id'])
+        # Removing unique constraint on 'DynamicIntrKeyValue', fields ['key', 'value', 'dynamic_interface']
+        db.delete_unique('dynamic_interface_kv', ['key', 'value', 'dynamic_interface_id'])
 
         # Deleting model 'DynamicInterface'
         db.delete_table('dynamic_interface')
@@ -92,7 +92,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Ctnr', 'db_table': "'ctnr'"},
             'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'domains': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['domain.Domain']", 'symmetrical': 'False', 'blank': 'True'}),
-            'email_contact': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
+            'email_contact': ('django.db.models.fields.CharField', [], {'max_length': '75', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'}),
             'ranges': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['range.Range']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -124,17 +124,17 @@ class Migration(SchemaMigration):
             'dns_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'domain': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['domain.Domain']", 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mac': ('django.db.models.fields.CharField', [], {'max_length': '19'}),
+            'last_seen': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'max_length': '11', 'blank': 'True'}),
+            'mac': ('django.db.models.fields.CharField', [], {'max_length': '19', 'blank': 'True'}),
             'range': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['range.Range']"}),
-            'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']", 'null': 'True', 'blank': 'True'}),
-            'vrf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vrf.Vrf']", 'null': 'True'}),
-            'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True'})
+            'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
+            'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True', 'blank': 'True'})
         },
         'dynamic_intr.dynamicintrkeyvalue': {
-            'Meta': {'unique_together': "(('key', 'value', 'intr'),)", 'object_name': 'DynamicIntrKeyValue', 'db_table': "'dynamic_interface_kv'"},
+            'Meta': {'unique_together': "(('key', 'value', 'dynamic_interface'),)", 'object_name': 'DynamicIntrKeyValue', 'db_table': "'dynamic_interface_kv'"},
+            'dynamic_interface': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dynamic_intr.DynamicInterface']"}),
             'has_validator': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'intr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dynamic_intr.DynamicInterface']"}),
             'is_option': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_quoted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_statement': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -143,26 +143,29 @@ class Migration(SchemaMigration):
         },
         'network.network': {
             'Meta': {'unique_together': "(('ip_upper', 'ip_lower', 'prefixlen'),)", 'object_name': 'Network', 'db_table': "'network'"},
-            'dhcpd_raw_include': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'dhcpd_raw_include': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ip_lower': ('django.db.models.fields.BigIntegerField', [], {'blank': 'True'}),
-            'ip_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'ip_type': ('django.db.models.fields.CharField', [], {'default': "'4'", 'max_length': '1'}),
             'ip_upper': ('django.db.models.fields.BigIntegerField', [], {'blank': 'True'}),
             'network_str': ('django.db.models.fields.CharField', [], {'max_length': '49'}),
             'prefixlen': ('django.db.models.fields.PositiveIntegerField', [], {}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['site.Site']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
-            'vlan': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vlan.Vlan']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'})
+            'vlan': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vlan.Vlan']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
+            'vrf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vrf.Vrf']", 'null': 'True', 'blank': 'True'})
         },
         'range.range': {
             'Meta': {'unique_together': "(('start_upper', 'start_lower', 'end_upper', 'end_lower'),)", 'object_name': 'Range', 'db_table': "'range'"},
-            'allow': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
-            'deny': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
-            'dhcpd_raw_include': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'allow': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
+            'deny': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
+            'dhcp_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'dhcpd_raw_include': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'end_lower': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'end_str': ('django.db.models.fields.CharField', [], {'max_length': '39'}),
             'end_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ip_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'ip_type': ('django.db.models.fields.CharField', [], {'default': "'4'", 'max_length': '1'}),
             'is_reserved': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'network': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['network.Network']", 'null': 'True', 'blank': 'True'}),
             'range_type': ('django.db.models.fields.CharField', [], {'default': "'st'", 'max_length': '2'}),
@@ -179,7 +182,7 @@ class Migration(SchemaMigration):
         'soa.soa': {
             'Meta': {'unique_together': "(('primary', 'contact', 'description'),)", 'object_name': 'SOA', 'db_table': "'soa'"},
             'contact': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'dirty': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'expire': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1209600'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -188,15 +191,13 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1368820919'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1377740240'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'system.system': {
-            'Meta': {'unique_together': "(('name', 'location', 'department'),)", 'object_name': 'System', 'db_table': "'system'"},
+            'Meta': {'object_name': 'System', 'db_table': "'system'"},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'department': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'location': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
@@ -209,8 +210,7 @@ class Migration(SchemaMigration):
         'vrf.vrf': {
             'Meta': {'object_name': 'Vrf', 'db_table': "'vrf'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'}),
-            'network': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['network.Network']", 'null': 'True'})
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'})
         },
         'workgroup.workgroup': {
             'Meta': {'object_name': 'Workgroup', 'db_table': "'workgroup'"},
