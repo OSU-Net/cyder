@@ -6,7 +6,7 @@ from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE,
-                                    STATIC)
+                                    STATIC, DYNAMIC)
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
                                     ALLOW_LEGACY)
@@ -183,15 +183,14 @@ class Range(models.Model, ObjectUrlMixin):
             raise ValidationError("The start of a range cannot be greater than"
                                   " or equal to the end of the range.")
 
-        if self.range_type == STATIC:
-            if self.dynamicinterface_set.exists():
-                raise ValidationError('A dynamic range cannot contain static '
-                                      'interfaces')
-        else:
-            if StaticInterface.objects.filter(
-                    start_end_filter(start, end, self.ip_type)[2]).exists():
-                raise ValidationError('A static range cannot contain dynamic '
-                                      'interfaces')
+        if self.range_type == STATIC and self.dynamicinterface_set.exists():
+            raise ValidationError('A static range cannot contain dynamic '
+                                  'interfaces')
+
+        if self.range_type == DYNAMIC and StaticInterface.objects.filter(
+                start_end_filter(start, end, self.ip_type)[2]).exists():
+            raise ValidationError('A dynamic range cannot contain static '
+                                  'interfaces')
 
         if not self.is_reserved:
             self.network.update_network()
