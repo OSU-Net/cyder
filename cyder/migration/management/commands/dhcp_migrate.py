@@ -6,6 +6,7 @@ from django.db import transaction
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.models import View
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
@@ -29,6 +30,8 @@ from lib.utilities import long2ip
 cached = {}
 host_option_values = None
 
+public, _ = View.objects.get_or_create(name="public")
+private, _ = View.objects.get_or_create(name="private")
 
 allow_all_subnets = [
     '10.192.76.2', '10.192.103.150', '10.192.15.2',
@@ -146,10 +149,15 @@ def create_range(range_id, start, end, range_type,
             start_lower=start, start_str=ipaddr.IPv4Address(start),
             end_lower=end, end_str=ipaddr.IPv4Address(end), is_reserved=True,
             range_type=r_type, allow=allow, ip_type='4', domain=d)
+
+    r.views.add(public)
+    r.views.add(private)
+
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         rk, _ = RangeKeyValue.objects.get_or_create(
             range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
             is_option=True, is_quoted=True)
+
     return (r, created)
 
 

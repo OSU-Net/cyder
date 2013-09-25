@@ -103,6 +103,7 @@ def render_forward_zone(view, mega_filter):
 
         range_set=Range.objects
         .filter(mega_filter)
+        .filter(views__name=view.name)
         .order_by('start_upper', 'start_lower'),
     )
     return data
@@ -136,6 +137,7 @@ def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter):
 
         range_set=Range.objects
         .filter(domain_mega_filter)
+        .filter(views__name=view.name)
         .order_by('start_upper', 'start_lower'),
 
     )

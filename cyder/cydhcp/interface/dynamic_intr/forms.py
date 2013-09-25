@@ -9,7 +9,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(DynamicInterfaceForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['system', 'domain', 'mac', 'vrf',
+        self.fields.keyOrder = ['system', 'mac', 'vrf',
                                 'site', 'range', 'workgroup', 'dhcp_enabled',
                                 'dns_enabled', 'ctnr']
         self.fields['range'].required = True

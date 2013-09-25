@@ -8,7 +8,11 @@ class RangeForm(forms.ModelForm, UsabilityFormMixin):
     class Meta:
         model = Range
         exclude = ('start_upper', 'start_lower', 'end_upper', 'end_lower')
-        widgets = {'ip_type': forms.RadioSelect}
+        fields = ('network', 'ip_type', 'start_str', 'end_str', 'domain',
+                  'is_reserved', 'allow', 'views', 'dhcpd_raw_include',
+                  'dhcp_enabled')
+        widgets = {'views': forms.CheckboxSelectMultiple,
+                   'ip_type': forms.RadioSelect}
 
     def __init__(self, *args, **kwargs):
         super(RangeForm, self).__init__(*args, **kwargs)
