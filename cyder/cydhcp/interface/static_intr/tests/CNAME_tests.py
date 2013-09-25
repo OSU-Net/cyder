@@ -78,4 +78,4 @@ class CNAMEStaticRegTests(TestCase):
         i = self.do_add_intr(**kwargs)
         cn, _ = CNAME.objects.get_or_create(label='food', domain=domain,
                                             target=label + "." + domain.name)
-        i.delete(check_cname=False)
+        i.delete(check_cname=False, **{'delete_system': False})
