@@ -60,7 +60,7 @@ cd cyder
 - Set up virtualenv (recommended):
 
     ```
-virtualenv --distribute .env
+virtualenv .env
     ```
 
     Do `source .env/bin/activate` now and every time you run your shell.
