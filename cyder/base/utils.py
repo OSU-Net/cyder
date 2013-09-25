@@ -7,6 +7,7 @@ from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
+
 import cyder as cy
 
 
@@ -108,7 +109,12 @@ def tablefy(objects, users=False, extra_cols=None, info=True, request=False):
         for title, field, value in obj.details()['data']:
             # Build data.
             try:
-                url = value.get_detail_url()
+                if title == 'IP':
+                    from cyder.cydhcp.range.utils import find_range
+                    rng = find_range(value)
+                    url = rng.get_detail_url()
+                else:
+                    url = value.get_detail_url()
                 if value == obj:
                     if info is True:
                         row_data[0]['url'] = [url]
@@ -185,6 +191,7 @@ def make_megafilter(Klass, term):
     Builds a query string that searches over fields in model's
     search_fields.
     """
+    term = term.strip()
     megafilter = []
     for field in Klass.search_fields:
         if field == 'mac':
@@ -201,16 +208,7 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
     if ctnr.name in ['global', 'default']:
         return objects or Klass.objects
 
-    if hasattr(Klass, 'filter_by_ctnr'):
-        return Klass.filter_by_ctnr(ctnr, objects)
-    else:
-        objects = objects or Klass.objects
-        if hasattr(Klass, 'domain'):
-            objects = objects.filter(domain__in=ctnr.domains.all())
-        elif hasattr(Klass, 'reverse_domain'):
-            objects = objects.filter(reverse_domain__in=ctnr.domains.all())
-
-    return objects
+    return Klass.filter_by_ctnr(ctnr, objects)
 
 
 def _filter(request, Klass):

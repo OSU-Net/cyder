@@ -1,12 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.http import HttpResponse
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.constants import (
-    ALLOW_OPTIONS, DENY_OPTIONS, RANGE_TYPE, STATIC
+    ALLOW_OPTIONS, RANGE_TYPE, STATIC
 )
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_VRF, ALLOW_KNOWN,
@@ -72,8 +71,6 @@ class Range(models.Model, ObjectUrlMixin):
 
     allow = models.CharField(max_length=1, choices=ALLOW_OPTIONS,
                              default=ALLOW_LEGACY)
-    deny = models.CharField(max_length=20, choices=DENY_OPTIONS.items(),
-                            blank=True)
 
     attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
@@ -298,13 +295,12 @@ class Range(models.Model, ObjectUrlMixin):
 
             :returns: ipaddr.IPv4Address
         """
-        if self.network.ip_type is not '4':
+        if self.network and self.network.ip_type != '4':
             return None
-        start = self.start_lower
-        end = self.end_lower
-        if start >= end - 1:
-            return HttpResponse("Too small of a range.")
-        ip = find_free_ip(start, end, ip_type='4')
+        elif self.ip_type != '4':
+            return None
+
+        ip = find_free_ip(self.start_lower, self.end_lower, ip_type='4')
         if ip:
             return ip
         else:

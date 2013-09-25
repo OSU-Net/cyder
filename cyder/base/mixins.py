@@ -82,6 +82,14 @@ class ObjectUrlMixin(object):
 
 
 class UsabilityFormMixin(object):
+    def append_required_all(self):
+        for fieldname, field in self.fields.items():
+            if self.fields[fieldname].required is True:
+                if self.fields[fieldname].label is None:
+                    self.fields[fieldname].label = fieldname.capitalize() + '*'
+                else:
+                    self.fields[fieldname].label += '*'
+
     def alphabetize_all(self):
         for fieldname, field in self.fields.items():
             if hasattr(field, 'queryset'):
@@ -98,8 +106,9 @@ class UsabilityFormMixin(object):
             queryset = self.fields[fieldname].queryset
             if queryset.model is Ctnr:
                 ctnrs = set(c.pk for c in request.session['ctnrs'])
-                for pk in [1,2]:
-                    if pk in ctnrs: ctnrs.remove(pk)
+                for pk in [1, 2]:
+                    if pk in ctnrs:
+                        ctnrs.remove(pk)
 
                 if self.fields[fieldname].initial:
                     ctnrs.add(self.fields[fieldname].initial.pk)
@@ -132,3 +141,4 @@ class UsabilityFormMixin(object):
             self.filter_by_ctnr_all(request)
         self.alphabetize_all()
         self.autoselect_system()
+        self.append_required_all()

@@ -1,0 +1,74 @@
+Char = (letterOrDigit | '.' | '-' | '_')
+OptionValueChar = :c ?(not c in reserved_chars)
+FQDN = < Char* >
+HexDigit = :c ?( c in hexdigits )
+MACSeg = HexDigit{2}':'
+Octet = <digit{1,3}>:dig -> int(dig) < 256
+IP = <Octet '.' Octet '.' Octet '.' Octet>
+MAC = <MACSeg{5}HexDigit{2}>
+OptionKey = < Char* >
+OptionValue = < OptionValueChar* >
+ParameterKey = OptionKey:p ?(p not in keywords) -> p
+
+Option :scope = ws 'option' ws OptionKey:option_key ws OptionValue:option_value ';'
+        -> Option(key=option_key, value=option_value, scope=scope)
+
+Parameter :scope = ws ParameterKey:param_key ws OptionValue:param_value ';'
+        -> Parameter(key=param_key, value=param_value, scope=scope)
+
+FixedAddress = ws 'fixed-address' ws IP:ip ';'
+        -> {'ip': ip}
+
+HardwareAddress = ws 'hardware ethernet' ws MAC:mac ';'
+        -> {'mac': mac.lower()}
+
+HostAttributes = Option(HOST) | HardwareAddress | FixedAddress | Parameter(HOST)
+
+Host = ws 'host' ws FQDN:fqdn ws '{' HostAttributes*:attrs ws '}'
+        -> Host(**prepare_arguments(attrs, fqdn=fqdn.lower(), exclude_list=['mac', 'fqdn']))
+
+Range = ws 'range' ws IP:start ws IP:end ';'
+        -> {'start': start, 'end': end}
+
+Allow = ws 'allow' ws OptionValue:allow ';'
+        -> Allow(allow)
+
+Deny = ws 'deny' ws OptionValue:deny ';'
+        -> Deny(deny)
+
+PoolAttrs = Option(POOL) | Allow | Parameter(POOL) | Range | Deny
+
+Pool = ws 'pool' ws '{' PoolAttrs*:attrs ws '}'
+        -> Pool(**prepare_arguments(attrs, exclude_list=['start', 'end']))
+
+SubnetAttrs = Option(SUBNET) | Pool | Parameter(SUBNET)
+
+Subnet = ws 'subnet' ws IP:network_addr ws 'netmask' ws IP:netmask_addr ws '{'
+            SubnetAttrs*:attrs ws
+        '}'
+        -> Subnet(**prepare_arguments(attrs,
+                                      netmask_addr=netmask_addr,
+                                      network_addr=network_addr))
+
+GroupAttrs = Group | Host | Option(GROUP) | Parameter(GROUP)
+
+Group = ws 'group' ws '{' GroupAttrs*:attrs ws '}'
+        -> Group(**prepare_arguments(attrs))
+
+TopLevelGroup = Group:group -> self.add_group(group)
+
+TopLevelHost = Host:host -> self.add_host(host)
+
+Class = ws 'class' ws '"' <(Char | ' ')* ':' IP ':' IP>:name '"' ws '{'
+        ws 'match' ws <Char*>:match ';' ws '}' -> ClientClass(name=name, match=match)
+
+TopLevelClass = Class:klass -> self.add_class(klass)
+
+TopLevelSubClass = ws 'subclass' ws '"' <(Char | ' ')* ':' IP ':' IP>:name '"' ws  '1:' MAC:mac ';'
+        -> self.add_subclass(name=name, mac=mac.lower())
+
+
+TopLevelOption = Option(GLOBAL):option -> config.add_option(option)
+TopLevelParameter = Parameter(GLOBAL):param -> self.add_parameter(param)
+TopLevelSubnet = Subnet:sub -> self.add_subnet(sub)
+GlobalParse = (TopLevelClass | TopLevelSubClass | TopLevelSubnet | TopLevelOption | TopLevelParameter | TopLevelGroup | TopLevelHost)* ws -> self

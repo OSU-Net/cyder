@@ -15,6 +15,7 @@ from cyder.base.constants import IP_TYPE_6
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
+from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -97,9 +98,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
     dhcp_enabled = models.BooleanField(
-        default=True, help_text='Enable DHCP for this interface?')
+        default=True)
     dns_enabled = models.BooleanField(
-        default=True, help_text='Enable DNS for this interface?')
+        default=True)
 
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
@@ -110,6 +111,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     class Meta:
         db_table = 'static_interface'
         unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or StaticInterface.objects
+        return objects.filter(ctnr=ctnr)
 
     def __repr__(self):
         return '<StaticInterface: {0}>'.format(str(self))
@@ -125,25 +131,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     @property
     def range(self):
-        if not self.ip_str:
-            return None
-
-        self.clean_ip()
-
-        Range = get_model('range', 'range')
-        q_start = (Q(start_upper__lt=self.ip_upper) |
-                   Q(start_upper=self.ip_upper,
-                     start_lower__lte=self.ip_lower))
-        q_end = (Q(end_upper__gt=self.ip_upper) |
-                 Q(end_upper=self.ip_upper,
-                   end_lower__gte=self.ip_lower))
-        r = Range.objects.filter(q_start, q_end)
-
-        if r.exists():
-            return r.get()
-        else:
-            return None
-
+        if self.ip_str:
+            return find_range(self.ip_str)
 
     def update_attrs(self):
         self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
@@ -189,6 +178,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def get_related_systems(self):
         related_interfaces = StaticInterface.objects.filter(mac=self.mac)
+        related_interfaces = related_interfaces.select_related('system')
         related_systems = set()
         for interface in related_interfaces:
             related_systems.update([interface.system])

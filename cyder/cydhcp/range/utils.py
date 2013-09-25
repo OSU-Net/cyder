@@ -1,11 +1,35 @@
+from django.db.models import get_model, Q
+
 from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
+from cyder.base.utils import qd_to_py_dict
+
+from django.db.models.loading import get_model
+from django.http import HttpResponse
+
+import json
+
+import ipaddr
 
 
 def pretty_ranges(ranges):
     return [(rng.start_str + " - " + rng.end_str) for rng in ranges]
+
+
+def find_range(ip_str):
+    Range = get_model('range', 'range')
+    ip_upper, ip_lower = one_to_two(int(ipaddr.IPAddress(ip_str)))
+    q_start = (Q(start_upper__lt=ip_upper) |
+               Q(start_upper=ip_upper,
+                 start_lower__lte=ip_lower))
+    q_end = (Q(end_upper__gt=ip_upper) |
+             Q(end_upper=ip_upper,
+               end_lower__gte=ip_lower))
+    try:
+        return Range.objects.filter(q_start, q_end)[0]
+    except IndexError:
+        return None
 
 
 def ip_taken(ip, records):
@@ -65,6 +89,8 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
                 remove those items from their lists
 
     """
+    from cyder.cydhcp.interface.static_intr.models import StaticInterface
+
     istart, iend, ipf_q = start_end_filter(ip_start, ip_end, ip_type)
 
     def get_ip(rec):
@@ -124,3 +150,81 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
         'used': int(iend) - int(istart) - unused + 1,
         'free_ranges': free_ranges,
     }
+
+
+def range_wizard(request):
+    from cyder.cydhcp.network.utils import get_ranges
+    vrf_networks = set()
+    site_networks = set()
+    networks = []
+    if request.POST:
+        data = qd_to_py_dict(request.POST)
+        if data['range']:
+            Range = get_model('range', 'range')
+            rng = Range.objects.get(id=data['range'])
+
+            if data['free_ip'] and rng and rng.ip_type == '4':
+                ip_str = rng.get_next_ip()
+                if not ip_str:
+                    ip_str = 'This range is full!'
+            else:
+                ip_str = '.'.join(rng.start_str.split('.')[:-1])
+
+            return HttpResponse(json.dumps({
+                'ip_type': rng.ip_type,
+                'ip_str': str(ip_str), }))
+
+        if data['vrf']:
+            Vrf = get_model('vrf', 'vrf')
+            vrf = Vrf.objects.get(id=data['vrf'])
+            vrf_networks = vrf.get_related_networks([vrf])
+
+        if data['site']:
+            Site = get_model('site', 'site')
+            site = Site.objects.get(id=data['site'])
+            # Right now campus will return a result of all networks
+            if site.name == 'Campus':
+                Network = get_model('network', 'network')
+                site_networks = Network.objects.all()
+            else:
+                site_networks = site.get_related_networks([site])
+
+        if data.get('range_type', None):
+            range_types = [data.get('range_type')[:2]]
+        else:
+            range_types = ['st', 'dy']
+        all_ranges = False
+
+        if data['site'] and data['vrf']:
+            networks = vrf_networks.intersection(site_networks)
+
+        elif data['site'] or data['vrf']:
+            networks = vrf_networks.union(site_networks)
+
+        else:
+            all_ranges = True
+
+        ranges = get_ranges(
+            networks, ctnr=request.session['ctnr'],
+            range_types=range_types, all_ranges=all_ranges)
+
+        if len(ranges) > 0:
+            if data['free_ip'] and ranges[0].ip_type == '4':
+                ip_str = ranges[0].get_next_ip()
+                ip_type = 4
+                if not ip_str:
+                    ip_str = 'This range is full!'
+            else:
+                ip_str = '.'.join(ranges[0].start_str.split('.')[:-1])
+                ip_type = ranges[0].ip_type
+        else:
+            ip_str = ''
+            ip_type = 4
+
+        ranges = [(pretty_ranges(ranges)), ([r.id for r in ranges])]
+        return HttpResponse(json.dumps({'ranges': ranges,
+                                        'ip_type': ip_type,
+                                        'ip_str': str(ip_str)}))
+
+    else:
+        return None
