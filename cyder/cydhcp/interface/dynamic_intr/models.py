@@ -24,7 +24,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True)
-    dns_enabled = models.BooleanField(default=True)
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
     search_fields = ('mac',)

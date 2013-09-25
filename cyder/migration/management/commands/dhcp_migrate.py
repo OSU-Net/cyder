@@ -309,8 +309,7 @@ def migrate_dynamic_hosts():
 
         intr, _ = DynamicInterface.objects.get_or_create(
             range=r, workgroup=w, ctnr=c, domain=d, mac=mac, system=s,
-            dhcp_enabled=enabled, dns_enabled=enabled,
-            last_seen=items['last_seen'])
+            dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,
