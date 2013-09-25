@@ -15,6 +15,7 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import IPFilter, four_to_two, join_dhcp_args
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
+from cyder.cydns.models import ViewMixin
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -24,7 +25,7 @@ import ipaddr
 # import reversion
 
 
-class Range(models.Model, ObjectUrlMixin):
+class Range(ViewMixin, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
