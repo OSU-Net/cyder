@@ -19,9 +19,9 @@ $(document).ready(function() {
             this.onclick = function onclick(event) {
                 $.post('/dhcp/interface/interface_delete/', postData, function(data) {
                     if(data.last == true) {
-                        if(confirm("Because this is the last interface on it's "
+                        if(confirm("Because this is the last interface on its "
                                    + "system, deleting this interface will also "
-                                   + "delete it's system. Are you sure you want "
+                                   + "delete its system. Are you sure you want "
                                    + "to continue?")) {
                             window.location.replace(url);
                         };
