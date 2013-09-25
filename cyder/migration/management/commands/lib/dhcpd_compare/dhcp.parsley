@@ -1,0 +1,44 @@
+ascii = letterOrDigit | (anything:x ?(x in symbols) -> x)
+asciiNoQuote = ascii:x ?(x != '"') -> x
+asciiSafe = ascii:x ?(x not in '"{};') -> x
+wsNoNewline = <(' ' | '\t')*>
+
+quotedString = '"' <(~'"' ('\\"' | asciiNoQuote | ws))+>:x '"' -> x
+word = <quotedString | asciiSafe+>
+
+
+statement = <word (ws word)*>:stmt ws ';' -> Statement(stmt)
+
+rangeStmt = 'range' ws word:start ws word:end ws ';' -> RangeStmt(start, end)
+
+
+poolContents = (~rangeStmt statement:s ws -> s)*:pre (rangeStmt:rs ws -> rs):rs
+               (statement:s ws -> s)*:post -> (pre or []) + [rs] + (post or [])
+pool = 'pool' ws '{' ws poolContents:contents '}' -> Pool(contents)
+
+subnetItem = (pool | statement):item ws -> item
+subnet = 'subnet' ws word:netaddr ws 'netmask' ws word:netmask ws '{' ws
+         subnetItem*:contents '}' -> Subnet(netaddr, netmask, contents)
+
+classItem = statement:item ws -> item
+class = 'class' ws quotedString:name ws '{' ws classItem*:contents '}'
+        -> Class(name, contents)
+
+hostItem = statement:item ws -> item
+host = 'host' ws word:name ws '{' ws hostItem*:contents '}'
+       -> Host(name, contents)
+
+groupName = <asciiSafe+ (wsNoNewline asciiSafe+)*>
+groupItem = (host | statement):item ws -> item
+group = 'group' ws '{' ws '#' ws groupName:name ws groupItem*:contents '}'
+        -> Group(name, contents)
+
+subclassItem = statement:item ws -> item
+subclassEnd = ('{' ws subclassItem*:contents '}' -> contents) | (';' -> None)
+subclass = 'subclass' ws quotedString:classname ws word:match ws
+           subclassEnd:contents
+           -> config.get_class(classname).add_subclass(match, contents)
+
+configFileItem = (subnet | class | subclass | host | group | statement):item ws
+                 -> config.add(item)
+configFile = ws configFileItem* -> None
