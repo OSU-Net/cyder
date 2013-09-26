@@ -8,6 +8,7 @@ from cyder.cydns.cname.models import CNAME
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.base.constants import IP_TYPE_6, IP_TYPE_4
+from cyder.cydhcp.range.utils import find_range
 
 
 class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
@@ -78,7 +79,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                 raise ValidationError(
                     "A CNAME points to this {0} record. Change the CNAME "
                     "before deleting this record.".format(self.record_type()))
-
         super(BaseAddressRecord, self).delete(*args, **kwargs)
 
     def check_intr_collision(self):
@@ -164,3 +164,15 @@ class AddressRecord(BaseAddressRecord):
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
+
+    def save(self, *args, **kwargs):
+        super(AddressRecord, self).save(*args, **kwargs)
+        rng = find_range(self.ip_str)
+        if rng:
+            rng.save()
+
+    def delete(self, *args, **kwargs):
+        rng = find_range(self.ip_str)
+        super(AddressRecord, self).delete(*args, **kwargs)
+        if rng:
+            rng.save()
