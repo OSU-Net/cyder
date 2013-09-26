@@ -33,7 +33,6 @@ class SystemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = System
-        fields = System.get_api_fields()
 
 
 class SystemViewSet(viewsets.ModelViewSet):
