@@ -188,7 +188,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         self.clean_reverse(update_reverse_domain=urd)  # BasePTR
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
-        self.range.save()
+        if self.range:
+            self.range.save()
 
     def delete(self, *args, **kwargs):
         rng = self.range
@@ -196,7 +197,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             self.reverse_domain.soa.schedule_rebuild()
             # The reverse_domain field is in the Ip class.
         super(StaticInterface, self).delete(*args, **kwargs)
-        rng.save()
+        if rng:
+            rng.save()
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
