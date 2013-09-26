@@ -59,13 +59,13 @@
         <th>View or Create</th>
       </thead>
       <tbody>
-        {% for obj in range_data %}
-          {% if obj[0] == 'Free' %}
+        {% for x in range_data %}
+          {% if x[0] == 'Free' %}
           <tr>
-              {% if obj[1] == obj[2] %}
-                <td>{{ obj[1] }}</td>
+              {% if x[1] == x[2] %}
+                <td>{{ x[1] }}</td>
               {% else %}
-                <td>{{ obj[1] }} - {{ obj[2] }}</td>
+                <td>{{ x[1] }} - {{ x[2] }}</td>
               {% endif %}
               <td>Free</td>
               <td>
@@ -73,31 +73,37 @@
                   {{ create_button('address_record',
                                    url('cydns-get-record'),
                                    url('address_record'),
-                                   data=obj[-1],
+                                   data=x[-1],
                                    button_prefix="") }}
                 {% endif %}
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='ptr') %}
                   {{ create_button('ptr',
                                    url('cydns-get-record'),
                                    url('ptr'),
-                                   data=obj[-1],
+                                   data=x[-1],
                                    button_prefix="") }}
                                    {% endif %}
-                {% if request.user.get_profile().has_perm(request, 2, obj_class='staticinterface') %}
-                  <a class="btn submit a" href={{ url('system-create', obj[1].__str__()) }}>Static Interface</a>
+                {% if request.user.get_profile().has_perm(request, 2, obj_class='staticinterface') and obj.range_type == 'st' %}
+                  <a class="btn submit a" href={{ url('system-create', x[1].__str__()) }}>Static Interface</a>
                 {% endif %}
                 <td>
             </tr>
           {% else %}
-            {% for record_ip, record_set in obj %}
+            {% for record_ip, record_set in x %}
               {% for record in record_set %}
                 <tr>
                   <td>{{ record_ip }}</td>
                   <td>{{ record._meta.db_table|prettify_obj_type }}</td>
                   {% if record.get_detail_url() %}
-                    <td><a href="{{ record.get_detail_url() }}">{{record.fqdn}}</a></td>
+                    <td><a href="{{ record.get_detail_url() }}">{{record}}</a></td>
                   {% else %}
-                    <td><a href="{{ record.domain.get_detail_url() }}">{{record.fqdn}}</a></td>
+                    {% if record.domain %}
+                      <td><a href="{{ record.domain.get_detail_url() }}">{{record}}</a></td>
+                    {% elif record.reverse_domain %}
+                      <td><a href="{{ record.reverse_domain.get_detail_url() }}">{{record}}</a></td>
+                    {% else %}
+                      <td>{{record}}</td>
+                    {% endif %}
                   {% endif %}
                 </tr>
               {% endfor %}
