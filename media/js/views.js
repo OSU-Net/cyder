@@ -27,6 +27,7 @@ $(document).ready(function() {
         // Show create form on clicking create button.
         e.preventDefault();
         slideUp($('#obj-form'));
+        form.action = this.href;
         if(this.hasAttribute('data-objType')) {
             var $createBtn = $(this);
             var formPrettyObjType = $createBtn.attr('data-prettyobjtype');
