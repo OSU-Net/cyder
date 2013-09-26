@@ -3,6 +3,7 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.models import ViewMixin, DisplayMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
@@ -126,11 +127,17 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
         self.clean(update_reverse_domain=urd)
         super(PTR, self).save(*args, **kwargs)
         self.rebuild_reverse()
+        rng = find_range(self.ip_str)
+        if rng:
+            rng.save()
 
     def delete(self, *args, **kwargs):
         if self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
+        rng = find_range(self.ip_str)
         super(PTR, self).delete(*args, **kwargs)
+        if rng:
+            rng.save()
 
     def clean(self, update_reverse_domain=True):
         self.clean_ip()
