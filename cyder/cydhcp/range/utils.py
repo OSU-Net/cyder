@@ -1,11 +1,8 @@
 from django.db.models import get_model, Q
 
 from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.ptr.models import PTR
 from cyder.base.utils import qd_to_py_dict
 
-from django.db.models.loading import get_model
 from django.http import HttpResponse
 
 import json
@@ -89,8 +86,9 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
                 remove those items from their lists
 
     """
-    from cyder.cydhcp.interface.static_intr.models import StaticInterface
-
+    StaticInterface = get_model('static_intr', 'staticinterface')
+    PTR = get_model('ptr', 'ptr')
+    AddressRecord = get_model('addressrecord', 'addressrecord')
     istart, iend, ipf_q = start_end_filter(ip_start, ip_end, ip_type)
 
     def get_ip(rec):
