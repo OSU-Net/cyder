@@ -85,7 +85,11 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return get_display(self) + " ({0}% Used)".format(str(self.range_usage))
+        if self.range_usage:
+            return get_display(self) + " ({0}% Used)".format(
+                str(self.range_usage))
+        else:
+            return get_display(self)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
