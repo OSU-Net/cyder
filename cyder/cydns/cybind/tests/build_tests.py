@@ -12,7 +12,7 @@ from cyder.cydns.cybind.builder import DNSBuilder, BuildError
 
 from cyder.cydns.tests.utils import create_fake_zone
 
-from cyder.scripts.dnsbuilds.tests.build_tests import BuildScriptTests
+from cyder.cydns.cybind.dnsbuilds.tests.build_tests import BuildScriptTests
 
 
 class MockBuildScriptTests(BuildScriptTests, TestCase):
