@@ -7,7 +7,7 @@ class SOAForm(ModelForm):
     class Meta:
         model = SOA
         fields = ('description', 'primary', 'contact', 'expire', 'retry',
-                  'refresh', 'minimum', 'ttl', 'is_signed')
+                  'refresh', 'minimum', 'ttl', 'is_signed', 'dns_enabled')
         exclude = ('serial', 'dirty',)
 
 

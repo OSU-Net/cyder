@@ -72,6 +72,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)
+    dns_enabled = models.BooleanField(default=True)
+
     search_fields = ('primary', 'contact', 'description')
     display_fields = ('description',)
     template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
