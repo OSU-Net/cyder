@@ -167,6 +167,3 @@ def compare_files(filename1, filename2, verbose=False):
         stderr.write('## Comparing...\n')
     compare(one, two, diffFile, 'related')
     return str(diffFile)
-
-if __name__ == '__main__':
-    stdout.write(compare_files(argv[1], argv[2], verbose=True))
