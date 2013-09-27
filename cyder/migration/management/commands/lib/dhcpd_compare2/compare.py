@@ -102,14 +102,6 @@ def deep_compare(x, y, zs):
     return same
 
 
-def shallow_compare(x, y, zs):
-    if not x == y:
-        zs.update((deepcopy(x), deepcopy(y)))
-        return False
-    else:
-        return True
-
-
 def compare(left, right, diff, childtype):
     same = True
 
@@ -133,7 +125,7 @@ def compare(left, right, diff, childtype):
             if has_children(x) or has_children(y):
                 same = deep_compare(x, y, zs)
             else:
-                same = shallow_compare(x, y, zs)
+                same = True
         else: # left
             add_all(x, zs, '<')
             same = False
