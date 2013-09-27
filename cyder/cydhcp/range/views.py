@@ -1,6 +1,6 @@
 import json
 
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 
@@ -43,19 +43,26 @@ def range_detail(request, pk):
 
     allow.sort(key=lambda x: x.lower())
 
-    start_upper = mrange.start_upper
-    start_lower = mrange.start_lower
-    end_upper = mrange.end_upper
-    end_lower = mrange.end_lower
-    range_data, ip_usage_percent = range_usage(
-        two_to_one(start_upper, start_lower),
-        two_to_one(end_upper, end_lower),
-        mrange.ip_type)
+    range_type = mrange.range_type
+    range_data = []
+    ip_usage_percent = None
+    if range_type == 'st':
+        start_upper = mrange.start_upper
+        start_lower = mrange.start_lower
+        end_upper = mrange.end_upper
+        end_lower = mrange.end_lower
+        range_data, ip_usage_percent = range_usage(
+            two_to_one(start_upper, start_lower),
+            two_to_one(end_upper, end_lower),
+            mrange.ip_type)
+    else:
+        print 'ok'
     return render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
         'ranges_table': tablefy((mrange,), info=False, request=request),
         'range_data': make_paginator(request, range_data, 50),
+        'range_type': range_type,
         'attrs_table': tablefy(mrange.rangekeyvalue_set.all(),
                                request=request),
         'allow_list': allow,

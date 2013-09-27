@@ -2,7 +2,11 @@
 {% from "base/tables.html" import render_table %}
 {% from "base/utility.html" import create_button %}
 {% block title %}
-  Range {{ obj.start_str }} to {{ obj.end_str }}
+  {% if range_type == 'st' %}
+    Static Range {{ obj.start_str }} to {{ obj.end_str }}
+  {% else %}
+    Dynamic Range {{ obj.start_str }} to {{ obj.end_str }}
+  {% endif %}
 {% endblock %}
 
 {% block view_metadata %}
@@ -47,7 +51,7 @@
     {{ render_table(request, attrs_table) }}
   {% endif %}
 
-  {% if range_data %}
+  {% if range_data and range_type == 'st' %}
     <h3>Range Usage: {{ range_used }}</h3>
     {% with page_obj = range_data %}
       {% include "base/includes/pagination.html" %}
