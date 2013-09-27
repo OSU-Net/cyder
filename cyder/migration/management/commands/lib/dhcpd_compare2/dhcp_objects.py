@@ -60,7 +60,7 @@ class RangeStmt(Statement):
 
 class Pool(DHCPMixin):
     def __init__(self, contents=None):
-        self.contents = set(contents)
+        self.contents = set(contents or [])
         self.firstline = 'pool'
 
         rs = next(ifilter(is_rangestmt, contents), None)
