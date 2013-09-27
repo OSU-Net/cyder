@@ -103,10 +103,13 @@ def cydns_view(request, pk=None):
         except (ValidationError, ValueError), e:
             form = _revert(domain, request.POST, form, FormKlass)
             form._errors = ErrorDict()
+            if hasattr(e, 'messages'):
+                e = e.messages
+
             if '__all__' in form._errors:
-                form._errors['__all__'] += ErrorList(e.messages)
+                form._errors['__all__'] += ErrorList(e)
             else:
-                form._errors['__all__'] = ErrorList(e.messages)
+                form._errors['__all__'] = ErrorList(e)
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
