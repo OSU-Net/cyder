@@ -44,4 +44,4 @@ urlpatterns = patterns(
 for kv in DNS_KEY_VALUES:
     urlpatterns += patterns(
         '',
-        url(r"^{0}/".format(kv), include(cydns_urls(kv))))
+        url(r'^{0}/'.format(kv), include(cydns_urls(kv))))
