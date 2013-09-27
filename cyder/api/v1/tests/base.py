@@ -147,15 +147,12 @@ class APITests(object):
             "Authentication credentials were not provided."
 
     def test_unauthorized_root(self):
-        """Make sure unauthorized users can't access the root view."""
         self.metatest_unauthorized(self.root_url)
 
     def test_unauthorized_list(self):
-        """Make sure unauthorized users can't access the list view."""
         self.metatest_unauthorized(self.object_list_url)
 
     def test_unauthorized_detail(self):
-        """Make sure unauthorized users can't access the detail view."""
         self.metatest_unauthorized(self.object_url(1))
 
     def test_nonexistent(self):
