@@ -41,6 +41,16 @@ class UserProfile(models.Model, ObjectUrlMixin):
                 pass
         super(UserProfile, self).save(*args, **kwargs)
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        if objects:
+            return UserProfile.objects.filter(pk__in=
+                ctnr.users.filter(pk__in=objects)
+                .values_list('profile', flat=True))
+        else:
+            return UserProfile.objects.filter(pk__in=
+                ctnr.users.all().values_list('profile', flat=True))
+
 
 def create_user_profile(sender, **kwargs):
     user = kwargs['instance']

@@ -72,12 +72,11 @@ class CtnrAPI_Test(CoreAPITests):
 
         resp = self.http_get(
             self.f_object_list_url.format(1, 'core', 'user')
-            + '?ctnr='
-            + self.ctnr.name
+            + '?ctnr=' + self.ctnr.name
         )
         user_data = json.loads(resp.content)['results']
         for u in user_data:
-            if u['username'] == self.user.username:
+            if u['user']['username'] == self.user.username:
                 break
         else:
             assert 1 == 0, "Could not filter users by ctnr."

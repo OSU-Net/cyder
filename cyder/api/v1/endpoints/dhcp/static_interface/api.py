@@ -39,8 +39,6 @@ class StaticInterfaceSerializer(CommonDNSSerializer):
         read_only=True, view_name='api-dns-domain-detail')
     workgroup = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dhcp-workgroup-detail')
-    vrf = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-vrf-detail')
     domain = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dns-domain-detail')
 

@@ -124,16 +124,20 @@ class APITests(object):
         for key in a:
             assert a[key] == b[key]
 
-    def assertHttpOK(self, resp):
+    @staticmethod
+    def assertHttpOK(resp):
         assert resp.status_code == 200
 
-    def assertHttpUnauthorized(self, resp):
+    @staticmethod
+    def assertHttpUnauthorized(resp):
         assert resp.status_code == 401
 
-    def assertHttpNotFound(self, resp):
+    @staticmethod
+    def assertHttpNotFound(resp):
         assert resp.status_code == 404
 
-    def assertHttpMethodNotAllowed(self, resp):
+    @staticmethod
+    def assertHttpMethodNotAllowed(resp):
         assert resp.status_code == 405
 
     def metatest_unauthorized(self, url):

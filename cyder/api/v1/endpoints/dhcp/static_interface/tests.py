@@ -42,7 +42,11 @@ class StaticInterfaceV4API_Test(StaticInterfaceBase):
             'ip_str': '11.12.14.255',
             'ip_type': '4',
         })
-        obj, _ = self.model.objects.get_or_create(**data)
+        fack = self.model.objects.filter(**data)
+        if fack:
+            obj, _ = fack.all()[0]
+        else:
+            obj, _ = self.model.objects.get_or_create(**data)
         return obj
 
 
@@ -58,5 +62,9 @@ class StaticInterfaceV6API_Test(StaticInterfaceBase):
             'ip_str': '2001:0db8:85a3:0000:0000:8a2e:0370:7344',
             'ip_type': '6',
         })
-        obj, _ = self.model.objects.get_or_create(**data)
+        fack = self.model.objects.filter(**data).all()
+        if fack:
+            obj, _ = fack[0]
+        else:
+            obj, _ = self.model.objects.get_or_create(**data)
         return obj
