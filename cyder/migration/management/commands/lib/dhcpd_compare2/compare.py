@@ -127,11 +127,11 @@ def compare(left, right, diff, childtype):
             else:
                 same = True
         else: # left
-            add_all(x, zs, '<')
+            add_all(x, zs, '-')
             same = False
 
     for y in ys - xs: # right
-        add_all(y, zs, '>')
+        add_all(y, zs, '+')
         same = False
 
     #stderr.write('================================\n')
