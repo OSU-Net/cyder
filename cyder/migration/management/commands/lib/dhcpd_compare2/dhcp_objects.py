@@ -1,3 +1,4 @@
+from functools import total_ordering
 from itertools import ifilter
 
 
@@ -13,11 +14,18 @@ def join_p(xs, indent=1, prefix=''):
     return "".join(prefix + line + '\n' for line in lines)
 
 
+@total_ordering
 class DHCPMixin(object):
     side = ''
 
+    def __eq__(self, other):
+        return self.TYPE == other.TYPE and self._sort_str == other._sort_str
+
     def __ne__(self, other):
         return not self == other
+
+    def __lt__(self, other):
+        return self.TYPE < other.TYPE or self._sort_str < other._sort_str
 
     def __str__(self):
         s = ''
@@ -27,22 +35,20 @@ class DHCPMixin(object):
             else:
                 comment = ''
             s += self.side + self.firstline + ' {' + comment + '\n'
-            s += join_p(self.contents, prefix=self.side)
+            s += join_p(sorted(self.contents), prefix=self.side)
             s += self.side + '}\n'
         if hasattr(self, 'related') and self.related:
-            s += join_p(self.related, indent=0) # they print their own side
+            s += join_p(sorted(self.related), indent=0)
+            # they print their own side
         return s
 
-
 class Statement(DHCPMixin):
+    TYPE = 1
+
     def __init__(self, statement):
         self.statement = statement
 
-    def __eq__(self, other):
-        if not isinstance(other, Statement):
-            return NotImplemented
-        else:
-            return (self.statement == other.statement)
+        self._sort_str = self.statement
 
     def __hash__(self):
         return hash(self.statement)
@@ -52,13 +58,19 @@ class Statement(DHCPMixin):
 
 
 class RangeStmt(Statement):
+    TYPE = 0
+
     def __init__(self, start, end):
         self.statement = 'range {0} {1}'.format(start, end)
         self.start = start
         self.end = end
 
+        self._sort_str = self.start + self.end
+
 
 class Pool(DHCPMixin):
+    TYPE = 2
+
     def __init__(self, contents=None):
         self.contents = set(contents or [])
         self.firstline = 'pool'
@@ -66,18 +78,15 @@ class Pool(DHCPMixin):
         rs = next(ifilter(is_rangestmt, contents), None)
         self.start, self.end = rs.start, rs.end
 
-    def __eq__(self, other):
-        if not isinstance(other, Pool):
-            return NotImplemented
-        else:
-            return (self.start == other.start and
-                    self.end == other.end)
+        self._sort_str = self.start + self.end
 
     def __hash__(self):
         return hash(self.start + self.end)
 
 
 class Subnet(DHCPMixin):
+    TYPE = 3
+
     def __init__(self, netaddr, netmask, contents=None):
         self.netaddr = netaddr
         self.netmask = netmask
@@ -85,18 +94,15 @@ class Subnet(DHCPMixin):
         self.firstline = 'subnet {0} netmask {1}'.format(self.netaddr,
                                                          self.netmask)
 
-    def __eq__(self, other):
-        if not isinstance(other, Subnet):
-            return NotImplemented
-        else:
-            return (self.netaddr == other.netaddr and
-                    self.netmask == other.netmask)
+        self._sort_str = self.netaddr + self.netmask
 
     def __hash__(self):
         return hash(self.netaddr + self.netmask)
 
 
 class Subclass(DHCPMixin):
+    TYPE = 4
+
     def __init__(self, classname, match, contents=None):
         self.classname = classname
         self.match = match
@@ -104,12 +110,7 @@ class Subclass(DHCPMixin):
         self.firstline = 'subclass "{0}" {1}'.format(self.classname,
                                                      self.match)
 
-    def __eq__(self, other):
-        if not isinstance(other, Subclass):
-            return NotImplemented
-        else:
-            return (self.classname == other.classname and
-                    self.match == other.match)
+        self._sort_str = self.classname + self.match
 
     def __hash__(self):
         return hash(self.classname + self.match)
@@ -122,17 +123,15 @@ class Subclass(DHCPMixin):
 
 
 class Class(DHCPMixin):
+    TYPE = 5
+
     def __init__(self, name, contents=None, related=None):
         self.name = name
         self.contents = set(contents or [])
         self.related = set(related or [])
         self.firstline = 'class "{0}"'.format(self.name)
 
-    def __eq__(self, other):
-        if not isinstance(other, Class):
-            return NotImplemented
-        else:
-            return (self.name == other.name)
+        self._sort_str = self.name
 
     def __hash__(self):
         return hash(self.name)
@@ -142,33 +141,29 @@ class Class(DHCPMixin):
 
 
 class Group(DHCPMixin):
+    TYPE = 6
+
     def __init__(self, name, contents=None):
         self.name = name
         self.contents = set(contents or [])
         self.firstline = 'group'
         self.comment = self.name
 
-    def __eq__(self, other):
-        if not isinstance(other, Group):
-            return NotImplemented
-        else:
-            return (self.name == other.name)
+        self._sort_str = self.name
 
     def __hash__(self):
         return hash(self.name)
 
 
 class Host(DHCPMixin):
+    TYPE = 7
+
     def __init__(self, name, contents=None):
         self.name = name
         self.contents = set(contents or [])
         self.firstline = 'host ' + self.name
 
-    def __eq__(self, other):
-        if not isinstance(other, Host):
-            return NotImplemented
-        else:
-            return (self.name == other.name)
+        self._sort_str = self.name
 
     def __hash__(self):
         return hash(self.name)
