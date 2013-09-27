@@ -86,8 +86,15 @@ class Range(models.Model, ObjectUrlMixin):
 
     def __str__(self):
         if self.range_usage:
-            return get_display(self) + " ({0}% Used)".format(
-                str(self.range_usage))
+            if self.range_usage == 100:
+                return get_display(self) + " (Full Capacity)"
+
+            elif self.range_usage > 100:
+                return get_display(self) + " (Over Capacity)"
+
+            else:
+                return get_display(self) + " ({0}% Used)".format(
+                    str(self.range_usage))
         else:
             return get_display(self)
 
@@ -303,9 +310,18 @@ class Range(models.Model, ObjectUrlMixin):
             self.network, self.start_str, self.end_str)
 
     def get_usage(self):
-        from cyder.cydhcp.range.range_usage import range_usage
-        _, usage = range_usage(self.start_lower, self.end_lower,
-                               self.ip_type)
+        if self.range_type == 'st':
+            from cyder.cydhcp.range.range_usage import range_usage
+            _, usage = range_usage(self.start_lower, self.end_lower,
+                                   self.ip_type)
+        else:
+            DynamicInterface = models.get_model('dynamic_intr',
+                                                'dynamicinterface')
+            used = float(DynamicInterface.objects.filter(
+                range=self, dhcp_enabled=True).count())
+            capacity = float(self.end_lower - self.start_lower + 1)
+            usage = (used/capacity)*100
+
         return usage
 
     def get_next_ip(self):

@@ -115,6 +115,17 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
         super(DynamicInterface, self).clean()
 
+    def save(self, *args, **kwargs):
+        super(DynamicInterface, self).save()
+        if self.range:
+            self.range.save()
+
+    def delete(self, *args, **kwargs):
+        rng = self.range
+        super(DynamicInterface, self).delete()
+        if rng:
+            rng.save()
+
 
 class DynamicIntrKeyValue(CommonOption):
     dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
