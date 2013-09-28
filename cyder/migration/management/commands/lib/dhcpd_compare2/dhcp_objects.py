@@ -18,9 +18,6 @@ def join_p(xs, indent=1, prefix=''):
 class DHCPMixin(object):
     side = ''
 
-    def __eq__(self, other):
-        return self.TYPE == other.TYPE and self._sort_str == other._sort_str
-
     def __ne__(self, other):
         return not self == other
 
@@ -50,6 +47,10 @@ class Statement(DHCPMixin):
 
         self._sort_str = self.statement
 
+    def __eq__(self, other):
+        return (isinstance(other, Statement)
+                and self.statement == other.statement)
+
     def __hash__(self):
         return hash(self.statement)
 
@@ -67,6 +68,10 @@ class RangeStmt(Statement):
 
         self._sort_str = self.start + self.end
 
+    def __eq__(self, other):
+        return (isinstance(other, RangeStmt) and self.start == other.start
+                and self.end == other.end)
+
 
 class Pool(DHCPMixin):
     TYPE = 2
@@ -79,6 +84,10 @@ class Pool(DHCPMixin):
         self.start, self.end = rs.start, rs.end
 
         self._sort_str = self.start + self.end
+
+    def __eq__(self, other):
+        return (isinstance(other, Pool) and self.start == other.start
+                and self.end == other.end)
 
     def __hash__(self):
         return hash(self.start + self.end)
@@ -96,6 +105,10 @@ class Subnet(DHCPMixin):
 
         self._sort_str = self.netaddr + self.netmask
 
+    def __eq__(self, other):
+        return (isinstance(other, Subnet) and self.netaddr == other.netaddr
+                and self.netmask == other.netmask)
+
     def __hash__(self):
         return hash(self.netaddr + self.netmask)
 
@@ -111,6 +124,11 @@ class Subclass(DHCPMixin):
                                                      self.match)
 
         self._sort_str = self.classname + self.match
+
+    def __eq__(self, other):
+        return (isinstance(other, Subclass)
+                and self.classname == other.classname
+                and self.match == other.match)
 
     def __hash__(self):
         return hash(self.classname + self.match)
@@ -133,6 +151,9 @@ class Class(DHCPMixin):
 
         self._sort_str = self.name
 
+    def __eq__(self, other):
+        return isinstance(other, Class) and self.name == other.name
+
     def __hash__(self):
         return hash(self.name)
 
@@ -151,6 +172,9 @@ class Group(DHCPMixin):
 
         self._sort_str = self.name
 
+    def __eq__(self, other):
+        return isinstance(other, Group) and self.name == other.name
+
     def __hash__(self):
         return hash(self.name)
 
@@ -164,6 +188,9 @@ class Host(DHCPMixin):
         self.firstline = 'host ' + self.name
 
         self._sort_str = self.name
+
+    def __eq__(self, other):
+        return isinstance(other, Host) and self.name == other.name
 
     def __hash__(self):
         return hash(self.name)
