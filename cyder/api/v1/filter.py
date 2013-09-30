@@ -42,11 +42,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         )
 
         for q in request.QUERY_PARAMS:
-            if q.startswith("i_") and q.endswith(ALLOWED_ENDINGS):
+            if q.startswith("i:") and q.endswith(ALLOWED_ENDINGS):
                 q_include[q[2:]] = request.QUERY_PARAMS[q]
-            elif q.startswith("e_") and q.endswith(ALLOWED_ENDINGS):
+            elif q.startswith("e:") and q.endswith(ALLOWED_ENDINGS):
                 q_exclude[q[2:]] = request.QUERY_PARAMS[q]
-            elif q.startswith("k_"):
+            elif q.startswith("k:"):
                 # key value matching
                 q_keyvalues[q[2:]] = request.QUERY_PARAMS[q]
             elif q == "sort":

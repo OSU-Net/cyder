@@ -154,13 +154,13 @@ This returns a **list view** of Domain records. List views allow you to navigate
             ...
         ]
     }
-    
+
 1. ``count``, ``next``, and ``previous`` all provide data that can help simplify API interaction.
 
    - ``count`` gives the number of records of the requested type. This makes it easy to iterate through records without making additional requests to check when you've reached the end.
    - ``next`` and ``previous`` each contain URLs to the next and previous page of results. These are constructed dynamically by the API, so they will always contain any query parameters you have passed. Because these values will be ``null`` if no such page exists, you can also use them to iterate through multi-page lists of results without having to count. This is also safer than counting, because changes made to the database in the middle of a large batch of API requests may cause there to be a different number of pages than there were at the beginning of the operation.
-   
-2. As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name ``in-addr.arpa``, you could simply pass the value of ``master_domain`` to api_connect and retrieve the appropriate record.
+
+2. As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name ``in-addr.arpa``, you could simply pass the value of ``master_domain`` to curl and retrieve the appropriate record.
 
 ~~~~~~~~~~~~
 Detail Views
@@ -235,17 +235,17 @@ Before we can write our query, however, we need to know the basic structure of e
 
 .. code::
 
-    mode         = "i_" | "e_"
-    
+    mode         = "i:" | "e:"
+
     field        = ? any valid field name ?
-    
+
     field lookup = "exact" | "iexact" | "contains" | "icontains" | "gt"
                  | "gte" | "lt" | "lte" | "startswith" | "istartswith"
                  | "endswith" | "iendswith" | "isnull"
 
     filter       = mode, "_", field, "__", field lookup
 
-Here, ``mode`` sets whether records matching the query should be included (``i_``) or excluded (``e_``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
+Here, ``mode`` sets whether records matching the query should be included (``i:``) or excluded (``e:``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
 
 .. _field lookups reference: https://docs.djangoproject.com/en/1.4/ref/models/querysets/#field-lookups
 
@@ -255,13 +255,13 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i_target__exact=www.orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu"
 
 .. code:: json
 
     {
         "count": 233,
-        "next": "http://127.0.0.1:8000/api/v1/cname/?i_target__exact=www.orst.edu&page=2",
+        "next": "http://127.0.0.1:8000/api/v1/cname/?i:target__exact=www.orst.edu&page=2",
         "previous": null,
         "results": [
             {
@@ -302,13 +302,13 @@ Here we can see the first two results are both domains under ``orst.edu``. Let's
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i_target__exact=www.orst.edu&e_fqdn_contains=orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu&e:fqdn_contains=orst.edu"
 
 .. code:: json
 
     {
         "count": 182,
-        "next": "http://127.0.0.1:8000/api/v1/cname/?i_target__exact=www.orst.edu&e_fqdn__contains=orst.edu&page=2",
+        "next": "http://127.0.0.1:8000/api/v1/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu&page=2",
         "previous": null,
         "results": [
             {
@@ -339,23 +339,23 @@ Basic queries are not only limited to top-level fields. Sometime it is desirable
 .. code:: json
 
     {
-        "count": 521, 
-        "next": "http://127.0.0.1:8000/api/v1/dns/mx/?page=2", 
-        "previous": null, 
+        "count": 521,
+        "next": "http://127.0.0.1:8000/api/v1/dns/mx/?page=2",
+        "previous": null,
         "results": [
             {
-                "label": "rattusdev", 
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2727/", 
+                "label": "rattusdev",
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2727/",
                 "views": [
                     "public"
-                ], 
-                "id": 286, 
-                "created": "2013-08-16T15:18:45", 
-                "modified": "2013-08-16T15:18:45", 
-                "fqdn": "rattusdev.nacse.org", 
-                "ttl": 86400, 
-                "description": "", 
-                "server": "relay.oregonstate.edu", 
+                ],
+                "id": 286,
+                "created": "2013-08-16T15:18:45",
+                "modified": "2013-08-16T15:18:45",
+                "fqdn": "rattusdev.nacse.org",
+                "ttl": 86400,
+                "description": "",
+                "server": "relay.oregonstate.edu",
                 "priority": 5
             },
             ...
@@ -364,30 +364,30 @@ Basic queries are not only limited to top-level fields. Sometime it is desirable
 
 We know that domain records have a ``name`` field containing their FQDN, so we should construct our query to find only MX records attached to the domain ``orst.edu``. Querying fields of related records is easily accomplished by appending two underscores and the name of the field we want to query in the related record. For example, querying the domain name of MX records is accomplished like so:
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/mx/?i_domain__name__exact=orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/mx/?i:domain__name__exact=orst.edu"
 
 Now our results look like this:
 
 .. code:: json
 
     {
-        "count": 9, 
-        "next": null, 
-        "previous": null, 
+        "count": 9,
+        "next": null,
+        "previous": null,
         "results": [
             {
-                "label": "exchangemail", 
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2974/", 
+                "label": "exchangemail",
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2974/",
                 "views": [
                     "public"
                 ],
-                "id": 410, 
-                "created": "2013-08-16T15:24:29", 
-                "modified": "2013-08-16T15:24:29", 
-                "fqdn": "exchangemail.orst.edu", 
-                "ttl": 86400, 
-                "description": "", 
-                "server": "ex1.oregonstate.edu", 
+                "id": 410,
+                "created": "2013-08-16T15:24:29",
+                "modified": "2013-08-16T15:24:29",
+                "fqdn": "exchangemail.orst.edu",
+                "ttl": 86400,
+                "description": "",
+                "server": "ex1.oregonstate.edu",
                 "priority": 5
             },
             ...
@@ -421,29 +421,29 @@ As an example, let's try finding all systems running Linux.
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/core/system/?k_operating+system=linux"
+    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/core/system/?k:operating+system=linux"
 
 .. code:: json
 
     {
-        "count": 363, 
-        "next": "http://127.0.0.1:8000/api/v1/core/system/?k_operating+system=linux&page=2", 
-        "previous": null, 
+        "count": 363,
+        "next": "http://127.0.0.1:8000/api/v1/core/system/?k:operating+system=linux&page=2",
+        "previous": null,
         "results": [
             {
-                "id": 9918, 
-                "name": "voledev", 
+                "id": 9918,
+                "name": "voledev",
                 "systemkeyvalue_set": [
                     {
-                        "id": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/29699/", 
-                        "key": "Hardware Type", 
-                        "value": "VM", 
+                        "id": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/29699/",
+                        "key": "Hardware Type",
+                        "value": "VM",
                         "is_quoted": false
-                    }, 
+                    },
                     {
-                        "id": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/29700/", 
-                        "key": "Operating System", 
-                        "value": "Linux", 
+                        "id": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/29700/",
+                        "key": "Operating System",
+                        "value": "Linux",
                         "is_quoted": false
                     }
                 ]
@@ -451,7 +451,7 @@ As an example, let's try finding all systems running Linux.
             ...
         ]
     }
-    
+
 This list can be used as is, or it can be further filtered with additional query parameters. For example, we could search for all systems running Linux in the ``nws`` container, or all enabled IPv6 networks on a certain VLAN.
 
 Summary of Field Lookups
@@ -459,22 +459,22 @@ Summary of Field Lookups
 ~~~~~
 exact
 ~~~~~
-Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter ``i_field__exact=Go+Beavs``, it will match fields that contain the value "Go Beavs", but not "go beavs" or "go Beavs".
+Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter ``i:field__exact=Go+Beavs``, it will match fields that contain the value "Go Beavs", but not "go beavs" or "go Beavs".
 
 ~~~~~~
 iexact
 ~~~~~~
-Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter ``i_field__iexact=Go+Beavs``, it will match fields that contain the value "Go Beavs", "go beavs", and "go Beavs", as well as any other capitalizations of the string "Go Beavs".
+Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter ``i:field__iexact=Go+Beavs``, it will match fields that contain the value "Go Beavs", "go beavs", and "go Beavs", as well as any other capitalizations of the string "Go Beavs".
 
 ~~~~~~~~
 contains
 ~~~~~~~~
-Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i_field__contains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", and "Go Beavers!", but not "go beavs", "I love the beavs", or "Go beavers!"
+Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i:field__contains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", and "Go Beavers!", but not "go beavs", "I love the beavs", or "Go beavers!"
 
 ~~~~~~~~~
 icontains
 ~~~~~~~~~
-Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i_field__icontains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", "Go Beavers!", "go beavs", "I love the beavs", and "Go beavers!", as well as any other string containing the search value, regardless of case.
+Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i:field__icontains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", "Go Beavers!", "go beavs", "I love the beavs", and "Go beavers!", as well as any other string containing the search value, regardless of case.
 
 ~~
 gt
@@ -485,7 +485,7 @@ Example query:
 
 .. code::
 
-    ?i_field_gt=10
+    ?i:field_gt=10
 
 ~~~
 gte
@@ -496,7 +496,7 @@ Example query:
 
 .. code::
 
-    ?i_field_gte=10
+    ?i:field_gte=10
 
 ~~
 lt
@@ -507,7 +507,7 @@ Example query:
 
 .. code::
 
-    ?i_field_lt=10
+    ?i:field_lt=10
 
 ~~~
 lte
@@ -518,29 +518,29 @@ Example query:
 
 .. code::
 
-    ?i_field_lte=10
+    ?i:field_lte=10
 
 ~~~~~~~~~~
 startswith
 ~~~~~~~~~~
-Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter ``i_field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
+Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter ``i:field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
 
 ~~~~~~~~~~~
 istartswith
 ~~~~~~~~~~~
-Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter ``i_field__istartswith=Go``, it would match "Go Beavs!", "Go Beavers!", "go beavs", and "GO BEAVS!", but not "Let's go Beavers!"
+Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter ``i:field__istartswith=Go``, it would match "Go Beavs!", "Go Beavers!", "go beavs", and "GO BEAVS!", but not "Let's go Beavers!"
 
 ~~~~~~~~
 endswith
 ~~~~~~~~
-Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter ``i_field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
+Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter ``i:field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
 
 ~~~~~~~~~
 iendswith
 ~~~~~~~~~
-Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter ``i_field__iendswith=Beavers``, it would match "Go Beavers", "I love the Beavers", and "GO BEAVERS", but not "Go Beavers!" or "I love the Beavers."
+Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter ``i:field__iendswith=Beavers``, it would match "Go Beavers", "I love the Beavers", and "GO BEAVERS", but not "Go Beavers!" or "I love the Beavers."
 
 ~~~~~~
 isnull
 ~~~~~~
-Find all rows where the queried field is null or not null. If you pass the query string parameter ``i_field__isnull=False``, it would only match rows where ``field`` has a value.
+Find all rows where the queried field is null or not null. If you pass the query string parameter ``i:field__isnull=False``, it would only match rows where ``field`` has a value.
