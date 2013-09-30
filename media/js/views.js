@@ -1,6 +1,10 @@
 $(document).ready(function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
+    var hidden_inner_form = document.getElementById('hidden-inner-form');
+    if(hidden_inner_form) {
+        var defaults = hidden_inner_form.innerHTML;
+    };
     var objType = metadata.attr('data-objType');
     var objName = metadata.attr('data-objName');
     var prettyObjType = metadata.attr('data-prettyObjType');
@@ -24,6 +28,8 @@ $(document).ready(function() {
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
+        slideUp($('#obj-form'));
+        form.action = this.href;
         if(this.hasAttribute('data-objType')) {
             var $createBtn = $(this);
             var formPrettyObjType = $createBtn.attr('data-prettyobjtype');
@@ -31,7 +37,6 @@ $(document).ready(function() {
             var formGetUrl = $createBtn.attr('data-getUrl');
             var formObjName = $createBtn.attr('data-objName');
             var data_to_post = $createBtn.attr('data-kwargs');
-            slideUp($('#obj-form'));
             $.get(formGetUrl,
                 {
                     'object_type': formObjType,
@@ -57,7 +62,12 @@ $(document).ready(function() {
         } else {
             setTimeout(function() {
                 $('#form-title').html('Creating ' + prettyObjType);
-                clear_form_all(form);
+
+                if(defaults) {
+                    $('#hidden-inner-form').empty().html(defaults);
+                } else {
+                    clear_form_all(form);
+                };
             }, 150);
             $('.form-btns a.submit').text('Create ' + prettyObjType);
             $('#obj-form').slideToggle();

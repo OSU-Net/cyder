@@ -17,7 +17,7 @@ from cyder.cydhcp.range.models import Range
 
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
-from core.task.models import Task
+from cyder.core.task.models import Task
 
 
 class DirtySOATests(TestCase):
@@ -29,7 +29,8 @@ class DirtySOATests(TestCase):
         self.sr.dirty = False
         self.sr.save()
 
-        self.dom = create_fake_zone("bgaz", suffix="")
+        self.dom = create_fake_zone("azg.bgaz", suffix="")
+        create_fake_zone("foo.bar.com", suffix="")
         self.soa = self.dom.soa
         self.soa.dirty = False
         self.soa.save()
@@ -59,6 +60,7 @@ class DirtySOATests(TestCase):
         local_soa.dirty = False
         local_soa.save()
         rec = Klass(**create_data)
+        rec.clean()
         rec.full_clean()
         rec.save()
         self.assertTrue(rec.bind_render_record() not in ('', None))
@@ -136,7 +138,7 @@ class DirtySOATests(TestCase):
         create_data = {
             'ip_str': '10.2.3.4',
             'ip_type': '4',
-            'name': 'foo.bar.com',
+            'fqdn': 'foo.bar.com',
         }
         update_data = {
             'label': 'asdfx2',

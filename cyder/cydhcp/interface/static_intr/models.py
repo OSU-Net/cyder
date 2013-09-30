@@ -15,6 +15,7 @@ from cyder.base.constants import IP_TYPE_6
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
+from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -130,25 +131,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     @property
     def range(self):
-        if not self.ip_str:
-            return None
-
-        self.clean_ip()
-
-        Range = get_model('range', 'range')
-        q_start = (Q(start_upper__lt=self.ip_upper) |
-                   Q(start_upper=self.ip_upper,
-                     start_lower__lte=self.ip_lower))
-        q_end = (Q(end_upper__gt=self.ip_upper) |
-                 Q(end_upper=self.ip_upper,
-                   end_lower__gte=self.ip_lower))
-        r = Range.objects.filter(q_start, q_end)
-
-        if r.exists():
-            return r.get()
-        else:
-            return None
-
+        if self.ip_str:
+            return find_range(self.ip_str)
 
     def update_attrs(self):
         self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
@@ -196,8 +180,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return related_systems
 
     def save(self, *args, **kwargs):
-        urd = kwargs.pop('update_reverse_domain', True)
-        self.clean_reverse(update_reverse_domain=urd)  # BasePTR
+        self.urd = kwargs.pop('update_reverse_domain', True)
+        self.clean_reverse()  # BasePTR
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
 
@@ -209,11 +193,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
-            raise ValidationError("A PTR already uses this Name and IP")
+        if PTR.objects.filter(ip_str=self.ip_str).exists():
+            raise ValidationError("A PTR already uses '%s'" %
+                                  self.ip_str)
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
-            raise ValidationError("An A record already uses this Name and IP")
+            raise ValidationError("An A record already uses '%s' and '%s'" %
+                                  (self.fqdn, self.ip_str))
 
     def interface_name(self):
         self.update_attrs()
@@ -264,11 +250,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             validate_mac(self.mac)
 
         from cyder.cydns.ptr.models import PTR
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
-            raise ValidationError('A PTR already uses this Name and IP')
+        if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
+            raise ValidationError("A PTR already uses '%s' and '%s'" %
+                                  (self.fqdn, self.ip_str))
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
-            raise ValidationError('An A record already uses this Name and IP')
+            raise ValidationError("An A record already uses '%s' and '%s'" %
+                                  (self.fqdn, self.ip_str))
 
         if kwargs.pop('validate_glue', True):
             self.check_glue_status()

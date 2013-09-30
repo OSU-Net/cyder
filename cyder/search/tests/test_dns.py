@@ -66,7 +66,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        ptr = PTR(name="host1.wee2.wee.mozilla.com", ip_str="1111::",
+        ptr = PTR(fqdn="host1.wee2.wee.mozilla.com", ip_str="1111::",
                   ip_type="6")
         ptr.save()
         addr = AddressRecord(label="host1", domain=root_domain, ip_str="11::",
@@ -123,7 +123,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        ptr = PTR(name="host1.wee2.wee.mozilla.com", ip_str="2111:0::",
+        ptr = PTR(fqdn="host1.wee.mozilla.com", ip_str="2111:0::",
                   ip_type="6")
         ptr.save()
 
@@ -146,7 +146,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['SOA']), 2)
         self.assertEqual(len(res['NS']), 2)
         self.assertEqual(len(res['DOMAIN']), 2)
-        ptr = PTR(name="host1.wee2.wee.mozilla.com", ip_str="10.0.0.1",
+        ptr = PTR(fqdn="host1.wee.mozilla.com", ip_str="10.0.0.1",
                   ip_type="4")
         ptr.save()
         addr = AddressRecord(label="host1", domain=root_domain,

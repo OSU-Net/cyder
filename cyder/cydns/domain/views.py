@@ -14,7 +14,7 @@ def domain_detail(request, pk):
         'CNAMEs': 'cname_set',
         'MXs': 'mx_set',
         'Nameservers': 'nameserver_set',
-        'PTRs': 'ptr_set',
+        'PTRs': 'reverse_ptr_set',
         'SRVs': 'srv_set',
         'SSHFPs': 'sshfp_set',
         'TXTs': 'txt_set',

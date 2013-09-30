@@ -139,9 +139,9 @@ class CNAME(CydnsRecord, LabelDomainMixin):
             )
 
         PTR = get_model('ptr', 'PTR')
-        if PTR.objects.filter(name=self.fqdn):
+        if PTR.objects.filter(fqdn=self.fqdn):
             raise ValidationError("RFC 1034 says you shouldn't point PTR "
                                   "records at CNAMEs, and a PTR points to"
-                                  " this name!")
+                                  " %s!" % self.fqdn)
 
         # Should SRV's not be allowed to point to a CNAME? /me looks for an RFC

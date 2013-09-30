@@ -26,6 +26,9 @@ class PTRTests(cyder.base.tests.TestCase):
         self.o_e.save()
         self.b_o_e = Domain(name="bar.oregonstate.edu")
         self.b_o_e.save()
+        Domain(name="nothing").save()
+        Domain(name="nothing.nothing").save()
+        Domain(name="nothing.nothing.nothing").save()
 
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
@@ -40,7 +43,8 @@ class PTRTests(cyder.base.tests.TestCase):
         return d
 
     def do_generic_add(self, ip_str, fqdn, ip_type, domain=None):
-        ret = PTR(name=fqdn, ip_str=ip_str, ip_type=ip_type)
+        ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
+        ret.clean()
         ret.full_clean()
         ret.save()
 
@@ -49,18 +53,18 @@ class PTRTests(cyder.base.tests.TestCase):
         ip = Ip(ip_str=ip_str, ip_type=ip_type)
         ip.clean_ip()
         ptr = PTR.objects.filter(
-            name=fqdn, ip_upper=ip.ip_upper, ip_lower=ip.ip_lower)
+            fqdn=fqdn, ip_upper=ip.ip_upper, ip_lower=ip.ip_lower)
         ptr.__repr__()
         self.assertTrue(ptr)
         ip_str = ip_str.lower()
         self.assertEqual(ptr[0].ip_str, ip_str)
         if domain:
-            if ptr[0].name == "":
+            if ptr[0].fqdn == "":
                 self.assertEqual(fqdn, domain.name)
             else:
-                self.assertEqual(fqdn, ptr[0].name + "." + domain.name)
+                self.assertEqual(fqdn, ptr[0].fqdn + "." + domain.name)
         else:
-            self.assertEqual(fqdn, ptr[0].name)
+            self.assertEqual(fqdn, ptr[0].fqdn)
         return ret
 
     def test_dns_form_ipv4(self):
@@ -77,18 +81,17 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def do_generic_invalid_add(
             self, ip, fqdn, ip_type, exception, domain=None):
-        # LOL, looks like I didn't know about assertRaises!
-        e = None
-        try:
+        with self.assertRaises(exception):
             self.do_generic_add(ip, fqdn, ip_type, domain)
-        except exception, e:
-            pass
-        self.assertEqual(exception, type(e))
 
     def test_no_domain(self):
         test_ip = "244.123.123.123"
-        name = "foo"
-        self.do_generic_invalid_add(test_ip, name, '4', ValidationError)
+        name = "lol.foo"
+        self.do_generic_invalid_add(test_ip, name, '4', Domain.DoesNotExist)
+        name = "oregonstate.com"
+        self.do_generic_invalid_add(test_ip, name, '4', Domain.DoesNotExist)
+        name = "me.oregondfastate.edu"
+        self.do_generic_invalid_add(test_ip, name, '4', Domain.DoesNotExist)
 
     def test_add_invalid_name_ipv6_ptr(self):
         bad_name = "testyfoo.com"
@@ -114,7 +117,7 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_invalid_add(test_ip, bad_name, '4', ValidationError)
 
     def test_add_invalid_ip_ipv6_ptr(self):
-        test_name = "testyfoo.com"
+        test_name = "oregonstate.edu"
         bad_ip = "123.123.123.123."
         self.do_generic_invalid_add(bad_ip, test_name, '6', ValidationError)
         bad_ip = "123:!23:!23:"
@@ -149,13 +152,13 @@ class PTRTests(cyder.base.tests.TestCase):
                                     ValidationError)
 
         self.do_generic_add(self.osu_block + ":dd",
-                            "foo.bar.oregondfastate.com", '6')
+                            "foo.bar.oregonstate.edu", '6')
         self.do_generic_invalid_add(self.osu_block + ":dd",
-                                    "foo.bar.oregondfastate.com", '6',
+                                    "foo.bar.oregonstate.edu", '6',
                                     ValidationError)
 
     def test_add_invalid_ip_ipv4_ptr(self):
-        test_name = "testyfoo.com"
+        test_name = "oregonstate.edu"
         bad_ip = "123.123"
         self.do_generic_invalid_add(bad_ip, test_name, '4', ValidationError)
         bad_ip = "asdfasdf"
@@ -185,12 +188,13 @@ class PTRTests(cyder.base.tests.TestCase):
             "128.193.1.1", "foo.bar.oregonstate.edu", '4', ValidationError)
 
         self.do_generic_add(
-            "128.128.1.1", "foo.bar.oregondfastate.com", '4')
+            "128.128.1.1", "foo.bar.oregonstate.edu", '4')
         self.do_generic_invalid_add(
-            "128.128.1.1", "foo.bar.oregondfastate.com", '4', ValidationError)
+            "128.128.1.1", "foo.bar.oregonstate.edu", '4', ValidationError)
 
     def do_generic_remove(self, ip, fqdn, ip_type):
-        ptr = PTR(ip_str=ip, name=fqdn, ip_type=ip_type)
+        ptr = PTR(ip_str=ip, fqdn=fqdn, ip_type=ip_type)
+        ptr.clean()
         ptr.full_clean()
         ptr.save()
 
@@ -198,7 +202,7 @@ class PTRTests(cyder.base.tests.TestCase):
 
         ip = Ip(ip_str=ip, ip_type=ip_type)
         ip.clean_ip()
-        ptr = PTR.objects.filter(name=fqdn, ip_upper=ip.ip_upper,
+        ptr = PTR.objects.filter(fqdn=fqdn, ip_upper=ip.ip_upper,
                                  ip_lower=ip.ip_lower)
         self.assertFalse(ptr)
 
@@ -243,14 +247,14 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_remove(ip, fqdn, '6')
 
     def do_generic_update(self, ptr, new_fqdn, ip_type):
-        ptr.name = new_fqdn
+        ptr.fqdn = new_fqdn
         ptr.full_clean()
         ptr.save()
 
-        ptr = PTR.objects.filter(name=new_fqdn, ip_upper=ptr.ip_upper,
+        ptr = PTR.objects.filter(fqdn=new_fqdn, ip_upper=ptr.ip_upper,
                                  ip_lower=ptr.ip_lower)
         self.assertTrue(ptr)
-        self.assertEqual(new_fqdn, ptr[0].name)
+        self.assertEqual(new_fqdn, ptr[0].fqdn)
 
     def test_update_ipv4(self):
         ptr = self.do_generic_add("128.193.1.1", "oregonstate.edu", '4')
@@ -258,12 +262,8 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_update(ptr, fqdn, '4')
         fqdn = "google.edu"
         self.do_generic_update(ptr, fqdn, '4')
-        fqdn = "asdfasfd.oregonstate.edu"
-        self.do_generic_update(ptr, fqdn, '4')
-        fqdn = "asdfasf.foo.oregonstate.edu"
-        self.do_generic_update(ptr, fqdn, '4')
-        fqdn = "edu"
-        self.do_generic_update(ptr, fqdn, '4')
+        fqdn = "bar.oregonstate.edu"
+        self.do_generic_update(ptr, fqdn, '6')
 
     def test_update_ipv6(self):
         ptr = self.do_generic_add(
@@ -272,20 +272,12 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_update(ptr, fqdn, '6')
         fqdn = "google.edu"
         self.do_generic_update(ptr, fqdn, '6')
-        fqdn = "asdfasfd.oregonstate.edu"
-        self.do_generic_update(ptr, fqdn, '6')
-        fqdn = "asdfasf.foo.oregonstate.edu"
-        self.do_generic_update(ptr, fqdn, '6')
-        fqdn = "edu"
+        fqdn = "bar.oregonstate.edu"
         self.do_generic_update(ptr, fqdn, '6')
 
     def do_generic_invalid_update(self, ptr, fqdn, ip_type, exception):
-        e = None
-        try:
+        with self.assertRaises(exception):
             self.do_generic_update(ptr, fqdn, ip_type)
-        except exception, e:
-            pass
-        self.assertEqual(exception, type(e))
 
     def test_invalid_update_ipv4(self):
         ptr = self.do_generic_add("128.3.1.1", "oregonstate.edu", '4')

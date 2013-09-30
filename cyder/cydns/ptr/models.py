@@ -3,21 +3,22 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.cydns.models import ViewMixin, DisplayMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
-from cyder.cydns.validation import validate_fqdn, validate_ttl
-from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydns.cname.models import CNAME
+from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
 class BasePTR(object):
-    def clean_reverse(self, update_reverse_domain=True):
+    urd = True
+
+    def clean_reverse(self, update_reverse_domain=None):
         # This indirection is so StaticInterface can call this function
-        if update_reverse_domain:
+        if self.urd or update_reverse_domain:
             self.update_reverse_domain()
+            self.urd = False
         check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
 
@@ -40,10 +41,7 @@ class BasePTR(object):
             1.1.193.128     PTR         FOO.BAR.COM
             ^-- PTR's shouldn't point to CNAMES
         """
-        if hasattr(self, 'name'):
-            name = self.name
-        else:
-            name = self.fqdn
+        name = self.fqdn
 
         if CNAME.objects.filter(fqdn=name).exists():
             raise ValidationError(
@@ -74,35 +72,28 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
+class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
     """
     A PTR is used to map an IP to a domain name.
 
-    >>> PTR(ip_str=ip_str, name=fqdn, ip_type=ip_type)
+    >>> PTR(ip_str=ip_str, fqdn=fqdn, ip_type=ip_type)
 
     """
     id = models.AutoField(primary_key=True)
-    reverse_domain = models.ForeignKey(Domain, null=False, blank=True)
+    reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
+                                       related_name='reverse_ptr_set')
 
-    name = models.CharField(
-        max_length=255, validators=[validate_fqdn], help_text="The name that "
-        "this record points to."
-    )
-    ttl = models.PositiveIntegerField(
-        default=3600, blank=True, null=True, validators=[validate_ttl]
-    )
-    description = models.CharField(max_length=1000, blank=True)
-    template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
+    template = _("{ip_str:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
-                 "{rdtype:$rdtype_just} {name:1}.")
-    search_fields = ('ip_str', 'name')
+                 "{rdtype:$rdtype_just} {bind_name:1}")
+    search_fields = ('ip_str', 'fqdn')
 
     class Meta:
         db_table = 'ptr'
-        unique_together = ('ip_str', 'ip_type', 'name')
+        unique_together = ('ip_str', 'ip_type', 'fqdn')
 
     def __str__(self):
-        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.name)
+        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.fqdn)
 
     def __repr__(self):
         return "<{0}>".format(str(self))
@@ -118,8 +109,8 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
         return 'PTR'
 
     def save(self, *args, **kwargs):
-        urd = kwargs.pop('update_reverse_domain', True)
-        self.clean(update_reverse_domain=urd)
+        self.urd = kwargs.pop('update_reverse_domain', True)
+        self.clean()
         super(PTR, self).save(*args, **kwargs)
         self.rebuild_reverse()
 
@@ -128,24 +119,25 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
             self.reverse_domain.soa.schedule_rebuild()
         super(PTR, self).delete(*args, **kwargs)
 
-    def clean(self, update_reverse_domain=True):
+    def clean(self):
+        super(PTR, self).clean()
         self.clean_ip()
         # We need to check if there is a registration using our ip and name
         # because that registration will generate a ptr record.
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         if (StaticInterface.objects.filter(
-                fqdn=self.name, ip_upper=self.ip_upper,
-                ip_lower=self.ip_lower).exists()):
+                ip_upper=self.ip_upper, ip_lower=self.ip_lower).exists()):
             raise ValidationError(
-                "An registration has already used this IP and Name."
+                "A static interface has already used %s" % self.ip_str
             )
-        self.clean_reverse(update_reverse_domain=update_reverse_domain)
+        self.clean_reverse()
 
     def details(self):
         """For tables."""
         data = super(PTR, self).details()
         data['data'] = [
-            ('Name', 'name', self.name),
+            ('Label', 'label', self.label),
+            ('Domain', 'domain', self.domain),
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
@@ -154,10 +146,7 @@ class PTR(BasePTR, Ip, ViewMixin, ObjectUrlMixin, DisplayMixin):
     def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'name', 'datatype': 'string', 'editable': True},
+            {'name': 'label', 'datatype': 'string', 'editable': True},
+            {'name': 'domain', 'datatype': 'string', 'editable': True},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
-
-    def bind_render_record(self, pk=False, **kwargs):
-        self.fqdn = self.dns_name().strip('.')
-        return super(PTR, self).bind_render_record(pk=pk, **kwargs)

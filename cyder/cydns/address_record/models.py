@@ -82,7 +82,8 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                 fqdn=self.fqdn, ip_upper=self.ip_upper,
                 ip_lower=self.ip_lower).exists():
             raise ValidationError(
-                "A Static Interface has already reserved this A record."
+                "A Static Interface with %s and %s already exists" %
+                (self.fqdn, self.ip_str)
             )
 
     def validate_delegation_conditions(self):

@@ -59,7 +59,7 @@ class PTRStaticRegTests(TestCase):
         return r
 
     def do_add_ptr(self, label, domain, ip_str, ip_type='4'):
-        ptr = PTR(name=label + '.' + domain.name, ip_str=ip_str,
+        ptr = PTR(fqdn=label + '.' + domain.name, ip_str=ip_str,
                   ip_type=ip_type)
         ptr.clean()
         ptr.save()
