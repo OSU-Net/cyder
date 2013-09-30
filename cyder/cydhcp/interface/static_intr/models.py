@@ -184,8 +184,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return related_systems
 
     def save(self, *args, **kwargs):
-        urd = kwargs.pop('update_reverse_domain', True)
-        self.clean_reverse(update_reverse_domain=urd)  # BasePTR
+        self.urd = kwargs.pop('update_reverse_domain', True)
+        self.clean_reverse()  # BasePTR
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
         if self.range:
@@ -202,11 +202,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
-            raise ValidationError("A PTR already uses this Name and IP")
+        if PTR.objects.filter(ip_str=self.ip_str).exists():
+            raise ValidationError("A PTR already uses '%s'" %
+                                  self.ip_str)
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
-            raise ValidationError("An A record already uses this Name and IP")
+            raise ValidationError("An A record already uses '%s' and '%s'" %
+                                  (self.fqdn, self.ip_str))
 
     def interface_name(self):
         self.update_attrs()
@@ -257,11 +259,13 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             validate_mac(self.mac)
 
         from cyder.cydns.ptr.models import PTR
-        if PTR.objects.filter(ip_str=self.ip_str, name=self.fqdn).exists():
-            raise ValidationError('A PTR already uses this Name and IP')
+        if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
+            raise ValidationError("A PTR already uses '%s' and '%s'" %
+                                  (self.fqdn, self.ip_str))
         if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
                                         ).exists():
-            raise ValidationError('An A record already uses this Name and IP')
+            raise ValidationError("An A record already uses '%s' and '%s'" %
+                                  (self.fqdn, self.ip_str))
 
         if kwargs.pop('validate_glue', True):
             self.check_glue_status()
