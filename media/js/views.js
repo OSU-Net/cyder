@@ -2,7 +2,9 @@ $(document).ready(function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
     var hidden_inner_form = document.getElementById('hidden-inner-form');
-    var defaults = hidden_inner_form.innerHTML;
+    if(hidden_inner_form) {
+        var defaults = hidden_inner_form.innerHTML;
+    };
     var objType = metadata.attr('data-objType');
     var objName = metadata.attr('data-objName');
     var prettyObjType = metadata.attr('data-prettyObjType');
