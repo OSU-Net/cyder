@@ -455,7 +455,7 @@ class NSTestsModels(TestCase):
         # At his point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
-        ptr = PTR(fqdn="asdf", ip_str="22.1.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="22.1.1.1", ip_type="4")
         ptr.save()
 
         self.assertRaises(ValidationError, ns.delete)
@@ -475,7 +475,7 @@ class NSTestsModels(TestCase):
         cdomain.soa = root_domain.soa
         cdomain.save()
 
-        ptr = PTR(fqdn="asdf", ip_str="23.10.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="23.10.1.1", ip_type="4")
         ptr.save()
 
         self.assertRaises(ValidationError, ns.delete)
@@ -546,7 +546,7 @@ class NSTestsModels(TestCase):
 
         # Add a record to the domain.
 
-        ptr = PTR(fqdn="asdf", ip_str="32.1.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="32.1.1.1", ip_type="4")
         ptr.save()
 
         s = SOA(primary="asdf.asdf", contact="asdf.asdf", description="asdf")
@@ -569,7 +569,7 @@ class NSTestsModels(TestCase):
         cdomain.save()
 
         # Add a record to the domain.
-        ptr = PTR(fqdn="asdf", ip_str="33.10.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="33.10.1.1", ip_type="4")
         ptr.save()
 
         # Now try to add the domain to the zone that has no NS records at it's
