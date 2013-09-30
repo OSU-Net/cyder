@@ -292,13 +292,13 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
 .. code:: python
 
     query = {'i:target__exact': 'www.orst.edu'}
-    print api_connect("http://127.0.0.1:8000/api/v1/cname/", MY_TOKEN, query)
+    print api_connect("http://127.0.0.1:8000/api/v1/dns/cname/", MY_TOKEN, query)
 
 .. code:: json
 
     {
         "count": 233,
-        "next": "http://127.0.0.1:8000/api/v1/cname/?i:target__exact=www.orst.edu&page=2",
+        "next": "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu&page=2",
         "previous": null,
         "results": [
             {
@@ -346,7 +346,7 @@ Here we can see the first two results are both domains under ``orst.edu``. Let's
 
     {
         "count": 182,
-        "next": "http://127.0.0.1:8000/api/v1/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu&page=2",
+        "next": "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu&page=2",
         "previous": null,
         "results": [
             {
