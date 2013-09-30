@@ -136,7 +136,7 @@ def _build_queries(fqdn, dn=True, mx=True, sr=True, tx=True,
         qsets.append(('AddressRecord', ars))
     if pt:
         qsets.append(('PTR', cydns.ptr.models.PTR.objects.
-                      Q(**{'name{0}'.format(search_operator): fqdn}) |
+                      Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
                       Q(**{'ip_str{0}'.format(search_operator): ip})))
     if intr:
         StaticInterface = cydhcp.interface.static_intr.models.StaticInterface

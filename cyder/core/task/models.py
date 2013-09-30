@@ -28,4 +28,5 @@ class Task(models.Model):
 
     @classmethod
     def schedule_zone_rebuild(cls, soa):
-        Task(task=str(soa.pk), ttype='dns').save()
+        if not Task.objects.filter(task=str(soa.pk), ttype='dns').exists():
+            Task(task=str(soa.pk), ttype='dns').save()
