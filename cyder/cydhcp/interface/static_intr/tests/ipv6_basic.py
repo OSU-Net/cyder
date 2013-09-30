@@ -142,7 +142,7 @@ class V6StaticInterTests(TestCase):
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type)
         self.assertRaises(ValidationError, a.clean)
-        ptr = PTR(ip_str=ip_str, ip_type=ip_type, name=i.fqdn)
+        ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=i.fqdn)
         self.assertRaises(ValidationError, ptr.clean)
 
     def test2_bad_add_for_a_ptr(self):
@@ -158,7 +158,7 @@ class V6StaticInterTests(TestCase):
                           ip_type=ip_type)
         a.clean()
         a.save()
-        ptr = PTR(ip_str=ip_str, ip_type=ip_type, name=a.fqdn)
+        ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=a.fqdn)
         ptr.clean()
         ptr.save()
         self.assertRaises(ValidationError, self.do_add, **kwargs)

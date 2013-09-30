@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
 from cyder.cydns.cybind.builder import DNSBuilder, BuildError
@@ -130,3 +130,9 @@ class Command(BaseCommand):
 
         if options['dhcp']:
             dhcp_migrate.do_everything(skip=False)
+
+        del options['verbosity']
+        del options['settings']
+        if not any(options.values()):
+            raise CommandError("No flags passed; no action taken. "
+                               "Try maintain_migrate --help")

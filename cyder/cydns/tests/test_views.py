@@ -235,7 +235,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def setUp(self):
         test_data = {
-            'name': random_label(),
+            'label': random_label(),
             'ip_type': '4',
             'ip_str': '196.168.1.2',
         }
@@ -246,11 +246,11 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         Domain.objects.create(name='1.168.196.in-addr.arpa')
 
         Domain.objects.create(name=ip_to_domain_name(test_data['ip_str']))
-        do_setUp(self, PTR, test_data, use_domain=False, use_rdomain=True)
+        do_setUp(self, PTR, test_data, use_domain=True, use_rdomain=True)
 
     def post_data(self):
         return {
-            'name': random_label(),
+            'fqdn': random_label() + '.' + self.domain.name,
             'ip_type': '4',
             'ip_str': '196.168.1.3',
             'description': 'yo',

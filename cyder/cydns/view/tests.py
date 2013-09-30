@@ -61,7 +61,7 @@ class ViewTests(TestCase):
         a.save()
 
     def test_private_view_case_1_ptr(self):
-        ptr = PTR(name="asf", ip_str="10.0.0.1",
+        ptr = PTR(fqdn="asf", ip_str="10.0.0.1",
                   ip_type="4")
         ptr.clean()
         ptr.save()
