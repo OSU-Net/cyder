@@ -3,10 +3,12 @@ import json
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
+from django.db.models.loading import get_model
 
 import ipaddr
 
 from cyder.base.utils import make_paginator, tablefy, make_megafilter
+from cyder.base.helpers import do_sort
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
 from cyder.cydhcp.range.models import Range, RangeKeyValue
@@ -46,6 +48,8 @@ def range_detail(request, pk):
     range_type = mrange.range_type
     range_data = []
     ip_usage_percent = None
+    dynamic_interfaces = []
+    dynamic_interfaces_page_obj = None
     if range_type == 'st':
         start_upper = mrange.start_upper
         start_lower = mrange.start_lower
@@ -56,7 +60,14 @@ def range_detail(request, pk):
             two_to_one(end_upper, end_lower),
             mrange.ip_type)
     else:
-        print 'ok'
+        ip_usage_percent = mrange.range_usage
+        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
+        dynamic_interfaces = DynamicInterface.objects.filter(range=mrange)
+        dynamic_interfaces_page_obj = make_paginator(
+            request, do_sort(request, dynamic_interfaces), 10)
+
+    if ip_usage_percent:
+        ip_usage_percent = "{0}%".format(ip_usage_percent)
     return render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
@@ -66,7 +77,10 @@ def range_detail(request, pk):
         'attrs_table': tablefy(mrange.rangekeyvalue_set.all(),
                                request=request),
         'allow_list': allow,
-        'range_used': "{0}%".format(ip_usage_percent)
+        'range_used': ip_usage_percent,
+        'dynamic_intr_table': tablefy(dynamic_interfaces_page_obj, info=True,
+                                      request=request),
+        'page_obj': dynamic_interfaces_page_obj
     })
 
 
