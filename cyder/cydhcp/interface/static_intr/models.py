@@ -184,11 +184,12 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return related_systems
 
     def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
         self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean_reverse()  # BasePTR
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
-        if self.range:
+        if self.range and update_range_usage:
             self.range.save()
 
     def delete(self, *args, **kwargs):

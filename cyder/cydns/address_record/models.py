@@ -167,9 +167,10 @@ class AddressRecord(BaseAddressRecord):
         return data
 
     def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
         super(AddressRecord, self).save(*args, **kwargs)
         rng = find_range(self.ip_str)
-        if rng:
+        if rng and update_range_usage:
             rng.save()
 
     def delete(self, *args, **kwargs):

@@ -141,8 +141,8 @@ class Range(models.Model, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         self.clean()
-        update_usage = kwargs.pop('update_usage', True)
-        if update_usage:
+        update_range_usage = kwargs.pop('update__range_usage', True)
+        if update_range_usage:
             self.range_usage = self.get_usage()
         super(Range, self).save(*args, **kwargs)
 

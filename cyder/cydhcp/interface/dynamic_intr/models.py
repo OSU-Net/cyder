@@ -115,8 +115,9 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         super(DynamicInterface, self).clean()
 
     def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
         super(DynamicInterface, self).save()
-        if self.range:
+        if self.range and update_range_usage:
             self.range.save()
 
     def delete(self, *args, **kwargs):
