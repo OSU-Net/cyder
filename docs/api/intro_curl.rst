@@ -414,7 +414,7 @@ Many records have key-value pairs (also called attributes) associated with them.
 * Static Interface
 * Dynamic Interface
 
-Key value filtering is very straightforward. However, for technical reasons, it is also somewhat limited compared to ordinary field searching. Only case insensitive exact matching (the same as the ``iexact`` field lookup) is allowed for key-value searching. It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
+Key value filtering is very straightforward. However, for technical reasons, it is also somewhat limited compared to ordinary field searching. Only case insensitive exact matching is allowed for key-value searching. It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
 
 As an example, let's try finding all systems running Linux.
 
