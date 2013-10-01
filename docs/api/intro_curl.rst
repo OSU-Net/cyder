@@ -235,14 +235,14 @@ Before we can write our query, however, we need to know the basic structure of e
 
 .. code::
 
-    mode         = "i:" | "e:"
+    mode         = "i" | "e"
 
     field        = ? any valid field name ?
 
     field lookup = "exact" | "contains" | "gt" | "gte" | "lt" | "lte"
                  | "startswith" | "endswith" | "isnull"
 
-    filter       = mode, "_", field, "__", field lookup
+    filter       = mode, ":", field, "__", field lookup
 
 Here, ``mode`` sets whether records matching the query should be included (``i:``) or excluded (``e:``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
 
@@ -414,7 +414,7 @@ Many records have key-value pairs (also called attributes) associated with them.
 * Static Interface
 * Dynamic Interface
 
-Key value filtering is very straightforward. However, for technical reasons, it is also somewhat limited compared to ordinary field searching. Only case insensitive exact matching is allowed for key-value searching. It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
+Key value filtering is very straightforward. **Note: For technical reasons, key-value searching is limited compared to ordinary field searching. Only case insensitive exact matching is allowed for key-value searching.** It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
 
 As an example, let's try finding all systems running Linux.
 

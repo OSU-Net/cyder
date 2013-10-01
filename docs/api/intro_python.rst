@@ -271,14 +271,14 @@ Before we can write our query, however, we need to know the basic structure of e
 
 .. code::
 
-    mode         = "i:" | "e:"
+    mode         = "i" | "e"
 
     field        = ? any valid field name ?
 
     field lookup = "exact" | "contains" | "gt" | "gte" | "lt" | "lte"
                  | "startswith" | "endswith" | "isnull"
 
-    filter       = mode, "_", field, "__", field lookup
+    filter       = mode, ":", field, "__", field lookup
 
 Here, ``mode`` sets whether records matching the query should be included (``i:``) or excluded (``e:``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
 
