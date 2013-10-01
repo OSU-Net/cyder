@@ -8,7 +8,6 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
-from cyder.cydhcp.keyvalue.models import KeyValue
 
 
 class Vlan(models.Model, ObjectUrlMixin):

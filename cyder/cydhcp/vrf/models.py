@@ -6,7 +6,6 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.keyvalue.models import KeyValue
 
 
 class Vrf(models.Model, ObjectUrlMixin):

@@ -14,7 +14,6 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
                                 start_end_filter)
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR

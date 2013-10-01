@@ -11,7 +11,6 @@ from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
-from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task

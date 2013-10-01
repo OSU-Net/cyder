@@ -2,7 +2,6 @@ from django.db import models
 
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac

@@ -5,7 +5,6 @@ from django.core.validators import RegexValidator
 from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.utils import networks_to_Q
 
 

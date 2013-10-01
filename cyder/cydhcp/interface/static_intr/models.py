@@ -16,7 +16,6 @@ from cyder.base.constants import IP_TYPE_6
 from cyder.base.eav.models import Attribute, EAVBase
 
 from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac

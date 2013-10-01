@@ -5,7 +5,6 @@ from django.db import models
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import join_dhcp_args
 
 
