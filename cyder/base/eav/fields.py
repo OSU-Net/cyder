@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from south.modelsinspector import add_introspection_rules
 
 from cyder.base.eav import validators
 from cyder.base.eav.constants import (ATTRIBUTE_INFORMATIONAL,
@@ -86,3 +87,20 @@ class EAVValueField(models.CharField):
         validator(value)
 
         super(EAVValueField, self).validate(value, model_instance)
+
+
+add_introspection_rules([
+    (
+        [AttributeValueTypeField], # model
+        [], # args
+        {'attribute_type_field': ('attribute_type_field', {})}, # kwargs
+    )
+], [r'^cyder\.base\.eav\.fields\.AttributeValueTypeField'])
+
+add_introspection_rules([
+    (
+        [EAVValueField], # model
+        [], # args
+        {'attribute_field': ('attribute_field', {})}, # kwargs
+    )
+], [r'^cyder\.base\.eav\.fields\.EAVValueField'])
