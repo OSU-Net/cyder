@@ -527,7 +527,7 @@ Example query:
 
 .. code::
 
-    ?i:field_gt=10
+    ?i:field__gt=10
 
 ~~~
 gte
@@ -538,7 +538,7 @@ Example query:
 
 .. code::
 
-    ?i:field_gte=10
+    ?i:field__gte=10
 
 ~~
 lt
@@ -549,7 +549,7 @@ Example query:
 
 .. code::
 
-    ?i:field_lt=10
+    ?i:field__lt=10
 
 ~~~
 lte
@@ -560,7 +560,7 @@ Example query:
 
 .. code::
 
-    ?i:field_lte=10
+    ?i:field__lte=10
 
 ~~~~~~~~~~
 startswith
