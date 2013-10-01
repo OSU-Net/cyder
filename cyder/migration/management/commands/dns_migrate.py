@@ -4,6 +4,8 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
 
+from cyder.migration.utils import range_usage_get_create
+
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
@@ -196,14 +198,14 @@ class Zone(object):
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
                     .exists()):
                 try:
-                    static = StaticInterface(label=name, domain=self.domain,
-                                             mac=clean_mac(ha), system=system,
-                                             ip_str=long2ip(ip), ip_type='4',
-                                             workgroup=w, ctnr=ctnr,
-                                             ttl=items['ttl'],
-                                             dns_enabled=enabled,
-                                             dhcp_enabled=enabled,
-                                             last_seen=items['last_seen'])
+                    static, _ = range_usage_get_create(
+                        StaticInterface,
+                        **{'label': name, 'domain': self.domain,
+                           'mac': clean_mac(ha), 'system': system,
+                           'ip_str': long2ip(ip), 'ip_type': '4',
+                           'workgroup': w, 'ctnr': ctnr, 'ttl': items['ttl'],
+                           'dns_enabled': enabled, 'dhcp_enabled': enabled,
+                           'last_seen': items['last_seen']})
 
                     # Static Interfaces need to be cleaned independently.
                     # (no get_or_create)
@@ -268,9 +270,10 @@ class Zone(object):
                     pass
 
             if ptr_type == 'forward':
-                arec, _ = AddressRecord.objects.get_or_create(
-                    label=label, domain=self.domain,
-                    ip_str=long2ip(ip), ip_type='4')
+                arec, _ = range_usage_get_create(
+                    AddressRecord,
+                    **{'label': label, 'domain': self.domain,
+                       'ip_str': long2ip(ip), 'ip_type': '4'})
                 if enabled:
                     arec.views.add(public)
                     arec.views.add(private)
@@ -283,7 +286,7 @@ class Zone(object):
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
                     ptr.full_clean()
-                    ptr.save()
+                    ptr.save(**{'update_range_usage': False})
                     if enabled:
                         ptr.views.add(public)
                         ptr.views.add(private)

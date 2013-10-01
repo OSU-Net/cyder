@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from sys import stderr
 
+from cyder.migration.utils import range_usage_get_create
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
@@ -97,7 +98,8 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment, en, known):
+def create_range(range_id, start, end, range_type, subnet_id, comment, en,
+                 known):
     """
     Takes a row form the Maintain range table
     returns a range which is saved in cyder
@@ -129,16 +131,20 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en, known
             n.save()
 
         if int(n.network.network) < start < end < int(n.network.broadcast):
-            r, created = Range.objects.get_or_create(
-                start_lower=start, start_str=ipaddr.IPv4Address(start),
-                end_lower=end, end_str=ipaddr.IPv4Address(end),
-                range_type=r_type, allow=allow, ip_type='4',
-                network=n)
+            r, created = range_usage_get_create(
+                Range,
+                **{'start_lower': start,
+                   'start_str': ipaddr.IPv4Address(start),
+                   'end_lower': end, 'end_str': ipaddr.IPv4Address(end),
+                   'range_type': r_type, 'allow': allow, 'ip_type': '4',
+                   'network': n})
     if not r:
-        r, created = Range.objects.get_or_create(
-            start_lower=start, start_str=ipaddr.IPv4Address(start),
-            end_lower=end, end_str=ipaddr.IPv4Address(end),
-            is_reserved=True, range_type=r_type, allow=allow, ip_type='4')
+        r, created = range_usage_get_create(
+            Range,
+            **{'start_lower': start, 'start_str': ipaddr.IPv4Address(start),
+               'end_lower': end, 'end_str': ipaddr.IPv4Address(end),
+               'is_reserved': True, 'range_type': r_type, 'allow': allow,
+               'ip_type': '4'})
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         rk, _ = RangeKeyValue.objects.get_or_create(
             range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
@@ -307,9 +313,11 @@ def migrate_dynamic_hosts():
             kv.clean()
             kv.save()
 
-        intr, _ = DynamicInterface.objects.get_or_create(
-            range=r, workgroup=w, ctnr=c, domain=d, mac=mac, system=s,
-            dhcp_enabled=enabled, last_seen=items['last_seen'])
+        intr, _ = range_usage_get_create(
+            DynamicInterface,
+            **{'range': r, 'workgroup': w, 'ctnr': c, 'domain': d,
+               'mac': mac, 'system': s, 'dhcp_enabled': enabled,
+               'last_seen': items['last_seen']})
 
         for key, value in get_host_option_values(items['id']):
             kv = DynamicIntrKeyValue(dynamic_interface=intr,
