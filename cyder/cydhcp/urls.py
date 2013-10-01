@@ -42,4 +42,4 @@ urlpatterns = patterns(
 for kv in DHCP_KEY_VALUES:
     urlpatterns += patterns(
         '',
-        url(r"^{0}/".format(kv), include(cydhcp_urls(kv))))
+        url(r'^{0}/'.format(kv), include(cydhcp_urls(kv))))
