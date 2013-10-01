@@ -239,9 +239,8 @@ Before we can write our query, however, we need to know the basic structure of e
 
     field        = ? any valid field name ?
 
-    field lookup = "exact" | "iexact" | "contains" | "icontains" | "gt"
-                 | "gte" | "lt" | "lte" | "startswith" | "istartswith"
-                 | "endswith" | "iendswith" | "isnull"
+    field lookup = "exact" | "contains" | "gt" | "gte" | "lt" | "lte"
+                 | "startswith" | "endswith" | "isnull"
 
     filter       = mode, "_", field, "__", field lookup
 

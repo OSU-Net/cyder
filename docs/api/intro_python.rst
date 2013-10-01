@@ -275,9 +275,8 @@ Before we can write our query, however, we need to know the basic structure of e
 
     field        = ? any valid field name ?
 
-    field lookup = "exact" | "iexact" | "contains" | "icontains" | "gt"
-                 | "gte" | "lt" | "lte" | "startswith" | "istartswith"
-                 | "endswith" | "iendswith" | "isnull"
+    field lookup = "exact" | "contains" | "gt" | "gte" | "lt" | "lte"
+                 | "startswith" | "endswith" | "isnull"
 
     filter       = mode, "_", field, "__", field lookup
 
@@ -456,7 +455,7 @@ Many records have key-value pairs (also called attributes) associated with them.
 * Static Interface
 * Dynamic Interface
 
-Key value filtering is very straightforward. However, for technical reasons, it is also somewhat limited compared to ordinary field searching. Only case insensitive exact matching (the same as the ``iexact`` field lookup) is allowed for key-value searching. It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
+Key value filtering is very straightforward. However, for technical reasons, it is also somewhat limited compared to ordinary field searching. Only case insensitive exact matching is allowed for key-value searching. It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
 
 As an example, let's try finding all systems running Linux.
 
@@ -503,20 +502,10 @@ exact
 ~~~~~
 Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter ``i:field__exact=Go+Beavs``, it will match fields that contain the value "Go Beavs", but not "go beavs" or "go Beavs".
 
-~~~~~~
-iexact
-~~~~~~
-Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter ``i:field__iexact=Go+Beavs``, it will match fields that contain the value "Go Beavs", "go beavs", and "go Beavs", as well as any other capitalizations of the string "Go Beavs".
-
 ~~~~~~~~
 contains
 ~~~~~~~~
 Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i:field__contains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", and "Go Beavers!", but not "go beavs", "I love the beavs", or "Go beavers!"
-
-~~~~~~~~~
-icontains
-~~~~~~~~~
-Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i:field__icontains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", "Go Beavers!", "go beavs", "I love the beavs", and "Go beavers!", as well as any other string containing the search value, regardless of case.
 
 ~~
 gt
@@ -565,22 +554,12 @@ Example query:
 ~~~~~~~~~~
 startswith
 ~~~~~~~~~~
-Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter ``i:field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
-
-~~~~~~~~~~~
-istartswith
-~~~~~~~~~~~
-Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter ``i:field__istartswith=Go``, it would match "Go Beavs!", "Go Beavers!", "go beavs", and "GO BEAVS!", but not "Let's go Beavers!"
+Find all rows where the queried field starts with the search value. If you pass the query string parameter ``i:field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
 
 ~~~~~~~~
 endswith
 ~~~~~~~~
-Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter ``i:field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
-
-~~~~~~~~~
-iendswith
-~~~~~~~~~
-Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter ``i:field__iendswith=Beavers``, it would match "Go Beavers", "I love the Beavers", and "GO BEAVERS", but not "Go Beavers!" or "I love the Beavers."
+Find all rows where the queried field ends with the search value. If you pass the query string parameter ``i:field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
 
 ~~~~~~
 isnull

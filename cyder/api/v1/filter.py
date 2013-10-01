@@ -71,11 +71,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         if q_include or q_exclude:
             f_queryset = queryset.filter(**q_include).exclude(**q_exclude)
 
-        if kv_queryset and f_queryset:
+        if kv_queryset is not None and f_queryset is not None:
             return (kv_queryset & f_queryset).all()
-        elif kv_queryset:
+        elif kv_queryset is not None:
             return kv_queryset.all()
-        elif f_queryset:
+        elif f_queryset is not None:
             return f_queryset.all()
         else:
             return queryset.all()
