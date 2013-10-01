@@ -11,7 +11,6 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
                                 start_end_filter)
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -71,7 +70,6 @@ class Range(models.Model, ObjectUrlMixin):
     allow = models.CharField(max_length=1, choices=ALLOW_OPTIONS,
                              default=ALLOW_LEGACY)
 
-    attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
 
@@ -95,9 +93,6 @@ class Range(models.Model, ObjectUrlMixin):
             return ctnr.ranges.filter(pk__in=objects)
         else:
             return ctnr.ranges
-
-    def update_attrs(self):
-        self.attrs = AuxAttr(RangeKeyValue, self, "range")
 
     def _range_ips(self):
         self._start, self._end = four_to_two(

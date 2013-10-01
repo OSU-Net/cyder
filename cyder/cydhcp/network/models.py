@@ -9,7 +9,6 @@ from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -98,9 +97,6 @@ class Network(models.Model, ObjectUrlMixin):
             other._range_ips()
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
-
-    def update_attrs(self):
-        self.attrs = AuxAttr(NetworkKeyValue, self, "network")
 
     def save(self, *args, **kwargs):
         add_routers = True if not self.pk else False
@@ -275,9 +271,6 @@ class NetworkKeyValue(CommonOption):
     is an option, is option should be set.
     """
     network = models.ForeignKey(Network, null=False)
-    aux_attrs = (
-        ('description', 'A description of the network'),
-    )
 
     class Meta:
         db_table = 'network_kv'

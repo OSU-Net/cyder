@@ -10,7 +10,6 @@ from django.db import models
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.models import KeyValue
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
@@ -92,11 +91,6 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         return template.format(root_domain=self.root_domain,
                                rdtype=self.rdtype, rdclass='IN',
                                **self.__dict__)
-
-    def update_attrs(self):
-        self.attrs = AuxAttr(SOAKeyValue, self, 'soa')
-
-    attrs = None
 
     def __str__(self):
         return get_display(self)

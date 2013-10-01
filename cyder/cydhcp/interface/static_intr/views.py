@@ -12,8 +12,6 @@ from cyder.cydhcp.interface.static_intr.forms import (
     StaticInterfaceForm, StaticInterfaceQuickForm)
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
-from cyder.cydhcp.keyvalue.utils import (get_attrs, update_attrs, get_aa,
-                                         get_docstrings, dict_to_kv)
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.views import (CydhcpListView, CydhcpDetailView,
@@ -86,17 +84,10 @@ def edit_static_interface(request, intr_pk):
     # TODO, make sure the user has access to this system
     intr = get_object_or_404(StaticInterface, pk=intr_pk)
     system = intr.system
-    attrs = intr.staticintrkeyvalue_set.all()
-    aa = get_aa(StaticIntrKeyValue())
-    docs = get_docstrings(StaticIntrKeyValue())
     if request.method == 'POST':
         interface_form = StaticInterfaceForm(request.POST, instance=intr)
         if interface_form.is_valid():
             try:
-                # Handle key value stuff.
-                kv = None
-                kv = get_attrs(request.POST)
-                update_attrs(kv, attrs, StaticIntrKeyValue, intr, 'intr')
                 intr = interface_form.save()
 
                 # Everything checks out. Clean and Save all the objects.
@@ -104,14 +95,9 @@ def edit_static_interface(request, intr_pk):
                 intr.save()
             except ValidationError, e:
                 interface_form._errors['__all__'] = ErrorList(e.messages)
-                if kv:
-                    attrs = dict_to_kv(kv, StaticIntrKeyValue)
                 return render(request, 'static_intr/static_intr_edit.html', {
                     'form': interface_form,
                     'intr': intr,
-                    'attrs': attrs,
-                    'aa': json.dumps(aa),
-                    'docs': docs,
                     'form_title': 'Edit Interface for System {0}'.format(
                         system),
                     'domain': intr.domain
@@ -120,9 +106,6 @@ def edit_static_interface(request, intr_pk):
             return render(request, 'static_intr/static_intr_edit.html', {
                 'form': interface_form,
                 'intr': intr,
-                'attrs': attrs,
-                'aa': json.dumps(aa),
-                'docs': docs,
                 'form_title': 'Edit Interface for System {0}'.format(
                     system),
                 'domain': intr.domain
@@ -136,9 +119,6 @@ def edit_static_interface(request, intr_pk):
         return render(request, 'static_intr/static_intr_edit.html', {
             'form': interface_form,
             'intr': intr,
-            'attrs': attrs,
-            'aa': json.dumps(aa),
-            'docs': docs,
             'form_title': 'Edit Interface for System {0}'.format(system),
             'domain': intr.domain
         })
