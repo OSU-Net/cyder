@@ -7,7 +7,7 @@ from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_txt_data
 
 
-class TXT(CydnsRecord, LabelDomainMixin):
+class TXT(LabelDomainMixin, CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
