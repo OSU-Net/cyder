@@ -83,7 +83,8 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
-            return ensure_domain(name=self.dname, force=True)
+            return ensure_domain(name=self.dname, force=True,
+                                 **{'update_range_usage': False})
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -210,7 +211,7 @@ class Zone(object):
                     # Static Interfaces need to be cleaned independently.
                     # (no get_or_create)
                     static.full_clean()
-                    static.save()
+                    static.save(**{'update_range_usage': False})
 
                     static.views.add(public)
                     static.views.add(private)
@@ -223,7 +224,7 @@ class Zone(object):
 
                 except ValidationError, e:
                     stderr.write("Error generating static interface for host "
-                                 "with IP {0}\n".format(static.ip_str))
+                                 "with IP {0}\n".format(long2ip(ip)))
                     stderr.write("Original exception: {0}\n".format(e))
             else:
                 stderr.write("Ignoring host %s: already exists.\n"

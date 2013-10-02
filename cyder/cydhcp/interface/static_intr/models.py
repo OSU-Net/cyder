@@ -194,11 +194,12 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def delete(self, *args, **kwargs):
         rng = self.range
+        update_range_usage = kwargs.pop('update_range_usage', True)
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
             # The reverse_domain field is in the Ip class.
         super(StaticInterface, self).delete(*args, **kwargs)
-        if rng:
+        if rng and update_range_usage:
             rng.save()
         # ^ goes to BaseAddressRecord
 

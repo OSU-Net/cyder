@@ -124,11 +124,12 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
             rng.save()
 
     def delete(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
         if self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
         rng = find_range(self.ip_str)
         super(PTR, self).delete(*args, **kwargs)
-        if rng:
+        if rng and update_range_usage:
             rng.save()
 
     def clean(self):
