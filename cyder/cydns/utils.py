@@ -57,10 +57,10 @@ def get_clobbered(domain_name, **kwargs):
             # being pruneable and not having any records or child domains. We
             # set the call_prune_tree flag to tell the object's delete function
             # to skip calling prune_tree
-            if obj.__class__ in [StaticInterface, AddressRecord]:
-                obj.delete(**kwargs)
-            else:
-                obj.delete()
+            if obj.__class__ not in [StaticInterface, AddressRecord]:
+                kwargs.pop('update_range_usage', True)
+
+            obj.delete(**kwargs)
     return clobber_objects
 
 
