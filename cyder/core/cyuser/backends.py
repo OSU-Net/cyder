@@ -41,8 +41,8 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     :type request: :class:`request`
     :param obj: The object being tested for permission.
     :type obj: :class:`object`
-    :param action: ``view``, ``create, ``update``, ``delete``
-    :type action: :class: `string`
+    :param action: ``0`` (view), ``1`` (create), ``2`` (update), ``3`` (delete)
+    :type action: :class: `int`
 
     An example of checking whether a user has 'create' permission on a
         :class:`Domain` object.
@@ -98,11 +98,9 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     else:
         return False
 
-    if obj_type and 'KeyValue' in obj_type:
-        if 'Workgroup' in obj_type:
-            obj_type = 'GroupOption'
-        else:
-            obj_type = obj_type.split('KeyValue')[0]
+    if (obj_type and obj_type.endswith('KeyValue')
+            and obj_type != 'WorkgroupKeyValue'):
+        obj_type = obj_type.rstrip('KeyValue')
 
     handling_functions = {
         # Administrative.
@@ -125,10 +123,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'SRV': has_domain_record_perm,
         'SSHFP': has_domain_record_perm,
         'TXT': has_domain_record_perm,
-
-        # Reverse domain records.
         'PTR': has_reverse_domain_record_perm,
-        'ReverseNameserver': has_reverse_domain_record_perm,
 
         # DHCP.
         'Network': has_network_perm,
@@ -138,15 +133,10 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'Vlan': has_vlan_perm,
         'Vrf': has_vrf_perm,
         'Workgroup': has_workgroup_perm,
-
-        # Options.
-        'SubnetOption': has_generic_dhcp_perm,
-        'ClassOption': has_generic_dhcp_perm,
-        'PoolOption': has_generic_dhcp_perm,
-        'GroupOption': has_workgroup_option_perm,
-
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
+
+        'WorkgroupKeyValue': has_workgroup_keyvalue_perm,
     }
 
     handling_function = handling_functions.get(obj_type, False)
@@ -304,7 +294,7 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_workgroup_option_perm(user_level, obj, ctnr, action):
+def has_workgroup_keyvalue_perm(user_level, obj, ctnr, action):
     """Permissions for group options."""
     return {
         'cyder_admin': True,  # ?
