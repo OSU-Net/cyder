@@ -85,7 +85,7 @@ class Range(models.Model, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        if self.range_usage:
+        if self.range_usage or self.range_usage == 0:
             if self.range_usage == 100:
                 return get_display(self) + " (Full Capacity)"
 
