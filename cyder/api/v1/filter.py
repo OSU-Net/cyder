@@ -15,22 +15,16 @@ class SearchFieldFilter(filters.BaseFilterBackend):
     """Filter based on record attributes."""
 
     def filter_queryset(self, request, queryset, view):
-        ALLOWED_ENDINGS = (
-            '__exact', '__iexact', '__contains', '__icontains', '__gt',
-            '__gte', '__lt', '__lte', '__startswith', '__istartswith',
-            '__endswith', '__iendswith', '__isnull', '__search',
-        )
-
         q_include = {}
         q_exclude = {}
         q_keyvalues = {}
 
+        kv_queryset = None
+        f_queryset = None
+
         parent_model = queryset.model
         parent_name = parent_model.__name__.lower()
         keyvalue_model = getattr(view, 'keyvaluemodel', None)
-
-        kv_queryset = None
-        f_queryset = None
 
         matching = lambda k, v: set(
             keyvalue_model.objects.filter(
@@ -42,9 +36,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         )
 
         for q in request.QUERY_PARAMS:
-            if q.startswith("i:") and q.endswith(ALLOWED_ENDINGS):
+            if q.endswith(("__regex", "__iregex")):
+                continue
+            elif q.startswith("i:"):
                 q_include[q[2:]] = request.QUERY_PARAMS[q]
-            elif q.startswith("e:") and q.endswith(ALLOWED_ENDINGS):
+            elif q.startswith("e:"):
                 q_exclude[q[2:]] = request.QUERY_PARAMS[q]
             elif q.startswith("k:"):
                 # key value matching

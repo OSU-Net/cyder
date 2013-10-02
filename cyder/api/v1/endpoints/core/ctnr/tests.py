@@ -65,6 +65,7 @@ class CtnrAPI_Test(CoreAPITests):
         self.ctnr.domains.add(self.ctnr_domain)
         self.ctnr.ranges.add(self.range)
         self.ctnr.workgroups.add(self.workgroup)
+        self.ctnr.save()
         return self.ctnr
 
     def test_user_filter(self):

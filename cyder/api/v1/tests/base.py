@@ -164,6 +164,18 @@ class APITests(object):
         self.assertHttpNotFound(resp)
         assert json.loads(resp.content)['detail'] == "Not found"
 
+    def test_empty_list(self):
+        obj = self.create_data()
+        bad_id = obj.id
+        obj.delete()
+        resp = self.client.get(self.object_list_url,
+                               data={'i:id__exact': bad_id},
+                               **self.authheader)
+        self.assertHttpOK(resp)
+        data = json.loads(resp.content)
+        assert 'count' in data
+        assert data['count'] == 0
+
     def test_existing(self):
         obj = self.create_data()
         resp = self.client.get(self.object_url(obj.id),
