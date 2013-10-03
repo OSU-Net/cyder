@@ -74,7 +74,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     is_signed = models.BooleanField(default=False)
     dns_enabled = models.BooleanField(default=True)
 
-    search_fields = ('primary', 'contact', 'description')
+    search_fields = ('primary', 'contact', 'description', 'root_domain__name')
     display_fields = ('description',)
     template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
@@ -128,13 +128,11 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         """For tables."""
         data = super(SOA, self).details()
         data['data'] = [
-            ('Description', 'description', self),
+            ('Root Domain', 'root_domain', self.root_domain),
             ('Primary', 'primary', self.primary),
             ('Contact', 'contact', self.contact),
             ('Serial', 'serial', self.serial),
-            ('Expire', 'expire', self.expire),
-            ('Retry', 'retry', self.retry),
-            ('Refresh', 'refresh', self.refresh),
+            ('Enabled', 'dns_enabled', self.dns_enabled),
         ]
         return data
 
