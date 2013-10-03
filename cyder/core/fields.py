@@ -24,7 +24,7 @@ class MacAddrField(CharField):
         else:
             self.dhcp_enabled = None # always validate
 
-        kwargs['max_length'] = 12
+        kwargs['max_length'] = 17
         kwargs['blank'] = True
 
         super(MacAddrField, self).__init__(*args, **kwargs)

@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'DynamicInterface.mac'
-        db.alter_column('dynamic_interface', 'mac', self.gf('cyder.core.fields.MacAddrField')(max_length=12, dhcp_enabled='dhcp_enabled'))
+        db.alter_column('dynamic_interface', 'mac', self.gf('cyder.core.fields.MacAddrField')(max_length=17, dhcp_enabled='dhcp_enabled'))
 
     def backwards(self, orm):
 
@@ -90,7 +90,7 @@ class Migration(SchemaMigration):
             'domain': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['domain.Domain']", 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_seen': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'max_length': '11', 'blank': 'True'}),
-            'mac': ('cyder.core.fields.MacAddrField', [], {'blank': 'True', 'max_length': '12', 'dhcp_enabled': "'dhcp_enabled'"}),
+            'mac': ('cyder.core.fields.MacAddrField', [], {'blank': 'True', 'max_length': '17', 'dhcp_enabled': "'dhcp_enabled'"}),
             'range': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['range.Range']"}),
             'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
             'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True', 'blank': 'True'})
@@ -155,7 +155,7 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380775861'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380826717'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'system.system': {
