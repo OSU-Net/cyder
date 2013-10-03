@@ -8,6 +8,8 @@ import cydns
 import datetime
 import re
 
+from cyder.core.fields import MacAddrField
+
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
@@ -16,7 +18,7 @@ from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.range.utils import find_range
-from cyder.cydhcp.utils import format_mac
+from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 
@@ -87,9 +89,11 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     not like the Django ORM where you must call the `save()` function for any
     changes to propagate to the database.
     """
+
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
-    mac = models.CharField(max_length=17, blank=True)
+    mac = MacAddrField(dhcp_enabled='dhcp_enabled',
+                       help_text="MAC address with or without colons")
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
@@ -222,7 +226,15 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         else:
             return '{0}{1}.{2}'.format(itype, primary, alias)
 
-    def build_host(self):
+    def format_host_option(self, option):
+        s = str(option)
+        s = s.replace('%h', self.label)
+        s = s.replace('%i', self.ip_str)
+        s = s.replace('%m', self.mac)
+        s = s.replace('%6m', self.mac[0:6])
+        return s
+
+    def build_host(self, options=None):
         build_str = '\thost {0} {{\n'.format(self.fqdn)
         build_str += '\t\thardware ethernet {0};\n'.format(
             format_mac(self.mac))
@@ -230,7 +242,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address6 {0};\n'.format(self.ip_str)
         else:
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
-        """
+        build_str += join_dhcp_args(map(self.format_host_option, options),
+                                    depth=2)
         options = self.staticintrkeyvalue_set.filter(is_option=True)
         statements = self.staticintrkeyvalue_set.filter(is_statement=True)
         if options:
@@ -239,8 +252,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if statements:
             build_str += '\t\t# Host Statements\n'
             build_str += join_dhcp_args(statements, depth=2)
-        """
-        build_str += '\t}\n\n'
+        build_str += '\t}\n'
         return build_str
 
     def build_subclass(self, contained_range, allowed):
@@ -250,9 +262,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)
-        if self.dhcp_enabled:
-            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
-            validate_mac(self.mac)
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():

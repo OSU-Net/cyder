@@ -66,8 +66,6 @@ class Vrf(models.Model, ObjectUrlMixin):
                     continue
                 build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(
                     self.name, range_.start_str, range_.end_str)
-                build_str += "\n# {0} for range {1}:{2}\n".format(
-                    self.name, range_.start_str, range_.end_str)
                 build_str += "\tmatch hardware;\n"
                 build_str += "}\n"
                 for client in dynamic_clients:
