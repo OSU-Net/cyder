@@ -35,7 +35,7 @@ class MacAddrField(CharField):
             if value == '':
                 raise ValidationError(
                     "This field is required when DHCP is enabled")
-            value = value.lower().replace(':', '')
+            value = value.lower().replace(':', '').replace('-', '')
             validate_mac(value)
 
         value = super(CharField, self).clean(value, model_instance)
