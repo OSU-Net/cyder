@@ -157,10 +157,6 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
                 print ('\tEnd is not inside network'
                        .format(n.network.broadcast))
 
-            if range_str == '10.255.255.255 - 10.255.255.255':
-                print ("(Enabling it anyway because it's "
-                       "10.255.255.255 - 10.255.255.255.)")
-                valid = True
 
         dhcp_enabled = bool(enabled and valid)
     else: # the Range doesn't have a Network
