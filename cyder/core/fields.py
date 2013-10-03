@@ -1,5 +1,6 @@
-from django.db.models import CharField
+from django.db.models import CharField, NOT_PROVIDED
 from django.core.exceptions import ValidationError
+from south.modelsinspector import add_introspection_rules
 
 from cyder.cydhcp.validation import validate_mac
 
@@ -23,11 +24,6 @@ class MacAddrField(CharField):
         else:
             self.dhcp_enabled = None # always validate
 
-        for option in ['max_length', 'blank']:
-            if option in kwargs:
-                raise Exception('You cannot specify the {0} option.'
-                                .format(option))
-
         kwargs['max_length'] = 12
         kwargs['blank'] = True
 
@@ -44,3 +40,12 @@ class MacAddrField(CharField):
 
         value = super(CharField, self).clean(value, model_instance)
         return value
+
+
+add_introspection_rules([
+    (
+        [MacAddrField], # model
+        [], # args
+        {'dhcp_enabled': ('dhcp_enabled', {})}, # kwargs
+    )
+], [r'^cyder\.core\.fields\.MacAddrField'])
