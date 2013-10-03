@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'StaticInterface.mac'
-        db.alter_column('static_interface', 'mac', self.gf('cyder.core.fields.MacAddrField')(max_length=12, dhcp_enabled='dhcp_enabled'))
+        db.alter_column('static_interface', 'mac', self.gf('cyder.core.fields.MacAddrField')(max_length=17, dhcp_enabled='dhcp_enabled'))
 
     def backwards(self, orm):
 
@@ -132,7 +132,7 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380775855'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380826714'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'static_intr.staticinterface': {
@@ -151,7 +151,7 @@ class Migration(SchemaMigration):
             'ip_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': '63', 'blank': 'True'}),
             'last_seen': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'max_length': '11', 'blank': 'True'}),
-            'mac': ('cyder.core.fields.MacAddrField', [], {'blank': 'True', 'max_length': '12', 'dhcp_enabled': "'dhcp_enabled'"}),
+            'mac': ('cyder.core.fields.MacAddrField', [], {'blank': 'True', 'max_length': '17', 'dhcp_enabled': "'dhcp_enabled'"}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'reverse_domain': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'reverse_staticintr_set'", 'null': 'True', 'to': "orm['domain.Domain']"}),
             'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
