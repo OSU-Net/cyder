@@ -1,4 +1,5 @@
-import cyder as cy
+from cyder.base.constants import (LEVEL_GUEST, LEVEL_USER, LEVEL_ADMIN,
+                                  ACTION_VIEW, ACTION_UPDATE)
 
 
 def has_perm(self, request, action, obj=None, obj_class=None):
@@ -57,18 +58,18 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     # Get user level.
     try:
         ctnr_level = CtnrUser.objects.get(ctnr=ctnr, user=user).level
-        is_ctnr_admin = ctnr_level == cy.LEVEL_ADMIN
-        is_ctnr_user = ctnr_level == cy.LEVEL_USER
-        is_ctnr_guest = ctnr_level == cy.LEVEL_GUEST
+        is_ctnr_admin = ctnr_level == LEVEL_ADMIN
+        is_ctnr_user = ctnr_level == LEVEL_USER
+        is_ctnr_guest = ctnr_level == LEVEL_GUEST
     except CtnrUser.DoesNotExist:
         is_ctnr_admin = False
         is_ctnr_user = False
         is_ctnr_guest = False
     try:
         cyder_level = CtnrUser.objects.get(ctnr=1, user=user).level
-        is_cyder_admin = cyder_level == cy.LEVEL_ADMIN
-        is_cyder_user = cyder_level == cy.LEVEL_USER
-        is_cyder_guest = cyder_level == cy.LEVEL_GUEST
+        is_cyder_admin = cyder_level == LEVEL_ADMIN
+        is_cyder_user = cyder_level == LEVEL_USER
+        is_cyder_guest = cyder_level == LEVEL_GUEST
     except CtnrUser.DoesNotExist:
         is_cyder_admin = False
         is_cyder_user = False
@@ -112,7 +113,6 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 
         'SOA': has_soa_perm,
 
-        # Top-level ctnr objects.
         'Domain': has_domain_perm,
 
         # Domain records.
@@ -155,32 +155,32 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 def has_administrative_perm(user_level, obj, ctnr, action):
     """Permissions for ctnrs or users. Not related to DNS or DHCP objects."""
     return {
-        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'cyder_admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
 def has_ctnr_object_perm(user_level, obj, ctnr, action):
     """Permissions for ctnr object relationships."""
     return {
-        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'cyder_admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'ctnr_admin': action == ACTION_VIEW,
+        'admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'user': action == ACTION_VIEW,
+        'guest': action == (ACTION_VIEW),
     }.get(user_level, False)
 
 
 def has_ctnr_user_perm(user_level, obj, ctnr, action):
     """Permissions for ctnr users."""
     return {
-        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'ctnr_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'cyder_admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'ctnr_admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'admin': action in (ACTION_VIEW, ACTION_UPDATE),
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -191,9 +191,9 @@ def has_soa_perm(user_level, obj, ctnr, action):
     """
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -204,10 +204,10 @@ def has_domain_perm(user_level, obj, ctnr, action):
         return False
 
     return {
-        'cyder_admin': action in [cy.ACTION_VIEW, cy.ACTION_UPDATE],  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'cyder_admin': action in (ACTION_VIEW, ACTION_UPDATE),  # ?
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -223,7 +223,7 @@ def has_domain_record_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action in [cy.ACTION_VIEW],
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -233,9 +233,9 @@ def has_name_server_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -249,9 +249,9 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,
-        'ctnr_admin': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
         'user': True,
-        'guest': action in [cy.ACTION_VIEW],
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -262,9 +262,9 @@ def has_subnet_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -274,9 +274,9 @@ def has_range_perm(user_level, obj, ctnr, action):
         return False
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -288,9 +288,9 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,  # ?
-        'ctnr_admin': action in [cy.ACTION_VIEW],  # ?
-        'user': action in [cy.ACTION_VIEW],  # ?
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,  # ?
+        'user': action == ACTION_VIEW,  # ?
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -299,8 +299,8 @@ def has_workgroup_keyvalue_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,  # ?
         'ctnr_admin': True,  # ?
-        'user': action in [cy.ACTION_VIEW],  # ?
-        'guest': action in [cy.ACTION_VIEW],
+        'user': action == ACTION_VIEW,  # ?
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -313,7 +313,7 @@ def has_system_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action in [cy.ACTION_VIEW],
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -325,43 +325,43 @@ def has_generic_dhcp_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,
         'ctnr_admin': True,
         'user': True,
-        'guest': action in [cy.ACTION_VIEW],
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
 def has_vrf_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
 def has_site_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
 def has_vlan_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
 def has_network_perm(user_level, obj, ctnr, action):
     return {
         'cyder_admin': True,
-        'ctnr_admin': action in [cy.ACTION_VIEW],
-        'user': action in [cy.ACTION_VIEW],
-        'guest': action in [cy.ACTION_VIEW],
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -371,7 +371,7 @@ def has_static_registration_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,  # ?
         'ctnr_admin': True,  # ?
         'user': True,  # ?
-        'guest': action in [cy.ACTION_VIEW],
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
 
@@ -381,5 +381,5 @@ def has_dynamic_registration_perm(user_level, obj, ctnr, action):
         'cyder_admin': True,  # ?
         'ctnr_admin': True,  # ?
         'user': True,  # ?
-        'guest': action in [cy.ACTION_VIEW],
+        'guest': action == ACTION_VIEW,
     }.get(user_level, False)
