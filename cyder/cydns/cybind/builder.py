@@ -18,7 +18,7 @@ from cyder.settings.dnsbuilds import (
 
 from cyder.core.task.models import Task
 
-from cyder.cydns.domain.models import SOA
+from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
 from cyder.cydns.cybind.zone_builder import build_zone_data
 from cyder.cydns.cybind.models import DNSBuildRun

@@ -6,8 +6,8 @@ from cyder.cydns.soa.models import SOA, SOAKeyValue
 class SOAForm(ModelForm):
     class Meta:
         model = SOA
-        fields = ('description', 'primary', 'contact', 'expire', 'retry',
-                  'refresh', 'minimum', 'ttl', 'is_signed', 'dns_enabled')
+        fields = ('primary', 'contact', 'expire', 'retry', 'refresh',
+                  'minimum', 'ttl', 'description', 'is_signed', 'dns_enabled')
         exclude = ('serial', 'dirty',)
 
 

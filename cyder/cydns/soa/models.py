@@ -2,9 +2,8 @@ import time
 from gettext import gettext as _
 from string import Template
 
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db.models import Q, F
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
@@ -69,6 +68,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM,
                                           validators=[validate_minimum])
     description = models.CharField(max_length=200, blank=True)
+    root_domain = models.ForeignKey("domain.Domain", null=False, unique=True,
+                                    related_name="root_soa")
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)
@@ -87,7 +88,6 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         # We are using the description field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
         # Domain models.py file for more info.
-        unique_together = ('primary', 'contact', 'description')
 
     def bind_render_record(self):
         template = Template(self.template).substitute(**self.justs)
@@ -116,19 +116,11 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     def rdtype(self):
         return 'SOA'
 
-    @property
-    def root_domain(self):
-        try:
-            return self.domain_set.get(~Q(master_domain__soa=F('soa')),
-                                       soa__isnull=False)
-        except ObjectDoesNotExist:
-            return None
-
     def details(self):
         """For tables."""
         data = super(SOA, self).details()
         data['data'] = [
-            ('Root Domain', 'root_domain', self.root_domain),
+            ('Root Domain', 'root_domain__name', self.root_domain),
             ('Primary', 'primary', self.primary),
             ('Contact', 'contact', self.contact),
             ('Serial', 'serial', self.serial),

@@ -9,7 +9,6 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticIntrKeyValue)
 from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -72,7 +71,7 @@ class Zone(object):
             soa, _ = SOA.objects.get_or_create(
                 primary=primary, contact=contact, refresh=refresh,
                 retry=retry, expire=expire, minimum=minimum,
-                description='SOA for %s zone' % self.dname)
+                root_domain=self.domain, description='')
             return soa
         else:
             return None

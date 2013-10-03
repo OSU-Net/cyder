@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -84,7 +83,7 @@ class Domain(models.Model, ObjectUrlMixin):
                             validators=[validate_domain_name])
     master_domain = models.ForeignKey("self", null=True,
                                       default=None, blank=True)
-    soa = models.ForeignKey(SOA, null=True, default=None, blank=True)
+    soa = models.ForeignKey("soa.SOA", null=True, default=None, blank=True)
     is_reverse = models.BooleanField(default=False)
     # This indicates if this domain (and zone) needs to be rebuilt
     dirty = models.BooleanField(default=False)
@@ -120,8 +119,9 @@ class Domain(models.Model, ObjectUrlMixin):
         data = super(Domain, self).details()
         data['data'] = [
             ('Name', 'name', self),
-            ('Master Domain', 'master_domain', self.master_domain),
-            ('SOA', 'soa', self.soa),
+            ('SOA', 'soa__root_domain__name',
+             self.soa.root_domain if self.soa else None),
+            ('Master Domain', 'master_domain__name', self.master_domain),
             ('Delegated', 'delegated', self.delegated),
         ]
         return data
