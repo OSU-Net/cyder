@@ -1,6 +1,6 @@
 from django import forms
 
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.core.system.models import System, SystemAV
 from cyder.base.mixins import UsabilityFormMixin
 
 
@@ -20,10 +20,10 @@ class ExtendedSystemForm(forms.ModelForm, UsabilityFormMixin):
         model = System
 
 
-class SystemKeyValueForm(forms.ModelForm):
+class SystemAVForm(forms.ModelForm):
     system = forms.ModelChoiceField(
         queryset=System.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = SystemKeyValue
+        model = SystemAV

@@ -170,7 +170,7 @@ def prettify_obj_type(obj_type, *args, **kwargs):
                 capitalize = True
             else:
                 prettified += obj_type[i]
-        if 'Kv' in prettified:
+        if 'Av' in prettified:
             prettified = prettified.split(' ')[0] + ' Attribute'
             return prettified
         return prettified

@@ -1,1 +1,1 @@
-DNS_KEY_VALUES = ("soa_kv",)
+DNS_EAV_MODELS = ("soa_av",)

@@ -245,8 +245,8 @@ class Range(models.Model, ObjectUrlMixin):
                                   "this range")
 
     def build_range(self):
-        range_options = self.rangekeyvalue_set.filter(is_option=True)
-        range_statements = self.rangekeyvalue_set.filter(is_statement=True)
+        range_options = self.rangeav_set.filter(is_option=True)
+        range_statements = self.rangeav_set.filter(is_statement=True)
         build_str = "\tpool {\n"
         build_str += "\t\t# Pool Statements\n"
         build_str += "\t\tfailover peer \"dhcp\";\n"
@@ -366,7 +366,7 @@ class RangeAV(EAVBase):
     attribute = models.ForeignKey(Attribute)
 
 
-# reversion.(RangeKeyValue)
+# reversion.(RangeAV)
 
 
 class RangeOverflowError(ValidationError):

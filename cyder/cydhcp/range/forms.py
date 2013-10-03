@@ -1,6 +1,6 @@
 from django import forms
 
-from cyder.cydhcp.range.models import Range, RangeKeyValue
+from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.base.mixins import UsabilityFormMixin
 
 
@@ -18,11 +18,11 @@ class RangeForm(forms.ModelForm, UsabilityFormMixin):
              'style': 'display: none;width: 680px'})
 
 
-class RangeKeyValueForm(forms.ModelForm):
+class RangeAVForm(forms.ModelForm):
     range = forms.ModelChoiceField(
         queryset=Range.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = RangeKeyValue
+        model = RangeAV
         exclude = ('is_option', 'is_statement', 'is_quoted')

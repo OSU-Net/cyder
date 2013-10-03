@@ -11,7 +11,7 @@ from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.forms import (
     StaticInterfaceForm, StaticInterfaceQuickForm)
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticIntrKeyValue)
+                                                       StaticInterfaceAV)
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.views import (CydhcpListView, CydhcpDetailView,
@@ -23,7 +23,7 @@ def static_intr_detail(request, pk):
 
     return cy_detail(request, StaticInterface,
                      'static_intr/static_intr_detail.html', {
-                     'Attributes': 'staticintrkeyvalue_set',
+                     'Attributes': 'staticintrav_set',
                      }, pk=pk, obj=static_interface)
 
 
@@ -75,7 +75,7 @@ def delete_attr(request, attr_pk):
     """
     #system = get_object_or_404(System, pk=system_pk)
     #intr = get_object_or_404(StaticInterface, pk=intr_pk)
-    attr = get_object_or_404(StaticIntrKeyValue, pk=attr_pk)
+    attr = get_object_or_404(StaticInterfaceAV, pk=attr_pk)
     attr.delete()
     return HttpResponse("Attribute Removed.")
 

@@ -110,7 +110,7 @@ class Network(models.Model, ObjectUrlMixin):
             #else:
                 #router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
 
-            #kv = NetworkKeyValue(key="routers", value=router, network=self)
+            #kv = NetworkAV(key="routers", value=router, network=self)
             #kv.clean()
             #kv.save()
 
@@ -208,8 +208,8 @@ class Network(models.Model, ObjectUrlMixin):
 
     def build_subnet(self, raw=False):
         self.update_network()
-        statements = self.networkkeyvalue_set.filter(is_statement=True)
-        options = self.networkkeyvalue_set.filter(is_option=True)
+        statements = self.networkav_set.filter(is_statement=True)
+        options = self.networkav_set.filter(is_option=True)
         ranges = self.range_set.filter(range_type=DYNAMIC, dhcp_enabled=True)
         if self.ip_type == IP_TYPE_4:
             build_str = "\nsubnet {0} netmask {1} {{\n".format(

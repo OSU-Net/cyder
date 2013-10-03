@@ -1,6 +1,6 @@
 from django import forms
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicIntrKeyValue)
+                                                        DynamicInterfaceAV)
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.forms import RangeWizard
 
@@ -18,11 +18,11 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
         exclude = ('last_seen')
 
 
-class DynamicIntrKeyValueForm(forms.ModelForm):
+class DynamicInterfaceAVForm(forms.ModelForm):
     dynamic_interface = forms.ModelChoiceField(
         queryset=DynamicInterface.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = DynamicIntrKeyValue
+        model = DynamicInterfaceAV
         exclude = ('is_option', 'is_statement', 'is_quoted',)

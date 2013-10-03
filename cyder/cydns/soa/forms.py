@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from cyder.cydns.soa.models import SOA, SOAKeyValue
+from cyder.cydns.soa.models import SOA, SOAAV
 
 
 class SOAForm(ModelForm):
@@ -11,11 +11,11 @@ class SOAForm(ModelForm):
         exclude = ('serial', 'dirty',)
 
 
-class SOAKeyValueForm(ModelForm):
+class SOAAVForm(ModelForm):
     soa = forms.ModelChoiceField(
         queryset=SOA.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = SOAKeyValue
+        model = SOAAV
         exclude = ('serial', 'dirty',)

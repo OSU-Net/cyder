@@ -1,5 +1,5 @@
 from django import forms
-from cyder.cydhcp.site.models import Site, SiteKeyValue
+from cyder.cydhcp.site.models import Site, SiteAV
 
 
 class SiteForm(forms.ModelForm):
@@ -9,11 +9,11 @@ class SiteForm(forms.ModelForm):
         model = Site
 
 
-class SiteKeyValueForm(forms.ModelForm):
+class SiteAVForm(forms.ModelForm):
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = SiteKeyValue
+        model = SiteAV
         exclude = ('is_quoted',)

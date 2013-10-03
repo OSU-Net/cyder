@@ -12,25 +12,25 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicIntrKeyValue)
+                                                        DynamicInterfaceAV)
 from cyder.cydhcp.interface.dynamic_intr.forms import (DynamicInterfaceForm,
-                                                       DynamicIntrKeyValueForm)
+                                                       DynamicInterfaceAVForm)
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticIntrKeyValue)
+                                                       StaticInterfaceAV)
 from cyder.cydhcp.interface.static_intr.forms import (StaticInterfaceForm,
-                                                      StaticIntrKeyValueForm)
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
-from cyder.cydhcp.network.forms import NetworkForm, NetworkKeyValueForm
-from cyder.cydhcp.range.models import Range, RangeKeyValue
-from cyder.cydhcp.range.forms import RangeForm, RangeKeyValueForm
-from cyder.cydhcp.site.models import Site, SiteKeyValue
-from cyder.cydhcp.site.forms import SiteForm, SiteKeyValueForm
-from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
-from cyder.cydhcp.vlan.forms import VlanForm, VlanKeyValueForm
-from cyder.cydhcp.vrf.models import Vrf, VrfKeyValue
-from cyder.cydhcp.vrf.forms import VrfForm, VrfKeyValueForm
-from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
-from cyder.cydhcp.workgroup.forms import WorkgroupForm, WorkgroupKeyValueForm
+                                                      StaticInterfaceAVForm)
+from cyder.cydhcp.network.models import Network, NetworkAV
+from cyder.cydhcp.network.forms import NetworkForm, NetworkAVForm
+from cyder.cydhcp.range.models import Range, RangeAV
+from cyder.cydhcp.range.forms import RangeForm, RangeAVForm
+from cyder.cydhcp.site.models import Site, SiteAV
+from cyder.cydhcp.site.forms import SiteForm, SiteAVForm
+from cyder.cydhcp.vlan.models import Vlan, VlanAV
+from cyder.cydhcp.vlan.forms import VlanForm, VlanAVForm
+from cyder.cydhcp.vrf.models import Vrf, VrfAV
+from cyder.cydhcp.vrf.forms import VrfForm, VrfAVForm
+from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
+from cyder.cydhcp.workgroup.forms import WorkgroupForm, WorkgroupAVForm
 
 import ipaddr
 
@@ -38,23 +38,23 @@ import ipaddr
 def get_klasses(obj_type):
     return {
         'network': (Network, NetworkForm, None),
-        'network_kv': (NetworkKeyValue, NetworkKeyValueForm, None),
+        'network_av': (NetworkAV, NetworkAVForm, None),
         'range': (Range, RangeForm, None),
-        'range_kv': (RangeKeyValue, RangeKeyValueForm, None),
+        'range_av': (RangeAV, RangeAVForm, None),
         'site': (Site, SiteForm, None),
-        'site_kv': (SiteKeyValue, SiteKeyValueForm, None),
+        'site_av': (SiteAV, SiteAVForm, None),
         'vlan': (Vlan, VlanForm, None),
-        'vlan_kv': (VlanKeyValue, VlanKeyValueForm, None),
+        'vlan_av': (VlanAV, VlanAVForm, None),
         'static_interface': (StaticInterface, StaticInterfaceForm, None),
-        'static_interface_kv': (StaticIntrKeyValue, StaticIntrKeyValueForm,
+        'static_interface_av': (StaticInterfaceAV, StaticInterfaceAVForm,
                                 None),
         'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
-        'dynamic_interface_kv': (DynamicIntrKeyValue, DynamicIntrKeyValueForm,
+        'dynamic_interface_av': (DynamicInterfaceAV, DynamicInterfaceAVForm,
                                  None),
         'vrf': (Vrf, VrfForm, None),
-        'vrf_kv': (VrfKeyValue, VrfKeyValueForm, None),
+        'vrf_av': (VrfAV, VrfAVForm, None),
         'workgroup': (Workgroup, WorkgroupForm, None),
-        'workgroup_kv': (WorkgroupKeyValue, WorkgroupKeyValueForm, None),
+        'workgroup_av': (WorkgroupAV, WorkgroupAVForm, None),
     }.get(obj_type, (None, None, None))
 
 
@@ -86,7 +86,7 @@ def cydhcp_detail(request, pk):
     obj_type = request.path.split('/')[2]
     Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
-    attr_getter = getattr(obj, "{0}keyvalue_set".format(obj_type))
+    attr_getter = getattr(obj, "{0}av_set".format(obj_type))
     return render(request, "{0}/{0}_detail.html".format(obj_type), {
         obj_type: obj,
         'attrs': attr_getter.all()

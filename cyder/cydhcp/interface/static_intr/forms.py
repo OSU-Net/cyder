@@ -5,7 +5,7 @@ import ipaddr
 
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticIntrKeyValue)
+                                                       StaticInterfaceAV)
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
@@ -49,13 +49,13 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
         widgets = {'ip_type': forms.RadioSelect}
 
 
-class StaticIntrKeyValueForm(forms.ModelForm):
+class StaticInterfaceAVForm(forms.ModelForm):
     static_interface = forms.ModelChoiceField(
         queryset=StaticInterface.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = StaticIntrKeyValue
+        model = StaticInterfaceAV
         exclude = ('is_option', 'is_statement', 'is_quoted')
 
 

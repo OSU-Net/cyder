@@ -1,6 +1,6 @@
 from django import forms
 
-from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
+from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 
 class WorkgroupForm(forms.ModelForm):
@@ -9,11 +9,11 @@ class WorkgroupForm(forms.ModelForm):
         model = Workgroup
 
 
-class WorkgroupKeyValueForm(forms.ModelForm):
+class WorkgroupAVForm(forms.ModelForm):
     workgroup = forms.ModelChoiceField(
         queryset=Workgroup.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
-        model = WorkgroupKeyValue
+        model = WorkgroupAV
         exclude = ("is_quoted",)

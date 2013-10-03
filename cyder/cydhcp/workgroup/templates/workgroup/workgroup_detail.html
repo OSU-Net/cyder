@@ -14,9 +14,9 @@
 {% endblock %}
 
 {% block extra_action_bar %}
-  {% if request.user.get_profile().has_perm(request, 0, obj_class='WorkgroupKeyValue') %}
-    {{ create_button('workgroup_kv', url('cydhcp-get-record'),
-                     url('workgroup_kv'), objName=obj.name,
+  {% if request.user.get_profile().has_perm(request, 0, obj_class='WorkgroupAV') %}
+    {{ create_button('workgroup_av', url('cydhcp-get-record'),
+                     url('workgroup_av'), objName=obj.name,
                      buttonName="Workgroup Attribute") }}
   {% endif %}
 {% endblock %}

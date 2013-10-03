@@ -33,5 +33,5 @@ urlpatterns = patterns(
 
 urlpatterns += patterns(
     '',
-    url(r'^system_kv/', include(core_urls('system_kv')))
+    url(r'^system_av/', include(core_urls('system_av')))
 )

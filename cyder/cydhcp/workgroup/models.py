@@ -53,8 +53,8 @@ class Workgroup(models.Model, ObjectUrlMixin):
         #if not (static_clients or dynamic_clients):
             #return build_str
         build_str += "group {{ #{0}\n".format(self.name)
-        statements = self.workgroupkeyvalue_set.filter(is_statement=True)
-        options = list(self.workgroupkeyvalue_set.filter(is_option=True))
+        statements = self.workgroupav_set.filter(is_statement=True)
+        options = list(self.workgroupav_set.filter(is_option=True))
 
         def is_host_option(option):
             return any(x in option.value for x in ['%h', '%i', '%m', '%6m'])

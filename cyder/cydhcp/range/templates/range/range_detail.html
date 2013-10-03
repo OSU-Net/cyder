@@ -17,8 +17,8 @@
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
-    {{ create_button('range_kv', url('cydhcp-get-record'),
-                     url('range_kv'), objName=obj.start_str,
+    {{ create_button('range_av', url('cydhcp-get-record'),
+                     url('range_av'), objName=obj.start_str,
                      buttonName="Range Attribute") }}
   {% endif %}
 {% endblock %}
