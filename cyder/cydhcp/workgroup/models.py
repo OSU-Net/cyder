@@ -43,23 +43,35 @@ class Workgroup(models.Model, ObjectUrlMixin):
         ]}
 
     def build_workgroup(self):
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
+        from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
-        static_clients = self.staticinterface_set.filter(dhcp_enabled=True)
-        dynamic_clients = self.dynamicinterface_set.filter(dhcp_enabled=True)
-        if not (static_clients or dynamic_clients):
-            return build_str
+        dynamic_clients = DynamicInterface.objects.filter(
+            workgroup=self, dhcp_enabled=True)
+        static_clients = StaticInterface.objects.filter(
+            workgroup=self, dhcp_enabled=True)
+        #if not (static_clients or dynamic_clients):
+            #return build_str
         build_str += "group {{ #{0}\n".format(self.name)
         statements = self.workgroupkeyvalue_set.filter(is_statement=True)
-        options = self.workgroupkeyvalue_set.filter(is_option=True)
+        options = list(self.workgroupkeyvalue_set.filter(is_option=True))
+
+        def is_host_option(option):
+            return any(x in option.value for x in ['%h', '%i', '%m', '%6m'])
+
+        host_options = filter(is_host_option, options)
+        for x in host_options:
+            options.remove(x)
+
         build_str += "\t# Workgroup Options\n"
         if options:
             build_str += join_dhcp_args(options)
         build_str += "\t# Workgroup Statements\n"
         if statements:
             build_str += join_dhcp_args(statements)
-        build_str += "\t# Static Hosts in Workgorup\n"
+        build_str += "\t# Static Hosts in Workgroup\n"
         for client in chain(dynamic_clients, static_clients):
-            build_str += client.build_host()
+            build_str += client.build_host(host_options)
         build_str += "}\n"
         return build_str
 
