@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
@@ -59,8 +60,9 @@ class Ctnr(models.Model, ObjectUrlMixin):
     def build_legacy_class(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
-        for range_ in self.ranges.filter(range_type=DYNAMIC,
-                                         dhcp_enabled=True):
+        for range_ in self.ranges.filter(Q(range_type=DYNAMIC,
+                                           dhcp_enabled=True) |
+                                         Q(start_str='10.255.255.255')):
             clients = (range_.dynamicinterface_set.filter(ctnr=self,
                                                           dhcp_enabled=True)
                                                   .exclude(mac=''))
