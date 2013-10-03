@@ -21,9 +21,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
-    mac = MacAddrField(dhcp_enabled='dhcp_enabled',
-                       help_text='MAC address with or without colons '
-                                 '(required if DHCP is enabled)')
+    mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
+                       help_text='(required if DHCP is enabled)')
     domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True,

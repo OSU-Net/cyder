@@ -92,9 +92,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
-    mac = MacAddrField(dhcp_enabled='dhcp_enabled',
-                       help_text='MAC address with or without colons '
-                                 '(required if DHCP is enabled)')
+    mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
+                       help_text='(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
