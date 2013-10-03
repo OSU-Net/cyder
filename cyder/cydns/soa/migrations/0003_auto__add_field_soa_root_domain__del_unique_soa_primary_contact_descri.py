@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from south.db import db
 from south.v2 import SchemaMigration
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, F
 
 
 class Migration(SchemaMigration):
@@ -53,7 +51,7 @@ class Migration(SchemaMigration):
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
             'root_domain': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'root_soa'", 'unique': 'True', 'to': "orm['domain.Domain']"}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380831968'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380836647'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'soa.soakeyvalue': {
