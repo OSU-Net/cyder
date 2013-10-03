@@ -1,13 +1,15 @@
 from django.forms import ModelForm
 from django import forms
 from cyder.cydns.soa.models import SOA, SOAKeyValue
+from cyder.base.mixins import UsabilityFormMixin
 
 
-class SOAForm(ModelForm):
+class SOAForm(ModelForm, UsabilityFormMixin):
     class Meta:
         model = SOA
-        fields = ('primary', 'contact', 'expire', 'retry', 'refresh',
-                  'minimum', 'ttl', 'description', 'is_signed', 'dns_enabled')
+        fields = ('root_domain', 'primary', 'contact', 'expire',
+                  'retry', 'refresh', 'minimum', 'ttl', 'description',
+                  'is_signed', 'dns_enabled')
         exclude = ('serial', 'dirty',)
 
 
