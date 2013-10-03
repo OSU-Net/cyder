@@ -119,8 +119,7 @@ class Domain(models.Model, ObjectUrlMixin):
         data = super(Domain, self).details()
         data['data'] = [
             ('Name', 'name', self),
-            ('SOA', 'soa__root_domain__name',
-             self.soa.root_domain if self.soa else None),
+            ('SOA', 'soa__root_domain__name', self.soa),
             ('Master Domain', 'master_domain__name', self.master_domain),
             ('Delegated', 'delegated', self.delegated),
         ]

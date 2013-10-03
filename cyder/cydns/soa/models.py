@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
-from cyder.base.helpers import get_display
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
@@ -76,7 +75,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     dns_enabled = models.BooleanField(default=True)
 
     search_fields = ('primary', 'contact', 'description', 'root_domain__name')
-    display_fields = ('description',)
+    display_fields = ('root_domain__name',)
     template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
                  "{refresh} {retry} {expire})")
@@ -101,7 +100,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     attrs = None
 
     def __str__(self):
-        return get_display(self)
+        return self.root_domain.name
 
     def __repr__(self):
         return "<'{0}'>".format(str(self))
