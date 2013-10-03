@@ -83,8 +83,8 @@ class EAVValueField(models.CharField):
                 raise ValidationError('DHCP option or statement value can '
                                       'only contain ASCII characters')
 
-        validator = getattr(validators, attribute.value_type)
-        validator(value)
+            validator = getattr(validators, attribute.value_type)
+            validator(value)
 
         super(EAVValueField, self).validate(value, model_instance)
 
