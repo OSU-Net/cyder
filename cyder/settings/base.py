@@ -237,6 +237,8 @@ REST_FRAMEWORK = {
         'cyder.api.v1.authentication.CyderTokenAuthentication',
     ),
     'PAGINATE_BY': 25,
+    'PAGINATE_BY_PARAM': 'count',
+    'MAX_PAGINATE_BY': 100,
     'DEFAULT_FILTER_BACKENDS': (
         'cyder.api.v1.filter.SearchFieldFilter',
     ),

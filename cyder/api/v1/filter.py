@@ -60,7 +60,8 @@ class SearchFieldFilter(filters.BaseFilterBackend):
             elif (q in (f.name for f in queryset.model._meta.fields)
                   and q not in UNHANDLED_PARAMS):
                 raise InvalidQuery(
-                    "'{}' is not a valid query parameter".format(q)
+                    "'{}' is not a valid query parameter. Did you mean to"
+                    " prefix `i:`, `e:`, or `k:`?".format(q)
                 )
 
         if q_keyvalues:
