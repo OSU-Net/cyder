@@ -3,6 +3,9 @@ from rest_framework import exceptions, filters
 from cyder.core.ctnr.models import Ctnr
 
 
+UNHANDLED_PARAMS = 'page',
+
+
 class InvalidQuery(exceptions.APIException):
     status_code = 400
 
@@ -54,6 +57,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
             elif q == "ctnr":
                 queryset = parent_model.filter_by_ctnr(
                     Ctnr.objects.get(name=request.QUERY_PARAMS[q]))
+            elif (q in (f.name for f in queryset.model._meta.fields)
+                  and q not in UNHANDLED_PARAMS):
+                raise InvalidQuery(
+                    "'{}' is not a valid query parameter".format(q)
+                )
 
         if q_keyvalues:
             if getattr(view, 'keyvaluemodel', None):
