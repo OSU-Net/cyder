@@ -495,6 +495,16 @@ As an example, let's try finding all systems running Linux.
 
 This list can be used as is, or it can be further filtered with additional query parameters. For example, we could search for all systems running Linux in the ``nws`` container, or all enabled IPv6 networks on a certain VLAN.
 
+
+Sorting
+-------
+By passing a comma separated list of fields in a query parameter named ``sort``, you can sort query results. Sort is descending by default, but ascending sort may be achieved by prepending a dash (`-`) to the field name.
+
+Setting Results Per Page
+------------------------
+You may set the number of results to display per page by passing a query parameter named ``count`` with the number of records to display per page (up to a limit of 100).
+
+
 Summary of Field Lookups
 ------------------------
 ~~~~~

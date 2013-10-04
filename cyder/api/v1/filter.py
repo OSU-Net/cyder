@@ -39,24 +39,32 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         )
 
         for q in request.QUERY_PARAMS:
+            p = request.QUERY_PARAMS[q]
             if q.endswith(("__regex", "__iregex")):
                 continue
+
             elif q.startswith("i:"):
-                q_include[q[2:]] = request.QUERY_PARAMS[q]
+                q_include[q[2:]] = p
+
             elif q.startswith("e:"):
-                q_exclude[q[2:]] = request.QUERY_PARAMS[q]
+                q_exclude[q[2:]] = p
+
             elif q.startswith("k:"):
                 # key value matching
-                q_keyvalues[q[2:]] = request.QUERY_PARAMS[q]
+                q_keyvalues[q[2:]] = p
+
             elif q == "sort":
-                sort = request.QUERY_PARAMS[q].split(',')
+                sort = p.split(',')
                 queryset = queryset.order_by(*sort)
+
             elif q == "ctnr_id":
-                queryset = parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(id=int(request.QUERY_PARAMS[q])))
+                queryset &= parent_model.filter_by_ctnr(
+                    Ctnr.objects.get(id=int(p)))
+
             elif q == "ctnr":
-                queryset = parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(name=request.QUERY_PARAMS[q]))
+                queryset = queryset & parent_model.filter_by_ctnr(
+                    Ctnr.objects.get(name=p))
+
             elif (q in (f.name for f in queryset.model._meta.fields)
                   and q not in UNHANDLED_PARAMS):
                 raise InvalidQuery(
