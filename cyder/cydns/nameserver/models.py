@@ -55,6 +55,16 @@ class Nameserver(CydnsRecord):
     def __str__(self):
         return self.bind_render_record()
 
+    @classmethod
+    def get_api_fields(cls):
+        return ['ttl', 'description', 'server', 'domain', 'views']
+
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects or Nameserver.objects
+        objects = objects.filter(domain__in=ctnr.domains.all())
+        return objects
+
     @property
     def rdtype(self):
         return 'NS'

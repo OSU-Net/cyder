@@ -13,7 +13,7 @@ from cyder.cydns.models import LabelDomainMixin
 from gettext import gettext as _
 
 
-class MX(CydnsRecord, LabelDomainMixin):
+class MX(LabelDomainMixin, CydnsRecord):
     """
     >>> MX(label=label, domain=domain, server=server, priority=prio,
     ...     ttl=tll)

@@ -72,7 +72,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
+class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     """
     A PTR is used to map an IP to a domain name.
 

@@ -12,8 +12,6 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
         self.fields.keyOrder = ['system', 'domain', 'mac', 'vrf', 'site',
                                 'range', 'workgroup', 'dhcp_enabled', 'ctnr']
         self.fields['range'].required = True
-        self.fields['mac'].help_text = 'Required if DHCP is enabled'
-        self.fields['dhcp_enabled'].label = 'Enable DHCP?'
 
     class Meta:
         model = DynamicInterface

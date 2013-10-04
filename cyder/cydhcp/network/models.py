@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -103,19 +104,19 @@ class Network(models.Model, ObjectUrlMixin):
         self.attrs = AuxAttr(NetworkKeyValue, self, "network")
 
     def save(self, *args, **kwargs):
-        add_routers = True if not self.pk else False
         self.update_network()
         super(Network, self).save(*args, **kwargs)
 
-        if add_routers:
-            if self.ip_type == IP_TYPE_4:
-                router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
-            else:
-                router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
+        #if (self.pk is None and
+                #not self.networkkeyvalue_set.filter(key='routers').exists()):
+            #if self.ip_type == IP_TYPE_4:
+                #router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
+            #else:
+                #router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
 
-            kv = NetworkKeyValue(key="routers", value=router, network=self)
-            kv.clean()
-            kv.save()
+            #kv = NetworkKeyValue(key="routers", value=router, network=self)
+            #kv.clean()
+            #kv.save()
 
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
@@ -213,7 +214,7 @@ class Network(models.Model, ObjectUrlMixin):
         self.update_network()
         statements = self.networkkeyvalue_set.filter(is_statement=True)
         options = self.networkkeyvalue_set.filter(is_option=True)
-        ranges = self.range_set.all()
+        ranges = self.range_set.filter(range_type=DYNAMIC, dhcp_enabled=True)
         if self.ip_type == IP_TYPE_4:
             build_str = "\nsubnet {0} netmask {1} {{\n".format(
                 self.network.network, self.network.netmask)

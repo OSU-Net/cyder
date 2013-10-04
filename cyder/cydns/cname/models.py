@@ -9,7 +9,7 @@ from cyder.cydns.search_utils import smart_fqdn_exists
 from gettext import gettext as _
 
 
-class CNAME(CydnsRecord, LabelDomainMixin):
+class CNAME(LabelDomainMixin, CydnsRecord):
     """
     CNAMES can't point to an any other records. Said another way,
     CNAMES can't be at the samle level as any other record. This means
