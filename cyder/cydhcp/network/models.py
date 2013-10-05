@@ -110,9 +110,10 @@ class Network(models.Model, ObjectUrlMixin):
             #else:
                 #router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
 
-            #kv = NetworkAV(key="routers", value=router, network=self)
-            #kv.clean()
-            #kv.save()
+            #eav = NetworkAV(attribute=Attribute.objects.get(name="routers"),
+                            #value=router, network=self)
+            #eav.clean()
+            #eav.save()
 
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
