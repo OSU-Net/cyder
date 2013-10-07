@@ -3,7 +3,7 @@ from rest_framework import exceptions, filters
 from cyder.core.ctnr.models import Ctnr
 
 
-UNHANDLED_PARAMS = 'page',
+UNHANDLED_PARAMS = 'page', 'count',
 
 
 class InvalidQuery(exceptions.APIException):
@@ -65,11 +65,11 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 queryset = queryset & parent_model.filter_by_ctnr(
                     Ctnr.objects.get(name=p))
 
-            elif (q in (f.name for f in queryset.model._meta.fields)
-                  and q not in UNHANDLED_PARAMS):
+            elif q not in UNHANDLED_PARAMS:
                 raise InvalidQuery(
-                    "'{}' is not a valid query parameter. Did you mean to"
-                    " prefix `i:`, `e:`, or `k:`?".format(q)
+                    "'{}' is not a valid query parameter. Check your spelling "
+                    "and make sure you used the proper prefix, if appropriate."
+                    .format(q)
                 )
 
         if q_keyvalues:
