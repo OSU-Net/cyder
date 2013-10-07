@@ -164,6 +164,11 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
             self.save()
 
     def save(self, *args, **kwargs):
+        for domain in self.domain_set.all():
+            if domain != self.root_domain:
+                domain.soa = None
+                domain.save()
+
         self.full_clean()
         if not self.pk:
             new = True
