@@ -93,7 +93,8 @@ def create_zone_ajax(request):
         root_domain, purgeable=True, inherit_soa=False, force=True)
 
     soa = SOA(primary=primary, contact=contact, serial=int(time.time()),
-              description="SOA for {0}".format(root_domain))
+              description="SOA for {0}".format(root_domain),
+              root_domain=domain)
     try:
         soa.save()
     except ValidationError, e:
