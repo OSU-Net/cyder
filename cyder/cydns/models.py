@@ -90,9 +90,8 @@ class ViewMixin(models.Model):
 class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
-                                      help_text="Time to Live of this record")
-    description = models.CharField(max_length=1000, blank=True,
-                                   help_text="A description of this record.")
+                                      verbose_name="Time to live")
+    description = models.CharField(max_length=1000, blank=True)
 
     class Meta:
         abstract = True
@@ -171,13 +170,11 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             from cyder.cydns.utils import prune_tree
             prune_tree(db_domain)
 
-
     def schedule_rebuild_check(self):
         PTR = get_model('ptr', 'ptr')
         if self.domain.soa and not isinstance(self, PTR):
             # Mark the soa
             self.domain.soa.schedule_rebuild()
-
 
     def fqdn_kwargs_check(self, kwargs):
         fqdn = kwargs.pop('fqdn', None)
