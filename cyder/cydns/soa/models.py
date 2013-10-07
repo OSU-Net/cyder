@@ -183,6 +183,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
                 if getattr(db_self, field) != getattr(self, field):
                     self.schedule_rebuild(commit=False)
 
+        self.root_domain.soa = self
+        self.root_domain.save()
         super(SOA, self).save(*args, **kwargs)
 
         if new:

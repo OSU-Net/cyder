@@ -94,7 +94,7 @@ def validate_zone_soa(domain, master_domain):
     if not domain:
         raise Exception("You called this function wrong")
 
-    if not domain.soa:
+    if not domain.soa or domain.soa.pk is None:
         return
 
     zone_domains = domain.soa.domain_set.all()
