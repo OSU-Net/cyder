@@ -285,6 +285,15 @@ def get_update_form(request, get_klasses_fn):
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
 
+                if related_type == 'range' and 'kv' not in obj_type:
+                    for field in ['vrf', 'site', 'next_ip']:
+                        form.fields[field].widget = forms.HiddenInput()
+                    form.fields['ip_str'].widget.attrs['readonly'] = True
+                    form.fields['ip_type'].widget.attrs['readonly'] = True
+                    ip_type = form.fields['ip_type'].initial
+                    form.fields['ip_type'].choices = [
+                        (str(ip_type), "IPv{0}".format(ip_type))]
+
                 if FormKlass.__name__ == 'RangeForm':
                     Network = get_model('network', 'network')
                     network = Network.objects.get(id=related_pk)
