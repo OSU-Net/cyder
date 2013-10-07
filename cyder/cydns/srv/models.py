@@ -18,7 +18,7 @@ class SRV(CydnsRecord):
     id = models.AutoField(primary_key=True)
     label = models.CharField(max_length=63, blank=True,
                              validators=[validate_srv_label],
-                             help_text="Short name of the fqdn")
+                             help_text="Short name of the FQDN")
     domain = models.ForeignKey(Domain, null=False)
     fqdn = models.CharField(max_length=255, blank=True,
                             validators=[validate_srv_name])
