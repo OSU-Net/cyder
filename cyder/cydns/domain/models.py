@@ -180,7 +180,7 @@ class Domain(models.Model, ObjectUrlMixin):
                                           "record.")
 
         if self.soa:
-            for dom in self.domain_set.filter(soa=None):
+            for dom in self.domain_set.filter(soa=None, master_domain=self):
                 dom.soa = self.soa
                 dom.save()
 
