@@ -68,7 +68,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
                                           validators=[validate_minimum])
     description = models.CharField(max_length=200, blank=True)
     root_domain = models.ForeignKey("domain.Domain", null=False, unique=True,
-                                    related_name="root_soa")
+                                    related_name="root_of_soa")
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)
@@ -165,12 +165,6 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        if self.pk:
-            for domain in self.domain_set.all():
-                if domain != self.root_domain:
-                    domain.soa = None
-                    domain.save()
-
         if not self.pk:
             new = True
             self.dirty = True
@@ -188,6 +182,12 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
             for field in fields:
                 if getattr(db_self, field) != getattr(self, field):
                     self.schedule_rebuild(commit=False)
+
+        if self.pk:
+            for domain in self.domain_set.all():
+                if domain != self.root_domain:
+                    domain.soa = None
+                    domain.save(override_soa=True)
 
         self.root_domain.soa = self
         self.root_domain.save()

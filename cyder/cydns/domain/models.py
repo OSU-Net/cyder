@@ -136,6 +136,10 @@ class Domain(models.Model, ObjectUrlMixin):
         ]}
 
     def delete(self, *args, **kwargs):
+        override_soa = kwargs.pop('override_soa', False)
+        if not override_soa:
+            self.validate_root_domain()
+
         self.check_for_children()
         if self.is_reverse:
             self.reassign_reverse_delete()
@@ -146,6 +150,10 @@ class Domain(models.Model, ObjectUrlMixin):
         super(Domain, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
+        override_soa = kwargs.pop('override_soa', False)
+        if not override_soa:
+            self.validate_root_domain()
+
         self.full_clean()
         if not self.pk:
             new_domain = True
@@ -170,6 +178,12 @@ class Domain(models.Model, ObjectUrlMixin):
                                           "are attempting to create a zone "
                                           "whose root domain has no NS "
                                           "record.")
+
+        if self.soa:
+            for dom in self.domain_set.filter(soa=None):
+                dom.soa = self.soa
+                dom.save()
+
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:
             # Collect any ptr's that belong to this new domain.
@@ -206,6 +220,12 @@ class Domain(models.Model, ObjectUrlMixin):
             if db_self.name != self.name and self.domain_set.exists():
                 raise ValidationError("Child domains rely on this domain's "
                                       "name remaining the same.")
+
+    def validate_root_domain(self):
+        root_of_soa = self.root_of_soa.all()
+        if root_of_soa and root_of_soa[0] != self.soa:
+            raise ValidationError("Cannot delete domain or change its SOA "
+                                  "because it is a root domain.")
 
     def check_for_children(self):
         if self.domain_set.exists():

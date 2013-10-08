@@ -55,7 +55,7 @@ class Migration(DataMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'root_domain': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'root_soa'", 'to': "orm['domain.Domain']"}),
+            'root_domain': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'root_of_soa'", 'to': "orm['domain.Domain']"}),
             'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1380835484'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
