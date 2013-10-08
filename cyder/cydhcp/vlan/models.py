@@ -75,9 +75,10 @@ class Vlan(models.Model, ObjectUrlMixin):
 
 
 class VlanAV(EAVBase):
-    class Meta(EAVBase.Meta):
+    class Meta:
         db_table = 'vlan_av'
+        unique_together = ('vlan', 'attribute')
 
 
-    entity = models.ForeignKey(Vlan)
+    vlan = models.ForeignKey(Vlan)
     attribute = models.ForeignKey(Attribute)

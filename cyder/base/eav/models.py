@@ -27,10 +27,18 @@ class Attribute(models.Model):
 
 class EAVBase(models.Model, ObjectUrlMixin):
     """The entity-attribute-value base model
-    When you inherit from this model, you must define the following fields::
-        entity = ForeignKey(ENTITY)
+
+    When you inherit from this model, you must define the following field::
         attribute = ForeignKey(Attribute)
-    where ENTITY is the entity model for the EAV model you're defining.
+
+    You should define a ForeignKey field to the related object (the entity).
+    Parts of the Cyder UI infer the relatedness from the field name, so make
+    sure it follows the convention defined in cyder.base.views.get_update_form
+    near the assignment of `form.fields[related_type]`, or else you'll get
+    strange behavior.
+
+    You should also specifiy `unique_together = (ENTITY, Attribute)` in `Meta`,
+    where ENTITY is the name of the entity field.
 
     The child class is required to define the attribute field because it allows
     you to filter the attribute choices by adding
@@ -40,7 +48,6 @@ class EAVBase(models.Model, ObjectUrlMixin):
 
     class Meta:
         abstract = True
-        unique_together = ('entity', 'attribute')
 
 
     value = EAVValueField(max_length=255, attribute_field='attribute')

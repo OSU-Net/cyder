@@ -110,7 +110,8 @@ class Site(models.Model, ObjectUrlMixin):
 class SiteAV(EAVBase):
     class Meta:
         db_table = 'site_av'
+        unique_together = ('site', 'attribute')
 
 
-    entity = models.ForeignKey(Site)
+    site = models.ForeignKey(Site)
     attribute = models.ForeignKey(Attribute)

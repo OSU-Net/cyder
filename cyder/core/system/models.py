@@ -57,9 +57,10 @@ class System(BaseModel, ObjectUrlMixin):
 
 
 class SystemAV(EAVBase):
-    class Meta(EAVBase.Meta):
+    class Meta:
         db_table = 'system_av'
+        unique_together = ('system', 'attribute')
 
 
-    entity = models.ForeignKey(System)
+    system = models.ForeignKey(System)
     attribute = models.ForeignKey(Attribute)
