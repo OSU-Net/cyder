@@ -63,7 +63,7 @@ class SearchFieldFilter(filters.BaseFilterBackend):
 
             elif q == "ctnr":
                 queryset = queryset & parent_model.filter_by_ctnr(
-                    Ctnr.objects.get(name=p))
+                    Ctnr.objects.get(name=p)).all()
 
             elif q not in UNHANDLED_PARAMS:
                 raise InvalidQuery(
