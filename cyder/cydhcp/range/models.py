@@ -62,11 +62,11 @@ class Range(models.Model, ObjectUrlMixin):
 
     start_upper = models.BigIntegerField(null=True, editable=False)
     start_lower = models.BigIntegerField(null=True, editable=False)
-    start_str = models.CharField(max_length=39, verbose_name="Start Address")
+    start_str = models.CharField(max_length=39, verbose_name="Start address")
 
     end_lower = models.BigIntegerField(null=True, editable=False)
     end_upper = models.BigIntegerField(null=True, editable=False)
-    end_str = models.CharField(max_length=39, verbose_name="End Address")
+    end_str = models.CharField(max_length=39, verbose_name="End address")
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
