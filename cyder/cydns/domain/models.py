@@ -232,6 +232,12 @@ class Domain(models.Model, ObjectUrlMixin):
             raise ValidationError("Before deleting this domain, please "
                                   "remove its children.")
 
+    def get_children_recursive(self):
+        children = self.domain_set.all()
+        for child in list(children):
+            children |= child.get_children_recursive()
+        return children
+
     def has_record_set(self, view=None, exclude_ns=False):
         object_sets = [
             self.addressrecord_set,

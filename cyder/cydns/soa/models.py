@@ -184,10 +184,10 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
                     self.schedule_rebuild(commit=False)
 
         if self.pk:
-            for domain in self.domain_set.all():
-                if domain != self.root_domain:
-                    domain.soa = None
-                    domain.save(override_soa=True)
+            root_children = self.root_domain.get_children_recursive()
+            for domain in self.domain_set.exclude(pk__in=root_children):
+                domain.soa = None
+                domain.save(override_soa=True)
 
         self.root_domain.soa = self
         self.root_domain.save()
