@@ -37,7 +37,8 @@ class Network(models.Model, ObjectUrlMixin):
     # This field is here so ES can search this model easier.
     network_str = models.CharField(
         max_length=49, editable=True,
-        help_text="The network address of this network.")
+        help_text="The network address of this network.",
+        verbose_name="Network address")
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
     enabled = models.BooleanField(default=True)
@@ -110,9 +111,11 @@ class Network(models.Model, ObjectUrlMixin):
         #if (self.pk is None and
                 #not self.networkkeyvalue_set.filter(key='routers').exists()):
             #if self.ip_type == IP_TYPE_4:
-                #router = str(ipaddr.IPv4Address(int(self.network.network) + 1))
+                #router = str(
+                #    ipaddr.IPv4Address(int(self.network.network) + 1))
             #else:
-                #router = str(ipaddr.IPv6Address(int(self.network.network) + 1))
+                #router = str(
+                #   ipaddr.IPv6Address(int(self.network.network) + 1))
 
             #kv = NetworkKeyValue(key="routers", value=router, network=self)
             #kv.clean()
