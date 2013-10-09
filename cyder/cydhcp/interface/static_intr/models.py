@@ -1,7 +1,6 @@
 from gettext import gettext as _
 
 from django.db import models
-from django.db.models import Q, get_model
 from django.core.exceptions import ValidationError
 
 import cydns
@@ -19,7 +18,6 @@ from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
-from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
@@ -91,7 +89,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     """
 
     id = models.AutoField(primary_key=True)
-    ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
+    ctnr = models.ForeignKey('ctnr.Ctnr', null=False, verbose_name="Container")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
                        help_text='(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
