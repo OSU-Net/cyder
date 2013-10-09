@@ -232,13 +232,20 @@ ZONE_BLACKLIST = []
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'cyder.api.permissions.ReadOnlyIfAuthenticated',
+        'cyder.api.v1.permissions.ReadOnlyIfAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'cyder.api.authtoken.authentication.CyderTokenAuthentication',
+        'cyder.api.v1.authentication.CyderTokenAuthentication',
     ),
     'PAGINATE_BY': 25,
-    'DEFAULT_FILTER_BACKENDS': ('cyder.api.filter.SearchFieldFilter',),
+    'PAGINATE_BY_PARAM': 'count',
+    'MAX_PAGINATE_BY': 100,
+    'DEFAULT_FILTER_BACKENDS': (
+        'cyder.api.v1.filter.SearchFieldFilter',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
 
 

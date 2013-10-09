@@ -80,11 +80,6 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
             {'name': 'key', 'datatype': 'string', 'editable': True},
         ]}
 
-    @classmethod
-    def get_api_fields(cls):
-        return super(SSHFP, cls).get_api_fields() + ['fingerprint_type',
-                                                     'algorithm_number', 'key']
-
     @property
     def rdtype(self):
         return 'SSHFP'
