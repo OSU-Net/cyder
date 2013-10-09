@@ -175,7 +175,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
             db_self = SOA.objects.get(pk=self.pk)
             fields = [
                 'primary', 'contact', 'expire', 'retry', 'refresh',
-                'description'
+                'root_domain',
             ]
             # Leave out serial and dirty so rebuilds don't cause a never ending
             # build cycle
