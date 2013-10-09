@@ -47,7 +47,7 @@ class LabelDomainMixin(models.Model):
     # -- RFC218
     label = models.CharField(
         max_length=63, blank=True, validators=[validate_first_label],
-        help_text="Short name of the fqdn"
+        help_text="Short name of the FQDN"
     )
     fqdn = models.CharField(
         max_length=255, blank=True, validators=[validate_fqdn], db_index=True
