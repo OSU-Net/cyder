@@ -82,23 +82,7 @@ class StaticInterTests(TestCase):
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         i = self.do_add(**kwargs)
-        i.update_attrs()
-        self.assertEqual('None', i.interface_name())
-        i.attrs.interface_type = "eth"
-        self.assertEqual('None', i.interface_name())
-        i.attrs.primary = "0"
-        self.assertEqual('eth0', i.interface_name())
-        i.attrs.alias = "0"
-        self.assertEqual('eth0.0', i.interface_name())
         i.clean()
-
-        def bad_assign():
-            i.attrs.interface_type = "wee"
-        self.assertRaises(ValidationError, bad_assign)
-
-        def bad_assign2():
-            i.attrs.alias = "wee"
-        self.assertRaises(ValidationError, bad_assign2)
 
     def test2_create_basic(self):
         mac = "11:22:33:44:55:66"

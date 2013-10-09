@@ -7,8 +7,6 @@ from django.shortcuts import render
 from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA, SOAKeyValue
 
-from cyder.cydhcp.keyvalue.utils import get_aa, get_docstrings, get_attrs
-from cyder.cydhcp.keyvalue.utils import update_attrs, dict_to_kv
 import json as json
 
 
@@ -35,9 +33,6 @@ def delete_soa_attr(request, attr_pk):
 
 def update_soa(request, soa_pk):
     soa = get_object_or_404(SOA, pk=soa_pk)
-    attrs = soa.soakeyvalue_set.all()
-    docs = get_docstrings(SOAKeyValue())
-    aa = get_aa(SOAKeyValue())
     if request.method == 'POST':
         form = SOAForm(request.POST, instance=soa)
         try:
@@ -45,29 +40,17 @@ def update_soa(request, soa_pk):
                 return render(request, 'soa/soa_edit.html', {
                     'soa': soa,
                     'form': form,
-                    'attrs': attrs,
-                    'docs': docs,
-                    'aa': json.dumps(aa)
                 })
             else:
-                # Handle key value stuff.
-                kv = None
-                kv = get_attrs(request.POST)
-                update_attrs(kv, attrs, SOAKeyValue, soa, 'soa')
                 soa = form.save()
                 return redirect(soa.get_update_url())
         except ValidationError, e:
             if form._errors is None:
                 form._errors = ErrorDict()
             form._errors['__all__'] = ErrorList(e.messages)
-            if kv:
-                attrs = dict_to_kv(kv, SOAKeyValue)
             return render(request, 'soa/soa_edit.html', {
                 'soa': soa,
                 'form': form,
-                'attrs': attrs,
-                'docs': docs,
-                'aa': json.dumps(aa)
             })
 
     else:
@@ -75,7 +58,4 @@ def update_soa(request, soa_pk):
         return render(request, 'soa/soa_edit.html', {
             'soa': soa,
             'form': form,
-            'attrs': attrs,
-            'docs': docs,
-            'aa': json.dumps(aa)
         })

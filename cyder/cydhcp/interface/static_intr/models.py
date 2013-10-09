@@ -16,7 +16,6 @@ from cyder.base.constants import IP_TYPE_6
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac
@@ -53,41 +52,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     BaseAddressRecord and will call its clean method with
     'update_reverse_domain' set to True. This will ensure that its A record is
     valid *and* that its PTR record is valid.
-
-    Using the 'attrs' attribute.
-
-    To interface with the Key Value store of an interface use the 'attrs'
-    attribute. This attribute is a direct proxy to the Keys and Values in the
-    Key Value store. When you assign an attribute of the 'attrs' attribute a
-    value, a key is create/updated. For example:
-
-    >>> intr = <Assume this is an existing StaticInterface instance>
-    >>> intr.update_attrs()  # This updates the object with keys/values already
-    >>> # in the KeyValue store.
-    >>> intr.attrs.primary
-    '0'
-
-    In the previous line, there was a key called 'primary' and it's value
-    would be returned when you accessed the attribute 'primary'.
-
-    >>> intr.attrs.alias
-    Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
-    AttributeError: 'attrs' object has no attribute 'alias'
-
-    Here 'attrs' didn't have an attribute 'alias' which means that there was no
-    KeyValue with key 'alias'. If we wanted to create that key and give it a
-    value of '0' we would do:
-
-    >>> intr.attrs.alias = '0'
-
-    This *immediately* creates a KeyValue pair with key='alias' and value='0'.
-
-    >>> intr.attrs.alias = '1'
-
-    This *immediately* updates the KeyValue object with a value of '1'. It is
-    not like the Django ORM where you must call the `save()` function for any
-    changes to propagate to the database.
     """
 
     id = models.AutoField(primary_key=True)
@@ -109,7 +73,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
 
-    attrs = None
     search_fields = ('mac', 'ip_str', 'fqdn')
 
     class Meta:
@@ -137,9 +100,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def range(self):
         if self.ip_str:
             return find_range(self.ip_str)
-
-    def update_attrs(self):
-        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
 
     def details(self):
         data = super(StaticInterface, self).details()
@@ -204,22 +164,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                                         ).exists():
             raise ValidationError("An A record already uses '%s' and '%s'" %
                                   (self.fqdn, self.ip_str))
-
-    def interface_name(self):
-        self.update_attrs()
-        try:
-            itype, primary, alias = '', '', ''
-            itype = self.attrs.interface_type
-            primary = self.attrs.primary
-            alias = self.attrs.alias
-        except AttributeError:
-            pass
-        if itype == '' or primary == '':
-            return 'None'
-        elif alias == '':
-            return '{0}{1}'.format(itype, primary)
-        else:
-            return '{0}{1}.{2}'.format(itype, primary, alias)
 
     def format_host_option(self, option):
         s = str(option)
