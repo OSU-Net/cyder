@@ -125,16 +125,6 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
             allow = ALLOW_ANY
         elif known:
             allow = ALLOW_KNOWN
-        elif '128.193.177.71' == str(ipaddr.IPv4Address(start)):
-            allow = ALLOW_LEGACY_AND_VRF
-            v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
-            n.vrf = v
-            n.save()
-        elif '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-            allow = ALLOW_LEGACY_AND_VRF
-            v, _ = Vrf.objects.get_or_create(name="avaya-hack")
-            n.vrf = v
-            n.save()
 
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                      ipaddr.IPv4Address(end))
