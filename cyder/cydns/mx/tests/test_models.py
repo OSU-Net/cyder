@@ -26,7 +26,7 @@ class MXTests(cyder.base.tests.TestCase):
         return mx
 
     def test_add_mx(self):
-        data = {'label': '', 'domain': self.o_e, 'server':
+        data = {'label': 'osumail', 'domain': self.o, 'server':
                 'relay.oregonstate.edu', 'priority': 2, 'ttl': 2222}
         self.do_generic_add(data)
         data = {'label': '', 'domain': self.o_e, 'server':
@@ -43,7 +43,7 @@ class MXTests(cyder.base.tests.TestCase):
         self.do_generic_add(data)
 
     def test_add_invalid(self):
-        data = {'label': 'bar', 'domain': self.o_e, 'server':
+        data = {'label': '', 'domain': self.o, 'server':
                 'mail.oregonstate.edu', 'priority': 123, 'ttl': 23}
         self.assertRaises(
             ValidationError, self.do_generic_add, data)  # TLD condition

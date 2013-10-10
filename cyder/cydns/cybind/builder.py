@@ -10,10 +10,11 @@ import os
 import re
 import time
 
-from cyder.settings.dnsbuilds import (
-    STAGE_DIR, PROD_DIR, LOCK_FILE, STOP_UPDATE_FILE, NAMED_CHECKZONE_OPTS,
-    MAX_ALLOWED_LINES_CHANGED, MAX_ALLOWED_CONFIG_LINES_REMOVED,
-    NAMED_CHECKZONE, NAMED_CHECKCONF, LAST_RUN_FILE, BIND_PREFIX
+from cyder.settings import (
+    DNS_STAGE_DIR, DNS_PROD_DIR, DNS_LOCK_FILE, DNS_STOP_UPDATE_FILE,
+    DNS_NAMED_CHECKZONE_OPTS, DNS_MAX_ALLOWED_LINES_CHANGED,
+    DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED, DNS_NAMED_CHECKZONE,
+    DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
 )
 
 from cyder.core.task.models import Task
@@ -99,7 +100,7 @@ class SVNBuilderMixin(object):
         returned.
         """
         # svn diff changes and react if changes are too large
-        if sum(lines_changed) > MAX_ALLOWED_LINES_CHANGED:
+        if sum(lines_changed) > DNS_MAX_ALLOWED_LINES_CHANGED:
             if self.FORCE:
                 self.log("Sanity check failed but FORCE == True. "
                          "Ignoring thresholds.")
@@ -159,7 +160,7 @@ class SVNBuilderMixin(object):
                 os.path.join(self.PROD_DIR, 'config')
             )
             config_lines_removed = config_lines_changed[1]
-            if config_lines_removed > MAX_ALLOWED_CONFIG_LINES_REMOVED:
+            if config_lines_removed > DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED:
                 if self.FORCE:
                     self.log("Config sanity check failed but "
                              "FORCE == True. Ignoring thresholds.")
@@ -178,14 +179,14 @@ class SVNBuilderMixin(object):
 class DNSBuilder(SVNBuilderMixin):
     def __init__(self, **kwargs):
         defaults = {
-            'STAGE_DIR': STAGE_DIR,
-            'PROD_DIR': PROD_DIR,
-            'BIND_PREFIX': BIND_PREFIX,
-            'LOCK_FILE': LOCK_FILE,
-            'STOP_UPDATE_FILE': STOP_UPDATE_FILE,
-            'LAST_RUN_FILE': LAST_RUN_FILE,
+            'STAGE_DIR': DNS_STAGE_DIR,
+            'PROD_DIR': DNS_PROD_DIR,
+            'BIND_PREFIX': DNS_BIND_PREFIX,
+            'LOCK_FILE': DNS_LOCK_FILE,
+            'STOP_UPDATE_FILE': DNS_STOP_UPDATE_FILE,
+            'LAST_RUN_FILE': DNS_LAST_RUN_FILE,
             'STAGE_ONLY': False,
-            'NAMED_CHECKZONE_OPTS': NAMED_CHECKZONE_OPTS,
+            'NAMED_CHECKZONE_OPTS': DNS_NAMED_CHECKZONE_OPTS,
             'CLOBBER_STAGE': False,
             'PUSH_TO_PROD': False,
             'BUILD_ZONES': True,
@@ -431,18 +432,18 @@ class DNSBuilder(SVNBuilderMixin):
         with errors raise a BuildError.
         """
         # Make sure we have the write tools to do the job
-        command_str = "test -f {0}".format(NAMED_CHECKZONE)
+        command_str = "test -f {0}".format(DNS_NAMED_CHECKZONE)
         stdout, stderr, returncode = self.shell_out(command_str)
         if returncode != 0:
             raise BuildError("Couldn't find named-checkzone.")
 
         # Check the zone file.
         command_str = "{0} {1} {2} {3}".format(
-                      NAMED_CHECKZONE, self.NAMED_CHECKZONE_OPTS,
+                      DNS_NAMED_CHECKZONE, self.NAMED_CHECKZONE_OPTS,
                       root_domain.name, zone_file)
         self.log(
             "Calling `{0} {1} {2}`".
-            format(NAMED_CHECKZONE, root_domain.name, zone_file),
+            format(DNS_NAMED_CHECKZONE, root_domain.name, zone_file),
             root_domain=root_domain
         )
         stdout, stderr, returncode = self.shell_out(command_str)
@@ -450,23 +451,23 @@ class DNSBuilder(SVNBuilderMixin):
             raise BuildError("\nnamed-checkzone failed on zone {0}. "
                              "\ncommand: {1}\nstdout: {2}\nstderr:{3}\n".
                              format(root_domain.name, command_str, stdout,
-                             stderr))
+                                    stderr))
 
     def named_checkconf(self, conf_file):
-        command_str = "test -f {0}".format(NAMED_CHECKCONF)
+        command_str = "test -f {0}".format(DNS_NAMED_CHECKCONF)
         stdout, stderr, returncode = self.shell_out(command_str)
         if returncode != 0:
-            raise BuildError("Couldn't find {0}".format(NAMED_CHECKCONF))
+            raise BuildError("Couldn't find {0}".format(DNS_NAMED_CHECKCONF))
 
-        command_str = "{0} {1}".format(NAMED_CHECKCONF, conf_file)
+        command_str = "{0} {1}".format(DNS_NAMED_CHECKCONF, conf_file)
         self.log("Calling `{0} {1}` ".
-                 format(NAMED_CHECKCONF, conf_file))
+                 format(DNS_NAMED_CHECKCONF, conf_file))
         stdout, stderr, returncode = self.shell_out(command_str)
         if returncode != 0:
             raise BuildError("\nnamed-checkconf rejected config {0}. "
                              "\ncommand: {1}\nstdout: {2}\nstderr:{3}\n".
                              format(conf_file, command_str, stdout,
-                             stderr))
+                                    stderr))
 
     def stage_to_prod(self, src):
         """Copy file over to PROD_DIR. Return the new location of the

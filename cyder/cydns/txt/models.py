@@ -7,7 +7,7 @@ from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_txt_data
 
 
-class TXT(CydnsRecord, LabelDomainMixin):
+class TXT(LabelDomainMixin, CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
@@ -50,11 +50,6 @@ class TXT(CydnsRecord, LabelDomainMixin):
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
-
-    @classmethod
-    def get_api_fields(cls):
-        data = super(TXT, cls).get_api_fields() + ['txt_data']
-        return data
 
     @property
     def rdtype(self):

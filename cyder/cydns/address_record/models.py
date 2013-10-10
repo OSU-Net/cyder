@@ -46,11 +46,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
 
-    @classmethod
-    def get_api_fields(cls):
-        return super(BaseAddressRecord, cls).get_api_fields() + ['ip_str',
-                                                                 'ip_type']
-
     def clean(self, *args, **kwargs):
         self.clean_ip()
         ignore_intr = kwargs.pop("ignore_intr", False)
@@ -87,7 +82,8 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                 fqdn=self.fqdn, ip_upper=self.ip_upper,
                 ip_lower=self.ip_lower).exists():
             raise ValidationError(
-                "A Static Interface has already reserved this A record."
+                "A Static Interface with %s and %s already exists" %
+                (self.fqdn, self.ip_str)
             )
 
     def validate_delegation_conditions(self):

@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import *
 
-from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.cydns.views import *
 from cyder.cydns.constants import DNS_KEY_VALUES
 
@@ -39,9 +38,8 @@ urlpatterns = patterns(
 
     url(r'^view/', include('cyder.cydns.view.urls')),
     url(r'^bind/', include('cyder.cydns.cybind.urls')),
-    url(r'^api/', include(v1_dns_api.urls)),
 )
 for kv in DNS_KEY_VALUES:
     urlpatterns += patterns(
         '',
-        url(r"^{0}/".format(kv), include(cydns_urls(kv))))
+        url(r'^{0}/'.format(kv), include(cydns_urls(kv))))

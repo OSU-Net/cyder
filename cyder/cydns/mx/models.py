@@ -13,7 +13,7 @@ from cyder.cydns.models import LabelDomainMixin
 from gettext import gettext as _
 
 
-class MX(CydnsRecord, LabelDomainMixin):
+class MX(LabelDomainMixin, CydnsRecord):
     """
     >>> MX(label=label, domain=domain, server=server, priority=prio,
     ...     ttl=tll)
@@ -69,10 +69,6 @@ class MX(CydnsRecord, LabelDomainMixin):
     @property
     def rdtype(self):
         return 'MX'
-
-    @classmethod
-    def get_api_fields(cls):
-        return super(MX, cls).get_api_fields() + ['server', 'priority']
 
     def save(self, *args, **kwargs):
         self.full_clean()

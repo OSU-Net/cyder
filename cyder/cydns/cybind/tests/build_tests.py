@@ -29,7 +29,7 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
         """Return a valid set of data"""
         return {
             'root_domain': '{0}.{0}.oregonstate.edu'.format(
-            random_label() + random_str),
+                random_label() + random_str),
             'soa_primary': 'ns1.oregonstate.edu',
             'soa_contact': 'noc.oregonstate.edu',
             'nameserver_1': 'ns1.oregonstate.edu',

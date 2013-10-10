@@ -561,27 +561,11 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_add_A_invalid_address_records(self):
 
-        data = {'label': "oregonstate", 'domain': self.e, 'ip': "128.193.0.2"}
-        self.assertRaises(ValidationError, self.do_add_record, data)
-
-        data = {'label': "foo", 'domain': self.o_e, 'ip': "128.193.0.2"}
-        self.assertRaises(ValidationError, self.do_add_record, data)
-
-        data = {'label': 'foo.nas', 'domain': self.o_e, 'ip': "128.193.0.2"}
-        self.assertRaises(ValidationError, self.do_add_record, data)
-
-        data = {'label': 'foo.bar.nas', 'domain': self.o_e, 'ip':
-                "128.193.0.2"}
+        data = {'label': "", 'domain': self.e, 'ip': "128.193.0.2"}
         self.assertRaises(ValidationError, self.do_add_record, data)
 
         data = {'label': 'foo.baz.bar.nas', 'domain': self.o_e,
                 'ip': "128.193.0.2"}
-        self.assertRaises(ValidationError, self.do_add_record, data)
-
-        data = {'label': 'n as', 'domain': self.o_e, 'ip': "128.193.0.2"}
-        self.assertRaises(ValidationError, self.do_add_record, data)
-
-        data = {'label': 'n as', 'domain': self.o_e, 'ip': "128.193.0.2"}
         self.assertRaises(ValidationError, self.do_add_record, data)
 
         data = {'label': 'n%as', 'domain': self.o_e, 'ip': "128.193.0.2"}

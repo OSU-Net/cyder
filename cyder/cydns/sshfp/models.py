@@ -26,7 +26,7 @@ def validate_sha1(sha1):
         raise ValidationError("Invalid key.")
 
 
-class SSHFP(CydnsRecord, LabelDomainMixin):
+class SSHFP(LabelDomainMixin, CydnsRecord):
     """
     >>> SSHFP(label=label, domain=domain, key=key_data,
     ... algorithm_number=algo_num, fingerprint_type=fing_type)
@@ -79,11 +79,6 @@ class SSHFP(CydnsRecord, LabelDomainMixin):
              'editable': True},
             {'name': 'key', 'datatype': 'string', 'editable': True},
         ]}
-
-    @classmethod
-    def get_api_fields(cls):
-        return super(SSHFP, cls).get_api_fields() + ['fingerprint_type',
-                                                     'algorithm_number', 'key']
 
     @property
     def rdtype(self):

@@ -5,13 +5,14 @@ from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydns.validation import validate_ip_type
-from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_VRF, ALLOW_KNOWN,
-                                    ALLOW_LEGACY, RANGE_TYPE, STATIC, DYNAMIC)
+from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
+                                    ALLOW_LEGACY, ALLOW_VRF,
+                                    ALLOW_LEGACY_AND_VRF, RANGE_TYPE, STATIC,
+                                    DYNAMIC)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
                                 start_end_filter)
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -71,7 +72,6 @@ class Range(models.Model, ObjectUrlMixin):
     allow = models.CharField(max_length=1, choices=ALLOW_OPTIONS,
                              default=ALLOW_LEGACY)
 
-    attrs = None
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
 
@@ -95,9 +95,6 @@ class Range(models.Model, ObjectUrlMixin):
             return ctnr.ranges.filter(pk__in=objects)
         else:
             return ctnr.ranges
-
-    def update_attrs(self):
-        self.attrs = AuxAttr(RangeKeyValue, self, "range")
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
@@ -203,17 +200,29 @@ class Range(models.Model, ObjectUrlMixin):
                         self.network.network))
         self.check_for_overlaps()
 
-    def get_allowed_clients(self):
-        allow = []
-        if self.allow == ALLOW_VRF:
-            allow = ["allow members of \"{0}:{1}:{2}\"".format(
-                self.network.vrf.name, self.start_str, self.end_str)]
+    def get_allow_deny_list(self):
+        if self.allow == ALLOW_ANY:
+            allow = []
         elif self.allow == ALLOW_KNOWN:
+            # FIXME: add hyphen once compatibility with Maintain is established
             allow = ['allow known clients']
-        elif self.allow == ALLOW_LEGACY:
-            allow = ["allow members of \"{0}:{1}:{2}\"".format(
+            allow += ['allow members of "{0}:{1}:{2}"'.format(
                 ctnr.name, self.start_str, self.end_str)
                 for ctnr in self.ctnr_set.all()]
+        else:
+            allow = []
+            if (self.allow == ALLOW_VRF or
+                    self.allow == ALLOW_LEGACY_AND_VRF):
+                allow += ['allow members of "{0}:{1}:{2}"'.format(
+                    self.network.vrf.name, self.start_str, self.end_str)]
+            if (self.allow == ALLOW_LEGACY or
+                    self.allow == ALLOW_LEGACY_AND_VRF):
+                allow += ['allow members of "{0}:{1}:{2}"'.format(
+                    ctnr.name, self.start_str, self.end_str)
+                    for ctnr in self.ctnr_set.all()]
+            if not allow:
+                allow += ['deny unknown-clients']
+
         return allow
 
     def check_for_overlaps(self):
@@ -259,7 +268,7 @@ class Range(models.Model, ObjectUrlMixin):
             build_str += "\t\t# Raw pool includes\n"
             build_str += "\t\t{0};".format(self.dhcp_raw_include)
         build_str += "\t\t# Allow statements\n"
-        build_str += join_dhcp_args(self.get_allowed_clients(), depth=2)
+        build_str += join_dhcp_args(self.get_allow_deny_list(), depth=2)
         if self.ip_type == IP_TYPE_4:
             build_str += "\t\trange {0} {1};\n".format(self.start_str,
                                                        self.end_str)
