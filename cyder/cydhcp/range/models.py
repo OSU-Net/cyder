@@ -219,8 +219,8 @@ class Range(models.Model, ObjectUrlMixin):
             allow = []
             if (self.allow == ALLOW_VRF or
                     self.allow == ALLOW_LEGACY_AND_VRF):
-                allow += ['allow members of "{0}:{1}:{2}"'.format(
-                    self.network.vrf.name, self.start_str, self.end_str)]
+                allow += ['allow members of "{0}"'.format(
+                    self.network.vrf.name)]
             if (self.allow == ALLOW_LEGACY or
                     self.allow == ALLOW_LEGACY_AND_VRF):
                 allow += ['allow members of "{0}:{1}:{2}"'.format(
