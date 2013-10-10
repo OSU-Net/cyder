@@ -846,6 +846,15 @@
     }
   },
   {
+    "pk": 120,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "UCSipServer",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
     "pk": 124,
     "model": "eav.Attribute",
     "fields": {
@@ -863,6 +872,60 @@
       "value_type": "string"
     }
   },
+  {
+    "pk": 144,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "option-144",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 161,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ftp-server",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 162,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ftp-root-path",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 176,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ipphone",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 242,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "ipphone242",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 252,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "wpad-curl",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  }
   {
     "pk": 201,
     "model": "eav.Attribute",
@@ -1663,5 +1726,203 @@
       "attribute_type": "i",
       "value_type": ""
     }
-  }
+  },
+  {
+    "pk": 501,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.root-mount-options",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 502,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.root-server-ip-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 503,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.root-server-hostname",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 504,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.root-path-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 505,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.swap-server-ip-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 506,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.swap-file-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 507,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.boot-file-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 508,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.posix-timezone-string",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 509,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.boot-read-size",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 510,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.install-server-ip-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 511,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.install-server-hostname",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 512,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.install-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 513,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.sysid-config-file-server",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 514,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.JumpStart-server",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 515,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.terminal-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 516,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.bootURI",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 517,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "SUNW.HTTPproxy",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 521,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "MSUCClient.UCIdentifier",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 522,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "MSUCClient.URLScheme",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 523,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "MSUCClient.WebServerFqdn",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 524,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "MSUCClient.WebServerPort",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 525,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "MSUCClient.CertProvRelPath",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
 ]
