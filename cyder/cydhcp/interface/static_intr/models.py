@@ -191,8 +191,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.staticintrav_set.filter(is_option=True)
-        statements = self.staticintrav_set.filter(is_statement=True)
+        options = self.staticinterfaceav_set.filter(is_option=True)
+        statements = self.staticinterfaceav_set.filter(is_statement=True)
         if options:
             build_str += '\t\t# Host Options\n'
             build_str += join_dhcp_args(options, depth=2)

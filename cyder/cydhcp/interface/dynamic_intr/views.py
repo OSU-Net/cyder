@@ -13,7 +13,7 @@ def dynamic_intr_detail(request, pk):
 
     return cy_detail(request, DynamicInterface,
                      'dynamic_intr/dynamic_intr_detail.html', {
-                     'Attributes': 'dynamicintrav_set',
+                     'Attributes': 'dynamicinterfaceav_set',
                      }, pk=pk, obj=dynamic_interface)
 
 
