@@ -96,18 +96,6 @@ def create_zone_ajax(request):
     domain = ensure_domain(
         root_domain, purgeable=True, inherit_soa=False, force=True)
 
-    soa = SOA(primary=primary, contact=contact, serial=int(time.time()),
-              description="SOA for {0}".format(root_domain),
-              root_domain=domain)
-    try:
-        soa.save()
-    except ValidationError, e:
-        error = e.messages[0]
-        _clean_domain_tree(domain)
-        return response_error(error)
-    domain.purgeable = False
-    domain.save()
-
     private_view, _ = View.objects.get_or_create(name='private')
     public_view, _ = View.objects.get_or_create(name='public')
     saved_nss = []  # If these are errors, back out
@@ -130,8 +118,23 @@ def create_zone_ajax(request):
             for s_ns in saved_nss:
                 s_ns.delete()
             _clean_domain_tree(domain)
-            soa.delete()
             return response_error(error)
+
+    soa = SOA(primary=primary, contact=contact, serial=int(time.time()),
+              description="SOA for {0}".format(root_domain),
+              root_domain=domain)
+
+    try:
+        soa.save()
+    except ValidationError, e:
+        error = e.messages[0]
+        _clean_domain_tree(domain)
+        for s_ns in saved_nss:
+            s_ns.delete()
+        return response_error(error)
+    domain.purgeable = False
+    domain.save()
+
     try:
         domain.soa = soa
         domain.save()
