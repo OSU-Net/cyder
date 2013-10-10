@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.loading import get_model
+from itertools import chain
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -57,19 +58,21 @@ class Vrf(models.Model, ObjectUrlMixin):
         ]}
 
     def build_vrf(self):
-        build_str = ''
+        build_str = ('class "{0}" {{\n'
+                     '\tmatch hardware;\n'
+                     '}};\n'
+                     .format(self.name))
+
         for network_ in self.network_set.all():
             for range_ in network_.range_set.all():
-                dynamic_clients = range_.dynamicinterface_set.filter(
-                    dhcp_enabled=True)
-                if not dynamic_clients:
-                    continue
-                build_str += "\nclass \"{0}:{1}:{2}\" {{\n".format(
-                    self.name, range_.start_str, range_.end_str)
-                build_str += "\tmatch hardware;\n"
-                build_str += "}\n"
-                for client in dynamic_clients:
+                clients = chain(
+                    range_.staticinterfaces.filter(dhcp_enabled=True),
+                    range_.dynamicinterface_set.filter(dhcp_enabled=True)
+                )
+                for client in clients:
                     build_str += client.build_subclass(self.name)
+
+
         return build_str
 
 
