@@ -153,8 +153,8 @@ class Domain(models.Model, ObjectUrlMixin):
         override_soa = kwargs.pop('override_soa', False)
         if not override_soa:
             self.validate_root_domain()
+            self.full_clean()
 
-        self.full_clean()
         if not self.pk:
             new_domain = True
         else:
