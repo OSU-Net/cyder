@@ -60,7 +60,7 @@ class Vrf(models.Model, ObjectUrlMixin):
     def build_vrf(self):
         build_str = ('class "{0}" {{\n'
                      '\tmatch hardware;\n'
-                     '}};\n'
+                     '}}\n'
                      .format(self.name))
 
         for network_ in self.network_set.all():
