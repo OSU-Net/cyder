@@ -57,7 +57,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
             {'name': 'description', 'datatype': 'string', 'editable': True},
         ]}
 
-    def build_legacy_class(self):
+    def build_legacy_classes(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
         for range_ in self.ranges.filter(Q(range_type=DYNAMIC,
