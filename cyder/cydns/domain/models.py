@@ -162,18 +162,11 @@ class Domain(models.Model, ObjectUrlMixin):
             db_self = Domain.objects.get(pk=self.pk)
             # Raise an exception...
             # If our soa is different AND it's non-null AND we have records in
-            # this domain AND EITHER
-            #       the new soa has a record domain with no nameservers
-            #   OR
-            #       it has no root domain, which means we are going to
-            #       be the root domain, and we have no nameserver records.
-            # TODO: fix the view bug
-            if (db_self.soa != self.soa and
-                self.soa and self.has_record_set() and
-                (self.soa.root_domain and
-                not self.soa.root_domain.nameserver_set.exists() or
-                not self.soa.root_domain and
-                 not self.nameserver_set.all().exists())):
+            # this domain AND the new soa has a record domain with no
+            # nameservers. NOTE: All SOAs now require a root domain.
+            # TODO: fix the view bug (???)
+            if db_self.soa != self.soa and self.soa and self.has_record_set():
+                if not self.soa.root_domain.nameserver_set.exists():
                     raise ValidationError("By changing this domain's SOA you "
                                           "are attempting to create a zone "
                                           "whose root domain has no NS "
