@@ -98,7 +98,7 @@ def validate_zone_soa(domain, master_domain):
         return
 
     zone_domains = domain.soa.domain_set.all()
-    root_domain = find_root_domain(domain.soa)
+    root_domain = domain.soa.root_domain
 
     if not root_domain:  # No one is using this domain.
         return
@@ -110,7 +110,7 @@ def validate_zone_soa(domain, master_domain):
         # Someone uses this soa, make sure the domain is part of that
         # zone (i.e. has a parent in the zone or is the root domain of
         # the zone).
-        if root_domain == domain or root_domain.master_domain == domain:
+        if root_domain == domain:
             return
         raise ValidationError("This SOA is used for a different zone.")
 

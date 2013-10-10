@@ -157,6 +157,8 @@ class Domain(models.Model, ObjectUrlMixin):
 
         if not self.pk:
             new_domain = True
+            if self.master_domain and self.master_domain.soa:
+                self.soa = self.master_domain.soa
         else:
             new_domain = False
             db_self = Domain.objects.get(pk=self.pk)
@@ -175,7 +177,7 @@ class Domain(models.Model, ObjectUrlMixin):
         if self.soa:
             for dom in self.domain_set.filter(soa=None, master_domain=self):
                 dom.soa = self.soa
-                dom.save()
+                dom.save(override_soa=True)
 
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:

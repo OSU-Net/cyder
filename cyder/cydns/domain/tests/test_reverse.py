@@ -98,11 +98,9 @@ class ReverseDomainTests(TestCase):
         b_m = self.create_domain(name='8.3')
         b_m.save()
 
-        s = SOA(primary="ns1.foo.com", contact="asdf", description="test")
+        s = SOA(primary="ns1.foo.com", contact="asdf", description="test",
+                root_domain=f_m)
         s.save()
-
-        f_m.soa = s
-        f_m.save()
 
         b_m.soa = s
         self.assertRaises(ValidationError, b_m.save)
@@ -112,7 +110,10 @@ class ReverseDomainTests(TestCase):
         n_f_m.save()
 
         m.soa = s
-        m.save()
+        self.assertRaises(ValidationError, m.save)
+
+        s.root_domain = m
+        s.save()
 
         b_m = Domain.objects.get(pk=b_m.pk)  # Refresh object
         b_m.soa = s
@@ -121,31 +122,31 @@ class ReverseDomainTests(TestCase):
         m.soa = None
         self.assertRaises(ValidationError, m.save)
 
-        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2")
+        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2",
+                 root_domain=Domain.objects.create(name="test2"))
         s2.save()
 
         m.soa = s2
         self.assertRaises(ValidationError, m.save)
 
     def test_2_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
-                                          contact="hostmaster.foo",
-                                          description="foo.gaz2")
         d, _ = Domain.objects.get_or_create(name="11.in-addr.arpa")
         d.soa = None
         d.save()
         d1, _ = Domain.objects.get_or_create(name="12.in-addr.arpa")
-        d1.soa = s1
         d1.save()
-
-    def test_3_soa_validators(self):
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
                                           contact="hostmaster.foo",
+                                          root_domain=d1,
                                           description="foo.gaz2")
 
+    def test_3_soa_validators(self):
         d, _ = Domain.objects.get_or_create(name="gaz")
-        d.soa = s1
         d.save()
+        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
+                                          contact="hostmaster.foo",
+                                          root_domain=d,
+                                          description="foo.gaz2")
 
         r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
         r.soa = s1

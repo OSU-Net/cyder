@@ -183,9 +183,9 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
                 domain.soa = None
                 domain.save(override_soa=True)
 
+        super(SOA, self).save(*args, **kwargs)
         self.root_domain.soa = self
         self.root_domain.save()
-        super(SOA, self).save(*args, **kwargs)
 
         if new:
             # Need to call this after save because new objects won't have a pk
