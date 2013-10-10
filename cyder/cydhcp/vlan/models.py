@@ -22,7 +22,7 @@ class Vlan(models.Model, ObjectUrlMixin):
         unique_together = ("name", "number")
 
     def __str__(self):
-        return get_display(self)
+        return get_display(self) + ', {0}'.format(self.number)
 
     def __repr__(self):
         return "<Vlan {0}>".format(str(self))
