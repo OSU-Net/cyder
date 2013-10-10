@@ -63,7 +63,8 @@ def create_zone_ajax(request):
     if Domain.objects.filter(name=root_domain).exists():
         error = gt("<b>{0}</b> is already a domain. To make it a new zone, "
                    "assign it a newly created SOA.".format(root_domain))
-        return response_error(error)
+        return HttpResponse(json.dumps({'success': False, 'error': error}),
+                            status=400)
 
     primary = qd.get('soa_primary', None)
     if not primary:
