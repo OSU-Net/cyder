@@ -1,30 +1,32 @@
 from rest_framework import serializers
 
+from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
 from cyder.api.v1.endpoints.dhcp import api
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
+from cyder.cydhcp.network.models import Network, NetworkAV
 
 
-class NetworkKeyValueSerializer(serializers.ModelSerializer):
+class NetworkAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     network = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dhcp-network-detail')
+    attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
-        model = NetworkKeyValue
+        model = NetworkAV
 
 
-class NetworkKeyValueViewSet(api.CommonDHCPViewSet):
-    model = NetworkKeyValue
-    serializer_class = NetworkKeyValueSerializer
+class NetworkAVViewSet(api.CommonDHCPViewSet):
+    model = NetworkAV
+    serializer_class = NetworkAVSerializer
 
 
-class NetworkNestedKeyValueSerializer(serializers.ModelSerializer):
+class NetworkNestedAVSerializer(CommonAPINestedAVSerializer):
     id = serializers.HyperlinkedIdentityField(
         view_name='api-dhcp-network_keyvalues-detail')
 
     class Meta:
-        model = NetworkKeyValue
-        fields = api.NestedKeyValueFields
+        model = NetworkAV
+        fields = api.NestedAVFields
 
 
 class NetworkSerializer(api.CommonDHCPSerializer):
@@ -34,7 +36,7 @@ class NetworkSerializer(api.CommonDHCPSerializer):
         read_only=True, view_name='api-dhcp-site-detail')
     vrf = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dhcp-vrf-detail')
-    networkkeyvalue_set = NetworkNestedKeyValueSerializer(many=True)
+    networkav_set = NetworkNestedAVSerializer(many=True)
 
     class Meta(api.CommonDHCPMeta):
         model = Network
@@ -44,4 +46,4 @@ class NetworkSerializer(api.CommonDHCPSerializer):
 class NetworkViewSet(api.CommonDHCPViewSet):
     model = Network
     serializer_class = NetworkSerializer
-    keyvaluemodel = NetworkKeyValue
+    avmodel = NetworkAV

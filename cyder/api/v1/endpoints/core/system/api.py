@@ -1,35 +1,37 @@
 from rest_framework import serializers, viewsets
 
-# from cyder.api.v1.endpoints.core import api
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.core.system.models import System, SystemAV
 
 
-class SystemKeyValueSerializer(serializers.ModelSerializer):
+class SystemAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-core-system-detail')
+    attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
-        model = SystemKeyValue
+        model = SystemAV
 
 
-class SystemKeyValueViewSet(viewsets.ModelViewSet):
-    model = SystemKeyValue
-    queryset = SystemKeyValue.objects.all()
-    serializer_class = SystemKeyValueSerializer
+class SystemAVViewSet(viewsets.ModelViewSet):
+    model = SystemAV
+    queryset = SystemAV.objects.all()
+    serializer_class = SystemAVSerializer
 
 
-class SystemNestedKeyValueSerializer(serializers.ModelSerializer):
+class SystemNestedAVSerializer(CommonAPINestedAVSerializer):
     id = serializers.HyperlinkedIdentityField(
-        view_name='api-core-system_keyvalues-detail')
+        view_name='api-core-system_attributes-detail')
+    attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
-        model = SystemKeyValue
-        fields = ['id', 'key', 'value', 'is_quoted']
+        model = SystemAV
+        fields = ['id', 'attribute', 'value']
 
 
 class SystemSerializer(serializers.ModelSerializer):
-    systemkeyvalue_set = SystemNestedKeyValueSerializer(many=True)
+    systemav_set = SystemNestedAVSerializer(many=True)
 
     class Meta:
         model = System
@@ -38,4 +40,4 @@ class SystemSerializer(serializers.ModelSerializer):
 class SystemViewSet(viewsets.ModelViewSet):
     queryset = System.objects.all()
     serializer_class = SystemSerializer
-    keyvaluemodel = SystemKeyValue
+    avmodel = SystemAV

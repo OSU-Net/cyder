@@ -3,7 +3,7 @@ from rest_framework import serializers
 from cyder.api.v1.endpoints import api
 
 
-NestedKeyValueFields = api.NestedKeyValueFields
+NestedAVFields = api.NestedAVFields
 
 
 class CommonDHCPSerializer(api.CommonAPISerializer):
