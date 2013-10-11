@@ -79,7 +79,7 @@ class ReverseDomainTests(TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
+        d, _ = Domain.objects.get_or_create(name=name, delegated=delegated)
         d.clean()
         self.assertTrue(d.is_reverse)
         return d
@@ -373,27 +373,14 @@ class ReverseDomainTests(TestCase):
             '5.6.2.3.1.0.5.3.f.0.0.0.1.2.3.4.1.2.3.4.1.2.3.4')
 
     def test_add_reverse_domainless_ips(self):
-        e = None
-        try:
-            self.add_ptr_ipv4('8.8.8.8')
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
+        self.assertRaises(ValidationError, self.add_ptr_ipv4,
+                          **{'ip':'8.8.8.8'})
+        self.assertRaises(ValidationError, self.add_ptr_ipv6,
+                          **{'ip':'2001:0db8:85a3:0000:0000:8a2e:0370:733'})
 
-        try:
-            self.add_ptr_ipv6('2001:0db8:85a3:0000:0000:8a2e:0370:733')
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
         boot_strap_ipv6_reverse_domain("2.0.0.1")
-        try:
-            self.create_domain(name='2.0.0.1', ip_type='6').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
+        self.assertRaises(ValidationError, self.create_domain,
+                          **{'name': '2.0.0.1', 'ip_type':'6'})
         self.add_ptr_ipv6('2001:0db8:85a3:0000:0000:8a2e:0370:733')
 
     def test_ipv6_to_longs(self):
