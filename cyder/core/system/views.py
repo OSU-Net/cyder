@@ -1,7 +1,9 @@
 import ipaddr
 
 from django import forms
+from django.forms.util import ErrorDict, ErrorList
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
 
 
@@ -84,8 +86,12 @@ def system_create_view(request, initial):
                 dynamic_form = form
 
             if form.is_valid():
-                form.save()
-                return redirect(reverse('system-detail', args=[system.id]))
+                try:
+                    form.save()
+                    return redirect(reverse('system-detail', args=[system.id]))
+                except ValidationError, e:
+                    form._errors = ErrorDict()
+                    form._errors['__all__'] = ErrorList(e.messages)
             else:
                 if '__all__' in form.errors and (
                         MAC_ERR in form.errors['__all__']):
