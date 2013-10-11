@@ -4,11 +4,12 @@ from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import join_dhcp_args
 
 
-class Workgroup(models.Model, ObjectUrlMixin):
+class Workgroup(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 

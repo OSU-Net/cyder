@@ -3,11 +3,11 @@ from django.db.models.loading import get_model
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
-from cyder.cydhcp.network.models import Network
+from cyder.base.models import BaseModel
 from cyder.cydhcp.keyvalue.models import KeyValue
 
 
-class Vrf(models.Model, ObjectUrlMixin):
+class Vrf(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
