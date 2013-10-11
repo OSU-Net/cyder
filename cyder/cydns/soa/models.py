@@ -9,6 +9,7 @@ from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
@@ -25,7 +26,7 @@ DEFAULT_REFRESH = 180  # 3 min
 DEFAULT_MINIMUM = 180  # 3 min
 
 
-class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
+class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     """
     SOA stands for Start of Authority
 
@@ -198,7 +199,6 @@ class SOAKeyValue(KeyValue):
 
     class Meta:
         db_table = 'soa_kv'
-
 
     def _aa_disabled(self):
         """
