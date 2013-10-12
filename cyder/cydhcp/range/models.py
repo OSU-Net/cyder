@@ -171,8 +171,8 @@ class Range(models.Model, ObjectUrlMixin):
         start, end = four_to_two(
             self.start_upper, self.start_lower, self.end_upper, self.end_lower)
         if start > end:
-            raise ValidationError("The start of a range cannot be greater than"
-                                  " or equal to the end of the range.")
+            raise ValidationError("The start of a range cannot be greater "
+                                  "than the end of the range.")
 
         if self.range_type == STATIC and self.dynamicinterface_set.exists():
             raise ValidationError('A static range cannot contain dynamic '
