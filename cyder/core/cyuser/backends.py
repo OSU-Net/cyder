@@ -101,7 +101,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 
     if (obj_type and obj_type.endswith('KeyValue')
             and obj_type != 'WorkgroupKeyValue'):
-        obj_type = obj_type.rstrip('KeyValue')
+        obj_type = obj_type[:-len('KeyValue')]
 
     handling_functions = {
         # Administrative.
