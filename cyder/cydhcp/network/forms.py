@@ -61,7 +61,6 @@ class NetworkAVForm(forms.ModelForm):
 
     class Meta:
         model = NetworkAV
-        exclude = ('is_statement', 'is_option', 'is_quoted')
 
 
 class NetworkForm_network(forms.Form):

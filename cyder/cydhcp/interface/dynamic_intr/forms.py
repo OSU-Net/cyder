@@ -25,4 +25,3 @@ class DynamicInterfaceAVForm(forms.ModelForm):
 
     class Meta:
         model = DynamicInterfaceAV
-        exclude = ('is_option', 'is_statement', 'is_quoted',)

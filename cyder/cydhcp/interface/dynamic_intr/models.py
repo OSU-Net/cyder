@@ -1,5 +1,6 @@
 from django.db import models
 
+from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
@@ -88,8 +89,10 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             format_mac(self.mac))
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.dynamicinterfaceav_set.filter(is_option=True)
-        statements = self.dynamicinterfaceav_set.filter(is_statement=True)
+        options = self.dynamicinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        statements = self.dynamicinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         if options:
             build_str += "\t\t# Host Options\n"
             build_str += join_dhcp_args(options, depth=2)

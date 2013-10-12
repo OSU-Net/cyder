@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -245,8 +246,10 @@ class Range(models.Model, ObjectUrlMixin):
                                   "this range")
 
     def build_range(self):
-        range_options = self.rangeav_set.filter(is_option=True)
-        range_statements = self.rangeav_set.filter(is_statement=True)
+        range_options = self.rangeav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        range_statements = self.rangeav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         build_str = "\tpool {\n"
         build_str += "\t\t# Pool Statements\n"
         build_str += "\t\tfailover peer \"dhcp\";\n"

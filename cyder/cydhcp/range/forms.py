@@ -25,4 +25,3 @@ class RangeAVForm(forms.ModelForm):
 
     class Meta:
         model = RangeAV
-        exclude = ('is_option', 'is_statement', 'is_quoted')

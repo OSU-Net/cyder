@@ -13,6 +13,7 @@ from cyder.core.fields import MacAddrField
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
+from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.models import Attribute, EAVBase
 
 from cyder.cydhcp.constants import STATIC
@@ -191,8 +192,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.staticinterfaceav_set.filter(is_option=True)
-        statements = self.staticinterfaceav_set.filter(is_statement=True)
+        options = self.staticinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        statements = self.staticinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         if options:
             build_str += '\t\t# Host Options\n'
             build_str += join_dhcp_args(options, depth=2)

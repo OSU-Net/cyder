@@ -4,6 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -209,8 +210,10 @@ class Network(models.Model, ObjectUrlMixin):
 
     def build_subnet(self, raw=False):
         self.update_network()
-        statements = self.networkav_set.filter(is_statement=True)
-        options = self.networkav_set.filter(is_option=True)
+        statements = self.networkav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
+        options = self.networkav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
         ranges = self.range_set.filter(range_type=DYNAMIC, dhcp_enabled=True)
         if self.ip_type == IP_TYPE_4:
             build_str = "\nsubnet {0} netmask {1} {{\n".format(

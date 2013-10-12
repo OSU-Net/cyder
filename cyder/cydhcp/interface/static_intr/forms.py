@@ -56,7 +56,6 @@ class StaticInterfaceAVForm(forms.ModelForm):
 
     class Meta:
         model = StaticInterfaceAV
-        exclude = ('is_option', 'is_statement', 'is_quoted')
 
 
 class FullStaticInterfaceForm(forms.ModelForm):
