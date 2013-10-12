@@ -130,9 +130,8 @@ class Range(models.Model, ObjectUrlMixin):
 
     def clean(self):
         if self.network is None and not self.is_reserved:
-            raise ValidationError("ERROR: Range {0}-{1} is not associated "
-                                  "with a network and is not reserved".format(
-                                  self.start_str, self.end_str))
+            raise ValidationError('Range must be associated with a network '
+                                  'unless it is reserved')
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
@@ -144,7 +143,7 @@ class Range(models.Model, ObjectUrlMixin):
                     self.start_str)
                 self.end_upper, self.end_lower = ipv6_to_longs(self.end_str)
             else:
-                raise ValidationError("ERROR: could not determine the ip type")
+                raise ValidationError('Invalid IP type')
         except ipaddr.AddressValueError, e:
             raise ValidationError(str(e))
 
