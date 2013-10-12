@@ -101,7 +101,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 
     if (obj_type and obj_type.endswith('KeyValue')
             and obj_type != 'WorkgroupKeyValue'):
-        obj_type = obj_type.rstrip('KeyValue')
+        obj_type = obj_type[:-len('KeyValue')]
 
     handling_functions = {
         # Administrative.
@@ -139,7 +139,10 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'WorkgroupKeyValue': has_workgroup_keyvalue_perm,
     }
 
-    handling_function = handling_functions.get(obj_type, False)
+    def invalid(*args):
+        raise Exception('No handling function for {0}'.format(obj_type))
+
+    handling_function = handling_functions.get(obj_type, invalid)
     if not handling_function:
         if '_' in obj_type:
             obj_type = obj_type.replace('_', '')
