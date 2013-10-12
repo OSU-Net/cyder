@@ -71,7 +71,7 @@ def delete_static_interface(reqeust, intr_pk):
 
 def delete_attr(request, attr_pk):
     """
-    An view destined to be called by ajax to remove an attr.
+    A view destined to be called by ajax to remove an attr.
     """
     #system = get_object_or_404(System, pk=system_pk)
     #intr = get_object_or_404(StaticInterface, pk=intr_pk)

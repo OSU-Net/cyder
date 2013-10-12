@@ -218,12 +218,12 @@ class Network(models.Model, ObjectUrlMixin):
             build_str = "\nsubnet6 {0} netmask {1} {{\n".format(
                 self.network.network, self.network.netmask)
         if not raw:
-            build_str += "\t# Network Statements\n"
+            build_str += "\t# Network statements\n"
             build_str += join_dhcp_args(statements)
-            build_str += "\t# Network Options\n"
+            build_str += "\t# Network options\n"
             build_str += join_dhcp_args(options)
             if self.dhcpd_raw_include:
-                build_str += "\t# Raw Network Options\n"
+                build_str += "\t# Raw network options\n"
                 build_str += join_dhcp_args(self.dhcpd_raw_include.split("\n"))
         for range_ in ranges:
             build_str += range_.build_range()

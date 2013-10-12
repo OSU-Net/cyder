@@ -112,7 +112,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
     def get_api_fields(cls):
         """
         The purpose of this is to help the API decide which fields to expose
-        to the user when they are creating and updateing an Object. This
+        to the user when they are creating and updating an Object. This
         function should be implemented in inheriting models and overriden to
         provide additional fields. Tastypie ignores any relational fields on
         the model. See the ModelResource definitions for view and domain
@@ -260,10 +260,10 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         if self.domain.nameserver_set.filter(server=self.fqdn).exists():
             return
         else:
-            # Confusing error messege?
+            # Confusing error message?
             raise ValidationError(
-                "You can only create an a records in a delegated domain that "
-                "has an NS record pointing at it."
+                "You can only create a record in a delegated domain that has "
+                "an NS record pointing at it."
             )
 
     def check_TLD_condition(self):
@@ -272,8 +272,8 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             domain = domains[0]
             PTR = get_model('ptr', 'ptr')
             if not domain.master_domain and not isinstance(self, PTR):
-                raise ValidationError("You cannot create an record that points"
-                                      " to the top level of another domain.")
+                raise ValidationError("You cannot create a record that points "
+                                      "to the top level of another domain.")
             elif self.label:
                 # blank label allowed
                 self.label = ''

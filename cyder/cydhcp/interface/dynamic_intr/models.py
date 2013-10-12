@@ -64,7 +64,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
             ('Domain', 'domain', self.domain),
-            ('Last Seen', 'last_seen', date)]
+            ('Last seen', 'last_seen', date)]
         return data
 
     @staticmethod

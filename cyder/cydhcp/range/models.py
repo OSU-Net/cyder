@@ -290,12 +290,12 @@ class Range(models.Model, ObjectUrlMixin):
 
     def choice_display(self):
         if not self.network.site:
-            site_name = "No Site"
+            site_name = "No site"
         else:
             site_name = self.network.site.name.upper()
 
         if not self.network.vlan:
-            vlan_name = "No Vlan"
+            vlan_name = "No VLAN"
         else:
             vlan_name = str(self.network.vlan)
         return "{0} - {1} - ({2}) {3} to {4}".format(
@@ -303,7 +303,7 @@ class Range(models.Model, ObjectUrlMixin):
             self.network, self.start_str, self.end_str)
 
     def get_next_ip(self):
-        """Find's the most appropriate ip address within a range. If it can't
+        """Finds the most appropriate IP address within a range. If it can't
         find an IP it returns None. If it finds an IP it returns an IPv4Address
         object.
 
@@ -322,7 +322,7 @@ class Range(models.Model, ObjectUrlMixin):
 
 
 def find_free_ip(start, end, ip_type='4'):
-    """Given start and end numbers, find a free ip.
+    """Given start and end numbers, find a free IP.
     :param start: The start number
     :type start: int
     :param end: The end number
