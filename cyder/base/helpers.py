@@ -4,11 +4,13 @@ import json
 import string
 import urllib
 import urlparse
+from string import capwords
 
 from django.utils.encoding import smart_str
 from django.db.models import ForeignKey
 
 from jingo import register
+
 
 mac_re = re.compile("(([0-9a-f]){2}:){5}([0-9a-f]){2}$")
 
@@ -117,35 +119,6 @@ urlparams = register.filter(urlparams)
 
 
 @register.filter
-def humanized_class_name(obj, *args, **kwargs):
-    """
-    Adds spaces to camel-case class names.
-    """
-    humanized = ''
-
-    class_name = obj.__class__.__name__
-
-    for i in range(len(class_name)):
-        humanized += class_name[i]
-        # Insert space between every camel hump.
-        if (i + 1 < len(class_name) and class_name[i].islower()
-                and class_name[i + 1].isupper()):
-            humanized += ' '
-
-    return humanized
-
-
-@register.filter
-def humanized_model_name(model_name, *args, **kwargs):
-    """
-    Capitalize and add spaces to underscored db table names.
-    """
-    model_name.replace('_', ' ')
-    return string.join([word[0].upper() + word[1:]
-                        for word in model_name.split()])
-
-
-@register.filter
 def prettify_obj_type(obj_type, *args, **kwargs):
     """
     Turns all-lowercase record type string to all caps or splits into
@@ -155,27 +128,19 @@ def prettify_obj_type(obj_type, *args, **kwargs):
     if not obj_type:
         return
 
-    prettified = ''
-    if obj_type in ['range', 'network', 'site', 'domain', 'nameserver',
-                    'workgroup', 'system']:
-        return obj_type[0].upper() + obj_type[1:]
-    elif '_' in obj_type:
-        capitalize = True
-        for i in range(len(obj_type)):
-            if capitalize:
-                prettified += obj_type[i].upper()
-                capitalize = False
-            elif obj_type[i] == '_':
-                prettified += ' '
-                capitalize = True
-            else:
-                prettified += obj_type[i]
-        if 'Av' in prettified:
-            prettified = prettified.split(' ')[0] + ' Attribute'
-            return prettified
-        return prettified
+    acronyms = ('cname', 'mx', 'ptr', 'srv', 'sshfp', 'txt', 'ns', 'soa',
+                'vlan', 'vrf')
 
-    return obj_type.upper()
+    obj_type = obj_type.lower()
+
+    if obj_type in acronyms:
+        return obj_type.upper()
+    else:
+        prettified = capwords(obj_type.replace('_', ' '))
+
+        if prettified.endswith(' Av'):
+            prettified = prettified[:-len('Av')] + 'attribute'
+        return prettified
 
 
 @register.function
