@@ -5,20 +5,21 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from sys import stderr
 
+from cyder.base.eav.models import Attribute
 from cyder.core.ctnr.models import Ctnr, CtnrUser
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
                                     ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF,
                                     STATIC, DYNAMIC)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicIntrKeyValue)
-from cyder.cydhcp.network.models import Network, NetworkKeyValue
-from cyder.cydhcp.range.models import Range, RangeKeyValue
+                                                        DynamicInterfaceAV)
+from cyder.cydhcp.network.models import Network, NetworkAV
+from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupKeyValue
+from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 import ipaddr
 import MySQLdb
@@ -95,11 +96,12 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
                        "FROM dhcp_options "
                        "WHERE id = {0}".format(dhcp_option))
         name, type = cursor.fetchone()
-        kv, kv_created = NetworkKeyValue.objects.get_or_create(
-            value=str(value), key=name, network=n)
-        if kv_created:
-            kv.clean()
-            kv.save()
+        attr = Attribute.objects.get(name=name)
+        eav, eav_created = NetworkAV.objects.get_or_create(
+            network=n, attribute=attr, value=value)
+        if eav_created:
+            eav.full_clean()
+            eav.save()
     return (n, created)
 
 
@@ -145,8 +147,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
 
         # If the range is disabled, we don't need to print warnings.
         if not valid and enabled:
-            print 'Range {0} in network {1} is invalid:'.format(range_str,
-                                                                n)
+            print 'Range {0} in network {1} is invalid:'.format(range_str, n)
 
             if not valid_start:
                 print ('\tStart is not inside network'
@@ -170,12 +171,12 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
         network=n, dhcp_enabled=dhcp_enabled, is_reserved=not dhcp_enabled)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-        rk, kv_created = RangeKeyValue.objects.get_or_create(
-            range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
-            is_option=True, is_quoted=True)
-        if kv_created:
-            rk.clean()
-            rk.save()
+        attr = Attribute.objects.get(name='ipphone242')
+        eav, eav_created = RangeAV.objects.get_or_create(
+            range=r, attribute=attr, value='L2Q=1,L2QVLAN=503')
+        if eav_created:
+            eav.full_clean()
+            eav.save()
     return (r, created)
 
 
@@ -243,11 +244,12 @@ def migrate_workgroups():
                            "FROM dhcp_options "
                            "WHERE id = {0}".format(dhcp_option))
             name, type = cursor.fetchone()
-            kv, kv_created = WorkgroupKeyValue.objects.get_or_create(
-                value=value, key=name, workgroup=w)
-            if kv_created:
-                kv.clean()
-                kv.save()
+            attr = Attribute.objects.get(name=name)
+            eav, eav_created = WorkgroupAV.objects.get_or_create(
+                workgroup=w, attribute=attr, value=value)
+            if eav_created:
+                eav.clean()
+                eav.save()
         migrated.append((w, created))
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
@@ -377,20 +379,21 @@ def migrate_dynamic_hosts():
             if not value or value == '0':
                 continue
 
-            kv = SystemKeyValue(system=s, key=sys_value_keys[key],
-                                value=value)
-            kv.clean()
-            kv.save()
+            attr = Attribute.objects.get(name=sys_value_keys[key])
+            eav = SystemAV(system=s, attribute=attr, value=value)
+            eav.full_clean()
+            eav.save()
 
         intr, _ = DynamicInterface.objects.get_or_create(
             range=r, workgroup=w, ctnr=c, domain=d, mac=mac, system=s,
             dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
-            kv = DynamicIntrKeyValue(dynamic_interface=intr,
-                                     key=key, value=value)
-            kv.clean()
-            kv.save()
+            attr = Attribute.objects.get(name=key)
+            eav = DynamicInterfaceAV(dynamicinterface=intr,
+                                     attribute=attr, value=value)
+            eav.full_clean()
+            eav.save()
 
         count += 1
         if not count % 1000:

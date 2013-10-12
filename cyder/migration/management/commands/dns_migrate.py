@@ -4,10 +4,11 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
 
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.base.eav.models import Attribute
+from cyder.core.system.models import System, SystemAV
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticIntrKeyValue)
+                                                       StaticInterfaceAV)
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -178,10 +179,10 @@ class Zone(object):
                 value = items[key]
                 if not value or value == '0':
                     continue
-                kv = SystemKeyValue(system=system, key=sys_value_keys[key],
-                                    value=value)
-                kv.clean()
-                kv.save()
+                attr = Attribute.objects.get(name=sys_value_keys[key])
+                eav = SystemAV(system=system, attribute=attr, value=value)
+                eav.full_clean()
+                eav.save()
 
             if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
@@ -214,10 +215,11 @@ class Zone(object):
                     static.views.add(private)
 
                     for key, value in get_host_option_values(items['id']):
-                        kv = StaticIntrKeyValue(static_interface=static,
-                                                key=key, value=value)
-                        kv.clean()
-                        kv.save()
+                        attr = Attribute.objects.get(name=key)
+                        eav = StaticInterfaceAV(staticinterface=static,
+                                                attribute=attr, value=value)
+                        eav.full_clean()
+                        eav.save()
 
                 except ValidationError:
                     try:
