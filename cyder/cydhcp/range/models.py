@@ -192,11 +192,7 @@ class Range(models.Model, ObjectUrlMixin):
 
             if (IPClass(self.start_str) < self.network.network.network or
                     IPClass(self.end_str) > self.network.network.broadcast):
-                raise RangeOverflowError(
-                    "Range {0} to {1} doesn't fit in {2}".format(
-                        IPClass(self.start_lower),
-                        IPClass(self.end_lower),
-                        self.network.network))
+                raise RangeOverflowError("Range doesn't fit in network")
         self.check_for_overlaps()
 
     def get_allow_deny_list(self):
@@ -245,12 +241,8 @@ class Range(models.Model, ObjectUrlMixin):
             # start > end
             if self._end < range._start:
                 continue
-            raise ValidationError("Stored range {0} - {1} would contain "
-                                  "{2} - {3}".format(
-                                      Ip(range._start),
-                                      Ip(range._end),
-                                      Ip(self._start),
-                                      Ip(self._end)))
+            raise ValidationError("Stored range {0} - {1} would overlap with "
+                                  "this range")
 
     def build_range(self):
         range_options = self.rangekeyvalue_set.filter(is_option=True)

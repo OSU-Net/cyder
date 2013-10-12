@@ -87,7 +87,7 @@ class Network(models.Model, ObjectUrlMixin):
     def __contains__(self, other):
         if self.ip_type is not other.ip_type:
             raise Exception("__contains__ is not defined for "
-                            "ip type {0} and ip type {1}".format(
+                            "IPv{0} and IPv{1}".format(
                             self.ip_type, other.ip_type))
         self.update_network()
         if type(other) is type(self):
