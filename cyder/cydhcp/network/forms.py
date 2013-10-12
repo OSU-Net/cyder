@@ -16,8 +16,8 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
         queryset=Site.objects.all(),
         empty_label="(Defaults to parent's site.)",
         required=False,
-        help_text='The site the network will be put into. '
-                  'Defaults to parent network\'s site'
+        help_text="The site the network will be put into. "
+                  "Defaults to parent network's site"
     )
 
     def __init__(self, *args, **kwargs):
