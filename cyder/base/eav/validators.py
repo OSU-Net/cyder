@@ -247,11 +247,11 @@ def flag_optional_text(value):
 
 
 def uint8_list(value):
-    list_validator(value, uint8)
+    validate_list(value, uint8)
 
 
 def uint16_list(value):
-    list_validator(value, uint16)
+    validate_list(value, uint16)
 
 
 def host_list(value):
