@@ -23,7 +23,7 @@ def static_intr_detail(request, pk):
 
     return cy_detail(request, StaticInterface,
                      'static_intr/static_intr_detail.html', {
-                     'Attributes': 'staticintrav_set',
+                     'Attributes': 'staticinterfaceav_set',
                      }, pk=pk, obj=static_interface)
 
 

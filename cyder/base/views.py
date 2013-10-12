@@ -285,7 +285,7 @@ def get_update_form(request, get_klasses_fn):
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
 
-                if related_type == 'range' and 'kv' not in obj_type:
+                if related_type == 'range' and not obj_type.endswith('_av'):
                     for field in ['vrf', 'site', 'next_ip']:
                         form.fields[field].widget = forms.HiddenInput()
                     form.fields['ip_str'].widget.attrs['readonly'] = True
