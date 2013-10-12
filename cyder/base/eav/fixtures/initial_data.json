@@ -873,6 +873,51 @@
     }
   },
   {
+    "pk": 128,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mitel-128",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 129,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mitel-129",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 130,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mitel-130",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 132,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mitel-132-vlan",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 133,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mitel-133-pri",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
     "pk": 144,
     "model": "eav.Attribute",
     "fields": {
@@ -925,7 +970,7 @@
       "attribute_type": "o",
       "value_type": "text"
     }
-  }
+  },
   {
     "pk": 301,
     "model": "eav.Attribute",
@@ -1925,4 +1970,13 @@
       "value_type": "string"
     }
   },
+  {
+    "pk": 1125,
+    "model": "eav.Attribute",
+    "fields": {
+      "name": "mitel-125",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  }
 ]
