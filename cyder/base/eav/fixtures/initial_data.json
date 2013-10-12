@@ -927,7 +927,7 @@
     }
   }
   {
-    "pk": 201,
+    "pk": 301,
     "model": "eav.Attribute",
     "fields": {
       "name": "default-lease-time",
@@ -936,7 +936,7 @@
     }
   },
   {
-    "pk": 202,
+    "pk": 302,
     "model": "eav.Attribute",
     "fields": {
       "name": "max-lease-time",
@@ -945,7 +945,7 @@
     }
   },
   {
-    "pk": 203,
+    "pk": 303,
     "model": "eav.Attribute",
     "fields": {
       "name": "min-lease-time",
@@ -954,7 +954,7 @@
     }
   },
   {
-    "pk": 204,
+    "pk": 304,
     "model": "eav.Attribute",
     "fields": {
       "name": "dynamic-bootp-lease-cutoff",
@@ -963,7 +963,7 @@
     }
   },
   {
-    "pk": 205,
+    "pk": 305,
     "model": "eav.Attribute",
     "fields": {
       "name": "dynamic-bootp-lease-length",
@@ -972,7 +972,7 @@
     }
   },
   {
-    "pk": 206,
+    "pk": 306,
     "model": "eav.Attribute",
     "fields": {
       "name": "boot-unknown-clients",
@@ -981,7 +981,7 @@
     }
   },
   {
-    "pk": 207,
+    "pk": 307,
     "model": "eav.Attribute",
     "fields": {
       "name": "dynamic-bootp",
@@ -990,7 +990,7 @@
     }
   },
   {
-    "pk": 208,
+    "pk": 308,
     "model": "eav.Attribute",
     "fields": {
       "name": "allow-bootp",
@@ -999,7 +999,7 @@
     }
   },
   {
-    "pk": 209,
+    "pk": 309,
     "model": "eav.Attribute",
     "fields": {
       "name": "allow-booting",
@@ -1008,7 +1008,7 @@
     }
   },
   {
-    "pk": 210,
+    "pk": 310,
     "model": "eav.Attribute",
     "fields": {
       "name": "one-lease-per-client",
@@ -1017,7 +1017,7 @@
     }
   },
   {
-    "pk": 211,
+    "pk": 311,
     "model": "eav.Attribute",
     "fields": {
       "name": "get-lease-hostnames",
@@ -1026,7 +1026,7 @@
     }
   },
   {
-    "pk": 212,
+    "pk": 312,
     "model": "eav.Attribute",
     "fields": {
       "name": "use-host-decl-names",
@@ -1035,7 +1035,7 @@
     }
   },
   {
-    "pk": 213,
+    "pk": 313,
     "model": "eav.Attribute",
     "fields": {
       "name": "use-lease-addr-for-default-route",
@@ -1044,7 +1044,7 @@
     }
   },
   {
-    "pk": 214,
+    "pk": 314,
     "model": "eav.Attribute",
     "fields": {
       "name": "min-secs",
@@ -1053,7 +1053,7 @@
     }
   },
   {
-    "pk": 215,
+    "pk": 315,
     "model": "eav.Attribute",
     "fields": {
       "name": "filename",
@@ -1062,7 +1062,7 @@
     }
   },
   {
-    "pk": 216,
+    "pk": 316,
     "model": "eav.Attribute",
     "fields": {
       "name": "server-name",
@@ -1071,7 +1071,7 @@
     }
   },
   {
-    "pk": 217,
+    "pk": 317,
     "model": "eav.Attribute",
     "fields": {
       "name": "next-server",
@@ -1080,7 +1080,7 @@
     }
   },
   {
-    "pk": 218,
+    "pk": 318,
     "model": "eav.Attribute",
     "fields": {
       "name": "authoritative",
@@ -1089,7 +1089,7 @@
     }
   },
   {
-    "pk": 219,
+    "pk": 319,
     "model": "eav.Attribute",
     "fields": {
       "name": "vendor-option-space",
@@ -1098,7 +1098,7 @@
     }
   },
   {
-    "pk": 220,
+    "pk": 320,
     "model": "eav.Attribute",
     "fields": {
       "name": "always-reply-rfc1048",
@@ -1107,7 +1107,7 @@
     }
   },
   {
-    "pk": 221,
+    "pk": 321,
     "model": "eav.Attribute",
     "fields": {
       "name": "site-option-space",
@@ -1116,7 +1116,7 @@
     }
   },
   {
-    "pk": 222,
+    "pk": 322,
     "model": "eav.Attribute",
     "fields": {
       "name": "always-broadcast",
@@ -1125,7 +1125,7 @@
     }
   },
   {
-    "pk": 223,
+    "pk": 323,
     "model": "eav.Attribute",
     "fields": {
       "name": "ddns-domainname",
@@ -1134,7 +1134,7 @@
     }
   },
   {
-    "pk": 224,
+    "pk": 324,
     "model": "eav.Attribute",
     "fields": {
       "name": "ddns-hostname",
@@ -1143,7 +1143,7 @@
     }
   },
   {
-    "pk": 225,
+    "pk": 325,
     "model": "eav.Attribute",
     "fields": {
       "name": "ddns-rev-domainname",
@@ -1152,7 +1152,7 @@
     }
   },
   {
-    "pk": 226,
+    "pk": 326,
     "model": "eav.Attribute",
     "fields": {
       "name": "lease-file-name",
@@ -1161,7 +1161,7 @@
     }
   },
   {
-    "pk": 227,
+    "pk": 327,
     "model": "eav.Attribute",
     "fields": {
       "name": "pid-file-name",
@@ -1170,7 +1170,7 @@
     }
   },
   {
-    "pk": 228,
+    "pk": 328,
     "model": "eav.Attribute",
     "fields": {
       "name": "duplicates",
@@ -1179,7 +1179,7 @@
     }
   },
   {
-    "pk": 229,
+    "pk": 329,
     "model": "eav.Attribute",
     "fields": {
       "name": "declines",
@@ -1188,7 +1188,7 @@
     }
   },
   {
-    "pk": 230,
+    "pk": 330,
     "model": "eav.Attribute",
     "fields": {
       "name": "ddns-updates",
@@ -1197,7 +1197,7 @@
     }
   },
   {
-    "pk": 231,
+    "pk": 331,
     "model": "eav.Attribute",
     "fields": {
       "name": "omapi-port",
@@ -1206,7 +1206,7 @@
     }
   },
   {
-    "pk": 232,
+    "pk": 332,
     "model": "eav.Attribute",
     "fields": {
       "name": "local-port",
@@ -1215,7 +1215,7 @@
     }
   },
   {
-    "pk": 233,
+    "pk": 333,
     "model": "eav.Attribute",
     "fields": {
       "name": "limited-broadcast-address",
@@ -1224,7 +1224,7 @@
     }
   },
   {
-    "pk": 234,
+    "pk": 334,
     "model": "eav.Attribute",
     "fields": {
       "name": "remote-port",
@@ -1233,7 +1233,7 @@
     }
   },
   {
-    "pk": 235,
+    "pk": 335,
     "model": "eav.Attribute",
     "fields": {
       "name": "local-address",
@@ -1242,7 +1242,7 @@
     }
   },
   {
-    "pk": 236,
+    "pk": 336,
     "model": "eav.Attribute",
     "fields": {
       "name": "omapi-key",
@@ -1251,7 +1251,7 @@
     }
   },
   {
-    "pk": 237,
+    "pk": 337,
     "model": "eav.Attribute",
     "fields": {
       "name": "stash-agent-options",
@@ -1260,7 +1260,7 @@
     }
   },
   {
-    "pk": 238,
+    "pk": 338,
     "model": "eav.Attribute",
     "fields": {
       "name": "ddns-ttl",
@@ -1269,7 +1269,7 @@
     }
   },
   {
-    "pk": 239,
+    "pk": 339,
     "model": "eav.Attribute",
     "fields": {
       "name": "ddns-update-style",
@@ -1278,7 +1278,7 @@
     }
   },
   {
-    "pk": 240,
+    "pk": 340,
     "model": "eav.Attribute",
     "fields": {
       "name": "client-updates",
@@ -1287,7 +1287,7 @@
     }
   },
   {
-    "pk": 241,
+    "pk": 341,
     "model": "eav.Attribute",
     "fields": {
       "name": "update-optimization",
@@ -1296,7 +1296,7 @@
     }
   },
   {
-    "pk": 242,
+    "pk": 342,
     "model": "eav.Attribute",
     "fields": {
       "name": "ping-check",
@@ -1305,7 +1305,7 @@
     }
   },
   {
-    "pk": 243,
+    "pk": 343,
     "model": "eav.Attribute",
     "fields": {
       "name": "update-static-leases",
@@ -1314,7 +1314,7 @@
     }
   },
   {
-    "pk": 244,
+    "pk": 344,
     "model": "eav.Attribute",
     "fields": {
       "name": "log-facility",
@@ -1323,7 +1323,7 @@
     }
   },
   {
-    "pk": 245,
+    "pk": 345,
     "model": "eav.Attribute",
     "fields": {
       "name": "do-forward-updates",
@@ -1332,7 +1332,7 @@
     }
   },
   {
-    "pk": 246,
+    "pk": 346,
     "model": "eav.Attribute",
     "fields": {
       "name": "ping-timeout",
@@ -1341,7 +1341,7 @@
     }
   },
   {
-    "pk": 247,
+    "pk": 347,
     "model": "eav.Attribute",
     "fields": {
       "name": "infinite-is-reserved",
@@ -1350,7 +1350,7 @@
     }
   },
   {
-    "pk": 248,
+    "pk": 348,
     "model": "eav.Attribute",
     "fields": {
       "name": "update-conflict-detection",
@@ -1359,7 +1359,7 @@
     }
   },
   {
-    "pk": 249,
+    "pk": 349,
     "model": "eav.Attribute",
     "fields": {
       "name": "leasequery",
@@ -1368,7 +1368,7 @@
     }
   },
   {
-    "pk": 250,
+    "pk": 350,
     "model": "eav.Attribute",
     "fields": {
       "name": "adaptive-lease-time-threshold",
@@ -1377,7 +1377,7 @@
     }
   },
   {
-    "pk": 251,
+    "pk": 351,
     "model": "eav.Attribute",
     "fields": {
       "name": "do-reverse-updates",
@@ -1386,7 +1386,7 @@
     }
   },
   {
-    "pk": 252,
+    "pk": 352,
     "model": "eav.Attribute",
     "fields": {
       "name": "fqdn-reply",
@@ -1395,7 +1395,7 @@
     }
   },
   {
-    "pk": 253,
+    "pk": 353,
     "model": "eav.Attribute",
     "fields": {
       "name": "preferred-lifetime",
@@ -1404,7 +1404,7 @@
     }
   },
   {
-    "pk": 254,
+    "pk": 354,
     "model": "eav.Attribute",
     "fields": {
       "name": "dhcpv6-lease-file-name",
@@ -1413,7 +1413,7 @@
     }
   },
   {
-    "pk": 255,
+    "pk": 355,
     "model": "eav.Attribute",
     "fields": {
       "name": "dhcpv6-pid-file-name",
@@ -1422,7 +1422,7 @@
     }
   },
   {
-    "pk": 256,
+    "pk": 356,
     "model": "eav.Attribute",
     "fields": {
       "name": "limit-addrs-per-ia",
@@ -1431,7 +1431,7 @@
     }
   },
   {
-    "pk": 257,
+    "pk": 357,
     "model": "eav.Attribute",
     "fields": {
       "name": "limit-prefs-per-ia",
@@ -1440,7 +1440,7 @@
     }
   },
   {
-    "pk": 258,
+    "pk": 358,
     "model": "eav.Attribute",
     "fields": {
       "name": "delayed-ack",
@@ -1449,7 +1449,7 @@
     }
   },
   {
-    "pk": 259,
+    "pk": 359,
     "model": "eav.Attribute",
     "fields": {
       "name": "max-ack-delay",
@@ -1458,7 +1458,7 @@
     }
   },
   {
-    "pk": 260,
+    "pk": 360,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-server",
@@ -1467,7 +1467,7 @@
     }
   },
   {
-    "pk": 261,
+    "pk": 361,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-port",
@@ -1476,7 +1476,7 @@
     }
   },
   {
-    "pk": 262,
+    "pk": 362,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-username",
@@ -1485,7 +1485,7 @@
     }
   },
   {
-    "pk": 263,
+    "pk": 363,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-password",
@@ -1494,7 +1494,7 @@
     }
   },
   {
-    "pk": 264,
+    "pk": 364,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-base-dn",
@@ -1503,7 +1503,7 @@
     }
   },
   {
-    "pk": 265,
+    "pk": 365,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-method",
@@ -1512,7 +1512,7 @@
     }
   },
   {
-    "pk": 266,
+    "pk": 366,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-debug-file",
@@ -1521,7 +1521,7 @@
     }
   },
   {
-    "pk": 267,
+    "pk": 367,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-dhcp-server-cn",
@@ -1530,7 +1530,7 @@
     }
   },
   {
-    "pk": 268,
+    "pk": 368,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-referrals",
@@ -1539,7 +1539,7 @@
     }
   },
   {
-    "pk": 269,
+    "pk": 369,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-ssl",
@@ -1548,7 +1548,7 @@
     }
   },
   {
-    "pk": 270,
+    "pk": 370,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-reqcert",
@@ -1557,7 +1557,7 @@
     }
   },
   {
-    "pk": 271,
+    "pk": 371,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-ca-file",
@@ -1566,7 +1566,7 @@
     }
   },
   {
-    "pk": 272,
+    "pk": 372,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-ca-dir",
@@ -1575,7 +1575,7 @@
     }
   },
   {
-    "pk": 273,
+    "pk": 373,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-cert",
@@ -1584,7 +1584,7 @@
     }
   },
   {
-    "pk": 274,
+    "pk": 374,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-key",
@@ -1593,7 +1593,7 @@
     }
   },
   {
-    "pk": 275,
+    "pk": 375,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-crlcheck",
@@ -1602,7 +1602,7 @@
     }
   },
   {
-    "pk": 276,
+    "pk": 376,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-ciphers",
@@ -1611,7 +1611,7 @@
     }
   },
   {
-    "pk": 277,
+    "pk": 377,
     "model": "eav.Attribute",
     "fields": {
       "name": "ldap-tls-randfile",
@@ -1620,7 +1620,7 @@
     }
   },
   {
-    "pk": 301,
+    "pk": 401,
     "model": "eav.Attribute",
     "fields": {
       "name": "server-identifier",
@@ -1629,7 +1629,7 @@
     }
   },
   {
-    "pk": 401,
+    "pk": 501,
     "model": "eav.Attribute",
     "fields": {
       "name": "Hardware type",
@@ -1638,7 +1638,7 @@
     }
   },
   {
-    "pk": 402,
+    "pk": 502,
     "model": "eav.Attribute",
     "fields": {
       "name": "Operating system",
@@ -1647,7 +1647,7 @@
     }
   },
   {
-    "pk": 403,
+    "pk": 503,
     "model": "eav.Attribute",
     "fields": {
       "name": "Location",
@@ -1656,7 +1656,7 @@
     }
   },
   {
-    "pk": 404,
+    "pk": 504,
     "model": "eav.Attribute",
     "fields": {
       "name": "Department",
@@ -1665,7 +1665,7 @@
     }
   },
   {
-    "pk": 405,
+    "pk": 505,
     "model": "eav.Attribute",
     "fields": {
       "name": "Serial number",
@@ -1674,7 +1674,7 @@
     }
   },
   {
-    "pk": 406,
+    "pk": 506,
     "model": "eav.Attribute",
     "fields": {
       "name": "Other ID",
@@ -1683,7 +1683,7 @@
     }
   },
   {
-    "pk": 407,
+    "pk": 507,
     "model": "eav.Attribute",
     "fields": {
       "name": "Purchase date",
@@ -1692,7 +1692,7 @@
     }
   },
   {
-    "pk": 408,
+    "pk": 508,
     "model": "eav.Attribute",
     "fields": {
       "name": "PO number",
@@ -1701,7 +1701,7 @@
     }
   },
   {
-    "pk": 409,
+    "pk": 509,
     "model": "eav.Attribute",
     "fields": {
       "name": "Warranty date",
@@ -1710,7 +1710,7 @@
     }
   },
   {
-    "pk": 410,
+    "pk": 510,
     "model": "eav.Attribute",
     "fields": {
       "name": "Owning unit",
@@ -1719,7 +1719,7 @@
     }
   },
   {
-    "pk": 411,
+    "pk": 511,
     "model": "eav.Attribute",
     "fields": {
       "name": "User ID",
@@ -1728,7 +1728,7 @@
     }
   },
   {
-    "pk": 501,
+    "pk": 601,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.root-mount-options",
@@ -1737,7 +1737,7 @@
     }
   },
   {
-    "pk": 502,
+    "pk": 602,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.root-server-ip-address",
@@ -1746,7 +1746,7 @@
     }
   },
   {
-    "pk": 503,
+    "pk": 603,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.root-server-hostname",
@@ -1755,7 +1755,7 @@
     }
   },
   {
-    "pk": 504,
+    "pk": 604,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.root-path-name",
@@ -1764,7 +1764,7 @@
     }
   },
   {
-    "pk": 505,
+    "pk": 605,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.swap-server-ip-address",
@@ -1773,7 +1773,7 @@
     }
   },
   {
-    "pk": 506,
+    "pk": 606,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.swap-file-path",
@@ -1782,7 +1782,7 @@
     }
   },
   {
-    "pk": 507,
+    "pk": 607,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.boot-file-path",
@@ -1791,7 +1791,7 @@
     }
   },
   {
-    "pk": 508,
+    "pk": 608,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.posix-timezone-string",
@@ -1800,7 +1800,7 @@
     }
   },
   {
-    "pk": 509,
+    "pk": 609,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.boot-read-size",
@@ -1809,7 +1809,7 @@
     }
   },
   {
-    "pk": 510,
+    "pk": 610,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.install-server-ip-address",
@@ -1818,7 +1818,7 @@
     }
   },
   {
-    "pk": 511,
+    "pk": 611,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.install-server-hostname",
@@ -1827,7 +1827,7 @@
     }
   },
   {
-    "pk": 512,
+    "pk": 612,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.install-path",
@@ -1836,7 +1836,7 @@
     }
   },
   {
-    "pk": 513,
+    "pk": 613,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.sysid-config-file-server",
@@ -1845,7 +1845,7 @@
     }
   },
   {
-    "pk": 514,
+    "pk": 614,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.JumpStart-server",
@@ -1854,7 +1854,7 @@
     }
   },
   {
-    "pk": 515,
+    "pk": 615,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.terminal-name",
@@ -1863,7 +1863,7 @@
     }
   },
   {
-    "pk": 516,
+    "pk": 616,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.bootURI",
@@ -1872,7 +1872,7 @@
     }
   },
   {
-    "pk": 517,
+    "pk": 617,
     "model": "eav.Attribute",
     "fields": {
       "name": "SUNW.HTTPproxy",
@@ -1881,7 +1881,7 @@
     }
   },
   {
-    "pk": 521,
+    "pk": 621,
     "model": "eav.Attribute",
     "fields": {
       "name": "MSUCClient.UCIdentifier",
@@ -1890,7 +1890,7 @@
     }
   },
   {
-    "pk": 522,
+    "pk": 622,
     "model": "eav.Attribute",
     "fields": {
       "name": "MSUCClient.URLScheme",
@@ -1899,7 +1899,7 @@
     }
   },
   {
-    "pk": 523,
+    "pk": 623,
     "model": "eav.Attribute",
     "fields": {
       "name": "MSUCClient.WebServerFqdn",
@@ -1908,7 +1908,7 @@
     }
   },
   {
-    "pk": 524,
+    "pk": 624,
     "model": "eav.Attribute",
     "fields": {
       "name": "MSUCClient.WebServerPort",
@@ -1917,7 +1917,7 @@
     }
   },
   {
-    "pk": 525,
+    "pk": 625,
     "model": "eav.Attribute",
     "fields": {
       "name": "MSUCClient.CertProvRelPath",
