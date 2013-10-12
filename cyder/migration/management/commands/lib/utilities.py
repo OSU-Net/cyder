@@ -29,3 +29,15 @@ def calc_prefixlen(netmask):
         bits += netmask & 1
         netmask >>= 1
     return bits
+
+
+ATTR_CONVERSIONS = {
+    'slp-scope': 'slp-service-scope'
+}
+
+
+def fix_attr_name(attr_name):
+    if attr_name in ATTR_CONVERSIONS:
+        return ATTR_CONVERSIONS[attr_name]
+    else:
+        return attr_name

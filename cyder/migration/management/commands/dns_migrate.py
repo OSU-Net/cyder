@@ -23,7 +23,7 @@ from cyder.cydns.models import View
 import MySQLdb
 from optparse import make_option
 from lib import maintain_dump, fix_maintain
-from lib.utilities import clean_mac, ip2long, long2ip
+from lib.utilities import clean_mac, ip2long, long2ip, fix_attr_name
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -176,10 +176,11 @@ class Zone(object):
             system = System(name=name)
             system.save()
             for key in sys_value_keys.keys():
-                value = items[key]
+                value = items[key].strip()
                 if not value or value == '0':
                     continue
-                attr = Attribute.objects.get(name=sys_value_keys[key])
+                attr = Attribute.objects.get(
+                    name=fix_attr_name(sys_value_keys[key]))
                 eav = SystemAV(system=system, attribute=attr, value=value)
                 eav.full_clean()
                 eav.save()
@@ -215,7 +216,7 @@ class Zone(object):
                     static.views.add(private)
 
                     for key, value in get_host_option_values(items['id']):
-                        attr = Attribute.objects.get(name=key)
+                        attr = Attribute.objects.get(name=fix_attr_name(key))
                         eav = StaticInterfaceAV(staticinterface=static,
                                                 attribute=attr, value=value)
                         eav.full_clean()

@@ -25,7 +25,7 @@ import ipaddr
 import MySQLdb
 from optparse import make_option
 
-from lib.utilities import long2ip
+from lib.utilities import long2ip, fix_attr_name
 
 
 cached = {}
@@ -96,7 +96,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
                        "FROM dhcp_options "
                        "WHERE id = {0}".format(dhcp_option))
         name, type = cursor.fetchone()
-        attr = Attribute.objects.get(name=name)
+        attr = Attribute.objects.get(name=fix_attr_name(name))
         eav, eav_created = NetworkAV.objects.get_or_create(
             network=n, attribute=attr, value=value)
         if eav_created:
@@ -171,7 +171,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
         network=n, dhcp_enabled=dhcp_enabled, is_reserved=not dhcp_enabled)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-        attr = Attribute.objects.get(name='ipphone242')
+        attr = Attribute.objects.get(name=fix_attr_name('ipphone242'))
         eav, eav_created = RangeAV.objects.get_or_create(
             range=r, attribute=attr, value='L2Q=1,L2QVLAN=503')
         if eav_created:
@@ -244,7 +244,7 @@ def migrate_workgroups():
                            "FROM dhcp_options "
                            "WHERE id = {0}".format(dhcp_option))
             name, type = cursor.fetchone()
-            attr = Attribute.objects.get(name=name)
+            attr = Attribute.objects.get(name=fix_attr_name(name))
             eav, eav_created = WorkgroupAV.objects.get_or_create(
                 workgroup=w, attribute=attr, value=value)
             if eav_created:
@@ -375,11 +375,12 @@ def migrate_dynamic_hosts():
         s = System(name=items['name'])
         s.save()
         for key in sys_value_keys.keys():
-            value = items[key]
+            value = items[key].strip()
             if not value or value == '0':
                 continue
 
-            attr = Attribute.objects.get(name=sys_value_keys[key])
+            attr = Attribute.objects.get(
+                name=fix_attr_name(sys_value_keys[key]))
             eav = SystemAV(system=s, attribute=attr, value=value)
             eav.full_clean()
             eav.save()
@@ -389,7 +390,7 @@ def migrate_dynamic_hosts():
             dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
-            attr = Attribute.objects.get(name=key)
+            attr = Attribute.objects.get(name=fix_attr_name(key))
             eav = DynamicInterfaceAV(dynamicinterface=intr,
                                      attribute=attr, value=value)
             eav.full_clean()
