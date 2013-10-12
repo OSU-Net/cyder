@@ -105,7 +105,7 @@ class NetworkForm_site(forms.Form):
         cleaned_data = super(NetworkForm_site, self).clean()
         site = cleaned_data.get('site', None)
         if not site:
-            raise ValidationError("That site does not exist.  Try again")
+            raise ValidationError("That site does not exist")
         return cleaned_data
 
 
