@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.loading import get_model
 
+from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
@@ -63,4 +64,5 @@ class SystemAV(EAVBase):
 
 
     system = models.ForeignKey(System)
-    attribute = models.ForeignKey(Attribute)
+    attribute = models.ForeignKey(Attribute,
+            limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})
