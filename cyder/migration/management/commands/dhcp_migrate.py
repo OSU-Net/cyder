@@ -391,7 +391,7 @@ def migrate_dynamic_hosts():
 
         for key, value in get_host_option_values(items['id']):
             attr = Attribute.objects.get(name=fix_attr_name(key))
-            eav = DynamicInterfaceAV(dynamicinterface=intr,
+            eav = DynamicInterfaceAV(dynamic_interface=intr,
                                      attribute=attr, value=value)
             eav.full_clean()
             eav.save()

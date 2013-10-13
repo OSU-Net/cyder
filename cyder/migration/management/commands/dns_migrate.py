@@ -217,7 +217,7 @@ class Zone(object):
 
                     for key, value in get_host_option_values(items['id']):
                         attr = Attribute.objects.get(name=fix_attr_name(key))
-                        eav = StaticInterfaceAV(staticinterface=static,
+                        eav = StaticInterfaceAV(static_interface=static,
                                                 attribute=attr, value=value)
                         eav.full_clean()
                         eav.save()

@@ -8,47 +8,47 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Removing unique constraint on 'DynamicIntrKeyValue', fields ['key', 'value', 'dynamic_interface']
-        db.delete_unique('dynamic_interface_kv', ['key', 'value', 'dynamic_interface_id'])
+        # Removing unique constraint on 'StaticIntrKeyValue', fields ['key', 'value', 'static_interface']
+        db.delete_unique('static_interface_kv', ['key', 'value', 'static_interface_id'])
 
-        # Deleting model 'DynamicIntrKeyValue'
-        db.delete_table('dynamic_interface_kv')
+        # Deleting model 'StaticIntrKeyValue'
+        db.delete_table('static_interface_kv')
 
-        # Adding model 'DynamicInterfaceAV'
-        db.create_table('dynamic_interface_av', (
+        # Adding model 'StaticInterfaceAV'
+        db.create_table('static_interface_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('dynamicinterface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
+            ('static_interface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['static_intr.StaticInterface'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
-        db.send_create_signal('dynamic_intr', ['DynamicInterfaceAV'])
+        db.send_create_signal('static_intr', ['StaticInterfaceAV'])
 
-        # Adding unique constraint on 'DynamicInterfaceAV', fields ['dynamicinterface', 'attribute']
-        db.create_unique('dynamic_interface_av', ['dynamicinterface_id', 'attribute_id'])
+        # Adding unique constraint on 'StaticInterfaceAV', fields ['static_interface', 'attribute']
+        db.create_unique('static_interface_av', ['static_interface_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'DynamicInterfaceAV', fields ['dynamicinterface', 'attribute']
-        db.delete_unique('dynamic_interface_av', ['dynamicinterface_id', 'attribute_id'])
+        # Removing unique constraint on 'StaticInterfaceAV', fields ['static_interface', 'attribute']
+        db.delete_unique('static_interface_av', ['static_interface_id', 'attribute_id'])
 
-        # Adding model 'DynamicIntrKeyValue'
-        db.create_table('dynamic_interface_kv', (
+        # Adding model 'StaticIntrKeyValue'
+        db.create_table('static_interface_kv', (
             ('key', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('is_option', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('has_validator', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('dynamic_interface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
+            ('static_interface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['static_intr.StaticInterface'])),
+            ('is_quoted', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('is_statement', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('is_quoted', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
-        db.send_create_signal('dynamic_intr', ['DynamicIntrKeyValue'])
+        db.send_create_signal('static_intr', ['StaticIntrKeyValue'])
 
-        # Adding unique constraint on 'DynamicIntrKeyValue', fields ['key', 'value', 'dynamic_interface']
-        db.create_unique('dynamic_interface_kv', ['key', 'value', 'dynamic_interface_id'])
+        # Adding unique constraint on 'StaticIntrKeyValue', fields ['key', 'value', 'static_interface']
+        db.create_unique('static_interface_kv', ['key', 'value', 'static_interface_id'])
 
-        # Deleting model 'DynamicInterfaceAV'
-        db.delete_table('dynamic_interface_av')
+        # Deleting model 'StaticInterfaceAV'
+        db.delete_table('static_interface_av')
 
 
     models = {
@@ -117,25 +117,6 @@ class Migration(SchemaMigration):
             'purgeable': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'soa': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['soa.SOA']", 'null': 'True', 'blank': 'True'})
         },
-        'dynamic_intr.dynamicinterface': {
-            'Meta': {'object_name': 'DynamicInterface', 'db_table': "'dynamic_interface'"},
-            'ctnr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ctnr.Ctnr']"}),
-            'dhcp_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'domain': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['domain.Domain']", 'null': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_seen': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'max_length': '11', 'blank': 'True'}),
-            'mac': ('django.db.models.fields.CharField', [], {'max_length': '19', 'blank': 'True'}),
-            'range': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['range.Range']"}),
-            'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
-            'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True', 'blank': 'True'})
-        },
-        'dynamic_intr.dynamicinterfaceav': {
-            'Meta': {'unique_together': "(('dynamicinterface', 'attribute'),)", 'object_name': 'DynamicInterfaceAV', 'db_table': "'dynamic_interface_av'"},
-            'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
-            'dynamicinterface': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dynamic_intr.DynamicInterface']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
-        },
         'eav.attribute': {
             'Meta': {'object_name': 'Attribute', 'db_table': "'attribute'"},
             'attribute_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
@@ -192,14 +173,50 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1381194830'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1381608645'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
+        },
+        'static_intr.staticinterface': {
+            'Meta': {'unique_together': "(('ip_upper', 'ip_lower', 'label', 'domain', 'mac'),)", 'object_name': 'StaticInterface', 'db_table': "'static_interface'"},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'ctnr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ctnr.Ctnr']"}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'blank': 'True'}),
+            'dhcp_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'dns_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'domain': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['domain.Domain']"}),
+            'fqdn': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '255', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip_lower': ('django.db.models.fields.BigIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'ip_str': ('django.db.models.fields.CharField', [], {'max_length': '39'}),
+            'ip_type': ('django.db.models.fields.CharField', [], {'default': "'4'", 'max_length': '1'}),
+            'ip_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '63', 'blank': 'True'}),
+            'last_seen': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'max_length': '11', 'blank': 'True'}),
+            'mac': ('cyder.core.fields.MacAddrField', [], {'blank': 'True', 'max_length': '17', 'dhcp_enabled': "'dhcp_enabled'"}),
+            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'reverse_domain': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'reverse_staticintr_set'", 'null': 'True', 'to': "orm['domain.Domain']"}),
+            'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
+            'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'}),
+            'views': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['view.View']", 'symmetrical': 'False', 'blank': 'True'}),
+            'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True', 'blank': 'True'})
+        },
+        'static_intr.staticinterfaceav': {
+            'Meta': {'unique_together': "(('static_interface', 'attribute'),)", 'object_name': 'StaticInterfaceAV', 'db_table': "'static_interface_av'"},
+            'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'static_interface': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['static_intr.StaticInterface']"}),
+            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         },
         'system.system': {
             'Meta': {'object_name': 'System', 'db_table': "'system'"},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'view.view': {
+            'Meta': {'unique_together': "(('name',),)", 'object_name': 'View', 'db_table': "'view'"},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'vlan.vlan': {
@@ -220,4 +237,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['dynamic_intr']
+    complete_apps = ['static_intr']

@@ -27,16 +27,6 @@ class SearchFieldFilter(filters.BaseFilterBackend):
 
         parent_model = queryset.model
         parent_name = parent_model.__name__.lower()
-        keyvalue_model = getattr(view, 'keyvaluemodel', None)
-
-        matching = lambda k, v: set(
-            keyvalue_model.objects.filter(
-                attribute__name__iexact=k,
-                value__iexact=v
-            ).values_list(
-                parent_name, flat=True
-            )
-        )
 
         for q in request.QUERY_PARAMS:
             p = request.QUERY_PARAMS[q]
@@ -73,7 +63,19 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 )
 
         if q_attributes:
-            if getattr(view, 'avmodel', None):
+            avmodel = getattr(view, 'avmodel', None)
+            if avmodel:
+                avmodel_entity = getattr(view, 'avmodel_entity', None)
+                matching = lambda k, v: set(
+                    avmodel.objects.filter(
+                        attribute__name__iexact=k,
+                        value__iexact=v
+                    ).values_list(
+                        avmodel_entity or parent_name,
+                        flat=True
+                    )
+                )
+
                 parent_set_list = (
                     matching(k, q_attributes[k]) for k in q_attributes)
                 parent_ids = reduce((lambda x, y: x & y), parent_set_list)

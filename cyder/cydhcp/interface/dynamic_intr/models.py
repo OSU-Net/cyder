@@ -137,8 +137,8 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 class DynamicInterfaceAV(EAVBase):
     class Meta:
         db_table = "dynamic_interface_av"
-        unique_together = ('dynamicinterface', 'attribute')
+        unique_together = ('dynamic_interface', 'attribute')
 
 
-    dynamicinterface = models.ForeignKey(DynamicInterface)
+    dynamic_interface = models.ForeignKey(DynamicInterface)
     attribute = models.ForeignKey(Attribute)
