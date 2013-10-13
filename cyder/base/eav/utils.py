@@ -46,8 +46,8 @@ def is_hex_byte_sequence(value):
 
 
 def strip_and_get_base(value):
-    if value[0:2] == '0x':
-        value = value[2:]
+    if value.startswith('0x'):
+        value = value[len('0x'):]
         base = 16
     else:
         base = 10

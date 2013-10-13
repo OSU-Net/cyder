@@ -15,8 +15,7 @@ class AttributeValueTypeField(models.CharField):
         if 'attribute_type_field' in kwargs:
             self.attribute_type_field = kwargs.pop('attribute_type_field')
         else:
-            raise Exception("You must specify the 'attribute_type_field' "
-                            "option")
+            raise Exception("The 'attribute_type_field' argument is required")
 
         kwargs['blank'] = False # always run validate()
 
@@ -56,9 +55,8 @@ class EAVValueField(models.CharField):
 
 
     def __init__(self, *args, **kwargs):
-        if 'attribute_field' in kwargs:
-            self.attribute_field = kwargs.pop('attribute_field')
-        else:
+        self.attribute_field = kwargs.pop('attribute_field', None)
+        if self.attribute_field is None:
             raise Exception("You must specify the 'attribute_field' option")
 
         super(EAVValueField, self).__init__(*args, **kwargs)
@@ -96,6 +94,7 @@ add_introspection_rules([
         {'attribute_type_field': ('attribute_type_field', {})}, # kwargs
     )
 ], [r'^cyder\.base\.eav\.fields\.AttributeValueTypeField'])
+
 
 add_introspection_rules([
     (

@@ -130,7 +130,7 @@ def _is_int(value, bits):
 ### Utility functions that raise exceptions ###
 ###############################################
 
-# These are not validators. They do raise exceptions, though.
+# These are not validators, but they do raise exceptions.
 
 
 def _uint(value, bits):
