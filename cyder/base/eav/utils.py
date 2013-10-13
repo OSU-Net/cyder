@@ -41,7 +41,7 @@ def is_hex_byte(value):
 
 
 def is_hex_byte_sequence(value):
-    return validate_list(value, _hex_byte, separator=':',
+    return validate_list(value, is_hex_byte, separator=':',
                          strip_whitespace=False)
 
 
