@@ -29,7 +29,7 @@ def validate_list(value, validator=default_validator, separator=',',
     elif length < min_length:
         if die:
             raise ValidationError("List must contain at least {0} items"
-                                  .format(length))
+                                  .format(min_length))
         else:
             return False
     else:
