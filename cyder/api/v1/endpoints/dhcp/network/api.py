@@ -22,7 +22,7 @@ class NetworkAVViewSet(api.CommonDHCPViewSet):
 
 class NetworkNestedAVSerializer(CommonAPINestedAVSerializer):
     id = serializers.HyperlinkedIdentityField(
-        view_name='api-dhcp-network_keyvalues-detail')
+        view_name='api-dhcp-network_attributes-detail')
 
     class Meta:
         model = NetworkAV
