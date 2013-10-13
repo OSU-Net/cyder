@@ -37,8 +37,8 @@ class EAVBase(models.Model, ObjectUrlMixin):
     near the assignment of `form.fields[related_type]`, or else you'll get
     strange behavior.
 
-    You should also specifiy `unique_together = (ENTITY, Attribute)` in `Meta`,
-    where ENTITY is the name of the entity field.
+    You should also specify `unique_together = (ENTITY, 'attribute')` in
+    `Meta`, where ENTITY is the name of the entity field.
 
     The child class is required to define the attribute field because it allows
     you to filter the attribute choices by adding
