@@ -33,7 +33,7 @@ class AttributeValueTypeField(models.CharField):
 
 
     def validate(self, value, model_instance):
-        attribute_type = getattr(model_instance, self.attributes_type_field)
+        attribute_type = getattr(model_instance, self.attribute_type_field)
 
         if attribute_type in (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT):
             if not value:
