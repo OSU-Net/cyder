@@ -16,4 +16,4 @@ class WorkgroupAVForm(forms.ModelForm):
 
     class Meta:
         model = WorkgroupAV
-        exclude = ("is_quoted",)
+        fields = ('workgroup', 'attribute', 'value')

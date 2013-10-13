@@ -18,4 +18,4 @@ class SOAAVForm(ModelForm):
 
     class Meta:
         model = SOAAV
-        exclude = ('serial', 'dirty',)
+        fields = ('soa', 'attribute', 'value')

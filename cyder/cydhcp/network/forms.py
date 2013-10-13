@@ -61,6 +61,7 @@ class NetworkAVForm(forms.ModelForm):
 
     class Meta:
         model = NetworkAV
+        fields = ('network', 'attribute', 'value')
 
 
 class NetworkForm_network(forms.Form):

@@ -25,3 +25,4 @@ class DynamicInterfaceAVForm(forms.ModelForm):
 
     class Meta:
         model = DynamicInterfaceAV
+        fields = ('dynamic_interface', 'attribute', 'value')

@@ -16,4 +16,4 @@ class SiteAVForm(forms.ModelForm):
 
     class Meta:
         model = SiteAV
-        exclude = ('is_quoted',)
+        fields = ('site', 'attribute', 'value')

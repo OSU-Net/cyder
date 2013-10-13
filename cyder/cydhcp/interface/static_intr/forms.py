@@ -56,6 +56,7 @@ class StaticInterfaceAVForm(forms.ModelForm):
 
     class Meta:
         model = StaticInterfaceAV
+        fields = ('static_interface', 'attribute', 'value')
 
 
 class FullStaticInterfaceForm(forms.ModelForm):

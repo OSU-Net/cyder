@@ -17,4 +17,4 @@ class VlanAVForm(forms.ModelForm):
 
     class Meta:
         model = VlanAV
-        exclude = ('is_quoted',)
+        fields = ('vlan', 'attribute', 'value')

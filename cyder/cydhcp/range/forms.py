@@ -25,3 +25,4 @@ class RangeAVForm(forms.ModelForm):
 
     class Meta:
         model = RangeAV
+        fields = ('range', 'attribute', 'value')

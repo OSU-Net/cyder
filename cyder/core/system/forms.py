@@ -27,3 +27,4 @@ class SystemAVForm(forms.ModelForm):
 
     class Meta:
         model = SystemAV
+        fields = ('system', 'attribute', 'value')

@@ -16,4 +16,4 @@ class VrfAVForm(forms.ModelForm):
 
     class Meta:
         model = VrfAV
-        exclude = ('is_quoted',)
+        fields = ('vrf', 'attribute', 'value')
