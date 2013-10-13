@@ -22,10 +22,11 @@ from cyder.base.eav.utils import strip_and_get_base, validate_list
 
 
 ### Parameter assumptions:
-###     - 'value' in all functions:
+###     * 'value' in all functions:
 ###         - basestring object
-###         - not '' or u''
 ###         - no leading or trailing spaces
+###     * 'value' in validators:
+###         - not '' or u''
 
 
 VALUE_TYPES = (
@@ -92,6 +93,9 @@ def _is_ip6(value):
 
 
 def _is_domain(value):
+    if not value:
+        return False
+
     if value[-1] == '.':
         value = value[:-1]
 
