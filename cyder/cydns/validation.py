@@ -368,6 +368,12 @@ def validate_reverse_name(reverse_name, ip_type):
         :type reverse_name: str
     """
     _name_type_check(reverse_name)
+    for suffix in ["in-addr.arpa", "ip6.arpa", "arpa"]:
+        if reverse_name == suffix:
+            return
+        elif reverse_name[-1*len(suffix):] == suffix:
+            reverse_name = reverse_name[:-1*len(suffix)]
+            reverse_name = reverse_name.rstrip('.')
 
     valid_ipv6 = "0123456789AaBbCcDdEeFf"
 

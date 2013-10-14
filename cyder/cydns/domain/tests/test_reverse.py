@@ -79,8 +79,9 @@ class ReverseDomainTests(TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d, _ = Domain.objects.get_or_create(name=name, delegated=delegated)
+        d = Domain(name=name, delegated=delegated)
         d.clean()
+        d.save()
         self.assertTrue(d.is_reverse)
         return d
 
@@ -279,12 +280,8 @@ class ReverseDomainTests(TestCase):
         rdx.save()
         rdy = self.create_domain(name='192.168', ip_type='4')
         rdy.save()
-        try:
-            self.create_domain(name='192.168', ip_type='4').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
+        self.assertRaises(ValidationError, self.create_domain,
+                          name='192.168', ip_type='4')
 
         self.create_domain(name='128', ip_type='4').save()
         rd0 = self.create_domain(name='128.193', ip_type='4')
@@ -329,39 +326,19 @@ class ReverseDomainTests(TestCase):
         osu_block = "2.6.2.1.1.0.5.F.0.0.0"
         test_dname = osu_block + ".d.e.a.d.b.e.e.f"
         boot_strap_ipv6_reverse_domain(test_dname)
-        try:
-            self.create_domain(
-                name='2.6.2.1.1.0.5.f.0.0.0', ip_type='6').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
-        try:
-            self.create_domain(name='2.6.2.1', ip_type='6').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
-        try:
-            self.create_domain(
-                name='2.6.2.1.1.0.5.F.0.0.0.d.e.a.d', ip_type='6').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
-        try:
-            self.create_domain(name='2.6.2.1.1.0.5.F.0.0.0.d.e.a.d.b.e.e.f',
-                               ip_type='6').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
-        try:
-            self.create_domain(name=test_dname, ip_type='6').save()
-        except ValidationError, e:
-            pass
-        self.assertEqual(ValidationError, type(e))
-        e = None
+
+        self.assertRaises(ValidationError, self.create_domain,
+                          name='2.6.2.1.1.0.5.f.0.0.0', ip_type='6')
+        self.assertRaises(ValidationError, self.create_domain,
+                          name='2.6.2.1', ip_type='6')
+        self.assertRaises(ValidationError, self.create_domain,
+                          name='2.6.2.1.1.0.5.F.0.0.0.d.e.a.d', ip_type='6')
+        self.assertRaises(ValidationError, self.create_domain,
+                          name='2.6.2.1.1.0.5.F.0.0.0.d.e.a.d.b.e.e.f',
+                          ip_type='6')
+        self.assertRaises(ValidationError, self.create_domain,
+                          name=test_dname, ip_type='6')
+
         # These should pass
         boot_strap_ipv6_reverse_domain('7.6.2.4')
         boot_strap_ipv6_reverse_domain('6.6.2.5.1')
@@ -373,14 +350,13 @@ class ReverseDomainTests(TestCase):
             '5.6.2.3.1.0.5.3.f.0.0.0.1.2.3.4.1.2.3.4.1.2.3.4')
 
     def test_add_reverse_domainless_ips(self):
-        self.assertRaises(ValidationError, self.add_ptr_ipv4,
-                          **{'ip':'8.8.8.8'})
+        self.assertRaises(ValidationError, self.add_ptr_ipv4, ip='8.8.8.8')
         self.assertRaises(ValidationError, self.add_ptr_ipv6,
-                          **{'ip':'2001:0db8:85a3:0000:0000:8a2e:0370:733'})
+                          ip='2001:0db8:85a3:0000:0000:8a2e:0370:733')
 
         boot_strap_ipv6_reverse_domain("2.0.0.1")
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': '2.0.0.1', 'ip_type':'6'})
+                          name='2.0.0.1', ip_type='6')
         self.add_ptr_ipv6('2001:0db8:85a3:0000:0000:8a2e:0370:733')
 
     def test_ipv6_to_longs(self):
@@ -391,20 +367,20 @@ class ReverseDomainTests(TestCase):
     def test_bad_names(self):
         name = None
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': name, 'ip_type': '6'})
+                          name=name, ip_type='6')
         name = 124
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': name, 'ip_type': '6'})
+                          name=name, ip_type='6')
         name = "0.9.0"
         ip_type = "asdf"
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': name, 'ip_type': ip_type})
+                          name=name, ip_type=ip_type)
         ip_type = None
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': name, 'ip_type': ip_type})
+                          name=name, ip_type=ip_type)
         ip_type = 1234
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': name, 'ip_type': ip_type})
+                          name=name, ip_type=ip_type)
 
     def test_add_remove_reverse_ipv6_domains(self):
         osu_block = "2620:105:F000"
@@ -624,4 +600,4 @@ class ReverseDomainTests(TestCase):
         dom.save()
 
         self.assertRaises(ValidationError, self.create_domain,
-                          **{'name': '3.4', 'delegated': False})
+                          name='3.4', delegated=False)
