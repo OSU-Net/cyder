@@ -1,5 +1,5 @@
 from cyder.api.v1.endpoints.dns.tests import DNSAPITests
-from cyder.api.v1.tests.base import APIKVTestMixin
+from cyder.api.v1.tests.base import APIKVTestMixin, build_domain
 from cyder.cydns.soa.models import SOA
 
 
@@ -14,6 +14,7 @@ class SOAAPI_Test(DNSAPITests, APIKVTestMixin):
             'retry': 420,
             'refresh': 420,
             'description': 'Test SOA',
+            'root_domain': build_domain("soaapi_test", self.domain),
         }
         obj, _ = SOA.objects.get_or_create(**data)
         return obj

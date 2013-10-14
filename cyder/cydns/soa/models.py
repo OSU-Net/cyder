@@ -138,9 +138,9 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
         return reverse('build-debug', args=[self.pk])
 
     def delete(self, *args, **kwargs):
-        if self.domain_set.exists():
+        if self.domain_set.exclude(pk=self.root_domain.pk).exists():
             raise ValidationError(
-                "Domains exist in this SOA's zone. Delete "
+                "Child domains exist in this SOA's zone. Delete "
                 "those domains or remove them from this zone before "
                 "deleting this SOA.")
         super(SOA, self).delete(*args, **kwargs)
