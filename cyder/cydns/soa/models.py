@@ -143,6 +143,8 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
                 "Child domains exist in this SOA's zone. Delete "
                 "those domains or remove them from this zone before "
                 "deleting this SOA.")
+        self.root_domain.soa = None
+        self.root_domain.save(override_soa=True)
         super(SOA, self).delete(*args, **kwargs)
 
     def has_record_set(self, view=None, exclude_ns=False):
