@@ -1,20 +1,19 @@
-from cyder.api.v1.endpoints.dhcp.tests import DHCPAPITests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
+from cyder.api.v1.tests.base import APITests
 
 
-class StaticInterfaceBase(DHCPAPITests):
+class StaticInterfaceBase(APITests):
     model = StaticInterface
-    urlname = "static_interface"
     keyvalue_attr = "staticintrkeyvalue_set"
 
-    def __init__(self, *args, **kwargs):
+    def setUp(self):
         Domain.objects.get_or_create(name='arpa')
         self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.system, _ = System.objects.get_or_create(name="TestSystem")
-        super(StaticInterfaceBase, self).__init__(self, *args, **kwargs)
+        super(StaticInterfaceBase, self).setUp()
 
     def create_data(self):
         return {
@@ -31,8 +30,10 @@ class StaticInterfaceBase(DHCPAPITests):
 
 
 class StaticInterfaceV4API_Test(StaticInterfaceBase):
-    def __init__(self, *args, **kwargs):
-        super(StaticInterfaceV4API_Test, self).__init__(self, *args, **kwargs)
+    __test__ = True
+
+    def setUp(self):
+        super(StaticInterfaceV4API_Test, self).setUp()
         Domain.objects.get_or_create(name='in-addr.arpa')
         Domain.objects.get_or_create(name='11.in-addr.arpa')
 
@@ -51,8 +52,10 @@ class StaticInterfaceV4API_Test(StaticInterfaceBase):
 
 
 class StaticInterfaceV6API_Test(StaticInterfaceBase):
-    def __init__(self, *args, **kwargs):
-        super(StaticInterfaceV6API_Test, self).__init__(self, *args, **kwargs)
+    __test__ = True
+
+    def setUp(self):
+        super(StaticInterfaceV6API_Test, self).setUp()
         Domain.objects.get_or_create(name='ip6.arpa')
         Domain.objects.get_or_create(name='2.ip6.arpa')
 

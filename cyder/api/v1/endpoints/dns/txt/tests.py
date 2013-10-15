@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.txt.models import TXT
+from cyder.api.v1.tests.base import APITests
 
 
-class TXTAPI_Test(DNSAPITests):
+class TXTAPI_Test(APITests):
+    __test__ = True
     model = TXT
 
     def create_data(self):

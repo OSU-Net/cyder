@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dhcp.tests import DHCPAPITests
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.api.v1.tests.base import APITests
 
 
-class WorkgroupAPI_Test(DHCPAPITests):
+class WorkgroupAPI_Test(APITests):
+    __test__ = True
     model = Workgroup
 
     def create_data(self):

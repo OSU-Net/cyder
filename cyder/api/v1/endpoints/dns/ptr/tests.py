@@ -1,9 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
+from cyder.api.v1.tests.base import APITests
 
 
-class PTRBase(DNSAPITests):
+class PTRBase(APITests):
     model = PTR
 
     def create_data(self):
@@ -18,7 +18,7 @@ class PTRBase(DNSAPITests):
 
 
 class PTRv4API_Test(PTRBase):
-    model = PTR
+    __test__ = True
 
     def create_data(self):
         data = super(PTRv4API_Test, self).create_data()
@@ -35,7 +35,7 @@ class PTRv4API_Test(PTRBase):
 
 
 class PTRv6API_Test(PTRBase):
-    model = PTR
+    __test__ = True
 
     def create_data(self):
         data = super(PTRv6API_Test, self).create_data()

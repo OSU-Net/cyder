@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.sshfp.models import SSHFP
+from cyder.api.v1.tests.base import APITests
 
 
-class SSHFPAPI_Test(DNSAPITests):
+class SSHFPAPI_Test(APITests):
+    __test__ = True
     model = SSHFP
 
     def create_data(self):
