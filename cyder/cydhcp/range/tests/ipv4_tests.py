@@ -12,7 +12,6 @@ from cyder.core.ctnr.models import Ctnr
 class V4RangeTests(TestCase):
 
     def setUp(self):
-        Domain.objects.all().delete()
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
         self.d = Domain(name="com")
