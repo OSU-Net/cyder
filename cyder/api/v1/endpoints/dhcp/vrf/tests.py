@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dhcp.tests import DHCPAPITests
 from cyder.cydhcp.vrf.models import Vrf
+from cyder.api.v1.tests.base import APITests
 
 
-class VrfAPI_Test(DHCPAPITests):
+class VrfAPI_Test(APITests):
+    __test__ = True
     model = Vrf
 
     def create_data(self):

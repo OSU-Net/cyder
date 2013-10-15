@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.mx.models import MX
+from cyder.api.v1.tests.base import APITests
 
 
-class MXAPI_Test(DNSAPITests):
+class MXAPI_Test(APITests):
+    __test__ = True
     model = MX
 
     def create_data(self):

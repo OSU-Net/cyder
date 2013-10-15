@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dhcp.tests import DHCPAPITests
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.api.v1.tests.base import APITests
 
 
-class VlanAPI_Test(DHCPAPITests):
+class VlanAPI_Test(APITests):
+    __test__ = True
     model = Vlan
 
     def create_data(self):

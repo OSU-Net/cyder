@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.srv.models import SRV
+from cyder.api.v1.tests.base import APITests
 
 
-class SRVAPI_Test(DNSAPITests):
+class SRVAPI_Test(APITests):
+    __test__ = True
     model = SRV
 
     def create_data(self):

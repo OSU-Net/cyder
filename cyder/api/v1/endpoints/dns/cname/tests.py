@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.cname.models import CNAME
+from cyder.api.v1.tests.base import APITests
 
 
-class CNAMEAPI_Test(DNSAPITests):
+class CNAMEAPI_Test(APITests):
+    __test__ = True
     model = CNAME
 
     def create_data(self):

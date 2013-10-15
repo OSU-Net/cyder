@@ -1,11 +1,10 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.address_record.models import AddressRecord
+from cyder.api.v1.tests.base import APITests
 
 
-class AddressRecordBase(DNSAPITests):
+class AddressRecordBase(APITests):
     model = AddressRecord
     root = "dns"
-    urlname = "address_record"
 
     def create_data(self, label):
         return {
@@ -17,6 +16,8 @@ class AddressRecordBase(DNSAPITests):
 
 
 class AddressRecordv4API_Test(AddressRecordBase):
+    __test__ = True
+
     def create_data(self):
         data = super(AddressRecordv4API_Test, self).create_data('foo')
         data.update({
@@ -29,7 +30,7 @@ class AddressRecordv4API_Test(AddressRecordBase):
 
 
 class AddressRecordv6API_Test(AddressRecordBase):
-    model = AddressRecord
+    __test__ = True
 
     def create_data(self):
         data = super(AddressRecordv6API_Test, self).create_data('bar')

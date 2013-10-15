@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth.models import User
 from django.test.client import Client
+from django.test import TestCase
 
 from cyder.api.authtoken.models import Token
 from cyder.cydns.domain.models import Domain
@@ -35,7 +36,7 @@ def build_domain(label, domain_obj):
 
 class APIKVTestMixin(object):
     """Mixin to test endpoints with key-value support."""
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         if not hasattr(self, "keyvalue_attr"):
             self.keyvalue_attr = self.model.__name__.lower() + "keyvalue_set"
 
@@ -55,7 +56,7 @@ class APIKVTestMixin(object):
         self.model.objects.filter(id=obj.id).delete()
 
 
-class APITests(object):
+class APITests(TestCase):
     """Base class for API Tests. This contains a lot of helpful methods,
     the core tests to run on every object, and the code that starts off
     building the test data.
@@ -91,6 +92,7 @@ class APITests(object):
     inherit from this class and create basic test data, while allowing the
     classes that inherit from it to define the case-specific data.
     """
+    __test__ = False
     fixtures = ['test_users/test_users.json']
 
     client = Client()
@@ -99,13 +101,12 @@ class APITests(object):
     f_object_list_url = "/api/v{0}/{1}/{2}/"
     f_object_url = "/api/v{0}/{1}/{2}/{3}/"
 
-    def __init__(self, *args, **kwargs):
-        if hasattr(self, 'urlname'):
-            urlname = getattr(self, 'urlname')
+    def setUp(self):
+        if hasattr(self, "url"):
+            url = self.url
         else:
-            urlname = str(self.model.__name__).lower()
-
-        root = getattr(self, 'root')
+            url = self.model.get_list_url()
+        root, urlname = tuple(url.strip("/").split("/"))
 
         self.domain, self.view = build_sample_domain()
         self.token = Token.objects.create(
