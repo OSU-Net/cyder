@@ -39,6 +39,15 @@ class System(BaseModel, ObjectUrlMixin):
         ]
         return data
 
+    def delete(self):
+        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
+        for interface in DynamicInterface.objects.filter(system=self):
+            interface.delete(**{'delete_system': False})
+        StaticInterface = get_model('static_intr', 'staticinterface')
+        for interface in StaticInterface.objects.filter(system=self):
+            interface.delete(**{'delete_system': False})
+        super(System, self).delete()
+
     @staticmethod
     def eg_metadata():
         """EditableGrid metadata."""

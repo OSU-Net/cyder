@@ -2,7 +2,7 @@ import ipaddr
 
 from django import forms
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 
 
 from cyder.base.utils import tablefy, qd_to_py_dict
@@ -16,7 +16,11 @@ from cyder.cydhcp.validation import MAC_ERR
 
 
 def system_detail(request, pk):
-    system = get_object_or_404(System, pk=pk)
+    try:
+        system = System.objects.get(id=pk)
+    except:
+        return redirect(reverse('system'))
+
     attrs = system.systemkeyvalue_set.all()
     dynamic = DynamicInterface.objects.filter(system=system)
     related_systems = set()
