@@ -294,11 +294,11 @@ DHCP_STAGE_DIR = '/tmp/dhcp/stage'
 DHCP_PROD_DIR = '/tmp/dhcp/prod'
 
 # DHCP_TARGET_FILE: The configuration file that will be generated
-DHCP_TARGET_FILE = 'dhcpd.conf'
+DHCP_TARGET_FILE = 'dhcpd.conf.data'
 
 # DHCP_CHECK_FILE: The conf file whose syntax will be checked (None means
 # don't check any file)
-DHCP_CHECK_FILE = DHCP_TARGET_FILE
+DHCP_CHECK_FILE = None
 
 DHCP_REPO_DIR = DHCP_STAGE_DIR
 
