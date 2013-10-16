@@ -1,7 +1,6 @@
 import json
 from django.contrib.auth.models import User
 
-from cyder.api.v1.endpoints.core.tests import CoreAPITests
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -10,13 +9,15 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.domain.models import Domain
+from cyder.api.v1.tests.base import APITests
 
 
-class CtnrAPI_Test(CoreAPITests):
+class CtnrAPI_Test(APITests):
+    __test__ = True
     model = Ctnr
 
-    def __init__(self):
-        super(CoreAPITests, self).__init__()
+    def setUp(self):
+        super(CtnrAPI_Test, self).setUp()
         user_data = {
             'username': 'testuser',
         }

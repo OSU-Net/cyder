@@ -1,9 +1,10 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.api.v1.tests.base import APIKVTestMixin, build_domain
 from cyder.cydns.soa.models import SOA
+from cyder.api.v1.tests.base import APITests
 
 
-class SOAAPI_Test(DNSAPITests, APIKVTestMixin):
+class SOAAPI_Test(APITests, APIKVTestMixin):
+    __test__ = True
     model = SOA
     keyvalue_attr = "keyvalue_set"
 

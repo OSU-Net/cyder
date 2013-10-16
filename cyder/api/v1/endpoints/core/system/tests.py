@@ -1,9 +1,9 @@
-from cyder.api.v1.endpoints.core.tests import CoreAPITests
-from cyder.api.v1.tests.base import APIKVTestMixin
+from cyder.api.v1.tests.base import APIKVTestMixin, APITests
 from cyder.core.system.models import System
 
 
-class SystemAPI_Test(CoreAPITests, APIKVTestMixin):
+class SystemAPI_Test(APITests, APIKVTestMixin):
+    __test__ = True
     model = System
     keyvalue_attr = "systemkeyvalue_set"
 

@@ -1,18 +1,18 @@
-from cyder.api.v1.endpoints.dhcp.tests import DHCPAPITests
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
+from cyder.api.v1.tests.base import APITests
 
 
-class NetworkBase(DHCPAPITests):
+class NetworkBase(APITests):
     model = Network
 
-    def __init__(self, *args, **kwargs):
+    def setUp(self):
         self.site = Site.objects.get_or_create(name='site')[0]
         self.vlan = Vlan.objects.get_or_create(name='vlan', number=420)[0]
         self.vrf = Vrf.objects.get_or_create(name='vrf')[0]
-        super(NetworkBase, self).__init__(*args, **kwargs)
+        super(NetworkBase, self).setUp()
 
     def create_data(self):
         return {
@@ -23,6 +23,8 @@ class NetworkBase(DHCPAPITests):
 
 
 class NetworkV4API_Test(NetworkBase):
+    __test__ = True
+
     def create_data(self):
         data = super(NetworkV4API_Test, self).create_data()
         data.update({
@@ -33,6 +35,8 @@ class NetworkV4API_Test(NetworkBase):
 
 
 class NetworkV6API_Test(NetworkBase):
+    __test__ = True
+
     def create_data(self):
         data = super(NetworkV6API_Test, self).create_data()
         data.update({

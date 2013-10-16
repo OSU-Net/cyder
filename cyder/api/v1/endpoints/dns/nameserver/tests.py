@@ -1,8 +1,9 @@
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
 from cyder.cydns.nameserver.models import Nameserver
+from cyder.api.v1.tests.base import APITests
 
 
-class NameserverAPI_Test(DNSAPITests):
+class NameserverAPI_Test(APITests):
+    __test__ = True
     model = Nameserver
 
     def create_data(self):

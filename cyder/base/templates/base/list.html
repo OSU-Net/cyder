@@ -45,7 +45,7 @@
   {% endif %}
 
   {% if object_table %}
-    {{ render_table(request, object_table) }}
+    {{ render_table(request, object_table, obj_type) }}
   {% elif page_obj %}
     {% include "base/includes/object_table.html" %}
   {% endif %}

@@ -1,10 +1,11 @@
+from cyder.cydns.domain.models import Domain
+from cyder.api.v1.tests.base import APITests
+
 import json
 
-from cyder.api.v1.endpoints.dns.tests import DNSAPITests
-from cyder.cydns.domain.models import Domain
 
-
-class DomainAPI_Test(DNSAPITests):
+class DomainAPI_Test(APITests):
+    __test__ = True
     model = Domain
 
     def create_data(self):
