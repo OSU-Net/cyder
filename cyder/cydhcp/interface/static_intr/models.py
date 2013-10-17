@@ -202,10 +202,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         build_str += '\t}\n'
         return build_str
 
-    def build_subclass(self, contained_range, allowed):
-        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed.name, contained_range.start_str, contained_range.end_str,
-            format_mac(self.mac))
+    def build_subclass(self, classname):
+        return 'subclass "{0}" 1:{1};\n'.format(
+            classname, format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)

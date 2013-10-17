@@ -99,10 +99,9 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         build_str += "\t}\n"
         return build_str
 
-    def build_subclass(self, allowed):
-        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed, self.range.start_str, self.range.end_str,
-            format_mac(self.mac))
+    def build_subclass(self, classname):
+        return 'subclass "{0}" 1:{1};\n'.format(
+            classname, format_mac(self.mac))
 
     def get_related_systems(self):
         related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
