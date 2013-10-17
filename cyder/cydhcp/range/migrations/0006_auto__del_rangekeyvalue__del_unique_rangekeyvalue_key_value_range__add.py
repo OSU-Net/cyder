@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('range_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('range', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['range.Range'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['range.Range'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('range', ['RangeAV'])
 
-        # Adding unique constraint on 'RangeAV', fields ['range', 'attribute']
-        db.create_unique('range_av', ['range_id', 'attribute_id'])
+        # Adding unique constraint on 'RangeAV', fields ['entity', 'attribute']
+        db.create_unique('range_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'RangeAV', fields ['range', 'attribute']
-        db.delete_unique('range_av', ['range_id', 'attribute_id'])
+        # Removing unique constraint on 'RangeAV', fields ['entity', 'attribute']
+        db.delete_unique('range_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'RangeKeyValue'
         db.create_table('range_kv', (
@@ -91,10 +91,10 @@ class Migration(SchemaMigration):
             'start_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'})
         },
         'range.rangeav': {
-            'Meta': {'unique_together': "(('range', 'attribute'),)", 'object_name': 'RangeAV', 'db_table': "'range_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'RangeAV', 'db_table': "'range_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['range.Range']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'range': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['range.Range']"}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         },
         'site.site': {

@@ -15,18 +15,18 @@ class Migration(SchemaMigration):
         db.create_table('vrf_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('vrf', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['vrf.Vrf'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['vrf.Vrf'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('vrf', ['VrfAV'])
 
-        # Adding unique constraint on 'VrfAV', fields ['vrf', 'attribute']
-        db.create_unique('vrf_av', ['vrf_id', 'attribute_id'])
+        # Adding unique constraint on 'VrfAV', fields ['entity', 'attribute']
+        db.create_unique('vrf_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'VrfAV', fields ['vrf', 'attribute']
-        db.delete_unique('vrf_av', ['vrf_id', 'attribute_id'])
+        # Removing unique constraint on 'VrfAV', fields ['entity', 'attribute']
+        db.delete_unique('vrf_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'VrfKeyValue'
         db.create_table('vrf_kv', (
@@ -56,11 +56,11 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'})
         },
         'vrf.vrfav': {
-            'Meta': {'unique_together': "(('vrf', 'attribute'),)", 'object_name': 'VrfAV', 'db_table': "'vrf_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'VrfAV', 'db_table': "'vrf_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vrf.Vrf']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'}),
-            'vrf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vrf.Vrf']"})
+            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         }
     }
 

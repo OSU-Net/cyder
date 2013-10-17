@@ -11,10 +11,10 @@ class VlanForm(forms.ModelForm):
 
 
 class VlanAVForm(forms.ModelForm):
-    vlan = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
             queryset=Vlan.objects.all(),
             widget=forms.HiddenInput())
 
     class Meta:
         model = VlanAV
-        fields = ('vlan', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

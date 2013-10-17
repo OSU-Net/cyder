@@ -361,11 +361,10 @@ def find_free_ip(start, end, ip_type='4'):
 
 
 class RangeAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'range_av'
-        unique_together = ('range', 'attribute')
 
-    range = models.ForeignKey(Range)
+    entity = models.ForeignKey(Range)
     attribute = models.ForeignKey(Attribute)
 
 

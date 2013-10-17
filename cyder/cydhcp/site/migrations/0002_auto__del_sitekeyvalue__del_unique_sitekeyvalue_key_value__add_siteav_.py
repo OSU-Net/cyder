@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('site_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['site.Site'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['site.Site'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('site', ['SiteAV'])
 
-        # Adding unique constraint on 'SiteAV', fields ['site', 'attribute']
-        db.create_unique('site_av', ['site_id', 'attribute_id'])
+        # Adding unique constraint on 'SiteAV', fields ['entity', 'attribute']
+        db.create_unique('site_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'SiteAV', fields ['site', 'attribute']
-        db.delete_unique('site_av', ['site_id', 'attribute_id'])
+        # Removing unique constraint on 'SiteAV', fields ['entity', 'attribute']
+        db.delete_unique('site_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'SiteKeyValue'
         db.create_table('site_kv', (
@@ -63,10 +63,10 @@ class Migration(SchemaMigration):
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['site.Site']", 'null': 'True', 'blank': 'True'})
         },
         'site.siteav': {
-            'Meta': {'unique_together': "(('site', 'attribute'),)", 'object_name': 'SiteAV', 'db_table': "'site_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'SiteAV', 'db_table': "'site_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['site.Site']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['site.Site']"}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         }
     }

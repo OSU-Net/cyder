@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('vlan_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('vlan', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['vlan.Vlan'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['vlan.Vlan'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('vlan', ['VlanAV'])
 
-        # Adding unique constraint on 'VlanAV', fields ['vlan', 'attribute']
-        db.create_unique('vlan_av', ['vlan_id', 'attribute_id'])
+        # Adding unique constraint on 'VlanAV', fields ['entity', 'attribute']
+        db.create_unique('vlan_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'VlanAV', fields ['vlan', 'attribute']
-        db.delete_unique('vlan_av', ['vlan_id', 'attribute_id'])
+        # Removing unique constraint on 'VlanAV', fields ['entity', 'attribute']
+        db.delete_unique('vlan_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'VlanKeyValue'
         db.create_table('vlan_kv', (
@@ -63,11 +63,11 @@ class Migration(SchemaMigration):
             'number': ('django.db.models.fields.PositiveIntegerField', [], {})
         },
         'vlan.vlanav': {
-            'Meta': {'unique_together': "(('vlan', 'attribute'),)", 'object_name': 'VlanAV', 'db_table': "'vlan_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'VlanAV', 'db_table': "'vlan_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vlan.Vlan']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'}),
-            'vlan': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vlan.Vlan']"})
+            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         }
     }
 

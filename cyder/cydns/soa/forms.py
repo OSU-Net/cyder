@@ -12,10 +12,10 @@ class SOAForm(ModelForm):
 
 
 class SOAAVForm(ModelForm):
-    soa = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=SOA.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = SOAAV
-        fields = ('soa', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

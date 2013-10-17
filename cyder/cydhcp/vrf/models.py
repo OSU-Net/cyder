@@ -75,11 +75,10 @@ class Vrf(models.Model, ObjectUrlMixin):
 
 
 class VrfAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'vrf_av'
-        unique_together = ('vrf', 'attribute')
 
 
-    vrf = models.ForeignKey(Vrf)
+    entity = models.ForeignKey(Vrf)
     attribute = models.ForeignKey(Attribute,
             limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})

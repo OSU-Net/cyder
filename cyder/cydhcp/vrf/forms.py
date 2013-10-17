@@ -10,10 +10,10 @@ class VrfForm(forms.ModelForm, UsabilityFormMixin):
 
 
 class VrfAVForm(forms.ModelForm):
-    vrf = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=Vrf.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = VrfAV
-        fields = ('vrf', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('static_interface_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('static_interface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['static_intr.StaticInterface'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['static_intr.StaticInterface'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('static_intr', ['StaticInterfaceAV'])
 
-        # Adding unique constraint on 'StaticInterfaceAV', fields ['static_interface', 'attribute']
-        db.create_unique('static_interface_av', ['static_interface_id', 'attribute_id'])
+        # Adding unique constraint on 'StaticInterfaceAV', fields ['entity', 'attribute']
+        db.create_unique('static_interface_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'StaticInterfaceAV', fields ['static_interface', 'attribute']
-        db.delete_unique('static_interface_av', ['static_interface_id', 'attribute_id'])
+        # Removing unique constraint on 'StaticInterfaceAV', fields ['entity', 'attribute']
+        db.delete_unique('static_interface_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'StaticIntrKeyValue'
         db.create_table('static_interface_kv', (
@@ -173,7 +173,7 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1381608645'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382040886'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'static_intr.staticinterface': {
@@ -201,10 +201,10 @@ class Migration(SchemaMigration):
             'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True', 'blank': 'True'})
         },
         'static_intr.staticinterfaceav': {
-            'Meta': {'unique_together': "(('static_interface', 'attribute'),)", 'object_name': 'StaticInterfaceAV', 'db_table': "'static_interface_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'StaticInterfaceAV', 'db_table': "'static_interface_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['static_intr.StaticInterface']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'static_interface': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['static_intr.StaticInterface']"}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         },
         'system.system': {

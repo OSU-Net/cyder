@@ -21,10 +21,10 @@ class ExtendedSystemForm(forms.ModelForm, UsabilityFormMixin):
 
 
 class SystemAVForm(forms.ModelForm):
-    system = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=System.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = SystemAV
-        fields = ('system', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

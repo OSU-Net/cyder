@@ -10,10 +10,10 @@ class WorkgroupForm(forms.ModelForm):
 
 
 class WorkgroupAVForm(forms.ModelForm):
-    workgroup = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=Workgroup.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = WorkgroupAV
-        fields = ('workgroup', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

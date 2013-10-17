@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('network_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('network', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['network.Network'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['network.Network'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('network', ['NetworkAV'])
 
-        # Adding unique constraint on 'NetworkAV', fields ['network', 'attribute']
-        db.create_unique('network_av', ['network_id', 'attribute_id'])
+        # Adding unique constraint on 'NetworkAV', fields ['entity', 'attribute']
+        db.create_unique('network_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'NetworkAV', fields ['network', 'attribute']
-        db.delete_unique('network_av', ['network_id', 'attribute_id'])
+        # Removing unique constraint on 'NetworkAV', fields ['entity', 'attribute']
+        db.delete_unique('network_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'NetworkKeyValue'
         db.create_table('network_kv', (
@@ -74,10 +74,10 @@ class Migration(SchemaMigration):
             'vrf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['vrf.Vrf']", 'null': 'True', 'blank': 'True'})
         },
         'network.networkav': {
-            'Meta': {'unique_together': "(('network', 'attribute'),)", 'object_name': 'NetworkAV', 'db_table': "'network_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'NetworkAV', 'db_table': "'network_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['network.Network']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'network': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['network.Network']"}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         },
         'site.site': {

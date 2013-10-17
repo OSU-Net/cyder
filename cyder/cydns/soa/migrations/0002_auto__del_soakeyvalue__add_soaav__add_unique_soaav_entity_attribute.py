@@ -15,13 +15,19 @@ class Migration(SchemaMigration):
         db.create_table('soa_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('soa', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['soa.SOA'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['soa.SOA'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('soa', ['SOAAV'])
 
+        # Adding unique constraint on 'SOAAV', fields ['entity', 'attribute']
+        db.create_unique('soa_av', ['entity_id', 'attribute_id'])
+
 
     def backwards(self, orm):
+        # Removing unique constraint on 'SOAAV', fields ['entity', 'attribute']
+        db.delete_unique('soa_av', ['entity_id', 'attribute_id'])
+
         # Adding model 'SOAKeyValue'
         db.create_table('soa_kv', (
             ('soa', self.gf('django.db.models.fields.related.ForeignKey')(related_name='keyvalue_set', to=orm['soa.SOA'])),
@@ -56,14 +62,14 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1381194850'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382040915'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'soa.soaav': {
-            'Meta': {'object_name': 'SOAAV', 'db_table': "'soa_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'SOAAV', 'db_table': "'soa_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['soa.SOA']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'soa': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['soa.SOA']"}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         }
     }

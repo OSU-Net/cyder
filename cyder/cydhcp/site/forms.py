@@ -10,10 +10,10 @@ class SiteForm(forms.ModelForm):
 
 
 class SiteAVForm(forms.ModelForm):
-    site = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = SiteAV
-        fields = ('site', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('dynamic_interface_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('dynamic_interface', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('dynamic_intr', ['DynamicInterfaceAV'])
 
-        # Adding unique constraint on 'DynamicInterfaceAV', fields ['dynamic_interface', 'attribute']
-        db.create_unique('dynamic_interface_av', ['dynamic_interface_id', 'attribute_id'])
+        # Adding unique constraint on 'DynamicInterfaceAV', fields ['entity', 'attribute']
+        db.create_unique('dynamic_interface_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'DynamicInterfaceAV', fields ['dynamic_interface', 'attribute']
-        db.delete_unique('dynamic_interface_av', ['dynamic_interface_id', 'attribute_id'])
+        # Removing unique constraint on 'DynamicInterfaceAV', fields ['entity', 'attribute']
+        db.delete_unique('dynamic_interface_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'DynamicIntrKeyValue'
         db.create_table('dynamic_interface_kv', (
@@ -130,9 +130,9 @@ class Migration(SchemaMigration):
             'workgroup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['workgroup.Workgroup']", 'null': 'True', 'blank': 'True'})
         },
         'dynamic_intr.dynamicinterfaceav': {
-            'Meta': {'unique_together': "(('dynamic_interface', 'attribute'),)", 'object_name': 'DynamicInterfaceAV', 'db_table': "'dynamic_interface_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'DynamicInterfaceAV', 'db_table': "'dynamic_interface_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
-            'dynamic_interface': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dynamic_intr.DynamicInterface']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dynamic_intr.DynamicInterface']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         },
@@ -192,7 +192,7 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1381608666'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382040893'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'system.system': {

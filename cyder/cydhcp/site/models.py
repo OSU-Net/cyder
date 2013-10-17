@@ -108,11 +108,10 @@ class Site(models.Model, ObjectUrlMixin):
 
 
 class SiteAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'site_av'
-        unique_together = ('site', 'attribute')
 
 
-    site = models.ForeignKey(Site)
+    entity = models.ForeignKey(Site)
     attribute = models.ForeignKey(Attribute,
             limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})

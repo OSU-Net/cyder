@@ -80,10 +80,9 @@ class Workgroup(models.Model, ObjectUrlMixin):
 
 
 class WorkgroupAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'workgroup_av'
-        unique_together = ('workgroup', 'attribute')
 
 
-    workgroup = models.ForeignKey(Workgroup)
+    entity = models.ForeignKey(Workgroup)
     attribute = models.ForeignKey(Attribute)

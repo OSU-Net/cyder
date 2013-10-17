@@ -19,10 +19,10 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
 
 
 class DynamicInterfaceAVForm(forms.ModelForm):
-    dynamic_interface = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=DynamicInterface.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = DynamicInterfaceAV
-        fields = ('dynamic_interface', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

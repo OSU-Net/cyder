@@ -55,13 +55,13 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
 
 
 class NetworkAVForm(forms.ModelForm):
-    network = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=Network.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = NetworkAV
-        fields = ('network', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')
 
 
 class NetworkForm_network(forms.Form):

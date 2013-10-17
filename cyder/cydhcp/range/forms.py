@@ -19,10 +19,10 @@ class RangeForm(forms.ModelForm, UsabilityFormMixin):
 
 
 class RangeAVForm(forms.ModelForm):
-    range = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=Range.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = RangeAV
-        fields = ('range', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')

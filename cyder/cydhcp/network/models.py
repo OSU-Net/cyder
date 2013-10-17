@@ -265,10 +265,9 @@ class Network(models.Model, ObjectUrlMixin):
 
 
 class NetworkAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'network_av'
-        unique_together = ('network', 'attribute')
 
 
-    network = models.ForeignKey(Network)
+    entity = models.ForeignKey(Network)
     attribute = models.ForeignKey(Attribute)

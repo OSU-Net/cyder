@@ -50,13 +50,13 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
 
 
 class StaticInterfaceAVForm(forms.ModelForm):
-    static_interface = forms.ModelChoiceField(
+    entity = forms.ModelChoiceField(
         queryset=StaticInterface.objects.all(),
         widget=forms.HiddenInput())
 
     class Meta:
         model = StaticInterfaceAV
-        fields = ('static_interface', 'attribute', 'value')
+        fields = ('entity', 'attribute', 'value')
 
 
 class FullStaticInterfaceForm(forms.ModelForm):

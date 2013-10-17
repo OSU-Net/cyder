@@ -274,10 +274,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
 
 class StaticInterfaceAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'static_interface_av'
-        unique_together = ('static_interface', 'attribute')
 
 
-    static_interface = models.ForeignKey(StaticInterface)
+    entity = models.ForeignKey(StaticInterface)
     attribute = models.ForeignKey(Attribute)

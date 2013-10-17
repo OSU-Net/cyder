@@ -18,18 +18,18 @@ class Migration(SchemaMigration):
         db.create_table('system_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
-            ('system', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['system.System'])),
+            ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['system.System'])),
             ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('system', ['SystemAV'])
 
-        # Adding unique constraint on 'SystemAV', fields ['system', 'attribute']
-        db.create_unique('system_av', ['system_id', 'attribute_id'])
+        # Adding unique constraint on 'SystemAV', fields ['entity', 'attribute']
+        db.create_unique('system_av', ['entity_id', 'attribute_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'SystemAV', fields ['system', 'attribute']
-        db.delete_unique('system_av', ['system_id', 'attribute_id'])
+        # Removing unique constraint on 'SystemAV', fields ['entity', 'attribute']
+        db.delete_unique('system_av', ['entity_id', 'attribute_id'])
 
         # Adding model 'SystemKeyValue'
         db.create_table('system_kv', (
@@ -64,10 +64,10 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'system.systemav': {
-            'Meta': {'unique_together': "(('system', 'attribute'),)", 'object_name': 'SystemAV', 'db_table': "'system_av'"},
+            'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'SystemAV', 'db_table': "'system_av'"},
             'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'system': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['system.System']"}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
         }
     }

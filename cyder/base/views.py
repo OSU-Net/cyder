@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponse
 from django.forms import ValidationError, ModelChoiceField, HiddenInput
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
-from django.db.models import get_model
+from django.db.models import get_model, Field
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
@@ -282,6 +282,17 @@ def get_update_form(request, get_klasses_fn):
         else:
             #  Get form to create a new object and prepopulate
             if related_type and related_pk:
+
+                # This try-except is faster than
+                # `'entity' in ...get_all_field_names()`.
+                try:
+                    # test if the model has an 'entity' field
+                    FormKlass._meta.model._meta.get_field('entity')
+                    # autofill the 'entity' field
+                    kwargs['entity'] = related_pk
+                except: # no 'entity' field
+                    pass
+
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
 

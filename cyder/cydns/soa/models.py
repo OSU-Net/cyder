@@ -195,10 +195,10 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
 
 class SOAAV(EAVBase):
-    class Meta:
+    class Meta(EAVBase.Meta):
         db_table = 'soa_av'
 
 
-    soa = models.ForeignKey(SOA)
+    entity = models.ForeignKey(SOA)
     attribute = models.ForeignKey(Attribute,
             limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})
