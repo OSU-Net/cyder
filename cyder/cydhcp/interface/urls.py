@@ -1,8 +1,8 @@
-from django.conf.urls.defaults import patterns, include
+from django.conf.urls.defaults import patterns, url
 
+from cyder.cydhcp.interface.views import interface_delete
 
 urlpatterns = patterns(
     '',
-    (r'^static/', include('cyder.cydhcp.interface.static_intr.urls')),
-    (r'^dynamic/', include('cyder.cydhcp.interface.dynamic_intr.urls')),
+    url(r'^interface_delete/', interface_delete, name='interface-delete'),
 )

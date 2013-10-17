@@ -102,13 +102,11 @@ def cydns_view(request, pk=None):
 
         except (ValidationError, ValueError), e:
             form = _revert(domain, request.POST, form, FormKlass)
-            form._errors = ErrorDict()
             if hasattr(e, 'messages'):
                 e = e.messages
 
-            if '__all__' in form._errors:
-                form._errors['__all__'] += ErrorList(e)
-            else:
+            if not form._errors:
+                form._errors = ErrorDict()
                 form._errors['__all__'] = ErrorList(e)
 
     object_list = _filter(request, Klass)

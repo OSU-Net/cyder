@@ -10,7 +10,6 @@ from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -88,7 +87,7 @@ class Network(models.Model, ObjectUrlMixin):
     def __contains__(self, other):
         if self.ip_type is not other.ip_type:
             raise Exception("__contains__ is not defined for "
-                            "ip type {0} and ip type {1}".format(
+                            "IPv{0} and IPv{1}".format(
                             self.ip_type, other.ip_type))
         self.update_network()
         if type(other) is type(self):
@@ -99,9 +98,6 @@ class Network(models.Model, ObjectUrlMixin):
             other._range_ips()
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
-
-    def update_attrs(self):
-        self.attrs = AuxAttr(NetworkKeyValue, self, "network")
 
     def save(self, *args, **kwargs):
         self.update_network()
@@ -222,12 +218,12 @@ class Network(models.Model, ObjectUrlMixin):
             build_str = "\nsubnet6 {0} netmask {1} {{\n".format(
                 self.network.network, self.network.netmask)
         if not raw:
-            build_str += "\t# Network Statements\n"
+            build_str += "\t# Network statements\n"
             build_str += join_dhcp_args(statements)
-            build_str += "\t# Network Options\n"
+            build_str += "\t# Network options\n"
             build_str += join_dhcp_args(options)
             if self.dhcpd_raw_include:
-                build_str += "\t# Raw Network Options\n"
+                build_str += "\t# Raw network options\n"
                 build_str += join_dhcp_args(self.dhcpd_raw_include.split("\n"))
         for range_ in ranges:
             build_str += range_.build_range()
@@ -255,8 +251,8 @@ class Network(models.Model, ObjectUrlMixin):
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
         except (ipaddr.AddressValueError, ipaddr.NetmaskValueError):
-            raise ValidationError("Invalid network for ip type of "
-                                  "'{0}'.".format(self, self.ip_type))
+            raise ValidationError('Invalid IPv{0} network'
+                                  .format(self.ip_type))
         # Update fields
         self.ip_upper = int(self.network) >> 64
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
@@ -276,9 +272,6 @@ class NetworkKeyValue(CommonOption):
     is an option, is option should be set.
     """
     network = models.ForeignKey(Network, null=False)
-    aux_attrs = (
-        ('description', 'A description of the network'),
-    )
 
     class Meta:
         db_table = 'network_kv'

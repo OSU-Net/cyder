@@ -1,6 +1,7 @@
 from django import forms
 
 from cyder.core.system.models import System, SystemKeyValue
+from cyder.base.mixins import UsabilityFormMixin
 
 
 class SystemForm(forms.ModelForm):
@@ -9,7 +10,7 @@ class SystemForm(forms.ModelForm):
         model = System
 
 
-class ExtendedSystemForm(forms.ModelForm):
+class ExtendedSystemForm(forms.ModelForm, UsabilityFormMixin):
     interface_type = forms.ChoiceField(
         widget=forms.RadioSelect, choices=(
             ('Static', 'Static Interface'),

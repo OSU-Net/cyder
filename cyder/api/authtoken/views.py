@@ -1,6 +1,7 @@
 # from django.auth.contrib.models import User
 from django import forms
-from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from rest_framework.authtoken.views import ObtainAuthToken as _
 

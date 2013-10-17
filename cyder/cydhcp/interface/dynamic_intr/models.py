@@ -61,7 +61,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
             ('Domain', 'domain', self.domain),
-            ('Last Seen', 'last_seen', date)]
+            ('Last seen', 'last_seen', date)]
         return data
 
     @staticmethod
@@ -96,10 +96,9 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
         build_str += "\t}\n"
         return build_str
 
-    def build_subclass(self, allowed):
-        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed, self.range.start_str, self.range.end_str,
-            format_mac(self.mac))
+    def build_subclass(self, classname):
+        return 'subclass "{0}" 1:{1};\n'.format(
+            classname, format_mac(self.mac))
 
     def get_related_systems(self):
         related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
@@ -117,6 +116,15 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        delete_system = kwargs.pop('delete_system', True)
+        if delete_system:
+            if (not self.system.dynamicinterface_set.all().exclude(
+                    id=self.id).exists() and
+                    not self.system.staticinterface_set.all().exists()):
+                self.system.delete()
+        super(DynamicInterface, self).delete()
 
 
 class DynamicIntrKeyValue(CommonOption):

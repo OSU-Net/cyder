@@ -83,6 +83,9 @@ MINIFY_BUNDLES = {
         'ctnr': (
             'js/ctnr/ctnr.js',
         ),
+        'interface_delete': (
+            'js/interface_delete.js',
+        ),
         'systemform': (
             'js/systemform.js',
         ),
@@ -232,13 +235,20 @@ ZONE_BLACKLIST = []
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'cyder.api.permissions.ReadOnlyIfAuthenticated',
+        'cyder.api.v1.permissions.ReadOnlyIfAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'cyder.api.authtoken.authentication.CyderTokenAuthentication',
+        'cyder.api.v1.authentication.CyderTokenAuthentication',
     ),
     'PAGINATE_BY': 25,
-    'DEFAULT_FILTER_BACKENDS': ('cyder.api.filter.SearchFieldFilter',),
+    'PAGINATE_BY_PARAM': 'count',
+    'MAX_PAGINATE_BY': 100,
+    'DEFAULT_FILTER_BACKENDS': (
+        'cyder.api.v1.filter.SearchFieldFilter',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
 
 
@@ -284,11 +294,11 @@ DHCP_STAGE_DIR = '/tmp/dhcp/stage'
 DHCP_PROD_DIR = '/tmp/dhcp/prod'
 
 # DHCP_TARGET_FILE: The configuration file that will be generated
-DHCP_TARGET_FILE = 'dhcpd.conf'
+DHCP_TARGET_FILE = 'dhcpd.conf.data'
 
 # DHCP_CHECK_FILE: The conf file whose syntax will be checked (None means
 # don't check any file)
-DHCP_CHECK_FILE = DHCP_TARGET_FILE
+DHCP_CHECK_FILE = None
 
 DHCP_REPO_DIR = DHCP_STAGE_DIR
 
