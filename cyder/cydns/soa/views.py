@@ -24,7 +24,7 @@ def soa_detail(request, pk):
 
 def delete_soa_attr(request, attr_pk):
     """
-    An view destined to be called by ajax to remove an attr.
+    A view destined to be called by ajax to remove an attr.
     """
     attr = get_object_or_404(SOAKeyValue, pk=attr_pk)
     attr.delete()

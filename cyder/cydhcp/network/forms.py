@@ -16,8 +16,8 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
         queryset=Site.objects.all(),
         empty_label="(Defaults to parent's site.)",
         required=False,
-        help_text='The site the network will be put into. '
-                  'Defaults to parent network\'s site'
+        help_text="The site the network will be put into. "
+                  "Defaults to parent network's site"
     )
 
     def __init__(self, *args, **kwargs):
@@ -48,9 +48,9 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
                 ip_upper, ip_lower = ipv6_to_longs(network.network)
 
         except ipaddr.AddressValueError, e:
-            raise ValidationError("Bad Ip address {0}".format(e))
+            raise ValidationError("Bad IP address {0}".format(e))
         except ipaddr.NetmaskValueError, e:
-            raise ValidationError("Bad Netmask {0}".format(e))
+            raise ValidationError("Bad netmask {0}".format(e))
         return cleaned_data
 
 
@@ -85,9 +85,9 @@ class NetworkForm_network(forms.Form):
                 network = ipaddr.IPv6Network(network_str)
                 ip_upper, ip_lower = ipv6_to_longs(network.network)
         except ipaddr.AddressValueError, e:
-            raise ValidationError("Bad Ip address {0}".format(e))
+            raise ValidationError("Bad IP address {0}".format(e))
         except ipaddr.NetmaskValueError, e:
-            raise ValidationError("Bad Netmask {0}".format(e))
+            raise ValidationError("Bad netmask {0}".format(e))
         if (Network.objects.filter(ip_upper=ip_upper,
                                    ip_lower=ip_lower).exists()):
             raise ValidationError("This network has already been allocated.")
@@ -105,7 +105,7 @@ class NetworkForm_site(forms.Form):
         cleaned_data = super(NetworkForm_site, self).clean()
         site = cleaned_data.get('site', None)
         if not site:
-            raise ValidationError("That site does not exist.  Try again")
+            raise ValidationError("That site does not exist")
         return cleaned_data
 
 
@@ -118,7 +118,7 @@ class NetworkForm_vlan(forms.Form):
     number = forms.IntegerField()
     create_choice = forms.ChoiceField(
         widget=forms.RadioSelect, initial='e', choices=(
-            ('existing', 'Use existing VLAN template.'),
-            ('new', 'Create New Vlan'),
-            ('none', 'Don\'t assign a vlan'),
+            ('existing', 'Use existing VLAN template'),
+            ('new', 'Create new VLAN'),
+            ('none', "Don't assign a VLAN"),
         ))

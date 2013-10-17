@@ -120,7 +120,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
                 'True: A/PTR' if self.dns_enabled else 'False'),
-            ('Last Seen', 'last_seen', date),
+            ('Last seen', 'last_seen', date),
         )
         return data
 
