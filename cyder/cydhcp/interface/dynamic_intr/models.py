@@ -60,7 +60,6 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
             ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('Domain', 'domain', self.domain),
             ('Last seen', 'last_seen', date)]
         return data
 
