@@ -46,14 +46,17 @@ def get_clobbered(domain_name):
             new_obj.id = None
             new_obj.label = ""
             clobber_objects.append((new_obj, obj_views))
+            kwargs = {'call_prune_tree': False}
             if Klass == AddressRecord:
-                kwargs = {"check_cname": False, "call_prune_tree": False}
-            else:
-                kwargs = {"call_prune_tree": False}
+                kwargs['check_cname'] = False
+            elif Klass == StaticInterface:
+                kwargs['delete_system'] = False
             # We have to be careful here to not delete any domains due to them
             # being pruneable and not having any records or child domains. We
-            # set the call_prune_tree flag to tell the object's delete function
-            # to skip calling prune_tree
+            # set the call_prune_tree argument to tell the object's delete
+            # function to skip calling prune_tree. We handle static interfaces
+            # analogously, using the delete_system argument to skip system
+            # deletion.
             obj.delete(**kwargs)
     return clobber_objects
 
