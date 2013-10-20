@@ -76,6 +76,8 @@ class Range(BaseModel, ObjectUrlMixin):
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
 
+    description = models.TextField(blank=True)
+
     search_fields = ('start_str', 'end_str')
     display_fields = ('start_str', 'end_str')
 
