@@ -4,6 +4,9 @@ from django.test.client import Client
 from django.test import TestCase
 
 from cyder.api.authtoken.models import Token
+from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
+from cyder.base.eav.validators import VALUE_TYPES
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
@@ -37,22 +40,28 @@ def build_domain(label, domain_obj):
 class APIKVTestMixin(object):
     """Mixin to test endpoints with key-value support."""
     def __init__(self):
-        if not hasattr(self, "keyvalue_attr"):
-            self.keyvalue_attr = self.model.__name__.lower() + "keyvalue_set"
+        self.keyvalue_attr = self.model.__name__.lower() + "av_set"
 
     def test_keyvalues(self):
-        """Test key-value retrieval."""
         obj = self.create_data()
+
+        # init attribute
+        attr, _ = Attribute.objects.get_or_create(
+            name="Test Attribute", attribute_type=ATTRIBUTE_INFORMATIONAL,
+            value_type="string")
+
         getattr(obj, self.keyvalue_attr).get_or_create(
-            key='Test Key', value='Test Value')
+            attribute=attr, value='Test Value', entity=obj)
+
         resp = self.http_get(self.object_url(obj.id))
         keyvalues = json.loads(resp.content)[self.keyvalue_attr]
+
         for kv in keyvalues:
-            if kv['key'] == 'Test Key':
+            if kv['attribute'] == 'Test Attribute':
                 assert kv['value'] == 'Test Value'
                 break
         else:
-            assert 1 == 0, "The test key-value pair could not be found."
+            assert 1 == 0, "The test attribute-value pair could not be found."
         self.model.objects.filter(id=obj.id).delete()
 
 

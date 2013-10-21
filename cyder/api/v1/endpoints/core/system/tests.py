@@ -5,7 +5,7 @@ from cyder.core.system.models import System
 class SystemAPI_Test(APITests, APIKVTestMixin):
     __test__ = True
     model = System
-    keyvalue_attr = "systemkeyvalue_set"
+    keyvalue_attr = "systemav_set"
 
     def create_data(self):
         data = {
