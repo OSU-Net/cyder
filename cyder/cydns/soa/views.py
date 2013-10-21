@@ -18,7 +18,7 @@ def soa_detail(request, pk):
                     .order_by('master_domain').select_related()),
         'rdomains': (soa.domain_set.filter(is_reverse=True)
                      .order_by('master_domain').select_related()),
-        'attributes': SOAAV.objects.filter(soa=soa.id)
+        'attributes': SOAAV.objects.filter(entity=soa.id)
     }, obj=soa)
 
 
