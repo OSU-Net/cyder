@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponse
 from django.forms import ValidationError, ModelChoiceField, HiddenInput
 from django.forms.util import ErrorList, ErrorDict
 from django.db import IntegrityError
-from django.db.models import get_model, Field
+from django.db.models import get_model
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
@@ -142,8 +142,25 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     form = FormKlass(instance=obj)
     if request.method == 'POST':
-        form = FormKlass(request.POST, instance=obj)
-
+        post_data = qd_to_py_dict(request.POST)
+        if FormKlass.__name__ == 'EAVForm':
+            from cyder.base.eav.models import Attribute
+            attribute = Attribute.objects.filter(name=post_data['attribute'])
+            if attribute.exists():
+                post_data['attribute'] = attribute[0].id
+            else:
+                form = FormKlass(post_data, instance=obj)
+                form._errors = ErrorDict()
+                form._errors['attribute'] = ErrorList(
+                    ["The attribute \"{0}\" does not exist".format(
+                        post_data['attribute'])])
+                return render(request, template, {
+                    'form': form,
+                    'obj': obj,
+                    'obj_type': obj_type,
+                    'pk': pk,
+                })
+        form = FormKlass(post_data, instance=obj)
         if form.is_valid():
             try:
                 if perm(request, cy.ACTION_CREATE, obj=obj, obj_class=Klass):
@@ -290,7 +307,7 @@ def get_update_form(request, get_klasses_fn):
                     FormKlass._meta.model._meta.get_field('entity')
                     # autofill the 'entity' field
                     kwargs['entity'] = related_pk
-                except: # no 'entity' field
+                except:     # no 'entity' field
                     pass
 
                 form = FormKlass(initial=dict(

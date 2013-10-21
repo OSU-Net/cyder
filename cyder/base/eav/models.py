@@ -1,7 +1,5 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 
-from cyder.base.eav import validators
 from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
                                       ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
 from cyder.base.eav.fields import AttributeValueTypeField, EAVValueField
@@ -11,15 +9,15 @@ from cyder.base.mixins import ObjectUrlMixin
 
 
 class Attribute(models.Model):
+    search_fields = ('name',)
+
     class Meta:
         db_table = 'attribute'
-
 
     name = models.CharField(max_length=255)
     attribute_type = models.CharField(max_length=1, choices=ATTRIBUTE_TYPES)
     value_type = AttributeValueTypeField(max_length=20, choices=VALUE_TYPES,
-                                  attribute_type_field='attribute_type')
-
+                                         attribute_type_field='attribute_type')
 
     def __unicode__(self):
         return self.name
@@ -46,9 +44,7 @@ class EAVBase(models.Model, ObjectUrlMixin):
         abstract = True
         unique_together = ('entity', 'attribute')
 
-
     value = EAVValueField(max_length=255, attribute_field='attribute')
-
 
     def __unicode__(self):
         kv_formats = {
@@ -68,7 +64,6 @@ class EAVBase(models.Model, ObjectUrlMixin):
 
         return (kv_formats[self.attribute.attribute_type]
                 .format(self.attribute.name, value))
-
 
     def details(self):
         """For tables."""
