@@ -2,7 +2,6 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.range.models import Range
-from cyder.cydns.domain.models import Domain
 from cyder.api.v1.tests.base import APITests
 
 
@@ -11,7 +10,6 @@ class DynamicInterfaceBase(APITests):
     keyvalue_attr = "dynamicintrkeyvalue_set"
 
     def setUp(self):
-        Domain.objects.get_or_create(name='arpa')
         self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.system, _ = System.objects.get_or_create(name="TestSystem")
         super(DynamicInterfaceBase, self).setUp()
