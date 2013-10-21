@@ -87,10 +87,10 @@ class Range(models.Model, ObjectUrlMixin):
     def __str__(self):
         if self.range_usage or self.range_usage == 0:
             if self.range_usage == 100:
-                return get_display(self) + " (Full Capacity)"
+                return get_display(self) + " (Full)"
 
             elif self.range_usage > 100:
-                return get_display(self) + " (Over Capacity)"
+                return get_display(self) + " (Over capacity)"
 
             else:
                 return get_display(self) + " ({0}% Used)".format(
