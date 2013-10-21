@@ -73,7 +73,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
+class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     """
     A PTR is used to map an IP to a domain name.
 
@@ -104,10 +104,6 @@ class PTR(BasePTR, Ip, CydnsRecord, LabelDomainMixin):
         objects = objects or PTR.objects
         objects = objects.filter(reverse_domain__in=ctnr.domains.all())
         return objects
-
-    @classmethod
-    def get_api_fields(cls):
-        return ['ip_str', 'ip_type', 'fqdn', 'ttl', 'description']
 
     @property
     def rdtype(self):

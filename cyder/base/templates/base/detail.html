@@ -14,7 +14,13 @@
         data-pk="{{ obj.pk }}">Edit</a>
     {% endif %}
     {% if obj.get_delete_url %}
-      <a class="btn btn-danger" id="delete" onclick="return confirm('Are you sure?');" href="{{ obj.get_delete_url() }}">Delete</a>
+      {% if obj_type == 'system' %}
+        <a class="btn btn-danger" id="delete" onclick="return confirm(
+            'Deleting this system will also delete its interfaces. Are you sure you want to continue?');"
+            href="{{ obj.get_delete_url() }}">Delete</a>
+      {% else %}
+        <a class="btn btn-danger" id="delete" onclick="return confirm('Are you sure?');" href="{{ obj.get_delete_url() }}">Delete</a>
+      {% endif %}
     {% endif %}
   {% endif %}
 {% endblock %}

@@ -153,7 +153,7 @@ def ensure_label_domain(fqdn, force=False):
         domain = Domain.objects.get(name=fqdn)
         if not domain.soa and not force:
             raise ValidationError("You must create a record inside an "
-                                  "existing zones.")
+                                  "existing zone.")
         return '', domain
     except ObjectDoesNotExist:
         pass

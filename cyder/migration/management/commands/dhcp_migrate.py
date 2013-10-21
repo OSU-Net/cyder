@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -9,7 +10,8 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemKeyValue
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
+                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF,
+                                    STATIC, DYNAMIC)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.cydhcp.network.models import Network, NetworkKeyValue
@@ -36,7 +38,7 @@ allow_all_subnets = [
     '10.196.0.32', '10.196.4.32', '10.192.136.63', '10.196.8.8',
     '10.196.16.8', '10.196.24.8', '10.196.32.8', '10.196.40.8',
     '10.162.128.32', '10.162.136.32', '10.162.144.32', '10.198.0.80',
-    '10.198.0.140', '10.192.131.9', '10.255.255.255']
+    '10.198.0.140', '10.192.131.9', '10.255.255.255', '10.214.64.32']
 
 
 class NotInMaintain(Exception):
@@ -61,8 +63,8 @@ cursor = connection.cursor()
 
 def clean_zone_name(name):
     name = name.replace(' ', '')
-    if name[:5] == "zone.":
-        name = name[5:]
+    #if name[:5] == "zone.":
+        #name = name[5:]
     return name
 
 
@@ -75,6 +77,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     network = str(ipaddr.IPv4Address(subnet & netmask))
     s, _ = Site.objects.get_or_create(name='Campus')
     v = None
+    enabled = (status == 'visible')
     if cursor.execute("SELECT * "
                       "FROM vlan "
                       "WHERE vlan_id = %s" % vlan):
@@ -82,7 +85,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
         v = Vlan.objects.get(name=vlan_name)
     n, created = Network.objects.get_or_create(
         network_str=network + '/' + prefixlen, ip_type='4',
-        site=s, vlan=v)
+        site=s, vlan=v, enabled=enabled)
     cursor.execute("SELECT dhcp_option, value "
                    "FROM object_option "
                    "WHERE object_id = {0} "
@@ -93,24 +96,26 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
                        "FROM dhcp_options "
                        "WHERE id = {0}".format(dhcp_option))
         name, type = cursor.fetchone()
-        kv, _ = NetworkKeyValue.objects.get_or_create(
+        kv, kv_created = NetworkKeyValue.objects.get_or_create(
             value=str(value), key=name, network=n)
+        if kv_created:
+            kv.clean()
+            kv.save()
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment, en,
-                 known):
+def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
+        known):
     """
-    Takes a row form the Maintain range table
-    returns a range which is saved in cyder
+    Takes a row from the Maintain range table.
+    Returns a range which is saved in Cyder.
     """
-    # Set the allow statement
-    n = None
-    r = None
-    r_type = 'st' if range_type == 'static' else 'dy'
+
+    r_type = STATIC if range_type == 'static' else DYNAMIC
     allow = ALLOW_LEGACY
-    if cursor.execute("SELECT * FROM subnet WHERE id = {0}".format(subnet_id)):
-        id, name, subnet, netmask, status, vlan = cursor.fetchone()
+    if cursor.execute("SELECT subnet, netmask "
+                      "FROM subnet WHERE id = {0}".format(subnet_id)):
+        subnet, netmask = cursor.fetchone()
         n = Network.objects.get(ip_lower=subnet,
                                 prefixlen=str(calc_prefixlen(netmask)))
         n.update_network()
@@ -130,25 +135,50 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, en,
             n.vrf = v
             n.save()
 
-        if int(n.network.network) < start < end < int(n.network.broadcast):
-            r, created = range_usage_get_create(
-                Range,
-                **{'start_lower': start,
-                   'start_str': ipaddr.IPv4Address(start),
-                   'end_lower': end, 'end_str': ipaddr.IPv4Address(end),
-                   'range_type': r_type, 'allow': allow, 'ip_type': '4',
-                   'network': n})
-    if not r:
-        r, created = range_usage_get_create(
-            Range,
-            **{'start_lower': start, 'start_str': ipaddr.IPv4Address(start),
-               'end_lower': end, 'end_str': ipaddr.IPv4Address(end),
-               'is_reserved': True, 'range_type': r_type, 'allow': allow,
-               'ip_type': '4'})
+        range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
+                                     ipaddr.IPv4Address(end))
+
+        valid_start = int(n.network.network) < start < int(n.network.broadcast)
+        valid_order = start <= end
+        valid_end = int(n.network.network) < end < int(n.network.broadcast)
+
+        valid = all((valid_start, valid_order, valid_end))
+
+        # If the range is disabled, we don't need to print warnings.
+        if not valid and enabled:
+            print 'Range {0} in network {1} is invalid:'.format(range_str,
+                                                                n)
+
+            if not valid_start:
+                print ('\tStart is not inside network'
+                       .format(n.network.network))
+            if not valid_order:
+                print '\tStart and end are out of order'
+            if not valid_end:
+                print ('\tEnd is not inside network'
+                       .format(n.network.broadcast))
+
+
+        dhcp_enabled = bool(enabled and valid)
+    else: # the Range doesn't have a Network
+        n = None
+        dhcp_enabled = False
+
+    r, created = range_usage_get_create(
+        Range,
+        **{'start_lower': start, 'start_str': ipaddr.IPv4Address(start),
+            'end_lower': end, 'end_str': ipaddr.IPv4Adress(end),
+            'range_type': r_type, 'allow': allow, 'ip_type': '4',
+            'network': n, 'dhcp_enabled': dhcp_enabled,
+            'is_reserved': not dhcp_enabled})
+
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-        rk, _ = RangeKeyValue.objects.get_or_create(
+        rk, kv_created = RangeKeyValue.objects.get_or_create(
             range=r, value='L2Q=1,L2QVLAN=503', key='ipphone242',
             is_option=True, is_quoted=True)
+        if kv_created:
+            rk.clean()
+            rk.save()
     return (r, created)
 
 
@@ -159,9 +189,9 @@ def migrate_subnets():
     results = cursor.fetchall()
     for row in results:
         migrated.append(create_subnet(*row))
-    print ("Records in Maintain {0}\n"
-           "Records Migrated {1}\n"
-           "Records created {2}".format(
+    print ("Records in Maintain: {0}\n"
+           "Records migrated: {1}\n"
+           "Records created: {2}".format(
                len(results),
                len(migrated),
                len([y for x, y in migrated if y])))
@@ -216,8 +246,11 @@ def migrate_workgroups():
                            "FROM dhcp_options "
                            "WHERE id = {0}".format(dhcp_option))
             name, type = cursor.fetchone()
-            kv, _ = WorkgroupKeyValue.objects.get_or_create(
+            kv, kv_created = WorkgroupKeyValue.objects.get_or_create(
                 value=value, key=name, workgroup=w)
+            if kv_created:
+                kv.clean()
+                kv.save()
         migrated.append((w, created))
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
@@ -254,9 +287,7 @@ def migrate_zones():
 @transaction.commit_on_success
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
-    cursor.execute("SELECT dynamic_range, name, domain, ha, location, "
-                   "workgroup, zone, enabled, last_seen "
-                   "FROM host WHERE ip = 0")
+    default, _ = Workgroup.objects.get_or_create(name='default')
 
     sys_value_keys = {"type": "Hardware Type",
                       "os": "Operating System",
@@ -291,10 +322,51 @@ def migrate_dynamic_hosts():
         if mac == "":
             enabled = False
 
-        r = maintain_find_range(items['dynamic_range'])
-        c = maintain_find_zone(items['zone'])
-        d = maintain_find_domain(items['domain'])
-        w = maintain_find_workgroup(items['workgroup'])
+        r = None
+        if not items['dynamic_range']:
+            print ("Host with MAC {0} "
+                   "has no dynamic_range in Maintain".format(items['ha']))
+        else:
+            try:
+                r = maintain_find_range(items['dynamic_range'])
+            except ObjectDoesNotExist:
+                print ("Host with MAC {0} has "
+                       "no dynamic range in Cyder".format(items['ha']))
+
+        c = None
+        if not items['zone']:
+            print "Host with MAC {0} has no zone in Maintain".format(
+                item['ha'])
+        else:
+            try:
+                c = maintain_find_zone(items['zone'])
+            except ObjectDoesNotExist:
+                print ("Host with MAC {0} has "
+                       "no ctnr in Cyder".format(items['ha']))
+                print "Failed to migrate zone_id {0}".format(items['zone'])
+
+        d = None
+        if not items['domain']:
+            print "Host with MAC {0} has no domain in Maintain".format(
+                items['ha'])
+        else:
+            try:
+                d = maintain_find_domain(items['domain'])
+            except ObjectDoesNotExist:
+                print ("Host with MAC {0} has "
+                       "no domain in Cyder".format(items['ha']))
+                print "Failed to migrate domain_id {0}".format(items['domain'])
+
+        w = default
+        if items['workgroup']:
+            try:
+                w = maintain_find_workgroup(items['workgroup'])
+            except ObjectDoesNotExist:
+                print ("Host with MAC {0} has "
+                       "no workgroup in Cyder".format(items['ha']))
+                print ("Failed to migrate workgroup_id {0}\n"
+                       "Adding it to the default group".format(
+                            items['workgroup']))
 
         if not all([r, c, d]):
             stderr.write("Trouble migrating host with mac {0}\n"
@@ -513,6 +585,7 @@ def migrate_all(skip=False):
 
 
 def delete_all():
+    print "Deleting DHCP objects."
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()

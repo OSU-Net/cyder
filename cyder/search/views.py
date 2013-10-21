@@ -9,7 +9,6 @@ from search.compiler.django_compile import compile_to_django
 
 from cyder.base.utils import tablefy
 from cyder.base.helpers import strip_if_mac_with_colons
-from cyder.cydns.api.v1.api import v1_dns_api
 from cyder.cydns.utils import get_zones
 
 
@@ -87,14 +86,6 @@ def _search(request):
     ]
 
     return (meta, tables)
-
-
-def resource_for_request(resource_name, filters, request):
-    resource = v1_dns_api.canonical_resource_for(resource_name)
-    objects = resource.get_object_list(request).filter(filters)
-    search_fields = resource._meta.object_class.search_fields
-    return [(search_fields, resource.model_to_data(model, request))
-            for model in objects]
 
 
 def request_to_search(request):

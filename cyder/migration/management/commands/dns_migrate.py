@@ -162,7 +162,7 @@ class Zone(object):
             items = dict(zip(keys, values))
             ctnr = maintain_find_zone(items['zone'])
 
-            name = items['name'].lower()
+            name = items['name']
             enabled = bool(items['enabled'])
             ip = items['ip']
             ha = items['ha']
@@ -222,10 +222,17 @@ class Zone(object):
                         kv.clean()
                         kv.save()
 
-                except ValidationError, e:
-                    stderr.write("Error generating static interface for host "
-                                 "with IP {0}\n".format(long2ip(ip)))
-                    stderr.write("Original exception: {0}\n".format(e))
+                except ValidationError:
+                    try:
+                        static.dhcp_enabled = False
+                        static.dns_enabled = False
+                        static.full_clean()
+                        static.save(**{'update_range_usage': False})
+                    except ValidationError, e:
+                        stderr.write("Error generating static interface for "
+                                     "host with IP {0}\n"
+                                     .format(static.ip_str))
+                        stderr.write("Original exception: {0}\n".format(e))
             else:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['id'])
@@ -460,12 +467,14 @@ def dump_maintain():
 
 
 def delete_DNS():
+    print "Deleting DNS objects."
     for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
                   StaticInterface, System, Workgroup]:
         thing.objects.all().delete()
 
 
 def delete_CNAME():
+    print 'Deleting CNAMEs.'
     CNAME.objects.all().delete()
 
 

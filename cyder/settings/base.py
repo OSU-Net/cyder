@@ -1,5 +1,6 @@
-# This is your project's main settings file that can be committed to your
-# repo. If you need to override a setting locally, use settings_local.py
+# This is Cyder's main settings file. If you need to override a setting
+# locally, use cyder/settings/local.py
+
 import os
 import sys
 
@@ -81,6 +82,9 @@ MINIFY_BUNDLES = {
         ),
         'ctnr': (
             'js/ctnr/ctnr.js',
+        ),
+        'interface_delete': (
+            'js/interface_delete.js',
         ),
         'systemform': (
             'js/systemform.js',
@@ -231,11 +235,72 @@ ZONE_BLACKLIST = []
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'cyder.api.permissions.ReadOnlyIfAuthenticated',
+        'cyder.api.v1.permissions.ReadOnlyIfAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'cyder.api.authtoken.authentication.CyderTokenAuthentication',
+        'cyder.api.v1.authentication.CyderTokenAuthentication',
     ),
     'PAGINATE_BY': 25,
-    'DEFAULT_FILTER_BACKENDS': ('cyder.api.filter.SearchFieldFilter',),
+    'PAGINATE_BY_PARAM': 'count',
+    'MAX_PAGINATE_BY': 100,
+    'DEFAULT_FILTER_BACKENDS': (
+        'cyder.api.v1.filter.SearchFieldFilter',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
+
+
+# bindbuild settings
+# ==================
+
+
+# DNS_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
+DNS_STAGE_DIR = "/tmp/dns_stage/"
+
+# DNS_PROD_DIR: This is the directory where Cyder will place its DNS files.
+# This should be an SVN repo
+DNS_PROD_DIR = "/tmp/dns_prod/cyzones/"
+
+# DNS_BIND_PREFIX: This is the path to where Cyder zone files are built
+# relative to the root of the SVN repo. This is usually a substring of
+# PROD_DIR.
+DNS_BIND_PREFIX = DNS_PROD_DIR
+
+
+DNS_LOCK_FILE = "/tmp/lock.file"
+DNS_NAMED_CHECKZONE_OPTS = ""
+DNS_MAX_ALLOWED_LINES_CHANGED = 500
+DNS_NAMED_CHECKZONE = "/usr/sbin/named-checkzone"  # path to named-checkzone
+DNS_NAMED_CHECKCONF = "/usr/sbin/named-checkconf"  # path to named-checkconf
+
+# Only one zone at a time should be removed
+DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED = 10
+
+DNS_STOP_UPDATE_FILE = "/tmp/stop.update"
+DNS_LAST_RUN_FILE = "/tmp/last.run"
+
+
+# dhcp_build settings
+# ===================
+
+
+# DHCP_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN
+# repo.
+DHCP_STAGE_DIR = '/tmp/dhcp/stage'
+
+# DHCP_PROD_DIR: Where Cyder will place the dhcpd configuration file.
+DHCP_PROD_DIR = '/tmp/dhcp/prod'
+
+# DHCP_TARGET_FILE: The configuration file that will be generated
+DHCP_TARGET_FILE = 'dhcpd.conf.data'
+
+# DHCP_CHECK_FILE: The conf file whose syntax will be checked (None means
+# don't check any file)
+DHCP_CHECK_FILE = None
+
+DHCP_REPO_DIR = DHCP_STAGE_DIR
+
+DHCP_VERBOSE_ERROR_LOG = True
+DHCP_VERBOSE_ERROR_LOG_LOCATION = '/tmp/error.log'

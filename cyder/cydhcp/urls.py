@@ -32,6 +32,7 @@ urlpatterns = patterns(
     url(r'^range/', include('cyder.cydhcp.range.urls')),
     url(r'^site/', include('cyder.cydhcp.site.urls')),
     url(r'^vlan/', include('cyder.cydhcp.vlan.urls')),
+    url(r'^interface/', include('cyder.cydhcp.interface.urls')),
     url(r'^static_interface/',
         include('cyder.cydhcp.interface.static_intr.urls')),
     url(r'^dynamic_interface/',
@@ -42,4 +43,4 @@ urlpatterns = patterns(
 for kv in DHCP_KEY_VALUES:
     urlpatterns += patterns(
         '',
-        url(r"^{0}/".format(kv), include(cydhcp_urls(kv))))
+        url(r'^{0}/'.format(kv), include(cydhcp_urls(kv))))

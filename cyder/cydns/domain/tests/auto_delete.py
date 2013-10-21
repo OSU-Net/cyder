@@ -178,7 +178,7 @@ class AutoDeleteTests(TestCase):
         )
         addr.save()
         self.assertFalse(prune_tree(the_domain))
-        addr.delete()
+        addr.delete(**{'delete_system': False})
 
         self.assertFalse(Domain.objects.filter(name="x.y.z.foo.poo"))
         self.assertFalse(Domain.objects.filter(name="y.z.foo.poo"))

@@ -73,11 +73,6 @@ class SRV(CydnsRecord):
         db_table = 'srv'
         unique_together = ("label", "domain", "target", "port")
 
-    @classmethod
-    def get_api_fields(cls):
-        return super(SRV, cls).get_api_fields() + [
-            'port', 'weight', 'priority', 'target']
-
     @property
     def rdtype(self):
         return 'SRV'

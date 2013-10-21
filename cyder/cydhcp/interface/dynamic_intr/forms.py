@@ -3,6 +3,7 @@ from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicIntrKeyValue)
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.forms import RangeWizard
+from cyder.cydhcp.range.models import Range
 
 
 class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
@@ -12,8 +13,8 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
         self.fields.keyOrder = ['system', 'domain', 'mac', 'vrf', 'site',
                                 'range', 'workgroup', 'dhcp_enabled', 'ctnr']
         self.fields['range'].required = True
-        self.fields['mac'].help_text = 'Required if DHCP is enabled'
-        self.fields['dhcp_enabled'].label = 'Enable DHCP?'
+        self.fields['range'].queryset = Range.objects.filter(
+            range_type='dy')
 
     class Meta:
         model = DynamicInterface

@@ -200,11 +200,11 @@ def find_root_domain(soa):
 """
 CyAddressValueError
     This exception is thrown when an attempt is made to create/update a
-    record with an invlaid IP.
+    record with an invalid IP.
 
 InvalidRecordNameError
     This exception is thrown when an attempt is made to create/update a
-    record with an invlaid name.
+    record with an invalid name.
 
 RecordExistsError
     This exception is thrown when an attempt is made to create a record

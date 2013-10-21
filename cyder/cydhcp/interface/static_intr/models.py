@@ -7,15 +7,16 @@ import cydns
 import datetime
 import re
 
+from cyder.core.fields import MacAddrField
+
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
-from cyder.cydhcp.keyvalue.utils import AuxAttr
 from cyder.cydhcp.range.utils import find_range
-from cyder.cydhcp.utils import format_mac
+from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 
@@ -50,45 +51,12 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     BaseAddressRecord and will call its clean method with
     'update_reverse_domain' set to True. This will ensure that its A record is
     valid *and* that its PTR record is valid.
-
-    Using the 'attrs' attribute.
-
-    To interface with the Key Value store of an interface use the 'attrs'
-    attribute. This attribute is a direct proxy to the Keys and Values in the
-    Key Value store. When you assign an attribute of the 'attrs' attribute a
-    value, a key is create/updated. For example:
-
-    >>> intr = <Assume this is an existing StaticInterface instance>
-    >>> intr.update_attrs()  # This updates the object with keys/values already
-    >>> # in the KeyValue store.
-    >>> intr.attrs.primary
-    '0'
-
-    In the previous line, there was a key called 'primary' and it's value
-    would be returned when you accessed the attribute 'primary'.
-
-    >>> intr.attrs.alias
-    Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
-    AttributeError: 'attrs' object has no attribute 'alias'
-
-    Here 'attrs' didn't have an attribute 'alias' which means that there was no
-    KeyValue with key 'alias'. If we wanted to create that key and give it a
-    value of '0' we would do:
-
-    >>> intr.attrs.alias = '0'
-
-    This *immediately* creates a KeyValue pair with key='alias' and value='0'.
-
-    >>> intr.attrs.alias = '1'
-
-    This *immediately* updates the KeyValue object with a value of '1'. It is
-    not like the Django ORM where you must call the `save()` function for any
-    changes to propagate to the database.
     """
+
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
-    mac = models.CharField(max_length=17, blank=True)
+    mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
+                       help_text='(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
                                        related_name='reverse_staticintr_set')
     system = models.ForeignKey(
@@ -96,15 +64,14 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
 
-    dhcp_enabled = models.BooleanField(
-        default=True)
-    dns_enabled = models.BooleanField(
-        default=True)
+    dhcp_enabled = models.BooleanField(verbose_name='Enable DHCP?',
+                                       default=True)
+    dns_enabled = models.BooleanField(verbose_name='Enable DNS?',
+                                      default=True)
 
     last_seen = models.PositiveIntegerField(
         max_length=11, blank=True, default=0)
 
-    attrs = None
     search_fields = ('mac', 'ip_str', 'fqdn')
 
     class Meta:
@@ -133,9 +100,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if self.ip_str:
             return find_range(self.ip_str)
 
-    def update_attrs(self):
-        self.attrs = AuxAttr(StaticIntrKeyValue, self, 'static_interface')
-
     def details(self):
         data = super(StaticInterface, self).details()
         if self.last_seen == 0:
@@ -155,7 +119,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
                 'True: A/PTR' if self.dns_enabled else 'False'),
-            ('Last Seen', 'last_seen', date),
+            ('Last seen', 'last_seen', date),
         )
         return data
 
@@ -165,11 +129,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return {'metadata': [
             {'name': 'fqdn', 'datatype': 'string', 'editable': False},
         ]}
-
-    @classmethod
-    def get_api_fields(cls):
-        return super(StaticInterface, cls).get_api_fields() + \
-            ['mac', 'dhcp_enabled', 'dns_enabled']
 
     @property
     def rdtype(self):
@@ -195,9 +154,17 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     def delete(self, *args, **kwargs):
         rng = self.range
         update_range_usage = kwargs.pop('update_range_usage', True)
+        delete_system = kwargs.pop('delete_system', True)
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
             # The reverse_domain field is in the Ip class.
+
+        if delete_system:
+            if(not self.system.staticinterface_set.all().exclude(
+                    id=self.id).exists() and
+                    not self.system.dynamicinterface_set.all().exists()):
+                self.system.delete()
+
         super(StaticInterface, self).delete(*args, **kwargs)
         if rng and update_range_usage:
             rng.save()
@@ -212,23 +179,15 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             raise ValidationError("An A record already uses '%s' and '%s'" %
                                   (self.fqdn, self.ip_str))
 
-    def interface_name(self):
-        self.update_attrs()
-        try:
-            itype, primary, alias = '', '', ''
-            itype = self.attrs.interface_type
-            primary = self.attrs.primary
-            alias = self.attrs.alias
-        except AttributeError:
-            pass
-        if itype == '' or primary == '':
-            return 'None'
-        elif alias == '':
-            return '{0}{1}'.format(itype, primary)
-        else:
-            return '{0}{1}.{2}'.format(itype, primary, alias)
+    def format_host_option(self, option):
+        s = str(option)
+        s = s.replace('%h', self.label)
+        s = s.replace('%i', self.ip_str)
+        s = s.replace('%m', self.mac)
+        s = s.replace('%6m', self.mac[0:6])
+        return s
 
-    def build_host(self):
+    def build_host(self, options=None):
         build_str = '\thost {0} {{\n'.format(self.fqdn)
         build_str += '\t\thardware ethernet {0};\n'.format(
             format_mac(self.mac))
@@ -236,7 +195,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address6 {0};\n'.format(self.ip_str)
         else:
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
-        """
+        build_str += join_dhcp_args(map(self.format_host_option, options),
+                                    depth=2)
         options = self.staticintrkeyvalue_set.filter(is_option=True)
         statements = self.staticintrkeyvalue_set.filter(is_statement=True)
         if options:
@@ -245,20 +205,15 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if statements:
             build_str += '\t\t# Host Statements\n'
             build_str += join_dhcp_args(statements, depth=2)
-        """
-        build_str += '\t}\n\n'
+        build_str += '\t}\n'
         return build_str
 
-    def build_subclass(self, contained_range, allowed):
-        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed.name, contained_range.start_str, contained_range.end_str,
-            format_mac(self.mac))
+    def build_subclass(self, classname):
+        return 'subclass "{0}" 1:{1};\n'.format(
+            classname, format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)
-        if self.dhcp_enabled:
-            self.mac = self.mac.lower().replace(':', '').replace(' ', '')
-            validate_mac(self.mac)
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():

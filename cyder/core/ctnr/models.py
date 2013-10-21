@@ -1,10 +1,12 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
+from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.validation import validate_ctnr_name
@@ -55,18 +57,26 @@ class Ctnr(models.Model, ObjectUrlMixin):
             {'name': 'description', 'datatype': 'string', 'editable': True},
         ]}
 
-    def build_legacy_class(self):
+    def build_legacy_classes(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
-        for range_ in self.ranges.all():
-            build_str += ("class \"{0}:{1}:{2}\" {{"
-                          "\n\tmatch hardware;\n}}\n".format(
-                              self.name, range_.start_str, range_.end_str))
-            for client in DynamicInterface.objects.filter(range=range_,
-                                                          ctnr=self,
-                                                          dhcp_enabled=True):
-                if client.mac:
-                    build_str += client.build_subclass(self.name)
+        for range_ in self.ranges.filter(Q(range_type=DYNAMIC,
+                                           dhcp_enabled=True) |
+                                         Q(start_str='10.255.255.255')):
+            clients = (range_.dynamicinterface_set.filter(ctnr=self,
+                                                          dhcp_enabled=True)
+                                                  .exclude(mac=''))
+
+            classname = '{0}:{1}:{2}'.format(
+                self.name, range_.start_str, range_.end_str)
+
+            build_str += ('class "{0}" {{\n'
+                          '\tmatch hardware;\n'
+                          '}}\n'
+                          .format(classname))
+
+            for client in clients:
+                build_str += client.build_subclass(classname)
         return build_str
 
 
