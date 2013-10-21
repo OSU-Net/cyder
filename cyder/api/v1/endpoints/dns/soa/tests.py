@@ -6,7 +6,7 @@ from cyder.api.v1.tests.base import APITests
 class SOAAPI_Test(APITests, APIKVTestMixin):
     __test__ = True
     model = SOA
-    keyvalue_attr = "keyvalue_set"
+    keyvalue_attr = "soaav_set"
 
     def create_data(self):
         data = {
