@@ -1,7 +1,8 @@
-from cyder.migration.management.commands.lib.dhcpd_compare.parser \
-        import compare
-
 from django.core.management.base import BaseCommand, CommandError
+from sys import stdout
+
+from cyder.migration.management.commands.lib.dhcpd_compare2.compare \
+        import compare_files
 
 
 class Command(BaseCommand):
@@ -11,4 +12,4 @@ class Command(BaseCommand):
         if len(args) != 2:
             raise CommandError('You must provide two files to compare')
 
-        compare(args[0], args[1])
+        stdout.write(compare_files(args[0], args[1], verbose=True))
