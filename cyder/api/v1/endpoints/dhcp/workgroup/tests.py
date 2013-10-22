@@ -1,8 +1,8 @@
 from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.api.v1.tests.base import APITests
+from cyder.api.v1.tests.base import APITests, APIEAVTestMixin
 
 
-class WorkgroupAPI_Test(APITests):
+class WorkgroupAPI_Test(APITests, APIEAVTestMixin):
     __test__ = True
     model = Workgroup
 
