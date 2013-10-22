@@ -22,7 +22,8 @@ class DHCPMixin(object):
         return not self == other
 
     def __lt__(self, other):
-        return self.TYPE < other.TYPE or self._sort_str < other._sort_str
+        return self.TYPE < other.TYPE or (self.TYPE == other.TYPE and
+                                          self._sort_str < other._sort_str)
 
     def __str__(self):
         s = ''
