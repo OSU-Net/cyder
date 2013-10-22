@@ -86,7 +86,7 @@ class Pool(DHCPMixin):
         self.contents = set(contents or [])
         self.firstline = 'pool'
 
-        rs = next(ifilter(is_rangestmt, contents), None)
+        rs = next(ifilter(is_rangestmt, contents))
         self.start, self.end = rs.start, rs.end
 
     def set_sort_str(self):
