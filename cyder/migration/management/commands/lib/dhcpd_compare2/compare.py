@@ -8,10 +8,6 @@ from dhcp_objects import (Statement, RangeStmt, Pool, Subnet, Class, Subclass,
                           Group, Host, ConfigFile)
 
 
-
-def first(it):
-    return next(it, None)
-
 symbols = ''.join(chr(i) for i in xrange(0x21, 0x7E + 1))
 
 comment = re.compile(r'(?:"(?:[^"\\]|\\.)*"|[^"#])*(#|$)')
@@ -54,7 +50,7 @@ def parse_file(name):
 
 
 def find_in(obj, xs):
-    return first(ifilter(lambda x: x == obj, xs))
+    return next(ifilter(lambda x: x == obj, xs), None)
 
 
 def has_contents(x):
