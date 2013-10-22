@@ -37,12 +37,11 @@ def build_domain(label, domain_obj):
     return domain
 
 
-class APIKVTestMixin(object):
+class APIEAVTestMixin(object):
     """Mixin to test endpoints with key-value support."""
-    def __init__(self):
-        self.keyvalue_attr = self.model.__name__.lower() + "av_set"
+    def test_eav(self):
+        eav_attr = self.model.__name__.lower() + "av_set"
 
-    def test_keyvalues(self):
         obj = self.create_data()
 
         # init attribute
@@ -50,15 +49,15 @@ class APIKVTestMixin(object):
             name="Test Attribute", attribute_type=ATTRIBUTE_INFORMATIONAL,
             value_type="string")
 
-        getattr(obj, self.keyvalue_attr).get_or_create(
+        getattr(obj, eav_attr).get_or_create(
             attribute=attr, value='Test Value', entity=obj)
 
         resp = self.http_get(self.object_url(obj.id))
-        keyvalues = json.loads(resp.content)[self.keyvalue_attr]
+        eavs = json.loads(resp.content)[eav_attr]
 
-        for kv in keyvalues:
-            if kv['attribute'] == 'Test Attribute':
-                assert kv['value'] == 'Test Value'
+        for eav in eavs:
+            if eav['attribute'] == 'Test Attribute':
+                assert eav['value'] == 'Test Value'
                 break
         else:
             assert 1 == 0, "The test attribute-value pair could not be found."

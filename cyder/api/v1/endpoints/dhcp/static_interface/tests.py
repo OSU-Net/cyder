@@ -7,7 +7,6 @@ from cyder.api.v1.tests.base import APITests
 
 class StaticInterfaceBase(APITests):
     model = StaticInterface
-    keyvalue_attr = "staticintrkeyvalue_set"
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
