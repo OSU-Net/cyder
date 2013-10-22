@@ -27,6 +27,7 @@ class DHCPMixin(object):
     def __str__(self):
         s = ''
         if hasattr(self, 'contents') and self.contents:
+            map(lambda x: x.set_sort_str(), self.contents)
             if hasattr(self, 'comment') and self.comment:
                 comment = ' # ' + self.comment
             else:
@@ -35,9 +36,11 @@ class DHCPMixin(object):
             s += join_p(sorted(self.contents), prefix=self.side)
             s += self.side + '}\n'
         if hasattr(self, 'related') and self.related:
+            map(lambda x: x.set_sort_str(), self.related)
             s += join_p(sorted(self.related), indent=0)
             # they print their own side
         return s
+
 
 class Statement(DHCPMixin):
     TYPE = 1
@@ -45,6 +48,7 @@ class Statement(DHCPMixin):
     def __init__(self, statement):
         self.statement = statement
 
+    def set_sort_str(self):
         self._sort_str = self.statement
 
     def __eq__(self, other):
@@ -66,6 +70,7 @@ class RangeStmt(Statement):
         self.start = start
         self.end = end
 
+    def set_sort_str(self):
         self._sort_str = self.start + self.end
 
     def __eq__(self, other):
@@ -83,6 +88,7 @@ class Pool(DHCPMixin):
         rs = next(ifilter(is_rangestmt, contents), None)
         self.start, self.end = rs.start, rs.end
 
+    def set_sort_str(self):
         self._sort_str = self.start + self.end
 
     def __eq__(self, other):
@@ -103,6 +109,7 @@ class Subnet(DHCPMixin):
         self.firstline = 'subnet {0} netmask {1}'.format(self.netaddr,
                                                          self.netmask)
 
+    def set_sort_str(self):
         self._sort_str = self.netaddr + self.netmask
 
     def __eq__(self, other):
@@ -123,6 +130,7 @@ class Subclass(DHCPMixin):
         self.firstline = 'subclass "{0}" {1}'.format(self.classname,
                                                      self.match)
 
+    def set_sort_str(self):
         self._sort_str = self.classname + self.match
 
     def __eq__(self, other):
@@ -149,6 +157,7 @@ class Class(DHCPMixin):
         self.related = set(related or [])
         self.firstline = 'class "{0}"'.format(self.name)
 
+    def set_sort_str(self):
         self._sort_str = self.name
 
     def __eq__(self, other):
@@ -170,6 +179,7 @@ class Group(DHCPMixin):
         self.firstline = 'group'
         self.comment = self.name
 
+    def set_sort_str(self):
         self._sort_str = self.name
 
     def __eq__(self, other):
@@ -187,6 +197,7 @@ class Host(DHCPMixin):
         self.contents = set(contents or [])
         self.firstline = 'host ' + self.name
 
+    def set_sort_str(self):
         self._sort_str = self.name
 
     def __eq__(self, other):
