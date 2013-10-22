@@ -17,7 +17,7 @@ symbols = ''.join(chr(i) for i in xrange(0x21, 0x7E + 1))
 comment = re.compile(r'(?:"(?:[^"\\]|\\.)*"|[^"#])*(#|$)')
 
 
-def parsefile(name):
+def parse_file(name):
     config = ConfigFile()
 
     bindings = {
@@ -148,11 +148,11 @@ def compare(left, right, diff, childtype):
 def compare_files(filename1, filename2, verbose=False):
     if verbose:
         stderr.write('## Parsing {0}...\n'.format(filename1))
-    one = parsefile(filename1)
+    one = parse_file(filename1)
 
     if verbose:
         stderr.write('## Parsing {0}...\n'.format(filename2))
-    two = parsefile(filename2)
+    two = parse_file(filename2)
 
     diffFile = ConfigFile()
     if verbose:
