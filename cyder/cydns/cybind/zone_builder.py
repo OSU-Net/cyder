@@ -43,7 +43,11 @@ def render_rdtype(rdtype_set, **kwargs):
         return ""
 
     rdtype_set = map(lambda obj: obj.bind_render_record(**kwargs), rdtype_set)
-    return "\n".join(sorted(r.strip() for r in rdtype_set if r.strip())) + "\n"
+    rdtype_set = (r.strip() for r in rdtype_set if r.strip())
+    if kwargs.pop('sort', True):
+        rdtype_set = sorted(rdtype_set, key=lambda s: s.lower())
+
+    return "\n".join(rdtype_set) + "\n"
 
 
 def _render_forward_zone(default_ttl, nameserver_set, mx_set,
@@ -58,7 +62,7 @@ def _render_forward_zone(default_ttl, nameserver_set, mx_set,
     BUILD_STR += render_rdtype(cname_set)
     BUILD_STR += render_rdtype(interface_set, rdtype='A')
     BUILD_STR += render_rdtype(addressrecord_set)
-    BUILD_STR += render_rdtype(range_set)
+    BUILD_STR += render_rdtype(range_set, sort=False)
     return BUILD_STR
 
 
