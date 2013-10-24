@@ -12,10 +12,21 @@ $(document).ready(function() {
     var getUrl = metadata.attr('data-getUrl');
     var domainsUrl = metadata.attr('data-domainsUrl');
     var objPk = metadata.attr('data-objPk');
+
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     if (domainsUrl) {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
+    $('#id_attribute').live('focus', function() {
+        $('#id_attribute').autocomplete({
+            minLength: 1,
+            source: '/eav/search',
+            delay: 400,
+            select: function(event, ui) {
+                attributeName = ui.item.label
+            }
+        });
+    });
 
     function prettify(obj) {
         var obj_name = obj.split('_');
