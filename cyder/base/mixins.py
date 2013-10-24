@@ -16,7 +16,7 @@ class DisplayMixin(object):
         'rdtype_just':  7,
         'rdclass_just': 3,
         'prio_just':    2,
-        'lhs_just':     39,
+        'lhs_just':     61,
         'extra_just':   1
     }
 

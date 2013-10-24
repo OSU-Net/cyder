@@ -329,11 +329,9 @@ class Range(ViewMixin, ObjectUrlMixin):
 
         DEFAULT_TTL = 3600
         if kwargs.pop('reverse', False):
-            template = ("$GENERATE {3:>3}-{4:<3} {0}.{1}.{2}.$     "
-                        "{6} IN  PTR  {5}.")
+            template = ("$GENERATE {3:>3}-{4:<3}  {1:44} {2}  IN  PTR     {0}")
         else:
-            template = ("$GENERATE {3:>3}-{4:<3} {0}-{1}-{2}-$.{5}.     "
-                        "{6} IN  A    {0}.{1}.{2}.$")
+            template = ("$GENERATE {3:>3}-{4:<3}  {0:44} {2}  IN  A       {1}")
 
         built = ""
         start = map(int, self.start_str.split("."))
@@ -347,8 +345,9 @@ class Range(ViewMixin, ObjectUrlMixin):
                 for c in range(c1, c2 + 1):
                     d1 = start[3] if (a, b, c) == tuple(start[:3]) else 0
                     d2 = end[3] if (a, b, c) == tuple(end[:3]) else 255
-                    rec = template.format(a, b, c, d1, d2,
-                                          self.domain, DEFAULT_TTL)
+                    host = "{0}-{1}-{2}-$.{3}.".format(a, b, c, self.domain)
+                    ip = "{0}.{1}.{2}.$".format(a, b, c)
+                    rec = template.format(host, ip, DEFAULT_TTL, d1, d2)
                     built = "\n".join([built, rec]).strip()
 
         return built
