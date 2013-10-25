@@ -71,6 +71,7 @@ def ctnr_detail(request, pk):
         user_table = tablefy(users, extra_cols=extra_cols, users=True,
                              request=request)
     else:
+        users = [cu.user for cu in ctnrUsers]
         user_table = tablefy(ctnrUsers, users=True, request=request)
 
     add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
