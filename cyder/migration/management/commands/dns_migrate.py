@@ -181,7 +181,7 @@ class Zone(object):
                     continue
                 attr = Attribute.objects.get(
                     name=fix_attr_name(sys_value_keys[key]))
-                eav = SystemAV(system=system, attribute=attr, value=value)
+                eav = SystemAV(entity=system, attribute=attr, value=value)
                 eav.full_clean()
                 eav.save()
 
@@ -217,7 +217,7 @@ class Zone(object):
 
                     for key, value in get_host_option_values(items['id']):
                         attr = Attribute.objects.get(name=fix_attr_name(key))
-                        eav = StaticInterfaceAV(static_interface=static,
+                        eav = StaticInterfaceAV(entity=static,
                                                 attribute=attr, value=value)
                         eav.full_clean()
                         eav.save()

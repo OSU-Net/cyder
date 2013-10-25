@@ -98,7 +98,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
         name, type = cursor.fetchone()
         attr = Attribute.objects.get(name=fix_attr_name(name))
         eav, eav_created = NetworkAV.objects.get_or_create(
-            network=n, attribute=attr, value=value)
+            entity=n, attribute=attr, value=value)
         if eav_created:
             eav.full_clean()
             eav.save()
@@ -173,7 +173,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         attr = Attribute.objects.get(name=fix_attr_name('ipphone242'))
         eav, eav_created = RangeAV.objects.get_or_create(
-            range=r, attribute=attr, value='L2Q=1,L2QVLAN=503')
+            entity=r, attribute=attr, value='L2Q=1,L2QVLAN=503')
         if eav_created:
             eav.full_clean()
             eav.save()
@@ -246,7 +246,7 @@ def migrate_workgroups():
             name, type = cursor.fetchone()
             attr = Attribute.objects.get(name=fix_attr_name(name))
             eav, eav_created = WorkgroupAV.objects.get_or_create(
-                workgroup=w, attribute=attr, value=value)
+                entity=w, attribute=attr, value=value)
             if eav_created:
                 eav.clean()
                 eav.save()
@@ -381,7 +381,7 @@ def migrate_dynamic_hosts():
 
             attr = Attribute.objects.get(
                 name=fix_attr_name(sys_value_keys[key]))
-            eav = SystemAV(system=s, attribute=attr, value=value)
+            eav = SystemAV(entity=s, attribute=attr, value=value)
             eav.full_clean()
             eav.save()
 
@@ -391,8 +391,7 @@ def migrate_dynamic_hosts():
 
         for key, value in get_host_option_values(items['id']):
             attr = Attribute.objects.get(name=fix_attr_name(key))
-            eav = DynamicInterfaceAV(dynamic_interface=intr,
-                                     attribute=attr, value=value)
+            eav = DynamicInterfaceAV(entity=intr, attribute=attr, value=value)
             eav.full_clean()
             eav.save()
 
