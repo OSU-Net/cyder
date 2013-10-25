@@ -97,6 +97,13 @@ class Range(models.Model, ObjectUrlMixin):
         else:
             return ctnr.ranges
 
+    @property
+    def staticinterfaces(self):
+        start, end = four_to_two(
+            self.start_upper, self.start_lower, self.end_upper, self.end_lower)
+        return StaticInterface.objects.filter(
+                start_end_filter(start, end, self.ip_type)[2])
+
     def _range_ips(self):
         self._start, self._end = four_to_two(
             self.start_upper,
@@ -179,8 +186,7 @@ class Range(models.Model, ObjectUrlMixin):
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if self.range_type == DYNAMIC and StaticInterface.objects.filter(
-                start_end_filter(start, end, self.ip_type)[2]).exists():
+        if self.range_type == DYNAMIC and self.staticinterfaces.exists():
             raise ValidationError('A dynamic range cannot contain static '
                                   'interfaces')
 
@@ -209,8 +215,8 @@ class Range(models.Model, ObjectUrlMixin):
             allow = []
             if (self.allow == ALLOW_VRF or
                     self.allow == ALLOW_LEGACY_AND_VRF):
-                allow += ['allow members of "{0}:{1}:{2}"'.format(
-                    self.network.vrf.name, self.start_str, self.end_str)]
+                allow += ['allow members of "{0}"'.format(
+                    self.network.vrf.name)]
             if (self.allow == ALLOW_LEGACY or
                     self.allow == ALLOW_LEGACY_AND_VRF):
                 allow += ['allow members of "{0}:{1}:{2}"'.format(

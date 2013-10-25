@@ -57,7 +57,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
             {'name': 'description', 'datatype': 'string', 'editable': True},
         ]}
 
-    def build_legacy_class(self):
+    def build_legacy_classes(self):
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
         for range_ in self.ranges.filter(Q(range_type=DYNAMIC,
@@ -66,11 +66,17 @@ class Ctnr(models.Model, ObjectUrlMixin):
             clients = (range_.dynamicinterface_set.filter(ctnr=self,
                                                           dhcp_enabled=True)
                                                   .exclude(mac=''))
-            build_str += ("class \"{0}:{1}:{2}\" {{"
-                          "\n\tmatch hardware;\n}}\n".format(
-                              self.name, range_.start_str, range_.end_str))
+
+            classname = '{0}:{1}:{2}'.format(
+                self.name, range_.start_str, range_.end_str)
+
+            build_str += ('class "{0}" {{\n'
+                          '\tmatch hardware;\n'
+                          '}}\n'
+                          .format(classname))
+
             for client in clients:
-                build_str += client.build_subclass(self.name)
+                build_str += client.build_subclass(classname)
         return build_str
 
 
