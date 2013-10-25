@@ -1,0 +1,9 @@
+[
+  {
+    "pk": 1,
+    "model": "vrf.vrf",
+    "fields": {
+      "name": "Legacy"
+    }
+  }
+]
