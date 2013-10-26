@@ -16,9 +16,15 @@ class AttributeFormField(forms.CharField):
 def get_eav_form(eav_model, entity_model):
     class EAVForm(forms.ModelForm):
         def __init__(self, *args, **kwargs):
-            if 'initial' not in kwargs:
-                kwargs['initial'] = dict()
-            kwargs['initial']['attribute'] = kwargs['instance'].attribute.name
+            if 'instance' in kwargs and kwargs['instance'] is not None:
+                # This is a bound form with a real instance
+
+                if 'initial' not in kwargs:
+                    kwargs['initial'] = dict()
+
+                # Set the attribute field to the name, not the pk
+                kwargs['initial']['attribute'] = \
+                    kwargs['instance'].attribute.name
 
             super(EAVForm, self).__init__(*args, **kwargs)
 
