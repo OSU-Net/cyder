@@ -1,8 +1,8 @@
 from django import forms
 
-from cyder.cydhcp.range.models import Range, RangeAV
-from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.eav.forms import get_eav_form
+from cyder.base.mixins import UsabilityFormMixin
+from cyder.cydhcp.range.models import Range, RangeAV
 
 
 class RangeForm(forms.ModelForm, UsabilityFormMixin):

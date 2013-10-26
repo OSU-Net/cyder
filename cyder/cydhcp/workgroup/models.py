@@ -3,6 +3,7 @@ from itertools import chain
 from django.db import models
 
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -85,4 +86,4 @@ class WorkgroupAV(EAVBase):
 
 
     entity = models.ForeignKey(Workgroup)
-    attribute = models.ForeignKey(Attribute)
+    attribute = EAVAttributeField(Attribute)

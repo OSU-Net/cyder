@@ -3,6 +3,7 @@ from django.db import models
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -371,7 +372,7 @@ class RangeAV(EAVBase):
         db_table = 'range_av'
 
     entity = models.ForeignKey(Range)
-    attribute = models.ForeignKey(Attribute)
+    attribute = EAVAttributeField(Attribute)
 
 
 # reversion.(RangeAV)

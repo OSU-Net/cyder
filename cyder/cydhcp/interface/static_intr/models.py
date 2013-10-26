@@ -14,6 +14,7 @@ from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 
 from cyder.cydhcp.constants import STATIC
@@ -278,4 +279,4 @@ class StaticInterfaceAV(EAVBase):
 
 
     entity = models.ForeignKey(StaticInterface)
-    attribute = models.ForeignKey(Attribute)
+    attribute = EAVAttributeField(Attribute)

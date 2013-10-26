@@ -3,6 +3,7 @@ from django.db.models.loading import get_model
 from django.core.validators import RegexValidator
 
 from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.cydhcp.utils import networks_to_Q
@@ -113,5 +114,5 @@ class SiteAV(EAVBase):
 
 
     entity = models.ForeignKey(Site)
-    attribute = models.ForeignKey(Attribute,
+    attribute = EAVAttributeField(Attribute,
             limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})

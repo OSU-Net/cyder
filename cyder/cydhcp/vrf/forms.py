@@ -1,7 +1,8 @@
 from django import forms
 
-from cyder.cydhcp.vrf.models import Vrf, VrfAV
+from cyder.base.eav.forms import get_eav_form
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.cydhcp.vrf.models import Vrf, VrfAV
 
 
 class VrfForm(forms.ModelForm, UsabilityFormMixin):
@@ -9,11 +10,4 @@ class VrfForm(forms.ModelForm, UsabilityFormMixin):
         model = Vrf
 
 
-class VrfAVForm(forms.ModelForm):
-    entity = forms.ModelChoiceField(
-        queryset=Vrf.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = VrfAV
-        fields = ('entity', 'attribute', 'value')
+VrfAVForm = get_eav_form(VrfAV, Vrf)

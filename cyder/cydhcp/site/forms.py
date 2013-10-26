@@ -1,4 +1,6 @@
 from django import forms
+
+from cyder.base.eav.forms import get_eav_form
 from cyder.cydhcp.site.models import Site, SiteAV
 
 
@@ -9,11 +11,4 @@ class SiteForm(forms.ModelForm):
         model = Site
 
 
-class SiteAVForm(forms.ModelForm):
-    entity = forms.ModelChoiceField(
-        queryset=Site.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = SiteAV
-        fields = ('entity', 'attribute', 'value')
+SiteAVForm = get_eav_form(SiteAV, Site)

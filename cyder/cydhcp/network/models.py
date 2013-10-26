@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
@@ -270,4 +271,4 @@ class NetworkAV(EAVBase):
 
 
     entity = models.ForeignKey(Network)
-    attribute = models.ForeignKey(Attribute)
+    attribute = EAVAttributeField(Attribute)

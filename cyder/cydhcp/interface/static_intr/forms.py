@@ -3,15 +3,16 @@ from django.core.exceptions import ValidationError
 
 import ipaddr
 
+from cyder.base.eav.forms import get_eav_form
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.system.models import System
+from cyder.cydhcp.forms import RangeWizard
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticInterfaceAV)
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
-from cyder.cydhcp.forms import RangeWizard
 from cyder.cydns.validation import validate_label
-from cyder.base.mixins import UsabilityFormMixin
 
 
 def validate_ip(ip):
@@ -49,14 +50,7 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
         widgets = {'ip_type': forms.RadioSelect}
 
 
-class StaticInterfaceAVForm(forms.ModelForm):
-    entity = forms.ModelChoiceField(
-        queryset=StaticInterface.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = StaticInterfaceAV
-        fields = ('entity', 'attribute', 'value')
+StaticInterfaceAVForm = get_eav_form(StaticInterfaceAV, StaticInterface)
 
 
 class FullStaticInterfaceForm(forms.ModelForm):

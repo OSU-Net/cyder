@@ -1,6 +1,7 @@
 from django.db import models
 
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
@@ -139,4 +140,4 @@ class DynamicInterfaceAV(EAVBase):
 
 
     entity = models.ForeignKey(DynamicInterface)
-    attribute = models.ForeignKey(Attribute)
+    attribute = EAVAttributeField(Attribute)

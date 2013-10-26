@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 import ipaddr
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.forms import get_eav_form
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.network.models import Network, NetworkAV
 from cyder.cydhcp.site.models import Site
@@ -54,14 +55,7 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
         return cleaned_data
 
 
-class NetworkAVForm(forms.ModelForm):
-    entity = forms.ModelChoiceField(
-        queryset=Network.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = NetworkAV
-        fields = ('entity', 'attribute', 'value')
+NetworkAVForm = get_eav_form(NetworkAV, Network)
 
 
 class NetworkForm_network(forms.Form):

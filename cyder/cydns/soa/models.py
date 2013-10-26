@@ -8,6 +8,7 @@ from django.db.models import Q, F
 from django.db import models
 
 from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
+from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
@@ -200,5 +201,5 @@ class SOAAV(EAVBase):
 
 
     entity = models.ForeignKey(SOA)
-    attribute = models.ForeignKey(Attribute,
+    attribute = EAVAttributeField(Attribute,
             limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})
