@@ -26,8 +26,8 @@ class Attribute(models.Model):
 class EAVBase(models.Model, ObjectUrlMixin):
     """The entity-attribute-value base model
 
-    When you inherit from this model, you must define the following field::
-        attribute = ForeignKey(Attribute)
+    When you inherit from this model, you must define the following fields::
+        attribute = EAVAttributeField(Attribute)
         entity = ForeignKey(ENTITY)
     where ENTITY is the entity model.
 

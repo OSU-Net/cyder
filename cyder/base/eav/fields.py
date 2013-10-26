@@ -1,3 +1,4 @@
+from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from south.modelsinspector import add_introspection_rules
@@ -21,7 +22,6 @@ class AttributeValueTypeField(models.CharField):
 
         super(AttributeValueTypeField, self).__init__(*args, **kwargs)
 
-
     def clean(self, value, model_instance):
         attribute_type = getattr(model_instance, self.attribute_type_field)
         if attribute_type == ATTRIBUTE_INFORMATIONAL:
@@ -30,7 +30,6 @@ class AttributeValueTypeField(models.CharField):
 
         return super(AttributeValueTypeField, self).clean(value,
                                                           model_instance)
-
 
     def validate(self, value, model_instance):
         attribute_type = getattr(model_instance, self.attribute_type_field)
@@ -57,10 +56,9 @@ class EAVValueField(models.CharField):
     def __init__(self, *args, **kwargs):
         self.attribute_field = kwargs.pop('attribute_field', None)
         if self.attribute_field is None:
-            raise Exception("You must specify the 'attribute_field' option")
+            raise Exception("The 'attribute_field' argument is required")
 
         super(EAVValueField, self).__init__(*args, **kwargs)
-
 
     def to_python(self, value):
         if not isinstance(value, unicode):
@@ -70,8 +68,10 @@ class EAVValueField(models.CharField):
 
         return super(EAVValueField, self).to_python(value)
 
-
     def validate(self, value, model_instance):
+        if not getattr(model_instance, self.attribute_field + '_id'):
+            return
+
         attribute = getattr(model_instance, self.attribute_field)
 
         if attribute.attribute_type in (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT):
@@ -85,6 +85,29 @@ class EAVValueField(models.CharField):
             validator(value)
 
         super(EAVValueField, self).validate(value, model_instance)
+
+
+class EAVAttributeField(models.ForeignKey):
+    def formfield(self, **kwargs):
+        return AttributeFormField(choices=self.rel.limit_choices_to, **kwargs)
+
+
+class AttributeFormField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        if 'choices' in kwargs:
+            self.choices = kwargs.pop('choices')
+        else:
+            raise Exception("The 'choices' argument is required")
+
+        super(AttributeFormField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        from cyder.base.eav.models import Attribute
+
+        try:
+            return Attribute.objects.get(name=value, **self.choices)
+        except Attribute.DoesNotExist:
+            raise ValidationError("No such attribute")
 
 
 add_introspection_rules([
@@ -103,3 +126,12 @@ add_introspection_rules([
         {'attribute_field': ('attribute_field', {})}, # kwargs
     )
 ], [r'^cyder\.base\.eav\.fields\.EAVValueField'])
+
+
+add_introspection_rules([
+    (
+        [EAVAttributeField], # model
+        [], # args
+        {}, # kwargs
+    )
+], [r'^cyder\.base\.eav\.fields\.EAVAttributeField'])
