@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
             ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['network.Network'])),
-            ('attribute', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['eav.Attribute'])),
+            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('network', ['NetworkAV'])
 
@@ -75,7 +75,7 @@ class Migration(SchemaMigration):
         },
         'network.networkav': {
             'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'NetworkAV', 'db_table': "'network_av'"},
-            'attribute': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['eav.Attribute']"}),
+            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'to': "orm['eav.Attribute']"}),
             'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['network.Network']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
