@@ -143,23 +143,6 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     form = FormKlass(instance=obj)
     if request.method == 'POST':
         post_data = qd_to_py_dict(request.POST)
-        if FormKlass.__name__ == 'EAVForm':
-            from cyder.base.eav.models import Attribute
-            attribute = Attribute.objects.filter(name=post_data['attribute'])
-            if attribute.exists():
-                post_data['attribute'] = attribute[0].id
-            else:
-                form = FormKlass(post_data, instance=obj)
-                form._errors = ErrorDict()
-                form._errors['attribute'] = ErrorList(
-                    ["The attribute \"{0}\" does not exist".format(
-                        post_data['attribute'])])
-                return render(request, template, {
-                    'form': form,
-                    'obj': obj,
-                    'obj_type': obj_type,
-                    'pk': pk,
-                })
         form = FormKlass(post_data, instance=obj)
         if form.is_valid():
             try:
