@@ -28,9 +28,7 @@ $(document).ready(function() {
                         term: request.term,
                         attribute_type: $('#id_attribute_type').val()
                     },
-                    success: function(data) {
-                        response(data)
-                    }
+                    success: response
                 })
             },
             delay: 400,
