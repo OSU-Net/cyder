@@ -20,7 +20,19 @@ $(document).ready(function() {
     $('#id_attribute').live('focus', function() {
         $('#id_attribute').autocomplete({
             minLength: 1,
-            source: '/eav/search',
+            source: function(request, response) {
+                $.ajax({
+                    url: '/eav/search',
+                    dataType: 'json',
+                    data: {
+                        term: request.term,
+                        attribute_type: $('#id_attribute_type').val()
+                    },
+                    success: function(data) {
+                        response(data)
+                    }
+                })
+            },
             delay: 400,
             select: function(event, ui) {
                 attributeName = ui.item.label

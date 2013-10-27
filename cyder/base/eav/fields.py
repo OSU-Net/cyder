@@ -4,7 +4,7 @@ from django.db import models
 from south.modelsinspector import add_introspection_rules
 
 from cyder.base.eav import validators
-from cyder.base.eav.constants import (ATTRIBUTE_INFORMATIONAL,
+from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
                                       ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
 
 
@@ -88,6 +88,20 @@ class EAVValueField(models.CharField):
 
 
 class EAVAttributeField(models.ForeignKey):
+    def __init__(self, *args, **kwargs):
+        if 'attribute_type_choices' in kwargs:
+            kwargs['limit_choices_to'] = \
+                {'attribute_type__in': kwargs['attribute_type_choices']}
+
+            self.type_choices = [
+                (attr_type, dict(ATTRIBUTE_TYPES)[attr_type])
+                for attr_type in kwargs.pop('attribute_type_choices')
+            ]
+        else:
+            self.type_choices = ATTRIBUTE_TYPES
+
+        super(EAVAttributeField, self).__init__(*args, **kwargs)
+
     def formfield(self, **kwargs):
         return AttributeFormField(choices=self.rel.limit_choices_to, **kwargs)
 

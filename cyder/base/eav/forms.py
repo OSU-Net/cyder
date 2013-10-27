@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
+from cyder.base.eav.constants import ATTRIBUTE_TYPES
 from cyder.base.eav.models import Attribute
 
 
@@ -19,12 +20,15 @@ def get_eav_form(eav_model, entity_model):
 
             super(EAVForm, self).__init__(*args, **kwargs)
 
+        attribute_type = forms.ChoiceField(
+            choices=eav_model._meta.get_field('attribute').type_choices)
+
         entity = forms.ModelChoiceField(
             queryset=entity_model.objects.all(),
             widget=forms.HiddenInput())
 
         class Meta:
             model = eav_model
-            fields = ('entity', 'attribute', 'value')
+            fields = ('entity', 'attribute_type', 'attribute', 'value')
 
     return EAVForm

@@ -11,9 +11,10 @@ def search(request):
     term = request.GET.get('term', '')
     if not term:
         raise Http404
+    attribute_type = request.GET.get('attribute_type', '')
 
     attributes = Attribute.objects.filter(
-        make_megafilter(Attribute, term))[:15]
+        make_megafilter(Attribute, term), attribute_type=attribute_type)[:15]
     attributes = [{
         'label': str(attribute),
         'pk': attribute.id} for attribute in attributes]
