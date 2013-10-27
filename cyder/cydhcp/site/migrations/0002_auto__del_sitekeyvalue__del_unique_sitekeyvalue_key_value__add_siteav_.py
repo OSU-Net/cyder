@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
             ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['site.Site'])),
-            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(to=orm['eav.Attribute'])),
+            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(type_choices=[('i', 'Informational')], to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('site', ['SiteAV'])
 
@@ -64,7 +64,7 @@ class Migration(SchemaMigration):
         },
         'site.siteav': {
             'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'SiteAV', 'db_table': "'site_av'"},
-            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'to': "orm['eav.Attribute']"}),
+            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'type_choices': "[('i', 'Informational')]", 'to': "orm['eav.Attribute']"}),
             'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['site.Site']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})

@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
             ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['dynamic_intr.DynamicInterface'])),
-            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(to=orm['eav.Attribute'])),
+            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(type_choices=(('i', 'Informational'), ('o', 'DHCP option'), ('s', 'DHCP statement')), to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('dynamic_intr', ['DynamicInterfaceAV'])
 
@@ -131,7 +131,7 @@ class Migration(SchemaMigration):
         },
         'dynamic_intr.dynamicinterfaceav': {
             'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'DynamicInterfaceAV', 'db_table': "'dynamic_interface_av'"},
-            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'to': "orm['eav.Attribute']"}),
+            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'type_choices': "(('i', 'Informational'), ('o', 'DHCP option'), ('s', 'DHCP statement'))", 'to': "orm['eav.Attribute']"}),
             'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['dynamic_intr.DynamicInterface']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
@@ -192,7 +192,7 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382828255'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382841286'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'system.system': {
