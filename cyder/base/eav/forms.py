@@ -35,4 +35,6 @@ def get_eav_form(eav_model, entity_model):
             model = eav_model
             fields = ('entity', 'attribute_type', 'attribute', 'value')
 
+    EAVForm.__name__ = eav_model.__name__ + 'Form'
+
     return EAVForm
