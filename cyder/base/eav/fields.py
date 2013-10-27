@@ -9,8 +9,17 @@ from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
 
 
 class AttributeValueTypeField(models.CharField):
-    __metaclass__ = models.SubfieldBase
+    """
+    This field represents the attribute value type -- in other words, the
+    type of data the EAV value is allowed to hold. It names a validator defined
+    in cyder.base.eav.validators, which is called in EAVValueField.validate
+    with the value as its argument. Informational attributes are not validated,
+    so this field is set to the empty string if the attribute is informational.
 
+    Arguments:
+        attribute_type_field: the name of the attribute_type field
+    """
+    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         if 'attribute_type_field' in kwargs:
@@ -50,8 +59,16 @@ class AttributeValueTypeField(models.CharField):
 
 
 class EAVValueField(models.CharField):
-    __metaclass__ = models.SubfieldBase
+    """
+    This field represents an EAV value. It strips leading and trailing
+    whitespace and validates using the validator function specified in
+    the EAV attribute object's attribute_type field.
 
+    Arguments:
+        attribute_field: the name of the attribute field
+    """
+
+    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         self.attribute_field = kwargs.pop('attribute_field', None)
@@ -88,6 +105,16 @@ class EAVValueField(models.CharField):
 
 
 class EAVAttributeField(models.ForeignKey):
+    """
+    This field is almost identical to a ForeignKey except that the target model
+    is always Attribute and that it takes a type_choices argument to simplify
+    attribute_type filtering in the model and the UI.
+
+    Arguments:
+        type_choices: an iterable containing the attribute_type values that
+                      specify allowable attributes
+    """
+
     def __init__(self, *args, **kwargs):
         if 'type_choices' in kwargs:
             kwargs['limit_choices_to'] = \
@@ -108,6 +135,13 @@ class EAVAttributeField(models.ForeignKey):
 
 
 class AttributeFormField(forms.CharField):
+    """
+    This field is the form field for EAVAttributeField; the user inputs a
+    attribute name, and the field converts that to a reference to the actual
+    Attribute object, raising a ValidationError if the attribute name is
+    invalid.
+    """
+
     def __init__(self, *args, **kwargs):
         if 'choices_query' in kwargs:
             self.choices_query = kwargs.pop('choices_query')
@@ -123,6 +157,10 @@ class AttributeFormField(forms.CharField):
             return Attribute.objects.get(name=value, **self.choices_query)
         except Attribute.DoesNotExist:
             raise ValidationError("No such attribute")
+
+
+# "Introspection rules" tell South which custom field arguments it needs to
+# keep track of. Don't change them unless you know what you're doing.
 
 
 add_introspection_rules([

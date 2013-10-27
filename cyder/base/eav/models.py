@@ -27,17 +27,16 @@ class EAVBase(models.Model, ObjectUrlMixin):
     """The entity-attribute-value base model
 
     When you inherit from this model, you must define the following fields::
-        attribute = EAVAttributeField(Attribute)
         entity = ForeignKey(ENTITY)
+        attribute = EAVAttributeField(Attribute)
     where ENTITY is the entity model.
 
     If you define a custom Meta class on your model, ensure it inherits from
     :code:`EAVBase.Meta`.
 
-    The child class is required to define the attribute field because it allows
-    you to filter the attribute choices by adding
-    :code:`limit_choices_to={'attribute_type': x}` or
-    :code:`limit_choices_to={'attribute_type__in': x}` to the argument list.
+    To restrict the attribute field by attribute type, pass EAVAttributeField
+    the `type_choices` keyword argument with an iterable specifying the
+    attribute types to allow.
     """
 
     class Meta:
