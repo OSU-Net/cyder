@@ -89,13 +89,13 @@ class EAVValueField(models.CharField):
 
 class EAVAttributeField(models.ForeignKey):
     def __init__(self, *args, **kwargs):
-        if 'attribute_type_choices' in kwargs:
+        if 'type_choices' in kwargs:
             kwargs['limit_choices_to'] = \
-                {'attribute_type__in': kwargs['attribute_type_choices']}
+                {'attribute_type__in': kwargs['type_choices']}
 
             self.type_choices = [
                 (attr_type, dict(ATTRIBUTE_TYPES)[attr_type])
-                for attr_type in kwargs.pop('attribute_type_choices')
+                for attr_type in kwargs.pop('type_choices')
             ]
         else:
             self.type_choices = ATTRIBUTE_TYPES
@@ -103,15 +103,16 @@ class EAVAttributeField(models.ForeignKey):
         super(EAVAttributeField, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
-        return AttributeFormField(choices=self.rel.limit_choices_to, **kwargs)
+        return AttributeFormField(choices_query=self.rel.limit_choices_to,
+                                  **kwargs)
 
 
 class AttributeFormField(forms.CharField):
     def __init__(self, *args, **kwargs):
-        if 'choices' in kwargs:
-            self.choices = kwargs.pop('choices')
+        if 'choices_query' in kwargs:
+            self.choices_query = kwargs.pop('choices_query')
         else:
-            raise Exception("The 'choices' argument is required")
+            raise Exception("The 'choices_query' argument is required")
 
         super(AttributeFormField, self).__init__(*args, **kwargs)
 
@@ -119,7 +120,7 @@ class AttributeFormField(forms.CharField):
         from cyder.base.eav.models import Attribute
 
         try:
-            return Attribute.objects.get(name=value, **self.choices)
+            return Attribute.objects.get(name=value, **self.choices_query)
         except Attribute.DoesNotExist:
             raise ValidationError("No such attribute")
 
@@ -146,6 +147,6 @@ add_introspection_rules([
     (
         [EAVAttributeField], # model
         [], # args
-        {}, # kwargs
+        {'type_choices': ('type_choices', {})}, # kwargs
     )
 ], [r'^cyder\.base\.eav\.fields\.EAVAttributeField'])
