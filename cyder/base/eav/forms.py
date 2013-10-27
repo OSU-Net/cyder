@@ -18,6 +18,10 @@ def get_eav_form(eav_model, entity_model):
                 kwargs['initial']['attribute'] = \
                     kwargs['instance'].attribute.name
 
+                # Set the attribute_type field to the current attribute's type
+                kwargs['initial']['attribute_type'] = \
+                    kwargs['instance'].attribute.attribute_type
+
             super(EAVForm, self).__init__(*args, **kwargs)
 
         attribute_type = forms.ChoiceField(
