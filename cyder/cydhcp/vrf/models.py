@@ -85,4 +85,4 @@ class VrfAV(EAVBase):
 
     entity = models.ForeignKey(Vrf)
     attribute = EAVAttributeField(Attribute,
-            limit_choices_to={'attribute_type': ATTRIBUTE_INFORMATIONAL})
+            type_choices=(ATTRIBUTE_INFORMATIONAL,))
