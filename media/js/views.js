@@ -17,6 +17,7 @@ $(document).ready(function() {
     if (domainsUrl) {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
+
     $('#id_attribute').live('focus', function() {
         $('#id_attribute').autocomplete({
             minLength: 1,
@@ -37,6 +38,10 @@ $(document).ready(function() {
             }
         });
     });
+
+	$('#id_attribute_type').live('change', function() {
+		$('#id_attribute').val('');
+	});
 
     function prettify(obj) {
         var obj_name = obj.split('_');
