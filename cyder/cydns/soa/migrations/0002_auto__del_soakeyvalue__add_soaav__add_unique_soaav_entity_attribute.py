@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
             ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['soa.SOA'])),
-            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(type_choices=[('i', 'Informational')], to=orm['eav.Attribute'])),
+            ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(to=orm['eav.Attribute'])),
         ))
         db.send_create_signal('soa', ['SOAAV'])
 
@@ -62,12 +62,12 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382841262'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1382908066'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'soa.soaav': {
             'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'SOAAV', 'db_table': "'soa_av'"},
-            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'type_choices': "[('i', 'Informational')]", 'to': "orm['eav.Attribute']"}),
+            'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'to': "orm['eav.Attribute']"}),
             'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['soa.SOA']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})

@@ -163,28 +163,27 @@ class AttributeFormField(forms.CharField):
 # keep track of. Don't change them unless you know what you're doing.
 
 
-add_introspection_rules([
-    (
-        [AttributeValueTypeField], # model
-        [], # args
-        {'attribute_type_field': ('attribute_type_field', {})}, # kwargs
-    )
-], [r'^cyder\.base\.eav\.fields\.AttributeValueTypeField'])
-
-
-add_introspection_rules([
-    (
-        [EAVValueField], # model
-        [], # args
-        {'attribute_field': ('attribute_field', {})}, # kwargs
-    )
-], [r'^cyder\.base\.eav\.fields\.EAVValueField'])
-
-
-add_introspection_rules([
-    (
-        [EAVAttributeField], # model
-        [], # args
-        {'type_choices': ('type_choices', {})}, # kwargs
-    )
-], [r'^cyder\.base\.eav\.fields\.EAVAttributeField'])
+add_introspection_rules(
+    [
+        (
+            [AttributeValueTypeField], # model
+            [], # args
+            {'attribute_type_field': ('attribute_type_field', {})} # kwargs
+        ),
+        (
+            [EAVValueField], # model
+            [], # args
+            {'attribute_field': ('attribute_field', {})} # kwargs
+        ),
+        (
+            [EAVAttributeField], # model
+            [], # args
+            {} # kwargs
+        ),
+    ],
+    [
+        r'^cyder\.base\.eav\.fields\.AttributeValueTypeField',
+        r'^cyder\.base\.eav\.fields\.EAVValueField',
+        r'^cyder\.base\.eav\.fields\.EAVAttributeField',
+    ]
+)
