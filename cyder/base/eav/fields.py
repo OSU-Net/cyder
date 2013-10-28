@@ -168,18 +168,18 @@ add_introspection_rules(
         (
             [AttributeValueTypeField], # model
             [], # args
-            {'attribute_type_field': ('attribute_type_field', {})} # kwargs
+            {'attribute_type_field': ('', {'is_value': True})} # kwargs
         ),
         (
             [EAVValueField], # model
             [], # args
-            {'attribute_field': ('attribute_field', {})} # kwargs
+            {'attribute_field': ('', {'is_value': True})} # kwargs
         ),
         (
             [EAVAttributeField], # model
             [], # args
             {} # kwargs
-        ),
+        )
     ],
     [
         r'^cyder\.base\.eav\.fields\.AttributeValueTypeField',

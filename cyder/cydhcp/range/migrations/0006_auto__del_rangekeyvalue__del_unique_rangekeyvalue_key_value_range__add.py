@@ -17,7 +17,7 @@ class Migration(SchemaMigration):
         # Adding model 'RangeAV'
         db.create_table('range_av', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='attribute', max_length=255)),
+            ('value', self.gf('cyder.base.eav.fields.EAVValueField')(attribute_field='', max_length=255)),
             ('entity', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['range.Range'])),
             ('attribute', self.gf('cyder.base.eav.fields.EAVAttributeField')(to=orm['eav.Attribute'])),
         ))
@@ -57,7 +57,7 @@ class Migration(SchemaMigration):
             'attribute_type': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'value_type': ('cyder.base.eav.fields.AttributeValueTypeField', [], {'attribute_type_field': "'attribute_type'", 'max_length': '20'})
+            'value_type': ('cyder.base.eav.fields.AttributeValueTypeField', [], {'attribute_type_field': "''", 'max_length': '20'})
         },
         'network.network': {
             'Meta': {'unique_together': "(('ip_upper', 'ip_lower', 'prefixlen'),)", 'object_name': 'Network', 'db_table': "'network'"},
@@ -95,7 +95,7 @@ class Migration(SchemaMigration):
             'attribute': ('cyder.base.eav.fields.EAVAttributeField', [], {'to': "orm['eav.Attribute']"}),
             'entity': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['range.Range']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "'attribute'", 'max_length': '255'})
+            'value': ('cyder.base.eav.fields.EAVValueField', [], {'attribute_field': "''", 'max_length': '255'})
         },
         'site.site': {
             'Meta': {'unique_together': "(('name', 'parent'),)", 'object_name': 'Site', 'db_table': "'site'"},
