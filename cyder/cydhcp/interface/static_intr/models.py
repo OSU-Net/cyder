@@ -1,7 +1,6 @@
 from gettext import gettext as _
 
 from django.db import models
-from django.db.models import Q, get_model
 from django.core.exceptions import ValidationError
 
 import cydns
@@ -18,7 +17,6 @@ from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
-from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
@@ -55,7 +53,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     """
 
     id = models.AutoField(primary_key=True)
-    ctnr = models.ForeignKey('ctnr.Ctnr', null=False)
+    ctnr = models.ForeignKey('ctnr.Ctnr', null=False, verbose_name="Container")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
                        help_text='(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
@@ -120,7 +118,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
                 'True: A/PTR' if self.dns_enabled else 'False'),
-            ('Last Seen', 'last_seen', date),
+            ('Last seen', 'last_seen', date),
         )
         return data
 
@@ -202,10 +200,9 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         build_str += '\t}\n'
         return build_str
 
-    def build_subclass(self, contained_range, allowed):
-        return "subclass \"{0}:{1}:{2}\" 1:{3};\n".format(
-            allowed.name, contained_range.start_str, contained_range.end_str,
-            format_mac(self.mac))
+    def build_subclass(self, classname):
+        return 'subclass "{0}" 1:{1};\n'.format(
+            classname, format_mac(self.mac))
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)

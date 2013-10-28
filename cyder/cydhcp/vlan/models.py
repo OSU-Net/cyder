@@ -4,12 +4,13 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 from cyder.cydhcp.keyvalue.models import KeyValue
 
 
-class Vlan(models.Model, ObjectUrlMixin):
+class Vlan(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     number = models.PositiveIntegerField()
@@ -22,7 +23,7 @@ class Vlan(models.Model, ObjectUrlMixin):
         unique_together = ("name", "number")
 
     def __str__(self):
-        return get_display(self) + ', {0}'.format(self.number)
+        return '{0} ({1})'.format(get_display(self), self.number)
 
     def __repr__(self):
         return "<Vlan {0}>".format(str(self))

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -11,7 +12,7 @@ from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain
 
 
-class Domain(models.Model, ObjectUrlMixin):
+class Domain(BaseModel, ObjectUrlMixin):
     """A Domain is used as a foreign key for most DNS records.
 
     A domain's SOA should be shared by only domains within its zone.
@@ -83,7 +84,8 @@ class Domain(models.Model, ObjectUrlMixin):
                             validators=[validate_domain_name])
     master_domain = models.ForeignKey("self", null=True,
                                       default=None, blank=True)
-    soa = models.ForeignKey("soa.SOA", null=True, default=None, blank=True)
+    soa = models.ForeignKey("soa.SOA", null=True, default=None,
+                            blank=True, verbose_name='SOA')
     is_reverse = models.BooleanField(default=False)
     # This indicates if this domain (and zone) needs to be rebuilt
     dirty = models.BooleanField(default=False)

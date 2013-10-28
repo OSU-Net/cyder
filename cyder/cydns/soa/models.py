@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
+from cyder.base.models import BaseModel
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
@@ -23,7 +24,7 @@ DEFAULT_REFRESH = 180  # 3 min
 DEFAULT_MINIMUM = 180  # 3 min
 
 
-class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
+class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     """
     SOA stands for Start of Authority
 
@@ -52,7 +53,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     id = models.AutoField(primary_key=True)
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
-                                      help_text="Time to Live of this record")
+                                      verbose_name="Time to live")
     primary = models.CharField(max_length=100, validators=[validate_fqdn])
     contact = models.CharField(max_length=100, validators=[validate_fqdn])
     serial = models.PositiveIntegerField(null=False, default=int(time.time()))
@@ -199,7 +200,6 @@ class SOAKeyValue(KeyValue):
 
     class Meta:
         db_table = 'soa_kv'
-
 
     def _aa_disabled(self):
         """

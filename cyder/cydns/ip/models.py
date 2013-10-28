@@ -57,8 +57,7 @@ class Ip(models.Model):
 
     """
     ip_str = models.CharField(
-        max_length=39, editable=True, verbose_name='IP',
-        help_text="IP Address in dotted quad or dotted colon format")
+        max_length=39, editable=True, verbose_name='IP address')
     # ip_upper/lower are calculated from ip_str on ip_clean.
     # TODO: rename ip_* to ipaddr_*
     ip_upper = models.BigIntegerField(null=True, blank=True)

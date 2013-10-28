@@ -49,7 +49,7 @@ class DHCPBuilder(SVNBuilderMixin):
         with open(os.path.join(self.STAGE_DIR, self.TARGET_FILE), 'w') as f:
             try:
                 for ctnr in Ctnr.objects.all():
-                    f.write(ctnr.build_legacy_class())
+                    f.write(ctnr.build_legacy_classes())
                 for vrf in Vrf.objects.all():
                     f.write(vrf.build_vrf())
                 for network in Network.objects.filter(enabled=True):

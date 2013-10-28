@@ -4,6 +4,7 @@ from django.db.models import Q
 
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
@@ -12,7 +13,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.validation import validate_ctnr_name
 
 
-class Ctnr(models.Model, ObjectUrlMixin):
+class Ctnr(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True,
                             validators=[validate_ctnr_name])
@@ -57,8 +58,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
             {'name': 'description', 'datatype': 'string', 'editable': True},
         ]}
 
-    def build_legacy_class(self):
-        from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+    def build_legacy_classes(self):
         build_str = ""
         for range_ in self.ranges.filter(Q(range_type=DYNAMIC,
                                            dhcp_enabled=True) |
@@ -66,15 +66,21 @@ class Ctnr(models.Model, ObjectUrlMixin):
             clients = (range_.dynamicinterface_set.filter(ctnr=self,
                                                           dhcp_enabled=True)
                                                   .exclude(mac=''))
-            build_str += ("class \"{0}:{1}:{2}\" {{"
-                          "\n\tmatch hardware;\n}}\n".format(
-                              self.name, range_.start_str, range_.end_str))
+
+            classname = '{0}:{1}:{2}'.format(
+                self.name, range_.start_str, range_.end_str)
+
+            build_str += ('class "{0}" {{\n'
+                          '\tmatch hardware;\n'
+                          '}}\n'
+                          .format(classname))
+
             for client in clients:
-                build_str += client.build_subclass(self.name)
+                build_str += client.build_subclass(classname)
         return build_str
 
 
-class CtnrUser(models.Model, ObjectUrlMixin):
+class CtnrUser(BaseModel, ObjectUrlMixin):
     user = models.ForeignKey(User)
     ctnr = models.ForeignKey(Ctnr)
     level = models.IntegerField()

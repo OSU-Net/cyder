@@ -4,6 +4,7 @@ from django.db import models
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_VRF,
@@ -22,7 +23,7 @@ import ipaddr
 # import reversion
 
 
-class Range(models.Model, ObjectUrlMixin):
+class Range(BaseModel, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
@@ -61,11 +62,11 @@ class Range(models.Model, ObjectUrlMixin):
 
     start_upper = models.BigIntegerField(null=True, editable=False)
     start_lower = models.BigIntegerField(null=True, editable=False)
-    start_str = models.CharField(max_length=39)
+    start_str = models.CharField(max_length=39, verbose_name="Start address")
 
     end_lower = models.BigIntegerField(null=True, editable=False)
     end_upper = models.BigIntegerField(null=True, editable=False)
-    end_str = models.CharField(max_length=39)
+    end_str = models.CharField(max_length=39, verbose_name="End address")
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
@@ -95,6 +96,13 @@ class Range(models.Model, ObjectUrlMixin):
             return ctnr.ranges.filter(pk__in=objects)
         else:
             return ctnr.ranges
+
+    @property
+    def staticinterfaces(self):
+        start, end = four_to_two(
+            self.start_upper, self.start_lower, self.end_upper, self.end_lower)
+        return StaticInterface.objects.filter(
+                start_end_filter(start, end, self.ip_type)[2])
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
@@ -130,9 +138,8 @@ class Range(models.Model, ObjectUrlMixin):
 
     def clean(self):
         if self.network is None and not self.is_reserved:
-            raise ValidationError("ERROR: Range {0}-{1} is not associated "
-                                  "with a network and is not reserved".format(
-                                  self.start_str, self.end_str))
+            raise ValidationError('Range must be associated with a network '
+                                  'unless it is reserved')
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
@@ -144,7 +151,7 @@ class Range(models.Model, ObjectUrlMixin):
                     self.start_str)
                 self.end_upper, self.end_lower = ipv6_to_longs(self.end_str)
             else:
-                raise ValidationError("ERROR: could not determine the ip type")
+                raise ValidationError('Invalid IP type')
         except ipaddr.AddressValueError, e:
             raise ValidationError(str(e))
 
@@ -172,15 +179,14 @@ class Range(models.Model, ObjectUrlMixin):
         start, end = four_to_two(
             self.start_upper, self.start_lower, self.end_upper, self.end_lower)
         if start > end:
-            raise ValidationError("The start of a range cannot be greater than"
-                                  " or equal to the end of the range.")
+            raise ValidationError("The start of a range cannot be greater "
+                                  "than the end of the range.")
 
         if self.range_type == STATIC and self.dynamicinterface_set.exists():
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if self.range_type == DYNAMIC and StaticInterface.objects.filter(
-                start_end_filter(start, end, self.ip_type)[2]).exists():
+        if self.range_type == DYNAMIC and self.staticinterfaces.exists():
             raise ValidationError('A dynamic range cannot contain static '
                                   'interfaces')
 
@@ -193,11 +199,7 @@ class Range(models.Model, ObjectUrlMixin):
 
             if (IPClass(self.start_str) < self.network.network.network or
                     IPClass(self.end_str) > self.network.network.broadcast):
-                raise RangeOverflowError(
-                    "Range {0} to {1} doesn't fit in {2}".format(
-                        IPClass(self.start_lower),
-                        IPClass(self.end_lower),
-                        self.network.network))
+                raise RangeOverflowError("Range doesn't fit in network")
         self.check_for_overlaps()
 
     def get_allow_deny_list(self):
@@ -213,8 +215,8 @@ class Range(models.Model, ObjectUrlMixin):
             allow = []
             if (self.allow == ALLOW_VRF or
                     self.allow == ALLOW_LEGACY_AND_VRF):
-                allow += ['allow members of "{0}:{1}:{2}"'.format(
-                    self.network.vrf.name, self.start_str, self.end_str)]
+                allow += ['allow members of "{0}"'.format(
+                    self.network.vrf.name)]
             if (self.allow == ALLOW_LEGACY or
                     self.allow == ALLOW_LEGACY_AND_VRF):
                 allow += ['allow members of "{0}:{1}:{2}"'.format(
@@ -246,12 +248,8 @@ class Range(models.Model, ObjectUrlMixin):
             # start > end
             if self._end < range._start:
                 continue
-            raise ValidationError("Stored range {0} - {1} would contain "
-                                  "{2} - {3}".format(
-                                      Ip(range._start),
-                                      Ip(range._end),
-                                      Ip(self._start),
-                                      Ip(self._end)))
+            raise ValidationError("Stored range {0} - {1} would overlap with "
+                                  "this range")
 
     def build_range(self):
         range_options = self.rangekeyvalue_set.filter(is_option=True)
@@ -291,12 +289,12 @@ class Range(models.Model, ObjectUrlMixin):
 
     def choice_display(self):
         if not self.network.site:
-            site_name = "No Site"
+            site_name = "No site"
         else:
             site_name = self.network.site.name.upper()
 
         if not self.network.vlan:
-            vlan_name = "No Vlan"
+            vlan_name = "No VLAN"
         else:
             vlan_name = str(self.network.vlan)
         return "{0} - {1} - ({2}) {3} to {4}".format(
@@ -304,7 +302,7 @@ class Range(models.Model, ObjectUrlMixin):
             self.network, self.start_str, self.end_str)
 
     def get_next_ip(self):
-        """Find's the most appropriate ip address within a range. If it can't
+        """Finds the most appropriate IP address within a range. If it can't
         find an IP it returns None. If it finds an IP it returns an IPv4Address
         object.
 
@@ -323,7 +321,7 @@ class Range(models.Model, ObjectUrlMixin):
 
 
 def find_free_ip(start, end, ip_type='4'):
-    """Given start and end numbers, find a free ip.
+    """Given start and end numbers, find a free IP.
     :param start: The start number
     :type start: int
     :param end: The end number
