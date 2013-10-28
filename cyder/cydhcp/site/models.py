@@ -3,11 +3,12 @@ from django.db.models.loading import get_model
 from django.core.validators import RegexValidator
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.utils import networks_to_Q
 
 
-class Site(models.Model, ObjectUrlMixin):
+class Site(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,
                             validators=[RegexValidator('^[^/]+$')])

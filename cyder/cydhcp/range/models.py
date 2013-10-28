@@ -4,6 +4,7 @@ from django.db import models
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_VRF,
@@ -22,7 +23,7 @@ import ipaddr
 # import reversion
 
 
-class Range(models.Model, ObjectUrlMixin):
+class Range(BaseModel, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,

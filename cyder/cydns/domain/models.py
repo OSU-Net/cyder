@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
@@ -12,7 +13,7 @@ from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain
 
 
-class Domain(models.Model, ObjectUrlMixin):
+class Domain(BaseModel, ObjectUrlMixin):
     """A Domain is used as a foreign key for most DNS records.
 
     A domain's SOA should be shared by only domains within its zone.
