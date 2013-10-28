@@ -14,7 +14,8 @@ class AttributeValueTypeField(models.CharField):
     type of data the EAV value is allowed to hold. It names a validator defined
     in cyder.base.eav.validators, which is called in EAVValueField.validate
     with the value as its argument. Informational attributes are not validated,
-    so this field is set to the empty string if the attribute is informational.
+    so this field's value is set to the empty string if the attribute is
+    informational.
 
     Arguments:
         attribute_type_field: the name of the attribute_type field
@@ -22,9 +23,8 @@ class AttributeValueTypeField(models.CharField):
     __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
-        if 'attribute_type_field' in kwargs:
-            self.attribute_type_field = kwargs.pop('attribute_type_field')
-        else:
+        self.attribute_type_field = kwargs.pop('attribute_type_field', None)
+        if self.attribute_type_field is None:
             raise Exception("The 'attribute_type_field' argument is required")
 
         kwargs['blank'] = False # always run validate()
@@ -51,11 +51,11 @@ class AttributeValueTypeField(models.CharField):
                 raise ValidationError("Invalid value type. The validator "
                                       "'{0}' does not exist" .format(value))
 
+        # super(...).validate will choke if value is '' or u'', because
+        # self.blank == False.
         if value:
             super(AttributeValueTypeField, self).validate(value,
                                                           model_instance)
-        # super(...).validate will choke if value is '' or u'', because
-        # self.blank == False.
 
 
 class EAVValueField(models.CharField):
