@@ -9,13 +9,14 @@ from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 
 import datetime
 import re
 
 
-class DynamicInterface(models.Model, ObjectUrlMixin):
-    ctnr = models.ForeignKey(Ctnr, null=False)
+class DynamicInterface(BaseModel, ObjectUrlMixin):
+    ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
