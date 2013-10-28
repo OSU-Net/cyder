@@ -10,8 +10,7 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF,
-                                    STATIC, DYNAMIC)
+                                    ALLOW_LEGACY, STATIC, DYNAMIC)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicInterfaceAV)
 from cyder.cydhcp.network.models import Network, NetworkAV

@@ -10,9 +10,8 @@ from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
-                                    ALLOW_LEGACY, ALLOW_VRF,
-                                    ALLOW_LEGACY_AND_VRF, RANGE_TYPE, STATIC,
-                                    DYNAMIC)
+                                    ALLOW_LEGACY, ALLOW_VRF, RANGE_TYPE,
+                                    STATIC, DYNAMIC)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
@@ -216,12 +215,10 @@ class Range(BaseModel, ObjectUrlMixin):
                 for ctnr in self.ctnr_set.all()]
         else:
             allow = []
-            if (self.allow == ALLOW_VRF or
-                    self.allow == ALLOW_LEGACY_AND_VRF):
+            if self.allow == ALLOW_VRF:
                 allow += ['allow members of "{0}"'.format(
                     self.network.vrf.name)]
-            if (self.allow == ALLOW_LEGACY or
-                    self.allow == ALLOW_LEGACY_AND_VRF):
+            if self.allow == ALLOW_LEGACY:
                 allow += ['allow members of "{0}:{1}:{2}"'.format(
                     ctnr.name, self.start_str, self.end_str)
                     for ctnr in self.ctnr_set.all()]
