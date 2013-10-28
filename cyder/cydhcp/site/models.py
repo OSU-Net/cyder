@@ -12,7 +12,8 @@ class Site(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,
                             validators=[RegexValidator('^[^/]+$')])
-    parent = models.ForeignKey("self", null=True, blank=True)
+    parent = models.ForeignKey("self", null=True, blank=True,
+                               verbose_name="Parent site")
 
     search_fields = ('name', 'parent__name')
     display_fields = ('name',)

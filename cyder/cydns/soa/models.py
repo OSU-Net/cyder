@@ -55,7 +55,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     id = models.AutoField(primary_key=True)
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
-                                      help_text="Time to Live of this record")
+                                      verbose_name="Time to live")
     primary = models.CharField(max_length=100, validators=[validate_fqdn])
     contact = models.CharField(max_length=100, validators=[validate_fqdn])
     serial = models.PositiveIntegerField(null=False, default=int(time.time()))
