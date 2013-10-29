@@ -202,4 +202,4 @@ class SOAAV(EAVBase):
 
     entity = models.ForeignKey(SOA)
     attribute = EAVAttributeField(Attribute,
-            type_choices=(ATTRIBUTE_INFORMATIONAL,))
+        type_choices=(ATTRIBUTE_INFORMATIONAL,))

@@ -65,4 +65,4 @@ class SystemAV(EAVBase):
 
     entity = models.ForeignKey(System)
     attribute = EAVAttributeField(Attribute,
-            type_choices=(ATTRIBUTE_INFORMATIONAL,))
+        type_choices=(ATTRIBUTE_INFORMATIONAL,))
