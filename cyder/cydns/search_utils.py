@@ -1,9 +1,6 @@
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
-import cydns
-import cydhcp
-
 
 def fqdn_search(fqdn, *args, **kwargs):
     """Find any records that have a name that is the provided fqdn. This
@@ -27,9 +24,11 @@ def smart_fqdn_exists(fqdn, *args, **kwargs):
         2) Look for a label = fqdn.split('.')[0]
             and domain = fqdn.split('.')[1:]
     """
+    from cyder.cydns.domain.models import Domain
+
     # Try approach 1
     try:
-        search_domain = cydns.domain.models.Domain.objects.get(name=fqdn)
+        search_domain = Domain.objects.get(name=fqdn)
         label = ''
     except ObjectDoesNotExist:
         search_domain = None
@@ -46,7 +45,7 @@ def smart_fqdn_exists(fqdn, *args, **kwargs):
     try:
         label = fqdn.split('.')[0]
         domain_name = '.'.join(fqdn.split('.')[1:])
-        search_domain = cydns.domain.models.Domain.objects.get(
+        search_domain = Domain.objects.get(
             name=domain_name)
     except ObjectDoesNotExist:
         search_domain = None
@@ -63,31 +62,37 @@ def _build_label_domain_queries(label, domain, mx=True, sr=True, tx=True,
     # getting cyclic imports.
     qsets = []
     if mx:
-        qsets.append(('MX', cydns.mx.models.MX.objects.
+        from cyder.cydns.mx.models import MX
+        qsets.append(('MX', MX.objects.
                       filter(**{'label': label, 'domain': domain})))
     if ns:
         if label == '':
-            qsets.append(('NS', cydns.nameserver.models.Nameserver.objects.
+            from cyder.cydns.nameserver.models import Nameserver
+            qsets.append(('NS', Nameserver.objects.
                           filter(**{'domain': domain})))
     if sr:
-        qsets.append(('SRV', cydns.srv.models.SRV.objects.
+        from cyder.cydns.srv.models import SRV
+        qsets.append(('SRV', SRV.objects.
                       filter(**{'label': label, 'domain': domain})))
     if tx:
-        qsets.append(('TXT', cydns.txt.models.TXT.objects.
+        from cyder.cydns.txt.models import TXT
+        qsets.append(('TXT', TXT.objects.
                       filter(**{'label': label, 'domain': domain})))
     if ss:
-        qsets.append(('SSHFP', cydns.sshfp.models.SSHFP.objects.
+        from cyder.cydns.sshfp.models import SSHFP
+        qsets.append(('SSHFP', SSHFP.objects.
                       filter(**{'label': label, 'domain': domain})))
     if cn:
-        qsets.append(('CNAME', cydns.cname.models.CNAME.objects.
+        from cyder.cydns.cname.models import CNAME
+        qsets.append(('CNAME', CNAME.objects.
                       filter(**{'label': label, 'domain': domain})))
     if ar:
-        AddressRecord = cydns.address_record.models.AddressRecord
+        from cyder.cydns.address_record.models import AddressRecord
         ars = AddressRecord.objects.filter(
             **{'label': label, 'domain': domain})
         qsets.append(('AddressRecord', ars))
     if intr:
-        StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
         intrs = StaticInterface.objects.filter(
             **{'label': label, 'domain': domain})
         qsets.append(('AddressRecord', intrs))
@@ -116,30 +121,36 @@ def _build_queries(fqdn, dn=True, mx=True, sr=True, tx=True,
     # getting cyclic imports.
     qsets = []
     if dn:
-        qsets.append(('Domain', cydns.domain.models.Domain.objects.
+        from cyder.cydns.domain.models import Domain
+        qsets.append(('Domain', Domain.objects.
                       filter(**{'name{0}'.format(search_operator): fqdn})))
     if mx:
-        qsets.append(('MX', cydns.mx.models.MX.objects.
+        from cyder.cydns.mx.models import MX
+        qsets.append(('MX', MX.objects.
                       filter(**{'fqdn{0}'.format(search_operator): fqdn})))
     if sr:
-        qsets.append(('SRV', cydns.srv.models.SRV.objects.
+        from cyder.cydns.srv.models import SRV
+        qsets.append(('SRV', SRV.objects.
                       filter(**{'fqdn{0}'.format(search_operator): fqdn})))
     if tx:
-        qsets.append(('TXT', cydns.txt.models.TXT.objects.
+        from cyder.cydns.txt.models import TXT
+        qsets.append(('TXT', TXT.objects.
                       filter(**{'fqdn{0}'.format(search_operator): fqdn})))
     if cn:
-        qsets.append(('CNAME', cydns.cname.models.CNAME.objects.
+        from cyder.cydns.cname.models import CNAME
+        qsets.append(('CNAME', CNAME.objects.
                       filter(**{'fqdn{0}'.format(search_operator): fqdn})))
     if ar:
-        AddressRecord = cydns.address_record.models.AddressRecord
+        from cyder.cydns.address_record.models import AddressRecord
         ars = AddressRecord.objects.filter(Q(fqdn=fqdn) | Q(ip_str=ip))
         qsets.append(('AddressRecord', ars))
     if pt:
-        qsets.append(('PTR', cydns.ptr.models.PTR.objects.
+        from cyder.cydns.ptr.models import PTR
+        qsets.append(('PTR', PTR.objects.
                       Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
                       Q(**{'ip_str{0}'.format(search_operator): ip})))
     if intr:
-        StaticInterface = cydhcp.interface.static_intr.models.StaticInterface
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
         qsets.append(('StaticInterface', StaticInterface.objects.filter(
             Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
             Q(**{'ip_str{0}'.format(search_operator): ip}))))
