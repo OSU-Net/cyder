@@ -213,28 +213,18 @@ class DNSBuilder(SVNBuilderMixin):
         except IOError, exc_value:
             if exc_value[0] == 11:
                 is_locked = True
-        if is_locked:
-            print "IS_LOCKED=True"
-        else:
-            print "IS_LOCKED=False"
+
+        print "IS_LOCKED={0}".format(bool(is_locked))
         print "LOCK_FILE={0}".format(self.LOCK_FILE)
 
-        if os.path.exists(self.STOP_UPDATE_FILE):
-            print "STOP_UPDATE_FILE_EXISTS=True"
-        else:
-            print "STOP_UPDATE_FILE_EXISTS=False"
+        print ("STOP_UPDATE_FILE_EXISTS={0}"
+               .format(os.path.exists(self.STOP_UPDATE_FILE)))
         print "STOP_UPDATE_FILE={0}".format(self.STOP_UPDATE_FILE)
 
-        if os.path.exists(self.STAGE_DIR):
-            print "STAGE_DIR_EXISTS=True"
-        else:
-            print "STAGE_DIR_EXISTS=False"
+        print "STAGE_DIR_EXISTS={0}".format(os.path.exists(self.STAGE_DIR))
         print "STAGE_DIR={0}".format(self.STAGE_DIR)
 
-        if os.path.exists(self.PROD_DIR):
-            print "PROD_DIR_EXISTS=True"
-        else:
-            print "PROD_DIR_EXISTS=False"
+        print "PROD_DIR_EXISTS={0}".format(os.path.exists(self.PROD_DIR))
         print "PROD_DIR={0}".format(self.PROD_DIR)
 
         print "LAST_RUN_FILE={0}".format(self.LAST_RUN_FILE)
