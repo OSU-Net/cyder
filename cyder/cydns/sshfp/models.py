@@ -49,6 +49,7 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
     search_fields = ("fqdn", "key")
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'sshfp'
         # unique_together = ('domain', 'label', 'txt_data')
         # TODO

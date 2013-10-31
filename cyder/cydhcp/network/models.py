@@ -52,6 +52,7 @@ class Network(BaseModel, ObjectUrlMixin):
     display_fields = ('network_str',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'network'
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
@@ -278,6 +279,7 @@ class NetworkKeyValue(CommonOption):
     network = models.ForeignKey(Network, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'network_kv'
         unique_together = ('key', 'value', 'network')
 

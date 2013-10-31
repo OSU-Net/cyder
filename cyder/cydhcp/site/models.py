@@ -19,6 +19,7 @@ class Site(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'site'
         unique_together = ('name', 'parent')
 
@@ -112,6 +113,7 @@ class SiteKeyValue(KeyValue):
     site = models.ForeignKey(Site, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'site_kv'
         unique_together = ('key', 'value')
 

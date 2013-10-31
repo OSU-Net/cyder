@@ -29,6 +29,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     search_fields = ('name', 'description')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'ctnr'
 
     def save(self, *args, **kwargs):
@@ -86,6 +87,7 @@ class CtnrUser(BaseModel, ObjectUrlMixin):
     level = models.IntegerField()
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'ctnr_users'
         unique_together = ('ctnr', 'user')
 

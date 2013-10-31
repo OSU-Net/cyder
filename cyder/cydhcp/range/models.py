@@ -80,6 +80,7 @@ class Range(BaseModel, ObjectUrlMixin):
     display_fields = ('start_str', 'end_str')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'range'
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
@@ -368,6 +369,7 @@ class RangeKeyValue(CommonOption):
     range = models.ForeignKey(Range, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'range_kv'
         unique_together = ('key', 'value', 'range')
 

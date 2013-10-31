@@ -146,6 +146,7 @@ class AddressRecord(BaseAddressRecord):
                  "{rdtype:$rdtype_just} {ip_str:$rhs_just}")
 
     class Meta:
+        app_label = 'cyder'
         db_table = "address_record"
         unique_together = ("label", "domain", "fqdn", "ip_upper", "ip_lower",
                            "ip_type")

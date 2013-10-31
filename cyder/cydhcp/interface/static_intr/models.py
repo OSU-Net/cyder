@@ -74,6 +74,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     search_fields = ('mac', 'ip_str', 'fqdn')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'static_interface'
         unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
 
@@ -271,5 +272,6 @@ class StaticIntrKeyValue(CommonOption):
     static_interface = models.ForeignKey(StaticInterface, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'static_interface_kv'
         unique_together = ('key', 'value', 'static_interface')

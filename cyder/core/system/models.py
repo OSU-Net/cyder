@@ -18,6 +18,7 @@ class System(BaseModel, ObjectUrlMixin):
         return get_display(self)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'system'
 
     @staticmethod
@@ -61,6 +62,7 @@ class SystemKeyValue(KeyValue, ObjectUrlMixin):
     system = models.ForeignKey(System, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'system_kv'
         unique_together = ('key', 'value', 'system')
 

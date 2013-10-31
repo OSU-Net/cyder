@@ -17,6 +17,7 @@ class Workgroup(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'workgroup'
 
     def __str__(self):
@@ -82,6 +83,7 @@ class WorkgroupKeyValue(CommonOption):
     aux_attrs = (('description', 'A description of the workgroup'))
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'workgroup_kv'
         unique_together = ('key', 'value', 'workgroup')
 

@@ -16,6 +16,7 @@ class Vrf(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'vrf'
 
     def __str__(self):
@@ -80,6 +81,7 @@ class VrfKeyValue(KeyValue):
     vrf = models. ForeignKey(Vrf, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vrf_kv"
 
     def _aa_decription(self):

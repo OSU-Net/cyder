@@ -31,6 +31,7 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     search_fields = ('fqdn', 'target')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'cname'
         unique_together = ('domain', 'label', 'target')
 

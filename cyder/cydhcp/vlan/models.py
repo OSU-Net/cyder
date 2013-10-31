@@ -19,6 +19,7 @@ class Vlan(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vlan"
         unique_together = ("name", "number")
 
@@ -78,6 +79,7 @@ class VlanKeyValue(KeyValue):
     vlan = models.ForeignKey(Vlan, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vlan_kv"
         unique_together = ("key", "value")
 
