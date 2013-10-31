@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q, F
 from django.db import models
 
-from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
@@ -202,4 +202,4 @@ class SOAAV(EAVBase):
 
     entity = models.ForeignKey(SOA)
     attribute = EAVAttributeField(Attribute,
-        type_choices=(ATTRIBUTE_INFORMATIONAL,))
+        type_choices=(ATTRIBUTE_INVENTORY,))

@@ -4,7 +4,7 @@ from django.db import models
 from south.modelsinspector import add_introspection_rules
 
 from cyder.base.eav import validators
-from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
+from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INVENTORY,
                                       ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
 
 
@@ -33,7 +33,7 @@ class AttributeValueTypeField(models.CharField):
 
     def clean(self, value, model_instance):
         attribute_type = getattr(model_instance, self.attribute_type_field)
-        if attribute_type == ATTRIBUTE_INFORMATIONAL:
+        if attribute_type == ATTRIBUTE_INVENTORY:
             # If the attribute is informational, we don't validate the value.
             value = u''
 

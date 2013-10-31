@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.loading import get_model
 from django.core.exceptions import ObjectDoesNotExist
 
-from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
@@ -82,4 +82,4 @@ class VlanAV(EAVBase):
 
     entity = models.ForeignKey(Vlan)
     attribute = EAVAttributeField(Attribute,
-        type_choices=(ATTRIBUTE_INFORMATIONAL,))
+        type_choices=(ATTRIBUTE_INVENTORY,))

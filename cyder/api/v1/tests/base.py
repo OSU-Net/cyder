@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from cyder.api.authtoken.models import Token
 from cyder.base.eav.models import Attribute, EAVBase
-from cyder.base.eav.constants import ATTRIBUTE_INFORMATIONAL
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.validators import VALUE_TYPES
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
@@ -46,7 +46,7 @@ class APIEAVTestMixin(object):
 
         # init attribute
         attr, _ = Attribute.objects.get_or_create(
-            name="Test Attribute", attribute_type=ATTRIBUTE_INFORMATIONAL,
+            name="Test Attribute", attribute_type=ATTRIBUTE_INVENTORY,
             value_type="string")
 
         getattr(obj, eav_attr).get_or_create(

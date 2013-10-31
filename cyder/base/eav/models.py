@@ -1,6 +1,6 @@
 from django.db import models
 
-from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INFORMATIONAL,
+from cyder.base.eav.constants import (ATTRIBUTE_TYPES, ATTRIBUTE_INVENTORY,
                                       ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
 from cyder.base.eav.fields import AttributeValueTypeField, EAVValueField
 from cyder.base.eav.utils import is_hex_byte_sequence
@@ -47,7 +47,7 @@ class EAVBase(models.Model, ObjectUrlMixin):
 
     def __unicode__(self):
         kv_formats = {
-            ATTRIBUTE_INFORMATIONAL: u'{0} = {1}',
+            ATTRIBUTE_INVENTORY: u'{0} = {1}',
             ATTRIBUTE_OPTION: u'option {0} {1}',
             ATTRIBUTE_STATEMENT: u'{0} {1}',
         }
