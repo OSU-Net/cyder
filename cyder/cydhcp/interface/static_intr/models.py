@@ -13,7 +13,8 @@ from cyder.core.fields import MacAddrField
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
-from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
+                                      ATTRIBUTE_INFORMATIONAL)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 
@@ -279,4 +280,5 @@ class StaticInterfaceAV(EAVBase):
 
 
     entity = models.ForeignKey(StaticInterface)
-    attribute = EAVAttributeField(Attribute)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INFORMATIONAL,))
