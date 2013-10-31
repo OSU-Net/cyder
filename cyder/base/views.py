@@ -295,7 +295,7 @@ def get_update_form(request, get_klasses_fn):
                         (str(ip_type), "IPv{0}".format(ip_type))]
 
                 if FormKlass.__name__ == 'RangeForm':
-                    Network = get_model('network', 'network')
+                    Network = get_model('cyder', 'network')
                     network = Network.objects.get(id=related_pk)
                     network_str = network.network_str.split('/')
                     initial = '.'.join(
@@ -313,12 +313,9 @@ def get_update_form(request, get_klasses_fn):
 
     if related_type in form.fields:
         if 'interface' in related_type:
-            app_label = related_type.replace('interface', 'intr')
             related_type = related_type.replace('_', '')
-        else:
-            app_label = related_type
 
-        RelatedKlass = get_model(app_label, related_type)
+        RelatedKlass = get_model('cyder', related_type)
         form.fields[related_type] = ModelChoiceField(
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))

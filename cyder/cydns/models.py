@@ -170,7 +170,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             prune_tree(db_domain)
 
     def schedule_rebuild_check(self):
-        PTR = get_model('ptr', 'ptr')
+        PTR = get_model('cyder', 'ptr')
         if self.domain.soa and not isinstance(self, PTR):
             # Mark the soa
             self.domain.soa.schedule_rebuild()
@@ -266,7 +266,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         domains = Domain.objects.filter(name=self.fqdn)
         if domains:
             domain = domains[0]
-            PTR = get_model('ptr', 'ptr')
+            PTR = get_model('cyder', 'ptr')
             if not domain.master_domain and not isinstance(self, PTR):
                 raise ValidationError("You cannot create a record that points "
                                       "to the top level of another domain.")

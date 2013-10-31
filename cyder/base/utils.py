@@ -229,7 +229,7 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
 
 
 def _filter(request, Klass):
-    Ctnr = get_model('ctnr', 'ctnr')
+    Ctnr = get_model('cyder', 'ctnr')
     if Klass is not Ctnr:
         objects = filter_by_ctnr(request.session['ctnr'], Klass)
     else:

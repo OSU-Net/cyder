@@ -228,7 +228,7 @@ def remove_object(request, ctnr_pk, obj_type, obj_pk):
     acting_user = request.user
     ctnr = Ctnr.objects.get(id=ctnr_pk)
     if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
-        Klass = get_model(obj_type, obj_type)
+        Klass = get_model('cyder', obj_type)
         obj = Klass.objects.get(id=obj_pk)
         m2m = getattr(ctnr, (obj_type + 's'), None)
 
@@ -268,7 +268,7 @@ def add_object(request, ctnr_pk):
 
     else:
         if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
-            Klass = get_model(obj_type, obj_type)
+            Klass = get_model('cyder', obj_type)
             if pk == 'null':
                 try:
                     if Klass.__name__ == 'Range':
