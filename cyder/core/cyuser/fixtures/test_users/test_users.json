@@ -1,6 +1,6 @@
 [
   {
-    "model": "ctnr.ctnr",
+    "model": "cyder.ctnr",
     "pk": 9999,
     "fields": {
       "description": "Test Ctnr",
@@ -21,7 +21,7 @@
     }
   },
   {
-    "model": "cyuser.userprofile",
+    "model": "cyder.userprofile",
     "pk": 1,
     "fields": {
       "user": 1,
@@ -42,7 +42,7 @@
     }
   },
   {
-    "model": "cyuser.userprofile",
+    "model": "cyder.userprofile",
     "pk": 99990,
     "fields": {
       "user": 99990,
@@ -50,7 +50,7 @@
       "phone_number": 1234567890 }
   },
   {
-    "model": "ctnr.ctnruser",
+    "model": "cyder.ctnruser",
     "pk": 99990,
     "fields": {
         "user": 99990,
@@ -72,7 +72,7 @@
     }
   },
   {
-    "model": "cyuser.userprofile",
+    "model": "cyder.userprofile",
     "pk": 99991,
     "fields": {
       "user": 99991,
@@ -80,7 +80,7 @@
       "phone_number": 1234567890 }
   },
   {
-    "model": "ctnr.ctnruser",
+    "model": "cyder.ctnruser",
     "pk": 99991,
     "fields": {
         "user": 99991,
@@ -102,7 +102,7 @@
     }
   },
   {
-    "model": "cyuser.userprofile",
+    "model": "cyder.userprofile",
     "pk": 99992,
     "fields": {
       "user": 99992,
@@ -110,7 +110,7 @@
       "phone_number": 1234567890 }
   },
   {
-    "model": "ctnr.ctnruser",
+    "model": "cyder.ctnruser",
     "pk": 99992,
     "fields": {
         "user": 99992,
