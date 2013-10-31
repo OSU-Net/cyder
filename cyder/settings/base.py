@@ -134,6 +134,11 @@ FIXTURES = [
     'cyder/core/cyuser/fixtures/test_users',
 ]
 
+FIXTURE_DIRS = (
+    'cyder/core/ctnr/fixtures/',
+    'cyder/core/cyuser/fixtures/',
+)
+
 SESSION_COOKIE_NAME = 'cyder'
 SESSION_COOKIE_SECURE = False
 
