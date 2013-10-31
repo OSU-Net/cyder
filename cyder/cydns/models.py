@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import get_model
 
-import cydns
 from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
@@ -237,7 +236,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         Call this function in models that can't overlap with an existing
         CNAME.
         """
-        CNAME = cydns.cname.models.CNAME
+        from cyder.cydns.cname.models import CNAME
         if hasattr(self, 'label'):
             if CNAME.objects.filter(domain=self.domain,
                                     label=self.label).exists():
