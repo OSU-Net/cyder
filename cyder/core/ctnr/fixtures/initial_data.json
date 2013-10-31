@@ -1,6 +1,6 @@
 [
   {
-    "model": "ctnr.ctnr",
+    "model": "cyder.ctnr",
     "pk": 1,
     "fields": {
       "description": "Global Ctnr",
@@ -8,7 +8,7 @@
     }
   },
   {
-    "model": "ctnr.ctnr",
+    "model": "cyder.ctnr",
     "pk": 2,
     "fields": {
       "description": "Default Ctnr",

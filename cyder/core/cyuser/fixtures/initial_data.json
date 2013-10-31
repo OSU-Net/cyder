@@ -12,7 +12,7 @@
     }
   },
   {
-    "model": "cyuser.userprofile",
+    "model": "cyder.userprofile",
     "pk": 1,
     "fields": {
       "user": 1,
@@ -20,7 +20,7 @@
       "phone_number": 1234567890 }
   },
   {
-    "model": "ctnr.ctnruser",
+    "model": "cyder.ctnruser",
     "pk": 1,
     "fields": {
         "user": 1,
