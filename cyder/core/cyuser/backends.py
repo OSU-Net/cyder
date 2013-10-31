@@ -2,9 +2,12 @@ from cyder.base.constants import (LEVEL_GUEST, LEVEL_USER, LEVEL_ADMIN,
                                   ACTION_VIEW, ACTION_UPDATE)
 
 
-def has_perm(self, request, action, obj=None, obj_class=None):
-    return _has_perm(request.user, request.session['ctnr'], action, obj,
-                     obj_class)
+def has_perm(self, request, action, obj=None, obj_class=None, ctnr=None):
+    if ctnr:
+        return _has_perm(request.user, ctnr, action, obj, obj_class)
+    else:
+        return _has_perm(request.user, request.session['ctnr'], action, obj,
+                         obj_class)
 
 
 def _has_perm(user, ctnr, action, obj=None, obj_class=None):
