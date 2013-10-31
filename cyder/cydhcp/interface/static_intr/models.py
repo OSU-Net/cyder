@@ -53,7 +53,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     """
 
     id = models.AutoField(primary_key=True)
-    ctnr = models.ForeignKey('ctnr.Ctnr', null=False, verbose_name="Container")
+    ctnr = models.ForeignKey('cyder.Ctnr', null=False,
+                             verbose_name="Container")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
                        help_text='(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,

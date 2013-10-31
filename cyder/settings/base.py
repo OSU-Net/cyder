@@ -137,7 +137,7 @@ FIXTURES = [
 SESSION_COOKIE_NAME = 'cyder'
 SESSION_COOKIE_SECURE = False
 
-AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
+AUTH_PROFILE_MODULE = 'cyder.UserProfile'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     #'django_cas.backends.CASBackend',

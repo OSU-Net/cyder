@@ -24,7 +24,7 @@ class Network(BaseModel, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
-    vrf = models.ForeignKey('vrf.Vrf', null=True, blank=True)
+    vrf = models.ForeignKey('cyder.Vrf', null=True, blank=True)
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
