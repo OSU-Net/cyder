@@ -4,15 +4,15 @@
 
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
-{% block title %}System {{ system.name }}{% endblock %}
+{% block title %}System {{ obj.name }}{% endblock %}
 
 {% block view_metadata %}
   <span id="view-metadata"
     data-objType="{{ obj_type }}"
-    data-objPk="{{ system.pk }}"
+    data-objPk="{{ obj.pk }}"
     data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
     data-getUrl="{{ url('core-get-record') }}"
-    data-objName="{{ system.name }}">
+    data-objName="{{ obj.name }}">
   </span>
 {% endblock %}
 
@@ -21,15 +21,15 @@
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class='static_interface') %}
     {{ create_button('static_interface', url('cydhcp-get-record'),
-                   url('static_interface'), objName=system.name) }}
+                   url('static_interface'), objName=obj.name) }}
   {% endif %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamic_interface') %}
     {{ create_button('dynamic_interface', url('cydhcp-get-record'),
-    url('dynamic_interface'), objName=system.name) }}
+    url('dynamic_interface'), objName=obj.name) }}
   {% endif %}
   {% if obj_type_perm %}
     {{ create_button('system_kv', url('core-get-record'),
-                   url('system_kv'), objName=system.name,
+                   url('system_kv'), objName=obj.name,
                    buttonName="System Attribute") }}
   {% endif %}
 {% endblock %}
