@@ -3,7 +3,6 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
-import cydns
 import datetime
 import re
 
@@ -243,7 +242,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if db_self.label == self.label and db_self.domain == self.domain:
             return
         # The label of the domain changed. Make sure it's not a glue record.
-        Nameserver = cydns.nameserver.models.Nameserver
+        from cyder.cydns.nameserver.models import Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
             raise ValidationError(
                 "This Interface represents a glue record for a "
