@@ -20,7 +20,7 @@ def _load_fixtures():
     from django.core.management import call_command
     from os import listdir
 
-    for filename in listdir('cyder/initial_data'):
+    for filename in sorted(listdir('cyder/initial_data')):
         call_command('loaddata', 'cyder/initial_data/' + filename)
 
 
