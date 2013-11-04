@@ -237,7 +237,7 @@ class Zone(object):
 
                 except ValidationError:
                     stderr.write("Error generating static interface for "
-                                 "host with IP {0}\n".form(long2ip(ip)))
+                                 "host with IP {0}\n".format(long2ip(ip)))
             else:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['id'])
