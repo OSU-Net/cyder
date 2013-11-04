@@ -9,6 +9,7 @@ from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
 from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
+from cyder.base.helpers import prettify_obj_type
 
 import cyder as cy
 
@@ -169,12 +170,15 @@ def tablefy(objects, users=False, extra_cols=None, info=True, request=False):
 
         # Actions
         if can_update:
+            obj_type = obj._meta.db_table
             row_data.append({'value': ['Update', 'Delete'],
                              'url': [obj.get_update_url(),
                                      obj.get_delete_url()],
                              'data': [[('pk', obj.id),
                                        ('object_type', obj._meta.db_table),
-                                       ('getUrl', find_get_record_url(obj))],
+                                       ('getUrl', find_get_record_url(obj)),
+                                       ('prettyObjType',
+                                           prettify_obj_type(obj_type))],
                                       None],
                              'class': ['update', 'delete'],
                              'img': ['/media/img/update.png',

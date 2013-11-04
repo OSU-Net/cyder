@@ -4,6 +4,7 @@ from django.db import models
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_VRF,
@@ -22,7 +23,7 @@ import ipaddr
 # import reversion
 
 
-class Range(models.Model, ObjectUrlMixin):
+class Range(BaseModel, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
@@ -61,11 +62,11 @@ class Range(models.Model, ObjectUrlMixin):
 
     start_upper = models.BigIntegerField(null=True, editable=False)
     start_lower = models.BigIntegerField(null=True, editable=False)
-    start_str = models.CharField(max_length=39)
+    start_str = models.CharField(max_length=39, verbose_name="Start address")
 
     end_lower = models.BigIntegerField(null=True, editable=False)
     end_upper = models.BigIntegerField(null=True, editable=False)
-    end_str = models.CharField(max_length=39)
+    end_str = models.CharField(max_length=39, verbose_name="End address")
 
     is_reserved = models.BooleanField(default=False, blank=False)
 

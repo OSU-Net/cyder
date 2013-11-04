@@ -1,7 +1,9 @@
 import ipaddr
 
 from django import forms
+from django.forms.util import ErrorDict, ErrorList
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from django.db.models.loading import get_model
 
@@ -41,7 +43,6 @@ def system_detail(request, pk):
 
     related_systems.discard(system)
     return render(request, 'system/system_detail.html', {
-        'system': system,
         'system_table': tablefy([system], info=False, request=request),
         'attrs_table': tablefy(attrs, request=request),
         'static_intr_tables': static_intr,
@@ -88,8 +89,12 @@ def system_create_view(request, initial):
                 dynamic_form = form
 
             if form.is_valid():
-                form.save()
-                return redirect(reverse('system-detail', args=[system.id]))
+                try:
+                    form.save()
+                    return redirect(reverse('system-detail', args=[system.id]))
+                except ValidationError, e:
+                    form._errors = ErrorDict()
+                    form._errors['__all__'] = ErrorList(e.messages)
             else:
                 if '__all__' in form.errors and (
                         MAC_ERR in form.errors['__all__']):

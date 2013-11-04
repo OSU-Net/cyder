@@ -3,15 +3,17 @@ from django.db.models.loading import get_model
 from django.core.validators import RegexValidator
 
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.utils import networks_to_Q
 
 
-class Site(models.Model, ObjectUrlMixin):
+class Site(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,
                             validators=[RegexValidator('^[^/]+$')])
-    parent = models.ForeignKey("self", null=True, blank=True)
+    parent = models.ForeignKey("self", null=True, blank=True,
+                               verbose_name="Parent site")
 
     search_fields = ('name', 'parent__name')
     display_fields = ('name',)
