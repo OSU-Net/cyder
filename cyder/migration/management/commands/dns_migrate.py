@@ -208,31 +208,36 @@ class Zone(object):
                            'dns_enabled': enabled, 'dhcp_enabled': enabled,
                            'last_seen': items['last_seen']})
 
-                    # Static Interfaces need to be cleaned independently.
-                    # (no get_or_create)
-                    static.full_clean()
-                    static.save(**{'update_range_usage': False})
-
-                    static.views.add(public)
-                    static.views.add(private)
-
-                    for key, value in get_host_option_values(items['id']):
-                        kv = StaticIntrKeyValue(static_interface=static,
-                                                key=key, value=value)
-                        kv.clean()
-                        kv.save()
-
-                except ValidationError:
                     try:
-                        static.dhcp_enabled = False
-                        static.dns_enabled = False
+                        # Static Interfaces need to be cleaned independently.
+                        # (no get_or_create)
                         static.full_clean()
                         static.save(**{'update_range_usage': False})
-                    except ValidationError, e:
-                        stderr.write("Error generating static interface for "
-                                     "host with IP {0}\n"
-                                     .format(static.ip_str))
-                        stderr.write("Original exception: {0}\n".format(e))
+
+                        static.views.add(public)
+                        static.views.add(private)
+
+                        for key, value in get_host_option_values(items['id']):
+                            kv = StaticIntrKeyValue(static_interface=static,
+                                                    key=key, value=value)
+                            kv.clean()
+                            kv.save()
+
+                    except ValidationError:
+                        try:
+                            static.dhcp_enabled = False
+                            static.dns_enabled = False
+                            static.full_clean()
+                            static.save(**{'update_range_usage': False})
+                        except ValidationError, e:
+                            stderr.write("Error generating static interface "
+                                         "for host with IP {0}\n"
+                                         .format(static.ip_str))
+                            stderr.write("Original exception: {0}\n".format(e))
+
+                except ValidationError:
+                    stderr.write("Error generating static interface for "
+                                 "host with IP {0}\n".form(long2ip(ip)))
             else:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['id'])
@@ -407,7 +412,7 @@ def gen_CNAME():
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
             print "Removing duplicate PTR for %s" % cn.fqdn
-            dup_ptrs.delete()
+            dup_ptrs.delete(**{'update_range_usage': False})
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
