@@ -19,6 +19,7 @@ class Site(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'site'
         unique_together = ('name', 'parent')
 
@@ -34,7 +35,7 @@ class Site(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('network', 'network')
+        Network = get_model('cyder', 'network')
         networks = Network.objects.filter(range__in=ctnr.ranges.all())
         objects = objects or Site.objects
         return objects.filter(network__in=networks)
@@ -112,6 +113,7 @@ class SiteKeyValue(KeyValue):
     site = models.ForeignKey(Site, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'site_kv'
         unique_together = ('key', 'value')
 

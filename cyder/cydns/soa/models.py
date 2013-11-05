@@ -81,6 +81,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     attrs = None
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'soa'
         # We are using the description field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
@@ -198,6 +199,7 @@ class SOAKeyValue(KeyValue):
     soa = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'soa_kv'
 
     def _aa_disabled(self):

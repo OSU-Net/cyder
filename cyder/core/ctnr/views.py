@@ -8,8 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.db.models.loading import get_model
 
-import cyder as cy
-from cyder.base.constants import LEVELS
+from cyder.base.constants import LEVELS, ACTION_UPDATE
 from cyder.base.utils import tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm, CtnrObjectForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
@@ -34,7 +33,7 @@ def ctnr_detail(request, pk):
     ctnrWorkgroups = ctnr.workgroups.select_related()
 
     if request.user.get_profile().has_perm(
-            request, cy.ACTION_UPDATE, obj_class='CtnrObject'):
+            request, ACTION_UPDATE, obj_class='CtnrObject'):
 
         extra_cols, domains = create_obj_extra_cols(
             ctnr, ctnrDomains, 'domain')
@@ -65,7 +64,7 @@ def ctnr_detail(request, pk):
                                                      initial='user')
 
     if request.user.get_profile().has_perm(
-            request, cy.ACTION_UPDATE, obj_class='CtnrUser'):
+            request, ACTION_UPDATE, obj_class='CtnrUser'):
 
         extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
         user_table = tablefy(users, extra_cols=extra_cols, users=True,
@@ -177,7 +176,7 @@ def remove_user(request, ctnr_pk, user_pk):
         messages.error(request, 'You can not edit your own permissions')
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), cy.ACTION_UPDATE,
+    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), ACTION_UPDATE,
                  obj_class=CtnrUser):
         try:
             CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
@@ -201,7 +200,7 @@ def update_user_level(request, ctnr_pk, user_pk, lvl):
         messages.error(request, 'You can not edit your own permissions')
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), cy.ACTION_UPDATE,
+    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), ACTION_UPDATE,
                  obj_class=CtnrUser):
         try:
             ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
@@ -227,8 +226,8 @@ def update_user_level(request, ctnr_pk, user_pk, lvl):
 def remove_object(request, ctnr_pk, obj_type, obj_pk):
     acting_user = request.user
     ctnr = Ctnr.objects.get(id=ctnr_pk)
-    if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
-        Klass = get_model(obj_type, obj_type)
+    if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=Ctnr):
+        Klass = get_model('cyder', obj_type)
         obj = Klass.objects.get(id=obj_pk)
         m2m = getattr(ctnr, (obj_type + 's'), None)
 
@@ -259,7 +258,7 @@ def add_object(request, ctnr_pk):
     name = request.POST.get('obj_name', '')
     obj_type = request.POST.get('obj_type', '')
     if obj_type == 'user':
-        if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=CtnrUser):
+        if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=CtnrUser):
             return add_user(request, ctnr, name, pk)
         else:
             messages.error(request,
@@ -267,8 +266,8 @@ def add_object(request, ctnr_pk):
             return HttpResponse(json.dumps({'redirect': 'yup'}))
 
     else:
-        if _has_perm(acting_user, ctnr, cy.ACTION_UPDATE, obj_class=Ctnr):
-            Klass = get_model(obj_type, obj_type)
+        if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=Ctnr):
+            Klass = get_model('cyder', obj_type)
             if pk == 'null':
                 try:
                     if Klass.__name__ == 'Range':

@@ -19,6 +19,7 @@ class Vlan(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vlan"
         unique_together = ("name", "number")
 
@@ -30,7 +31,7 @@ class Vlan(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('network', 'network')
+        Network = get_model('cyder', 'network')
         networks = Network.objects.filter(range__in=ctnr.ranges.all())
         objects = objects or Vlan.objects
         return objects.filter(network__in=networks)
@@ -78,6 +79,7 @@ class VlanKeyValue(KeyValue):
     vlan = models.ForeignKey(Vlan, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vlan_kv"
         unique_together = ("key", "value")
 

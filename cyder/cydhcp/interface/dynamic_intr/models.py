@@ -32,6 +32,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
     search_fields = ('mac',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'dynamic_interface'
 
     @staticmethod
@@ -134,5 +135,6 @@ class DynamicIntrKeyValue(CommonOption):
     dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "dynamic_interface_kv"
         unique_together = "key", "value", "dynamic_interface"
