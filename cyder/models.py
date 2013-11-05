@@ -19,14 +19,11 @@ from cyder.cydhcp.workgroup.models import *
 from cyder.cydhcp.vrf.models import *
 from cyder.cydhcp.interface.static_intr.models import *
 from cyder.cydhcp.interface.dynamic_intr.models import *
-from cyder.cydhcp.interface.models import *
 from cyder.cydhcp.vlan.models import *
 from cyder.cydhcp.range.models import *
-from cyder.cydhcp.models import *
 from cyder.core.ctnr.models import *
 from cyder.core.cyuser.models import *
 from cyder.core.system.models import *
 from cyder.core.task.models import *
-from cyder.core.models import *
 from cyder.base.models import *
 from cyder.api.authtoken.models import *
