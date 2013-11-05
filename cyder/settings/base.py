@@ -94,7 +94,6 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
     'cyder',
-    'migration',
 
     # Third party apps
     'south',

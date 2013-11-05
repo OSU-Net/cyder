@@ -29,5 +29,4 @@ from cyder.core.system.models import *
 from cyder.core.task.models import *
 from cyder.core.models import *
 from cyder.base.models import *
-from cyder.migration.models import *
 from cyder.api.authtoken.models import *
