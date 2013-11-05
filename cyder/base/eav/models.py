@@ -6,6 +6,7 @@ from cyder.base.eav.fields import AttributeValueTypeField, EAVValueField
 from cyder.base.eav.utils import is_hex_byte_sequence
 from cyder.base.eav.validators import VALUE_TYPES
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.utils import ClassProperty
 
 
 class Attribute(models.Model):
@@ -43,6 +44,11 @@ class EAVBase(models.Model, ObjectUrlMixin):
     class Meta:
         abstract = True
         unique_together = ('entity', 'attribute')
+
+    @ClassProperty
+    @classmethod
+    def pretty_type(cls):
+        return cls._meta.get_field('entity').rel.to.pretty_type + ' attribute'
 
     value = EAVValueField(max_length=255, attribute_field='attribute')
 

@@ -11,6 +11,8 @@ from cyder.base.models import BaseModel
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
+    pretty_type = 'VRF'
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 

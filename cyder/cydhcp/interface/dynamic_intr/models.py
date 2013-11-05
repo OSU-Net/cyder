@@ -19,6 +19,8 @@ import re
 
 
 class DynamicInterface(BaseModel, ObjectUrlMixin):
+    pretty_type = 'Dynamic interface'
+
     ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     system = models.ForeignKey(System, help_text="System to associate "

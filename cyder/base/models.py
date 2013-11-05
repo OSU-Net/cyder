@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 
+from cyder.base.utils import ClassProperty
+
 
 class BaseModel(models.Model):
     """
@@ -14,6 +16,11 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
         get_latest_by = 'created'
+
+    @ClassProperty
+    @classmethod
+    def pretty_type(cls):
+        return cls.__name__.lower()
 
     def unique_error_message(self, model_class, unique_check):
         error = super(BaseModel, self).unique_error_message(

@@ -161,3 +161,9 @@ def remove_dir_contents(dir_name):
             shutil.rmtree(file_path)
         else:
             os.remove(file_path)
+
+
+class ClassProperty(property):
+    """Enables you to make a classmethod a property"""
+    def __get__(self, cls, obj):
+        return self.fget.__get__(None, obj)()

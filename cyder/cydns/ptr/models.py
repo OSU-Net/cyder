@@ -80,6 +80,9 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     >>> PTR(ip_str=ip_str, fqdn=fqdn, ip_type=ip_type)
 
     """
+
+    pretty_type = 'PTR'
+
     id = models.AutoField(primary_key=True)
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
                                        related_name='reverse_ptr_set')

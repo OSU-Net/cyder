@@ -54,6 +54,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     valid *and* that its PTR record is valid.
     """
 
+    pretty_type = 'Static interface'
+
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('cyder.Ctnr', null=False,
                              verbose_name="Container")
