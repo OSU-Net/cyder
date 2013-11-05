@@ -163,12 +163,14 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
         n = None
         dhcp_enabled = False
 
+    name = comment[:comment.find('\n')][:50]
+
     r, created = Range.objects.get_or_create(
         start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end),
         range_type=r_type, allow=allow, ip_type='4',
         network=n, dhcp_enabled=dhcp_enabled, is_reserved=not dhcp_enabled,
-        description=comment)
+        name=name, description=comment)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         rk, kv_created = RangeKeyValue.objects.get_or_create(
