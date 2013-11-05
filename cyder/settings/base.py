@@ -191,7 +191,7 @@ REVERSE_DOMAINS = [
 
 VERIFICATION_SERVER = "ns1.oregonstate.edu"
 ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
-ZONE_PATH = "cyder/migration/management/commands/lib/zones"
+ZONE_PATH = "cyder/management/commands/lib/zones"
 ZONE_BLACKLIST = []
 
 REST_FRAMEWORK = {

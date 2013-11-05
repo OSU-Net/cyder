@@ -30,7 +30,7 @@ def parse_file(name):
         'ConfigFile': ConfigFile,
     }
 
-    with open('cyder/migration/management/commands/lib/dhcpd_compare2/'
+    with open('cyder/management/commands/lib/dhcpd_compare2/'
               'dhcp.parsley') as g:
         grammar = makeGrammar(g.read(), bindings)
 

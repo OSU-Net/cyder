@@ -15,7 +15,7 @@ def strip_comments(content):
     return "".join(line[:line.find('#')] if '#' in line else line for line in content)
 
 
-grammar = open('cyder/migration/management/commands/lib/dhcpd_compare/'
+grammar = open('cyder/management/commands/lib/dhcpd_compare/'
                'isc.parsley').read()
 
 class DhcpConfigContext(

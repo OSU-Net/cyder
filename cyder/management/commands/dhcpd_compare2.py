@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from sys import stdout
 
-from cyder.migration.management.commands.lib.dhcpd_compare2.compare \
+from cyder.management.commands.lib.dhcpd_compare2.compare \
         import compare_files
 
 
