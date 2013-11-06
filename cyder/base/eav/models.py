@@ -12,6 +12,7 @@ class Attribute(models.Model):
     search_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'attribute'
 
     name = models.CharField(max_length=255)
