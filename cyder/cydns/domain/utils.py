@@ -7,7 +7,7 @@ def name_to_domain(fqdn):
     """
     This function doesn't throw an exception if nothing is found.
     """
-    Domain = get_model('domain', 'domain')
+    Domain = get_model('cyder', 'domain')
     _name_type_check(fqdn)
     labels = fqdn.split('.')
     for i in xrange(len(labels)):

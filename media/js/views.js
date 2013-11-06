@@ -43,14 +43,6 @@ $(document).ready(function() {
 		$('#id_attribute').val('');
 	});
 
-    function prettify(obj) {
-        var obj_name = obj.split('_');
-        for(i=0; i < obj_name.length; i++){
-            obj_name[i] = obj_name[i].charAt(0).toUpperCase() + obj_name[i].slice(1);
-        }
-        return obj_name.join(' ');
-    }
-
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
@@ -111,17 +103,18 @@ $(document).ready(function() {
             extra_title = ' for ' + objName;
         };
         var object_type = $(this).attr('data-object_type') || objType;
+        var pretty_obj_type = $(this).attr('data-prettyObjType');
         $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
                 if (objType.indexOf('interface') != -1 && data.form.indexOf('title=') != -1) {
                     extra_title = ' for ' + data.form.split('title=')[1].split('/')[0].replace(/"/g, "");
                 };
-                $('#form-title').html('Updating ' + prettify(object_type) + extra_title);
+                $('#form-title').html('Updating ' + pretty_obj_type + extra_title);
                 $('#hidden-inner-form').empty().append(data.form);
                 initForms();
             }, 150);
-            $('.form-btns a.submit').text('Update ' + prettify(object_type));
+            $('.form-btns a.submit').text('Update ' + pretty_obj_type);
             $('#obj-form').slideDown();
         }, 'json');
     });

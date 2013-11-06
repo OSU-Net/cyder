@@ -7,10 +7,11 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydhcp.network.models import Network
 
 
-class Vrf(models.Model, ObjectUrlMixin):
+class Vrf(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
@@ -18,6 +19,7 @@ class Vrf(models.Model, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'vrf'
 
     def __str__(self):
@@ -25,7 +27,7 @@ class Vrf(models.Model, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('network', 'network')
+        Network = get_model('cyder', 'network')
         networks = Network.objects.filter(range__in=ctnr.ranges.all())
         objects = objects or Vrf.objects
         return objects.filter(network__in=networks)
@@ -80,6 +82,7 @@ class Vrf(models.Model, ObjectUrlMixin):
 
 class VrfAV(EAVBase):
     class Meta(EAVBase.Meta):
+        app_label = 'cyder'
         db_table = 'vrf_av'
 
 

@@ -19,6 +19,9 @@ class Token(models.Model, ObjectUrlMixin):
     purpose = models.CharField(max_length=100)  # purpose of token
     created = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        app_label = 'cyder'
+
     def save(self, *args, **kwargs):
         if not self.key:
             self.key = self.generate_key()

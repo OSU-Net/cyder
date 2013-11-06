@@ -16,7 +16,8 @@ class RangeWizard(forms.ModelForm):
     vrf = forms.ModelChoiceField(
         queryset=Vrf.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'wizard'}))
+        widget=forms.Select(attrs={'class': 'wizard'}),
+        label='VRF')
     site = forms.ModelChoiceField(
         queryset=Site.objects.all(),
         required=False,

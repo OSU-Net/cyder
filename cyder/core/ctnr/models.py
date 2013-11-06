@@ -4,6 +4,7 @@ from django.db.models import Q
 
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
@@ -12,7 +13,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.validation import validate_ctnr_name
 
 
-class Ctnr(models.Model, ObjectUrlMixin):
+class Ctnr(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True,
                             validators=[validate_ctnr_name])
@@ -28,6 +29,7 @@ class Ctnr(models.Model, ObjectUrlMixin):
     search_fields = ('name', 'description')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'ctnr'
 
     def save(self, *args, **kwargs):
@@ -58,7 +60,6 @@ class Ctnr(models.Model, ObjectUrlMixin):
         ]}
 
     def build_legacy_classes(self):
-        from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
         build_str = ""
         for range_ in self.ranges.filter(Q(range_type=DYNAMIC,
                                            dhcp_enabled=True) |
@@ -80,12 +81,13 @@ class Ctnr(models.Model, ObjectUrlMixin):
         return build_str
 
 
-class CtnrUser(models.Model, ObjectUrlMixin):
+class CtnrUser(BaseModel, ObjectUrlMixin):
     user = models.ForeignKey(User)
     ctnr = models.ForeignKey(Ctnr)
     level = models.IntegerField()
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'ctnr_users'
         unique_together = ('ctnr', 'user')
 

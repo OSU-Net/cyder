@@ -32,6 +32,7 @@ class MX(LabelDomainMixin, CydnsRecord):
     search_fields = ('fqdn', 'server')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'mx'
         # label and domain in CydnsRecord
         unique_together = ('domain', 'label', 'server', 'priority')

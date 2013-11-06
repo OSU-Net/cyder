@@ -7,11 +7,12 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 
 
-class Vlan(models.Model, ObjectUrlMixin):
+class Vlan(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     number = models.PositiveIntegerField()
@@ -20,6 +21,7 @@ class Vlan(models.Model, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vlan"
         unique_together = ("name", "number")
 
@@ -31,7 +33,7 @@ class Vlan(models.Model, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('network', 'network')
+        Network = get_model('cyder', 'network')
         networks = Network.objects.filter(range__in=ctnr.ranges.all())
         objects = objects or Vlan.objects
         return objects.filter(network__in=networks)
@@ -77,6 +79,7 @@ class Vlan(models.Model, ObjectUrlMixin):
 
 class VlanAV(EAVBase):
     class Meta(EAVBase.Meta):
+        app_label = 'cyder'
         db_table = 'vlan_av'
 
 

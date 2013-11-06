@@ -12,6 +12,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
@@ -27,7 +28,7 @@ DEFAULT_REFRESH = 180  # 3 min
 DEFAULT_MINIMUM = 180  # 3 min
 
 
-class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
+class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     """
     SOA stands for Start of Authority
 
@@ -56,7 +57,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     id = models.AutoField(primary_key=True)
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],
-                                      help_text="Time to Live of this record")
+                                      verbose_name="Time to live")
     primary = models.CharField(max_length=100, validators=[validate_fqdn])
     contact = models.CharField(max_length=100, validators=[validate_fqdn])
     serial = models.PositiveIntegerField(null=False, default=int(time.time()))
@@ -82,6 +83,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
     attrs = None
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'soa'
         # We are using the description field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
@@ -197,6 +199,7 @@ class SOA(models.Model, ObjectUrlMixin, DisplayMixin):
 
 class SOAAV(EAVBase):
     class Meta(EAVBase.Meta):
+        app_label = 'cyder'
         db_table = 'soa_av'
 
 

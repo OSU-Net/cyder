@@ -7,10 +7,11 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
+from cyder.base.models import BaseModel
 from cyder.cydhcp.utils import join_dhcp_args
 
 
-class Workgroup(models.Model, ObjectUrlMixin):
+class Workgroup(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
 
@@ -18,6 +19,7 @@ class Workgroup(models.Model, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'workgroup'
 
     def __str__(self):
@@ -82,6 +84,7 @@ class Workgroup(models.Model, ObjectUrlMixin):
 
 class WorkgroupAV(EAVBase):
     class Meta(EAVBase.Meta):
+        app_label = 'cyder'
         db_table = 'workgroup_av'
 
 

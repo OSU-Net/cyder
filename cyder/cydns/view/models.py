@@ -15,6 +15,7 @@ class View(models.Model, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'view'
         unique_together = ('name',)
 

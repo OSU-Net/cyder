@@ -7,20 +7,20 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
-from cyder.cydhcp.validation import validate_mac
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 
 import datetime
 import re
 
 
-class DynamicInterface(models.Model, ObjectUrlMixin):
-    ctnr = models.ForeignKey(Ctnr, null=False)
+class DynamicInterface(BaseModel, ObjectUrlMixin):
+    ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
@@ -35,6 +35,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
     search_fields = ('mac',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'dynamic_interface'
 
     @staticmethod
@@ -137,6 +138,7 @@ class DynamicInterface(models.Model, ObjectUrlMixin):
 
 class DynamicInterfaceAV(EAVBase):
     class Meta(EAVBase.Meta):
+        app_label = 'cyder'
         db_table = "dynamic_interface_av"
 
 

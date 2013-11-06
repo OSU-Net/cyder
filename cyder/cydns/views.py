@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
 from django.shortcuts import get_object_or_404, redirect, render
 
-import cyder as cy
+from cyder.base.constants import ACTION_CREATE
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
@@ -89,7 +89,7 @@ def cydns_view(request, pk=None):
         else:
             form = FormKlass(qd, instance=record)
         try:
-            if perm(request, cy.ACTION_CREATE, obj=record, obj_class=Klass):
+            if perm(request, ACTION_CREATE, obj=record, obj_class=Klass):
                 record = form.save()
                 # If domain, add to current ctnr.
                 if obj_type in DNS_EAV_MODELS or obj_type in DHCP_EAV_MODELS:

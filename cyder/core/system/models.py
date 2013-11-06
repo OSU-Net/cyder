@@ -20,13 +20,14 @@ class System(BaseModel, ObjectUrlMixin):
         return get_display(self)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'system'
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         objects = objects or System.objects
-        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
-        StaticInterface = get_model('static_intr', 'staticinterface')
+        DynamicInterface = get_model('cyder', 'dynamicinterface')
+        StaticInterface = get_model('cyder', 'staticinterface')
         dynamic_query = DynamicInterface.objects.filter(
             ctnr=ctnr).values_list('system')
         static_query = StaticInterface.objects.filter(
@@ -42,10 +43,10 @@ class System(BaseModel, ObjectUrlMixin):
         return data
 
     def delete(self):
-        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
+        DynamicInterface = get_model('cyder', 'dynamicinterface')
         for interface in DynamicInterface.objects.filter(system=self):
             interface.delete(**{'delete_system': False})
-        StaticInterface = get_model('static_intr', 'staticinterface')
+        StaticInterface = get_model('cyder', 'staticinterface')
         for interface in StaticInterface.objects.filter(system=self):
             interface.delete(**{'delete_system': False})
         super(System, self).delete()
@@ -60,6 +61,7 @@ class System(BaseModel, ObjectUrlMixin):
 
 class SystemAV(EAVBase):
     class Meta(EAVBase.Meta):
+        app_label = 'cyder'
         db_table = 'system_av'
 
 
