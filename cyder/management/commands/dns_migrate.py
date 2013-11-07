@@ -6,7 +6,6 @@ from sys import stderr
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
-from cyder.migration.utils import range_usage_get_create
 
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
@@ -25,7 +24,8 @@ from cyder.cydns.models import View
 import MySQLdb
 from optparse import make_option
 from lib import maintain_dump, fix_maintain
-from lib.utilities import clean_mac, ip2long, long2ip, fix_attr_name
+from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
+                           range_usage_get_create)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")

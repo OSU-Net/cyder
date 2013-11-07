@@ -6,7 +6,6 @@ from django.db import transaction
 from sys import stderr
 
 from cyder.base.eav.models import Attribute
-from cyder.migration.utils import range_usage_get_create
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
@@ -26,7 +25,7 @@ import ipaddr
 import MySQLdb
 from optparse import make_option
 
-from lib.utilities import long2ip, fix_attr_name
+from lib.utilities import long2ip, fix_attr_name, range_usage_get_create
 
 
 cached = {}
