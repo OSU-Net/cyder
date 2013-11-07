@@ -1,7 +1,7 @@
 [
   {
     "pk": 1,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "subnet-mask",
       "attribute_type": "o",
@@ -10,7 +10,7 @@
   },
   {
     "pk": 2,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "time-offset",
       "attribute_type": "o",
@@ -19,7 +19,7 @@
   },
   {
     "pk": 3,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "routers",
       "attribute_type": "o",
@@ -28,7 +28,7 @@
   },
   {
     "pk": 4,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "time-servers",
       "attribute_type": "o",
@@ -37,7 +37,7 @@
   },
   {
     "pk": 5,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ien116-name-servers",
       "attribute_type": "o",
@@ -46,7 +46,7 @@
   },
   {
     "pk": 6,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "domain-name-servers",
       "attribute_type": "o",
@@ -55,7 +55,7 @@
   },
   {
     "pk": 7,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "log-servers",
       "attribute_type": "o",
@@ -64,7 +64,7 @@
   },
   {
     "pk": 8,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "cookie-servers",
       "attribute_type": "o",
@@ -73,7 +73,7 @@
   },
   {
     "pk": 9,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "lpr-servers",
       "attribute_type": "o",
@@ -82,7 +82,7 @@
   },
   {
     "pk": 10,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "impress-servers",
       "attribute_type": "o",
@@ -91,7 +91,7 @@
   },
   {
     "pk": 11,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "resource-location-servers",
       "attribute_type": "o",
@@ -100,7 +100,7 @@
   },
   {
     "pk": 12,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "host-name",
       "attribute_type": "o",
@@ -109,7 +109,7 @@
   },
   {
     "pk": 13,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "boot-size",
       "attribute_type": "o",
@@ -118,7 +118,7 @@
   },
   {
     "pk": 14,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "merit-dump",
       "attribute_type": "o",
@@ -127,7 +127,7 @@
   },
   {
     "pk": 15,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "domain-name",
       "attribute_type": "o",
@@ -136,7 +136,7 @@
   },
   {
     "pk": 16,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "swap-server",
       "attribute_type": "o",
@@ -145,7 +145,7 @@
   },
   {
     "pk": 17,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "root-path",
       "attribute_type": "o",
@@ -154,7 +154,7 @@
   },
   {
     "pk": 18,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "extensions-path",
       "attribute_type": "o",
@@ -163,7 +163,7 @@
   },
   {
     "pk": 19,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ip-forwarding",
       "attribute_type": "o",
@@ -172,7 +172,7 @@
   },
   {
     "pk": 20,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "non-local-source-routing",
       "attribute_type": "o",
@@ -181,7 +181,7 @@
   },
   {
     "pk": 21,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "policy-filter",
       "attribute_type": "o",
@@ -190,7 +190,7 @@
   },
   {
     "pk": 22,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "max-dgram-reassembly",
       "attribute_type": "o",
@@ -199,7 +199,7 @@
   },
   {
     "pk": 23,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "default-ip-ttl",
       "attribute_type": "o",
@@ -208,7 +208,7 @@
   },
   {
     "pk": 24,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "path-mtu-aging-timeout",
       "attribute_type": "o",
@@ -217,7 +217,7 @@
   },
   {
     "pk": 25,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "path-mtu-plateau-table",
       "attribute_type": "o",
@@ -226,7 +226,7 @@
   },
   {
     "pk": 26,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "interface-mtu",
       "attribute_type": "o",
@@ -235,7 +235,7 @@
   },
   {
     "pk": 27,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "all-subnets-local",
       "attribute_type": "o",
@@ -244,7 +244,7 @@
   },
   {
     "pk": 28,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "broadcast-address",
       "attribute_type": "o",
@@ -253,7 +253,7 @@
   },
   {
     "pk": 29,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "perform-mask-discovery",
       "attribute_type": "o",
@@ -262,7 +262,7 @@
   },
   {
     "pk": 30,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mask-supplier",
       "attribute_type": "o",
@@ -271,7 +271,7 @@
   },
   {
     "pk": 31,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "router-discovery",
       "attribute_type": "o",
@@ -280,7 +280,7 @@
   },
   {
     "pk": 32,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "router-solicitation-address",
       "attribute_type": "o",
@@ -289,7 +289,7 @@
   },
   {
     "pk": 33,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "static-routes",
       "attribute_type": "o",
@@ -298,7 +298,7 @@
   },
   {
     "pk": 34,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "trailer-encapsulation",
       "attribute_type": "o",
@@ -307,7 +307,7 @@
   },
   {
     "pk": 35,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "arp-cache-timeout",
       "attribute_type": "o",
@@ -316,7 +316,7 @@
   },
   {
     "pk": 36,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ieee802-3-encapsulation",
       "attribute_type": "o",
@@ -325,7 +325,7 @@
   },
   {
     "pk": 37,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "default-tcp-ttl",
       "attribute_type": "o",
@@ -334,7 +334,7 @@
   },
   {
     "pk": 38,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "tcp-keepalive-interval",
       "attribute_type": "o",
@@ -343,7 +343,7 @@
   },
   {
     "pk": 39,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "tcp-keepalive-garbage",
       "attribute_type": "o",
@@ -352,7 +352,7 @@
   },
   {
     "pk": 40,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nis-domain",
       "attribute_type": "o",
@@ -361,7 +361,7 @@
   },
   {
     "pk": 41,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nis-servers",
       "attribute_type": "o",
@@ -370,7 +370,7 @@
   },
   {
     "pk": 42,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ntp-servers",
       "attribute_type": "o",
@@ -379,7 +379,7 @@
   },
   {
     "pk": 43,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "vendor-encapsulated-options",
       "attribute_type": "o",
@@ -388,7 +388,7 @@
   },
   {
     "pk": 44,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "netbios-name-servers",
       "attribute_type": "o",
@@ -397,7 +397,7 @@
   },
   {
     "pk": 45,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "netbios-dd-server",
       "attribute_type": "o",
@@ -406,7 +406,7 @@
   },
   {
     "pk": 46,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "netbios-node-type",
       "attribute_type": "o",
@@ -415,7 +415,7 @@
   },
   {
     "pk": 47,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "netbios-scope",
       "attribute_type": "o",
@@ -424,7 +424,7 @@
   },
   {
     "pk": 48,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "font-servers",
       "attribute_type": "o",
@@ -433,7 +433,7 @@
   },
   {
     "pk": 49,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "x-display-manager",
       "attribute_type": "o",
@@ -442,7 +442,7 @@
   },
   {
     "pk": 50,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-requested-address",
       "attribute_type": "o",
@@ -451,7 +451,7 @@
   },
   {
     "pk": 51,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-lease-time",
       "attribute_type": "o",
@@ -460,7 +460,7 @@
   },
   {
     "pk": 52,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-option-overload",
       "attribute_type": "o",
@@ -469,7 +469,7 @@
   },
   {
     "pk": 53,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-message-type",
       "attribute_type": "o",
@@ -478,7 +478,7 @@
   },
   {
     "pk": 54,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-server-identifier",
       "attribute_type": "o",
@@ -487,7 +487,7 @@
   },
   {
     "pk": 55,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-parameter-request-list",
       "attribute_type": "o",
@@ -496,7 +496,7 @@
   },
   {
     "pk": 56,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-message",
       "attribute_type": "o",
@@ -505,7 +505,7 @@
   },
   {
     "pk": 57,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-max-message-size",
       "attribute_type": "o",
@@ -514,7 +514,7 @@
   },
   {
     "pk": 58,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-renewal-time",
       "attribute_type": "o",
@@ -523,7 +523,7 @@
   },
   {
     "pk": 59,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-rebinding-time",
       "attribute_type": "o",
@@ -532,7 +532,7 @@
   },
   {
     "pk": 60,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "vendor-class-identifier",
       "attribute_type": "o",
@@ -541,7 +541,7 @@
   },
   {
     "pk": 61,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcp-client-identifier",
       "attribute_type": "o",
@@ -550,7 +550,7 @@
   },
   {
     "pk": 62,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nwip-domain",
       "attribute_type": "o",
@@ -559,7 +559,7 @@
   },
   {
     "pk": 63,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nwip-suboptions",
       "attribute_type": "o",
@@ -568,7 +568,7 @@
   },
   {
     "pk": 64,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nisplus-domain",
       "attribute_type": "o",
@@ -577,7 +577,7 @@
   },
   {
     "pk": 65,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nisplus-servers",
       "attribute_type": "o",
@@ -586,7 +586,7 @@
   },
   {
     "pk": 66,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "tftp-server-name",
       "attribute_type": "o",
@@ -595,7 +595,7 @@
   },
   {
     "pk": 67,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "bootfile-name",
       "attribute_type": "o",
@@ -604,7 +604,7 @@
   },
   {
     "pk": 68,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mobile-ip-home-agent",
       "attribute_type": "o",
@@ -613,7 +613,7 @@
   },
   {
     "pk": 69,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "smtp-server",
       "attribute_type": "o",
@@ -622,7 +622,7 @@
   },
   {
     "pk": 70,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "pop-server",
       "attribute_type": "o",
@@ -631,7 +631,7 @@
   },
   {
     "pk": 71,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nntp-server",
       "attribute_type": "o",
@@ -640,7 +640,7 @@
   },
   {
     "pk": 72,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "www-server",
       "attribute_type": "o",
@@ -649,7 +649,7 @@
   },
   {
     "pk": 73,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "finger-server",
       "attribute_type": "o",
@@ -658,7 +658,7 @@
   },
   {
     "pk": 74,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "irc-server",
       "attribute_type": "o",
@@ -667,7 +667,7 @@
   },
   {
     "pk": 75,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "streettalk-server",
       "attribute_type": "o",
@@ -676,7 +676,7 @@
   },
   {
     "pk": 76,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "streettalk-directory-assistance-server",
       "attribute_type": "o",
@@ -685,7 +685,7 @@
   },
   {
     "pk": 77,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "user-class",
       "attribute_type": "o",
@@ -694,7 +694,7 @@
   },
   {
     "pk": 78,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "slp-directory-agent",
       "attribute_type": "o",
@@ -703,7 +703,7 @@
   },
   {
     "pk": 79,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "slp-service-scope",
       "attribute_type": "o",
@@ -712,7 +712,7 @@
   },
   {
     "pk": 81,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "fqdn",
       "attribute_type": "o",
@@ -721,7 +721,7 @@
   },
   {
     "pk": 82,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "relay-agent-information",
       "attribute_type": "o",
@@ -730,7 +730,7 @@
   },
   {
     "pk": 85,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nds-servers",
       "attribute_type": "o",
@@ -739,7 +739,7 @@
   },
   {
     "pk": 86,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nds-tree-name",
       "attribute_type": "o",
@@ -748,7 +748,7 @@
   },
   {
     "pk": 87,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "nds-context",
       "attribute_type": "o",
@@ -757,7 +757,7 @@
   },
   {
     "pk": 88,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "bcms-controller-names",
       "attribute_type": "o",
@@ -766,7 +766,7 @@
   },
   {
     "pk": 89,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "bcms-controller-address",
       "attribute_type": "o",
@@ -775,7 +775,7 @@
   },
   {
     "pk": 91,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "client-last-transaction-time",
       "attribute_type": "o",
@@ -784,7 +784,7 @@
   },
   {
     "pk": 92,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "associated-ip",
       "attribute_type": "o",
@@ -793,7 +793,7 @@
   },
   {
     "pk": 98,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "uap-servers",
       "attribute_type": "o",
@@ -802,7 +802,7 @@
   },
   {
     "pk": 112,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "netinfo-server-address",
       "attribute_type": "o",
@@ -811,7 +811,7 @@
   },
   {
     "pk": 113,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "netinfo-server-tag",
       "attribute_type": "o",
@@ -820,7 +820,7 @@
   },
   {
     "pk": 114,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "default-url",
       "attribute_type": "o",
@@ -829,7 +829,7 @@
   },
   {
     "pk": 118,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "subnet-selection",
       "attribute_type": "o",
@@ -838,7 +838,7 @@
   },
   {
     "pk": 119,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "domain-search",
       "attribute_type": "o",
@@ -847,7 +847,7 @@
   },
   {
     "pk": 120,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "UCSipServer",
       "attribute_type": "o",
@@ -856,7 +856,7 @@
   },
   {
     "pk": 124,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "vivco",
       "attribute_type": "o",
@@ -865,7 +865,7 @@
   },
   {
     "pk": 125,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "vivso",
       "attribute_type": "o",
@@ -874,7 +874,7 @@
   },
   {
     "pk": 128,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mitel-128",
       "attribute_type": "o",
@@ -883,7 +883,7 @@
   },
   {
     "pk": 129,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mitel-129",
       "attribute_type": "o",
@@ -892,7 +892,7 @@
   },
   {
     "pk": 130,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mitel-130",
       "attribute_type": "o",
@@ -901,7 +901,7 @@
   },
   {
     "pk": 132,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mitel-132-vlan",
       "attribute_type": "o",
@@ -910,7 +910,7 @@
   },
   {
     "pk": 133,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mitel-133-pri",
       "attribute_type": "o",
@@ -919,7 +919,7 @@
   },
   {
     "pk": 144,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "option-144",
       "attribute_type": "o",
@@ -928,7 +928,7 @@
   },
   {
     "pk": 161,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ftp-server",
       "attribute_type": "o",
@@ -937,7 +937,7 @@
   },
   {
     "pk": 162,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ftp-root-path",
       "attribute_type": "o",
@@ -946,7 +946,7 @@
   },
   {
     "pk": 176,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ipphone",
       "attribute_type": "o",
@@ -955,7 +955,7 @@
   },
   {
     "pk": 242,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ipphone242",
       "attribute_type": "o",
@@ -964,7 +964,7 @@
   },
   {
     "pk": 252,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "wpad-curl",
       "attribute_type": "o",
@@ -973,7 +973,7 @@
   },
   {
     "pk": 301,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "default-lease-time",
       "attribute_type": "s",
@@ -982,7 +982,7 @@
   },
   {
     "pk": 302,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "max-lease-time",
       "attribute_type": "s",
@@ -991,7 +991,7 @@
   },
   {
     "pk": 303,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "min-lease-time",
       "attribute_type": "s",
@@ -1000,7 +1000,7 @@
   },
   {
     "pk": 304,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dynamic-bootp-lease-cutoff",
       "attribute_type": "s",
@@ -1009,7 +1009,7 @@
   },
   {
     "pk": 305,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dynamic-bootp-lease-length",
       "attribute_type": "s",
@@ -1018,7 +1018,7 @@
   },
   {
     "pk": 306,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "boot-unknown-clients",
       "attribute_type": "s",
@@ -1027,7 +1027,7 @@
   },
   {
     "pk": 307,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dynamic-bootp",
       "attribute_type": "s",
@@ -1036,7 +1036,7 @@
   },
   {
     "pk": 308,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "allow-bootp",
       "attribute_type": "s",
@@ -1045,7 +1045,7 @@
   },
   {
     "pk": 309,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "allow-booting",
       "attribute_type": "s",
@@ -1054,7 +1054,7 @@
   },
   {
     "pk": 310,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "one-lease-per-client",
       "attribute_type": "s",
@@ -1063,7 +1063,7 @@
   },
   {
     "pk": 311,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "get-lease-hostnames",
       "attribute_type": "s",
@@ -1072,7 +1072,7 @@
   },
   {
     "pk": 312,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "use-host-decl-names",
       "attribute_type": "s",
@@ -1081,7 +1081,7 @@
   },
   {
     "pk": 313,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "use-lease-addr-for-default-route",
       "attribute_type": "s",
@@ -1090,7 +1090,7 @@
   },
   {
     "pk": 314,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "min-secs",
       "attribute_type": "s",
@@ -1099,7 +1099,7 @@
   },
   {
     "pk": 315,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "filename",
       "attribute_type": "s",
@@ -1108,7 +1108,7 @@
   },
   {
     "pk": 316,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "server-name",
       "attribute_type": "s",
@@ -1117,7 +1117,7 @@
   },
   {
     "pk": 317,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "next-server",
       "attribute_type": "s",
@@ -1126,7 +1126,7 @@
   },
   {
     "pk": 318,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "authoritative",
       "attribute_type": "s",
@@ -1135,7 +1135,7 @@
   },
   {
     "pk": 319,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "vendor-option-space",
       "attribute_type": "s",
@@ -1144,7 +1144,7 @@
   },
   {
     "pk": 320,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "always-reply-rfc1048",
       "attribute_type": "s",
@@ -1153,7 +1153,7 @@
   },
   {
     "pk": 321,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "site-option-space",
       "attribute_type": "s",
@@ -1162,7 +1162,7 @@
   },
   {
     "pk": 322,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "always-broadcast",
       "attribute_type": "s",
@@ -1171,7 +1171,7 @@
   },
   {
     "pk": 323,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ddns-domainname",
       "attribute_type": "s",
@@ -1180,7 +1180,7 @@
   },
   {
     "pk": 324,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ddns-hostname",
       "attribute_type": "s",
@@ -1189,7 +1189,7 @@
   },
   {
     "pk": 325,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ddns-rev-domainname",
       "attribute_type": "s",
@@ -1198,7 +1198,7 @@
   },
   {
     "pk": 326,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "lease-file-name",
       "attribute_type": "s",
@@ -1207,7 +1207,7 @@
   },
   {
     "pk": 327,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "pid-file-name",
       "attribute_type": "s",
@@ -1216,7 +1216,7 @@
   },
   {
     "pk": 328,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "duplicates",
       "attribute_type": "s",
@@ -1225,7 +1225,7 @@
   },
   {
     "pk": 329,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "declines",
       "attribute_type": "s",
@@ -1234,7 +1234,7 @@
   },
   {
     "pk": 330,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ddns-updates",
       "attribute_type": "s",
@@ -1243,7 +1243,7 @@
   },
   {
     "pk": 331,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "omapi-port",
       "attribute_type": "s",
@@ -1252,7 +1252,7 @@
   },
   {
     "pk": 332,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "local-port",
       "attribute_type": "s",
@@ -1261,7 +1261,7 @@
   },
   {
     "pk": 333,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "limited-broadcast-address",
       "attribute_type": "s",
@@ -1270,7 +1270,7 @@
   },
   {
     "pk": 334,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "remote-port",
       "attribute_type": "s",
@@ -1279,7 +1279,7 @@
   },
   {
     "pk": 335,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "local-address",
       "attribute_type": "s",
@@ -1288,7 +1288,7 @@
   },
   {
     "pk": 336,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "omapi-key",
       "attribute_type": "s",
@@ -1297,7 +1297,7 @@
   },
   {
     "pk": 337,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "stash-agent-options",
       "attribute_type": "s",
@@ -1306,7 +1306,7 @@
   },
   {
     "pk": 338,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ddns-ttl",
       "attribute_type": "s",
@@ -1315,7 +1315,7 @@
   },
   {
     "pk": 339,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ddns-update-style",
       "attribute_type": "s",
@@ -1324,7 +1324,7 @@
   },
   {
     "pk": 340,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "client-updates",
       "attribute_type": "s",
@@ -1333,7 +1333,7 @@
   },
   {
     "pk": 341,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "update-optimization",
       "attribute_type": "s",
@@ -1342,7 +1342,7 @@
   },
   {
     "pk": 342,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ping-check",
       "attribute_type": "s",
@@ -1351,7 +1351,7 @@
   },
   {
     "pk": 343,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "update-static-leases",
       "attribute_type": "s",
@@ -1360,7 +1360,7 @@
   },
   {
     "pk": 344,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "log-facility",
       "attribute_type": "s",
@@ -1369,7 +1369,7 @@
   },
   {
     "pk": 345,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "do-forward-updates",
       "attribute_type": "s",
@@ -1378,7 +1378,7 @@
   },
   {
     "pk": 346,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ping-timeout",
       "attribute_type": "s",
@@ -1387,7 +1387,7 @@
   },
   {
     "pk": 347,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "infinite-is-reserved",
       "attribute_type": "s",
@@ -1396,7 +1396,7 @@
   },
   {
     "pk": 348,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "update-conflict-detection",
       "attribute_type": "s",
@@ -1405,7 +1405,7 @@
   },
   {
     "pk": 349,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "leasequery",
       "attribute_type": "s",
@@ -1414,7 +1414,7 @@
   },
   {
     "pk": 350,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "adaptive-lease-time-threshold",
       "attribute_type": "s",
@@ -1423,7 +1423,7 @@
   },
   {
     "pk": 351,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "do-reverse-updates",
       "attribute_type": "s",
@@ -1432,7 +1432,7 @@
   },
   {
     "pk": 352,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "fqdn-reply",
       "attribute_type": "s",
@@ -1441,7 +1441,7 @@
   },
   {
     "pk": 353,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "preferred-lifetime",
       "attribute_type": "s",
@@ -1450,7 +1450,7 @@
   },
   {
     "pk": 354,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcpv6-lease-file-name",
       "attribute_type": "s",
@@ -1459,7 +1459,7 @@
   },
   {
     "pk": 355,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "dhcpv6-pid-file-name",
       "attribute_type": "s",
@@ -1468,7 +1468,7 @@
   },
   {
     "pk": 356,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "limit-addrs-per-ia",
       "attribute_type": "s",
@@ -1477,7 +1477,7 @@
   },
   {
     "pk": 357,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "limit-prefs-per-ia",
       "attribute_type": "s",
@@ -1486,7 +1486,7 @@
   },
   {
     "pk": 358,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "delayed-ack",
       "attribute_type": "s",
@@ -1495,7 +1495,7 @@
   },
   {
     "pk": 359,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "max-ack-delay",
       "attribute_type": "s",
@@ -1504,7 +1504,7 @@
   },
   {
     "pk": 360,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-server",
       "attribute_type": "s",
@@ -1513,7 +1513,7 @@
   },
   {
     "pk": 361,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-port",
       "attribute_type": "s",
@@ -1522,7 +1522,7 @@
   },
   {
     "pk": 362,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-username",
       "attribute_type": "s",
@@ -1531,7 +1531,7 @@
   },
   {
     "pk": 363,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-password",
       "attribute_type": "s",
@@ -1540,7 +1540,7 @@
   },
   {
     "pk": 364,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-base-dn",
       "attribute_type": "s",
@@ -1549,7 +1549,7 @@
   },
   {
     "pk": 365,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-method",
       "attribute_type": "s",
@@ -1558,7 +1558,7 @@
   },
   {
     "pk": 366,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-debug-file",
       "attribute_type": "s",
@@ -1567,7 +1567,7 @@
   },
   {
     "pk": 367,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-dhcp-server-cn",
       "attribute_type": "s",
@@ -1576,7 +1576,7 @@
   },
   {
     "pk": 368,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-referrals",
       "attribute_type": "s",
@@ -1585,7 +1585,7 @@
   },
   {
     "pk": 369,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-ssl",
       "attribute_type": "s",
@@ -1594,7 +1594,7 @@
   },
   {
     "pk": 370,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-reqcert",
       "attribute_type": "s",
@@ -1603,7 +1603,7 @@
   },
   {
     "pk": 371,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-ca-file",
       "attribute_type": "s",
@@ -1612,7 +1612,7 @@
   },
   {
     "pk": 372,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-ca-dir",
       "attribute_type": "s",
@@ -1621,7 +1621,7 @@
   },
   {
     "pk": 373,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-cert",
       "attribute_type": "s",
@@ -1630,7 +1630,7 @@
   },
   {
     "pk": 374,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-key",
       "attribute_type": "s",
@@ -1639,7 +1639,7 @@
   },
   {
     "pk": 375,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-crlcheck",
       "attribute_type": "s",
@@ -1648,7 +1648,7 @@
   },
   {
     "pk": 376,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-ciphers",
       "attribute_type": "s",
@@ -1657,7 +1657,7 @@
   },
   {
     "pk": 377,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "ldap-tls-randfile",
       "attribute_type": "s",
@@ -1666,7 +1666,7 @@
   },
   {
     "pk": 401,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "server-identifier",
       "attribute_type": "o",
@@ -1675,7 +1675,7 @@
   },
   {
     "pk": 501,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Hardware type",
       "attribute_type": "i",
@@ -1684,7 +1684,7 @@
   },
   {
     "pk": 502,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Operating system",
       "attribute_type": "i",
@@ -1693,7 +1693,7 @@
   },
   {
     "pk": 503,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Location",
       "attribute_type": "i",
@@ -1702,7 +1702,7 @@
   },
   {
     "pk": 504,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Department",
       "attribute_type": "i",
@@ -1711,7 +1711,7 @@
   },
   {
     "pk": 505,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Serial number",
       "attribute_type": "i",
@@ -1720,7 +1720,7 @@
   },
   {
     "pk": 506,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Other ID",
       "attribute_type": "i",
@@ -1729,7 +1729,7 @@
   },
   {
     "pk": 507,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Purchase date",
       "attribute_type": "i",
@@ -1738,7 +1738,7 @@
   },
   {
     "pk": 508,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "PO number",
       "attribute_type": "i",
@@ -1747,7 +1747,7 @@
   },
   {
     "pk": 509,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Warranty date",
       "attribute_type": "i",
@@ -1756,7 +1756,7 @@
   },
   {
     "pk": 510,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "Owning unit",
       "attribute_type": "i",
@@ -1765,7 +1765,7 @@
   },
   {
     "pk": 511,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "User ID",
       "attribute_type": "i",
@@ -1774,7 +1774,7 @@
   },
   {
     "pk": 601,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.root-mount-options",
       "attribute_type": "o",
@@ -1783,7 +1783,7 @@
   },
   {
     "pk": 602,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.root-server-ip-address",
       "attribute_type": "o",
@@ -1792,7 +1792,7 @@
   },
   {
     "pk": 603,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.root-server-hostname",
       "attribute_type": "o",
@@ -1801,7 +1801,7 @@
   },
   {
     "pk": 604,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.root-path-name",
       "attribute_type": "o",
@@ -1810,7 +1810,7 @@
   },
   {
     "pk": 605,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.swap-server-ip-address",
       "attribute_type": "o",
@@ -1819,7 +1819,7 @@
   },
   {
     "pk": 606,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.swap-file-path",
       "attribute_type": "o",
@@ -1828,7 +1828,7 @@
   },
   {
     "pk": 607,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.boot-file-path",
       "attribute_type": "o",
@@ -1837,7 +1837,7 @@
   },
   {
     "pk": 608,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.posix-timezone-string",
       "attribute_type": "o",
@@ -1846,7 +1846,7 @@
   },
   {
     "pk": 609,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.boot-read-size",
       "attribute_type": "o",
@@ -1855,7 +1855,7 @@
   },
   {
     "pk": 610,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.install-server-ip-address",
       "attribute_type": "o",
@@ -1864,7 +1864,7 @@
   },
   {
     "pk": 611,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.install-server-hostname",
       "attribute_type": "o",
@@ -1873,7 +1873,7 @@
   },
   {
     "pk": 612,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.install-path",
       "attribute_type": "o",
@@ -1882,7 +1882,7 @@
   },
   {
     "pk": 613,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.sysid-config-file-server",
       "attribute_type": "o",
@@ -1891,7 +1891,7 @@
   },
   {
     "pk": 614,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.JumpStart-server",
       "attribute_type": "o",
@@ -1900,7 +1900,7 @@
   },
   {
     "pk": 615,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.terminal-name",
       "attribute_type": "o",
@@ -1909,7 +1909,7 @@
   },
   {
     "pk": 616,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.bootURI",
       "attribute_type": "o",
@@ -1918,7 +1918,7 @@
   },
   {
     "pk": 617,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "SUNW.HTTPproxy",
       "attribute_type": "o",
@@ -1927,7 +1927,7 @@
   },
   {
     "pk": 621,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "MSUCClient.UCIdentifier",
       "attribute_type": "o",
@@ -1936,7 +1936,7 @@
   },
   {
     "pk": 622,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "MSUCClient.URLScheme",
       "attribute_type": "o",
@@ -1945,7 +1945,7 @@
   },
   {
     "pk": 623,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "MSUCClient.WebServerFqdn",
       "attribute_type": "o",
@@ -1954,7 +1954,7 @@
   },
   {
     "pk": 624,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "MSUCClient.WebServerPort",
       "attribute_type": "o",
@@ -1963,7 +1963,7 @@
   },
   {
     "pk": 625,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "MSUCClient.CertProvRelPath",
       "attribute_type": "o",
@@ -1972,7 +1972,7 @@
   },
   {
     "pk": 1125,
-    "model": "eav.Attribute",
+    "model": "cyder.Attribute",
     "fields": {
       "name": "mitel-125",
       "attribute_type": "o",
