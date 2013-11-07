@@ -286,7 +286,7 @@ class Zone(object):
             if ptr_type == 'forward':
                 arec, _ = range_usage_get_create(
                     AddressRecord, label=label, domain=self.domain,
-                    ip_str=long2ip(ip), ip_type=4)
+                    ip_str=long2ip(ip), ip_type='4')
                 if enabled:
                     arec.views.add(public)
                     arec.views.add(private)

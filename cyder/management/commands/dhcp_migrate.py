@@ -105,8 +105,8 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
-        known):
+def create_range(range_id, start, end, range_type, subnet_id, comment,
+                 enabled, known):
     """
     Takes a row from the Maintain range table.
     Returns a range which is saved in Cyder.
@@ -137,7 +137,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
             n.save()
 
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
-                                     ipaddr.IPv4Address(end))
+                                       ipaddr.IPv4Address(end))
 
         valid_start = int(n.network.network) < start < int(n.network.broadcast)
         valid_order = start <= end
@@ -158,16 +158,16 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
                 print ('\tEnd is not inside network'
                        .format(n.network.broadcast))
 
-
         dhcp_enabled = bool(enabled and valid)
-    else: # the Range doesn't have a Network
+    else:
+        # the Range doesn't have a Network
         n = None
         dhcp_enabled = False
 
     r, created = range_usage_get_create(
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
-        allow=allow, ip_type=4, network=n, dhcp_enabled=dhcp_enabled,
+        allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
         is_reserved=not dhcp_enabled)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
