@@ -207,7 +207,7 @@ class Zone(object):
             else:
                 w = None
 
-            static, _ = StaticInterface(
+            static = StaticInterface(
                 label=name, domain=self.domain, mac=clean_mac(ha),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
