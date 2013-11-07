@@ -88,8 +88,15 @@ class Range(BaseModel, ObjectUrlMixin):
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
 
+    @property
+    def range_str(self):
+        return "{0} - {1}".format(self.start_str, self.end_str)
+
     def __str__(self):
-        return get_display(self)
+        if self.name:
+            return "{0} ({1})".format(self.range_str, self.name)
+        else:
+            return self.range_str
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -121,6 +128,7 @@ class Range(BaseModel, ObjectUrlMixin):
         has_net = self.network is not None
         data['data'] = [
             ('Range', 'start_str', self),
+            ('Name', 'name', self.name),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
