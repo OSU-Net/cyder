@@ -1,0 +1,1982 @@
+[
+  {
+    "pk": 1,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "subnet-mask",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "time-offset",
+      "attribute_type": "o",
+      "value_type": "int32"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "routers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "time-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ien116-name-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "domain-name-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 7,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "log-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 8,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "cookie-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 9,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "lpr-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 10,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "impress-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 11,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "resource-location-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 12,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "host-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 13,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "boot-size",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 14,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "merit-dump",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 15,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "domain-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 16,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "swap-server",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 17,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "root-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 18,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "extensions-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 19,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ip-forwarding",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 20,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "non-local-source-routing",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 21,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "policy-filter",
+      "attribute_type": "o",
+      "value_type": "host_pair_list"
+    }
+  },
+  {
+    "pk": 22,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "max-dgram-reassembly",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 23,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "default-ip-ttl",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 24,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "path-mtu-aging-timeout",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 25,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "path-mtu-plateau-table",
+      "attribute_type": "o",
+      "value_type": "uint16_list"
+    }
+  },
+  {
+    "pk": 26,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "interface-mtu",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 27,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "all-subnets-local",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 28,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "broadcast-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 29,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "perform-mask-discovery",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 30,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mask-supplier",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 31,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "router-discovery",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 32,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "router-solicitation-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 33,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "static-routes",
+      "attribute_type": "o",
+      "value_type": "host_pair_list"
+    }
+  },
+  {
+    "pk": 34,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "trailer-encapsulation",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 35,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "arp-cache-timeout",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 36,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ieee802-3-encapsulation",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 37,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "default-tcp-ttl",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 38,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "tcp-keepalive-interval",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 39,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "tcp-keepalive-garbage",
+      "attribute_type": "o",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 40,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nis-domain",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 41,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nis-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 42,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ntp-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 43,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "vendor-encapsulated-options",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 44,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "netbios-name-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 45,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "netbios-dd-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 46,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "netbios-node-type",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 47,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "netbios-scope",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 48,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "font-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 49,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "x-display-manager",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 50,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-requested-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 51,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-lease-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 52,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-option-overload",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 53,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-message-type",
+      "attribute_type": "o",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 54,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-server-identifier",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 55,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-parameter-request-list",
+      "attribute_type": "o",
+      "value_type": "uint8_list"
+    }
+  },
+  {
+    "pk": 56,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-message",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 57,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-max-message-size",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 58,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-renewal-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 59,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-rebinding-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 60,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "vendor-class-identifier",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 61,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcp-client-identifier",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 62,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nwip-domain",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 63,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nwip-suboptions",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 64,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nisplus-domain",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 65,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nisplus-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 66,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "tftp-server-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 67,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "bootfile-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 68,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mobile-ip-home-agent",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 69,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "smtp-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 70,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "pop-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 71,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nntp-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 72,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "www-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 73,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "finger-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 74,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "irc-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 75,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "streettalk-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 76,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "streettalk-directory-assistance-server",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 77,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "user-class",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 78,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "slp-directory-agent",
+      "attribute_type": "o",
+      "value_type": "flag_host_list"
+    }
+  },
+  {
+    "pk": 79,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "slp-service-scope",
+      "attribute_type": "o",
+      "value_type": "flag_optional_text"
+    }
+  },
+  {
+    "pk": 81,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "fqdn",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 82,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "relay-agent-information",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 85,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nds-servers",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 86,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nds-tree-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 87,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "nds-context",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 88,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "bcms-controller-names",
+      "attribute_type": "o",
+      "value_type": "domain_list"
+    }
+  },
+  {
+    "pk": 89,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "bcms-controller-address",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 91,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "client-last-transaction-time",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 92,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "associated-ip",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 98,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "uap-servers",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 112,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "netinfo-server-address",
+      "attribute_type": "o",
+      "value_type": "host_list"
+    }
+  },
+  {
+    "pk": 113,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "netinfo-server-tag",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 114,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "default-url",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 118,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "subnet-selection",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 119,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "domain-search",
+      "attribute_type": "o",
+      "value_type": "domain_list"
+    }
+  },
+  {
+    "pk": 120,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "UCSipServer",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 124,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "vivco",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 125,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "vivso",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 128,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mitel-128",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 129,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mitel-129",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 130,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mitel-130",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 132,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mitel-132-vlan",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 133,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mitel-133-pri",
+      "attribute_type": "o",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 144,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "option-144",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 161,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ftp-server",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 162,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ftp-root-path",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 176,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ipphone",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 242,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ipphone242",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 252,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "wpad-curl",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 301,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "default-lease-time",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 302,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "max-lease-time",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 303,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "min-lease-time",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 304,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dynamic-bootp-lease-cutoff",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 305,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dynamic-bootp-lease-length",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 306,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "boot-unknown-clients",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 307,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dynamic-bootp",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 308,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "allow-bootp",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 309,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "allow-booting",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 310,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "one-lease-per-client",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 311,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "get-lease-hostnames",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 312,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "use-host-decl-names",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 313,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "use-lease-addr-for-default-route",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 314,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "min-secs",
+      "attribute_type": "s",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 315,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "filename",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 316,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "server-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 317,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "next-server",
+      "attribute_type": "s",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 318,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "authoritative",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 319,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "vendor-option-space",
+      "attribute_type": "s",
+      "value_type": "identifier"
+    }
+  },
+  {
+    "pk": 320,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "always-reply-rfc1048",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 321,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "site-option-space",
+      "attribute_type": "s",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 322,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "always-broadcast",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 323,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ddns-domainname",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 324,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ddns-hostname",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 325,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ddns-rev-domainname",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 326,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "lease-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 327,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "pid-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 328,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "duplicates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 329,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "declines",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 330,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ddns-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 331,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "omapi-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 332,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "local-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 333,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "limited-broadcast-address",
+      "attribute_type": "s",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 334,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "remote-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 335,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "local-address",
+      "attribute_type": "s",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 336,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "omapi-key",
+      "attribute_type": "s",
+      "value_type": "domain"
+    }
+  },
+  {
+    "pk": 337,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "stash-agent-options",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 338,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ddns-ttl",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 339,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ddns-update-style",
+      "attribute_type": "s",
+      "value_type": "ddnsstyle"
+    }
+  },
+  {
+    "pk": 340,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "client-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 341,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "update-optimization",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 342,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ping-check",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 343,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "update-static-leases",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 344,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "log-facility",
+      "attribute_type": "s",
+      "value_type": "syslogfacility"
+    }
+  },
+  {
+    "pk": 345,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "do-forward-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 346,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ping-timeout",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 347,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "infinite-is-reserved",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 348,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "update-conflict-detection",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 349,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "leasequery",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 350,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "adaptive-lease-time-threshold",
+      "attribute_type": "s",
+      "value_type": "uint8"
+    }
+  },
+  {
+    "pk": 351,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "do-reverse-updates",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 352,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "fqdn-reply",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 353,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "preferred-lifetime",
+      "attribute_type": "s",
+      "value_type": "leasetime"
+    }
+  },
+  {
+    "pk": 354,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcpv6-lease-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 355,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "dhcpv6-pid-file-name",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 356,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "limit-addrs-per-ia",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 357,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "limit-prefs-per-ia",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 358,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "delayed-ack",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 359,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "max-ack-delay",
+      "attribute_type": "s",
+      "value_type": "uint32"
+    }
+  },
+  {
+    "pk": 360,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-server",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 361,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-port",
+      "attribute_type": "s",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 362,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-username",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 363,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-password",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 364,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-base-dn",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 365,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-method",
+      "attribute_type": "s",
+      "value_type": "ldapmethod"
+    }
+  },
+  {
+    "pk": 366,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-debug-file",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 367,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-dhcp-server-cn",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 368,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-referrals",
+      "attribute_type": "s",
+      "value_type": "flag"
+    }
+  },
+  {
+    "pk": 369,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-ssl",
+      "attribute_type": "s",
+      "value_type": "ldapsslusage"
+    }
+  },
+  {
+    "pk": 370,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-reqcert",
+      "attribute_type": "s",
+      "value_type": "ldaptlsreqcert"
+    }
+  },
+  {
+    "pk": 371,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-ca-file",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 372,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-ca-dir",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 373,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-cert",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 374,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-key",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 375,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-crlcheck",
+      "attribute_type": "s",
+      "value_type": "ldaptlscrlcheck"
+    }
+  },
+  {
+    "pk": 376,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-ciphers",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 377,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "ldap-tls-randfile",
+      "attribute_type": "s",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 401,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "server-identifier",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 501,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Hardware type",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 502,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Operating system",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 503,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Location",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 504,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Department",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 505,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Serial number",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 506,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Other ID",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 507,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Purchase date",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 508,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "PO number",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 509,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Warranty date",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 510,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "Owning unit",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 511,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "User ID",
+      "attribute_type": "i",
+      "value_type": ""
+    }
+  },
+  {
+    "pk": 601,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.root-mount-options",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 602,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.root-server-ip-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 603,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.root-server-hostname",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 604,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.root-path-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 605,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.swap-server-ip-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 606,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.swap-file-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 607,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.boot-file-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 608,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.posix-timezone-string",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 609,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.boot-read-size",
+      "attribute_type": "o",
+      "value_type": "uint16"
+    }
+  },
+  {
+    "pk": 610,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.install-server-ip-address",
+      "attribute_type": "o",
+      "value_type": "host"
+    }
+  },
+  {
+    "pk": 611,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.install-server-hostname",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 612,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.install-path",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 613,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.sysid-config-file-server",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 614,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.JumpStart-server",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 615,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.terminal-name",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 616,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.bootURI",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 617,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "SUNW.HTTPproxy",
+      "attribute_type": "o",
+      "value_type": "text"
+    }
+  },
+  {
+    "pk": 621,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "MSUCClient.UCIdentifier",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 622,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "MSUCClient.URLScheme",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 623,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "MSUCClient.WebServerFqdn",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 624,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "MSUCClient.WebServerPort",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 625,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "MSUCClient.CertProvRelPath",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  },
+  {
+    "pk": 1125,
+    "model": "cyder.Attribute",
+    "fields": {
+      "name": "mitel-125",
+      "attribute_type": "o",
+      "value_type": "string"
+    }
+  }
+]

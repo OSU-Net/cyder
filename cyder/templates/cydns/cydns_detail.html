@@ -1,0 +1,16 @@
+{% extends "base/detail.html" %}
+
+
+{% block sidebar %}
+  {% include "cydns/includes/cydns_sidebar.html" %}
+{% endblock %}
+
+{% block view_metadata %}
+  <span id="view-metadata"
+        data-objType="{{ obj_type }}"
+        data-objPK="{{ obj.pk }}"
+        data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+        data-getUrl="{{ url('cydns-get-record') }}"
+        data-objName="{{ obj }}">
+  </span>
+{% endblock %}

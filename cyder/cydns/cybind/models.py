@@ -12,6 +12,9 @@ class DNSBuildRun(models.Model):
     log = models.TextField()
     #stats_json = models.JSONField("stats", max_length=max_length)
 
+    class Meta:
+        app_label = 'cyder'
+
     def record(self, root_domain, soa, zfiles, zhash):
         bm = BuildManifest(zname=root_domain.name, files=','.join(zfiles),
                            zhash=zhash, build_run=self)
@@ -32,6 +35,9 @@ class BuildManifest(models.Model):
     zhash = models.CharField(max_length=max_length)
     build_run = models.ForeignKey(DNSBuildRun)
     #stats_json = models.JSONField("stats", max_length=max_length)
+
+    class Meta:
+        app_label = 'cyder'
 
     def stash(self, k, v):
         self.stats_json[k] = v

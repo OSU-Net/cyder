@@ -21,6 +21,7 @@ class TXT(LabelDomainMixin, CydnsRecord):
     search_fields = ("fqdn", "txt_data")
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'txt'
         # unique_together = ("domain", "label", "txt_data")
         # TODO

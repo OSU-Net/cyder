@@ -3,7 +3,6 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
-import cydns
 import datetime
 import re
 
@@ -12,9 +11,12 @@ from cyder.core.fields import MacAddrField
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
+from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
+                                      ATTRIBUTE_INVENTORY)
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 
 from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -53,7 +55,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     """
 
     id = models.AutoField(primary_key=True)
-    ctnr = models.ForeignKey('ctnr.Ctnr', null=False, verbose_name="Container")
+    ctnr = models.ForeignKey('cyder.Ctnr', null=False,
+                             verbose_name="Container")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
                        help_text='(required if DHCP is enabled)')
     reverse_domain = models.ForeignKey(Domain, null=True, blank=True,
@@ -74,6 +77,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     search_fields = ('mac', 'ip_str', 'fqdn')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'static_interface'
         unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
 
@@ -189,8 +193,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.staticintrkeyvalue_set.filter(is_option=True)
-        statements = self.staticintrkeyvalue_set.filter(is_statement=True)
+        options = self.staticinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        statements = self.staticinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         if options:
             build_str += '\t\t# Host Options\n'
             build_str += join_dhcp_args(options, depth=2)
@@ -241,7 +247,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         if db_self.label == self.label and db_self.domain == self.domain:
             return
         # The label of the domain changed. Make sure it's not a glue record.
-        Nameserver = cydns.nameserver.models.Nameserver
+        from cyder.cydns.nameserver.models import Nameserver
         if Nameserver.objects.filter(intr_glue=self).exists():
             raise ValidationError(
                 "This Interface represents a glue record for a "
@@ -267,9 +273,12 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return 'A/PTR'
 
 
-class StaticIntrKeyValue(CommonOption):
-    static_interface = models.ForeignKey(StaticInterface, null=False)
+class StaticInterfaceAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        app_label = 'cyder'
+        db_table = 'static_interface_av'
 
-    class Meta:
-        db_table = 'static_interface_kv'
-        unique_together = ('key', 'value', 'static_interface')
+
+    entity = models.ForeignKey(StaticInterface)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

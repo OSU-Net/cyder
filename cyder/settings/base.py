@@ -67,7 +67,6 @@ MINIFY_BUNDLES = {
             'js/utils.js',
             'js/application.js',
             'js/dhcp_raw_include.js',
-            'js/key_value_validators.js',
             'js/views.js',
             'js/rangewizard.js',
         ),
@@ -93,42 +92,7 @@ MINIFY_BUNDLES = {
 }
 
 INSTALLED_APPS = list(INSTALLED_APPS) + [
-    'api.authtoken',
-    'base',
-    'search',
-    'core',
-    'core.ctnr',
-    'core.cyuser',
-    'core.system',
-    'core.task',
-    'cydhcp',
-    'cydhcp.site',
-    'cydhcp.vlan',
-    'cydhcp.network',
-    'cydhcp.range',
-    'cydhcp.build',
-    'cydhcp.lib',
-    'cydhcp.interface',
-    'cydhcp.interface.dynamic_intr',
-    'cydhcp.interface.static_intr',
-    'cydhcp.vrf',
-    'cydhcp.workgroup',
-    'cydns',
-    'cydns',
-    'cydns.address_record',
-    'cydns.cname',
-    'cydns.domain',
-    'cydns.ip',
-    'cydns.mx',
-    'cydns.nameserver',
-    'cydns.ptr',
-    'cydns.soa',
-    'cydns.sshfp',
-    'cydns.srv',
-    'cydns.txt',
-    'cydns.view',
-    'cydns.cybind',
-    'migration',
+    'cyder',
 
     # Third party apps
     'south',
@@ -163,15 +127,10 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     'django.contrib.messages.context_processors.messages'
 )
 
-FIXTURES = [
-    'cyder/core/ctnr/fixtures/base',
-    'cyder/core/cyuser/fixtures/test_users',
-]
-
 SESSION_COOKIE_NAME = 'cyder'
 SESSION_COOKIE_SECURE = False
 
-AUTH_PROFILE_MODULE = 'cyuser.UserProfile'
+AUTH_PROFILE_MODULE = 'cyder.UserProfile'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     #'django_cas.backends.CASBackend',
@@ -230,7 +189,7 @@ REVERSE_DOMAINS = [
 
 VERIFICATION_SERVER = "ns1.oregonstate.edu"
 ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
-ZONE_PATH = "cyder/migration/management/commands/lib/zones"
+ZONE_PATH = "cyder/management/commands/lib/zones"
 ZONE_BLACKLIST = []
 
 REST_FRAMEWORK = {

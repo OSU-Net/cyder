@@ -12,5 +12,5 @@ def network_detail(request, pk):
         'Ranges': 'range_set',
         'Parent Networks': parent_networks,
         'Child Networks': child_networks,
-        'Attributes': 'networkkeyvalue_set',
+        'Attributes': 'networkav_set',
     }, obj=network)

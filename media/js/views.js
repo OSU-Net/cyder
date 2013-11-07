@@ -12,18 +12,36 @@ $(document).ready(function() {
     var getUrl = metadata.attr('data-getUrl');
     var domainsUrl = metadata.attr('data-domainsUrl');
     var objPk = metadata.attr('data-objPk');
+
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     if (domainsUrl) {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
 
-    function prettify(obj) {
-        var obj_name = obj.split('_');
-        for(i=0; i < obj_name.length; i++){
-            obj_name[i] = obj_name[i].charAt(0).toUpperCase() + obj_name[i].slice(1);
-        }
-        return obj_name.join(' ');
-    }
+    $('#id_attribute').live('focus', function() {
+        $('#id_attribute').autocomplete({
+            minLength: 1,
+            source: function(request, response) {
+                $.ajax({
+                    url: '/eav/search',
+                    dataType: 'json',
+                    data: {
+                        term: request.term,
+                        attribute_type: $('#id_attribute_type').val()
+                    },
+                    success: response
+                })
+            },
+            delay: 400,
+            select: function(event, ui) {
+                attributeName = ui.item.label
+            }
+        });
+    });
+
+	$('#id_attribute_type').live('change', function() {
+		$('#id_attribute').val('');
+	});
 
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
@@ -85,17 +103,18 @@ $(document).ready(function() {
             extra_title = ' for ' + objName;
         };
         var object_type = $(this).attr('data-object_type') || objType;
+        var pretty_obj_type = $(this).attr('data-prettyObjType');
         $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
-                if (objType.indexOf('interface') != -1) {
+                if (objType.indexOf('interface') != -1 && data.form.indexOf('title=') != -1) {
                     extra_title = ' for ' + data.form.split('title=')[1].split('/')[0].replace(/"/g, "");
                 };
-                $('#form-title').html('Updating ' + prettify(object_type) + extra_title);
+                $('#form-title').html('Updating ' + pretty_obj_type + extra_title);
                 $('#hidden-inner-form').empty().append(data.form);
                 initForms();
             }, 150);
-            $('.form-btns a.submit').text('Update ' + prettify(object_type));
+            $('.form-btns a.submit').text('Update ' + pretty_obj_type);
             $('#obj-form').slideDown();
         }, 'json');
     });

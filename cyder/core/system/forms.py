@@ -1,7 +1,8 @@
 from django import forms
 
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.base.eav.forms import get_eav_form
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.core.system.models import System, SystemAV
 
 
 class SystemForm(forms.ModelForm):
@@ -20,10 +21,4 @@ class ExtendedSystemForm(forms.ModelForm, UsabilityFormMixin):
         model = System
 
 
-class SystemKeyValueForm(forms.ModelForm):
-    system = forms.ModelChoiceField(
-        queryset=System.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = SystemKeyValue
+SystemAVForm = get_eav_form(SystemAV, System)

@@ -98,6 +98,7 @@ class Domain(BaseModel, ObjectUrlMixin):
     search_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'domain'
 
     def __str__(self):

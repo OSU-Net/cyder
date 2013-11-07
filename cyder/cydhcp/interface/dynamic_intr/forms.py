@@ -1,13 +1,14 @@
 from django import forms
-from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicIntrKeyValue)
+
+from cyder.base.eav.forms import get_eav_form
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.forms import RangeWizard
+from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
+                                                        DynamicInterfaceAV)
 from cyder.cydhcp.range.models import Range
 
 
 class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
-
     def __init__(self, *args, **kwargs):
         super(DynamicInterfaceForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['system', 'mac', 'vrf', 'site',
@@ -21,11 +22,4 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
         exclude = ('last_seen')
 
 
-class DynamicIntrKeyValueForm(forms.ModelForm):
-    dynamic_interface = forms.ModelChoiceField(
-        queryset=DynamicInterface.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = DynamicIntrKeyValue
-        exclude = ('is_option', 'is_statement', 'is_quoted',)
+DynamicInterfaceAVForm = get_eav_form(DynamicInterfaceAV, DynamicInterface)

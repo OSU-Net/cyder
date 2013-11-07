@@ -1,11 +1,10 @@
-from cyder.api.v1.tests.base import APIKVTestMixin, APITests
+from cyder.api.v1.tests.base import APIEAVTestMixin, APITests
 from cyder.core.system.models import System
 
 
-class SystemAPI_Test(APITests, APIKVTestMixin):
+class SystemAPI_Test(APITests, APIEAVTestMixin):
     __test__ = True
     model = System
-    keyvalue_attr = "systemkeyvalue_set"
 
     def create_data(self):
         data = {

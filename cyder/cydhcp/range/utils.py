@@ -18,7 +18,7 @@ def pretty_ranges(ranges):
 
 
 def find_range(ip_str):
-    Range = get_model('range', 'range')
+    Range = get_model('cyder', 'range')
     ip_upper, ip_lower = one_to_two(int(ipaddr.IPAddress(ip_str)))
     q_start = (Q(start_upper__lt=ip_upper) |
                Q(start_upper=ip_upper,
@@ -160,7 +160,7 @@ def range_wizard(request):
     if request.POST:
         data = qd_to_py_dict(request.POST)
         if data['range']:
-            Range = get_model('range', 'range')
+            Range = get_model('cyder', 'range')
             rng = Range.objects.get(id=data['range'])
 
             if data['free_ip'] and rng and rng.ip_type == '4':
@@ -175,16 +175,16 @@ def range_wizard(request):
                 'ip_str': str(ip_str), }))
 
         if data['vrf']:
-            Vrf = get_model('vrf', 'vrf')
+            Vrf = get_model('cyder', 'vrf')
             vrf = Vrf.objects.get(id=data['vrf'])
             vrf_networks = vrf.get_related_networks([vrf])
 
         if data['site']:
-            Site = get_model('site', 'site')
+            Site = get_model('cyder', 'site')
             site = Site.objects.get(id=data['site'])
             # Right now campus will return a result of all networks
             if site.name == 'Campus':
-                Network = get_model('network', 'network')
+                Network = get_model('cyder', 'network')
                 site_networks = Network.objects.all()
             else:
                 site_networks = site.get_related_networks([site])

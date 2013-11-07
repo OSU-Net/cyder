@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 
 from cyder.cydns.views import *
-from cyder.cydns.constants import DNS_KEY_VALUES
+from cyder.cydns.constants import DNS_EAV_MODELS
 
 
 def cydns_urls(obj_type):
@@ -39,7 +39,7 @@ urlpatterns = patterns(
     url(r'^view/', include('cyder.cydns.view.urls')),
     url(r'^bind/', include('cyder.cydns.cybind.urls')),
 )
-for kv in DNS_KEY_VALUES:
+for eav in DNS_EAV_MODELS:
     urlpatterns += patterns(
         '',
-        url(r'^{0}/'.format(kv), include(cydns_urls(kv))))
+        url(r'^{0}/'.format(eav), include(cydns_urls(eav))))

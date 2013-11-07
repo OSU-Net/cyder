@@ -99,9 +99,9 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     else:
         return False
 
-    if (obj_type and obj_type.endswith('KeyValue')
-            and obj_type != 'WorkgroupKeyValue'):
-        obj_type = obj_type[:-len('KeyValue')]
+    if (obj_type and obj_type.endswith('AV')
+            and obj_type != 'WorkgroupAV'):
+        obj_type = obj_type[:-len('AV')]
 
     handling_functions = {
         # Administrative.
@@ -136,7 +136,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
 
-        'WorkgroupKeyValue': has_workgroup_keyvalue_perm,
+        'WorkgroupAV': has_workgroupav_perm,
     }
 
     handling_function = handling_functions.get(obj_type, None)
@@ -298,7 +298,7 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
     }.get(user_level, False)
 
 
-def has_workgroup_keyvalue_perm(user_level, obj, ctnr, action):
+def has_workgroupav_perm(user_level, obj, ctnr, action):
     """Permissions for group options."""
     return {
         'cyder_admin': True,  # ?

@@ -26,9 +26,9 @@ IP_TYPES = {
 }
 
 DHCP_OBJECTS = ("workgroup", "vrf", "vlan", "site", "range", "network",
-                "static_interface", "dynamic_interface", "workgroup_kv",
-                "vrf_kv", "vlan_kv", "site_kv", "range_kv", "network_kv",
-                "static_interface_kv", "dynamic_interface_kv",)
+                "static_interface", "dynamic_interface", "workgroup_av",
+                "vrf_av", "vlan_av", "site_av", "range_av", "network_av",
+                "static_interface_av", "dynamic_interface_av",)
 
 DNS_OBJECTS = ("address_record", "cname", "domain", "mx", "nameserver", "ptr",
                "soa", "srv", "sshfp", "txt", "view",)

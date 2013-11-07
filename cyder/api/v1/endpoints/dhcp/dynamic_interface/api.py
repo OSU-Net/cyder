@@ -1,35 +1,37 @@
 from rest_framework import serializers
 
+from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
 from cyder.api.v1.endpoints.dhcp import api
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicIntrKeyValue)
+                                                        DynamicInterfaceAV)
 
 
-class DynamicIntrKeyValueSerializer(serializers.ModelSerializer):
+class DynamicInterfaceAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     dynamic_interface = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dhcp-dynamicinterface-detail')
+    attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
-        model = DynamicIntrKeyValue
+        model = DynamicInterfaceAV
 
 
-class DynamicIntrKeyValueViewSet(api.CommonDHCPViewSet):
-    model = DynamicIntrKeyValue
-    serializer_class = DynamicIntrKeyValueSerializer
+class DynamicInterfaceAVViewSet(api.CommonDHCPViewSet):
+    model = DynamicInterfaceAV
+    serializer_class = DynamicInterfaceAVSerializer
 
 
-class DynamicIntrNestedKeyValueSerializer(serializers.ModelSerializer):
+class DynamicInterfaceNestedAVSerializer(CommonAPINestedAVSerializer):
     id = serializers.HyperlinkedIdentityField(
-        view_name='api-dhcp-dynamicinterface_keyvalues-detail')
+        view_name='api-dhcp-dynamicinterface_attributes-detail')
 
     class Meta:
-        model = DynamicIntrKeyValue
-        fields = api.NestedKeyValueFields
+        model = DynamicInterfaceAV
+        fields = api.NestedAVFields
 
 
 class DynamicInterfaceSerializer(serializers.ModelSerializer):
-    dynamicintrkeyvalue_set = DynamicIntrNestedKeyValueSerializer(many=True)
+    dynamicinterfaceav_set = DynamicInterfaceNestedAVSerializer(many=True)
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-core-system-detail')
     range = serializers.HyperlinkedRelatedField(
@@ -47,4 +49,5 @@ class DynamicInterfaceSerializer(serializers.ModelSerializer):
 class DynamicInterfaceViewSet(api.CommonDHCPViewSet):
     model = DynamicInterface
     serializer_class = DynamicInterfaceSerializer
-    keyvaluemodel = DynamicIntrKeyValue
+    avmodel = DynamicInterfaceAV
+    avmodel_entity = 'dynamic_interface'

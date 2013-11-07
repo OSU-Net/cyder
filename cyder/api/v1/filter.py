@@ -20,23 +20,13 @@ class SearchFieldFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         q_include = {}
         q_exclude = {}
-        q_keyvalues = {}
+        q_attributes = {}
 
         kv_queryset = None
         f_queryset = None
 
         parent_model = queryset.model
         parent_name = parent_model.__name__.lower()
-        keyvalue_model = getattr(view, 'keyvaluemodel', None)
-
-        matching = lambda k, v: set(
-            keyvalue_model.objects.filter(
-                key__iexact=k,
-                value__iexact=v
-            ).values_list(
-                parent_name, flat=True
-            )
-        )
 
         for q in request.QUERY_PARAMS:
             p = request.QUERY_PARAMS[q]
@@ -49,9 +39,9 @@ class SearchFieldFilter(filters.BaseFilterBackend):
             elif q.startswith("e:"):
                 q_exclude[q[2:]] = p
 
-            elif q.startswith("k:"):
+            elif q.startswith("a:"):
                 # key value matching
-                q_keyvalues[q[2:]] = p
+                q_attributes[q[2:]] = p
 
             elif q == "sort":
                 sort = p.split(',')
@@ -72,14 +62,26 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                     .format(q)
                 )
 
-        if q_keyvalues:
-            if getattr(view, 'keyvaluemodel', None):
+        if q_attributes:
+            avmodel = getattr(view, 'avmodel', None)
+            if avmodel:
+                avmodel_entity = getattr(view, 'avmodel_entity', None)
+                matching = lambda k, v: set(
+                    avmodel.objects.filter(
+                        attribute__name__iexact=k,
+                        value__iexact=v
+                    ).values_list(
+                        avmodel_entity or parent_name,
+                        flat=True
+                    )
+                )
+
                 parent_set_list = (
-                    matching(k, q_keyvalues[k]) for k in q_keyvalues)
+                    matching(k, q_attributes[k]) for k in q_attributes)
                 parent_ids = reduce((lambda x, y: x & y), parent_set_list)
                 kv_queryset = queryset.filter(id__in=parent_ids)
             else:
-                raise InvalidQuery("This field does not have key-values.")
+                raise InvalidQuery("This record type does not have attributes.")
 
         if q_include or q_exclude:
             f_queryset = queryset.filter(**q_include).exclude(**q_exclude)

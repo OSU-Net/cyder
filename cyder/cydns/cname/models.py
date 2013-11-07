@@ -31,6 +31,7 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     search_fields = ('fqdn', 'target')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'cname'
         unique_together = ('domain', 'label', 'target')
 
@@ -130,14 +131,14 @@ class CNAME(LabelDomainMixin, CydnsRecord):
                 "Objects with this name already exist: {0}".format(objects)
             )
 
-        MX = get_model('mx', 'MX')
+        MX = get_model('cyder', 'MX')
         if MX.objects.filter(server=self.fqdn):
             raise ValidationError(
                 "RFC 2181 says you shouldn't point MX records at CNAMEs and "
                 "an MX points to this name!"
             )
 
-        PTR = get_model('ptr', 'PTR')
+        PTR = get_model('cyder', 'PTR')
         if PTR.objects.filter(fqdn=self.fqdn):
             raise ValidationError("RFC 1034 says you shouldn't point PTR "
                                   "records at CNAMEs, and a PTR points to"

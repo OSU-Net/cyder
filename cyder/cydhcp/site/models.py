@@ -2,9 +2,11 @@ from django.db import models
 from django.db.models.loading import get_model
 from django.core.validators import RegexValidator
 
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydhcp.utils import networks_to_Q
 
 
@@ -19,6 +21,7 @@ class Site(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'site'
         unique_together = ('name', 'parent')
 
@@ -34,7 +37,7 @@ class Site(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('network', 'network')
+        Network = get_model('cyder', 'network')
         networks = Network.objects.filter(range__in=ctnr.ranges.all())
         objects = objects or Site.objects
         return objects.filter(network__in=networks)
@@ -108,16 +111,12 @@ class Site(BaseModel, ObjectUrlMixin):
         return networks_to_Q(self.network_set.all())
 
 
-class SiteKeyValue(KeyValue):
-    site = models.ForeignKey(Site, null=False)
+class SiteAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        app_label = 'cyder'
+        db_table = 'site_av'
 
-    class Meta:
-        db_table = 'site_kv'
-        unique_together = ('key', 'value')
 
-    def _aa_address(self):
-        # Everything is valid
-        return
-
-    def _aa_description(self):
-        return
+    entity = models.ForeignKey(Site)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

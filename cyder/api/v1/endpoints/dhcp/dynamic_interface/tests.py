@@ -7,7 +7,6 @@ from cyder.api.v1.tests.base import APITests
 
 class DynamicInterfaceBase(APITests):
     model = DynamicInterface
-    keyvalue_attr = "dynamicintrkeyvalue_set"
 
     def setUp(self):
         self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
