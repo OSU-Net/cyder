@@ -6,6 +6,8 @@ from sys import stderr
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
+from cyder.migration.utils import range_usage_get_create
+
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticInterfaceAV)
@@ -82,7 +84,8 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
-            return ensure_domain(name=self.dname, force=True)
+            return ensure_domain(name=self.dname, force=True,
+                                 **{'update_range_usage': False})
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -198,41 +201,46 @@ class Zone(object):
                     label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
                     .exists()):
                 try:
-                    static = StaticInterface(label=name, domain=self.domain,
-                                             mac=clean_mac(ha), system=system,
-                                             ip_str=long2ip(ip), ip_type='4',
-                                             workgroup=w, ctnr=ctnr,
-                                             ttl=items['ttl'],
-                                             dns_enabled=enabled,
-                                             dhcp_enabled=enabled,
-                                             last_seen=items['last_seen'])
+                    static, _ = range_usage_get_create(
+                        StaticInterface, label=name, domain=self.domain,
+                        mac=clean_mac(ha), system=system, ip_str=long2ip(ip),
+                        ip_type='4', workgroup=w, ctnr=ctnr, ttl=items['ttl'],
+                        dns_enabled=enabled, dhcp_enabled=enabled,
+                        last_seen=items['last_seen'])
 
-                    # Static Interfaces need to be cleaned independently.
-                    # (no get_or_create)
-                    static.full_clean()
-                    static.save()
+                    try:
+                        # Static Interfaces need to be cleaned independently.
+                        # (no get_or_create)
+                        static.full_clean()
+                        static.save(update_range_usage=False)
 
-                    static.views.add(public)
-                    static.views.add(private)
+                        static.views.add(public)
+                        static.views.add(private)
 
-                    for key, value in get_host_option_values(items['id']):
-                        attr = Attribute.objects.get(name=fix_attr_name(key))
-                        eav = StaticInterfaceAV(entity=static,
-                                                attribute=attr, value=value)
-                        eav.full_clean()
-                        eav.save()
+                        for key, value in get_host_option_values(items['id']):
+                            attr = Attribute.objects.get(
+                                name=fix_attr_name(key))
+                            eav = StaticInterfaceAV(entity=static,
+                                                    attribute=attr,
+                                                    value=value)
+                            eav.full_clean()
+                            eav.save()
+
+                    except ValidationError:
+                        try:
+                            static.dhcp_enabled = False
+                            static.dns_enabled = False
+                            static.full_clean()
+                            static.save(**{'update_range_usage': False})
+                        except ValidationError, e:
+                            stderr.write("Error generating static interface "
+                                         "for host with IP {0}\n"
+                                         .format(static.ip_str))
+                            stderr.write("Original exception: {0}\n".format(e))
 
                 except ValidationError:
-                    try:
-                        static.dhcp_enabled = False
-                        static.dns_enabled = False
-                        static.full_clean()
-                        static.save()
-                    except ValidationError, e:
-                        stderr.write("Error generating static interface for "
-                                     "host with IP {0}\n"
-                                     .format(static.ip_str))
-                        stderr.write("Original exception: {0}\n".format(e))
+                    stderr.write("Error generating static interface for "
+                                 "host with IP {0}\n".format(long2ip(ip)))
             else:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['id'])
@@ -278,9 +286,10 @@ class Zone(object):
                     pass
 
             if ptr_type == 'forward':
-                arec, _ = AddressRecord.objects.get_or_create(
-                    label=label, domain=self.domain,
-                    ip_str=long2ip(ip), ip_type='4')
+                arec, _ = range_usage_get_create(
+                    AddressRecord,
+                    **{'label': label, 'domain': self.domain,
+                       'ip_str': long2ip(ip), 'ip_type': '4'})
                 if enabled:
                     arec.views.add(public)
                     arec.views.add(private)
@@ -293,7 +302,7 @@ class Zone(object):
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
                     ptr.full_clean()
-                    ptr.save()
+                    ptr.save(**{'update_range_usage': False})
                     if enabled:
                         ptr.views.add(public)
                         ptr.views.add(private)
@@ -406,7 +415,7 @@ def gen_CNAME():
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
             print "Removing duplicate PTR for %s" % cn.fqdn
-            dup_ptrs.delete()
+            dup_ptrs.delete(**{'update_range_usage': False})
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()

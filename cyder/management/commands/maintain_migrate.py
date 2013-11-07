@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.db.models.loading import get_model
 
 from cyder.cydns.cybind.builder import DNSBuilder, BuildError
 
@@ -95,6 +96,11 @@ class Command(BaseCommand):
             dhcp_migrate.migrate_zone_reverse()
             dhcp_migrate.migrate_user()
             dhcp_migrate.migrate_zone_user()
+            print 'Updating Range Usage'
+            Range = get_model('range', 'range')
+            ranges = Range.objects.all()
+            for rng in ranges:
+                rng.save()
 
         if options['dns']:
             print "Migrating DNS objects."

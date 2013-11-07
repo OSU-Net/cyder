@@ -1,14 +1,17 @@
 import json
 
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
+from django.db.models.loading import get_model
 
 import ipaddr
 
 from cyder.base.utils import make_paginator, tablefy, make_megafilter
+from cyder.base.helpers import do_sort
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.constants import *
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
+                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
 from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.range.range_usage import range_usage
 from cyder.cydhcp.utils import two_to_one
@@ -43,23 +46,42 @@ def range_detail(request, pk):
 
     allow.sort(key=lambda x: x.lower())
 
-    start_upper = mrange.start_upper
-    start_lower = mrange.start_lower
-    end_upper = mrange.end_upper
-    end_lower = mrange.end_lower
-    range_data, ip_usage_percent = range_usage(
-        two_to_one(start_upper, start_lower),
-        two_to_one(end_upper, end_lower),
-        mrange.ip_type)
+    range_type = mrange.range_type
+    range_data = []
+    ip_usage_percent = None
+    dynamic_interfaces = []
+    dynamic_interfaces_page_obj = None
+    if range_type == 'st':
+        start_upper = mrange.start_upper
+        start_lower = mrange.start_lower
+        end_upper = mrange.end_upper
+        end_lower = mrange.end_lower
+        range_data, ip_usage_percent = range_usage(
+            two_to_one(start_upper, start_lower),
+            two_to_one(end_upper, end_lower),
+            mrange.ip_type)
+    else:
+        ip_usage_percent = mrange.range_usage
+        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
+        dynamic_interfaces = DynamicInterface.objects.filter(range=mrange)
+        dynamic_interfaces_page_obj = make_paginator(
+            request, do_sort(request, dynamic_interfaces), 10)
+
+    if ip_usage_percent:
+        ip_usage_percent = "{0}%".format(ip_usage_percent)
     return render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
         'ranges_table': tablefy((mrange,), info=False, request=request),
         'range_data': make_paginator(request, range_data, 50),
+        'range_type': range_type,
         'attrs_table': tablefy(mrange.rangeav_set.all(),
                                request=request),
         'allow_list': allow,
-        'range_used': "{0}%".format(ip_usage_percent)
+        'range_used': ip_usage_percent,
+        'dynamic_intr_table': tablefy(dynamic_interfaces_page_obj, info=True,
+                                      request=request),
+        'page_obj': dynamic_interfaces_page_obj
     })
 
 
