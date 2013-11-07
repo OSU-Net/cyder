@@ -3,7 +3,8 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.test import TestCase
 
-import cyder as cy
+from cyder.base.constants import (ACTION_CREATE, ACTION_VIEW, ACTION_UPDATE,
+                             ACTION_DELETE)
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.views import login_session, become_user, unbecome_user
 from cyder.cydns.address_record.models import AddressRecord
@@ -143,9 +144,9 @@ class PermissionsTest(TestCase):
 
         perm_table = {
             'cyder_admin': ['all'],
-            'admin': [cy.ACTION_VIEW],
-            'user': [cy.ACTION_VIEW],
-            'guest': [cy.ACTION_VIEW],
+            'admin': [ACTION_VIEW],
+            'user': [ACTION_VIEW],
+            'guest': [ACTION_VIEW],
         }
 
         # initialize obj into ctnrs
@@ -169,10 +170,10 @@ class PermissionsTest(TestCase):
         self.setup_request()
 
         perm_table = {
-            'cyder_admin': [cy.ACTION_VIEW, cy.ACTION_UPDATE],
-            'admin': [cy.ACTION_VIEW],
-            'user': [cy.ACTION_VIEW],
-            'guest': [cy.ACTION_VIEW],
+            'cyder_admin': [ACTION_VIEW, ACTION_UPDATE],
+            'admin': [ACTION_VIEW],
+            'user': [ACTION_VIEW],
+            'guest': [ACTION_VIEW],
         }
 
         # Initialize obj into ctnrs.
@@ -195,13 +196,13 @@ class PermissionsTest(TestCase):
             'cyder_admin': ['all'],
             'admin': ['all'],
             'user': ['all'],
-            'guest': [cy.ACTION_VIEW],
+            'guest': [ACTION_VIEW],
         }
         ns_perm_table = {
             'cyder_admin': ['all'],
-            'admin': [cy.ACTION_VIEW],
-            'user': [cy.ACTION_VIEW],
-            'guest': [cy.ACTION_VIEW],
+            'admin': [ACTION_VIEW],
+            'user': [ACTION_VIEW],
+            'guest': [ACTION_VIEW],
         }
 
         # Initialize objs into ctnrs.
@@ -277,20 +278,20 @@ class PermissionsTest(TestCase):
         asserts against perm table.
         """
         create_perm = self.request.user.get_profile().has_perm(
-            self.request, cy.ACTION_CREATE, obj=obj)
+            self.request, ACTION_CREATE, obj=obj)
         view_perm = self.request.user.get_profile().has_perm(
-            self.request, cy.ACTION_VIEW, obj=obj)
+            self.request, ACTION_VIEW, obj=obj)
         update_perm = self.request.user.get_profile().has_perm(
-            self.request, cy.ACTION_UPDATE, obj=obj)
+            self.request, ACTION_UPDATE, obj=obj)
         delete_perm = self.request.user.get_profile().has_perm(
-            self.request, cy.ACTION_DELETE, obj=obj)
+            self.request, ACTION_DELETE, obj=obj)
 
         actual_perms = {
             'all': create_perm and view_perm and update_perm and delete_perm,
-            cy.ACTION_CREATE: create_perm,
-            cy.ACTION_VIEW: view_perm,
-            cy.ACTION_UPDATE: update_perm,
-            cy.ACTION_DELETE: delete_perm,
+            ACTION_CREATE: create_perm,
+            ACTION_VIEW: view_perm,
+            ACTION_UPDATE: update_perm,
+            ACTION_DELETE: delete_perm,
         }
 
         # Superuser.

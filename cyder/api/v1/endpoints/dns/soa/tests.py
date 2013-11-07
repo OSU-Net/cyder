@@ -1,12 +1,10 @@
-from cyder.api.v1.tests.base import APIKVTestMixin, build_domain
+from cyder.api.v1.tests.base import APIEAVTestMixin, build_domain, APITests
 from cyder.cydns.soa.models import SOA
-from cyder.api.v1.tests.base import APITests
 
 
-class SOAAPI_Test(APITests, APIKVTestMixin):
+class SOAAPI_Test(APITests, APIEAVTestMixin):
     __test__ = True
     model = SOA
-    keyvalue_attr = "keyvalue_set"
 
     def create_data(self):
         data = {

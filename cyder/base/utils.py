@@ -8,9 +8,9 @@ from django.db.models import Q, query
 from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
-from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
-
-import cyder as cy
+from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
+                                  ACTION_UPDATE)
+from cyder.base.helpers import prettify_obj_type
 
 
 def shell_out(command, use_shlex=True):
@@ -83,7 +83,7 @@ def tablefy(objects, users=False, extra_cols=None, info=True, request=False):
         Klass = objects[0].__class__
 
     if request is not False and request.user.get_profile().has_perm(
-            request, cy.ACTION_UPDATE, obj_class=Klass):
+            request, ACTION_UPDATE, obj_class=Klass):
         try:
             first_obj.get_update_url()
             can_update = True
@@ -169,12 +169,15 @@ def tablefy(objects, users=False, extra_cols=None, info=True, request=False):
 
         # Actions
         if can_update:
+            obj_type = obj._meta.db_table
             row_data.append({'value': ['Update', 'Delete'],
                              'url': [obj.get_update_url(),
                                      obj.get_delete_url()],
                              'data': [[('pk', obj.id),
                                        ('object_type', obj._meta.db_table),
-                                       ('getUrl', find_get_record_url(obj))],
+                                       ('getUrl', find_get_record_url(obj)),
+                                       ('prettyObjType',
+                                           prettify_obj_type(obj_type))],
                                       None],
                              'class': ['update', 'delete'],
                              'img': ['/media/img/update.png',
@@ -229,7 +232,7 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
 
 
 def _filter(request, Klass):
-    Ctnr = get_model('ctnr', 'ctnr')
+    Ctnr = get_model('cyder', 'ctnr')
     if Klass is not Ctnr:
         objects = filter_by_ctnr(request.session['ctnr'], Klass)
     else:

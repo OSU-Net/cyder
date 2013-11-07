@@ -17,6 +17,7 @@ class UserProfile(BaseModel, ObjectUrlMixin):
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'auth_user_profile'
 
     def __str__(self):

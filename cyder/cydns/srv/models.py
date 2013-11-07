@@ -70,6 +70,7 @@ class SRV(CydnsRecord):
         ]}
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'srv'
         unique_together = ("label", "domain", "target", "port")
 

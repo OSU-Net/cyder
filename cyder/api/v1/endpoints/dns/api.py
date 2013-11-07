@@ -5,7 +5,7 @@ from cyder.api.v1.endpoints import api
 from cyder.cydns.utils import ensure_label_domain
 
 
-NestedKeyValueFields = ['id', 'key', 'value', 'is_quoted']
+NestedKeyValueFields = api.NestedAVFields
 
 
 class FQDNMixin(object):

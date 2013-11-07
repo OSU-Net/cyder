@@ -1,5 +1,7 @@
 from django import forms
-from cyder.cydhcp.site.models import Site, SiteKeyValue
+
+from cyder.base.eav.forms import get_eav_form
+from cyder.cydhcp.site.models import Site, SiteAV
 
 
 class SiteForm(forms.ModelForm):
@@ -9,11 +11,4 @@ class SiteForm(forms.ModelForm):
         model = Site
 
 
-class SiteKeyValueForm(forms.ModelForm):
-    site = forms.ModelChoiceField(
-        queryset=Site.objects.all(),
-        widget=forms.HiddenInput())
-
-    class Meta:
-        model = SiteKeyValue
-        exclude = ('is_quoted',)
+SiteAVForm = get_eav_form(SiteAV, Site)

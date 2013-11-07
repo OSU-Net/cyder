@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 
 from cyder.cydns.soa.forms import SOAForm
-from cyder.cydns.soa.models import SOA, SOAKeyValue
+from cyder.cydns.soa.models import SOA, SOAAV
 
 import json as json
 
@@ -18,7 +18,7 @@ def soa_detail(request, pk):
                     .order_by('master_domain').select_related()),
         'rdomains': (soa.domain_set.filter(is_reverse=True)
                      .order_by('master_domain').select_related()),
-        'attributes': SOAKeyValue.objects.filter(soa=soa.id)
+        'attributes': SOAAV.objects.filter(entity=soa.id)
     }, obj=soa)
 
 
@@ -26,7 +26,7 @@ def delete_soa_attr(request, attr_pk):
     """
     A view destined to be called by ajax to remove an attr.
     """
-    attr = get_object_or_404(SOAKeyValue, pk=attr_pk)
+    attr = get_object_or_404(SOAAV, pk=attr_pk)
     attr.delete()
     return HttpResponse("Attribute Removed.")
 

@@ -9,7 +9,7 @@ import ipaddr
 from cyder.base.utils import make_paginator, tablefy, make_megafilter
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import *
-from cyder.cydhcp.range.models import Range, RangeKeyValue
+from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.range.range_usage import range_usage
 from cyder.cydhcp.utils import two_to_one
 from cyder.cydhcp.vrf.models import Vrf
@@ -20,7 +20,7 @@ def delete_range_attr(request, attr_pk):
     """
     An view destined to be called by ajax to remove an attr.
     """
-    attr = get_object_or_404(RangeKeyValue, pk=attr_pk)
+    attr = get_object_or_404(RangeAV, pk=attr_pk)
     attr.delete()
     return HttpResponse("Attribute Removed.")
 
@@ -56,7 +56,7 @@ def range_detail(request, pk):
         'obj_type': 'range',
         'ranges_table': tablefy((mrange,), info=False, request=request),
         'range_data': make_paginator(request, range_data, 50),
-        'attrs_table': tablefy(mrange.rangekeyvalue_set.all(),
+        'attrs_table': tablefy(mrange.rangeav_set.all(),
                                request=request),
         'allow_list': allow,
         'range_used': "{0}%".format(ip_usage_percent)

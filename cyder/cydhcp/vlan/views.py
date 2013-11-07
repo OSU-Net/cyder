@@ -9,5 +9,5 @@ def vlan_detail(request, pk):
 
     return cy_detail(request, Vlan, 'vlan/vlan_detail.html', {
         'Networks': 'network_set',
-        'Attributes': 'vlankeyvalue_set',
+        'Attributes': 'vlanav_set',
     }, pk=pk, obj=vlan)

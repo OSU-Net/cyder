@@ -2,6 +2,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
@@ -14,7 +17,6 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
                                 start_end_filter)
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -80,6 +82,7 @@ class Range(BaseModel, ObjectUrlMixin):
     display_fields = ('start_str', 'end_str')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'range'
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
@@ -252,8 +255,10 @@ class Range(BaseModel, ObjectUrlMixin):
                                   "this range")
 
     def build_range(self):
-        range_options = self.rangekeyvalue_set.filter(is_option=True)
-        range_statements = self.rangekeyvalue_set.filter(is_statement=True)
+        range_options = self.rangeav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        range_statements = self.rangeav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         build_str = "\tpool {\n"
         build_str += "\t\t# Pool Statements\n"
         build_str += "\t\tfailover peer \"dhcp\";\n"
@@ -364,27 +369,16 @@ def find_free_ip(start, end, ip_type='4'):
 # reversion.(Range)
 
 
-class RangeKeyValue(CommonOption):
-    range = models.ForeignKey(Range, null=False)
+class RangeAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        app_label = 'cyder'
+        db_table = 'range_av'
 
-    class Meta:
-        db_table = 'range_kv'
-        unique_together = ('key', 'value', 'range')
+    entity = models.ForeignKey(Range)
+    attribute = EAVAttributeField(Attribute)
 
-    def _aa_failover(self):
-        self.is_statement = True
-        self.is_option = False
-        if self.value != "peer \"dhcp-failover\"":
-            raise ValidationError("Invalid failover option. Try `peer "
-                                  "\"dhcp-failover\"`")
 
-    def _aa_routers(self):
-        self._routers(self.range.network.ip_type)
-
-    def _aa_ntp_servers(self):
-        self._ntp_servers(self.range.network.ip_type)
-
-# reversion.(RangeKeyValue)
+# reversion.(RangeAV)
 
 
 class RangeOverflowError(ValidationError):

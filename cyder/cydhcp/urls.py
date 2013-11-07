@@ -4,7 +4,7 @@ from django.views.generic.simple import direct_to_template
 from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
                                 cydhcp_get_update_form, cydhcp_search_obj,
                                 cydhcp_delete)
-from cyder.cydhcp.constants import DHCP_KEY_VALUES
+from cyder.cydhcp.constants import DHCP_EAV_MODELS
 
 
 def cydhcp_urls(object_type):
@@ -40,7 +40,7 @@ urlpatterns = patterns(
     url(r'^vrf/', include('cyder.cydhcp.vrf.urls')),
     url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
 )
-for kv in DHCP_KEY_VALUES:
+for eav in DHCP_EAV_MODELS:
     urlpatterns += patterns(
         '',
-        url(r'^{0}/'.format(kv), include(cydhcp_urls(kv))))
+        url(r'^{0}/'.format(eav), include(cydhcp_urls(eav))))
