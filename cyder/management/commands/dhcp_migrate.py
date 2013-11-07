@@ -165,12 +165,10 @@ def create_range(range_id, start, end, range_type, subnet_id, comment, enabled,
         dhcp_enabled = False
 
     r, created = range_usage_get_create(
-        Range,
-        **{'start_lower': start, 'start_str': ipaddr.IPv4Address(start),
-            'end_lower': end, 'end_str': ipaddr.IPv4Address(end),
-            'range_type': r_type, 'allow': allow, 'ip_type': '4',
-            'network': n, 'dhcp_enabled': dhcp_enabled,
-            'is_reserved': not dhcp_enabled})
+        Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
+        end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
+        allow=allow, ip_type=4, network=n, dhcp_enabled=dhcp_enabled,
+        is_reserved=not dhcp_enabled)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         attr = Attribute.objects.get(name=fix_attr_name('ipphone242'))
@@ -388,10 +386,8 @@ def migrate_dynamic_hosts():
             eav.save()
 
         intr, _ = range_usage_get_create(
-            DynamicInterface,
-            **{'range': r, 'workgroup': w, 'ctnr': c, 'domain': d,
-               'mac': mac, 'system': s, 'dhcp_enabled': enabled,
-               'last_seen': items['last_seen']})
+            DynamicInterface, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
+            system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         for key, value in get_host_option_values(items['id']):
             attr = Attribute.objects.get(name=fix_attr_name(key))

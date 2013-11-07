@@ -85,7 +85,7 @@ class Zone(object):
         """
         if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
             return ensure_domain(name=self.dname, force=True,
-                                 **{'update_range_usage': False})
+                                 update_range_usage=False)
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -231,7 +231,7 @@ class Zone(object):
                             static.dhcp_enabled = False
                             static.dns_enabled = False
                             static.full_clean()
-                            static.save(**{'update_range_usage': False})
+                            static.save(update_range_usage=False)
                         except ValidationError, e:
                             stderr.write("Error generating static interface "
                                          "for host with IP {0}\n"
@@ -287,9 +287,8 @@ class Zone(object):
 
             if ptr_type == 'forward':
                 arec, _ = range_usage_get_create(
-                    AddressRecord,
-                    **{'label': label, 'domain': self.domain,
-                       'ip_str': long2ip(ip), 'ip_type': '4'})
+                    AddressRecord, label=label, domain=self.domain,
+                    ip_str=long2ip(ip), ip_type=4)
                 if enabled:
                     arec.views.add(public)
                     arec.views.add(private)
@@ -302,7 +301,7 @@ class Zone(object):
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
                     ptr.full_clean()
-                    ptr.save(**{'update_range_usage': False})
+                    ptr.save(update_range_usage=False)
                     if enabled:
                         ptr.views.add(public)
                         ptr.views.add(private)
@@ -415,7 +414,7 @@ def gen_CNAME():
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
             print "Removing duplicate PTR for %s" % cn.fqdn
-            dup_ptrs.delete(**{'update_range_usage': False})
+            dup_ptrs.delete(update_range_usage=False)
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
