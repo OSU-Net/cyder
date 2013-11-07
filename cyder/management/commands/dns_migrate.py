@@ -176,6 +176,15 @@ class Zone(object):
             if ha == "":
                 enabled = False
 
+            # check for duplicate
+            static = StaticInterface.objects.filter(
+                label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+            if static:
+                stderr.write("Ignoring host %s: already exists.\n"
+                             % items['id'])
+                continue
+
+            # create system
             system = System(name=name)
             system.save()
             for key in sys_value_keys.keys():
@@ -188,6 +197,7 @@ class Zone(object):
                 eav.full_clean()
                 eav.save()
 
+            # check for workgroup
             if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
                                "FROM workgroup "
@@ -197,53 +207,41 @@ class Zone(object):
             else:
                 w = None
 
-            if not (StaticInterface.objects.filter(
-                    label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
-                    .exists()):
+            static, _ = StaticInterface(
+                label=name, domain=self.domain, mac=clean_mac(ha),
+                system=system, ip_str=long2ip(ip), ip_type='4',
+                workgroup=w, ctnr=ctnr, ttl=items['ttl'],
+                dns_enabled=enabled, dhcp_enabled=enabled,
+                last_seen=items['last_seen'])
+
+            # create static interface
+            try:
+                static.full_clean()
+                static.save(update_range_usage=False)
+
+                static.views.add(public)
+                static.views.add(private)
+            except ValidationError:
                 try:
-                    static, _ = range_usage_get_create(
-                        StaticInterface, label=name, domain=self.domain,
-                        mac=clean_mac(ha), system=system, ip_str=long2ip(ip),
-                        ip_type='4', workgroup=w, ctnr=ctnr, ttl=items['ttl'],
-                        dns_enabled=enabled, dhcp_enabled=enabled,
-                        last_seen=items['last_seen'])
+                    static.dhcp_enabled = False
+                    static.dns_enabled = enabled
+                    static.full_clean()
+                    static.save(update_range_usage=False)
+                except ValidationError, e:
+                    stderr.write("Error creating static interface for host"
+                                 "with IP {0}\n".format(static.ip_str))
+                    stderr.write("Original exception: {0}\n".format(e))
+                    static = None
+                    system.delete()
 
-                    try:
-                        # Static Interfaces need to be cleaned independently.
-                        # (no get_or_create)
-                        static.full_clean()
-                        static.save(update_range_usage=False)
-
-                        static.views.add(public)
-                        static.views.add(private)
-
-                        for key, value in get_host_option_values(items['id']):
-                            attr = Attribute.objects.get(
-                                name=fix_attr_name(key))
-                            eav = StaticInterfaceAV(entity=static,
-                                                    attribute=attr,
-                                                    value=value)
-                            eav.full_clean()
-                            eav.save()
-
-                    except ValidationError:
-                        try:
-                            static.dhcp_enabled = False
-                            static.dns_enabled = False
-                            static.full_clean()
-                            static.save(update_range_usage=False)
-                        except ValidationError, e:
-                            stderr.write("Error generating static interface "
-                                         "for host with IP {0}\n"
-                                         .format(static.ip_str))
-                            stderr.write("Original exception: {0}\n".format(e))
-
-                except ValidationError:
-                    stderr.write("Error generating static interface for "
-                                 "host with IP {0}\n".format(long2ip(ip)))
-            else:
-                stderr.write("Ignoring host %s: already exists.\n"
-                             % items['id'])
+            # add key-values
+            if static:
+                for key, value in get_host_option_values(items['id']):
+                    attr = Attribute.objects.get(name=fix_attr_name(key))
+                    eav = StaticInterfaceAV(
+                        entity=static, attribute=attr, value=value)
+                    eav.full_clean()
+                    eav.save()
 
     def gen_AR(self):
         """
