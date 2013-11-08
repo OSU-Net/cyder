@@ -27,7 +27,71 @@ from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.views import edit_user
 from cyder.core.ctnr.models import CtnrUser
 
+from cyder.models import (
+    AddressRecord, CNAME, Ctnr, Domain, DynamicInterface, DynamicInterfaceAV,
+    MX, Nameserver, Network, NetworkAV, PTR, Range, RangeAV, Site, SiteAV, SOA,
+    SOAAV, SRV, SSHFP, StaticInterface, StaticInterfaceAV, System, SystemAV,
+    TXT, Vlan, VlanAV, Vrf, VrfAV, Workgroup, WorkgroupAV
+)
+from cyder.cydns.address_record.forms import AddressRecordForm
+from cyder.cydns.cname.forms import CNAMEForm
+from cyder.core.ctnr.forms import CtnrForm
+from cyder.cydns.domain.forms import DomainForm
+from cyder.cydhcp.interface.dynamic_intr.forms import (DynamicInterfaceForm,
+                                                       DynamicInterfaceAVForm)
+from cyder.cydns.mx.forms import MXForm
+from cyder.cydns.nameserver.forms import NameserverForm
+from cyder.cydhcp.network.forms import NetworkForm, NetworkAVForm
+from cyder.cydns.ptr.forms import PTRForm
+from cyder.cydhcp.range.forms import RangeForm, RangeAVForm
+from cyder.cydhcp.site.forms import SiteForm, SiteAVForm
+from cyder.cydns.soa.forms import SOAForm, SOAAVForm
+from cyder.cydns.srv.forms import SRVForm
+from cyder.cydns.sshfp.forms import SSHFPForm
+from cyder.core.system.forms import SystemForm, SystemAVForm
+from cyder.cydhcp.interface.static_intr.forms import (StaticInterfaceForm,
+                                                      StaticInterfaceAVForm)
+from cyder.cydns.txt.forms import TXTForm
+from cyder.cydhcp.vlan.forms import VlanForm, VlanAVForm
+from cyder.cydhcp.vrf.forms import VrfForm, VrfAVForm
+from cyder.cydhcp.workgroup.forms import WorkgroupForm, WorkgroupAVForm
+
+
 import settings
+
+
+klasses = {
+    'address_record': (AddressRecord, AddressRecordForm),
+    'cname': (CNAME, CNAMEForm),
+    'ctnr': (Ctnr, CtnrForm),
+    'domain': (Domain, DomainForm),
+    'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
+    'dynamic_interface_av': (DynamicInterfaceAV, DynamicInterfaceAVForm),
+    'mx': (MX, MXForm),
+    'nameserver': (Nameserver, NameserverForm),
+    'network': (Network, NetworkForm),
+    'network_av': (NetworkAV, NetworkAVForm),
+    'ptr': (PTR, PTRForm),
+    'range': (Range, RangeForm),
+    'range_av': (RangeAV, RangeAVForm),
+    'site': (Site, SiteForm),
+    'site_av': (SiteAV, SiteAVForm),
+    'soa': (SOA, SOAForm),
+    'soa_av': (SOAAV, SOAAVForm),
+    'srv': (SRV, SRVForm),
+    'sshfp': (SSHFP, SSHFPForm),
+    'static_interface': (StaticInterface, StaticInterfaceForm),
+    'static_interface_av': (StaticInterfaceAV, StaticInterfaceAVForm),
+    'system': (System, SystemForm),
+    'system_av': (SystemAV, SystemAVForm),
+    'txt': (TXT, TXTForm),
+    'vlan': (Vlan, VlanForm),
+    'vlan_av': (VlanAV, VlanAVForm),
+    'vrf': (Vrf, VrfForm),
+    'vrf_av': (VrfAV, VrfAVForm),
+    'workgroup': (Workgroup, WorkgroupForm),
+    'workgroup_av': (WorkgroupAV, WorkgroupAVForm),
+}
 
 
 def home(request):
@@ -133,12 +197,12 @@ def send_email(request):
                       {'form': form})
 
 
-def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
+def cy_view(request, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
     obj_type = obj_type or request.path.split('/')[2]
 
-    Klass, FormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = klasses[obj_type]
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     if request.method == 'POST':
         object_table = None
@@ -333,7 +397,7 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     }.items() + kwargs.items()))
 
 
-def get_update_form(request, get_klasses_fn):
+def get_update_form(request):
     """
     Update view called asynchronously from the list_create view
     """
@@ -348,7 +412,7 @@ def get_update_form(request, get_klasses_fn):
     if not obj_type:
         raise Http404
 
-    Klass, FormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = klasses[obj_type]
     try:
         # Get the object if updating.
         if record_pk:
@@ -416,7 +480,7 @@ def get_update_form(request, get_klasses_fn):
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
 
 
-def search_obj(request, get_klasses_fn):
+def search_obj(request):
     """
     Returns a list of objects of 'obj_type' matching 'term'.
     """
@@ -425,7 +489,7 @@ def search_obj(request, get_klasses_fn):
     if not (obj_type and term):
         raise Http404
 
-    Klass, FormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = klasses[obj_type]
 
     records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]
@@ -433,7 +497,7 @@ def search_obj(request, get_klasses_fn):
     return HttpResponse(json.dumps(records))
 
 
-def table_update(request, pk, get_klasses_fn, object_type=None):
+def table_update(request, pk, object_type=None):
     """
     Called from editableGrid tables when updating a field. Try to update
     an object specified by pk with the post data.
@@ -442,7 +506,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
     # kwargs everywhere in the dispatchers.
     object_type = object_type or request.path.split('/')[2]
 
-    Klass, FormKlass = get_klasses_fn(object_type)
+    Klass, FormKlass = klasses[obj_type]
     obj = get_object_or_404(Klass, pk=pk)
 
     if not perm_soft(request, ACTION_UPDATE, obj=obj):

@@ -10,53 +10,13 @@ from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
                               cy_delete, get_update_form, search_obj,
-                              table_update)
+                              table_update, klasses)
 from cyder.core.cyuser.utils import perm
 
 from cyder.cydns.constants import DNS_EAV_MODELS
-from cyder.cydns.address_record.forms import (AddressRecordForm,
-                                              AddressRecordFQDNForm)
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.cname.forms import CNAMEForm, CNAMEFQDNForm
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.domain.forms import DomainForm
-from cyder.cydns.mx.forms import FQDNMXForm, MXForm
-from cyder.cydns.mx.models import MX
-from cyder.cydns.nameserver.forms import NameserverForm
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.ptr.forms import PTRForm
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.soa.forms import SOAForm, SOAAVForm
-from cyder.cydns.soa.models import SOA, SOAAV
-from cyder.cydns.sshfp.forms import FQDNSSHFPForm, SSHFPForm
-from cyder.cydns.sshfp.models import SSHFP
-from cyder.cydns.srv.forms import SRVForm, FQDNSRVForm
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
-from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 import json
-
-
-def get_klasses(obj_type):
-    """
-    Given record type string, grab its class and forms.
-    """
-    return {
-        'address_record': (AddressRecord, AddressRecordForm),
-        'cname': (CNAME, CNAMEForm),
-        'domain': (Domain, DomainForm),
-        'mx': (MX, MXForm),
-        'nameserver': (Nameserver, NameserverForm),
-        'ptr': (PTR, PTRForm),
-        'soa': (SOA, SOAForm),
-        'soa_av': (SOAAV, SOAAVForm),
-        'srv': (SRV, SRVForm),
-        'sshfp': (SSHFP, SSHFPForm),
-        'txt': (TXT, TXTForm),
-    }.get(obj_type, (None, None))
 
 
 def cydns_view(request, pk=None):
@@ -66,7 +26,7 @@ def cydns_view(request, pk=None):
     obj_type = request.path.split('/')[2]
 
     # Get the record form.
-    Klass, FormKlass = get_klasses(obj_type)
+    Klass, FormKlass = klasses[obj_type]
 
     # Get the object if updating.
     record = get_object_or_404(Klass, pk=pk) if pk else None
@@ -156,15 +116,15 @@ def _fqdn_to_domain(qd):
 
 
 def cydns_get_update_form(request):
-    return get_update_form(request, get_klasses)
+    return get_update_form(request)
 
 
 def cydns_table_update(request, pk, object_type=None):
-    return table_update(request, pk, get_klasses, object_type)
+    return table_update(request, pk, object_type)
 
 
 def cydns_search_obj(request):
-    return search_obj(request, get_klasses)
+    return search_obj(request)
 
 
 def cydns_index(request):

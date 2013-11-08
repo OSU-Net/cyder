@@ -5,80 +5,38 @@ from django.shortcuts import render, get_object_or_404
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
                               cy_view, cy_delete, get_update_form, search_obj,
-                              table_update)
+                              table_update, klasses)
 from cyder.cydhcp.forms import IpSearchForm
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
-from cyder.cydns.ptr.models import PTR
-from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicInterfaceAV)
-from cyder.cydhcp.interface.dynamic_intr.forms import (DynamicInterfaceForm,
-                                                       DynamicInterfaceAVForm)
-from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticInterfaceAV)
-from cyder.cydhcp.interface.static_intr.forms import (StaticInterfaceForm,
-                                                      StaticInterfaceAVForm)
-from cyder.cydhcp.network.models import Network, NetworkAV
-from cyder.cydhcp.network.forms import NetworkForm, NetworkAVForm
-from cyder.cydhcp.range.models import Range, RangeAV
-from cyder.cydhcp.range.forms import RangeForm, RangeAVForm
-from cyder.cydhcp.site.models import Site, SiteAV
-from cyder.cydhcp.site.forms import SiteForm, SiteAVForm
-from cyder.cydhcp.vlan.models import Vlan, VlanAV
-from cyder.cydhcp.vlan.forms import VlanForm, VlanAVForm
-from cyder.cydhcp.vrf.models import Vrf, VrfAV
-from cyder.cydhcp.vrf.forms import VrfForm, VrfAVForm
-from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
-from cyder.cydhcp.workgroup.forms import WorkgroupForm, WorkgroupAVForm
 
 import ipaddr
 
 
-def get_klasses(obj_type):
-    return {
-        'network': (Network, NetworkForm),
-        'network_av': (NetworkAV, NetworkAVForm),
-        'range': (Range, RangeForm),
-        'range_av': (RangeAV, RangeAVForm),
-        'site': (Site, SiteForm),
-        'site_av': (SiteAV, SiteAVForm),
-        'vlan': (Vlan, VlanForm),
-        'vlan_av': (VlanAV, VlanAVForm),
-        'static_interface': (StaticInterface, StaticInterfaceForm),
-        'static_interface_av': (StaticInterfaceAV, StaticInterfaceAVForm),
-        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
-        'dynamic_interface_av': (DynamicInterfaceAV, DynamicInterfaceAVForm),
-        'vrf': (Vrf, VrfForm),
-        'vrf_av': (VrfAV, VrfAVForm),
-        'workgroup': (Workgroup, WorkgroupForm),
-        'workgroup_av': (WorkgroupAV, WorkgroupAVForm),
-    }.get(obj_type, (None, None))
-
-
 def cydhcp_view(request, pk=None):
-    return cy_view(request, get_klasses, 'cydhcp/cydhcp_view.html', pk)
+    return cy_view(request, 'cydhcp/cydhcp_view.html', pk)
 
 
 def cydhcp_create(request, pk=None):
-    return cy_view(request, get_klasses, 'cydhcp/cydhcp_form.html', pk)
+    return cy_view(request, 'cydhcp/cydhcp_form.html', pk)
 
 
 def cydhcp_get_update_form(request):
-    return get_update_form(request, get_klasses)
+    return get_update_form(request)
 
 
 def cydhcp_search_obj(request):
-    return search_obj(request, get_klasses)
+    return search_obj(request)
 
 
 def cydhcp_table_update(request, pk, obj_type=None):
-    return table_update(request, pk, get_klasses, obj_type)
+    return table_update(request, pk, obj_type)
 
 
 def cydhcp_detail(request, pk):
     obj_type = request.path.split('/')[2]
-    Klass, FormKlass = get_klasses(obj_type)
+    Klass, FormKlass = klasses[obj_type]
     obj = get_object_or_404(Klass, pk=pk)
     attr_getter = getattr(obj, "{0}av_set".format(obj_type))
     return render(request, "{0}/{0}_detail.html".format(obj_type), {

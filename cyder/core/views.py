@@ -4,34 +4,22 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               BaseListView, BaseUpdateView,
                               cy_view, cy_delete, get_update_form, search_obj,
                               table_update)
-from cyder.core.ctnr.forms import CtnrForm
-from cyder.core.ctnr.models import Ctnr
-from cyder.core.system.forms import SystemForm, SystemAVForm
-from cyder.core.system.models import System, SystemAV
-
-
-def get_klasses(obj_type):
-    return {
-        'ctnr': (Ctnr, CtnrForm, None),
-        'system': (System, SystemForm, None),
-        'system_av': (SystemAV, SystemAVForm, None),
-    }.get(obj_type, (None, None, None))
 
 
 def core_view(request, pk=None):
-    return cy_view(request, get_klasses, 'core/core_view.html', pk)
+    return cy_view(request, 'core/core_view.html', pk)
 
 
 def core_get_update_form(request):
-    return get_update_form(request, get_klasses)
+    return get_update_form(request)
 
 
 def core_search_obj(request):
-    return search_obj(request, get_klasses)
+    return search_obj(request)
 
 
 def core_table_update(request, pk, obj_type=None):
-    return table_update(request, pk, get_klasses, obj_type)
+    return table_update(request, pk, obj_type)
 
 
 def core_index(request):
