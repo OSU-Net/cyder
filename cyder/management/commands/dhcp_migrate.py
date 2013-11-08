@@ -389,12 +389,6 @@ def migrate_dynamic_hosts():
             DynamicInterface, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
             system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
 
-        for key, value in get_host_option_values(items['id']):
-            attr = Attribute.objects.get(name=fix_attr_name(key))
-            eav = DynamicInterfaceAV(entity=intr, attribute=attr, value=value)
-            eav.full_clean()
-            eav.save()
-
         count += 1
         if not count % 1000:
             print "%s valid hosts found so far." % count
@@ -541,29 +535,6 @@ def maintain_get_cached(table, columns, object_id):
         return cached[(table, columns)][object_id]
     else:
         return (None for _ in columns)
-
-
-def get_host_option_values(host_id):
-    global host_option_values
-    if host_option_values is None:
-        host_option_values = {}
-        sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
-               "INNER JOIN {2} ON {2}.object_id = {0}.id "
-               "INNER JOIN {1} ON {1}.id = {2}.dhcp_option "
-               "WHERE {2}.type = '{3}'")
-        sql = sql.format("host", "dhcp_options", "object_option", "host")
-        print "Caching: %s" % sql
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        for h_id, name, value in results:
-            if h_id not in host_option_values:
-                host_option_values[h_id] = set([])
-            host_option_values[h_id].add((name, value))
-
-    if host_id in host_option_values:
-        return host_option_values[host_id]
-    else:
-        return []
 
 
 def migrate_all(skip=False):

@@ -132,8 +132,8 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import (maintain_find_zone, migrate_zones,
-                                  get_host_option_values)
+        from dhcp_migrate import maintain_find_zone, migrate_zones
+
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
             migrate_zones()
@@ -231,17 +231,7 @@ class Zone(object):
                     stderr.write("Error creating static interface for host"
                                  "with IP {0}\n".format(static.ip_str))
                     stderr.write("Original exception: {0}\n".format(e))
-                    static = None
                     system.delete()
-
-            # add key-values
-            if static:
-                for key, value in get_host_option_values(items['id']):
-                    attr = Attribute.objects.get(name=fix_attr_name(key))
-                    eav = StaticInterfaceAV(
-                        entity=static, attribute=attr, value=value)
-                    eav.full_clean()
-                    eav.save()
 
     def gen_AR(self):
         """
