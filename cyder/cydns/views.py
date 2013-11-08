@@ -46,6 +46,7 @@ def cydns_view(request, pk=None):
             return render(request, 'cydns/cydns_view.html', {
                 'form': form,
                 'obj_type': obj_type,
+                'pretty_obj_type': Klass.pretty_type,
                 'pk': pk,
                 'obj': record
             })
@@ -88,6 +89,7 @@ def cydns_view(request, pk=None):
         'page_obj': page_obj,
         'object_table': tablefy(page_obj, request=request),
         'obj_type': obj_type,
+        'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
     })
 

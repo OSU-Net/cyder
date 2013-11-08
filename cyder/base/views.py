@@ -255,6 +255,7 @@ def cy_view(request, template, pk=None, obj_type=None):
         'page_obj': page_obj,
         'object_table': object_table,
         'obj_type': obj_type,
+        'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
     })
 
@@ -393,6 +394,7 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
         'obj': obj,
         'obj_table': table,
         'obj_type': obj_type,
+        'pretty_obj_type': klasses[obj_type][0].pretty_type,
         'tables': tables
     }.items() + kwargs.items()))
 
