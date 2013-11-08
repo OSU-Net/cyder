@@ -45,19 +45,18 @@ def get_klasses(obj_type):
     Given record type string, grab its class and forms.
     """
     return {
-        'address_record': (AddressRecord, AddressRecordForm,
-                           AddressRecordFQDNForm),
-        'cname': (CNAME, CNAMEForm, CNAMEFQDNForm),
-        'domain': (Domain, DomainForm, DomainForm),
-        'mx': (MX, MXForm, FQDNMXForm),
-        'nameserver': (Nameserver, NameserverForm, NameserverForm),
-        'ptr': (PTR, PTRForm, PTRForm),
-        'soa': (SOA, SOAForm, SOAForm),
-        'soa_av': (SOAAV, SOAAVForm, SOAAVForm),
-        'srv': (SRV, SRVForm, FQDNSRVForm),
-        'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
-        'txt': (TXT, TXTForm, FQDNTXTForm),
-    }.get(obj_type, (None, None, None))
+        'address_record': (AddressRecord, AddressRecordForm),
+        'cname': (CNAME, CNAMEForm),
+        'domain': (Domain, DomainForm),
+        'mx': (MX, MXForm),
+        'nameserver': (Nameserver, NameserverForm),
+        'ptr': (PTR, PTRForm),
+        'soa': (SOA, SOAForm),
+        'soa_av': (SOAAV, SOAAVForm),
+        'srv': (SRV, SRVForm),
+        'sshfp': (SSHFP, SSHFPForm),
+        'txt': (TXT, TXTForm),
+    }.get(obj_type, (None, None))
 
 
 def cydns_view(request, pk=None):
@@ -67,7 +66,7 @@ def cydns_view(request, pk=None):
     obj_type = request.path.split('/')[2]
 
     # Get the record form.
-    Klass, FormKlass, FQDNFormKlass = get_klasses(obj_type)
+    Klass, FormKlass = get_klasses(obj_type)
 
     # Get the object if updating.
     record = get_object_or_404(Klass, pk=pk) if pk else None

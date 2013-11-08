@@ -138,7 +138,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     # Infer obj_type from URL, saves trouble of having to specify
     obj_type = obj_type or request.path.split('/')[2]
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     if request.method == 'POST':
         object_table = None
@@ -348,16 +348,13 @@ def get_update_form(request, get_klasses_fn):
     if not obj_type:
         raise Http404
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = get_klasses_fn(obj_type)
     try:
         # Get the object if updating.
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
             if perm(request, ACTION_UPDATE, obj=record):
-                if FormKlass:
-                    form = FormKlass(instance=record)
-                else:
-                    form = FQDNFormKlass(instance=record)
+                form = FormKlass(instance=record)
         else:
             #  Get form to create a new object and prepopulate
             if related_type and related_pk:
@@ -428,7 +425,7 @@ def search_obj(request, get_klasses_fn):
     if not (obj_type and term):
         raise Http404
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = get_klasses_fn(obj_type)
 
     records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]
@@ -445,7 +442,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
     # kwargs everywhere in the dispatchers.
     object_type = object_type or request.path.split('/')[2]
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(object_type)
+    Klass, FormKlass = get_klasses_fn(object_type)
     obj = get_object_or_404(Klass, pk=pk)
 
     if not perm_soft(request, ACTION_UPDATE, obj=obj):

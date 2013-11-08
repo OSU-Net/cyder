@@ -37,25 +37,23 @@ import ipaddr
 
 def get_klasses(obj_type):
     return {
-        'network': (Network, NetworkForm, None),
-        'network_av': (NetworkAV, NetworkAVForm, None),
-        'range': (Range, RangeForm, None),
-        'range_av': (RangeAV, RangeAVForm, None),
-        'site': (Site, SiteForm, None),
-        'site_av': (SiteAV, SiteAVForm, None),
-        'vlan': (Vlan, VlanForm, None),
-        'vlan_av': (VlanAV, VlanAVForm, None),
-        'static_interface': (StaticInterface, StaticInterfaceForm, None),
-        'static_interface_av': (StaticInterfaceAV, StaticInterfaceAVForm,
-                                None),
-        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm, None),
-        'dynamic_interface_av': (DynamicInterfaceAV, DynamicInterfaceAVForm,
-                                 None),
-        'vrf': (Vrf, VrfForm, None),
-        'vrf_av': (VrfAV, VrfAVForm, None),
-        'workgroup': (Workgroup, WorkgroupForm, None),
-        'workgroup_av': (WorkgroupAV, WorkgroupAVForm, None),
-    }.get(obj_type, (None, None, None))
+        'network': (Network, NetworkForm),
+        'network_av': (NetworkAV, NetworkAVForm),
+        'range': (Range, RangeForm),
+        'range_av': (RangeAV, RangeAVForm),
+        'site': (Site, SiteForm),
+        'site_av': (SiteAV, SiteAVForm),
+        'vlan': (Vlan, VlanForm),
+        'vlan_av': (VlanAV, VlanAVForm),
+        'static_interface': (StaticInterface, StaticInterfaceForm),
+        'static_interface_av': (StaticInterfaceAV, StaticInterfaceAVForm),
+        'dynamic_interface': (DynamicInterface, DynamicInterfaceForm),
+        'dynamic_interface_av': (DynamicInterfaceAV, DynamicInterfaceAVForm),
+        'vrf': (Vrf, VrfForm),
+        'vrf_av': (VrfAV, VrfAVForm),
+        'workgroup': (Workgroup, WorkgroupForm),
+        'workgroup_av': (WorkgroupAV, WorkgroupAVForm),
+    }.get(obj_type, (None, None))
 
 
 def cydhcp_view(request, pk=None):
