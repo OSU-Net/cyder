@@ -50,14 +50,14 @@ class VCSRepo(object):
         stdout, stderr, returncode = shell_out(command)
         if returncode != 0:
             error_msg = error_msg or '`{0}` failed'.format(command)
-            raise Exception('{0}\n'
-                            'command: {1}'
-                            'stdout: {2}'
-                            'stderr: {3}'
+            raise Exception('{0}\n\n'
+                            'command: {1}\n\n'
+                            '=== stdout ===\n{2}\n'
+                            '=== stderr ===\n{3}\n'
                             .format(
                                 error_msg,
                                 command,
-                                stdout or '\n',
+                                stdout,
                                 stderr.rstrip('\n')))
 
         return stdout, stderr
