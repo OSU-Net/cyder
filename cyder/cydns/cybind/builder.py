@@ -17,6 +17,8 @@ from cyder.settings import (
     DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
 )
 
+from cyder.base.vcs import log
+
 from cyder.core.task.models import Task
 
 from cyder.cydns.domain.models import SOA
@@ -26,6 +28,28 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 from cyder.core.utils import fail_mail
+
+
+def dict_defaults(d, defaults):
+    for argname, default in defaults.iteritems():
+        d[argname] = d.get(argname, default)
+
+
+def dns_log(msg, **kwargs):
+    dict_defaults(kwargs, {
+        'to_syslog': DNS_LOG_SYSLOG,
+    })
+
+    curframe = inspect.currentframe()
+    calframe = inspect.getouterframes(curframe, 2)
+    callername = "[{0}]".format(calframe[1][3])
+    if root_domain:
+        msg = "{0:20} < {1} > {2}".format(callername,
+                                           root_domain.name, msg)
+    else:
+        msg = "{0:20} {1}".format(callername, msg)
+
+    log(msg, **kwargs)
 
 
 class BuildError(Exception):
