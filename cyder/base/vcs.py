@@ -7,7 +7,6 @@ from cyder.base.utils import shell_out
 
 def log(msg, log_level='LOG_INFO', to_syslog=False, to_stderr=True,
             root_domain=None):
-
     ll = getattr(syslog, log_level)
 
     if to_syslog:
@@ -20,7 +19,7 @@ class VCSRepo(object):
     def __init__(self, repo_dir, diff_line_threshold, debug=False,
             log_syslog=False):
         self.repo_dir = repo_dir
-        self.diff_line_threshold = diff_line_theshold
+        self.diff_line_threshold = diff_line_threshold
         self.debug = debug
         self.log_syslog = log_syslog
 
@@ -37,28 +36,29 @@ class VCSRepo(object):
         log('Calling `{0}` in {1}'.format(command, self.repo_dir),
             to_stderr=self.debug, to_syslog=self.log_syslog)
 
-    def command_error(self, text=None, command, stdout, stderr):
-        text = text or '`{0}` failed'.format(command)
-        raise BuildError('{0}\n'
-                         'command: {1}\n'
-                         'stdout: {2}\n'
-                         'stderr: {3}'
-                         .format(text, command_str, stdout, stderr))
-
     def _sanity_check(self):
         lines_changed = self._lines_changed()
         if sum(lines_changed) > self.diff_line_threshold:
-            raise BuildError('Too many lines changed. '
-                             '{0} lines added and {1} lines removed. '
-                             'Aborting commit'.format(*lines_changed))
+            raise Exception('Sanity check failed -- too many lines changed.\n'
+                            '{0} lines added and {1} lines removed. '
+                            'Aborting commit'.format(*lines_changed))
 
-    def _run_command(self, cmd, log=True, error_msg=None):
+    def _run_command(self, command, log=True, error_msg=None):
         if log:
             self._log_command(command)
 
-        stdout, stderr, returncode = shell_out(cmd)
+        stdout, stderr, returncode = shell_out(command)
         if returncode != 0:
-            self.command_error(error_msg)
+            error_msg = error_msg or '`{0}` failed'.format(command)
+            raise Exception('{0}\n'
+                            'command: {1}'
+                            'stdout: {2}'
+                            'stderr: {3}'
+                            .format(
+                                error_msg,
+                                command,
+                                stdout or '\n',
+                                stderr.rstrip('\n')))
 
         return stdout, stderr
 
@@ -74,25 +74,13 @@ class SVNRepo(VCSRepo):
         self._update()
 
     def _add(self):
-        command = 'svn add --force .'
-        self._log_command(command)
-        _, _, returncode = shell_out(command)
-        if returncode != 0:
-            self.command_error('Failed to add files to repo.')
+        self._run_command('svn add --force .')
 
     def _checkin(self, message):
-        command = 'svn ci -m "{0}"'.format(message)
-        self._log_command(command)
-        _, _, returncode = shell_out(command)
-        if returncode != 0:
-            self.command_error('Failed to checkin changes.')
+        self._run_command('svn ci -m "{0}"'.format(message))
 
     def _update(self):
-        command = 'svn up'
-        self._log_command(command)
-        _, _, returncode = shell_out(command)
-        if returncode != 0:
-            self.command_error('Failed to update working copy.')
+        self._run_command('svn up')
 
     def _lines_changed(self):
         diff_ignore = (re.compile(r'---\s.+\s+\(revision\s\d+\)'),
@@ -100,8 +88,7 @@ class SVNRepo(VCSRepo):
 
         added, removed = 0, 0
 
-        command = 'svn diff --depth=infinity'
-        output, _, _ = shell_out(command)
+        output, _ = self._run_command('svn diff --depth=infinity')
 
         for line in output.split('\n'):
             if any(regex.match(line) for regex in diff_ignore):
@@ -133,7 +120,7 @@ class GitRepo(VCSRepo):
 
     def _lines_changed(self):
         diff_ignore = (re.compile(r'--- *\S'),
-                       re.compile(r'+++ *\S'))
+                       re.compile(r'\+\+\+ *\S'))
 
         output, _ = self._run_command('git diff --cached', log=False)
 
