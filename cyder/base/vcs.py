@@ -5,12 +5,12 @@ import syslog
 from cyder.base.utils import shell_out
 
 
-def log(msg, log_level='LOG_INFO', to_syslog=False, to_stderr=True,
-            root_domain=None):
-    ll = getattr(syslog, log_level)
+def log(msg, logger=syslog, log_level='LOG_INFO', to_syslog=False,
+            to_stderr=True):
+    ll = getattr(logger, log_level)
 
     if to_syslog:
-        syslog.syslog(ll, msg)
+        logger.syslog(ll, msg)
     if to_stderr:
         print "{0}: {1}".format(log_level[4:], msg)
 
