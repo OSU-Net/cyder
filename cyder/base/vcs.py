@@ -2,7 +2,7 @@ import os
 import re
 import syslog
 
-from cyder.base.utils import shell_out
+from cyder.base.utils import shell_out, set_attrs, dict_merge
 
 
 def log(msg, logger=syslog, log_level='LOG_INFO', to_syslog=False,
@@ -16,12 +16,15 @@ def log(msg, logger=syslog, log_level='LOG_INFO', to_syslog=False,
 
 
 class VCSRepo(object):
-    def __init__(self, repo_dir, diff_line_threshold, debug=False,
-            log_syslog=False):
-        self.repo_dir = repo_dir
-        self.diff_line_threshold = diff_line_threshold
-        self.debug = debug
-        self.log_syslog = log_syslog
+    def __init__(self, repo_dir, diff_line_threshold, logger=syslog,
+                 debug=False, log_syslog=False):
+        set_attrs(self, {
+            'repo_dir': repo_dir,
+            'diff_line_threshold': diff_line_threshold,
+            'logger': logger,
+            'debug': debug,
+            'log_syslog': log_syslog,
+        })
 
     def commit_and_push(self, message):
         old_dir = os.getcwd()
@@ -32,6 +35,9 @@ class VCSRepo(object):
         finally:
             os.chdir(old_dir)
 
+    def _log(self, message):
+        log(message, to_stderr=self.debug, to_syslog=self.log_syslog)
+
     def _log_command(self, command):
         log('Calling `{0}` in {1}'.format(command, self.repo_dir),
             to_stderr=self.debug, to_syslog=self.log_syslog)
@@ -39,26 +45,24 @@ class VCSRepo(object):
     def _sanity_check(self):
         lines_changed = self._lines_changed()
         if sum(lines_changed) > self.diff_line_threshold:
-            raise Exception('Sanity check failed -- too many lines changed.\n'
-                            '{0} lines added and {1} lines removed. '
-                            'Aborting commit'.format(*lines_changed))
+            raise Exception('Too many lines changed. Aborting commit.\n'
+                            '({0} lines added, {1} lines removed)'
+                            .format(*lines_changed))
 
-    def _run_command(self, command, log=True, error_msg=None):
+    def _run_command(self, command, log=True, failure_msg=None):
         if log:
             self._log_command(command)
 
         stdout, stderr, returncode = shell_out(command)
         if returncode != 0:
-            error_msg = error_msg or '`{0}` failed'.format(command)
+            failure_msg = failure_msg or '`{0}` failed'.format(command)
+            self._log
             raise Exception('{0}\n\n'
                             'command: {1}\n\n'
                             '=== stdout ===\n{2}\n'
                             '=== stderr ===\n{3}\n'
-                            .format(
-                                error_msg,
-                                command,
-                                stdout,
-                                stderr.rstrip('\n')))
+                            .format(failure_msg, command, stdout,
+                                    stderr.rstrip('\n')))
 
         return stdout, stderr
 
@@ -86,10 +90,9 @@ class SVNRepo(VCSRepo):
         diff_ignore = (re.compile(r'---\s.+\s+\(revision\s\d+\)'),
                        re.compile(r'\+\+\+.*'))
 
-        added, removed = 0, 0
-
         output, _ = self._run_command('svn diff --depth=infinity')
 
+        added, removed = 0, 0
         for line in output.split('\n'):
             if any(regex.match(line) for regex in diff_ignore):
                 continue
@@ -119,8 +122,8 @@ class GitRepo(VCSRepo):
         self._run_command('git add -A .')
 
     def _lines_changed(self):
-        diff_ignore = (re.compile(r'--- *\S'),
-                       re.compile(r'\+\+\+ *\S'))
+        diff_ignore = (re.compile(r'--- \S'),
+                       re.compile(r'\+\+\+ \S'))
 
         output, _ = self._run_command('git diff --cached', log=False)
 

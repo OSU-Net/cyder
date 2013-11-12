@@ -28,6 +28,16 @@ def shell_out(command, use_shlex=True):
     return stdout, stderr, p.returncode
 
 
+def set_attrs(obj, attrs):
+    for name, value in attrs.iteritems():
+        setattr(obj, name, value)
+
+
+def dict_merge(*dicts):
+    """Later keys override earlier ones"""
+    return dict(reduce(lambda x,y: x + y.items(), dicts, []))
+
+
 def find_get_record_url(obj):
     obj_type = obj._meta.db_table
     if obj_type in DHCP_OBJECTS:

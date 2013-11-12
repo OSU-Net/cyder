@@ -18,21 +18,16 @@ from cyder.settings import (
 )
 
 from cyder.base.vcs import log
+from cyder.base.utils import dict_merge, set_attrs
 
 from cyder.core.task.models import Task
+from cyder.core.utils import fail_mail
 
 from cyder.cydns.domain.models import SOA
 from cyder.cydns.view.models import View
 from cyder.cydns.cybind.zone_builder import build_zone_data
 from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
-
-from cyder.core.utils import fail_mail
-
-
-def dict_defaults(d, defaults):
-    for argname, default in defaults.iteritems():
-        d[argname] = d.get(argname, default)
 
 
 def dns_log(msg, **kwargs):
@@ -56,153 +51,9 @@ class BuildError(Exception):
     """Exception raised when there is an error in the build process."""
 
 
-class SVNBuilderMixin(object):
-    svn_ignore = [re.compile("---\s.+\s+\(revision\s\d+\)"),
-                  re.compile("\+\+\+.*")]
-
-    vcs_type = 'svn'
-
-    def svn_lines_changed(self, dirname):
-        """
-        This function will collect some metrics on how many lines were added
-        and removed during the build process.
-
-        :returns: (int, int) -> (lines_added, lines_removed)
-
-        The current implementation of this function uses the underlying svn
-        repo to generate a diff and then counts the number of lines that start
-        with '-' or '+'. This causes the accuracy of this function to have
-        slight errors because some lines in the diff output start with '-' or
-        '+' but aren't indicative of a line being removed or added. Since the
-        threashold of lines changing is in the hundreds of lines, an error of
-        tens of lines is not a large concern.
-        """
-        cwd = os.getcwd()
-        os.chdir(dirname)
-        try:
-            command_str = "svn add --force .".format(dirname)
-            self.log("Calling `{0}` in {1}".
-                     format(command_str, dirname))
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to add files to svn."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-            command_str = "svn diff --depth=infinity ."
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to add files to svn."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-        except Exception:
-            raise
-        finally:
-            self.log("Changing pwd to {0}".format(cwd))
-            os.chdir(cwd)  # go back!
-
-        la, lr = 0, 0
-
-        def svn_ignore(line):
-            for ignore in self.svn_ignore:
-                if ignore.match(line):
-                    return True
-            return False
-
-        for line in stdout.split('\n'):
-            if svn_ignore(line):
-                continue
-            if line.startswith('-'):
-                lr += 1
-            elif line.startswith('+'):
-                la += 1
-        return la, lr
-
-    def svn_sanity_check(self, lines_changed):
-        """
-        If sanity checks fail, this function will return a string which is
-        True-ish. If all sanity cheecks pass, a Falsy value will be
-        returned.
-        """
-        # svn diff changes and react if changes are too large
-        if sum(lines_changed) > DNS_MAX_ALLOWED_LINES_CHANGED:
-            if self.FORCE:
-                self.log("Sanity check failed but FORCE == True. "
-                         "Ignoring thresholds.")
-            else:
-                raise BuildError("Wow! Too many lines changed during this "
-                                 "checkin. {0} lines add, {1} lines removed."
-                                 .format(*lines_changed))
-
-    def svn_checkin(self, lines_changed):
-        # svn add has already been called
-        cwd = os.getcwd()
-        os.chdir(self.PROD_DIR)
-        self.log("Changing pwd to {0}".format(self.PROD_DIR))
-        try:
-            ci_message = _("Checking in DNS. {0} lines were added and {1} were"
-                           " removed".format(*lines_changed))
-            self.log("Commit message: {0}".format(ci_message))
-            command_str = "svn ci {0} -m \"{1}\"".format(
-                self.PROD_DIR, ci_message)
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to check in changes."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-            else:
-                self.log("Changes have been checked in.")
-        finally:
-            os.chdir(cwd)  # go back!
-            self.log("Changing pwd to {0}".format(cwd))
-        return
-
-    def vcs_checkin(self):
-        command_str = "svn add --force .".format(self.PROD_DIR)
-        stdout, stderr, returncode = self.shell_out(command_str)
-        try:
-            cwd = os.getcwd()
-            os.chdir(self.PROD_DIR)
-            self.log("Calling `svn up` in {0}".format(self.PROD_DIR))
-            command_str = "svn up"
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to svn up."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-        finally:
-            os.chdir(cwd)  # go back!
-            self.log("Changing pwd to {0}".format(cwd))
-
-        lines_changed = self.svn_lines_changed(self.PROD_DIR)
-        self.svn_sanity_check(lines_changed)
-        if lines_changed == (0, 0):
-            self.log("PUSH_TO_PROD is True but "
-                     "svn_lines_changed found that no lines differ "
-                     "from last svn checkin.")
-        else:
-            config_lines_changed = self.svn_lines_changed(
-                os.path.join(self.PROD_DIR, 'config')
-            )
-            config_lines_removed = config_lines_changed[1]
-            if config_lines_removed > DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED:
-                if self.FORCE:
-                    self.log("Config sanity check failed but "
-                             "FORCE == True. Ignoring thresholds.")
-                else:
-                    raise BuildError(
-                        "Wow! Too many lines removed from the config dir ({0} "
-                        "lines removed). Manually make sure this commit is "
-                        "okay." .format(config_lines_removed)
-                    )
-
-            self.log("PUSH_TO_PROD is True. Checking into "
-                     "svn.")
-            self.svn_checkin(lines_changed)
-
-
 class DNSBuilder(SVNBuilderMixin):
     def __init__(self, **kwargs):
-        defaults = {
+        kwargs = dict_merge({
             'STAGE_DIR': DNS_STAGE_DIR,
             'PROD_DIR': DNS_PROD_DIR,
             'BIND_PREFIX': DNS_BIND_PREFIX,
@@ -218,10 +69,9 @@ class DNSBuilder(SVNBuilderMixin):
             'LOG_SYSLOG': True,
             'DEBUG': False,
             'FORCE': False,
-            'bs': DNSBuildRun()  # Build statistic
-        }
-        for k, default in defaults.iteritems():
-            setattr(self, k, kwargs.get(k, default))
+            'bs': DNSBuildRun(),  # Build statistic
+        }, kwargs)
+        set_attrs(self, kwargs)
 
         # This is very specific to python 2.6
         syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
