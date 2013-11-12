@@ -114,7 +114,7 @@ def system_create_view(request, initial):
         interface_type = 'Dynamic'
         if 'range_' in initial:
             pk = initial.split('range_')[1]
-            Range = get_model('range', 'range')
+            Range = get_model('cyder', 'range')
             rng = Range.objects.filter(pk=pk)
             if rng.exists():
                 dynamic_form.fields['range'].initial = rng[0]

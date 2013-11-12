@@ -86,9 +86,9 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
                 remove those items from their lists
 
     """
-    StaticInterface = get_model('static_intr', 'staticinterface')
-    PTR = get_model('ptr', 'ptr')
-    AddressRecord = get_model('addressrecord', 'addressrecord')
+    StaticInterface = get_model('cyder', 'staticinterface')
+    PTR = get_model('cyder', 'ptr')
+    AddressRecord = get_model('cyder', 'addressrecord')
     istart, iend, ipf_q = start_end_filter(ip_start, ip_end, ip_type)
 
     def get_ip(rec):

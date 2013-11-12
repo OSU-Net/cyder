@@ -62,7 +62,7 @@ def range_detail(request, pk):
             mrange.ip_type)
     else:
         ip_usage_percent = mrange.range_usage
-        DynamicInterface = get_model('dynamic_intr', 'dynamicinterface')
+        DynamicInterface = get_model('cyder', 'dynamicinterface')
         dynamic_interfaces = DynamicInterface.objects.filter(range=mrange)
         dynamic_interfaces_page_obj = make_paginator(
             request, do_sort(request, dynamic_interfaces), 10)
