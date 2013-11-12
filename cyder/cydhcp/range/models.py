@@ -201,11 +201,13 @@ class Range(BaseModel, ObjectUrlMixin):
             raise ValidationError("The start of a range cannot be greater "
                                   "than the end of the range.")
 
-        if self.range_type == STATIC and self.dynamicinterface_set.exists():
+        if (self.range_type == STATIC and
+                self.dynamicinterface_set.filter(dhcp_enabled=True).exists()):
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if self.range_type == DYNAMIC and self.staticinterfaces.exists():
+        if (self.range_type == DYNAMIC and
+                self.staticinterfaces.filter(dhcp_enabled=True).exists()):
             raise ValidationError('A dynamic range cannot contain static '
                                   'interfaces')
 
