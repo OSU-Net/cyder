@@ -328,8 +328,7 @@ class Range(BaseModel, ObjectUrlMixin):
             _, usage = range_usage(self.start_lower, self.end_lower,
                                    self.ip_type)
         else:
-            DynamicInterface = models.get_model('dynamic_intr',
-                                                'dynamicinterface')
+            DynamicInterface = models.get_model('cyder', 'dynamicinterface')
             used = float(DynamicInterface.objects.filter(
                 range=self, dhcp_enabled=True).count())
             capacity = float(self.end_lower - self.start_lower + 1)
