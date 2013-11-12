@@ -14,7 +14,7 @@ from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
-import cyder as cy
+from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, model_to_post, tablefy,
@@ -142,11 +142,11 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     form = FormKlass(instance=obj)
     if request.method == 'POST':
-        form = FormKlass(request.POST, instance=obj)
-
+        post_data = qd_to_py_dict(request.POST)
+        form = FormKlass(post_data, instance=obj)
         if form.is_valid():
             try:
-                if perm(request, cy.ACTION_CREATE, obj=obj, obj_class=Klass):
+                if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
                     obj = form.save()
 
                     if Klass.__name__ == 'Ctnr':
@@ -201,7 +201,7 @@ def cy_delete(request, pk, get_klasses_fn):
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
     try:
-        if perm(request, cy.ACTION_DELETE, obj=obj):
+        if perm(request, ACTION_DELETE, obj=obj):
             if Klass.__name__ == 'Ctnr':
                 request = ctnr_delete_session(request, obj)
 
@@ -274,7 +274,7 @@ def get_update_form(request, get_klasses_fn):
         # Get the object if updating.
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
-            if perm(request, cy.ACTION_UPDATE, obj=record):
+            if perm(request, ACTION_UPDATE, obj=record):
                 if FormKlass:
                     form = FormKlass(instance=record)
                 else:
@@ -282,10 +282,21 @@ def get_update_form(request, get_klasses_fn):
         else:
             #  Get form to create a new object and prepopulate
             if related_type and related_pk:
+
+                # This try-except is faster than
+                # `'entity' in ...get_all_field_names()`.
+                try:
+                    # test if the model has an 'entity' field
+                    FormKlass._meta.model._meta.get_field('entity')
+                    # autofill the 'entity' field
+                    kwargs['entity'] = related_pk
+                except:     # no 'entity' field
+                    pass
+
                 form = FormKlass(initial=dict(
                     {related_type: related_pk}.items() + kwargs.items()))
 
-                if related_type == 'range' and 'kv' not in obj_type:
+                if related_type == 'range' and not obj_type.endswith('_av'):
                     for field in ['vrf', 'site', 'next_ip']:
                         form.fields[field].widget = forms.HiddenInput()
                     form.fields['ip_str'].widget.attrs['readonly'] = True
@@ -295,7 +306,7 @@ def get_update_form(request, get_klasses_fn):
                         (str(ip_type), "IPv{0}".format(ip_type))]
 
                 if FormKlass.__name__ == 'RangeForm':
-                    Network = get_model('network', 'network')
+                    Network = get_model('cyder', 'network')
                     network = Network.objects.get(id=related_pk)
                     network_str = network.network_str.split('/')
                     initial = '.'.join(
@@ -313,12 +324,9 @@ def get_update_form(request, get_klasses_fn):
 
     if related_type in form.fields:
         if 'interface' in related_type:
-            app_label = related_type.replace('interface', 'intr')
             related_type = related_type.replace('_', '')
-        else:
-            app_label = related_type
 
-        RelatedKlass = get_model(app_label, related_type)
+        RelatedKlass = get_model('cyder', related_type)
         form.fields[related_type] = ModelChoiceField(
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
@@ -359,7 +367,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(object_type)
     obj = get_object_or_404(Klass, pk=pk)
 
-    if not perm_soft(request, cy.ACTION_UPDATE, obj=obj):
+    if not perm_soft(request, ACTION_UPDATE, obj=obj):
         return HttpResponse(json.dumps({'error': 'You do not have appropriate'
                                                  ' permissions.'}))
 

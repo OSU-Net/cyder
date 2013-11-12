@@ -11,7 +11,7 @@ def site_detail(request, pk):
 
     return cy_detail(request, Site, 'site/site_detail.html', {
         'Networks': networks,
-        'Attributes': 'sitekeyvalue_set',
+        'Attributes': 'siteav_set',
         'Children Sites': 'site_set',
         'Vlanless Networks': networks.filter(vlan__isnull=True)
     }, obj=obj)

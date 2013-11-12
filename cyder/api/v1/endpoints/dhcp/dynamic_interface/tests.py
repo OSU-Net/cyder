@@ -9,7 +9,6 @@ from cyder.cydhcp.constants import DYNAMIC
 
 class DynamicInterfaceBase(APITests):
     model = DynamicInterface
-    keyvalue_attr = "dynamicintrkeyvalue_set"
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')

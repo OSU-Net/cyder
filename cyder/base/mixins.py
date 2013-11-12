@@ -129,7 +129,7 @@ class UsabilityFormMixin(object):
 
     def autoselect_system(self):
         if 'system' in self.initial:
-            System = get_model('system', 'system')
+            System = get_model('cyder', 'system')
             system_name = System.objects.get(
                 pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(

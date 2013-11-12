@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
 from django.shortcuts import get_object_or_404, redirect, render
 
-import cyder as cy
+from cyder.base.constants import ACTION_CREATE
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
@@ -12,9 +12,9 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               table_update)
 from cyder.core.cyuser.utils import perm
 
-from cyder.cydhcp.constants import DHCP_KEY_VALUES
+from cyder.cydhcp.constants import DHCP_EAV_MODELS
 
-from cyder.cydns.constants import DNS_KEY_VALUES
+from cyder.cydns.constants import DNS_EAV_MODELS
 from cyder.cydns.address_record.forms import (AddressRecordForm,
                                               AddressRecordFQDNForm)
 from cyder.cydns.address_record.models import AddressRecord
@@ -28,8 +28,8 @@ from cyder.cydns.nameserver.forms import NameserverForm
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.forms import PTRForm
 from cyder.cydns.ptr.models import PTR
-from cyder.cydns.soa.forms import SOAForm, SOAKeyValueForm
-from cyder.cydns.soa.models import SOA, SOAKeyValue
+from cyder.cydns.soa.forms import SOAForm, SOAAVForm
+from cyder.cydns.soa.models import SOA, SOAAV
 from cyder.cydns.sshfp.forms import FQDNSSHFPForm, SSHFPForm
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.srv.forms import SRVForm, FQDNSRVForm
@@ -52,7 +52,7 @@ def get_klasses(obj_type):
         'nameserver': (Nameserver, NameserverForm, NameserverForm),
         'ptr': (PTR, PTRForm, PTRForm),
         'soa': (SOA, SOAForm, SOAForm),
-        'soa_kv': (SOAKeyValue, SOAKeyValueForm, SOAKeyValueForm),
+        'soa_av': (SOAAV, SOAAVForm, SOAAVForm),
         'srv': (SRV, SRVForm, FQDNSRVForm),
         'sshfp': (SSHFP, SSHFPForm, FQDNSSHFPForm),
         'txt': (TXT, TXTForm, FQDNTXTForm),
@@ -89,10 +89,10 @@ def cydns_view(request, pk=None):
         else:
             form = FormKlass(qd, instance=record)
         try:
-            if perm(request, cy.ACTION_CREATE, obj=record, obj_class=Klass):
+            if perm(request, ACTION_CREATE, obj=record, obj_class=Klass):
                 record = form.save()
                 # If domain, add to current ctnr.
-                if obj_type in DNS_KEY_VALUES or obj_type in DHCP_KEY_VALUES:
+                if obj_type in DNS_EAV_MODELS or obj_type in DHCP_EAV_MODELS:
                     return redirect(request.META.get('HTTP_REFERER', ''))
 
                 if (hasattr(record, 'ctnr_set') and

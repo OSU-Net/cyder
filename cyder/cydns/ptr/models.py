@@ -90,6 +90,7 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     search_fields = ('ip_str', 'fqdn')
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'ptr'
         unique_together = ('ip_str', 'ip_type', 'fqdn')
 

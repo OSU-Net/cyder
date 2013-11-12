@@ -6,15 +6,15 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
                               table_update)
 from cyder.core.ctnr.forms import CtnrForm
 from cyder.core.ctnr.models import Ctnr
-from cyder.core.system.forms import SystemForm, SystemKeyValueForm
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.core.system.forms import SystemForm, SystemAVForm
+from cyder.core.system.models import System, SystemAV
 
 
 def get_klasses(obj_type):
     return {
         'ctnr': (Ctnr, CtnrForm, None),
         'system': (System, SystemForm, None),
-        'system_kv': (SystemKeyValue, SystemKeyValueForm, None),
+        'system_av': (SystemAV, SystemAVForm, None),
     }.get(obj_type, (None, None, None))
 
 

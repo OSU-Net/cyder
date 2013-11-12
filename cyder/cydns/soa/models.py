@@ -7,10 +7,12 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q, F
 from django.db import models
 
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.cydhcp.keyvalue.models import KeyValue
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
@@ -81,6 +83,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     attrs = None
 
     class Meta:
+        app_label = 'cyder'
         db_table = 'soa'
         # We are using the description field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
@@ -194,28 +197,12 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
             self.schedule_rebuild(commit=False)
 
 
-class SOAKeyValue(KeyValue):
-    soa = models.ForeignKey(SOA, related_name='keyvalue_set', null=False)
+class SOAAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        app_label = 'cyder'
+        db_table = 'soa_av'
 
-    class Meta:
-        db_table = 'soa_kv'
 
-    def _aa_disabled(self):
-        """
-        Disabled - The Value of this Key determines whether or not an SOA will
-        be asked to build a zone file. Values that represent true are 'True,
-        TRUE, true, 1' and 'yes'. Values that represent false are 'False,
-        FALSE, false, 0' and 'no'.
-        """
-        true_values = ["true", "1", "yes"]
-        false_values = ["false", "0", "no"]
-        if self.value.lower() in true_values:
-            self.value = "True"
-        elif self.value.lower() in false_values:
-            self.value = "False"
-        else:
-            raise ValidationError(
-                "Disabled should be set to either {0} OR {1}".format(
-                    ", ".join(true_values), ", ".join(false_values)
-                )
-            )
+    entity = models.ForeignKey(SOA)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

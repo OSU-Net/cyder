@@ -14,6 +14,7 @@ class Task(models.Model):
     dns = DNSManager()
 
     class Meta:
+        app_label = 'cyder'
         db_table = u'task'
         ordering = ['task']
 

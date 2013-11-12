@@ -3,10 +3,10 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
-from cyder.api.v1.tests.base import APITests
+from cyder.api.v1.tests.base import APITests, APIEAVTestMixin
 
 
-class RangeBase(APITests):
+class RangeBase(APITests, APIEAVTestMixin):
     model = Range
 
     def setUp(self):

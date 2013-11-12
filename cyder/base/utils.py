@@ -8,10 +8,9 @@ from django.db.models import Q, query
 from django.db.models.loading import get_model
 from django.forms.models import model_to_dict
 
-from cyder.base.constants import DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS
+from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
+                                  ACTION_UPDATE)
 from cyder.base.helpers import prettify_obj_type
-
-import cyder as cy
 
 
 def shell_out(command, use_shlex=True):
@@ -84,7 +83,7 @@ def tablefy(objects, users=False, extra_cols=None, info=True, request=False):
         Klass = objects[0].__class__
 
     if request is not False and request.user.get_profile().has_perm(
-            request, cy.ACTION_UPDATE, obj_class=Klass):
+            request, ACTION_UPDATE, obj_class=Klass):
         try:
             first_obj.get_update_url()
             can_update = True
@@ -233,7 +232,7 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
 
 
 def _filter(request, Klass):
-    Ctnr = get_model('ctnr', 'ctnr')
+    Ctnr = get_model('cyder', 'ctnr')
     if Klass is not Ctnr:
         objects = filter_by_ctnr(request.session['ctnr'], Klass)
     else:

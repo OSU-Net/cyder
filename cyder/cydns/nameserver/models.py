@@ -49,6 +49,7 @@ class Nameserver(CydnsRecord):
     search_fields = ("server", "domain__name")
 
     class Meta:
+        app_label = 'cyder'
         db_table = "nameserver"
         unique_together = ("domain", "server")
 

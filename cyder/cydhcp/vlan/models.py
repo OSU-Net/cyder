@@ -2,12 +2,14 @@ from django.db import models
 from django.db.models.loading import get_model
 from django.core.exceptions import ObjectDoesNotExist
 
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
-from cyder.cydhcp.keyvalue.models import KeyValue
 
 
 class Vlan(BaseModel, ObjectUrlMixin):
@@ -19,6 +21,7 @@ class Vlan(BaseModel, ObjectUrlMixin):
     display_fields = ('name',)
 
     class Meta:
+        app_label = 'cyder'
         db_table = "vlan"
         unique_together = ("name", "number")
 
@@ -30,7 +33,7 @@ class Vlan(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('network', 'network')
+        Network = get_model('cyder', 'network')
         networks = Network.objects.filter(range__in=ctnr.ranges.all())
         objects = objects or Vlan.objects
         return objects.filter(network__in=networks)
@@ -74,12 +77,12 @@ class Vlan(BaseModel, ObjectUrlMixin):
         return None
 
 
-class VlanKeyValue(KeyValue):
-    vlan = models.ForeignKey(Vlan, null=False)
+class VlanAV(EAVBase):
+    class Meta(EAVBase.Meta):
+        app_label = 'cyder'
+        db_table = 'vlan_av'
 
-    class Meta:
-        db_table = "vlan_kv"
-        unique_together = ("key", "value")
 
-    def _aa_description(self):
-        return
+    entity = models.ForeignKey(Vlan)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

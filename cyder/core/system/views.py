@@ -23,7 +23,7 @@ def system_detail(request, pk):
     except:
         return redirect(reverse('system'))
 
-    attrs = system.systemkeyvalue_set.all()
+    attrs = system.systemav_set.all()
     dynamic = DynamicInterface.objects.filter(system=system)
     related_systems = set()
 
@@ -33,12 +33,12 @@ def system_detail(request, pk):
     for intr in static:
         related_systems.update(intr.get_related_systems())
         static_intr.append((tablefy((intr,), request=request),
-                            tablefy(intr.staticintrkeyvalue_set.all(),
+                            tablefy(intr.staticinterfaceav_set.all(),
                                     request=request)))
     for intr in dynamic:
         related_systems.update(intr.get_related_systems())
         dynamic_intr.append((tablefy((intr,), request=request),
-                             tablefy(intr.dynamicintrkeyvalue_set.all(),
+                             tablefy(intr.dynamicinterfaceav_set.all(),
                                      request=request)))
 
     related_systems.discard(system)

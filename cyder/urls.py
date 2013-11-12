@@ -7,7 +7,6 @@ patch()
 from cyder.api.v1.routes import router
 
 from cyder.core.views import core_index
-from cyder.core.cyuser import views as cyuser_views
 from cyder.base.views import send_email, admin_page
 
 # Uncomment the next two lines to enable the admin:
@@ -23,6 +22,7 @@ urlpatterns = patterns(
     url(r'^core/',   include('cyder.core.urls')),
     url(r'^dhcp/',   include('cyder.cydhcp.urls')),
     url(r'^dns/',    include('cyder.cydns.urls')),
+    url(r'^eav/',    include('cyder.base.eav.urls')),
     url(r'^api/api', include('rest_framework.urls',
         namespace='rest_framework')),
     url(r'^search/', include('cyder.search.urls')),
