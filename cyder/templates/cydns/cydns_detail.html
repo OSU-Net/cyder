@@ -9,7 +9,7 @@
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-objPK="{{ obj.pk }}"
-        data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+        data-prettyObjType="{{ obj.pretty_type }}"
         data-getUrl="{{ url('cydns-get-record') }}"
         data-objName="{{ obj }}"
         data-csrfToken="{{ csrf_token }}">

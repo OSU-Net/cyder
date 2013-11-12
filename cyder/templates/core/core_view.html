@@ -1,6 +1,5 @@
 {% extends "core/core_list.html" %}
 
-{% set pretty_obj_type = obj_type|prettify_obj_type %}
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
 {% block title %}{{ pretty_obj_type + "s" }} {% endblock %}
@@ -21,7 +20,7 @@
 {% block form %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
-        data-prettyObjType="{{ pretty_obj_type }}"
+        data-prettyObjType="{{ obj.pretty_type }}"
         data-searchUrl="{{ url('core-search') }}"
         data-getUrl="{{ url('core-get-record') }}"
         data-csrfToken="{{ csrf_token }}">

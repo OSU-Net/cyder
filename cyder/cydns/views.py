@@ -3,14 +3,14 @@ from django.forms.util import ErrorDict, ErrorList
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from cyder.base.constants import ACTION_CREATE
+from cyder.base.constants import ACTION_CREATE, get_klasses
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
                               cy_delete, get_update_form, search_obj,
-                              table_update, klasses)
+                              table_update)
 from cyder.core.cyuser.utils import perm
 
 from cyder.cydns.constants import DNS_EAV_MODELS
@@ -26,7 +26,7 @@ def cydns_view(request, pk=None):
     obj_type = request.path.split('/')[2]
 
     # Get the record form.
-    Klass, FormKlass = klasses[obj_type]
+    Klass, FormKlass = get_klasses(obj_type)
 
     # Get the object if updating.
     record = get_object_or_404(Klass, pk=pk) if pk else None

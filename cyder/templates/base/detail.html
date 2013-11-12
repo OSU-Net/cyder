@@ -4,14 +4,14 @@
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
 {% block title %}
-  {{ obj_type|prettify_obj_type }}
+  {{ pretty_obj_type }}
 {% endblock %}
 
 {% block action_bar %}
   {% if obj_type_perm %}
     {% if obj.get_update_url %}
       <a class="btn btn-primary update" href="{{ obj.get_update_url() }}"
-        data-pk="{{ obj.pk }}" data-prettyObjType="{{ obj_type|prettify_obj_type }}">Edit</a>
+        data-pk="{{ obj.pk }}" data-prettyObjType="{{ obj.pretty_type }}">Edit</a>
     {% endif %}
     {% if obj.get_delete_url %}
       <a class="btn btn-danger" id="delete" href="{{ obj.get_delete_url() }}"

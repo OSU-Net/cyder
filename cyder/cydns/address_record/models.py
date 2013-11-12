@@ -138,6 +138,8 @@ class AddressRecord(BaseAddressRecord):
         ... ip_type=ip_type)
 
     """
+    pretty_type = 'address record'
+
     id = models.AutoField(primary_key=True)
 
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "

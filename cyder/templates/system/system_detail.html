@@ -10,7 +10,7 @@
   <span id="view-metadata"
     data-objType="{{ obj_type }}"
     data-objPk="{{ obj.pk }}"
-    data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
+    data-prettyObjType="{{ obj.pretty_type }}"
     data-getUrl="{{ url('core-get-record') }}"
     data-objName="{{ obj.name }}"
     data-csrfToken="{{ csrf_token }}">

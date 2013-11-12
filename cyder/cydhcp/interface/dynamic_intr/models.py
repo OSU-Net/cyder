@@ -19,7 +19,7 @@ import re
 
 
 class DynamicInterface(BaseModel, ObjectUrlMixin):
-    pretty_type = 'Dynamic interface'
+    pretty_type = 'dynamic interface'
 
     ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
     workgroup = models.ForeignKey(Workgroup, null=True, blank=True)

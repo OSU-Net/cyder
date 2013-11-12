@@ -145,7 +145,7 @@ class Tablefier:
                'data': [[('pk', obj.id),
                          ('object_type', obj._meta.db_table),
                          ('getUrl', find_get_record_url(obj)),
-                         ('prettyObjType', prettify_obj_type(obj_type))],
+                         ('prettyObjType', obj.pretty_type)],
                         None],
                'data-kwargs': '{"obj_type": "' + str(obj._meta.db_table)
                               + '", "pk": "' + str(obj.id) + '"}',

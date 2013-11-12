@@ -11,9 +11,9 @@
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
-    {{ create_button('range_av', url('cydhcp-get-record'),
-                     url('range_av'), objName=obj.start_str,
-                     buttonName="Range Attribute") }}
+    {{ create_button('range_av', pretty_obj_type, url('cydhcp-get-record'),
+                     url('range_av'), obj_name=obj.start_str,
+                     button_name="Range Attribute") }}
   {% endif %}
 
   {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamicinterface') and obj.range_type == 'dy' %}
@@ -71,6 +71,7 @@
               <td>
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='address_record') %}
                   {{ create_button('address_record',
+                                   'address_record'|prettify_obj_type,
                                    url('cydns-get-record'),
                                    url('address_record'),
                                    data=x[-1],
@@ -78,6 +79,7 @@
                 {% endif %}
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='ptr') %}
                   {{ create_button('ptr',
+                                   'ptr'|prettify_obj_type,
                                    url('cydns-get-record'),
                                    url('ptr'),
                                    data=x[-1],
@@ -98,7 +100,7 @@
               {% for record in record_set %}
                 <tr>
                   <td>{{ record_ip }}</td>
-                  <td>{{ record._meta.db_table|prettify_obj_type }}</td>
+                  <td>{{ record.pretty_type }}</td>
                   {% if record.get_detail_url() %}
                     <td><a href="{{ record.get_detail_url() }}">{{record}}</a></td>
                   {% else %}
