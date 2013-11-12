@@ -10,8 +10,7 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF,
-                                    STATIC, DYNAMIC)
+                                    ALLOW_LEGACY, STATIC, DYNAMIC)
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicInterfaceAV)
 from cyder.cydhcp.network.models import Network, NetworkAV
@@ -125,16 +124,6 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
             allow = ALLOW_ANY
         elif known:
             allow = ALLOW_KNOWN
-        elif '128.193.177.71' == str(ipaddr.IPv4Address(start)):
-            allow = ALLOW_LEGACY_AND_VRF
-            v, _ = Vrf.objects.get_or_create(name="ip-phones-hack")
-            n.vrf = v
-            n.save()
-        elif '128.193.166.81' == str(ipaddr.IPv4Address(start)):
-            allow = ALLOW_LEGACY_AND_VRF
-            v, _ = Vrf.objects.get_or_create(name="avaya-hack")
-            n.vrf = v
-            n.save()
 
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                        ipaddr.IPv4Address(end))
@@ -558,7 +547,7 @@ def delete_all():
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()
-    Vrf.objects.all().delete()
+    Vrf.objects.filter(id__gt=1).delete() # First is a fixture
     Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     DynamicInterface.objects.all().delete()
     Workgroup.objects.all().delete()

@@ -37,11 +37,9 @@ def range_detail(request, pk):
         allow = ['Known clients']
     else:
         allow = []
-        if (mrange.allow == ALLOW_VRF
-                or mrange.allow == ALLOW_LEGACY_AND_VRF):
+        if mrange.allow == ALLOW_VRF:
             allow += map(str, Vrf.objects.filter(network=mrange.network))
-        if (mrange.allow == ALLOW_LEGACY
-                or mrange.allow == ALLOW_LEGACY_AND_VRF):
+        if mrange.allow == ALLOW_LEGACY:
             allow += map(str, Ctnr.objects.filter(ranges=mrange))
 
     allow.sort(key=lambda x: x.lower())
