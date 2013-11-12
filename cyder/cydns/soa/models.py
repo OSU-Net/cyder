@@ -69,7 +69,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM,
                                           validators=[validate_minimum])
     description = models.CharField(max_length=200, blank=True)
-    root_domain = models.ForeignKey("domain.Domain", null=False, unique=True,
+    root_domain = models.ForeignKey("cyder.Domain", null=False, unique=True,
                                     related_name="root_of_soa")
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)

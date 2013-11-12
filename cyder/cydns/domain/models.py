@@ -84,7 +84,7 @@ class Domain(BaseModel, ObjectUrlMixin):
                             validators=[validate_domain_name])
     master_domain = models.ForeignKey("self", null=True,
                                       default=None, blank=True)
-    soa = models.ForeignKey("soa.SOA", null=True, default=None,
+    soa = models.ForeignKey("cyder.SOA", null=True, default=None,
                             blank=True, verbose_name='SOA')
     is_reverse = models.BooleanField(default=False)
     # This indicates if this domain (and zone) needs to be rebuilt
