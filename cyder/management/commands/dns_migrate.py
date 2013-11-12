@@ -218,9 +218,6 @@ class Zone(object):
             try:
                 static.full_clean()
                 static.save(update_range_usage=False)
-
-                static.views.add(public)
-                static.views.add(private)
             except ValidationError:
                 try:
                     static.dhcp_enabled = False
@@ -231,7 +228,12 @@ class Zone(object):
                     stderr.write("Error creating static interface for host"
                                  "with IP {0}\n".format(static.ip_str))
                     stderr.write("Original exception: {0}\n".format(e))
+                    static = None
                     system.delete()
+
+            if static:
+                static.views.add(public)
+                static.views.add(private)
 
     def gen_AR(self):
         """
