@@ -10,12 +10,7 @@ import os
 import re
 import time
 
-from cyder.settings import (
-    DNS_STAGE_DIR, DNS_PROD_DIR, DNS_LOCK_FILE, DNS_STOP_UPDATE_FILE,
-    DNS_NAMED_CHECKZONE_OPTS, DNS_MAX_ALLOWED_LINES_CHANGED,
-    DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED, DNS_NAMED_CHECKZONE,
-    DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
-)
+from cyder.settings import BINDBUILD_SETTINGS
 
 from cyder.base.vcs import log
 from cyder.base.utils import dict_merge, set_attrs
@@ -30,7 +25,7 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-def dns_log(msg, **kwargs):
+def dns_log(msg, *args, **kwargs):
     dict_defaults(kwargs, {
         'to_syslog': DNS_LOG_SYSLOG,
     })
@@ -44,31 +39,23 @@ def dns_log(msg, **kwargs):
     else:
         msg = "{0:20} {1}".format(callername, msg)
 
-    log(msg, **kwargs)
+    log(msg, *args, **kwargs)
 
 
 class BuildError(Exception):
     """Exception raised when there is an error in the build process."""
 
 
-class DNSBuilder(SVNBuilderMixin):
+class DNSBuilder(object):
     def __init__(self, **kwargs):
-        kwargs = dict_merge({
-            'STAGE_DIR': DNS_STAGE_DIR,
-            'PROD_DIR': DNS_PROD_DIR,
-            'BIND_PREFIX': DNS_BIND_PREFIX,
-            'LOCK_FILE': DNS_LOCK_FILE,
-            'STOP_UPDATE_FILE': DNS_STOP_UPDATE_FILE,
-            'LAST_RUN_FILE': DNS_LAST_RUN_FILE,
-            'STAGE_ONLY': False,
-            'NAMED_CHECKZONE_OPTS': DNS_NAMED_CHECKZONE_OPTS,
-            'CLOBBER_STAGE': False,
-            'PUSH_TO_PROD': False,
-            'BUILD_ZONES': True,
-            'PRESERVE_STAGE': False,
-            'LOG_SYSLOG': True,
-            'DEBUG': False,
-            'FORCE': False,
+        kwargs = dict_merge(BINDBUILD_SETTINGS, {
+            'stage_only': False,
+            'clobber_stage': False,
+            'push_to_prod': False,
+            'build_zones': True,
+            'preserve_stage': False,
+            'debug': False,
+            'force': False,
             'bs': DNSBuildRun(),  # Build statistic
         }, kwargs)
         set_attrs(self, kwargs)
@@ -77,31 +64,33 @@ class DNSBuilder(SVNBuilderMixin):
         syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
         self.lock_fd = None
 
-    def status(self):
-        """Print the status of the build system"""
-        is_locked = False
+    def is_locked(self):
         try:
-            self.lock_fd = open(self.LOCK_FILE, 'w+')
+            self.lock_fd = open(self.lock_file, 'w+')
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+            return False
         except IOError, exc_value:
             if exc_value[0] == 11:
-                is_locked = True
+                return True
 
-        print "IS_LOCKED={0}".format(bool(is_locked))
-        print "LOCK_FILE={0}".format(self.LOCK_FILE)
+    def status(self):
+        """Print the status of the build system"""
 
-        print ("STOP_UPDATE_FILE_EXISTS={0}"
-               .format(os.path.exists(self.STOP_UPDATE_FILE)))
-        print "STOP_UPDATE_FILE={0}".format(self.STOP_UPDATE_FILE)
+        print "is_locked={0}".format(self.is_locked())
+        print "lock_file={0}".format(self.lock_file)
 
-        print "STAGE_DIR_EXISTS={0}".format(os.path.exists(self.STAGE_DIR))
-        print "STAGE_DIR={0}".format(self.STAGE_DIR)
+        print ("stop_update_file_exists={0}"
+               .format(os.path.exists(self.stop_update_file)))
+        print "stop_update_file={0}".format(self.stop_update_file)
 
-        print "PROD_DIR_EXISTS={0}".format(os.path.exists(self.PROD_DIR))
-        print "PROD_DIR={0}".format(self.PROD_DIR)
+        print "stage_dir_exists={0}".format(os.path.exists(self.stage_dir))
+        print "stage_dir={0}".format(self.stage_dir)
 
-        print "LAST_RUN_FILE={0}".format(self.LAST_RUN_FILE)
+        print "prod_dir_exists={0}".format(os.path.exists(self.prod_dir))
+        print "prod_dir={0}".format(self.prod_dir)
+
+        print "last_run_file={0}".format(self.last_run_file)
 
     def format_title(self, title):
         return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
@@ -129,63 +118,9 @@ class DNSBuilder(SVNBuilderMixin):
         )
         return ts
 
-    def log(self, msg, log_level='LOG_INFO', **kwargs):
-        # Eventually log this stuff into bs
-        # Let's get the callers name and log that
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        callername = "[{0}]".format(calframe[1][3])
-        root_domain = kwargs.get('root_domain', None)
-        if root_domain:
-            fmsg = "{0:20} < {1} > {2}".format(callername,
-                                               root_domain.name, msg)
-        else:
-            fmsg = "{0:20} {1}".format(callername, msg)
-        if hasattr(syslog, log_level):
-            ll = getattr(syslog, log_level)
-        else:
-            ll = syslog.LOG_INFO
-
-        if self.LOG_SYSLOG:
-            syslog.syslog(ll, fmsg)
-        if self.DEBUG:
-            print "{0} {1}".format(log_level, fmsg)
-
-    def build_staging(self, force=False):
-        """
-        Create the stage folder. Fail if it already exists unless
-        force=True.
-        """
-        if os.path.exists(self.STAGE_DIR) and not force:
-            raise BuildError("The DNS build scripts tried to build the staging"
-                             " area but the area already exists.")
-        try:
-            os.makedirs(self.STAGE_DIR)
-        except OSError:
-            if not force:
-                raise
-
-    def clear_staging(self, force=False):
-        """
-        rm -rf the staging area. Fail if the staging area doesn't exist.
-        """
-        self.log("Attempting rm -rf staging "
-                 "area. ({0})...".format(self.STAGE_DIR))
-        if os.path.exists(self.STAGE_DIR) or force:
-            try:
-                shutil.rmtree(self.STAGE_DIR)
-            except OSError, e:
-                if e.errno == 2:
-                    self.log("Staging was not present.",
-                             log_level='LOG_WARNING')
-                else:
-                    raise
-            self.log("Staging area cleared")
-        else:
-            if not force:
-                raise BuildError("The DNS build scripts tried to remove the "
-                                 "staging area but the staging area didn't "
-                                 "exist.")
+    def log(self, *args, **kwargs):
+        kwargs['root_domain'] = self.root_domain
+        dns_log(*args, **kwargs)
 
     def lock(self):
         """

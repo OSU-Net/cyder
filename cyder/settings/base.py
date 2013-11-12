@@ -215,51 +215,55 @@ REST_FRAMEWORK = {
 # ==================
 
 
-# DNS_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN repo.
-DNS_STAGE_DIR = "/tmp/dns_stage/"
+BINDBUILD_SETTINGS = {
+    # stage_dir: Where test builds should go. This shouldn't be under
+    # version control.
+    'stage_dir': '/tmp/dns_stage/',
 
-# DNS_PROD_DIR: This is the directory where Cyder will place its DNS files.
-# This should be an SVN repo
-DNS_PROD_DIR = "/tmp/dns_prod/cyzones/"
+    # prod_dir: This is the directory where Cyder will place its DNS files.
+    # This should be a Git repo.
+    'prod_dir': '/tmp/dns_prod/cyzones/',
 
-# DNS_BIND_PREFIX: This is the path to where Cyder zone files are built
-# relative to the root of the SVN repo. This is usually a substring of
-# PROD_DIR.
-DNS_BIND_PREFIX = DNS_PROD_DIR
+    # bind_prefix: This is the path to where Cyder zone files are built
+    # relative to the root of the Git repo. This is usually a substring of
+    # prod_dir.
+    'bind_prefix': '',
 
+    'lock_file': '/tmp/lock.file',
+    'named_checkzone_opts': '',
+    'max_allowed_lines_changed': 500,
+    'named_checkzone': '/usr/sbin/named-checkzone',  # path to named-checkzone
+    'named_checkconf': '/usr/sbin/named-checkconf',  # path to named-checkconf
 
-DNS_LOCK_FILE = "/tmp/lock.file"
-DNS_NAMED_CHECKZONE_OPTS = ""
-DNS_MAX_ALLOWED_LINES_CHANGED = 500
-DNS_NAMED_CHECKZONE = "/usr/sbin/named-checkzone"  # path to named-checkzone
-DNS_NAMED_CHECKCONF = "/usr/sbin/named-checkconf"  # path to named-checkconf
+    # Only one zone at a time should be removed
+    'max_allowed_config_lines_removed': 10,
 
-# Only one zone at a time should be removed
-DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED = 10
-
-DNS_STOP_UPDATE_FILE = "/tmp/stop.update"
-DNS_LAST_RUN_FILE = "/tmp/last.run"
+    'stop_update_file': '/tmp/stop.update',
+    'last_run_file': '/tmp/last.run',
+    'log_syslog': False,
+}
 
 
 # dhcp_build settings
 # ===================
 
 
-# DHCP_STAGE_DIR: Where test builds should go. This shouldn't be in an SVN
-# repo.
-DHCP_STAGE_DIR = '/tmp/dhcp/stage'
+DHCPBUILD_SETTINGS = {
+    # stage_dir: Where test builds should go. This shouldn't be under
+    # version control.
+    'stage_dir': '/tmp/dhcp/stage',
 
-# DHCP_PROD_DIR: Where Cyder will place the dhcpd configuration file.
-DHCP_PROD_DIR = '/tmp/dhcp/prod'
+    # prod_dir: Where Cyder will place the dhcpd configuration file. This
+    # should be a Git repo.
+    'prod_dir': '/tmp/dhcp/prod',
 
-# DHCP_TARGET_FILE: The configuration file that will be generated
-DHCP_TARGET_FILE = 'dhcpd.conf.data'
+    # target_file: The configuration file that will be generated
+    'target_file': 'dhcpd.conf.data',
 
-# DHCP_CHECK_FILE: The conf file whose syntax will be checked (None means
-# don't check any file)
-DHCP_CHECK_FILE = None
+    # check_file: The conf file whose syntax will be checked (None means
+    # don't check any file)
+    'check_file': None,
 
-DHCP_REPO_DIR = DHCP_STAGE_DIR
-
-DHCP_VERBOSE_ERROR_LOG = True
-DHCP_VERBOSE_ERROR_LOG_LOCATION = '/tmp/error.log'
+    'verbose_error_log': True,
+    'verbose_error_log_location': '/tmp/error.log',
+}
