@@ -129,6 +129,16 @@ class EAVAttributeField(models.ForeignKey):
 
         super(EAVAttributeField, self).__init__(*args, **kwargs)
 
+    def validate(self, value, model_instance):
+        type_ = Attribute.objects.get(pk=value).attribute_type
+        valid = any(type_choice == type_
+                    for (type_choice, _) in self.type_choices)
+        if not valid:
+            raise ValidationError("Attribute '%s' is not allowed on this "
+                                  "object" % value)
+
+        super(EAVAttributeField, self).validate(value, model_instance)
+
     def formfield(self, **kwargs):
         return AttributeFormField(choices_query=self.rel.limit_choices_to,
                                   **kwargs)
