@@ -11,7 +11,7 @@ from cyder.base.utils import make_paginator, tablefy, make_megafilter
 from cyder.base.helpers import do_sort
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF)
+                                    ALLOW_LEGACY)
 from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.range.range_usage import range_usage
 from cyder.cydhcp.utils import two_to_one
