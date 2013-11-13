@@ -5,7 +5,7 @@ from django.forms.util import ErrorDict, ErrorList
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
-
+from django.db.models.loading import get_model
 
 from cyder.base.utils import tablefy, qd_to_py_dict
 from cyder.core.system.models import System
@@ -110,8 +110,16 @@ def system_create_view(request, initial):
     if initial == 'static_interface':
         interface_type = 'Static'
 
-    elif initial == 'dynamic_interface':
+    elif 'dynamic_interface' in initial:
         interface_type = 'Dynamic'
+        if 'range_' in initial:
+            pk = initial.split('range_')[1]
+            Range = get_model('cyder', 'range')
+            rng = Range.objects.filter(pk=pk)
+            if rng.exists():
+                dynamic_form.fields['range'].initial = rng[0]
+            dynamic_form.fields['range'].queryset = rng
+            dynamic_form.fields['range'].empty_label = None
 
     else:
         try:

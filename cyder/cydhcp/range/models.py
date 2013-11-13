@@ -81,6 +81,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
+    range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str')
     display_fields = ('start_str', 'end_str')
@@ -92,7 +93,18 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
                            'end_lower')
 
     def __str__(self):
-        return get_display(self)
+        if self.range_usage or self.range_usage == 0:
+            if self.range_usage == 100:
+                return get_display(self) + " (Full)"
+
+            elif self.range_usage > 100:
+                return get_display(self) + " (Over capacity)"
+
+            else:
+                return get_display(self) + " ({0}% Used)".format(
+                    str(self.range_usage))
+        else:
+            return get_display(self)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -142,12 +154,16 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         self.clean()
+        update_range_usage = kwargs.pop('update_range_usage', True)
+        if update_range_usage:
+            self.range_usage = self.get_usage()
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
         if self.network is None and not self.is_reserved:
-            raise ValidationError('Range must be associated with a network '
-                                  'unless it is reserved')
+            raise ValidationError("ERROR: Range {0}-{1} is not associated "
+                                  "with a network and is not reserved".format(
+                                      self.start_str, self.end_str))
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
@@ -190,11 +206,13 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             raise ValidationError("The start of a range cannot be greater "
                                   "than the end of the range.")
 
-        if self.range_type == STATIC and self.dynamicinterface_set.exists():
+        if (self.range_type == STATIC and
+                self.dynamicinterface_set.filter(dhcp_enabled=True).exists()):
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if self.range_type == DYNAMIC and self.staticinterfaces.exists():
+        if (self.range_type == DYNAMIC and
+                self.staticinterfaces.filter(dhcp_enabled=True).exists()):
             raise ValidationError('A dynamic range cannot contain static '
                                   'interfaces')
 
@@ -310,6 +328,20 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         return "{0} - {1} - ({2}) {3} to {4}".format(
             site_name, vlan_name,
             self.network, self.start_str, self.end_str)
+
+    def get_usage(self):
+        if self.range_type == 'st':
+            from cyder.cydhcp.range.range_usage import range_usage
+            _, usage = range_usage(self.start_lower, self.end_lower,
+                                   self.ip_type)
+        else:
+            DynamicInterface = models.get_model('cyder', 'dynamicinterface')
+            used = float(DynamicInterface.objects.filter(
+                range=self, dhcp_enabled=True).count())
+            capacity = float(self.end_lower - self.start_lower + 1)
+            usage = (used/capacity)*100
+
+        return usage
 
     def get_next_ip(self):
         """Finds the most appropriate IP address within a range. If it can't

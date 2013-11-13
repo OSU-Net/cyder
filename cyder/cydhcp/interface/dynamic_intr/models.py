@@ -125,12 +125,22 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
+        update_range_usage = kwargs.pop('update_range_usage', True)
+        rng = self.range
         if delete_system:
             if (not self.system.dynamicinterface_set.all().exclude(
                     id=self.id).exists() and
                     not self.system.staticinterface_set.all().exists()):
                 self.system.delete()
         super(DynamicInterface, self).delete()
+        if rng and update_range_usage:
+            rng.save()
+
+    def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
+        super(DynamicInterface, self).save()
+        if self.range and update_range_usage:
+            self.range.save()
 
 
 class DynamicInterfaceAV(EAVBase):

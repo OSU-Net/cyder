@@ -9,11 +9,9 @@ from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.models import View
-from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
-                                    ALLOW_LEGACY, ALLOW_LEGACY_AND_VRF,
-                                    STATIC, DYNAMIC)
-from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicInterfaceAV)
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_LEGACY,
+                                    ALLOW_LEGACY_AND_VRF, STATIC, DYNAMIC)
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.network.models import Network, NetworkAV
 from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.site.models import Site
@@ -27,7 +25,7 @@ import ipaddr
 import MySQLdb
 from optparse import make_option
 
-from lib.utilities import long2ip, fix_attr_name
+from lib.utilities import long2ip, fix_attr_name, range_usage_get_create
 
 
 cached = {}
@@ -148,7 +146,7 @@ def create_range(range_id, start, end, range_type, subnet_id,
             n.save()
 
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
-                                     ipaddr.IPv4Address(end))
+                                       ipaddr.IPv4Address(end))
 
         valid_start = int(n.network.network) < start < int(n.network.broadcast)
         valid_order = start <= end
@@ -169,17 +167,17 @@ def create_range(range_id, start, end, range_type, subnet_id,
                 print ('\tEnd is not inside network'
                        .format(n.network.broadcast))
 
-
         dhcp_enabled = bool(enabled and valid)
-    else: # the Range doesn't have a Network
+    else:
+        # the Range doesn't have a Network
         n = None
         dhcp_enabled = False
 
-    r, created = Range.objects.get_or_create(
-        start_lower=start, start_str=ipaddr.IPv4Address(start),
-        end_lower=end, end_str=ipaddr.IPv4Address(end),
-        range_type=r_type, allow=allow, ip_type='4', domain=d,
-        network=n, dhcp_enabled=dhcp_enabled, is_reserved=not dhcp_enabled)
+    r, created = range_usage_get_create(
+        Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
+        end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
+        allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
+        is_reserved=not dhcp_enabled)
     r.views.add(public)
     r.views.add(private)
 
@@ -401,15 +399,9 @@ def migrate_dynamic_hosts():
             eav.full_clean()
             eav.save()
 
-        intr, _ = DynamicInterface.objects.get_or_create(
-            range=r, workgroup=w, ctnr=c, mac=mac, system=s,
-            dhcp_enabled=enabled, last_seen=items['last_seen'])
-
-        for key, value in get_host_option_values(items['id']):
-            attr = Attribute.objects.get(name=fix_attr_name(key))
-            eav = DynamicInterfaceAV(entity=intr, attribute=attr, value=value)
-            eav.full_clean()
-            eav.save()
+        intr, _ = range_usage_get_create(
+            DynamicInterface, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
+            system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         count += 1
         if not count % 1000:
@@ -568,29 +560,6 @@ def maintain_get_cached(table, columns, object_id):
         return cached[(table, columns)][object_id]
     else:
         return (None for _ in columns)
-
-
-def get_host_option_values(host_id):
-    global host_option_values
-    if host_option_values is None:
-        host_option_values = {}
-        sql = ("SELECT {0}.id, {1}.name, {2}.value FROM {0} "
-               "INNER JOIN {2} ON {2}.object_id = {0}.id "
-               "INNER JOIN {1} ON {1}.id = {2}.dhcp_option "
-               "WHERE {2}.type = '{3}'")
-        sql = sql.format("host", "dhcp_options", "object_option", "host")
-        print "Caching: %s" % sql
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        for h_id, name, value in results:
-            if h_id not in host_option_values:
-                host_option_values[h_id] = set([])
-            host_option_values[h_id].add((name, value))
-
-    if host_id in host_option_values:
-        return host_option_values[host_id]
-    else:
-        return []
 
 
 def migrate_all(skip=False):
