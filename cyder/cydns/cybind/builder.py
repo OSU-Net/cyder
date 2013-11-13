@@ -10,7 +10,7 @@ import os
 import re
 import time
 
-from cyder.settings import BINDBUILD_SETTINGS
+from cyder.settings import BINDBUILD
 
 from cyder.base.vcs import log
 from cyder.base.utils import dict_merge, set_attrs, shell_out
@@ -44,7 +44,7 @@ class BuildError(Exception):
 
 class DNSBuilder(object):
     def __init__(self, **kwargs):
-        kwargs = dict_merge(BINDBUILD_SETTINGS, {
+        kwargs = dict_merge(BINDBUILD, {
             'stage_only': False,
             'clobber_stage': False,
             'push_to_prod': False,
