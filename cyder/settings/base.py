@@ -215,7 +215,7 @@ REST_FRAMEWORK = {
 # ==================
 
 
-BINDBUILD_SETTINGS = {
+BINDBUILD = {
     # stage_dir: Where test builds should go. This shouldn't be under
     # version control.
     'stage_dir': '/tmp/dns_stage/',
@@ -232,8 +232,6 @@ BINDBUILD_SETTINGS = {
     'lock_file': '/tmp/lock.file',
     'named_checkzone_opts': '',
     'max_allowed_lines_changed': 500,
-    'named_checkzone': '/usr/sbin/named-checkzone',  # path to named-checkzone
-    'named_checkconf': '/usr/sbin/named-checkconf',  # path to named-checkconf
 
     # Only one zone at a time should be removed
     'max_allowed_config_lines_removed': 10,
@@ -248,7 +246,7 @@ BINDBUILD_SETTINGS = {
 # ===================
 
 
-DHCPBUILD_SETTINGS = {
+DHCPBUILD = {
     # stage_dir: Where test builds should go. This shouldn't be under
     # version control.
     'stage_dir': '/tmp/dhcp/stage',
