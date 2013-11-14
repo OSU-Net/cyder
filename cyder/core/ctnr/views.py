@@ -109,8 +109,8 @@ def create_user_extra_cols(ctnr, ctnrusers):
                 'value': [LEVELS[ctnruser.level], '+', '-'],
                 'url': [
                     '',
-                    reverse('update-user', kwargs={'ctnr_pk': ctnr.id}),
-                    reverse('update-user', kwargs={'ctnr_pk': ctnr.id})],
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id}),
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id})],
                 'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
                 'class': ['', 'minus', 'plus'],
             }
@@ -131,7 +131,7 @@ def create_user_extra_cols(ctnr, ctnrusers):
         users.append(user)
         action_data.append({
             'value': 'Delete',
-            'url': reverse('update-user', kwargs={'ctnr_pk': ctnr.id}),
+            'url': reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id}),
             'img': '/media/img/delete.png',
             'class': 'delete remove-user'
         })
@@ -156,9 +156,9 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
         remove_data.append({
             'value': 'Delete',
             'url': reverse('ctnr-remove-object', kwargs={
-                'ctnr_pk': ctnr.id, 'obj_type': obj_type, 'obj_pk': obj.pk}),
+                'ctnr_pk': ctnr.id}),
             'img': '/media/img/delete.png',
-            'class': 'delete'
+            'class': 'delete remove-object'
         })
         objs.append(obj)
     extra_cols[0]['data'] = remove_data
@@ -170,7 +170,7 @@ def update_user(request, ctnr_pk):
     if not request.POST:
         return redirect(request.META.get('HTTP_REFERER', ''))
     ctnr = Ctnr.objects.get(id=ctnr_pk)
-    user_pk = request.POST.get('user_pk', None)
+    user_pk = request.POST.get('pk', None)
     return_status = {}
     if request.user.get_profile().id != int(user_pk):
         if _has_perm(request.user, ctnr, ACTION_UPDATE, obj_class=CtnrUser):
@@ -198,31 +198,36 @@ def update_user(request, ctnr_pk):
     return HttpResponse(json.dumps(return_status))
 
 
-def remove_object(request, ctnr_pk, obj_type, obj_pk):
+def remove_object(request, ctnr_pk):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
     acting_user = request.user
+    obj_type = request.POST.get('obj_type', None)
+    obj_pk = request.POST.get('pk', None)
     ctnr = Ctnr.objects.get(id=ctnr_pk)
+    return_status = {}
     if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=Ctnr):
         Klass = get_model('cyder', obj_type)
         obj = Klass.objects.get(id=obj_pk)
         m2m = getattr(ctnr, (obj_type + 's'), None)
 
         if m2m is None:
-            messages.error(
-                request, '{0} is not related to {1}'.format(obj_type, ctnr))
+            return_status['error'] = (
+                '{0} is not related to {1}'.format(obj_type, ctnr))
 
         else:
             if obj in m2m.all():
                 m2m.remove(obj)
+                return_status['success'] = True
             else:
-                messages.error(
-                    request, '{0} does not exist in {1}'.format(
-                        str(obj), ctnr))
+                return_status['error'] = (
+                    '{0} does not exist in {1}'.format(str(obj), ctnr))
 
     else:
-        messages.error(request,
-                       'You do not have permission to perform this action')
+        return_status['error'] = (
+            'You do not have permission to perform this action')
 
-    return redirect(reverse('ctnr-detail', args=[ctnr.id]))
+    return HttpResponse(json.dumps(return_status))
 
 
 def add_object(request, ctnr_pk):

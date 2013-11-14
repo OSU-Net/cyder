@@ -14,22 +14,26 @@ $(document).ready(function() {
     user_clone.id="user_clone";
     $(user_clone).removeAttr('style');
 
-    $('.minus, .plus, .remove-user').click(function(e) {
+    $('.minus, .plus, .remove-user, .remove-object').click(function(e) {
         e.preventDefault();
         var url = $(this).attr('href');
         var lvl;
         var detailUrl = $(this).parent().parent().find('a:first').attr('href');
-        var userPk = detailUrl.split('/').slice(-2)[0];
+        var pk = detailUrl.split('/').slice(-2)[0];
+        var obj_type = detailUrl.split('/').slice(2)[0];
         var action = 'user_level';
         if ($(this).attr('class') == 'minus') {
             lvl = -1;
         } else if ($(this).attr('class') == 'plus') {
             lvl = 1;
+        } else if ($(this).attr('class') == 'delete.remove-user') {
+            action = 'user_remove';
         } else {
-            action = 'user_remove'
+            action = 'obj_remove';
         };
         postData = {
-            user_pk: userPk,
+            obj_type: obj_type,
+            pk: pk,
             lvl: lvl,
             action: action,
         };
