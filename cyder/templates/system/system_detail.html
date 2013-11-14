@@ -4,8 +4,6 @@
 
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
-{% block title %}System {{ obj.name }}{% endblock %}
-
 {% block view_metadata %}
   <span id="view-metadata"
     data-objType="{{ obj_type }}"

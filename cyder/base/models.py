@@ -22,6 +22,10 @@ class BaseModel(models.Model):
     def pretty_type(cls):
         return cls.__name__.lower()
 
+    @property
+    def pretty_name(self):
+        return unicode(self)
+
     def unique_error_message(self, model_class, unique_check):
         error = super(BaseModel, self).unique_error_message(
             model_class, unique_check)

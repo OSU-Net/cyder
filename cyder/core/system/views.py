@@ -53,6 +53,7 @@ def system_detail(request, pk):
                                          request=request),
         'obj_type': 'system',
         'obj': system,
+        'pretty_obj_type': system.pretty_type,
     })
 
 

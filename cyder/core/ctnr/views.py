@@ -78,7 +78,8 @@ def ctnr_detail(request, pk):
     add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
 
     return render(request, 'ctnr/ctnr_detail.html', {
-        'object': ctnr,
+        'obj': ctnr,
+        'pretty_obj_type': ctnr.pretty_type,
         'obj_type': 'ctnr',
         'user_table': user_table,
         'domain_table': domain_table,
