@@ -109,34 +109,31 @@ def create_user_extra_cols(ctnr, ctnrusers):
                 'value': [LEVELS[ctnruser.level], '+', '-'],
                 'url': [
                     '',
-                    reverse('update-user-level', kwargs={
-                        'ctnr_pk': ctnr.id, 'user_pk': user.id,
-                        'lvl': -1}),
-                    reverse('update-user-level', kwargs={
-                        'ctnr_pk': ctnr.id, 'user_pk': user.id,
-                        'lvl': 1})],
+                    reverse('update-user', kwargs={'ctnr_pk': ctnr.id}),
+                    reverse('update-user', kwargs={'ctnr_pk': ctnr.id})],
                 'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
-                'class': ['', 'minus', 'plus']
+                'class': ['', 'minus', 'plus'],
             }
 
             if level['value'][0] == 'Admin':
                 del level['value'][2]
                 del level['url'][2]
                 del level['img'][2]
+                del level['class'][2]
 
             elif level['value'][0] == 'Guest':
                 del level['value'][1]
                 del level['url'][1]
                 del level['img'][1]
+                del level['class'][1]
 
         level_data.append(level)
         users.append(user)
         action_data.append({
             'value': 'Delete',
-            'url': reverse('ctnr-remove-user', kwargs={
-                'ctnr_pk': ctnr.id, 'user_pk': user.id}),
+            'url': reverse('update-user', kwargs={'ctnr_pk': ctnr.id}),
             'img': '/media/img/delete.png',
-            'class': 'delete'
+            'class': 'delete remove-user'
         })
 
     extra_cols[0]['data'] = level_data
@@ -169,58 +166,36 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
     return extra_cols, objs
 
 
-def remove_user(request, ctnr_pk, user_pk):
-    acting_user = request.user
-
-    if acting_user.get_profile().id == int(user_pk):
-        messages.error(request, 'You can not edit your own permissions')
+def update_user(request, ctnr_pk):
+    if not request.POST:
         return redirect(request.META.get('HTTP_REFERER', ''))
+    ctnr = Ctnr.objects.get(id=ctnr_pk)
+    user_pk = request.POST.get('user_pk', None)
+    return_status = {}
+    if request.user.get_profile().id != int(user_pk):
+        if _has_perm(request.user, ctnr, ACTION_UPDATE, obj_class=CtnrUser):
+            cu_qs = CtnrUser.objects.filter(ctnr_id=ctnr_pk, user_id=user_pk)
+            if cu_qs.exists():
+                ctnr_user = cu_qs.get()
+                if request.POST.get('action', None) == 'user_remove':
+                    ctnr_user.delete()
+                else:
+                    lvl = request.POST.get('lvl', None)
+                    if (ctnr_user.level + int(lvl)) in range(0, 3):
+                        ctnr_user.level += int(lvl)
+                        ctnr_user.save()
 
-    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), ACTION_UPDATE,
-                 obj_class=CtnrUser):
-        try:
-            CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk).delete()
-
-        except:
-            messages.error(request,
-                           'That user does not exist inside this container')
-
-        return redirect(request.META.get('HTTP_REFERER', ''))
-
-    else:
-        messages.error(
-            request, 'You do not have permission to perform this action')
-        return redirect(request.META.get('HTTP_REFERER', ''))
-
-
-def update_user_level(request, ctnr_pk, user_pk, lvl):
-    acting_user = request.user
-
-    if acting_user.get_profile().id == int(user_pk):
-        messages.error(request, 'You can not edit your own permissions')
-        return redirect(request.META.get('HTTP_REFERER', ''))
-
-    if _has_perm(acting_user, Ctnr.objects.get(id=ctnr_pk), ACTION_UPDATE,
-                 obj_class=CtnrUser):
-        try:
-            ctnr_user = CtnrUser.objects.get(ctnr_id=ctnr_pk, user_id=user_pk)
-
-        except:
-            messages.error(request,
-                           'That user does not exist inside this container')
-
-        if (ctnr_user.level + int(lvl)) not in range(0, 3):
-            return redirect(request.META.get('HTTP_REFERER', ''))
-
+                return_status['success'] = True
+            else:
+                return_status['error'] = (
+                    'That user does not exist inside this container')
         else:
-            ctnr_user.level += int(lvl)
-            ctnr_user.save()
-            return redirect(request.META.get('HTTP_REFERER', ''))
-
+            return_status['error'] = (
+                'You do not have permission to perform this action')
     else:
-        messages.error(
-            request, 'You do not have permission to perform this action')
-        return redirect(request.META.get('HTTP_REFERER', ''))
+        return_status['error'] = 'You can not edit your own permissions'
+
+    return HttpResponse(json.dumps(return_status))
 
 
 def remove_object(request, ctnr_pk, obj_type, obj_pk):
@@ -259,7 +234,7 @@ def add_object(request, ctnr_pk):
     obj_type = request.POST.get('obj_type', '')
     if obj_type == 'user':
         if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=CtnrUser):
-            return add_user(request, ctnr, name, pk)
+            return add_user(request, ctnr, name)
         else:
             messages.error(request,
                            'You do not have permission to perform this action')
@@ -293,43 +268,39 @@ def add_object(request, ctnr_pk):
                 if obj in m2m.all():
                     return HttpResponse(json.dumps({
                         'error': '{0} already exists in {1}'.format(
-                        name, str(ctnr))}))
+                            name, str(ctnr))}))
 
             m2m.add(obj)
 
         else:
             messages.error(request,
                            'You do not have permission to perform this action')
-    return HttpResponse(json.dumps({'redirect': 'yup'}))
+    return HttpResponse(json.dumps({'success': 'true'}))
 
 
-def add_user(request, ctnr, name, pk):
-        confirmation = request.POST.get('confirmation', '')
-        level = request.POST.get('level', '')
-        user, newUser = User.objects.get_or_create(username=name)
-        if newUser is True:
-            if confirmation == 'false':
-                return HttpResponse(json.dumps({
-                    'acknowledge': 'This user is not in any other container. '
-                    'Are you sure you want to create this user?'}))
-            else:
-                user.save()
+def add_user(request, ctnr, name):
+    confirmation = request.POST.get('confirmation', '')
+    level = request.POST.get('level', '')
+    if not name:
+        return HttpResponse(json.dumps({
+            'error': 'Please enter a user name'}))
 
-        ctnruser, newCtnrUser = CtnrUser.objects.get_or_create(
-            user_id=user.id, ctnr_id=ctnr.id, level=level)
+    if (confirmation == 'false' and
+            not User.objects.filter(username=name).exists()):
+        return HttpResponse(json.dumps({
+            'acknowledge': 'This user is not in any other container. '
+            'Are you sure you want to create this user?'}))
 
-        if newCtnrUser is False:
-            return HttpResponse(json.dumps({
-                'error': 'This user already exists in this container'}))
+    user, _ = User.objects.get_or_create(username=name)
+    user.save()
+    ctnruser, newCtnrUser = CtnrUser.objects.get_or_create(
+        user_id=user.id, ctnr_id=ctnr.id, level=level)
+    if newCtnrUser is False:
+        return HttpResponse(json.dumps({
+            'error': 'This user already exists in this container'}))
 
-        ctnruser.save()
-        ctnrusers = [CtnrUser.objects.select_related().get(
-            ctnr_id=ctnr.id, user_id=user)]
-        extra_cols, users = create_user_extra_cols(ctnr, ctnrusers)
-        user_table = tablefy(users, users=True, extra_cols=extra_cols,
-                             request=request)
-
-        return HttpResponse(json.dumps({'user': user_table}))
+    ctnruser.save()
+    return HttpResponse(json.dumps({'success': True}))
 
 
 class CtnrCreateView(CtnrView, CoreCreateView):
