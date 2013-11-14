@@ -75,7 +75,7 @@ $(document).ready(function() {
                     }, 150);
                     $('#obj-form form')[0].action = $createBtn.attr('href');
                     $('.form-btns a.submit').text('Create ' + formPrettyObjType);
-                    // change this if to include add more forms for ajax
+                    // Adjust this if statement to submit forms with ajax
                     if (formObjType.indexOf('av') >= 0) {
                         $('.form-btns a.submit').attr('class', 'btn c');
                     };
@@ -93,7 +93,7 @@ $(document).ready(function() {
             }, 150);
             $('.form-btns a.submit').text('Create ' + prettyObjType);
 
-            // change this if to include add more forms for ajax
+            // Adjust this if statement to submit forms with ajax
             if (formObjType.indexOf('av') >= 0) {
                 $('.form-btns a.submit').attr('class', 'btn c');
             };
@@ -125,7 +125,7 @@ $(document).ready(function() {
             }, 150);
             $('.form-btns a.submit').text('Update ' + pretty_obj_type);
 
-            // change this if to include add more forms for ajax
+            // Adjust this if statement to submit forms with ajax
             if (object_type.indexOf('av') >= 0) {
                 $('.form-btns a.submit').attr('class', 'btn c');
             };
