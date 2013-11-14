@@ -3,13 +3,13 @@
   <a class="btn create-obj" data-objType="{{ obj_type }}"
      data-prettyObjType="{{ pretty_obj_type }}"
      {% if obj_name %}
-        data-objName="{{ obj_name }}"
+       data-objName="{{ obj_name }}"
      {% endif %}
      {% if data %}
-        data-kwargs='{{ data }}'
+       data-kwargs='{{ data }}'
      {% endif %}
-     href="{{ post_url }}"
-     {% if buttonName %}
+       href="{{ post_url }}"
+     {% if button_name %}
        data-getUrl="{{ get_url }}">{{ button_prefix }}{{ button_name }}
      {% else %}
        data-getUrl="{{ get_url }}">{{ button_prefix }}{{ pretty_obj_type }}

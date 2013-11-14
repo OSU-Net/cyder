@@ -5,8 +5,8 @@
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
-    {{ create_button('dynamic_interface_av', url('cydhcp-get-record'),
-                     url('dynamic_interface_av'), objName=obj.mac_str,
-                     buttonName="Dynamic Interface Attribute") }}
+    {{ create_button('dynamic_interface_av', 'dynamic_interface_av'|prettify_obj_type,
+                     url('cydhcp-get-record'), url('dynamic_interface_av'), obj_name=obj.mac_str,
+                     button_name="Dynamic Interface Attribute") }}
   {% endif %}
 {% endblock %}

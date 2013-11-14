@@ -21,17 +21,16 @@
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class='static_interface') %}
-    {{ create_button('static_interface', url('cydhcp-get-record'),
-                   url('static_interface'), objName=obj.name) }}
+    {{ create_button('static_interface', 'static_interface'|prettify_obj_type,
+                     url('cydhcp-get-record'), url('static_interface'), obj_name=obj.name) }}
   {% endif %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamic_interface') %}
-    {{ create_button('dynamic_interface', url('cydhcp-get-record'),
-    url('dynamic_interface'), objName=obj.name) }}
+    {{ create_button('dynamic_interface', 'dynamic_interface'|prettify_obj_type,
+                     url('cydhcp-get-record'), url('dynamic_interface'), obj_name=obj.name) }}
   {% endif %}
   {% if obj_type_perm %}
-    {{ create_button('system_av', url('core-get-record'),
-                   url('system_av'), objName=obj.name,
-                   buttonName="System Attribute") }}
+    {{ create_button('system_av', 'system_av'|prettify_obj_type, url('core-get-record'),
+                     url('system_av'), obj_name=obj.name, button_name="System Attribute") }}
   {% endif %}
 {% endblock %}
 

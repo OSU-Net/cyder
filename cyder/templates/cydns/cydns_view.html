@@ -10,14 +10,16 @@
 
 {% block action_bar %}
   {% if obj_type_perm %}
-    <a class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+    <a class="btn create-obj" data-prettyObjType={{ pretty_obj_type }}>
+      Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}
+    </a>
   {% endif %}
 {% endblock %}
 
 {% block form %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
-        data-prettyObjType="{{ obj.pretty_type }}"
+        data-prettyObjType="{{ pretty_obj_type }}"
         data-searchUrl="{{ url('cydns-search-record') }}"
         data-getUrl="{{ url('cydns-get-record') }}"
         data-domainsUrl="{{ url('get-all-domains') }}"

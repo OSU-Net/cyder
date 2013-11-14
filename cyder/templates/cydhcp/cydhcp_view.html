@@ -10,13 +10,15 @@
 
 {% block action_bar %}
   {% if obj_type_perm %}
-    {% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
+    {% if obj_type in ["static_interface", "dynamic_interface"] %}
       {{ js('interface_delete') }}
       <a class="btn submit c" href={{ url('system-create') }}
           data-kwargs='{"initial": "True", "interface_type": "{{ pretty_obj_type|replace(' Interface', '') }}"}'
           id="system_create">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
     {% else %}
-      <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+      <a id ="btn create-obj" class="btn create-obj">
+        Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}
+      </a>
     {% endif %}
   {% endif %}
 {% endblock %}
