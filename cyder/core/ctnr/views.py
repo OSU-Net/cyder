@@ -243,7 +243,7 @@ def add_object(request, ctnr_pk):
         else:
             messages.error(request,
                            'You do not have permission to perform this action')
-            return HttpResponse(json.dumps({'redirect': 'yup'}))
+            return HttpResponse(json.dumps({'success': False}))
 
     else:
         if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=Ctnr):
