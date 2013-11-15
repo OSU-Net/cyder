@@ -80,10 +80,6 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     >>> PTR(ip_str=ip_str, fqdn=fqdn, ip_type=ip_type)
 
     """
-    @property
-    def pretty_name(self):
-        return self.fqdn
-
     pretty_type = 'PTR'
 
     id = models.AutoField(primary_key=True)

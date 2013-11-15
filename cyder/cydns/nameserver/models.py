@@ -29,6 +29,10 @@ class Nameserver(CydnsRecord):
         only be automatically assigned to a NS if a) The NS doesn't have a glue
         record or b) the glue record the NS has isn't valid.
     """
+    @property
+    def pretty_name(self):
+        return self.server
+
     id = models.AutoField(primary_key=True)
     domain = models.ForeignKey(Domain, null=False, help_text="The domain this "
                                "record is for.")

@@ -11,7 +11,6 @@ class TXT(LabelDomainMixin, CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
-
     pretty_type = 'TXT'
 
     id = models.AutoField(primary_key=True)
