@@ -18,6 +18,19 @@ $(document).ready(function() {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
 
+    $('#system_create').click( function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var postData = JSON.parse($(this).attr('data-kwargs'));
+        var postForm = $('<form style="display: none" action="' + url
+            + '" method="post"></form>');
+        $.each(postData, function(key, value) {
+            postForm.append($('<input>').attr({type: 'text', name: key, value: value}));
+        });
+        $('.content').append(postForm);
+        $(postForm).submit();
+    });
+
     $('#id_attribute').live('focus', function() {
         $('#id_attribute').autocomplete({
             minLength: 1,
