@@ -156,6 +156,10 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
+                    # Adjust this if statement to submit forms with ajax
+                    if 'AV' in FormKlass.__name__:
+                        return HttpResponse(json.dumps({'success': True}))
+
                     return redirect(
                         request.META.get('HTTP_REFERER', obj.get_list_url()))
 
@@ -177,6 +181,10 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
 
     if issubclass(type(form), UsabilityFormMixin):
         form.make_usable(request)
+
+    # Adjust this if statement to submit forms with ajax
+    if 'AV' in FormKlass.__name__:
+        return HttpResponse(json.dumps({'errors': form.errors}))
 
     if obj_type == 'system' and len(object_list) == 0:
         return redirect(reverse('system-create', args=[None]))
