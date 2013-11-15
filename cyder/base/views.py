@@ -340,7 +340,7 @@ def get_update_form(request):
     """
     Update view called asynchronously from the list_create view
     """
-    obj_type = request.GET.get('object_type', '')
+    obj_type = request.GET.get('obj_type', '')
     record_pk = request.GET.get('pk', '')
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')

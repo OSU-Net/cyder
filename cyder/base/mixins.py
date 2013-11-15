@@ -136,7 +136,7 @@ class UsabilityFormMixin(object):
             system_name = System.objects.get(
                 pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(
-                widget=HiddenInput(attrs={'title': system_name}),
+                widget=HiddenInput(),
                 empty_label='',
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
         elif 'system' in self.fields:

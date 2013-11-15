@@ -82,25 +82,19 @@ $(document).ready(function() {
             var formPrettyObjType = $createBtn.attr('data-prettyobjtype');
             var formObjType = $createBtn.attr('data-objType');
             var formGetUrl = $createBtn.attr('data-getUrl');
-            var formObjName = $createBtn.attr('data-objName');
             var data_to_post = $createBtn.attr('data-kwargs');
+            var formTitle = 'Creating ' + formPrettyObjType;
+
             $.get(formGetUrl,
                 {
-                    'object_type': formObjType,
+                    'obj_type': formObjType,
                     'related_type': objType,
                     'related_pk': objPk,
                     'data': data_to_post
                 },
                 function(data) {
                     setTimeout(function() {
-                        if(formObjName) {
-                            $('#form-title').html(
-                                'Creating ' + formPrettyObjType
-                                + ' for ' + formObjName);
-                        } else {
-                            $('#form-title').html(
-                                'Creating ' + formPrettyObjType);
-                        }
+                        $('#form-title').html(formTitle);
                         data.form.action = $createBtn.attr('href');
                         $('.inner-form').empty().append(data.form);
                         initForms();
@@ -143,27 +137,19 @@ $(document).ready(function() {
 
         e.preventDefault();
         form.action = this.href;
-        var extra_title = ''
-        if(this.href.indexOf(document.location) == -1) {
-            extra_title = ' for ' + objName;
-        };
-        var object_type = $(this).attr('data-object_type') || objType;
-        var pretty_obj_type = $(this).attr('data-prettyObjType');
-        $.get($(this).attr('data-getUrl') || getUrl,
-                {'object_type': object_type, 'pk': $(this).attr('data-pk')},
-                function(data) {
+        var formObjName = $(this).attr('data-objName') || objName;
+        var formObjType = $(this).attr('data-objType');
+        var formPrettyObjType = $(this).attr('data-prettyObjType');
+        var formTitle = 'Updating ' + formPrettyObjType + ' ' + formObjName;
+
+        $.get($(this).attr('data-getUrl') || getUrl, {'obj_type': formObjType,
+                       'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
-                if (objType.indexOf('interface') != -1
-                        && data.form.indexOf('title=') != -1) {
-                    extra_title = ' for ' + data.form.split(
-                        'title=')[1].split('/')[0].replace(/"/g, "");
-                };
-                $('#form-title').html(
-                    'Updating ' + pretty_obj_type + extra_title);
+                $('#form-title').html(formTitle);
                 $('#hidden-inner-form').empty().append(data.form);
                 initForms();
             }, 150);
-            $('.form-btns a.submit').text('Update ' + pretty_obj_type);
+            $('.form-btns a.submit').text('Update ' + formPrettyObjType);
 
             // Adjust this if statement to submit forms with ajax
             if (object_type.indexOf('av') >= 0) {

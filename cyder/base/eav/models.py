@@ -6,6 +6,7 @@ from cyder.base.eav.fields import AttributeValueTypeField, EAVValueField
 from cyder.base.eav.utils import is_hex_byte_sequence
 from cyder.base.eav.validators import VALUE_TYPES
 from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel
 from cyder.base.utils import ClassProperty
 
 
@@ -25,7 +26,7 @@ class Attribute(models.Model):
         return self.name
 
 
-class EAVBase(models.Model, ObjectUrlMixin):
+class EAVBase(BaseModel, ObjectUrlMixin):
     """The entity-attribute-value base model
 
     When you inherit from this model, you must define the following fields::
@@ -44,6 +45,10 @@ class EAVBase(models.Model, ObjectUrlMixin):
     class Meta:
         abstract = True
         unique_together = ('entity', 'attribute')
+
+    @property
+    def pretty_name(self):
+        return self.attribute.name
 
     @ClassProperty
     @classmethod
