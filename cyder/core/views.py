@@ -24,28 +24,3 @@ def core_table_update(request, pk, obj_type=None):
 
 def core_index(request):
     return render(request, 'core/core_index.html')
-
-
-class CoreDeleteView(BaseDeleteView):
-    """"""
-    template_name = "core/core_confirm_delete.html"
-
-
-class CoreDetailView(BaseDetailView):
-    """"""
-    template_name = "core/core_detail.html"
-
-
-class CoreCreateView(BaseCreateView):
-    """"""
-    template_name = "core/core_form.html"
-
-
-class CoreUpdateView(BaseUpdateView):
-    """"""
-    template_name = "core/core_form.html"
-
-
-class CoreListView(BaseListView):
-    """"""
-    template_name = 'core/core_list.html'

@@ -13,7 +13,6 @@ from cyder.base.utils import tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm, CtnrObjectForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.backends import _has_perm
-from cyder.core.views import CoreCreateView
 
 
 class CtnrView(object):
@@ -320,31 +319,6 @@ def add_user(request, ctnr, name):
 
     ctnruser.save()
     return HttpResponse(json.dumps({'success': True}))
-
-
-class CtnrCreateView(CtnrView, CoreCreateView):
-    def post(self, request, *args, **kwargs):
-        ctnr_form = CtnrForm(request.POST)
-
-        # Try to save the ctnr.
-        try:
-            # TODO: ACLs
-            ctnr = ctnr_form.save(commit=False)
-        except ValueError:
-            return render(request, 'ctnr/ctnr_form.html', {'form': ctnr_form})
-
-        ctnr.save()
-
-        # Update ctnr-related session variables.
-        request.session['ctnrs'].append(ctnr)
-        ctnr_names = json.loads(request.session['ctnr_names_json'])
-        ctnr_names.append(ctnr.name)
-        request.session['ctnr_names_json'] = json.dumps(ctnr_names)
-
-        return redirect(reverse('ctnr-detail', args=[ctnr.id]))
-
-    def get(self, request, *args, **kwargs):
-        return super(CtnrCreateView, self).get(request, *args, **kwargs)
 
 
 def change_ctnr(request, pk=None):
