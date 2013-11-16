@@ -25,12 +25,6 @@ def static_intr_detail(request, pk):
                      }, pk=pk, obj=static_interface)
 
 
-class StaticInterfaceView(object):
-    model = StaticInterface
-    form_class = StaticInterfaceForm
-    queryset = StaticInterface.objects.all()
-
-
 def detail_static_interface(reqeust, intr_pk):
     intr = get_object_or_404(StaticInterface, pk=intr_pk)
     system = intr.system
