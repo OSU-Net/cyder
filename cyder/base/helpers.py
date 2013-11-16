@@ -124,6 +124,10 @@ urlparams = register.filter(urlparams)
 def prettify_obj_type(obj_type, *args, **kwargs):
     return get_klasses(obj_type)[0].pretty_type
 
+@register.filter
+def smart_capitalize(x):
+    return x[0].upper() + x[1:]
+
 @register.function
 def a_or_an(next_word):
     """
