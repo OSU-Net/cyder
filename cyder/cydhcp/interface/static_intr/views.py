@@ -14,8 +14,6 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticInterfaceAV)
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.views import (CydhcpListView, CydhcpDetailView,
-                                CydhcpDeleteView, CydhcpCreateView)
 
 
 def static_intr_detail(request, pk):
@@ -31,26 +29,6 @@ class StaticInterfaceView(object):
     model = StaticInterface
     form_class = StaticInterfaceForm
     queryset = StaticInterface.objects.all()
-
-
-class StaticInterfaceListView(StaticInterfaceView, CydhcpListView):
-    """"""
-
-
-class StaticInterfaceUpdateView(StaticInterfaceView, CydhcpListView):
-    """"""
-
-
-class StaticInterfaceDeleteView(StaticInterfaceView, CydhcpDeleteView):
-    """"""
-
-
-class StaticInterfaceDetailView(StaticInterfaceView, CydhcpDetailView):
-    """"""
-
-
-class StaticInterfaceCreateView(StaticInterfaceView, CydhcpCreateView):
-    """"""
 
 
 def detail_static_interface(reqeust, intr_pk):

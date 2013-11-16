@@ -46,27 +46,6 @@ def cydhcp_detail(request, pk):
     })
 
 
-class CydhcpListView(BaseListView):
-    template_name = 'cydhcp/cydhcp_list.html'
-
-
-class CydhcpDetailView(BaseDetailView):
-    template_name = 'cydhcp/cydhcp_detail.html'
-
-
-class CydhcpCreateView(BaseCreateView):
-    template_name = 'cydhcp/cydhcp_form.html'
-
-
-class CydhcpUpdateView(BaseUpdateView):
-    template_name = 'cydhcp/cydhcp_form.html'
-
-
-class CydhcpDeleteView(BaseDeleteView):
-    template_name = 'cydhcp/cydhcp_confirm_delete.html'
-    succcess_url = '/cydhcp/'
-
-
 def search_ip(request):
     if request.method == "POST":
         form = IpSearchForm(request.POST)
