@@ -60,21 +60,17 @@ class DNSBuilder(object):
         syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
         self.lock_fd = None
 
+    def log(self, *args, **kwargs):
+        kwargs['root_domain'] = self.root_domain
+        kwargs['to_syslog'] = self.log_syslog
+        dns_log(*args, **kwargs)
+
     def _run_command(self, command, log=True, failure_msg=None):
         if log:
-            self._log_command(command)
-
-        stdout, stderr, returncode = shell_out(command)
-        if returncode != 0:
-            failure_msg = failure_msg or '`{0}` failed'.format(command)
-            raise BuildError('{0}\n\n'
-                             'command: {1}\n\n'
-                             '=== stdout ===\n{2}\n'
-                             '=== stderr ===\n{3}\n'
-                             .format(failure_msg, command, stdout,
-                                    stderr.rstrip('\n')))
-
-        return stdout, stderr
+            logger = lambda msg: log(msg, to_stderr=self.debug,
+                                             to_syslog=self.log_syslog)
+        else:
+            logger = None
 
 
     def is_locked(self):
@@ -130,11 +126,6 @@ class DNSBuilder(object):
             ts_len, 's' if ts_len != 1 else '')
         )
         return ts
-
-    def log(self, *args, **kwargs):
-        kwargs['root_domain'] = self.root_domain
-        kwargs['to_syslog'] = self.log_syslog
-        dns_log(*args, **kwargs)
 
     def lock(self):
         """

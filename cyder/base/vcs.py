@@ -2,17 +2,7 @@ import os
 import re
 import syslog
 
-from cyder.base.utils import shell_out, set_attrs, dict_merge
-
-
-def log(msg, logger=syslog, log_level='LOG_INFO', to_syslog=False,
-            to_stderr=True):
-    ll = getattr(logger, log_level)
-
-    if to_syslog:
-        logger.syslog(ll, msg)
-    if to_stderr:
-        print "{0}: {1}".format(log_level[4:], msg)
+from cyder.base.utils import set_attrs, dict_merge, log
 
 
 class VCSRepo(object):
@@ -35,12 +25,9 @@ class VCSRepo(object):
         finally:
             os.chdir(old_dir)
 
-    def _log(self, message):
-        log(message, to_stderr=self.debug, to_syslog=self.log_syslog)
-
-    def _log_command(self, command):
-        log('Calling `{0}` in {1}'.format(command, self.repo_dir),
-            to_stderr=self.debug, to_syslog=self.log_syslog)
+    def _log(self, message, log_level='LOG_INFO'):
+        log(message, log_level=log_level, to_stderr=self.debug,
+                to_syslog=self.log_syslog)
 
     def _sanity_check(self):
         lines_changed = self._lines_changed()
@@ -50,21 +37,11 @@ class VCSRepo(object):
                             .format(*lines_changed))
 
     def _run_command(self, command, log=True, failure_msg=None):
-        if log:
-            self._log_command(command)
+        command_logger = self._log if log else None
+        failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
 
-        stdout, stderr, returncode = shell_out(command)
-        if returncode != 0:
-            failure_msg = failure_msg or '`{0}` failed'.format(command)
-            self._log
-            raise Exception('{0}\n\n'
-                            'command: {1}\n\n'
-                            '=== stdout ===\n{2}\n'
-                            '=== stderr ===\n{3}\n'
-                            .format(failure_msg, command, stdout,
-                                    stderr.rstrip('\n')))
-
-        return stdout, stderr
+        run_command(command, command_logger=command_logger,
+                    failure_logger=logger, failure_msg=failure_msg)
 
 
 class SVNRepo(VCSRepo):

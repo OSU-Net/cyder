@@ -1,6 +1,9 @@
 import operator
+import os
 import shlex
 import subprocess
+import syslog
+from sys import stderr
 
 from django.core.paginator import Paginator, Page, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
@@ -26,6 +29,41 @@ def shell_out(command, use_shlex=True):
                          stdout=subprocess.PIPE)
     stdout, stderr = p.communicate()
     return stdout, stderr, p.returncode
+
+
+def log(msg, log_level='LOG_DEBUG', to_syslog=False,
+            to_stderr=True):
+    ll = getattr(syslog, log_level)
+
+    if to_syslog:
+        syslog.syslog(ll, msg)
+    if to_stderr:
+        stderr.write("{0}: {1}\n".format(log_level[4:], msg))
+
+
+def run_command(command, command_logger=None, failure_logger=None,
+                failure_msg=None, exception=Exception):
+    if command_logger:
+        command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
+    out, err, returncode = shell_out(command)
+    if returncode != 0:
+        failure_msg = failure_msg or ('`{0}` failed in '
+                                      '{1}'.format(command, os.getcwd()))
+
+        if failure_logger:
+            failure_logger(failure_msg)
+
+        exception_str = ('\n{0}\n\n'
+                         'command: {1}\n\n'.format(failure_msg, command))
+        if out:
+            exception_str += '=== stdout ===\n{0}\n'.format(out)
+        if err:
+            exception_str += '=== stderr ===\n{0}\n'.format(err)
+        exception_str = exception_str.rstrip('\n') + '\n'
+
+        raise exception(exception_str)
+
+    return stdout, stderr
 
 
 def set_attrs(obj, attrs):
