@@ -63,7 +63,7 @@ def run_command(command, command_logger=None, failure_logger=None,
 
         raise exception(exception_str)
 
-    return stdout, stderr
+    return out, err
 
 
 def set_attrs(obj, attrs):

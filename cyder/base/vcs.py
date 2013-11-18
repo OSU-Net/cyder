@@ -2,7 +2,7 @@ import os
 import re
 import syslog
 
-from cyder.base.utils import set_attrs, dict_merge, log
+from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
 class VCSRepo(object):
@@ -40,8 +40,9 @@ class VCSRepo(object):
         command_logger = self._log if log else None
         failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
 
-        run_command(command, command_logger=command_logger,
-                    failure_logger=logger, failure_msg=failure_msg)
+        return run_command(command, command_logger=command_logger,
+                           failure_logger=failure_logger,
+                           failure_msg=failure_msg)
 
 
 class SVNRepo(VCSRepo):
