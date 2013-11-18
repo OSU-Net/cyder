@@ -27,8 +27,8 @@ def shell_out(command, use_shlex=True):
         command_args = command
     p = subprocess.Popen(command_args, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    return stdout, stderr, p.returncode
+    out, err = p.communicate()
+    return out, err, p.returncode
 
 
 def log(msg, log_level='LOG_DEBUG', to_syslog=False,
@@ -45,7 +45,9 @@ def run_command(command, command_logger=None, failure_logger=None,
                 failure_msg=None, exception=Exception):
     if command_logger:
         command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
+
     out, err, returncode = shell_out(command)
+
     if returncode != 0:
         failure_msg = failure_msg or ('`{0}` failed in '
                                       '{1}'.format(command, os.getcwd()))

@@ -29,6 +29,8 @@ def dns_log(msg, *args, **kwargs):
     curframe = inspect.currentframe()
     calframe = inspect.getouterframes(curframe, 2)
     callername = "[{0}]".format(calframe[1][3])
+
+    root_domain = kwargs.pop('root_domain', None)
     if root_domain:
         msg = "{0:20} < {1} > {2}".format(callername,
                                            root_domain.name, msg)
@@ -62,15 +64,23 @@ class DNSBuilder(object):
 
     def log(self, *args, **kwargs):
         kwargs['root_domain'] = self.root_domain
+        kwargs['to_stderr'] = self.debug
         kwargs['to_syslog'] = self.log_syslog
         dns_log(*args, **kwargs)
 
     def _run_command(self, command, log=True, failure_msg=None):
         if log:
-            logger = lambda msg: log(msg, to_stderr=self.debug,
-                                             to_syslog=self.log_syslog)
+            command_logger = self.log if log else None
+            failure_logger = lambda msg: self.log(msg, log_level='LOG_ERR')
         else:
-            logger = None
+            command_logger, failure_logger = None, None
+
+        try:
+            run_command(command, command_logger=command_logger,
+                        failure_logger=failure_logger,
+                        failure_msg=failure_msg)
+        except Exception as e:
+            raise BuildError(e.message)
 
 
     def is_locked(self):

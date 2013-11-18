@@ -37,8 +37,11 @@ class VCSRepo(object):
                             .format(*lines_changed))
 
     def _run_command(self, command, log=True, failure_msg=None):
-        command_logger = self._log if log else None
-        failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
+        if log:
+            command_logger = self._log
+            failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
+        else:
+            command_logger, failure_logger = None, None
 
         return run_command(command, command_logger=command_logger,
                            failure_logger=failure_logger,
@@ -87,7 +90,7 @@ class GitRepo(VCSRepo):
         self._pull()
         self._add_all()
         if force:
-            log('Skipping sanity check.')
+            log('Skipping sanity check because force=True was passed.')
         else:
             self._sanity_check()
         self._commit(message)
