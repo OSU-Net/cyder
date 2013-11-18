@@ -13,6 +13,7 @@ from cyder.base.models import BaseModel
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -26,7 +27,8 @@ class Network(BaseModel, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
-    vrf = models.ForeignKey('cyder.Vrf', null=True, blank=True)
+    vrf = models.ForeignKey('cyder.Vrf',
+                            default=lambda: Vrf.objects.get(name='Legacy'))
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
