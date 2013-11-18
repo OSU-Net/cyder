@@ -234,15 +234,15 @@ class DNSBuilder(object):
         """
         # Check the zone file.
         self._run_command(
-            'named-checkzone {1} {2} {3}'.format(self.named_checkzone_opts,
-                                                 root_domain.name, zone_file),
+            ' '.join(self.named_checkzone, self.named_checkzone_opts,
+                     root_domain.name, zone_file),
             failure_msg='named-checkzone failed on zone {0}'
                         .format(root_domain.name)
         )
 
     def named_checkconf(self, conf_file):
         self._run_command(
-            'named-checkconf {1}'.format(DNS_NAMED_CHECKCONF, conf_file),
+            ' '.join(self.named_checkconf, conf_file),
             failure_msg='named-checkconf rejected config {0}'.format(conf_file)
         )
 

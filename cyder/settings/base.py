@@ -230,6 +230,8 @@ BINDBUILD = {
     'bind_prefix': '',
 
     'lock_file': '/tmp/lock.file',
+    'named_checkzone': 'named-checkzone',
+    'named_checkconf': 'named-checkconf',
     'named_checkzone_opts': '',
     'max_allowed_lines_changed': 500,
 
