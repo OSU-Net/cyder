@@ -11,13 +11,13 @@
 {% endblock %}
 
 {% block content %}
-  {% if obj_table %}
-    {% if obj_table != 'empty' %}
-      {{ render_table(request, obj_table) }}
-    {% else %}
+  {% if no_interfaces %}
       There are no interfaces in this container.
-    {% endif %}
   {% else %}
-    This feature is not available for the "global" container.
+      {% if obj_table %}
+          {{ render_table(request, obj_table) }}
+      {% else %}
+        This feature is not available for the "global" container.
+      {% endif %}
   {% endif %}
 {% endblock %}

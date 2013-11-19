@@ -257,7 +257,7 @@ def static_dynamic_view(request):
             'obj_table': table,
         })
     else:
-        return render(request, template, {'obj_table': []})
+        return render(request, template, {'no_interfaces': True})
 
 
 def cy_delete(request, pk, get_klasses_fn):
