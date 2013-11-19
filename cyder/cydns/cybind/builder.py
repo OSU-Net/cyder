@@ -82,6 +82,7 @@ class DNSBuilder(object):
         except Exception as e:
             raise BuildError(e.message)
 
+    @property
     def is_locked(self):
         try:
             self.lock_fd = open(self.lock_file, 'w+')
@@ -95,12 +96,10 @@ class DNSBuilder(object):
     def status(self):
         """Print the status of the build system"""
 
-        def is_data(name):
-            return isinstance(getattr(self, name), (bool, basestring, int,
-                                                    long))
-
-        for name in ifilter(is_data, dir(self)):
-            print '{0} = {1}'.format(name, str(getattr(self, name)))
+        for name in dir(self):
+            value = getattr(self, name)
+            if isinstance(value, (bool, basestring, int, long)):
+                print u'{0} = {1}'.format(name, unicode(value))
 
 
         #print "is_locked={0}".format(self.is_locked())

@@ -31,8 +31,7 @@ def shell_out(command, use_shlex=True):
     return out, err, p.returncode
 
 
-def log(msg, log_level='LOG_DEBUG', to_syslog=False,
-            to_stderr=True):
+def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True):
     ll = getattr(syslog, log_level)
 
     if to_syslog:
@@ -42,15 +41,15 @@ def log(msg, log_level='LOG_DEBUG', to_syslog=False,
 
 
 def run_command(command, command_logger=None, failure_logger=None,
-                failure_msg=None, exception=Exception):
+                failure_msg=None):
     if command_logger:
         command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
 
     out, err, returncode = shell_out(command)
 
     if returncode != 0:
-        failure_msg = failure_msg or ('`{0}` failed in '
-                                      '{1}'.format(command, os.getcwd()))
+        failure_msg = failure_msg or ('`{0}` failed in {1}'
+                                      .format(command, os.getcwd()))
 
         if failure_logger:
             failure_logger(failure_msg)
@@ -63,7 +62,7 @@ def run_command(command, command_logger=None, failure_logger=None,
             exception_str += '=== stderr ===\n{0}\n'.format(err)
         exception_str = exception_str.rstrip('\n') + '\n'
 
-        raise exception(exception_str)
+        raise Exception(exception_str)
 
     return out, err
 
