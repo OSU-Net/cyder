@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block title %} {{ "Interfaces" }} {% endblock %}
+
+{% block sidebar %}
+  {% include "core/includes/core_sidebar.html" %}
+{% endblock %}
+
+{% block action_bar %}
+{% endblock %}
+
+{% block filter_bar %}
+<form action="." method="get">
+  <input id="search-bar" type="search" name="filter" value="{{ request.GET['filter'] }}"></input>
+  <a class='submit btn'>Filter</a>
+  <label for="search-bar"></label>
+</form>
+{% endblock %}
+
+{% block content %}
+  {% if no_interfaces %}
+      There are no interfaces in this container.
+  {% else %}
+      {% if obj_table %}
+          {{ render_table(request, obj_table) }}
+      {% else %}
+        This feature is not available for the "global" container.
+      {% endif %}
+  {% endif %}
+{% endblock %}
