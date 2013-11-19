@@ -205,6 +205,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
 
 def static_dynamic_view(request):
     template = 'core/core_interfaces.html'
+    if request.session['ctnr'].name == 'global':
+        return render(request, template, {})
+
     StaticInterface = get_model('cyder', 'staticinterface')
     DynamicInterface = get_model('cyder', 'dynamicinterface')
     statics = _filter(request, StaticInterface).select_related('system')
