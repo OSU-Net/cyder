@@ -130,12 +130,15 @@ class EAVAttributeField(models.ForeignKey):
         super(EAVAttributeField, self).__init__(*args, **kwargs)
 
     def validate(self, value, model_instance):
-        type_ = Attribute.objects.get(pk=value).attribute_type
+        from cyder.base.eav.models import Attribute
+
+        attr = Attribute.objects.get(pk=value)
+        type_ = attr.attribute_type
         valid = any(type_choice == type_
                     for (type_choice, _) in self.type_choices)
         if not valid:
             raise ValidationError("Attribute '%s' is not allowed on this "
-                                  "object" % value)
+                                  "object" % attr)
 
         super(EAVAttributeField, self).validate(value, model_instance)
 
