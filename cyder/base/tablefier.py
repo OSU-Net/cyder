@@ -18,14 +18,15 @@ def find_get_record_url(obj):
 
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
-                 users=False, info=True):
+                 users=False, custom=None):
         if users:
             from cyder.core.cyuser.models import UserProfile
             objects = UserProfile.objects.filter(user__in=objects)
 
         self.objects = objects
         self.request = request
-        self.extra_cols = extra_cols
+        self.custom = custom
+        self.extra_cols = None if self.custom else extra_cols
 
     @cached_property
     def first_obj(self):
@@ -59,36 +60,36 @@ class Tablefier:
     @cached_property
     def headers(self):
         headers = []
-        self._add_info = False
+        if self.custom:
+            data = self.custom(self.first_obj)['data']
+        else:
+            data = self.first_obj.details()['data']
 
-        for title, sort_field, value in self.first_obj.details()['data']:
-            if value == self.first_obj:
-                self._add_info = True
-
+        for title, sort_field, value in data:
             headers.append([title, sort_field])
 
-        if self.extra_cols:
-            for col in self.extra_cols:
-                headers.append([col['header'], col['sort_field']])
+        if not self.custom:
+            if self.extra_cols:
+                for col in self.extra_cols:
+                    headers.append([col['header'], col['sort_field']])
 
-        if self.views:
-            headers.append(['Views', None])
-            if hasattr(self.objects, 'object_list'):
-                self.objects.object_list = (
-                    self.objects.object_list.prefetch_related('views'))
+            if self.views:
+                headers.append(['Views', None])
+                if hasattr(self.objects, 'object_list'):
+                    self.objects.object_list = (
+                        self.objects.object_list.prefetch_related('views'))
 
-        if self.can_update:
-            headers.append(['Actions', None])
+            if self.can_update:
+                headers.append(['Actions', None])
 
-        if self._add_info:
+        if self.add_info:
             headers.insert(0, ['Info', None])
 
         return headers
 
     @cached_property
     def add_info(self):
-        self.headers  # gotta make the headers first
-        return self._add_info
+        return bool(self.grab_url(self.first_obj))
 
     @staticmethod
     def grab_url(value):
@@ -158,18 +159,19 @@ class Tablefier:
                     'value': ['Info'], 'url': [self.grab_url(obj)],
                     'class': ['info'], 'img': ['/media/img/magnify.png']})
 
-            details = obj.details()
+            details = self.custom(obj) if self.custom else obj.details()
             for title, field, value in details['data']:
                 row_data.append(self.build_data(obj, value))
 
-            for d in extra_data:
-                row_data.append(self.build_extra(d))
+            if not self.custom:
+                for d in extra_data:
+                    row_data.append(self.build_extra(d))
 
-            if self.views:
-                row_data.append(self.build_view_field(obj))
+                if self.views:
+                    row_data.append(self.build_view_field(obj))
 
-            if self.can_update:
-                row_data.append(self.build_update_field(obj))
+                if self.can_update:
+                    row_data.append(self.build_update_field(obj))
 
             objs.append(obj)
             data.append(row_data)

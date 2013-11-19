@@ -203,6 +203,55 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     })
 
 
+def static_dynamic_view(request):
+    template = 'core/core_interfaces.html'
+    StaticInterface = get_model('cyder', 'staticinterface')
+    DynamicInterface = get_model('cyder', 'dynamicinterface')
+    statics = _filter(request, StaticInterface).select_related('system')
+    dynamics = (_filter(request, DynamicInterface)
+                .select_related('system', 'range'))
+    page_obj = list(statics) + list(dynamics)
+
+    def details(obj):
+        data = {}
+        data['url'] = obj.get_table_update_url()
+        data['data'] = []
+        if isinstance(obj, StaticInterface):
+            data['data'].append(('System', '1', obj.system))
+            data['data'].append(('MAC', '2', obj.mac_str))
+            data['data'].append(('IP', '3', obj.ip_str))
+        elif isinstance(obj, DynamicInterface):
+            data['data'].append(('System', '1', obj.system))
+            data['data'].append(('MAC', '2', obj))
+            data['data'].append(('IP', '3', obj.range))
+
+        if obj.last_seen == 0:
+            date = ''
+        else:
+            import datetime
+            date = datetime.datetime.fromtimestamp(obj.last_seen)
+            date = date.strftime('%B %d, %Y, %I:%M %p')
+
+        data['data'].append(('Last seen', '4', date))
+        return data
+
+    from cyder.base.tablefier import Tablefier
+    table = Tablefier(page_obj, request, custom=details).get_table()
+    if 'sort' not in request.GET:
+        sort, order = 1, 'asc'
+    else:
+        sort = int(request.GET['sort'])
+        order = request.GET['order'] if 'order' in request.GET else 'asc'
+
+    sort_fn = lambda x: str(x[sort]['value'][0]).lower()
+    table['data'] = sorted(table['data'], key=sort_fn,
+                           reverse=(order == 'desc'))
+    return render(request, template, {
+        'page_obj': page_obj,
+        'obj_table': table,
+    })
+
+
 def cy_delete(request, pk, get_klasses_fn):
     """DELETE. DELETE. DELETE."""
     obj_type = request.path.split('/')[2]
