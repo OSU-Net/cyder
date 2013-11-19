@@ -1,0 +1,19 @@
+{% extends "base/base.html" %}
+{% from "base/tables.html" import render_table %}
+
+{% block title %} {{ "Interfaces" }} {% endblock %}
+
+{% block sidebar %}
+    {% include "core/includes/core_sidebar.html" %}
+{% endblock %}
+
+{% block action_bar %}
+{% endblock %}
+
+{% block content %}
+    {% if obj_table %}
+        {{ render_table(request, obj_table) }}
+    {% else %}
+        This feature is not available for the "global" container.
+    {% endif %}
+{% endblock %}
