@@ -390,7 +390,7 @@ def migrate_dynamic_hosts():
             eav.save()
 
         intr, _ = range_usage_get_create(
-            DynamicInterface, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
+            DynamicInterface, range=r, workgroup=w, ctnr=c, mac=mac,
             system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         count += 1
