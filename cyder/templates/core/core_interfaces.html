@@ -10,6 +10,14 @@
 {% block action_bar %}
 {% endblock %}
 
+{% block filter_bar %}
+<form action="." method="get">
+  <input id="search-bar" type="search" name="filter" value="{{ request.GET['filter'] }}"></input>
+  <a class='submit btn'>Filter</a>
+  <label for="search-bar"></label>
+</form>
+{% endblock %}
+
 {% block content %}
   {% if no_interfaces %}
       There are no interfaces in this container.
