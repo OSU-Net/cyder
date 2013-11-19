@@ -240,19 +240,22 @@ def static_dynamic_view(request):
 
     from cyder.base.tablefier import Tablefier
     table = Tablefier(page_obj, request, custom=details).get_table()
-    if 'sort' not in request.GET:
-        sort, order = 1, 'asc'
-    else:
-        sort = int(request.GET['sort'])
-        order = request.GET['order'] if 'order' in request.GET else 'asc'
+    if table:
+        if 'sort' not in request.GET:
+            sort, order = 1, 'asc'
+        else:
+            sort = int(request.GET['sort'])
+            order = request.GET['order'] if 'order' in request.GET else 'asc'
 
-    sort_fn = lambda x: str(x[sort]['value'][0]).lower()
-    table['data'] = sorted(table['data'], key=sort_fn,
-                           reverse=(order == 'desc'))
-    return render(request, template, {
-        'page_obj': page_obj,
-        'obj_table': table,
-    })
+        sort_fn = lambda x: str(x[sort]['value'][0]).lower()
+        table['data'] = sorted(table['data'], key=sort_fn,
+                               reverse=(order == 'desc'))
+        return render(request, template, {
+            'page_obj': page_obj,
+            'obj_table': table,
+        })
+    else:
+        return render(request, template, {'obj_table': []})
 
 
 def cy_delete(request, pk, get_klasses_fn):

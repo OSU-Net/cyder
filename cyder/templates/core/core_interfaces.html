@@ -11,8 +11,11 @@
 {% endblock %}
 
 {% block content %}
-    {% if obj_table %}
+{% if obj_table %}
+    {% if obj_table != 'empty' %}
         {{ render_table(request, obj_table) }}
+    {% else %}
+        There are no interfaces in this container.
     {% else %}
         This feature is not available for the "global" container.
     {% endif %}
