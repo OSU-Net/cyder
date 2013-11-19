@@ -210,10 +210,12 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if (self.range_type == DYNAMIC and
-                self.staticinterfaces.filter(dhcp_enabled=True).exists()):
-            raise ValidationError('A dynamic range cannot contain static '
-                                  'interfaces')
+        if self.range_type == DYNAMIC:
+            if self.staticinterfaces.filter(dhcp_enabled=True).exists():
+                raise ValidationError('A dynamic range cannot contain static '
+                                      'interfaces')
+            if not self.domain:
+                raise ValidationError('A dynamic range must have a domain.')
 
         if not self.is_reserved:
             self.network.update_network()

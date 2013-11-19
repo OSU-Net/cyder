@@ -167,7 +167,7 @@ def create_range(range_id, start, end, range_type, subnet_id,
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
         allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
-        is_reserved=not dhcp_enabled)
+        is_reserved=not dhcp_enabled, domain=d)
     r.views.add(public)
     r.views.add(private)
 
@@ -573,7 +573,7 @@ def delete_all():
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()
-    Vrf.objects.filter(id__gt=1).delete() # First is a fixture
+    Vrf.objects.filter(id__gt=1).delete()  # First is a fixture
     Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     DynamicInterface.objects.all().delete()
     Workgroup.objects.all().delete()
