@@ -6,12 +6,11 @@ from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
 class VCSRepo(object):
-    def __init__(self, repo_dir, diff_line_threshold, logger=syslog,
+    def __init__(self, repo_dir, diff_line_threshold,
                  debug=False, log_syslog=False):
         set_attrs(self, {
             'repo_dir': repo_dir,
             'diff_line_threshold': diff_line_threshold,
-            'logger': logger,
             'debug': debug,
             'log_syslog': log_syslog,
         })
