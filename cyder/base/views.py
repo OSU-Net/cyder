@@ -221,12 +221,14 @@ def static_dynamic_view(request):
         data['data'] = []
         if isinstance(obj, StaticInterface):
             data['data'].append(('System', '1', obj.system))
-            data['data'].append(('MAC', '2', obj.mac_str))
-            data['data'].append(('IP', '3', obj.ip_str))
+            data['data'].append(('Type', '2', 'static'))
+            data['data'].append(('MAC', '3', obj.mac_str))
+            data['data'].append(('IP', '4', obj.ip_str))
         elif isinstance(obj, DynamicInterface):
             data['data'].append(('System', '1', obj.system))
-            data['data'].append(('MAC', '2', obj))
-            data['data'].append(('IP', '3', obj.range))
+            data['data'].append(('Type', '2', 'dynamic'))
+            data['data'].append(('MAC', '3', obj))
+            data['data'].append(('IP', '4', obj.range))
 
         if obj.last_seen == 0:
             date = ''
@@ -235,7 +237,7 @@ def static_dynamic_view(request):
             date = datetime.datetime.fromtimestamp(obj.last_seen)
             date = date.strftime('%B %d, %Y, %I:%M %p')
 
-        data['data'].append(('Last seen', '4', date))
+        data['data'].append(('Last seen', '5', date))
         return data
 
     from cyder.base.tablefier import Tablefier
