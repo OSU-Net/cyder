@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from gettext import gettext as _
 import inspect
 import fcntl
 import shutil
@@ -9,6 +8,8 @@ import syslog
 import os
 import re
 import time
+from gettext import gettext as _
+from itertools import ifilter
 
 from cyder.settings import BINDBUILD
 
@@ -58,7 +59,6 @@ class DNSBuilder(object):
         }, kwargs)
         set_attrs(self, kwargs)
 
-        # This is very specific to python 2.6
         syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
         self.lock_fd = None
 
@@ -82,7 +82,6 @@ class DNSBuilder(object):
         except Exception as e:
             raise BuildError(e.message)
 
-
     def is_locked(self):
         try:
             self.lock_fd = open(self.lock_file, 'w+')
@@ -96,20 +95,28 @@ class DNSBuilder(object):
     def status(self):
         """Print the status of the build system"""
 
-        print "is_locked={0}".format(self.is_locked())
-        print "lock_file={0}".format(self.lock_file)
+        def is_data(name):
+            return isinstance(getattr(self, name), (bool, basestring, int,
+                                                    long))
 
-        print ("stop_update_file_exists={0}"
-               .format(os.path.exists(self.stop_update_file)))
-        print "stop_update_file={0}".format(self.stop_update_file)
+        for name in ifilter(is_data, dir(self)):
+            print '{0} = {1}'.format(name, str(getattr(self, name)))
 
-        print "stage_dir_exists={0}".format(os.path.exists(self.stage_dir))
-        print "stage_dir={0}".format(self.stage_dir)
 
-        print "prod_dir_exists={0}".format(os.path.exists(self.prod_dir))
-        print "prod_dir={0}".format(self.prod_dir)
+        #print "is_locked={0}".format(self.is_locked())
+        #print "lock_file={0}".format(self.lock_file)
 
-        print "last_run_file={0}".format(self.last_run_file)
+        #print ("stop_update_file_exists={0}"
+               #.format(os.path.exists(self.stop_update_file)))
+        #print "stop_update_file={0}".format(self.stop_update_file)
+
+        #print "stage_dir_exists={0}".format(os.path.exists(self.stage_dir))
+        #print "stage_dir={0}".format(self.stage_dir)
+
+        #print "prod_dir_exists={0}".format(os.path.exists(self.prod_dir))
+        #print "prod_dir={0}".format(self.prod_dir)
+
+        #print "last_run_file={0}".format(self.last_run_file)
 
     def format_title(self, title):
         return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
