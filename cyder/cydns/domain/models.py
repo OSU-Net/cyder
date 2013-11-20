@@ -10,6 +10,12 @@ from cyder.cydns.search_utils import smart_fqdn_exists
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain
+from cyder.settings import MIGRATING
+
+
+if MIGRATING:
+    print "Migration detected; setting up domain child cache."
+    domain_child_cache = {}
 
 
 class Domain(BaseModel, ObjectUrlMixin):
@@ -151,6 +157,8 @@ class Domain(BaseModel, ObjectUrlMixin):
                                   "domain. Delete them before deleting this "
                                   "domain.")
         super(Domain, self).delete(*args, **kwargs)
+        if MIGRATING:
+            self.master_domain.refresh_cache()
 
     def save(self, *args, **kwargs):
         override_soa = kwargs.pop('override_soa', False)
@@ -186,6 +194,9 @@ class Domain(BaseModel, ObjectUrlMixin):
         if self.is_reverse and new_domain:
             # Collect any ptr's that belong to this new domain.
             reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
+
+        if MIGRATING:
+            self.refresh_cache()
 
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
@@ -231,10 +242,29 @@ class Domain(BaseModel, ObjectUrlMixin):
                                   "remove its children.")
 
     def get_children_recursive(self):
+        if MIGRATING and self in domain_child_cache:
+            return domain_child_cache[self]
+
         children = self.domain_set.all()
         for child in list(children):
             children |= child.get_children_recursive()
+
+        if MIGRATING:
+            domain_child_cache[self] = children
+
         return children
+
+    def refresh_cache(self):
+        if self in domain_child_cache:
+            old = domain_child_cache[self]
+            new = self.get_children_recursive()
+            if old == new:
+                return
+        else:
+            self.get_children_recursive()
+
+        if self.master_domain:
+            self.master_domain.refresh_cache()
 
     def has_record_set(self, view=None, exclude_ns=False):
         object_sets = [
