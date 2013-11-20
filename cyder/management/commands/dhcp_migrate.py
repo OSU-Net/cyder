@@ -43,6 +43,13 @@ allow_all_subnets = [
     '10.198.0.140', '10.192.131.9', '10.255.255.255', '10.214.64.32']
 
 
+voip_networks = {
+    '10.112.17.0/25', '10.112.21.0/25', '10.160.0.32/28', '10.160.16.0/27',
+    '10.160.48.0/25', '10.160.49.0/25', '10.195.128.0/22', '10.195.172.0/23',
+    '10.195.180.0/26', '10.195.180.128/26', '140.211.26.0/24',
+}
+
+
 class NotInMaintain(Exception):
     """"""
 
@@ -70,28 +77,36 @@ def clean_zone_name(name):
     return name
 
 
-def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
+def create_subnet(subnet_id, name, subnet, netmask, status, vlan_id):
     """
     Takes a row from the Maintain subnet table
     returns a new network object and creates the vlan it is associated with
     """
+
     prefixlen = str(calc_prefixlen(netmask))
     network = str(ipaddr.IPv4Address(subnet & netmask))
+    network_str = network + '/' + prefixlen
     s, _ = Site.objects.get_or_create(name='Campus')
-    v = None
+    vlan = None
     enabled = (status == 'visible')
+
     if cursor.execute("SELECT * "
                       "FROM vlan "
-                      "WHERE vlan_id = %s" % vlan):
+                      "WHERE vlan_id = %s" % vlan_id):
         vlan_id, vlan_name, vlan_number = cursor.fetchone()
-        v = Vlan.objects.get(name=vlan_name)
+        vlan = Vlan.objects.get(name=vlan_name)
+    vrf = Vrf.objects.get(name=('VoIP' if network_str in voip_networks
+                                else 'Legacy'))
+
     n, created = Network.objects.get_or_create(
-        network_str=network + '/' + prefixlen, ip_type='4',
-        site=s, vlan=v, enabled=enabled)
+        network_str=network_str, ip_type='4',
+        site=s, vlan=vlan, enabled=enabled, vrf=vrf)
+
     cursor.execute("SELECT dhcp_option, value "
                    "FROM object_option "
                    "WHERE object_id = {0} "
                    "AND type = 'subnet'".format(subnet_id))
+
     results = cursor.fetchall()
     for dhcp_option, value in results:
         cursor.execute("SELECT name, type "
@@ -104,6 +119,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
         if eav_created:
             eav.full_clean()
             eav.save()
+
     return (n, created)
 
 
@@ -573,7 +589,7 @@ def delete_all():
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()
-    Vrf.objects.filter(id__gt=1).delete()  # First is a fixture
+    Vrf.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     DynamicInterface.objects.all().delete()
     Workgroup.objects.all().delete()

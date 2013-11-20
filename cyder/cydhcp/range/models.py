@@ -80,6 +80,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
+
+    allow_voip_phones = models.BooleanField(
+        default=True, verbose_name='Allow VoIP phones')
+
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str')
@@ -240,6 +244,8 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
                 for ctnr in self.ctnr_set.all()]
         else:
             allow = []
+            if self.allow_voip_phones:
+                allow += ['allow members of "VoIP"']
             if self.allow == ALLOW_VRF:
                 allow += ['allow members of "{0}"'.format(
                     self.network.vrf.name)]
