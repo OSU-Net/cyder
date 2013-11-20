@@ -245,7 +245,7 @@ class Domain(BaseModel, ObjectUrlMixin):
         if MIGRATING and self in domain_child_cache:
             return domain_child_cache[self]
 
-        children = self.domain_set.all()
+        children = set(self.domain_set.all())
         for child in list(children):
             children |= child.get_children_recursive()
 

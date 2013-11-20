@@ -184,7 +184,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                     self.schedule_rebuild(commit=False)
 
         if self.pk:
-            root_children = self.root_domain.get_children_recursive()
+            root_children = [d.pk for d in
+                             self.root_domain.get_children_recursive()]
             for domain in self.domain_set.exclude(pk__in=root_children):
                 domain.soa = None
                 domain.save(override_soa=True)
