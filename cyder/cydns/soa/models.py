@@ -14,6 +14,7 @@ from cyder.base.models import BaseModel
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
+from cyder.settings import MIGRATING
 
 # import reversion
 
@@ -157,7 +158,10 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 return True
         return False
 
-    def schedule_rebuild(self, commit=True):
+    def schedule_rebuild(self, commit=True, force=False):
+        if MIGRATING and not force:
+            return
+
         Task.schedule_zone_rebuild(self)
         self.dirty = True
         if commit:

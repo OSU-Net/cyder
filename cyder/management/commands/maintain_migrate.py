@@ -95,6 +95,9 @@ class Command(BaseCommand):
             dhcp_migrate.migrate_zone_reverse()
             dhcp_migrate.migrate_user()
             dhcp_migrate.migrate_zone_user()
+            from cyder.cydns.soa.models import SOA
+            for s in SOA.objects.all():
+                s.schedule_rebuild(commit=True, force=True)
 
         if options['dns']:
             print "Migrating DNS objects."
