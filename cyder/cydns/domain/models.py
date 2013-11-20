@@ -251,20 +251,15 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         if MIGRATING:
             domain_child_cache[self] = children
+            if self.master_domain:
+                self.master_domain.refresh_cache()
 
         return children
 
     def refresh_cache(self):
         if self in domain_child_cache:
-            old = domain_child_cache[self]
-            new = self.get_children_recursive()
-            if old == new:
-                return
-        else:
-            self.get_children_recursive()
-
-        if self.master_domain:
-            self.master_domain.refresh_cache()
+            del(domain_child_cache[self])
+        self.get_children_recursive()
 
     def has_record_set(self, view=None, exclude_ns=False):
         object_sets = [
