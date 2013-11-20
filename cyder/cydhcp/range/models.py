@@ -1,3 +1,5 @@
+# encoding=utf-8
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -96,21 +98,22 @@ class Range(BaseModel, ObjectUrlMixin):
 
     @property
     def range_str(self):
-        return "{0} - {1}".format(self.start_str, self.end_str)
+        return u'{0} – {1}'.format(self.start_str, self.end_str)
 
-    def __str__(self):
-        if self.range_usage or self.range_usage == 0:
-            if self.range_usage == 100:
-                return get_display(self) + " (Full)"
-
-            elif self.range_usage > 100:
-                return get_display(self) + " (Over capacity)"
-
+    def __unicode__(self):
+        if isinstance(self.range_usage, int):
+            if self.range_usage >= 100:
+                usage = u'full'
             else:
-                return get_display(self) + " ({0}% Used)".format(
-                    str(self.range_usage))
+                usage = u'{0}%'.format(str(self.range_usage))
+
+            usage = u' ({0})'.format(usage)
         else:
-            return get_display(self)
+            usage = u''
+
+        name = u' ' + self.name if self.name else u''
+
+        return u''.join((self.range_str, name, usage))
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))

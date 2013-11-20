@@ -103,7 +103,7 @@ class Tablefier:
 
     def build_data(self, obj, value):
         if self.add_info and value == obj:
-            col = {'value': [str(value)], 'url': [None]}
+            col = {'value': [unicode(value)], 'url': [None]}
         else:
             col = {'value': [value], 'url': [self.grab_url(value)]}
         return col
