@@ -1,34 +1,36 @@
 from rest_framework import serializers
 
+from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
 from cyder.api.v1.endpoints.dns import api
-from cyder.cydns.soa.models import SOA, SOAKeyValue
+from cyder.cydns.soa.models import SOA, SOAAV
 
 
-class SOAKeyValueSerializer(serializers.ModelSerializer):
+class SOAAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     soa = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dns-soa-detail')
+    attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:  # don't import from api.CommonDNSMeta so we get all fields
-        model = SOAKeyValue
+        model = SOAAV
 
 
-class SOAKeyValueViewSet(api.CommonDNSViewSet):
-    model = SOAKeyValue
-    serializer_class = SOAKeyValueSerializer
+class SOAAVViewSet(api.CommonDNSViewSet):
+    model = SOAAV
+    serializer_class = SOAAVSerializer
 
 
-class SOANestedKeyValueSerializer(serializers.ModelSerializer):
+class SOANestedKeyValueSerializer(CommonAPINestedAVSerializer):
     id = serializers.HyperlinkedIdentityField(
-        view_name='api-dns-soa_keyvalues-detail')
+        view_name='api-dns-soa_attributes-detail')
 
     class Meta:
-        model = SOAKeyValue
+        model = SOAAV
         fields = api.NestedKeyValueFields
 
 
 class SOASerializer(serializers.HyperlinkedModelSerializer):
-    keyvalue_set = SOANestedKeyValueSerializer(many=True)
+    soaav_set = SOANestedKeyValueSerializer(many=True)
 
     class Meta(api.CommonDNSMeta):
         model = SOA
@@ -37,4 +39,4 @@ class SOASerializer(serializers.HyperlinkedModelSerializer):
 class SOAViewSet(api.CommonDNSViewSet):
     model = SOA
     serializer_class = SOASerializer
-    keyvaluemodel = SOAKeyValue
+    avmodel = SOAAV

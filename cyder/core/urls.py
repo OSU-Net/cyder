@@ -3,6 +3,7 @@ from django.conf.urls.defaults import *
 from cyder.core.views import (core_index, core_view, core_table_update,
                               core_get_update_form, core_search_obj,
                               core_delete)
+from cyder.base.views import static_dynamic_view
 
 
 def core_urls(object_type):
@@ -29,9 +30,11 @@ urlpatterns = patterns(
     url(r'^ctnr/', include('cyder.core.ctnr.urls')),
     url(r'^system/', include('cyder.core.system.urls')),
     url(r'^user/', include('cyder.core.cyuser.urls')),
+
+    url(r'^interfaces/$', static_dynamic_view, name='interfaces'),
 )
 
 urlpatterns += patterns(
     '',
-    url(r'^system_kv/', include(core_urls('system_kv')))
+    url(r'^system_av/', include(core_urls('system_av')))
 )

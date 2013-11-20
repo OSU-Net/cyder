@@ -1,11 +1,15 @@
 from rest_framework import serializers, viewsets
 
 
-NestedKeyValueFields = ['id', 'key', 'value', 'is_quoted']
+NestedAVFields = ['id', 'attribute', 'value']
 
 
 class CommonAPISerializer(serializers.ModelSerializer):
     pass
+
+
+class CommonAPINestedAVSerializer(serializers.ModelSerializer):
+    attribute = serializers.SlugRelatedField(slug_field='name')
 
 
 class CommonAPIMeta:

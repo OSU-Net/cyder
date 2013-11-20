@@ -4,11 +4,11 @@ from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
 from cyder.api.v1.tests.base import APITests
+from cyder.cydhcp.constants import DYNAMIC
 
 
 class DynamicInterfaceBase(APITests):
     model = DynamicInterface
-    keyvalue_attr = "dynamicintrkeyvalue_set"
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
@@ -33,7 +33,7 @@ class DynamicInterfaceV4API_Test(DynamicInterfaceBase):
         super(DynamicInterfaceV4API_Test, self).setUp()
         self.range, _ = Range.objects.get_or_create(
             start_str="12.12.0.0", end_str="12.12.255.255",
-            is_reserved=True)
+            range_type=DYNAMIC, is_reserved=True)
 
 
 class DynamicInterfaceV6API_Test(DynamicInterfaceBase):
@@ -44,4 +44,4 @@ class DynamicInterfaceV6API_Test(DynamicInterfaceBase):
         self.range, _ = Range.objects.get_or_create(
             start_str="2001:0db8:0000:0000:0000:0000:0000:0000",
             end_str="2001:0db8:0000:0000:0000:0000:0000:0001",
-            ip_type='6', is_reserved=True)
+            ip_type='6', range_type=DYNAMIC, is_reserved=True)

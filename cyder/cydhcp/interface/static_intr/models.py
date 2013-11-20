@@ -11,9 +11,12 @@ from cyder.core.fields import MacAddrField
 from cyder.core.system.models import System
 
 from cyder.base.constants import IP_TYPE_6
+from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
+                                      ATTRIBUTE_INVENTORY)
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 
 from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -143,12 +146,17 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return related_systems
 
     def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
         self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean_reverse()  # BasePTR
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
+        if self.range and update_range_usage:
+            self.range.save()
 
     def delete(self, *args, **kwargs):
+        rng = self.range
+        update_range_usage = kwargs.pop('update_range_usage', True)
         delete_system = kwargs.pop('delete_system', True)
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
@@ -161,6 +169,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 self.system.delete()
 
         super(StaticInterface, self).delete(*args, **kwargs)
+        if rng and update_range_usage:
+            rng.save()
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
@@ -190,8 +200,10 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             build_str += '\t\tfixed-address {0};\n'.format(self.ip_str)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.staticintrkeyvalue_set.filter(is_option=True)
-        statements = self.staticintrkeyvalue_set.filter(is_statement=True)
+        options = self.staticinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        statements = self.staticinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         if options:
             build_str += '\t\t# Host Options\n'
             build_str += join_dhcp_args(options, depth=2)
@@ -268,10 +280,12 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return 'A/PTR'
 
 
-class StaticIntrKeyValue(CommonOption):
-    static_interface = models.ForeignKey(StaticInterface, null=False)
-
-    class Meta:
+class StaticInterfaceAV(EAVBase):
+    class Meta(EAVBase.Meta):
         app_label = 'cyder'
-        db_table = 'static_interface_kv'
-        unique_together = ('key', 'value', 'static_interface')
+        db_table = 'static_interface_av'
+
+
+    entity = models.ForeignKey(StaticInterface)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

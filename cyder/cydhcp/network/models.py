@@ -4,13 +4,16 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
+from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydhcp.constants import DYNAMIC
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.site.models import Site
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
@@ -24,7 +27,8 @@ class Network(BaseModel, ObjectUrlMixin):
                              blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
-    vrf = models.ForeignKey('cyder.Vrf', null=True, blank=True)
+    vrf = models.ForeignKey('cyder.Vrf',
+                            default=lambda: Vrf.objects.get(name='Legacy'))
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
@@ -115,9 +119,10 @@ class Network(BaseModel, ObjectUrlMixin):
                 #router = str(
                 #   ipaddr.IPv6Address(int(self.network.network) + 1))
 
-            #kv = NetworkKeyValue(key="routers", value=router, network=self)
-            #kv.clean()
-            #kv.save()
+            #eav = NetworkAV(attribute=Attribute.objects.get(name="routers"),
+                            #value=router, network=self)
+            #eav.clean()
+            #eav.save()
 
     def delete(self, *args, **kwargs):
         if self.range_set.all().exists():
@@ -213,8 +218,10 @@ class Network(BaseModel, ObjectUrlMixin):
 
     def build_subnet(self, raw=False):
         self.update_network()
-        statements = self.networkkeyvalue_set.filter(is_statement=True)
-        options = self.networkkeyvalue_set.filter(is_option=True)
+        statements = self.networkav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
+        options = self.networkav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
         ranges = self.range_set.filter(range_type=DYNAMIC, dhcp_enabled=True)
         if self.ip_type == IP_TYPE_4:
             build_str = "\nsubnet {0} netmask {1} {{\n".format(
@@ -265,28 +272,11 @@ class Network(BaseModel, ObjectUrlMixin):
         self.prefixlen = self.network.prefixlen
 
 
-class NetworkKeyValue(CommonOption):
-    """
-    The NetworkOption Class.
-
-    DHCP option statements always start with the option keyword, followed
-    by an option name, followed by option data." -- The man page for
-    dhcpd-options
-
-    In this class, options are stored without the 'option' keyword. If it
-    is an option, is option should be set.
-    """
-    network = models.ForeignKey(Network, null=False)
-
-    class Meta:
+class NetworkAV(EAVBase):
+    class Meta(EAVBase.Meta):
         app_label = 'cyder'
-        db_table = 'network_kv'
-        unique_together = ('key', 'value', 'network')
+        db_table = 'network_av'
 
-    def save(self, *args, **kwargs):
-        self.clean()
-        super(NetworkKeyValue, self).save(*args, **kwargs)
 
-    def _aa_description(self):
-        """A descrition of this network"""
-        pass
+    entity = models.ForeignKey(Network)
+    attribute = EAVAttributeField(Attribute)

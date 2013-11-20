@@ -1,7 +1,10 @@
 from django.db import models
 
+from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
+                                      ATTRIBUTE_INVENTORY)
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
-from cyder.cydhcp.keyvalue.base_option import CommonOption
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -89,8 +92,10 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
             format_mac(self.mac))
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.dynamicintrkeyvalue_set.filter(is_option=True)
-        statements = self.dynamicintrkeyvalue_set.filter(is_statement=True)
+        options = self.dynamicinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_OPTION)
+        statements = self.dynamicinterfaceav_set.filter(
+            attribute__attribute_type=ATTRIBUTE_STATEMENT)
         if options:
             build_str += "\t\t# Host Options\n"
             build_str += join_dhcp_args(options, depth=2)
@@ -123,18 +128,30 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
+        update_range_usage = kwargs.pop('update_range_usage', True)
+        rng = self.range
         if delete_system:
             if (not self.system.dynamicinterface_set.all().exclude(
                     id=self.id).exists() and
                     not self.system.staticinterface_set.all().exists()):
                 self.system.delete()
         super(DynamicInterface, self).delete()
+        if rng and update_range_usage:
+            rng.save()
+
+    def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
+        super(DynamicInterface, self).save()
+        if self.range and update_range_usage:
+            self.range.save()
 
 
-class DynamicIntrKeyValue(CommonOption):
-    dynamic_interface = models.ForeignKey(DynamicInterface, null=False)
-
-    class Meta:
+class DynamicInterfaceAV(EAVBase):
+    class Meta(EAVBase.Meta):
         app_label = 'cyder'
-        db_table = "dynamic_interface_kv"
-        unique_together = "key", "value", "dynamic_interface"
+        db_table = "dynamic_interface_av"
+
+
+    entity = models.ForeignKey(DynamicInterface)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

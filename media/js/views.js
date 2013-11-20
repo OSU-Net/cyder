@@ -12,10 +12,36 @@ $(document).ready(function() {
     var getUrl = metadata.attr('data-getUrl');
     var domainsUrl = metadata.attr('data-domainsUrl');
     var objPk = metadata.attr('data-objPk');
+
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     if (domainsUrl) {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
+
+    $('#id_attribute').live('focus', function() {
+        $('#id_attribute').autocomplete({
+            minLength: 1,
+            source: function(request, response) {
+                $.ajax({
+                    url: '/eav/search',
+                    dataType: 'json',
+                    data: {
+                        term: request.term,
+                        attribute_type: $('#id_attribute_type').val()
+                    },
+                    success: response
+                })
+            },
+            delay: 400,
+            select: function(event, ui) {
+                attributeName = ui.item.label
+            }
+        });
+    });
+
+	$('#id_attribute_type').live('change', function() {
+		$('#id_attribute').val('');
+	});
 
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
@@ -49,6 +75,10 @@ $(document).ready(function() {
                     }, 150);
                     $('#obj-form form')[0].action = $createBtn.attr('href');
                     $('.form-btns a.submit').text('Create ' + formPrettyObjType);
+                    // Adjust this if statement to submit forms with ajax
+                    if (formObjType.indexOf('av') >= 0) {
+                        $('.form-btns a.submit').attr('class', 'btn c');
+                    };
                     $('#obj-form').slideToggle();
                 }, 'json');
         } else {
@@ -62,6 +92,11 @@ $(document).ready(function() {
                 };
             }, 150);
             $('.form-btns a.submit').text('Create ' + prettyObjType);
+
+            // Adjust this if statement to submit forms with ajax
+            if (objType.indexOf('av') >= 0) {
+                $('.form-btns a.submit').attr('class', 'btn c');
+            };
             $('#obj-form').slideToggle();
         }
     });
@@ -81,7 +116,7 @@ $(document).ready(function() {
         $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
                        'pk': $(this).attr('data-pk')}, function(data) {
             setTimeout(function() {
-                if (objType.indexOf('interface') != -1) {
+                if (objType.indexOf('interface') != -1 && data.form.indexOf('title=') != -1) {
                     extra_title = ' for ' + data.form.split('title=')[1].split('/')[0].replace(/"/g, "");
                 };
                 $('#form-title').html('Updating ' + pretty_obj_type + extra_title);
@@ -89,7 +124,50 @@ $(document).ready(function() {
                 initForms();
             }, 150);
             $('.form-btns a.submit').text('Update ' + pretty_obj_type);
+
+            // Adjust this if statement to submit forms with ajax
+            if (object_type.indexOf('av') >= 0) {
+                $('.form-btns a.submit').attr('class', 'btn c');
+            };
             $('#obj-form').slideDown();
         }, 'json');
+    });
+
+    function ajax_form_submit(url, form) {
+        var fields = form.find(':input').serializeArray();
+        var postData = {}
+        jQuery.each(fields, function (i, field) {
+            postData[field.name] = field.value;
+        });
+        $.post(url, postData, function(data) {
+            if (data.errors) {
+                if ($('#hidden-inner-form').find('#error').length) {
+                    $('#hidden-inner-form').find('#error').remove();
+                };
+                jQuery.each(fields, function (i, field) {
+                    if (data.errors[field.name]) {
+                        $('#id_' + field.name).after(
+                            '<p id="error"><font color="red">'
+                            + data.errors[field.name] + '</font></p>');
+                    };
+                });
+                if (data.errors['__all__']) {
+                    $('#hidden-inner-form').find('p:first').before(
+                        '<p id="error"><font color="red">'
+                        + data.errors['__all__'] + '</font></p>');
+                };
+            } else {
+                location.reload();
+            };
+        }, 'json');
+        return false;
+    };
+
+    $('#obj-form').live('submit', function(event) {
+        var url = $('#obj-form form')[0].action;
+        if (url.indexOf('av') >=0) {
+            event.preventDefault();
+            return ajax_form_submit(url, $('#obj-form'));
+        };
     });
 });

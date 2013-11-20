@@ -2,10 +2,12 @@ from django.db import models
 from django.db.models.loading import get_model
 from itertools import chain
 
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.cydhcp.keyvalue.models import KeyValue
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
@@ -77,12 +79,12 @@ class Vrf(BaseModel, ObjectUrlMixin):
         return build_str
 
 
-class VrfKeyValue(KeyValue):
-    vrf = models. ForeignKey(Vrf, null=False)
-
-    class Meta:
+class VrfAV(EAVBase):
+    class Meta(EAVBase.Meta):
         app_label = 'cyder'
-        db_table = "vrf_kv"
+        db_table = 'vrf_av'
 
-    def _aa_decription(self):
-        return
+
+    entity = models.ForeignKey(Vrf)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

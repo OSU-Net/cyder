@@ -2,10 +2,12 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.loading import get_model
 
+from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
+from cyder.base.eav.fields import EAVAttributeField
+from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
-from cyder.cydhcp.keyvalue.models import KeyValue
 
 
 class System(BaseModel, ObjectUrlMixin):
@@ -57,23 +59,12 @@ class System(BaseModel, ObjectUrlMixin):
         ]}
 
 
-class SystemKeyValue(KeyValue, ObjectUrlMixin):
-
-    system = models.ForeignKey(System, null=False)
-
-    class Meta:
+class SystemAV(EAVBase):
+    class Meta(EAVBase.Meta):
         app_label = 'cyder'
-        db_table = 'system_kv'
-        unique_together = ('key', 'value', 'system')
+        db_table = 'system_av'
 
-    def __str__(self):
-        return self.key
 
-    def details(self):
-        """For tables."""
-        data = super(SystemKeyValue, self).details()
-        data['data'] = [
-            ('Key', 'key', self),
-            ('Value', 'value', self.value),
-        ]
-        return data
+    entity = models.ForeignKey(System)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_INVENTORY,))

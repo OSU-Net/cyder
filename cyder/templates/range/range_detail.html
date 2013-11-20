@@ -2,14 +2,22 @@
 {% from "base/tables.html" import render_table %}
 {% from "base/utility.html" import create_button %}
 {% block title %}
-  Range {{ obj.start_str }} to {{ obj.end_str }}
+  {% if range_type == 'st' %}
+    Static Range {{ obj.start_str }} to {{ obj.end_str }}
+  {% else %}
+    Dynamic Range {{ obj.start_str }} to {{ obj.end_str }}
+  {% endif %}
 {% endblock %}
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
-    {{ create_button('range_kv', url('cydhcp-get-record'),
-                     url('range_kv'), objName=obj.start_str,
+    {{ create_button('range_av', url('cydhcp-get-record'),
+                     url('range_av'), objName=obj.start_str,
                      buttonName="Range Attribute") }}
+  {% endif %}
+
+  {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamicinterface') and obj.range_type == 'dy' %}
+  <a class="btn submit a" href={{ url('system-create', 'dynamic_interface_range_' ~ obj.pk ) }}>Create Dynamic Interface</a>
   {% endif %}
 {% endblock %}
 
@@ -36,9 +44,10 @@
     <h3>Range Attributes</h3>
     {{ render_table(request, attrs_table) }}
   {% endif %}
-
-  {% if range_data %}
+  {% if range_used %}
     <h3>Range Usage: {{ range_used }}</h3>
+  {% endif %}
+  {% if range_data and range_type == 'st' %}
     {% with page_obj = range_data %}
       {% include "base/includes/pagination.html" %}
     {% endwith %}
@@ -76,7 +85,7 @@
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='staticinterface') and obj.range_type == 'st' %}
                   <a class="btn submit a" href={{ url('system-create', x[1].__str__()) }}>Static Interface</a>
                 {% endif %}
-                <td>
+              </td>
             </tr>
           {% else %}
             {% for record_ip, record_set in x %}
@@ -102,5 +111,14 @@
         {% endfor %}
       </tbody>
     </table>
+    {% else %}
+      {% if page_obj %}
+        {% include "base/includes/pagination.html" %}
+      {% endif %}
+      {% if dynamic_intr_table %}
+        {{ render_table(request, dynamic_intr_table) }}
+      {% elif page_obj %}
+        {% include "base/includes/object_table.html" %}
+      {% endif %}
   {% endif %}
 {% endblock %}

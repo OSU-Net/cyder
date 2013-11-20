@@ -29,5 +29,5 @@ def vrf_detail(request, pk):
         'Dynamic Hosts': DynamicInterface.objects.filter(
             range__network__vrf=vrf),
         'Static Hosts': StaticInterface.objects.filter(get_static_intr_q(vrf)),
-        'Attributes': 'vrfkeyvalue_set',
+        'Attributes': 'vrfav_set',
     }, pk=pk, obj=vrf)

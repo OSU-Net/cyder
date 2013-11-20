@@ -4,10 +4,12 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
 
-from cyder.core.system.models import System, SystemKeyValue
+from cyder.base.eav.models import Attribute
+from cyder.core.system.models import System, SystemAV
+
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticIntrKeyValue)
+                                                       StaticInterfaceAV)
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -22,7 +24,8 @@ from cyder.cydns.models import View
 import MySQLdb
 from optparse import make_option
 from lib import maintain_dump, fix_maintain
-from lib.utilities import clean_mac, ip2long, long2ip
+from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
+                           range_usage_get_create)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -81,7 +84,8 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
-            return ensure_domain(name=self.dname, force=True)
+            return ensure_domain(name=self.dname, force=True,
+                                 update_range_usage=False)
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -128,8 +132,8 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import (maintain_find_zone, migrate_zones,
-                                  get_host_option_values)
+        from dhcp_migrate import maintain_find_zone, migrate_zones
+
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
             migrate_zones()
@@ -172,17 +176,28 @@ class Zone(object):
             if ha == "":
                 enabled = False
 
+            # check for duplicate
+            static = StaticInterface.objects.filter(
+                label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+            if static:
+                stderr.write("Ignoring host %s: already exists.\n"
+                             % items['id'])
+                continue
+
+            # create system
             system = System(name=name)
             system.save()
             for key in sys_value_keys.keys():
-                value = items[key]
+                value = items[key].strip()
                 if not value or value == '0':
                     continue
-                kv = SystemKeyValue(system=system, key=sys_value_keys[key],
-                                    value=value)
-                kv.clean()
-                kv.save()
+                attr = Attribute.objects.get(
+                    name=fix_attr_name(sys_value_keys[key]))
+                eav = SystemAV(entity=system, attribute=attr, value=value)
+                eav.full_clean()
+                eav.save()
 
+            # check for workgroup
             if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
                                "FROM workgroup "
@@ -192,47 +207,33 @@ class Zone(object):
             else:
                 w = None
 
-            if not (StaticInterface.objects.filter(
-                    label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
-                    .exists()):
+            static = StaticInterface(
+                label=name, domain=self.domain, mac=clean_mac(ha),
+                system=system, ip_str=long2ip(ip), ip_type='4',
+                workgroup=w, ctnr=ctnr, ttl=items['ttl'],
+                dns_enabled=enabled, dhcp_enabled=enabled,
+                last_seen=items['last_seen'])
+
+            # create static interface
+            try:
+                static.full_clean()
+                static.save(update_range_usage=False)
+            except ValidationError:
                 try:
-                    static = StaticInterface(label=name, domain=self.domain,
-                                             mac=clean_mac(ha), system=system,
-                                             ip_str=long2ip(ip), ip_type='4',
-                                             workgroup=w, ctnr=ctnr,
-                                             ttl=items['ttl'],
-                                             dns_enabled=enabled,
-                                             dhcp_enabled=enabled,
-                                             last_seen=items['last_seen'])
-
-                    # Static Interfaces need to be cleaned independently.
-                    # (no get_or_create)
+                    static.dhcp_enabled = False
+                    static.dns_enabled = enabled
                     static.full_clean()
-                    static.save()
+                    static.save(update_range_usage=False)
+                except ValidationError, e:
+                    stderr.write("Error creating static interface for host"
+                                 "with IP {0}\n".format(static.ip_str))
+                    stderr.write("Original exception: {0}\n".format(e))
+                    static = None
+                    system.delete()
 
-                    static.views.add(public)
-                    static.views.add(private)
-
-                    for key, value in get_host_option_values(items['id']):
-                        kv = StaticIntrKeyValue(static_interface=static,
-                                                key=key, value=value)
-                        kv.clean()
-                        kv.save()
-
-                except ValidationError:
-                    try:
-                        static.dhcp_enabled = False
-                        static.dns_enabled = False
-                        static.full_clean()
-                        static.save()
-                    except ValidationError, e:
-                        stderr.write("Error generating static interface for "
-                                     "host with IP {0}\n"
-                                     .format(static.ip_str))
-                        stderr.write("Original exception: {0}\n".format(e))
-            else:
-                stderr.write("Ignoring host %s: already exists.\n"
-                             % items['id'])
+            if static:
+                static.views.add(public)
+                static.views.add(private)
 
     def gen_AR(self):
         """
@@ -275,8 +276,8 @@ class Zone(object):
                     pass
 
             if ptr_type == 'forward':
-                arec, _ = AddressRecord.objects.get_or_create(
-                    label=label, domain=self.domain,
+                arec, _ = range_usage_get_create(
+                    AddressRecord, label=label, domain=self.domain,
                     ip_str=long2ip(ip), ip_type='4')
                 if enabled:
                     arec.views.add(public)
@@ -290,7 +291,7 @@ class Zone(object):
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
                     ptr.full_clean()
-                    ptr.save()
+                    ptr.save(update_range_usage=False)
                     if enabled:
                         ptr.views.add(public)
                         ptr.views.add(private)
@@ -403,7 +404,7 @@ def gen_CNAME():
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
             print "Removing duplicate PTR for %s" % cn.fqdn
-            dup_ptrs.delete()
+            dup_ptrs.delete(update_range_usage=False)
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()

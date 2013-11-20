@@ -28,8 +28,8 @@
     url('dynamic_interface'), objName=obj.name) }}
   {% endif %}
   {% if obj_type_perm %}
-    {{ create_button('system_kv', url('core-get-record'),
-                   url('system_kv'), objName=obj.name,
+    {{ create_button('system_av', url('core-get-record'),
+                   url('system_av'), objName=obj.name,
                    buttonName="System Attribute") }}
   {% endif %}
 {% endblock %}

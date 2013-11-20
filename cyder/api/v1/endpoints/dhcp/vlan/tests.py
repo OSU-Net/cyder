@@ -1,8 +1,8 @@
 from cyder.cydhcp.vlan.models import Vlan
-from cyder.api.v1.tests.base import APITests
+from cyder.api.v1.tests.base import APITests, APIEAVTestMixin
 
 
-class VlanAPI_Test(APITests):
+class VlanAPI_Test(APITests, APIEAVTestMixin):
     __test__ = True
     model = Vlan
 

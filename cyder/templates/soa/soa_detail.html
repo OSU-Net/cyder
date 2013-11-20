@@ -7,8 +7,8 @@
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
-    {{ create_button('soa_kv', url('cydns-get-record'),
-                     url('soa_kv'), objName=obj.description,
+    {{ create_button('soa_av', url('cydns-get-record'),
+                     url('soa_av'), objName=obj.description,
                      buttonName="SOA Attribute") }}
   {% endif %}
   <a class="btn" href='/dns/bind/build_debug/{{ obj.pk }}/'>View BIND file</a>

@@ -1,6 +1,7 @@
 from django import forms
 
-from cyder.cydhcp.vlan.models import Vlan, VlanKeyValue
+from cyder.base.eav.forms import get_eav_form
+from cyder.cydhcp.vlan.models import Vlan, VlanAV
 
 
 class VlanForm(forms.ModelForm):
@@ -10,11 +11,4 @@ class VlanForm(forms.ModelForm):
         model = Vlan
 
 
-class VlanKeyValueForm(forms.ModelForm):
-    vlan = forms.ModelChoiceField(
-            queryset=Vlan.objects.all(),
-            widget=forms.HiddenInput())
-
-    class Meta:
-        model = VlanKeyValue
-        exclude = ('is_quoted',)
+VlanAVForm = get_eav_form(VlanAV, Vlan)

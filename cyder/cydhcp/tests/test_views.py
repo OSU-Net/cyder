@@ -29,14 +29,15 @@ class NetworkViewTests(cyder.base.tests.TestCase):
     def setUp(self):
         test_data = {
             'ip_type': IP_TYPE_4,
-            'network_str': '192.168.1.100',
+            'network_str': '192.168.1.100/24',
         }
         do_setUp(self, Network, test_data)
 
     def post_data(self):
         return {
             'ip_type': IP_TYPE_4,
-            'network_str': '192.168.2.100',
+            'network_str': '192.168.2.100/24',
+            'vrf': Vrf.objects.get(name='Legacy').id,
         }
 
 

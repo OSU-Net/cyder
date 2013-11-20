@@ -12,18 +12,26 @@ class CtnrSerializer(api.CommonCoreSerializer):
     workgroups = serializers.SerializerMethodField('ctnrworkgroups')
 
     def ctnrusers(self, obj):
+        if obj is None:
+            return
         return (reverse('api-core-user-list', request=self.context['request'])
                 + "?ctnr_id=" + str(obj.id))
 
     def ctnrdomains(self, obj):
+        if obj is None:
+            return
         return (reverse('api-dns-domain-list', request=self.context['request'])
                 + "?ctnr_id=" + str(obj.id))
 
     def ctnrranges(self, obj):
+        if obj is None:
+            return
         return (reverse('api-dhcp-range-list', request=self.context['request'])
                 + "?ctnr_id=" + str(obj.id))
 
     def ctnrworkgroups(self, obj):
+        if obj is None:
+            return
         return (reverse('api-dhcp-workgroup-list',
                 request=self.context['request'])
                 + "?ctnr_id=" + str(obj.id))
