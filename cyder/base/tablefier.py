@@ -1,9 +1,7 @@
 from django.core.urlresolvers import reverse
 from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
                                   ACTION_UPDATE)
-from cyder.base.helpers import prettify_obj_type
-
-from helpers import cached_property
+from cyder.base.helpers import prettify_obj_type, cached_property
 
 
 def find_get_record_url(obj):
