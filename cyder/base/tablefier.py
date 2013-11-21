@@ -82,6 +82,10 @@ class Tablefier:
             if self.can_update:
                 headers.append(['Actions', None])
 
+        if hasattr(self.objects, 'object_list'):
+            self.objects.object_list = (self.objects.object_list
+                .select_related(*[f for _, f in headers if f]))
+
         if self.add_info:
             headers.insert(0, ['Info', None])
 
@@ -183,6 +187,7 @@ class Tablefier:
         if not self.objects:
             return None
 
+        self.headers  # generate headers first to select related objects
         objs, data, urls = self.get_data()
         return {
             'headers': self.headers,
