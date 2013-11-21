@@ -72,7 +72,7 @@ class DNSBuilder(object):
 
     def _run_command(self, command, log=True, failure_msg=None):
         if log:
-            command_logger = self.log if log else None
+            command_logger = self.log
             failure_logger = lambda msg: self.log(msg, log_level='LOG_ERR')
         else:
             command_logger, failure_logger = None, None
