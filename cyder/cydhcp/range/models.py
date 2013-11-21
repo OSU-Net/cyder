@@ -98,10 +98,10 @@ class Range(BaseModel, ObjectUrlMixin):
 
     @property
     def range_str(self):
-        return u'{0} – {1}'.format(self.start_str, self.end_str)
+        return u'{0}–{1}'.format(self.start_str, self.end_str)
 
     def __unicode__(self):
-        if isinstance(self.range_usage, int):
+        if self.range_usage is not None:
             if self.range_usage >= 100:
                 usage = u'full'
             else:

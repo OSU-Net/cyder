@@ -96,7 +96,7 @@ class Command(BaseCommand):
             dhcp_migrate.migrate_zone_reverse()
             dhcp_migrate.migrate_user()
             dhcp_migrate.migrate_zone_user()
-            print 'Updating Range Usage'
+            print 'Updating range usage'
             Range = get_model('cyder', 'range')
             ranges = Range.objects.all()
             for rng in ranges:
