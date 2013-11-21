@@ -31,11 +31,12 @@ def shell_out(command, use_shlex=True):
     return out, err, p.returncode
 
 
-def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True):
-    ll = getattr(syslog, log_level)
+def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
+        logger=syslog):
+    ll = getattr(logger, log_level)
 
     if to_syslog:
-        syslog.syslog(ll, msg)
+        logger.syslog(ll, msg)
     if to_stderr:
         stderr.write("{0}: {1}\n".format(log_level[4:], msg))
 

@@ -38,6 +38,8 @@ def dns_log(msg, *args, **kwargs):
     else:
         msg = "{0:20} {1}".format(callername, msg)
 
+    kwargs['logger'] = syslog
+
     log(msg, *args, **kwargs)
 
 

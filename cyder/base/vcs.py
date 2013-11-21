@@ -26,7 +26,7 @@ class VCSRepo(object):
 
     def _log(self, message, log_level='LOG_INFO'):
         log(message, log_level=log_level, to_stderr=self.debug,
-                to_syslog=self.log_syslog)
+                to_syslog=self.log_syslog, logger=self.logger)
 
     def _sanity_check(self):
         lines_changed = self._lines_changed()
