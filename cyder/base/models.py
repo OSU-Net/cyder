@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 
-from cyder.base.utils import ClassProperty
+from cyder.base.utils import classproperty
 
 
 class BaseModel(models.Model):
@@ -17,7 +17,7 @@ class BaseModel(models.Model):
         abstract = True
         get_latest_by = 'created'
 
-    @ClassProperty
+    @classproperty
     @classmethod
     def pretty_type(cls):
         return cls.__name__.lower()

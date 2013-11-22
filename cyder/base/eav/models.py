@@ -7,7 +7,7 @@ from cyder.base.eav.utils import is_hex_byte_sequence
 from cyder.base.eav.validators import VALUE_TYPES
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.utils import ClassProperty
+from cyder.base.utils import classproperty
 
 
 class Attribute(models.Model):
@@ -50,7 +50,7 @@ class EAVBase(BaseModel, ObjectUrlMixin):
     def pretty_name(self):
         return self.attribute.name
 
-    @ClassProperty
+    @classproperty
     @classmethod
     def pretty_type(cls):
         return cls._meta.get_field('entity').rel.to.pretty_type + ' attribute'
