@@ -1,8 +1,7 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import include, patterns, url
 
 from cyder.core.views import (core_index, core_view, core_table_update,
-                              core_get_update_form, core_search_obj,
-                              core_delete)
+                              core_get_update_form, core_search_obj)
 from cyder.base.views import static_dynamic_view
 
 
@@ -13,8 +12,6 @@ def core_urls(object_type):
         url(r'^$', core_view, name=object_type),
         url(r'^(?P<pk>[\w-]+)/update/$', core_view,
             name=object_type + '-update'),
-        url(r'^(?P<pk>[\w-]+)/delete/$', core_delete,
-            name=object_type + '-delete'),
         url(r'^(?P<pk>[\w-]+)/tableupdate/$', core_table_update,
             name=object_type + '-table-update'),
     )

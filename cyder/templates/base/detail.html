@@ -14,13 +14,8 @@
         data-pk="{{ obj.pk }}" data-prettyObjType="{{ obj_type|prettify_obj_type }}">Edit</a>
     {% endif %}
     {% if obj.get_delete_url %}
-      {% if obj_type == 'system' %}
-        <a class="btn btn-danger" id="delete" onclick="return confirm(
-            'Deleting this system will also delete its interfaces. Are you sure you want to continue?');"
-            href="{{ obj.get_delete_url() }}">Delete</a>
-      {% else %}
-        <a class="btn btn-danger" id="delete" onclick="return confirm('Are you sure?');" href="{{ obj.get_delete_url() }}">Delete</a>
-      {% endif %}
+      <a class="btn btn-dange" id="delete" href="{{ obj.get_delete_url() }}"
+         data-kwargs='{"obj_type": "{{ obj_type }}", "pk": "{{ obj.pk }}"}'>Delete</a>
     {% endif %}
   {% endif %}
 {% endblock %}

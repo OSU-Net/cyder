@@ -156,10 +156,6 @@ def _fqdn_to_domain(qd):
     return qd, domain, None
 
 
-def cydns_delete(request, pk):
-    return cy_delete(request, pk, get_klasses)
-
-
 def cydns_get_update_form(request):
     return get_update_form(request, get_klasses)
 

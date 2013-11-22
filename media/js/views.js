@@ -18,8 +18,18 @@ $(document).ready(function() {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
 
-    $('#system_create').click( function(e) {
+    $('#system_create, #delete').click( function(e) {
         e.preventDefault();
+        if ($(this).attr('id') == 'delete') {
+            var msg = "Are you sure?";
+            if (objType == 'system') {
+                msg = "Deleting this system will also delete its"
+                    + " interfaces. Are you sure you want to continue?";
+            }
+            if (!confirm(msg)) {
+                return false;
+            }
+        }
         var url = $(this).attr('href');
         var postData = JSON.parse($(this).attr('data-kwargs'));
         var postForm = $('<form style="display: none" action="' + url

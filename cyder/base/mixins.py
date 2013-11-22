@@ -57,7 +57,7 @@ class ObjectUrlMixin(object):
 
     def get_delete_url(self):
         """Return the delete url of an object."""
-        return reverse(self._meta.db_table + '-delete', args=[self.pk])
+        return reverse('delete')
 
     def get_detail_url(self):
         """Return the detail url of an object."""

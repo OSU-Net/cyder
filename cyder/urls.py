@@ -7,7 +7,7 @@ patch()
 from cyder.api.v1.routes import router
 
 from cyder.core.views import core_index
-from cyder.base.views import send_email, admin_page
+from cyder.base.views import send_email, admin_page, cy_delete
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -28,7 +28,7 @@ urlpatterns = patterns(
     url(r'^search/', include('cyder.search.urls')),
     url(r'^bug/$', send_email, name='bug-report'),
     url(r'^administration/$', admin_page, name='admin-page'),
-
+    url(r'^delete/$', cy_delete, name='delete'),
     url(r'^accounts/login/$',  'django_cas.views.login',  name='login'),
     url(r'^accounts/logout/$', 'django_cas.views.logout', name='logout'),
 )
