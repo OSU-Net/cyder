@@ -17,11 +17,11 @@ class Command(BaseCommand):
                     action='store_true',
                     default=False,
                     help="Check files into vcs and push upstream."),
-        make_option('--log-syslog',
+        make_option('-l', '--log-syslog',
                     dest='log_syslog',
                     action='store_true',
                     help="Log to syslog."),
-        make_option('--no-log-syslog',
+        make_option('-L', '--no-log-syslog',
                     dest='log_syslog',
                     action='store_false',
                     help="Do not log to syslog."),
@@ -30,29 +30,30 @@ class Command(BaseCommand):
                     action='store_true',
                     default=False,
                     help="Print copious amounts of text."),
-        make_option('-f', '--force',
-                    dest='force',
+        make_option('-f', '--force-build',
+                    dest='force_build',
                     action='store_true',
                     default=False,
-                    help="Ignore all change delta thresholds."),
+                    help="Rebuild zones even if they're up to date."),
+        make_option('-C', '--no-sanity-check',
+                    dest='sanity_check',
+                    action='store_false',
+                    default=True,
+                    help="Don't run the diff sanity check."),
     )
 
     def handle(self, *args, **options):
-        options
-
         builder_opts = {}
-        for name in ('log_syslog', 'debug', 'force'):
+        for name in ('log_syslog', 'debug'):
             val = options.pop(name)
             if val is not None:
                 builder_opts[name] = val
 
-        b = DNSBuilder(**builder_opts)
-
-        if options['build']:
-            b.build(clean_up=options['push'])
-
-        if options['push']:
-            b.push()
+        with DNSBuilder(**builder_opts) as b:
+            if options['build']:
+                b.build(clean_up=options['push'], force=options['force_build'])
+            if options['push']:
+                b.push(sanity_check=options['sanity_check'])
 
         #try:
             #b.build_dns()

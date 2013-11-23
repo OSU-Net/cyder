@@ -545,8 +545,7 @@ class DNSBuilder(object):
             self.log_info(msg)
             return True
 
-    @lock_wrapper
-    def build(self, clean_up=True):
+    def build(self, clean_up=True, force=False):
         if self.stop_update_exists():
             return
 
@@ -555,7 +554,7 @@ class DNSBuilder(object):
         try:
             dns_tasks = self.get_scheduled()
 
-            if not dns_tasks and not self.force:
+            if not dns_tasks and not force:
                 self.log_info("Nothing to do!")
                 return
 
@@ -575,8 +574,7 @@ class DNSBuilder(object):
             self.log_err('Error during build.')
             raise
 
-    @lock_wrapper
-    def push(self):
+    def push(self, sanity_check=True):
         self.repo.reset_and_pull()
 
         try:
@@ -585,4 +583,12 @@ class DNSBuilder(object):
             self.repo.clean()
             raise
 
-        self.repo.commit_and_push('Update config file', force=self.force)
+        self.repo.commit_and_push('Update config file',
+                                  sanity_check=sanity_check)
+
+    def __enter__(self):
+        self.lock()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.unlock()

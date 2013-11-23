@@ -43,8 +43,8 @@ class VCSRepo(object):
         self._pull()
 
     @chdir_wrapper
-    def commit_and_push(self, message, force=False):
-        self._commit_and_push(message, force=force)
+    def commit_and_push(self, message, sanity_check=True):
+        self._commit_and_push(message, sanity_check=sanity_check)
 
     def _log(self, message, log_level='LOG_DEBUG'):
         log(message, log_level=log_level, to_stderr=self.debug,
@@ -72,22 +72,24 @@ class VCSRepo(object):
 
 
 class GitRepo(VCSRepo):
-    def _is_working_tree_dirty(self):  # sorry for function name
-        _, _, returncode = self._run_command('git diff --quiet')
+    def _is_index_dirty(self):  # sorry for function name
+        _, _, returncode = self._run_command('git diff --cached --quiet',
+            ignore_failure=True)
         return returncode != 0
 
-    def _commit_and_push(self, message, force=False):
+    def _commit_and_push(self, message, sanity_check=True):
         self._add_all()
 
-        if not self._is_working_tree_dirty():
+        if not self._is_index_dirty():
             self._log('There were no changes. Nothing to commit.',
                       log_level='LOG_INFO')
             return
 
-        if force:
-            self._log('Skipping sanity check because force=True was passed.')
-        else:
+        if sanity_check:
             self._sanity_check()
+        else:
+            self._log('Skipping sanity check because sanity_check=False was '
+                      'passed.')
 
         self._commit(message)
         self._push()
