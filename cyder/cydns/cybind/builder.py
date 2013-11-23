@@ -13,8 +13,8 @@ from itertools import ifilter
 
 from cyder.settings import BINDBUILD
 
-from cyder.base.vcs import log
-from cyder.base.utils import dict_merge, set_attrs, shell_out
+from cyder.base.vcs import GitRepo
+from cyder.base.utils import dict_merge, log, set_attrs, run_command, shell_out
 
 from cyder.core.task.models import Task
 from cyder.core.utils import fail_mail
@@ -64,13 +64,42 @@ class DNSBuilder(object):
         syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
         self.lock_fd = None
 
-    def log(self, *args, **kwargs):
-        kwargs['root_domain'] = self.root_domain
-        kwargs['to_stderr'] = self.debug
-        kwargs['to_syslog'] = self.log_syslog
-        dns_log(*args, **kwargs)
+        self.repo = GitRepo(self.prod_dir, self.max_allowed_lines_changed,
+            debug=self.debug, log_syslog=self.log_syslog, logger=syslog)
 
-    def _run_command(self, command, log=True, failure_msg=None):
+    def log(self, msg, *args, **kwargs):
+        kwargs = dict_merge({
+            'to_stderr': self.debug,
+            'to_syslog': self.log_syslog,
+            'logger': syslog,
+        }, kwargs)
+
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        callername = "[{0}]".format(calframe[2][3])
+
+        root_domain = kwargs.pop('root_domain', None)
+        if root_domain:
+            fullmsg = "{0:20} < {1} > {2}".format(callername,
+                                               root_domain.name, msg)
+        else:
+            fullmsg = "{0:20} {1}".format(callername, msg)
+
+        log(fullmsg, *args, **kwargs)
+
+    def log_debug(self, *args, **kwargs):
+        self.log(*args, log_level='LOG_DEBUG', **kwargs)
+
+    def log_info(self, *args, **kwargs):
+        self.log(*args, log_level='LOG_INFO', **kwargs)
+
+    def log_notice(self, *args, **kwargs):
+        self.log(*args, log_level='LOG_NOTICE', **kwargs)
+
+    def log_err(self, *args, **kwargs):
+        self.log(*args, log_level='LOG_ERR', **kwargs)
+
+    def run_command(self, command, log=True, failure_msg=None):
         if log:
             command_logger = self.log
             failure_logger = lambda msg: self.log(msg, log_level='LOG_ERR')
@@ -103,20 +132,15 @@ class DNSBuilder(object):
             if isinstance(value, (bool, basestring, int, long)):
                 print u'{0} = {1}'.format(name, unicode(value))
 
-
         #print "is_locked={0}".format(self.is_locked())
         #print "lock_file={0}".format(self.lock_file)
-
         #print ("stop_update_file_exists={0}"
                #.format(os.path.exists(self.stop_update_file)))
         #print "stop_update_file={0}".format(self.stop_update_file)
-
         #print "stage_dir_exists={0}".format(os.path.exists(self.stage_dir))
         #print "stage_dir={0}".format(self.stage_dir)
-
         #print "prod_dir_exists={0}".format(os.path.exists(self.prod_dir))
         #print "prod_dir={0}".format(self.prod_dir)
-
         #print "last_run_file={0}".format(self.last_run_file)
 
     def format_title(self, title):
@@ -140,7 +164,7 @@ class DNSBuilder(object):
         """
         ts = [t for t in Task.dns.all()]
         ts_len = len(ts)
-        self.log("{0} zone{1} requested to be rebuilt".format(
+        self.log_debug("{0} zone{1} requested to be rebuilt".format(
             ts_len, 's' if ts_len != 1 else '')
         )
         return ts
@@ -153,17 +177,17 @@ class DNSBuilder(object):
         try:
             if not os.path.exists(os.path.dirname(self.lock_file)):
                 os.makedirs(os.path.dirname(self.lock_file))
-            self.log("Attempting acquire mutext "
-                     "({0})...".format(self.lock_file))
+            self.log_debug("Attempting to acquire mutex ({0})..."
+                     .format(self.lock_file))
             self.lock_fd = open(self.lock_file, 'w+')
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self.log(self.format_title("Mutex Acquired"))
+            self.log_debug("Mutex acquired")
             return True
         except IOError, exc_value:
             self.lock_fd = None
             #  IOError: [Errno 11] Resource temporarily unavailable
             if exc_value[0] == 11:
-                self.log(
+                self.log_err(
                     "DNS build script attempted to acquire the "
                     "build mutux but another process already has it."
                 )
@@ -182,10 +206,9 @@ class DNSBuilder(object):
         """
         if not self.lock_fd:
             return False
-        self.log("Attempting release mutex "
-                 "({0})...".format(self.lock_file))
+        self.log_debug("Releasing mutex ({0})...".format(self.lock_file))
         fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-        self.log("Unlock Complete.")
+        self.log_debug("Unlock Complete.")
         return True
 
     def calc_target(self, root_domain, soa):
@@ -341,16 +364,16 @@ class DNSBuilder(object):
             new_serial = int(time.time())
             force_rebuild = True
             # it's a new serial
-            self.log(
-                'LOG_NOTICE', "{0} appears to be a new zone. Building {1} "
+            self.log_debug(
+                "{0} appears to be a new zone. Building {1} "
                 "with initial serial {2}".format(soa, file_meta['prod_fname'],
                                                  new_serial),
-                root_domain=root_domain)
+                root_domain=root_domain, log_level='LOG_NOTICE')
         elif int(serial) != soa.serial:
             # Looks like someone made some changes... let's nuke them.
             # We should probably email someone too.
-            self.log(
-                'LOG_NOTICE', "{0} has serial {1} in svn ({2}) and serial "
+            self.log_notice(
+                "{0} has serial {1} in svn ({2}) and serial "
                 "{3} in the database. Zone will be rebuilt."
                 .format(soa, serial, file_meta['prod_fname'],
                         soa.serial),
@@ -425,11 +448,11 @@ class DNSBuilder(object):
                     soa.dirty = False
                     soa.save()
 
-                self.log('====== Processing {0} {1} ======'.format(
+                self.log_debug('====== Processing {0} {1} ======'.format(
                     root_domain, soa.serial)
                 )
                 views_to_build = []
-                self.log(
+                self.log_debug(
                     "SOA was seen with dirty == {0}".format(force_rebuild),
                     root_domain=root_domain
                 )
@@ -437,22 +460,22 @@ class DNSBuilder(object):
                 # This for loop decides which views will be canidates for
                 # rebuilding.
                 for view in View.objects.all():
-                    self.log("++++++ Looking at < {0} > view ++++++".
+                    self.log_debug("++++++ Looking at < {0} > view ++++++".
                              format(view.name), root_domain=root_domain)
                     t_start = time.time()  # tic
                     view_data = build_zone_data(view, root_domain, soa,
-                                                logf=self.log)
+                                                logf=self.log_debug)
                     build_time = time.time() - t_start  # toc
-                    self.log('< {0} > Built {1} data in {2} seconds'
+                    self.log_debug('< {0} > Built {1} data in {2} seconds'
                              .format(view.name, soa, build_time),
-                             root_domain=root_domain, build_time=build_time)
+                             root_domain=root_domain)
                     if not view_data:
-                        self.log('< {0} > No data found in this view. '
+                        self.log_debug('< {0} > No data found in this view. '
                                  'No zone file will be made or included in any'
                                  ' config for this view.'.format(view.name),
                                  root_domain=root_domain)
                         continue
-                    self.log('< {0} > Non-empty data set for this '
+                    self.log_debug('< {0} > Non-empty data set for this '
                              'view. Its zone file will be included in the '
                              'config.'.format(view.name),
                              root_domain=root_domain)
@@ -469,7 +492,7 @@ class DNSBuilder(object):
                         (view, file_meta, view_data)
                     )
 
-                self.log(
+                self.log_debug(
                     '----- Building < {0} > ------'.format(
                         ' | '.join([v.name for v, _, _ in views_to_build])
                     ), root_domain=root_domain
@@ -479,10 +502,10 @@ class DNSBuilder(object):
                     # Bypass save so we don't have to save a possible stale
                     # 'dirty' value to the db.
                     SOA.objects.filter(pk=soa.pk).update(serial=soa.serial + 1)
-                    self.log('Zone will be rebuilt at serial {0}'
+                    self.log_debug('Zone will be rebuilt at serial {0}'
                              .format(soa.serial + 1), root_domain=root_domain)
                 else:
-                    self.log('Zone is stable at serial {0}'
+                    self.log_debug('Zone is stable at serial {0}'
                              .format(soa.serial), root_domain=root_domain)
 
                 for view, file_meta, view_data in views_to_build:
@@ -495,29 +518,28 @@ class DNSBuilder(object):
                     # If it's dirty or we are rebuilding another view, rebuild
                     # the zone
                     if force_rebuild:
-                        self.log(
+                        self.log_debug(
                             'Rebuilding < {0} > view file {1}'
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain)
-                        prod_fname = self.build_zone(
+                        self.build_zone(
                             view, file_meta,
                             # Lazy string evaluation
                             view_data.format(serial=soa.serial + 1),
                             root_domain
                         )
-                        assert prod_fname == file_meta['prod_fname']
                     else:
-                        self.log(
+                        self.log_debug(
                             'NO REBUILD needed for < {0} > view file {1}'
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain
                         )
                         # Run named-checkzone for good measure.
                         if self.stage_only:
-                            self.log("Not calling named-checkconf.",
+                            self.log_debug("Not calling named-checkconf.",
                                      root_domain=root_domain)
                         else:
-                            self.named_checkzone(
+                            self.run_checkzone(
                                 file_meta['prod_fname'], root_domain
                             )
             except Exception:
@@ -535,15 +557,14 @@ class DNSBuilder(object):
 
     def build_config_files(self, zone_stmts):
         # named-checkconf on config files
-        self.log(self.format_title("Building config files"))
-        configs = []
-        self.log(
+        self.log_info("Building config files")
+        self.log_debug(
             "Building configs for views < {0} >".format(
                 ' | '.join([view_name for view_name in zone_stmts.keys()])
             )
         )
         for view_name, view_stmts in zone_stmts.iteritems():
-            self.log("Building config for view < {0} >".
+            self.log_debug("Building config for view < {0} >".
                      format(view_name))
             configs.append(
                 self.build_view_config(view_name, 'master', view_stmts)
@@ -556,17 +577,14 @@ class DNSBuilder(object):
         cancel the build.
         """
         if os.path.exists(self.stop_update_file):
-            msg = ("The stop_update_file ({0}) exists. Build canceled. \n"
-                   "Reason for skipped build: \n"
-                   "{1}".format(self.stop_update_file,
-                                open(self.stop_update_file).read()))
-            fail_mail(msg, subject="DNS builds have stoped")
-            self.log(msg)
-            return True
+            with open(self.stop_update_file) as f:
+                msg = ("The stop_update_file ({0}) exists. Build canceled. \n"
+                       "Reason for skipped build: \n"
+                       "{1}".format(self.stop_update_file, f.read()))
 
-    def goto_out(self):
-        self.log(self.format_title("Release Mutex"))
-        self.unlock()
+            fail_mail(msg, subject="DNS builds have stopped")
+            self.log_info(msg)
+            return True
 
     def build_dns(self):
         if self.stop_update_exists():
@@ -617,9 +635,9 @@ class DNSBuilder(object):
                 # function
                 map(lambda t: t.delete(), dns_tasks)
 
-        # All errors are handled by caller (this function)
-        except BuildError:
-            self.log('Error during build. Not removing staging')
+            self.log_info('Build successful')
+        except (BuildError, Exception):
+            self.log_err('Error during build.')
             raise
         except Exception:
             self.log('Error during build. Not removing staging')

@@ -38,17 +38,19 @@ def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
     if to_syslog:
         logger.syslog(ll, msg)
     if to_stderr:
-        stderr.write("{0}: {1}\n".format(log_level[4:], msg))
+        stderr.write("{0}:{1}{2}\n".format(
+            log_level[4:], ' '*(12-len(log_level)),
+            msg))
 
 
 def run_command(command, command_logger=None, failure_logger=None,
-                failure_msg=None):
+                failure_msg=None, ignore_failure=False):
     if command_logger:
         command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
 
     out, err, returncode = shell_out(command)
 
-    if returncode != 0:
+    if returncode != 0 and not ignore_failure:
         failure_msg = failure_msg or ('`{0}` failed in {1}'
                                       .format(command, os.getcwd()))
 
@@ -65,7 +67,7 @@ def run_command(command, command_logger=None, failure_logger=None,
 
         raise Exception(exception_str)
 
-    return out, err
+    return out, err, returncode
 
 
 def set_attrs(obj, attrs):
