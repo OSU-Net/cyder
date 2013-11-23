@@ -7,38 +7,24 @@ from optparse import make_option
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('--stage-only',
-                    dest='stage_only',
+        make_option('-b', '--build',
+                    dest='build',
                     action='store_true',
                     default=False,
-                    help="Just build staging and don't copy to prod. name"
-                         "d-checkzone will still be run."),
-        make_option('--clobber-stage',
-                    dest='clobber_stage',
-                    action='store_true',
-                    default=False,
-                    help="If stage already exists delete it before runnin"
-                         "g the build script."),
-        make_option('--ship-it',
-                    dest='push_to_prod',
+                    help="Build zone files."),
+        make_option('-p', '--push',
+                    dest='push',
                     action='store_true',
                     default=False,
                     help="Check files into vcs and push upstream."),
-        make_option('--preserve-stage',
-                    dest='preserve_stage',
+        make_option('--log-syslog',
+                    dest='log_syslog',
                     action='store_true',
-                    default=False,
-                    help="Do not remove staging area after build"
-                         " completes."),
-        make_option('--no-build',
-                    dest='build_zones',
-                    action='store_false',
-                    default=True,
-                    help="Do not build zone files."),
-        make_option('--no-syslog',
+                    help="Log to syslog."),
+        make_option('--no-log-syslog',
                     dest='log_syslog',
                     action='store_false',
-                    default=True, help="Do not log to syslog."),
+                    help="Do not log to syslog."),
         make_option('--debug',
                     dest='debug',
                     action='store_true',
@@ -52,18 +38,33 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        b = DNSBuilder(**dict(options))
-        try:
-            b.build_dns()
-        except BuildError as err:
-            msg = "FATAL: {0}".format(err)
-            print msg
-            b.log(msg, log_level='LOG_ERR')
-            fail_mail(err)
-            raise err
-        except Exception as err:
-            msg = "Exception: {0}".format(err)
-            print msg
-            b.log(msg.format(err), log_level='LOG_CRIT')
-            fail_mail(err)
-            raise err
+        options
+
+        builder_opts = {}
+        for name in ('log_syslog', 'debug', 'force'):
+            val = options.pop(name)
+            if val is not None:
+                builder_opts[name] = val
+
+        b = DNSBuilder(**builder_opts)
+
+        if options['build']:
+            b.build(clean_up=options['push'])
+
+        if options['push']:
+            b.push()
+
+        #try:
+            #b.build_dns()
+        #except BuildError as err:
+            #msg = "FATAL: {0}".format(err)
+            #print msg
+            #b.log(msg, log_level='LOG_ERR')
+            #fail_mail(err)
+            #raise err
+        #except Exception as err:
+            #msg = "Exception: {0}".format(err)
+            #print msg
+            #b.log(msg, log_level='LOG_CRIT')
+            #fail_mail(err)
+            #raise err

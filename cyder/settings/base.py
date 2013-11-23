@@ -229,7 +229,7 @@ BINDBUILD = {
     # prod_dir.
     'bind_prefix': '',
 
-    'lock_file': '/tmp/lock.file',
+    'lock_file': '/tmp/cyder.lock',
     'named_checkzone': 'named-checkzone',
     'named_checkconf': 'named-checkconf',
     'named_checkzone_opts': '',

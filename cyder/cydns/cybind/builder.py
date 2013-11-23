@@ -2,12 +2,11 @@
 import inspect
 import fcntl
 import shutil
-import shlex
-import subprocess
 import syslog
 import os
 import re
 import time
+from distutils.dir_util import copy_tree
 from gettext import gettext as _
 from itertools import ifilter
 
@@ -26,21 +25,19 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-def dns_log(msg, *args, **kwargs):
-    curframe = inspect.currentframe()
-    calframe = inspect.getouterframes(curframe, 2)
-    callername = "[{0}]".format(calframe[1][3])
+def lock_wrapper(func):
+    def wrapped(self, *args, **kwargs):
+        if not self.lock():
+            return  # we couldn't get the lock
 
-    root_domain = kwargs.pop('root_domain', None)
-    if root_domain:
-        msg = "{0:20} < {1} > {2}".format(callername,
-                                           root_domain.name, msg)
-    else:
-        msg = "{0:20} {1}".format(callername, msg)
+        try:
+            func(self, *args, **kwargs)
+        finally:
+            self.unlock()
 
-    kwargs['logger'] = syslog
+    wrapped.__name__ = func.__name__
 
-    log(msg, *args, **kwargs)
+    return wrapped
 
 
 class BuildError(Exception):
@@ -107,9 +104,9 @@ class DNSBuilder(object):
             command_logger, failure_logger = None, None
 
         try:
-            run_command(command, command_logger=command_logger,
-                        failure_logger=failure_logger,
-                        failure_msg=failure_msg)
+            return run_command(command, command_logger=command_logger,
+                               failure_logger=failure_logger,
+                               failure_msg=failure_msg)
         except Exception as e:
             raise BuildError(e.message)
 
@@ -162,7 +159,7 @@ class DNSBuilder(object):
             the scheduled tasks. Not checking files into Git is indicative of a
             troubleshoot build.
         """
-        ts = [t for t in Task.dns.all()]
+        ts = list(Task.dns.all())
         ts_len = len(ts)
         self.log_debug("{0} zone{1} requested to be rebuilt".format(
             ts_len, 's' if ts_len != 1 else '')
@@ -254,57 +251,30 @@ class DNSBuilder(object):
         """
         if not os.path.exists(os.path.dirname(stage_fname)):
             os.makedirs(os.path.dirname(stage_fname))
-        self.log("Stage zone file is {0}".format(stage_fname),
+        self.log_debug("Stage zone file is {0}".format(stage_fname),
                  root_domain=root_domain)
         with open(stage_fname, 'w+') as fd:
             fd.write(data)
         return stage_fname
 
-    def named_checkzone(self, zone_file, root_domain):
+    def run_checkzone(self, zone_file, root_domain):
         """Shell out and call named-checkzone on the zone file. If it returns
         with errors raise a BuildError.
         """
         # Check the zone file.
-        self._run_command(
-            ' '.join(self.named_checkzone, self.named_checkzone_opts,
-                     root_domain.name, zone_file),
+        self.run_command(
+            ' '.join((self.named_checkzone, self.named_checkzone_opts,
+                      root_domain.name, zone_file)),
+            log=True,
             failure_msg='named-checkzone failed on zone {0}'
                         .format(root_domain.name)
         )
 
-    def named_checkconf(self, conf_file):
-        self._run_command(
-            ' '.join(self.named_checkconf, conf_file),
+    def run_checkconf(self, conf_file):
+        self.run_command(
+            ' '.join((self.named_checkconf, conf_file)),
             failure_msg='named-checkconf rejected config {0}'.format(conf_file)
         )
-
-    def stage_to_prod(self, src):
-        """Copy file over to prod_dir. Return the new location of the
-        file.
-        """
-
-        if not src.startswith(self.stage_dir):
-            raise BuildError("Improper file '{0}' passed to "
-                             "stage_to_prod".format(src))
-        dst = src.replace(self.stage_dir, self.prod_dir)
-        dst_dir = os.path.dirname(dst)
-
-        if self.stage_only:
-            self.log("Did not copy {0} to {1}".format(src, dst))
-            return dst
-
-        if not os.path.exists(dst_dir):
-            os.makedirs(dst_dir)
-        # copy2 will copy file metadata
-        try:
-            shutil.copy2(src, dst)
-            self.log("Copied {0} to {1}".format(src, dst))
-        except (IOError, os.error) as why:
-            raise BuildError("cp -p {0} {1} caused {2}".format(src,
-                             dst, str(why)))
-        except shutil.Error:
-            raise
-        return dst
 
     def write_stage_config(self, config_fname, stmts):
         """
@@ -322,23 +292,16 @@ class DNSBuilder(object):
     def build_zone(self, view, file_meta, view_data, root_domain):
         """
         This function will write the zone's zone file to the the staging area
-        and call named-checkconf on the files before they are copied over to
-        PROD_DIR. If will return a tuple of files corresponding to where the
-        `privat_file` and `public_file` are written to. If a file is not
-        written to the file system `None` will be returned instead of the path
-        to the file.
+        and call named-checkconf on the files.
         """
         stage_fname = os.path.join(self.stage_dir, file_meta['rel_fname'])
         self.write_stage_zone(
             stage_fname, root_domain, file_meta['rel_fname'], view_data
         )
-        self.log("Built stage_{0}_file to {1}".format(view.name, stage_fname),
-                 root_domain=root_domain)
-        self.named_checkzone(stage_fname, root_domain)
-
-        prod_fname = self.stage_to_prod(stage_fname)
-
-        return prod_fname
+        self.log_debug(
+            "Built stage_{0}_file to {1}".format(view.name, stage_fname),
+            root_domain=root_domain)
+        self.run_checkzone(stage_fname, root_domain)
 
     def calc_fname(self, view, root_domain):
         return "{0}.{1}".format(root_domain.name, view.name)
@@ -552,8 +515,7 @@ class DNSBuilder(object):
         config_fname = "{0}.{1}".format(ztype, view_name)
         zone_stmts = '\n'.join(stmts).format(ztype=ztype)
         stage_config = self.write_stage_config(config_fname, zone_stmts)
-        self.named_checkconf(stage_config)
-        return self.stage_to_prod(stage_config)
+        self.run_checkconf(stage_config)
 
     def build_config_files(self, zone_stmts):
         # named-checkconf on config files
@@ -566,10 +528,7 @@ class DNSBuilder(object):
         for view_name, view_stmts in zone_stmts.iteritems():
             self.log_debug("Building config for view < {0} >".
                      format(view_name))
-            configs.append(
-                self.build_view_config(view_name, 'master', view_stmts)
-            )
-        return configs
+            self.build_view_config(view_name, 'master', view_stmts)
 
     def stop_update_exists(self):
         """
@@ -586,51 +545,27 @@ class DNSBuilder(object):
             self.log_info(msg)
             return True
 
-    def build_dns(self):
+    @lock_wrapper
+    def build(self, clean_up=True):
         if self.stop_update_exists():
             return
-        self.log('Building...')
-        if not self.lock():
-            return
 
-        dns_tasks = self.get_scheduled()
-
-        if not dns_tasks and not self.FORCE:
-            self.log("Nothing to do!")
-            self.goto_out()
-            return
+        self.log_debug('Building...')
 
         try:
-            if self.clobber_stage or self.FORCE:
-                self.clear_staging(force=True)
-            self.build_staging()
+            dns_tasks = self.get_scheduled()
+
+            if not dns_tasks and not self.force:
+                self.log_info("Nothing to do!")
+                return
 
             # zone files
-            if self.build_zones:
-                soa_pks_to_rebuild = set(int(t.task) for t in dns_tasks)
-                self.build_config_files(
-                    self.build_zone_files(soa_pks_to_rebuild)
-                )
-            else:
-                self.log("build_zones is False. Not "
-                         "building zone files.")
+            soa_pks_to_rebuild = set(int(t.task) for t in dns_tasks)
+            self.build_config_files(
+                self.build_zone_files(soa_pks_to_rebuild)
+            )
 
-            self.log(self.format_title("VCS Checkin"))
-            if self.build_zones and self.push_to_prod:
-                self.vcs_checkin()
-            else:
-                self.log("push_to_prod is False. Not checking "
-                         "into {0}".format(self.vcs_type))
-
-            self.log(self.format_title("Handle Staging"))
-            if self.preserve_stage:
-                self.log("preserve_stage is True. Not "
-                         "removing staging. You will need to use "
-                         "--clobber-stage on the next run.")
-            else:
-                self.clear_staging()
-
-            if self.push_to_prod:
+            if clean_up:
                 # Only delete the scheduled tasks we saw at the top of the
                 # function
                 map(lambda t: t.delete(), dns_tasks)
@@ -639,10 +574,15 @@ class DNSBuilder(object):
         except (BuildError, Exception):
             self.log_err('Error during build.')
             raise
-        except Exception:
-            self.log('Error during build. Not removing staging')
+
+    @lock_wrapper
+    def push(self):
+        self.repo.reset_and_pull()
+
+        try:
+            copy_tree(self.stage_dir, self.prod_dir)
+        except:
+            self.repo.clean()
             raise
-        finally:
-            # Clean up
-            self.goto_out()
-        self.log('Successful build is successful.')
+
+        self.repo.commit_and_push('Update config file', force=self.force)

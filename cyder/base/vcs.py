@@ -5,6 +5,21 @@ import syslog
 from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
+def chdir_wrapper(func):
+    def wrapped(self, *args, **kwargs):
+        old_dir = os.getcwd()
+        os.chdir(self.repo_dir)
+
+        try:
+            func(self, *args, **kwargs)
+        finally:
+            os.chdir(old_dir)
+
+    wrapped.__name__ = func.__name__
+
+    return wrapped
+
+
 class VCSRepo(object):
     def __init__(self, repo_dir, diff_line_threshold,
                  debug=False, log_syslog=False, logger=syslog):
@@ -16,14 +31,20 @@ class VCSRepo(object):
             'logger': logger,
         })
 
-    def commit_and_push(self, message):
-        old_dir = os.getcwd()
-        os.chdir(self.repo_dir)
+    @chdir_wrapper
+    def reset_to_head(self):
+        self._reset_to_head()
 
-        try:
-            self._commit_and_push(message)
-        finally:
-            os.chdir(old_dir)
+    @chdir_wrapper
+    def reset_and_pull(self):
+        """Make the working tree match what's currently on the server."""
+
+        self._reset_to_head()
+        self._pull()
+
+    @chdir_wrapper
+    def commit_and_push(self, message, force=False):
+        self._commit_and_push(message, force=force)
 
     def _log(self, message, log_level='LOG_DEBUG'):
         log(message, log_level=log_level, to_stderr=self.debug,
@@ -51,9 +72,18 @@ class VCSRepo(object):
 
 
 class GitRepo(VCSRepo):
+    def _is_working_tree_dirty(self):  # sorry for function name
+        _, _, returncode = self._run_command('git diff --quiet')
+        return returncode != 0
+
     def _commit_and_push(self, message, force=False):
-        self._pull()
         self._add_all()
+
+        if not self._is_working_tree_dirty():
+            self._log('There were no changes. Nothing to commit.',
+                      log_level='LOG_INFO')
+            return
+
         if force:
             self._log('Skipping sanity check because force=True was passed.')
         else:
@@ -61,6 +91,13 @@ class GitRepo(VCSRepo):
 
         self._commit(message)
         self._push()
+
+    def _reset_to_head(self):
+        self._run_command('git reset --hard')
+        self._run_command('git clean -dxf')
+
+    def _remove_all(self):
+        self._run_command('git rm -rf .', ignore_failure=True)
 
     def _pull(self):
         self._run_command('git pull --ff-only')
