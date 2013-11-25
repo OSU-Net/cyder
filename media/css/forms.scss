@@ -66,6 +66,10 @@
     }
 }
 
+#id_range, #id_network {
+    font-family: "Courier New", Courier, monospace;
+}
+
 .ui-dialog {
     @include default-box-shadow();
     .ui-dialog-titlebar {
