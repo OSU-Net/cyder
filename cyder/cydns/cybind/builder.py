@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import inspect
-import fcntl
 import shutil
 import syslog
 import os
@@ -13,7 +12,8 @@ from itertools import ifilter
 from cyder.settings import BINDBUILD
 
 from cyder.base.vcs import GitRepo
-from cyder.base.utils import dict_merge, log, set_attrs, run_command, shell_out
+from cyder.base.utils import (dict_merge, log, MutexMixin, set_attrs,
+                              run_command, shell_out)
 
 from cyder.core.task.models import Task
 from cyder.core.utils import fail_mail
@@ -25,26 +25,16 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-def lock_wrapper(func):
-    def wrapped(self, *args, **kwargs):
-        if not self.lock():
-            return  # we couldn't get the lock
-
-        try:
-            func(self, *args, **kwargs)
-        finally:
-            self.unlock()
-
-    wrapped.__name__ = func.__name__
-
-    return wrapped
-
-
 class BuildError(Exception):
     """Exception raised when there is an error in the build process."""
 
 
-class DNSBuilder(object):
+class DNSBuilder(MutexMixin):
+    """
+    Note: Ensure that DNSBuilder is instantiated from a `with` statement. Its
+    __exit__ method releases a mutex, so it's critical that it be called
+    regardless of the reason the Python interpreter exits.
+    """
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
             'stage_only': False,
@@ -165,48 +155,6 @@ class DNSBuilder(object):
             ts_len, 's' if ts_len != 1 else '')
         )
         return ts
-
-    def lock(self):
-        """
-        Tries to write a lock file. Returns True if we get the lock, else
-        return False.
-        """
-        try:
-            if not os.path.exists(os.path.dirname(self.lock_file)):
-                os.makedirs(os.path.dirname(self.lock_file))
-            self.log_debug("Attempting to acquire mutex ({0})..."
-                     .format(self.lock_file))
-            self.lock_fd = open(self.lock_file, 'w+')
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self.log_debug("Mutex acquired")
-            return True
-        except IOError, exc_value:
-            self.lock_fd = None
-            #  IOError: [Errno 11] Resource temporarily unavailable
-            if exc_value[0] == 11:
-                self.log_err(
-                    "DNS build script attempted to acquire the "
-                    "build mutux but another process already has it."
-                )
-                fail_mail(
-                    "An attempt was made to start the DNS build script "
-                    "while an instance of the script was already running. "
-                    "The attempt was denied.",
-                    subject="Concurrent DNS builds attempted.")
-                return False
-            else:
-                raise
-
-    def unlock(self):
-        """
-        Tries to remove the lock file.
-        """
-        if not self.lock_fd:
-            return False
-        self.log_debug("Releasing mutex ({0})...".format(self.lock_file))
-        fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-        self.log_debug("Unlock Complete.")
-        return True
 
     def calc_target(self, root_domain, soa):
         """
@@ -586,9 +534,14 @@ class DNSBuilder(object):
         self.repo.commit_and_push('Update config file',
                                   sanity_check=sanity_check)
 
-    def __enter__(self):
-        self.lock()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.unlock()
+    def _lock_failure(self):
+        self.log_err(
+            'DNS build script attempted to acquire the build mutux but '
+            'another process already has it.',
+            to_stderr=False)
+        fail_mail(
+            'An attempt was made to start the DNS build script while an '
+            'instance of the script was already running. The attempt was '
+            'denied.',
+            subject="Concurrent DNS builds attempted.")
+        super(DNSBuilder, self)._lock_failure()
