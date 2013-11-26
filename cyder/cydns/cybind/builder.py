@@ -88,13 +88,13 @@ class DNSBuilder(object):
         self.log(*args, log_level='LOG_DEBUG', **kwargs)
 
     def log_info(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_INFO', **kwargs)
+        self.log(*args, log_level='LOG_INFO', to_stderr=True, **kwargs)
 
     def log_notice(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_NOTICE', **kwargs)
+        self.log(*args, log_level='LOG_NOTICE', to_stderr=True, **kwargs)
 
     def log_err(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_ERR', **kwargs)
+        self.log(*args, log_level='LOG_ERR', to_stderr=True, **kwargs)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
