@@ -56,7 +56,6 @@ class DNSBuilder(MutexMixin):
 
     def log(self, msg, *args, **kwargs):
         kwargs = dict_merge({
-            'to_stderr': self.debug,
             'to_syslog': self.log_syslog,
             'logger': syslog,
         }, kwargs)
@@ -75,7 +74,7 @@ class DNSBuilder(MutexMixin):
         log(fullmsg, *args, **kwargs)
 
     def log_debug(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_DEBUG', **kwargs)
+        self.log(*args, log_level='LOG_DEBUG', to_stderr=self.debug, **kwargs)
 
     def log_info(self, *args, **kwargs):
         self.log(*args, log_level='LOG_INFO', to_stderr=True, **kwargs)
@@ -88,10 +87,11 @@ class DNSBuilder(MutexMixin):
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
-            command_logger = self.log
+            command_logger = self.log_debug
             failure_logger = lambda msg: self.log(msg, log_level='LOG_ERR')
         else:
-            command_logger, failure_logger = None, None
+            command_logger = None
+            failure_logger = None
 
         try:
             return run_command(command, command_logger=command_logger,
