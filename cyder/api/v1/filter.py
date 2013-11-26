@@ -26,7 +26,6 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         f_queryset = None
 
         parent_model = queryset.model
-        parent_name = parent_model.__name__.lower()
 
         for q in request.QUERY_PARAMS:
             p = request.QUERY_PARAMS[q]
