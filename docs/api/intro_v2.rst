@@ -33,11 +33,6 @@ The following conventions are used throughout this document:
 
 For readability, all API responses in this tutorial will be formatted with linebreaks and indentation, and some may be abbreviated. Actual API responses may differ. If you want your API responses to look as pretty as mine do, pipe the output of your curl request to ``python -mjson.tool``.
 
----------------
-Getting Started
----------------
-This section covers some basic features and terminology of the Cyder API. You'll learn how to get API access, structure a basic request, authenticate to the server, differentiate between the endpoints provided by the API, and traverse relations between records.
-
 Requesting Your API Token
 -------------------------
 API access is restricted to those with a **token**. A token is a randomly-generated 40 character hex string that is associated with your username. All API requests must be accompanied by a valid token or the request will be ignored.
@@ -56,7 +51,7 @@ You will now see a page with your token's key, purpose, and date of creation. Fr
 
 **Note:** It is strongly recommended that you generate a new key for each application that will be accessing the API.
 
-Through this tutorial, the placeholder ``MY_TOKEN`` will be used instead of an actual API token. Anywhere you see ``MY_TOKEN`` used, you should replace it with your own token.
+Through this tutorial, the placeholder ``MY_TOKEN`` will be used instead of an actual API token. Anywhere you see ``MY_TOKEN`` used, you must replace it with your own token.
 
 API Basics
 ----------
@@ -73,31 +68,29 @@ First let's construct a basic request to the API.
 
 Assuming the requested token and URL are valid, you should now be presented with a listing of all available API endpoints.
 
-.. COMMENT! Update the endpoint listing.
-
 .. code:: json
 
     {
         "core/ctnr": "http://127.0.0.1:8000/api/v1/core/ctnr/",
         "core/system": "http://127.0.0.1:8000/api/v1/core/system/",
-        "core/system/keyvalues": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/",
+        "core/system/attributes": "http://127.0.0.1:8000/api/v1/core/system/attributes/",
         "core/user": "http://127.0.0.1:8000/api/v1/core/user/",
         "dhcp/dynamic_interface": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/",
-        "dhcp/dynamic_interface/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/keyvalues/",
+        "dhcp/dynamic_interface/attributes": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/attributes/",
         "dhcp/network": "http://127.0.0.1:8000/api/v1/dhcp/network/",
-        "dhcp/network/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/network/keyvalues/",
+        "dhcp/network/attributes": "http://127.0.0.1:8000/api/v1/dhcp/network/attributes/",
         "dhcp/range": "http://127.0.0.1:8000/api/v1/dhcp/range/",
-        "dhcp/range/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/range/keyvalues/",
+        "dhcp/range/attributes": "http://127.0.0.1:8000/api/v1/dhcp/range/attributes/",
         "dhcp/site": "http://127.0.0.1:8000/api/v1/dhcp/site/",
-        "dhcp/site/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/site/keyvalues/",
+        "dhcp/site/attributes": "http://127.0.0.1:8000/api/v1/dhcp/site/attributes/",
         "dhcp/static_interface": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/",
-        "dhcp/static_interface/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/keyvalues/",
+        "dhcp/static_interface/attributes": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/attributes/",
         "dhcp/vlan": "http://127.0.0.1:8000/api/v1/dhcp/vlan/",
-        "dhcp/vlan/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/vlan/keyvalues/",
+        "dhcp/vlan/attributes": "http://127.0.0.1:8000/api/v1/dhcp/vlan/attributes/",
         "dhcp/vrf": "http://127.0.0.1:8000/api/v1/dhcp/vrf/",
-        "dhcp/vrf/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/vrf/keyvalues/",
+        "dhcp/vrf/attributes": "http://127.0.0.1:8000/api/v1/dhcp/vrf/attributes/",
         "dhcp/workgroup": "http://127.0.0.1:8000/api/v1/dhcp/workgroup/",
-        "dhcp/workgroup/keyvalues": "http://127.0.0.1:8000/api/v1/dhcp/workgroup/keyvalues/",
+        "dhcp/workgroup/attributes": "http://127.0.0.1:8000/api/v1/dhcp/workgroup/attributes/",
         "dns/address_record": "http://127.0.0.1:8000/api/v1/dns/address_record/",
         "dns/cname": "http://127.0.0.1:8000/api/v1/dns/cname/",
         "dns/domain": "http://127.0.0.1:8000/api/v1/dns/domain/",
@@ -105,7 +98,7 @@ Assuming the requested token and URL are valid, you should now be presented with
         "dns/nameserver": "http://127.0.0.1:8000/api/v1/dns/nameserver/",
         "dns/ptr": "http://127.0.0.1:8000/api/v1/dns/ptr/",
         "dns/soa": "http://127.0.0.1:8000/api/v1/dns/soa/",
-        "dns/soa/keyvalues": "http://127.0.0.1:8000/api/v1/dns/soa/keyvalues/",
+        "dns/soa/attributes": "http://127.0.0.1:8000/api/v1/dns/soa/attributes/",
         "dns/srv": "http://127.0.0.1:8000/api/v1/dns/srv/",
         "dns/sshfp": "http://127.0.0.1:8000/api/v1/dns/sshfp/",
         "dns/txt": "http://127.0.0.1:8000/api/v1/dns/txt/"
@@ -124,32 +117,34 @@ Let's see what happens when we request one of the returned URLs.
 
 This returns a **list view** of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and the client. Later, when you learn about filtering, list views will become the most important part of the Cyder API. Here's an example response to the above query:
 
-.. COMMENT! Update API output.
-
 .. code:: json
 
     {
-        "count": 2097,
+        "count": 2148,
         "next": "http://127.0.0.1:8000/api/v1/dns/domain/?page=2",
         "previous": null,
         "results": [
             {
+                "created": "2013-11-07T12:35:06",
                 "delegated": false,
                 "dirty": false,
                 "id": 1,
                 "is_reverse": true,
                 "master_domain": null,
+                "modified": "2013-11-07T12:35:06",
                 "name": "arpa",
                 "purgeable": false,
                 "soa": null,
                 "url": "http://127.0.0.1:8000/dns/domain/1/"
             },
             {
+                "created": "2013-11-07T12:35:06",
                 "delegated": false,
                 "dirty": false,
                 "id": 2,
                 "is_reverse": true,
                 "master_domain": "http://127.0.0.1:8000/api/v1/dns/domain/1/",
+                "modified": "2013-11-07T12:35:06",
                 "name": "in-addr.arpa",
                 "purgeable": false,
                 "soa": null,
@@ -166,6 +161,7 @@ This returns a **list view** of Domain records. List views allow you to navigate
 
 2. As stated before, where appropriate, related records are pointed to with URLs for easy navigation. In this case, if you wanted to check the master domain of the domain name ``in-addr.arpa``, you could simply pass the value of ``master_domain`` to curl and retrieve the appropriate record.
 
+
 ~~~~~~~~~~~~
 Detail Views
 ~~~~~~~~~~~~
@@ -180,11 +176,13 @@ This returns a **detail view** of the Domain record with an ``id`` of 2.
 .. code:: json
 
     {
+        "created": "2013-11-07T12:35:06",
         "delegated": false,
         "dirty": false,
         "id": 2,
         "is_reverse": true,
         "master_domain": "http://127.0.0.1:8000/api/v1/dns/domain/1/",
+        "modified": "2013-11-07T12:35:06",
         "name": "in-addr.arpa",
         "purgeable": false,
         "soa": null,
@@ -211,21 +209,22 @@ Let's say we want to query for every CNAME that aliases a non ``orst.edu`` domai
 
     curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/"
 
-.. COMMENT! This should be updated since the views field isn't up to date.
-
 Here's the first record we get back:
 
+.. code:: json
+
     {
-        "created": "2013-08-16T18:55:39",
+        "created": "2013-11-08T18:37:24",
         "description": "",
-        "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2979/",
+        "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1416/",
         "fqdn": "www.emt.orst.edu",
         "id": 1,
         "label": "www",
-        "modified": "2013-08-16T18:55:39",
+        "modified": "2013-11-08T18:37:24",
         "target": "www.orst.edu",
         "ttl": 3600,
         "views": [
+            "private",
             "public"
         ]
     }
@@ -237,8 +236,6 @@ Any of the fields listed here can be queried. Let's try building our query. Cyde
 ~~~~~~~~~~~~~~~
 Querying Fields
 ~~~~~~~~~~~~~~~
-.. COMMENT! Pretty much this entire section needs to be updated due to the changes in supported field lookup types.
-
 
 Before we can write our query, however, we need to know the basic structure of each filter. Each filter must contain a selection mode, the field to query, and the field lookup type. The exact structure can be easily described with Extended Backus-Naur Form:
 
@@ -248,12 +245,15 @@ Before we can write our query, however, we need to know the basic structure of e
 
     field        = ? any valid field name ?
 
-    field lookup = "exact" | "contains" | "gt" | "gte" | "lt" | "lte"
-                 | "startswith" | "endswith" | "isnull"
+    field lookup = "exact" | "contains" | "in" | "gt" | "gte" | "lt" | "lte"
+                 | "startswith" | "endswith" | "range" | "year" | "month"
+                 | "day" | "week_day" | "isnull" | "search"
 
     filter       = mode, ":", field, "__", field lookup
 
-Here, ``mode`` sets whether records matching the query should be included (``i:``) or excluded (``e:``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_ and this document's `Summary of Field Lookups`_. Note that the field lookups ``in``, ``range``, ``year``, ``month``, ``day``, ``week_day``, ``regex``, and ``iregex`` are not supported.
+Here, ``mode`` sets whether records matching the query should be included (``i:``) or excluded (``e:``). ``field`` must contain the name of a field in the record, including related fields. ``field lookup`` is used to decide how records should be matched. Each of the supported query types is described in Django's `field lookups reference`_. Note that the field lookups ``regex`` and ``iregex`` are not supported. Additionally, some of the supported field lookups are idiosyncratic and must be used in unique ways which will be discussed later.
+
+.. COMMENT: TODO Change last sentence to reference specific section.
 
 .. _field lookups reference: https://docs.djangoproject.com/en/1.4/ref/models/querysets/#field-lookups
 
@@ -268,37 +268,52 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
 .. code:: json
 
     {
-        "count": 233,
-        "next": "http://127.0.0.1:8000/api/v1/cname/?i:target__exact=www.orst.edu&page=2",
+        "count": 235,
+        "next": "http://127.0.0.1:8000/api/v1/dns/cname/?i%3Atarget__exact=www.orst.edu&page=2",
         "previous": null,
         "results": [
             {
+                "created": "2013-11-08T18:37:24",
                 "description": "",
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1416/",
                 "fqdn": "www.emt.orst.edu",
                 "id": 1,
+                "label": "www",
+                "modified": "2013-11-08T18:37:24",
                 "target": "www.orst.edu",
                 "ttl": 3600,
                 "views": [
+                    "private",
                     "public"
                 ]
             },
             {
+                "created": "2013-11-08T18:37:26",
                 "description": "",
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1416/",
                 "fqdn": "emt.orst.edu",
                 "id": 7,
+                "label": "",
+                "modified": "2013-11-08T18:37:26",
                 "target": "www.orst.edu",
                 "ttl": 3600,
                 "views": [
+                    "private",
                     "public"
                 ]
             },
             {
+                "created": "2013-11-08T18:37:41",
                 "description": "",
-                "fqdn": "diversity.oregonstate.edu",
-                "id": 56,
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1611/",
+                "fqdn": "cla-dev.cws.oregonstate.edu",
+                "id": 40,
+                "label": "cla-dev",
+                "modified": "2013-11-08T18:37:41",
                 "target": "www.orst.edu",
                 "ttl": 3600,
                 "views": [
+                    "private",
                     "public"
                 ]
             },
@@ -310,22 +325,27 @@ Here we can see the first two results are both domains under ``orst.edu``. Let's
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu&e:fqdn_contains=orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu"
 
 .. code:: json
 
     {
-        "count": 182,
-        "next": "http://127.0.0.1:8000/api/v1/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu&page=2",
+        "count": 184,
+        "next": "http://127.0.0.1:8000/api/v1/dns/cname/?e%3Afqdn__contains=orst.edu&i%3Atarget__exact=www.orst.edu&page=2",
         "previous": null,
         "results": [
             {
+                "created": "2013-11-08T18:37:41",
                 "description": "",
-                "fqdn": "diversity.oregonstate.edu",
-                "id": 56,
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1611/",
+                "fqdn": "cla-dev.cws.oregonstate.edu",
+                "id": 40,
+                "label": "cla-dev",
+                "modified": "2013-11-08T18:37:41",
                 "target": "www.orst.edu",
                 "ttl": 3600,
                 "views": [
+                    "private",
                     "public"
                 ]
             },
@@ -347,24 +367,25 @@ Basic queries are not only limited to top-level fields. Sometime it is desirable
 .. code:: json
 
     {
-        "count": 521,
+        "count": 523,
         "next": "http://127.0.0.1:8000/api/v1/dns/mx/?page=2",
         "previous": null,
         "results": [
             {
-                "label": "rattusdev",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2727/",
-                "views": [
-                    "public"
-                ],
-                "id": 286,
-                "created": "2013-08-16T15:18:45",
-                "modified": "2013-08-16T15:18:45",
-                "fqdn": "rattusdev.nacse.org",
-                "ttl": 86400,
+                "created": "2013-11-07T12:48:40",
                 "description": "",
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1167/",
+                "fqdn": "rattusdev.nacse.org",
+                "id": 2,
+                "label": "rattusdev",
+                "modified": "2013-11-07T12:48:40",
+                "priority": 5,
                 "server": "relay.oregonstate.edu",
-                "priority": 5
+                "ttl": 86400,
+                "views": [
+                    "private",
+                    "public"
+                ]
             },
             ...
         ]
@@ -380,41 +401,39 @@ Now our results look like this:
 
     {
         "count": 9,
-        "next": null,
+        "next": "http://127.0.0.1:8000/api/v1/dns/mx/?i%3Adomain__name__exact=orst.edu&count=1&page=2",
         "previous": null,
         "results": [
             {
-                "label": "exchangemail",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/2974/",
-                "views": [
-                    "public"
-                ],
-                "id": 410,
-                "created": "2013-08-16T15:24:29",
-                "modified": "2013-08-16T15:24:29",
-                "fqdn": "exchangemail.orst.edu",
-                "ttl": 86400,
+                "created": "2013-11-07T12:56:21",
                 "description": "",
+                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1411/",
+                "fqdn": "exchangemail.orst.edu",
+                "id": 126,
+                "label": "exchangemail",
+                "modified": "2013-11-07T12:56:21",
+                "priority": 5,
                 "server": "ex1.oregonstate.edu",
-                "priority": 5
-            },
-            ...
+                "ttl": 86400,
+                "views": [
+                    "private",
+                    "public"
+                ]
+            }
         ]
     }
 
 ~~~~~~~~~~~~~~~~~~~~~~
 Filtering by Container
 ~~~~~~~~~~~~~~~~~~~~~~
-.. COMMENT! Probably shouldn't assume a fixed ID for nws. Could add a bit of stuff about the ctnr endpoint's use of this feature for illustrative purposes.
+As with the Cyder user interface, the Cyder API allows you to filter results by their associated container. You can filter by the container's name or its ID. For example, if you wanted to find all domains in the container ``nws``, you could pass the query string parameter ``ctnr=nws`` or ``ctnr_id=292`` (assuming 292 is the ID of ``nws`` in your Cyder installation). Note that you can only filter by one container at a time. It is not currently possible to find the intersection of two or more containers.
 
-As with the Cyder user interface, the Cyder API allows you to filter results by their associated container. You can filter by the container's name or its ID. For example, if you wanted to find all domains in the container ``nws``, you could pass the query string parameter ``ctnr=nws`` or ``ctnr_id=292``. (Note that you can only filter by one container at a time. It is not currently possible to find the intersection of two or more containers.)
+The ``/api/v1/core/ctnr/`` is a useful illustration of this feature, because it is used to filter the domains, ranges, users, and workgroups related to each container.
 
 ~~~~~~~~~~~~~~~~~~~~~~~
-Filtering by Key-Values
+Filtering by Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~
-.. COMMENT! Update nomenclature to refer to attributes instead of key-values.
-
-Many records have key-value pairs (also called attributes) associated with them. Specifically, the following records have key-value pairs and key-value pair filtering enabled:
+Many records have attributes associated with them. Specifically, the following records have attributes and attribute filtering enabled:
 
 * System
 * SOA
@@ -427,36 +446,44 @@ Many records have key-value pairs (also called attributes) associated with them.
 * Static Interface
 * Dynamic Interface
 
-Key value filtering is very straightforward. **Note: For technical reasons, key-value searching is limited compared to ordinary field searching. Only case insensitive exact matching is allowed for key-value searching.** It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
+Attribute filtering is very straightforward. **Note: For technical reasons, attribute searching is limited compared to ordinary field searching. Only case insensitive exact matching is allowed for attribute searching.** It is possible to access key-value records directly and perform more complex queries with field lookups, but this doesn't allow you to search for combinations of key-value pairs on the same record without more complex client-side processing.
+
+The basic format of a keyvalue query parameter is as follows:
+
+.. code::
+
+    http://127.0.0.1:8000/api/v1/[endpoint]/?a:[attribute+name]:[attribute+value]
+
+As usual, the name and value must be properly URL encoded.
 
 As an example, let's try finding all systems running Linux.
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/core/system/?k:operating+system=linux"
+    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/core/system/?a:operating+system=linux"
 
 .. code:: json
 
     {
-        "count": 363,
-        "next": "http://127.0.0.1:8000/api/v1/core/system/?k:operating+system=linux&page=2",
+        "count": 368,
+        "next": "http://127.0.0.1:8000/api/v1/core/system/?page=2&a%3AOperating+System=linux",
         "previous": null,
         "results": [
             {
-                "id": 9918,
+                "created": "2013-11-07T12:48:45",
+                "id": 13,
+                "modified": "2013-11-07T12:48:45",
                 "name": "voledev",
-                "systemkeyvalue_set": [
+                "systemav_set": [
                     {
-                        "id": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/29699/",
-                        "key": "Hardware Type",
-                        "value": "VM",
-                        "is_quoted": false
+                        "attribute": "Hardware type",
+                        "id": "http://127.0.0.1:8000/api/v1/core/system/attributes/16/",
+                        "value": "VM"
                     },
                     {
-                        "id": "http://127.0.0.1:8000/api/v1/core/system/keyvalues/29700/",
-                        "key": "Operating System",
-                        "value": "Linux",
-                        "is_quoted": false
+                        "attribute": "Operating system",
+                        "id": "http://127.0.0.1:8000/api/v1/core/system/attributes/17/",
+                        "value": "Linux"
                     }
                 ]
             },
@@ -473,98 +500,3 @@ By passing a comma separated list of fields in a query parameter named ``sort``,
 Setting Results Per Page
 ------------------------
 You may set the number of results to display per page by passing a query parameter named ``count`` with the number of records to display (up to a limit of 100).
-
-Summary of Field Lookups
-------------------------
-.. COMMENT! This section may need to be expanded to cover additional field lookup types.
-
-~~~~~
-exact
-~~~~~
-Find all rows where the queried field matches the exact query value; case sensitive. If you pass the query string parameter ``i:field__exact=Go+Beavs``, it will match fields that contain the value "Go Beavs", but not "go beavs" or "go Beavs".
-
-~~~~~~
-iexact
-~~~~~~
-Find all rows where the queried field matches the exact query value; case insensitive. If you pass the query string parameter ``i:field__iexact=Go+Beavs``, it will match fields that contain the value "Go Beavs", "go beavs", and "go Beavs", as well as any other capitalizations of the string "Go Beavs".
-
-~~~~~~~~
-contains
-~~~~~~~~
-Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i:field__contains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", and "Go Beavers!", but not "go beavs", "I love the beavs", or "Go beavers!"
-
-~~~~~~~~~
-icontains
-~~~~~~~~~
-Find all rows where the queried field contains the search value; case sensitive. If you pass the query string parameter ``i:field__icontains=Beav``, it will match fields that contain the value "Go Beavs", "I love the Beavs", "Go Beavers!", "go beavs", "I love the beavs", and "Go beavers!", as well as any other string containing the search value, regardless of case.
-
-~~
-gt
-~~
-Find all rows where the queried field contains a value that is greater than the search value.
-
-Example query:
-
-.. code::
-
-    ?i:field__gt=10
-
-~~~
-gte
-~~~
-Find all rows where the queried field contains a value that is greater than or equal to the search value.
-
-Example query:
-
-.. code::
-
-    ?i:field__gte=10
-
-~~
-lt
-~~
-Find all rows where the queried field contains a value that is less than the search value.
-
-Example query:
-
-.. code::
-
-    ?i:field__lt=10
-
-~~~
-lte
-~~~
-Find all rows where the queried field contains a value that is less than or equal to the search value.
-
-Example query:
-
-.. code::
-
-    ?i:field__lte=10
-
-~~~~~~~~~~
-startswith
-~~~~~~~~~~
-Find all rows where the queried field starts with the search value; case sensitive. If you pass the query string parameter ``i:field__startswith=Go``, it would match "Go Beavs!" and "Go Beavers!", but not "go beavs", "GO BEAVS!", or "Let's go Beavers!"
-
-~~~~~~~~~~~
-istartswith
-~~~~~~~~~~~
-Find all rows where the queried field starts with the search value; case insensitive. If you pass the query string parameter ``i:field__istartswith=Go``, it would match "Go Beavs!", "Go Beavers!", "go beavs", and "GO BEAVS!", but not "Let's go Beavers!"
-
-~~~~~~~~
-endswith
-~~~~~~~~
-Find all rows where the queried field ends with the search value; case sensitive. If you pass the query string parameter ``i:field__endswith=Beavers``, it would match "Go Beavers" and "I love the Beavers", but not "GO BEAVERS", "Go Beavers!", or "I love the Beavers."
-
-~~~~~~~~~
-iendswith
-~~~~~~~~~
-Find all rows where the queried field ends with the search value; case insensitive. If you pass the query string parameter ``i:field__iendswith=Beavers``, it would match "Go Beavers", "I love the Beavers", and "GO BEAVERS", but not "Go Beavers!" or "I love the Beavers."
-
-~~~~~~
-isnull
-~~~~~~
-Find all rows where the queried field is null or not null. If you pass the query string parameter ``i:field__isnull=False``, it would only match rows where ``field`` has a value.
-
-.. COMMENT! Add a section on obeying rate limits.

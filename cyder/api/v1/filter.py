@@ -65,13 +65,13 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         if q_attributes:
             avmodel = getattr(view, 'avmodel', None)
             if avmodel:
-                avmodel_entity = getattr(view, 'avmodel_entity', None)
+                avmodel_entity = getattr(view, 'avmodel_entity', 'entity')
                 matching = lambda k, v: set(
                     avmodel.objects.filter(
                         attribute__name__iexact=k,
                         value__iexact=v
                     ).values_list(
-                        avmodel_entity or parent_name,
+                        avmodel_entity,
                         flat=True
                     )
                 )
