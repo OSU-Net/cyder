@@ -40,9 +40,7 @@ def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
     if to_syslog:
         logger.syslog(ll, msg)
     if to_stderr:
-        stderr.write("{0}:{1}{2}\n".format(
-            log_level[4:], ' '*(12-len(log_level)),
-            msg))
+        stderr.write(msg + '\n')
 
 
 def run_command(command, command_logger=None, failure_logger=None,
