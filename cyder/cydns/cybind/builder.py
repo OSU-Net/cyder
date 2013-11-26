@@ -331,7 +331,7 @@ class DNSBuilder(object):
                 "{0} appears to be a new zone. Building {1} "
                 "with initial serial {2}".format(soa, file_meta['prod_fname'],
                                                  new_serial),
-                root_domain=root_domain, log_level='LOG_NOTICE')
+                root_domain=root_domain)
         elif int(serial) != soa.serial:
             # Looks like someone made some changes... let's nuke them.
             # We should probably email someone too.
