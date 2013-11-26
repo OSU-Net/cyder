@@ -12,8 +12,8 @@ from itertools import ifilter
 from cyder.settings import BINDBUILD
 
 from cyder.base.vcs import GitRepo
-from cyder.base.utils import (dict_merge, log, MutexMixin, set_attrs,
-                              run_command, shell_out)
+from cyder.base.utils import (dict_merge, log, MutexMixin, remove_dir_contents,
+                              run_command, set_attrs, shell_out)
 
 from cyder.core.task.models import Task
 from cyder.core.utils import fail_mail
@@ -500,6 +500,7 @@ class DNSBuilder(MutexMixin):
         self.log_debug('Building...')
 
         try:
+            remove_dir_contents(self.stage_dir)
             dns_tasks = self.get_scheduled()
 
             if not dns_tasks and not force:

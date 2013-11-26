@@ -2,6 +2,7 @@ import fcntl
 import operator
 import os
 import shlex
+import shutil
 import subprocess
 import syslog
 from sys import stderr
@@ -365,3 +366,12 @@ class MutexMixin(object):
 
     def _lock_failure():
         raise Exception('Failed to acquire mutex ({0})'.format(self.lock_file))
+
+
+def remove_dir_contents(dir_name):
+    for file_name in os.listdir(dir_name):
+        file_path = os.path.join(dir_name, file_name)
+        if os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+        else:
+            os.remove(file_path)
