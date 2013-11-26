@@ -16,7 +16,7 @@ def find_get_record_url(obj):
 
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
-                 users=False, custom=None):
+                 users=False, custom=None, update=True):
         if users:
             from cyder.core.cyuser.models import UserProfile
             objects = UserProfile.objects.filter(user__in=objects)
@@ -25,6 +25,7 @@ class Tablefier:
         self.request = request
         self.custom = custom
         self.extra_cols = None if self.custom else extra_cols
+        self.update = update
 
     @cached_property
     def first_obj(self):
@@ -43,7 +44,7 @@ class Tablefier:
         request = self.request
         if (request and request.user.get_profile().has_perm(
                 request, ACTION_UPDATE, obj_class=self.klass) and
-                hasattr(self.klass, 'get_update_url')):
+                hasattr(self.klass, 'get_update_url')) and self.update is True:
             return True
         return False
 

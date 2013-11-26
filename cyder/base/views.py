@@ -75,9 +75,10 @@ def admin_page(request):
 
             extra_cols[0]['data'] = perma_delete_data
             user_table = tablefy(lost_users, extra_cols=extra_cols, users=True,
-                                 request=request)
+                                 request=request, update=False)
 
-            superuser_table = tablefy(superusers, users=True, request=request)
+            superuser_table = tablefy(superusers, users=True, request=request,
+                                      update=False)
             user_form = EditUserForm()
 
             return render(request, 'base/admin_page.html', {
