@@ -41,13 +41,10 @@ class Tablefier:
     @cached_property
     def can_update(self):
         request = self.request
-        if request and request.user.get_profile().has_perm(
-                request, ACTION_UPDATE, obj_class=self.klass):
-            try:
-                self.klass.get_update_url()
-                return True
-            except TypeError:
-                pass
+        if (request and request.user.get_profile().has_perm(
+                request, ACTION_UPDATE, obj_class=self.klass) and
+                hasattr(self.klass, 'get_update_url')):
+            return True
         return False
 
     @cached_property
