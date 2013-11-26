@@ -6,6 +6,7 @@ from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
 def chdir_wrapper(func):
+    """A decorator that handles changing to and from stage_dir"""
     def wrapped(self, *args, **kwargs):
         old_dir = os.getcwd()
         os.chdir(self.repo_dir)
