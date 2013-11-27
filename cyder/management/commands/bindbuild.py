@@ -7,6 +7,7 @@ from optparse import make_option
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
+        ### action options ###
         make_option('-b', '--build',
                     dest='build',
                     action='store_true',
@@ -17,6 +18,7 @@ class Command(BaseCommand):
                     action='store_true',
                     default=False,
                     help="Check files into vcs and push upstream."),
+        ### logging/debug options ###
         make_option('-l', '--log-syslog',
                     dest='log_syslog',
                     action='store_true',
@@ -30,6 +32,7 @@ class Command(BaseCommand):
                     action='store_true',
                     default=False,
                     help="Print copious amounts of text."),
+        ### miscellaneous ###
         make_option('-f', '--force-build',
                     dest='force_build',
                     action='store_true',

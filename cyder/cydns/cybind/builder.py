@@ -51,8 +51,8 @@ class DNSBuilder(MutexMixin):
         }, kwargs)
         set_attrs(self, kwargs)
 
-        syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
-        self.lock_fd = None
+        if self.log_syslog:
+            syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
 
         self.repo = GitRepo(self.prod_dir, self.max_allowed_lines_changed,
             debug=self.debug, log_syslog=self.log_syslog, logger=syslog)
@@ -108,17 +108,6 @@ class DNSBuilder(MutexMixin):
                                failure_msg=failure_msg)
         except Exception as e:
             raise BuildError(e.message)
-
-    @property
-    def is_locked(self):
-        try:
-            self.lock_fd = open(self.lock_file, 'w+')
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-            return False
-        except IOError, exc_value:
-            if exc_value[0] == 11:
-                return True
 
     def status(self):
         """Print the status of the build system"""
