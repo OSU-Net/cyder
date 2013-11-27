@@ -257,6 +257,9 @@ DHCPBUILD = {
     # should be a Git repo.
     'prod_dir': '/tmp/dhcp/prod',
 
+    'lock_file': '/tmp/cyder_dhcp_lock',
+    'dhcpd': 'dhcpd',
+
     # target_file: The configuration file that will be generated
     'target_file': 'dhcpd.conf.data',
 
@@ -264,6 +267,5 @@ DHCPBUILD = {
     # don't check any file)
     'check_file': None,
 
-    'verbose_error_log': True,
-    'verbose_error_log_location': '/tmp/error.log',
+    'stop_file': '/tmp/cyder_dhcp.stop',
 }
