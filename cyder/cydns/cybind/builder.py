@@ -69,24 +69,28 @@ class DNSBuilder(MutexMixin):
 
         root_domain = kwargs.pop('root_domain', None)
         if root_domain:
-            fullmsg = "{0:20} < {1} > {2}".format(callername,
-                                               root_domain.name, msg)
+            fullmsg = "{0:24} < {1} > {2}".format(callername,
+                                                  root_domain.name, msg)
         else:
-            fullmsg = "{0:20} {1}".format(callername, msg)
+            fullmsg = "{0:24} {1}".format(callername, msg)
 
         log(fullmsg, *args, **kwargs)
 
-    def log_debug(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_DEBUG', to_stderr=self.debug, **kwargs)
+    def log_debug(self, msg, root_domain=None):
+        self.log(msg, log_level='LOG_DEBUG', to_stderr=self.debug,
+                 root_domain=root_domain)
 
-    def log_info(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_INFO', to_stderr=True, **kwargs)
+    def log_info(self, msg, root_domain=None):
+        self.log(msg, log_level='LOG_INFO', to_stderr=True,
+                 root_domain=root_domain)
 
-    def log_notice(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_NOTICE', to_stderr=True, **kwargs)
+    def log_notice(self, msg, root_domain=None):
+        self.log(msg, log_level='LOG_NOTICE', to_stderr=True,
+                 root_domain=root_domain)
 
-    def log_err(self, *args, **kwargs):
-        self.log(*args, log_level='LOG_ERR', to_stderr=True, **kwargs)
+    def log_err(self, msg, root_domain=None):
+        self.log(msg, log_level='LOG_ERR', to_stderr=True,
+                 root_domain=root_domain)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
@@ -523,7 +527,7 @@ class DNSBuilder(MutexMixin):
 
             self.log_info('Build successful')
         except (BuildError, Exception):
-            self.log_err('Error during build.')
+            self.log_err('Error during build.', to_stderr=False)
             raise
 
     def push(self, sanity_check=True):
