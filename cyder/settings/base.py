@@ -238,7 +238,7 @@ BINDBUILD = {
     # Only one zone at a time should be removed
     'max_allowed_config_lines_removed': 10,
 
-    'stop_update_file': '/tmp/stop.update',
+    'stop_file': '/tmp/cyder_dns.stop',
     'last_run_file': '/tmp/last.run',
     'log_syslog': False,
 }

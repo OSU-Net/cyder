@@ -76,26 +76,28 @@ class DNSBuilder(MutexMixin):
 
         log(fullmsg, *args, **kwargs)
 
-    def log_debug(self, msg, root_domain=None):
-        self.log(msg, log_level='LOG_DEBUG', to_stderr=self.debug,
+    def log_debug(self, msg, root_domain=None, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.debug
+        self.log(msg, log_level='LOG_DEBUG', to_stderr=to_stderr,
                  root_domain=root_domain)
 
-    def log_info(self, msg, root_domain=None):
-        self.log(msg, log_level='LOG_INFO', to_stderr=True,
+    def log_info(self, msg, root_domain=None, to_stderr=True):
+        self.log(msg, log_level='LOG_INFO', to_stderr=to_stderr,
                  root_domain=root_domain)
 
-    def log_notice(self, msg, root_domain=None):
-        self.log(msg, log_level='LOG_NOTICE', to_stderr=True,
+    def log_notice(self, msg, root_domain=None, to_stderr=True):
+        self.log(msg, log_level='LOG_NOTICE', to_stderr=to_stderr,
                  root_domain=root_domain)
 
-    def log_err(self, msg, root_domain=None):
-        self.log(msg, log_level='LOG_ERR', to_stderr=True,
+    def log_err(self, msg, root_domain=None, to_stderr=True):
+        self.log(msg, log_level='LOG_ERR', to_stderr=to_stderr,
                  root_domain=root_domain)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
             command_logger = self.log_debug
-            failure_logger = lambda msg: self.log(msg, log_level='LOG_ERR')
+            failure_logger = self.log_err
         else:
             command_logger = None
             failure_logger = None
@@ -128,9 +130,9 @@ class DNSBuilder(MutexMixin):
 
         #print "is_locked={0}".format(self.is_locked())
         #print "lock_file={0}".format(self.lock_file)
-        #print ("stop_update_file_exists={0}"
-               #.format(os.path.exists(self.stop_update_file)))
-        #print "stop_update_file={0}".format(self.stop_update_file)
+        #print ("stop_file_exists={0}"
+               #.format(os.path.exists(self.stop_file)))
+        #print "stop_file={0}".format(self.stop_file)
         #print "stage_dir_exists={0}".format(os.path.exists(self.stage_dir))
         #print "stage_dir={0}".format(self.stage_dir)
         #print "prod_dir_exists={0}".format(os.path.exists(self.prod_dir))
@@ -485,24 +487,27 @@ class DNSBuilder(MutexMixin):
                      format(view_name))
             self.build_view_config(view_name, 'master', view_stmts)
 
-    def stop_update_exists(self):
-        """
-        Look for a file referenced by `stop_update_file` and if it exists,
-        cancel the build.
-        """
-        if os.path.exists(self.stop_update_file):
-            with open(self.stop_update_file) as f:
-                msg = ("The stop_update_file ({0}) exists. Build canceled. \n"
-                       "Reason for skipped build: \n"
-                       "{1}".format(self.stop_update_file, f.read()))
-
-            fail_mail(msg, subject="DNS builds have stopped")
-            self.log_info(msg)
-            return True
-
     def build(self, clean_up=True, force=False):
-        if self.stop_update_exists():
-            return
+        try:
+            with open(self.stop_file) as stop_fd:
+                now = time.time()
+                contents = stop_fd.read()
+            last = os.path.getmtime(self.stop_file)
+
+            msg = ("The stop file ({0}) exists. Build canceled.\n"
+                   "Reason for skipped build:\n"
+                   "{1}".format(self.stop_file, contents))
+            self.log_info(msg, to_stderr=False)
+            if now - last > 1800:  # every 30 minutes
+                os.utime(self.stop_file, (now, now))
+                fail_mail(msg, subject="DNS builds have stopped")
+
+            raise BuildError(msg)
+        except IOError as e:
+            if e.errno == 2:  # IOError: [Errno 2] No such file or directory
+                pass
+            else:
+                raise
 
         self.log_debug('Building...')
 
