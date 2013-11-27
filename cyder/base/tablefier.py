@@ -24,8 +24,12 @@ class Tablefier:
         self.objects = objects
         self.request = request
         self.custom = custom
-        self.extra_cols = None if self.custom else extra_cols
-        self.update = update
+        if self.custom:
+            self.extra_cols = None
+            self.update = False
+        else:
+            self.extra_cols = extra_cols
+            self.update = update
 
     @cached_property
     def first_obj(self):
@@ -50,6 +54,9 @@ class Tablefier:
 
     @cached_property
     def views(self):
+        if self.custom:
+            return False
+
         views = hasattr(self.first_obj, 'views')
         return views
 
@@ -64,19 +71,18 @@ class Tablefier:
         for title, sort_field, value in data:
             headers.append([title, sort_field])
 
-        if not self.custom:
-            if self.extra_cols:
-                for col in self.extra_cols:
-                    headers.append([col['header'], col['sort_field']])
+        if self.extra_cols:
+            for col in self.extra_cols:
+                headers.append([col['header'], col['sort_field']])
 
-            if self.views:
-                headers.append(['Views', None])
-                if hasattr(self.objects, 'object_list'):
-                    self.objects.object_list = (
-                        self.objects.object_list.prefetch_related('views'))
+        if self.views:
+            headers.append(['Views', None])
+            if hasattr(self.objects, 'object_list'):
+                self.objects.object_list = (
+                    self.objects.object_list.prefetch_related('views'))
 
-            if self.can_update:
-                headers.append(['Actions', None])
+        if self.can_update:
+            headers.append(['Actions', None])
 
         if hasattr(self.objects, 'object_list'):
             self.objects.object_list = (self.objects.object_list
@@ -163,15 +169,14 @@ class Tablefier:
             for title, field, value in details['data']:
                 row_data.append(self.build_data(obj, value))
 
-            if not self.custom:
-                for d in extra_data:
-                    row_data.append(self.build_extra(d))
+            for d in extra_data:
+                row_data.append(self.build_extra(d))
 
-                if self.views:
-                    row_data.append(self.build_view_field(obj))
+            if self.views:
+                row_data.append(self.build_view_field(obj))
 
-                if self.can_update:
-                    row_data.append(self.build_update_field(obj))
+            if self.can_update:
+                row_data.append(self.build_update_field(obj))
 
             objs.append(obj)
             data.append(row_data)
