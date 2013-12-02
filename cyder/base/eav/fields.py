@@ -169,7 +169,11 @@ class AttributeFormField(forms.CharField):
         try:
             return Attribute.objects.get(name=value, **self.choices_query)
         except Attribute.DoesNotExist:
-            raise ValidationError("No such attribute")
+            if Attribute.objects.filter(name=value).exists():
+                raise ValidationError('This attribute is not allowed on this '
+                                      'object')
+            else:
+                raise ValidationError('No such attribute')
 
 
 # "Introspection rules" tell South which custom field arguments it needs to
