@@ -58,7 +58,7 @@ class DHCPBuilder(MutexMixin):
                    "Reason for skipped build:\n"
                    "{1}".format(self.stop_file, contents))
             self.log_info(msg, to_stderr=False)
-            if now - last > 1800:  # every 30 minutes
+            if now - last > self.stop_file_email_interval:
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DHCP builds have stopped")
 

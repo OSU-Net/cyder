@@ -239,6 +239,8 @@ BINDBUILD = {
     'max_allowed_config_lines_removed': 10,
 
     'stop_file': '/tmp/cyder_dns.stop',
+    'stop_file_email_interval': 1800,  # 30 minutes
+
     'last_run_file': '/tmp/last.run',
     'log_syslog': False,
 }
@@ -268,4 +270,5 @@ DHCPBUILD = {
     'check_file': None,
 
     'stop_file': '/tmp/cyder_dhcp.stop',
+    'stop_file_email_interval': 1800,  # 30 minutes
 }
