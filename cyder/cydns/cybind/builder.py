@@ -1,4 +1,5 @@
-#!/usr/bin/python
+from __future__ import unicode_literals
+
 import inspect
 import shutil
 import syslog
@@ -52,7 +53,7 @@ class DNSBuilder(MutexMixin):
         set_attrs(self, kwargs)
 
         if self.log_syslog:
-            syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
+            syslog.openlog(b'dnsbuild', 0, syslog.LOG_LOCAL6)
 
         self.repo = GitRepo(self.prod_dir, self.max_allowed_lines_changed,
             debug=self.debug, log_syslog=self.log_syslog, logger=syslog)
@@ -505,7 +506,7 @@ class DNSBuilder(MutexMixin):
             dns_tasks = self.get_scheduled()
 
             if not dns_tasks and not force:
-                self.log_info("Nothing to do!")
+                self.log_info('Nothing to do!')
                 return
 
             # zone files
@@ -519,9 +520,11 @@ class DNSBuilder(MutexMixin):
                 # function
                 map(lambda t: t.delete(), dns_tasks)
 
-            self.log_info('Build successful')
-        except (BuildError, Exception):
-            self.log_err('Error during build.', to_stderr=False)
+            self.log_info('DNS build successful')
+        except (BuildError, Exception) as e:
+            self.log_err('DNS build failed.\n'
+                         'Original exception: {0}'
+                         .format(e), to_stderr=False)
             raise
 
     def push(self, sanity_check=True):
@@ -530,11 +533,10 @@ class DNSBuilder(MutexMixin):
         try:
             copy_tree(self.stage_dir, self.prod_dir)
         except:
-            self.repo.clean()
+            self.repo.reset_to_head()
             raise
 
-        self.repo.commit_and_push('Update config file',
-                                  sanity_check=sanity_check)
+        self.repo.commit_and_push('Update config', sanity_check=sanity_check)
 
     def _lock_failure(self):
         self.log_err(

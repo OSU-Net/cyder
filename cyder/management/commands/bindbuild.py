@@ -1,8 +1,9 @@
-from cyder.cydns.cybind.builder import DNSBuilder, BuildError
+from optparse import make_option
+
 from django.core.management.base import BaseCommand, CommandError
 
-from core.utils import fail_mail
-from optparse import make_option
+from cyder.core.utils import fail_mail
+from cyder.cydns.cybind.builder import DNSBuilder
 
 
 class Command(BaseCommand):
@@ -37,7 +38,7 @@ class Command(BaseCommand):
                     dest='force_build',
                     action='store_true',
                     default=False,
-                    help="Rebuild zones even if they're up to date."),
+                    help="Rebuild all zones even if they're up to date."),
         make_option('-C', '--no-sanity-check',
                     dest='sanity_check',
                     action='store_false',
@@ -51,6 +52,7 @@ class Command(BaseCommand):
             val = options.pop(name)
             if val is not None:
                 builder_opts[name] = val
+            # else use settings
 
         with DNSBuilder(**builder_opts) as b:
             if options['build']:

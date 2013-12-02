@@ -265,10 +265,14 @@ DHCPBUILD = {
     # target_file: The configuration file that will be generated
     'target_file': 'dhcpd.conf.data',
 
-    # check_file: The conf file whose syntax will be checked (None means
-    # don't check any file)
+    # check_file: The conf file whose syntax will be checked (None means don't
+    # check any file)
     'check_file': None,
+
+    'max_allowed_lines_changed': 500,
 
     'stop_file': '/tmp/cyder_dhcp.stop',
     'stop_file_email_interval': 1800,  # 30 minutes
+
+    'log_syslog': False,
 }

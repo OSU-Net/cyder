@@ -35,6 +35,8 @@ def shell_out(command, use_shlex=True):
 
 def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
         logger=syslog):
+    msg = unicode(msg)
+
     ll = getattr(logger, log_level)
 
     if to_syslog:
