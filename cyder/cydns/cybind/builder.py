@@ -28,10 +28,6 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-class BuildError(Exception):
-    """Exception raised when there is an error in the build process."""
-
-
 class DNSBuilder(MutexMixin):
     """
     DNSBuilder must be instantiated from a `with` statement. Its __exit__
@@ -109,12 +105,9 @@ class DNSBuilder(MutexMixin):
             command_logger = None
             failure_logger = None
 
-        try:
-            return run_command(command, command_logger=command_logger,
-                               failure_logger=failure_logger,
-                               failure_msg=failure_msg)
-        except Exception as e:
-            raise BuildError(e.message)
+        return run_command(command, command_logger=command_logger,
+                           failure_logger=failure_logger,
+                           failure_msg=failure_msg)
 
     def status(self):
         """Print the status of the build system"""
@@ -212,7 +205,7 @@ class DNSBuilder(MutexMixin):
 
     def run_checkzone(self, zone_file, root_domain):
         """Shell out and call named-checkzone on the zone file. If it returns
-        with errors raise a BuildError.
+        with errors raise an exception.
         """
         # Check the zone file.
         self.run_command(
@@ -498,7 +491,7 @@ class DNSBuilder(MutexMixin):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DNS builds have stopped")
 
-            raise BuildError(msg)
+            raise Exception(msg)
         except IOError as e:
             if e.errno == 2:  # IOError: [Errno 2] No such file or directory
                 pass

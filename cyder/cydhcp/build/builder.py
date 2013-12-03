@@ -19,10 +19,6 @@ from cyder.base.vcs import GitRepo
 from cyder.settings import DHCPBUILD
 
 
-class BuildError(Exception):
-    """Exception raised when there is an error in the build process."""
-
-
 class DHCPBuilder(MutexMixin):
     """
     DHCPBuilder must be instantiated from a `with` statement. Its __exit__
@@ -75,12 +71,9 @@ class DHCPBuilder(MutexMixin):
             command_logger = None
             failure_logger = None
 
-        try:
-            return run_command(command, command_logger=command_logger,
-                               failure_logger=failure_logger,
-                               failure_msg=failure_msg)
-        except Exception as e:
-            raise BuildError(e.message)
+        return run_command(command, command_logger=command_logger,
+                           failure_logger=failure_logger,
+                           failure_msg=failure_msg)
 
     def build(self):
         try:
@@ -97,7 +90,7 @@ class DHCPBuilder(MutexMixin):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DHCP builds have stopped")
 
-            raise BuildError(msg)
+            raise Exception(msg)
         except IOError as e:
             if e.errno == 2:  # IOError: [Errno 2] No such file or directory
                 pass
