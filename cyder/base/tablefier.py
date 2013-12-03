@@ -41,13 +41,10 @@ class Tablefier:
     @cached_property
     def can_update(self):
         request = self.request
-        if request and request.user.get_profile().has_perm(
-                request, ACTION_UPDATE, obj_class=self.klass):
-            try:
-                self.klass.get_update_url()
-                return True
-            except TypeError:
-                pass
+        if (request and request.user.get_profile().has_perm(
+                request, ACTION_UPDATE, obj_class=self.klass) and
+                hasattr(self.klass, 'get_update_url')):
+            return True
         return False
 
     @cached_property
@@ -105,7 +102,7 @@ class Tablefier:
 
     def build_data(self, obj, value):
         if self.add_info and value == obj:
-            col = {'value': [str(value)], 'url': [None]}
+            col = {'value': [unicode(value)], 'url': [None]}
         else:
             col = {'value': [value], 'url': [self.grab_url(value)]}
         return col
