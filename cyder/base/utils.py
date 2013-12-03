@@ -54,21 +54,19 @@ def run_command(command, command_logger=None, failure_logger=None,
     out, err, returncode = shell_out(command)
 
     if returncode != 0 and not ignore_failure:
-        failure_msg = failure_msg or ('`{0}` failed in {1}'
-                                      .format(command, os.getcwd()))
+        msg = ('`{0}` failed in {1}\n\n'
+               'command: {2}\n\n'
+               .format(command, os.getcwd(), failure_msg, command))
+        if out:
+            msg += '=== stdout ===\n{0}\n'.format(out)
+        if err:
+            msg += '=== stderr ===\n{0}\n'.format(err)
+        msg = msg.rstrip('\n') + '\n'
 
         if failure_logger:
-            failure_logger(failure_msg)
+            failure_logger(msg)
 
-        exception_str = ('\n{0}\n\n'
-                         'command: {1}\n\n'.format(failure_msg, command))
-        if out:
-            exception_str += '=== stdout ===\n{0}\n'.format(out)
-        if err:
-            exception_str += '=== stderr ===\n{0}\n'.format(err)
-        exception_str = exception_str.rstrip('\n') + '\n'
-
-        raise Exception(exception_str)
+        raise Exception(msg)
 
     return out, err, returncode
 
