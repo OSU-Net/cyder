@@ -17,8 +17,9 @@
   <tbody>
     {% for row in object_table['data'] %}
       <tr id="{{ R ~ loop.index }}" data-url="{{ object_table['postback_urls'][loop.index0] }}">
+        {% set i = 0 %}
         {% for col in row %}
-          <td>
+          <td class="{{object_table['headers'][i][0] | lower}}_column">
             {% for cell in col['value'] %}
               {% if col['url'][loop.index0] %}
                 <a{% if col['class'] %} class="{{ col['class'][loop.index0] }}"{% endif %}
@@ -42,6 +43,7 @@
               {% endif %}
             {% endfor %}
           </td>
+          {% set i = i + 1 %}
         {% endfor %}
       </tr>
     {% endfor %}
