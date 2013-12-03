@@ -1,14 +1,16 @@
 from __future__ import unicode_literals
 
 import inspect
-import shutil
-import syslog
 import os
 import re
+import shutil
+import sys
+import syslog
 import time
 from distutils.dir_util import copy_tree
 from gettext import gettext as _
 from itertools import ifilter
+from traceback import format_exception
 
 from cyder.settings import BINDBUILD
 
@@ -66,7 +68,11 @@ class DNSBuilder(MutexMixin):
 
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
-        callername = "[{0}]".format(calframe[2][3])
+
+        frame_number = 2
+        while calframe[frame_number][3] == 'run_command':
+            frame_number += 1
+        callername = "[{0}]".format(calframe[frame_number][3])
 
         root_domain = kwargs.pop('root_domain', None)
         if root_domain:
@@ -80,8 +86,8 @@ class DNSBuilder(MutexMixin):
     def log_debug(self, msg, root_domain=None, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.debug
-        self.log(msg, log_level='LOG_DEBUG', to_stderr=to_stderr,
-                 root_domain=root_domain)
+        self.log(msg, log_level='LOG_DEBUG', to_syslog=False,
+                 to_stderr=to_stderr, root_domain=root_domain)
 
     def log_info(self, msg, root_domain=None, to_stderr=True):
         self.log(msg, log_level='LOG_INFO', to_stderr=to_stderr,
@@ -521,11 +527,16 @@ class DNSBuilder(MutexMixin):
                 map(lambda t: t.delete(), dns_tasks)
 
             self.log_info('DNS build successful')
-        except (BuildError, Exception) as e:
-            self.log_err('DNS build failed.\n'
-                         'Original exception: {0}'
-                         .format(e), to_stderr=False)
-            raise
+        except:
+            self.error()
+
+    def error(self):
+        ei = sys.exc_info()
+        exc_msg = ''.join(format_exception(*ei)).rstrip('\n')
+
+        self.log_err('DNS build failed.\nOriginal exception: ' + exc_msg,
+                     to_stderr=False)
+        raise
 
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()

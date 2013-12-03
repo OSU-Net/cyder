@@ -40,7 +40,8 @@ def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
     ll = getattr(logger, log_level)
 
     if to_syslog:
-        logger.syslog(ll, msg)
+        for line in msg.splitlines():
+            logger.syslog(ll, line)
     if to_stderr:
         stderr.write(msg + '\n')
 
@@ -364,7 +365,7 @@ class MutexMixin(object):
         self.log_debug("Unlock Complete.")
         return True
 
-    def _lock_failure():
+    def _lock_failure(self):
         raise Exception('Failed to acquire mutex ({0})'.format(self.lock_file))
 
 

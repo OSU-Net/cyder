@@ -3,9 +3,12 @@ from __future__ import unicode_literals
 import os
 import shlex
 import subprocess
+import sys
 import syslog
 from distutils.dir_util import copy_tree
+from traceback import format_exception
 
+from cyder.core.utils import fail_mail
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vrf.models import Vrf
@@ -52,7 +55,8 @@ class DHCPBuilder(MutexMixin):
     def log_debug(self, msg, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.debug
-        self.log(msg, log_level='LOG_DEBUG', to_stderr=to_stderr)
+        self.log(msg, log_level='LOG_DEBUG', to_syslog=False,
+                 to_stderr=to_stderr)
 
     def log_info(self, msg, to_stderr=True):
         self.log(msg, log_level='LOG_INFO', to_stderr=to_stderr)
@@ -62,6 +66,21 @@ class DHCPBuilder(MutexMixin):
 
     def log_err(self, msg, to_stderr=True):
         self.log(msg, log_level='LOG_ERR', to_stderr=to_stderr)
+
+    def run_command(self, command, log=True, failure_msg=None):
+        if log:
+            command_logger = self.log_debug
+            failure_logger = self.log_err
+        else:
+            command_logger = None
+            failure_logger = None
+
+        try:
+            return run_command(command, command_logger=command_logger,
+                               failure_logger=failure_logger,
+                               failure_msg=failure_msg)
+        except Exception as e:
+            raise BuildError(e.message)
 
     def build(self):
         try:
@@ -87,8 +106,9 @@ class DHCPBuilder(MutexMixin):
 
         self.log_debug('Building...')
 
-        with open(os.path.join(self.stage_dir, self.target_file), 'w') as f:
-            try:
+        try:
+            with open(os.path.join(self.stage_dir, self.target_file), 'w') \
+                    as f:
                 for ctnr in Ctnr.objects.all():
                     f.write(ctnr.build_legacy_classes())
                 for vrf in Vrf.objects.all():
@@ -97,10 +117,10 @@ class DHCPBuilder(MutexMixin):
                     f.write(network.build_subnet())
                 for workgroup in Workgroup.objects.all():
                     f.write(workgroup.build_workgroup())
-            except (OSError, ValueError), e:
-                self.log_err(e)
+        except:
+            self.error()
 
-        if test_syntax and self.CHECK_FILE:
+        if self.check_file:
             self.check_syntax()
 
         self.log_debug('DHCP build successful')
@@ -116,17 +136,27 @@ class DHCPBuilder(MutexMixin):
 
         self.repo.commit_and_push('Update config', sanity_check=sanity_check)
 
+    def error(self):
+        ei = sys.exc_info()
+        exc_msg = ''.join(format_exception(*ei)).rstrip('\n')
+
+        self.log_err(
+            'DHCP build failed.\nOriginal exception: ' + exc_msg,
+            to_stderr=False)
+        raise
+
     def check_syntax(self):
-        out, err, ret = shell_out("{0} -t -cf {1}".format(
+        out, err, ret = run_command("{0} -t -cf {1}".format(
             self.dhcpd, os.path.join(self.stage_dir, self.check_file)
         ))
+
         if ret != 0:
             log_msg = 'DHCP build failed due to a syntax error'
-            extra = ('{0} said:\n'
-                     '{1}'
-                     .format(self.dhcpd, err))
+            exception_msg = log_msg + ('\n{0} said:\n{1}'
+                                       .format(self.dhcpd, err))
+
             self.log_err(log_msg, to_stderr=False)
-            raise BuildError(log_msg + '\n' + extra)
+            raise BuildError(exception_message)
 
     def _lock_failure(self):
         self.log_err(
@@ -138,4 +168,4 @@ class DHCPBuilder(MutexMixin):
             'instance of the script was already running. The attempt was '
             'denied.',
             subject="Concurrent DHCP builds attempted.")
-        super(DNSBuilder, self)._lock_failure()
+        super(DHCPBuilder, self)._lock_failure()
