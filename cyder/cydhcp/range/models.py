@@ -135,7 +135,8 @@ class Range(BaseModel, ObjectUrlMixin):
         has_net = self.network is not None
         data['data'] = [
             ('Range', 'start_str', self),
-            ('Type', 'range_type', 'S' if self.range_type == 'st' else 'D'),
+            ('Type', 'range_type',
+             'static' if self.range_type == 'st' else 'dynamic'),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
