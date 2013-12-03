@@ -1,9 +1,7 @@
 from django.core.urlresolvers import reverse
 from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
                                   ACTION_UPDATE)
-from cyder.base.helpers import prettify_obj_type
-
-from helpers import cached_property
+from cyder.base.helpers import prettify_obj_type, cached_property
 
 
 def find_get_record_url(obj):
@@ -43,13 +41,10 @@ class Tablefier:
     @cached_property
     def can_update(self):
         request = self.request
-        if request and request.user.get_profile().has_perm(
-                request, ACTION_UPDATE, obj_class=self.klass):
-            try:
-                self.klass.get_update_url()
-                return True
-            except TypeError:
-                pass
+        if (request and request.user.get_profile().has_perm(
+                request, ACTION_UPDATE, obj_class=self.klass) and
+                hasattr(self.klass, 'get_update_url')):
+            return True
         return False
 
     @cached_property
@@ -82,6 +77,10 @@ class Tablefier:
             if self.can_update:
                 headers.append(['Actions', None])
 
+        if hasattr(self.objects, 'object_list'):
+            self.objects.object_list = (self.objects.object_list
+                .select_related(*[f for _, f in headers if f]))
+
         if self.add_info:
             headers.insert(0, ['Info', None])
 
@@ -103,7 +102,7 @@ class Tablefier:
 
     def build_data(self, obj, value):
         if self.add_info and value == obj:
-            col = {'value': [str(value)], 'url': [None]}
+            col = {'value': [unicode(value)], 'url': [None]}
         else:
             col = {'value': [value], 'url': [self.grab_url(value)]}
         return col
@@ -183,6 +182,7 @@ class Tablefier:
         if not self.objects:
             return None
 
+        self.headers  # generate headers first to select related objects
         objs, data, urls = self.get_data()
         return {
             'headers': self.headers,
