@@ -1,3 +1,5 @@
+# encoding=utf-8
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -81,6 +83,9 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
 
+    name = models.CharField(blank=True, max_length=50)
+    description = models.TextField(blank=True)
+
     allow_voip_phones = models.BooleanField(
         default=True, verbose_name='Allow VoIP phones')
 
@@ -95,19 +100,24 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
 
-    def __str__(self):
-        if self.range_usage or self.range_usage == 0:
-            if self.range_usage == 100:
-                return get_display(self) + " (Full)"
+    @property
+    def range_str(self):
+        return u'{0}–{1}'.format(self.start_str, self.end_str)
 
-            elif self.range_usage > 100:
-                return get_display(self) + " (Over capacity)"
-
+    def __unicode__(self):
+        if self.range_usage is not None:
+            if self.range_usage >= 100:
+                usage = u'full'
             else:
-                return get_display(self) + " ({0}% Used)".format(
-                    str(self.range_usage))
+                usage = u'{0}%'.format(str(self.range_usage))
+
+            usage = u' ({0})'.format(usage)
         else:
-            return get_display(self)
+            usage = u''
+
+        name = u' ' + self.name if self.name else u''
+
+        return u''.join((self.range_str, name, usage))
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -138,6 +148,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         data = super(Range, self).details()
         has_net = self.network is not None
         data['data'] = [
+            ('Name', 'name', self.name),
             ('Range', 'start_str', self),
             ('Domain', 'domain', self.domain),
             ('Network', 'network', self.network if has_net else ""),

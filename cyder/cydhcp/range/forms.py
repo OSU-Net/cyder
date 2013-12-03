@@ -15,6 +15,7 @@ class RangeForm(forms.ModelForm, UsabilityFormMixin):
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'range_type': forms.RadioSelect,
                    'ip_type': forms.RadioSelect}
+        exclude = 'range_usage'
 
     def __init__(self, *args, **kwargs):
         super(RangeForm, self).__init__(*args, **kwargs)

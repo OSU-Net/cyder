@@ -179,11 +179,13 @@ def create_range(range_id, start, end, range_type, subnet_id,
         n = None
         dhcp_enabled = False
 
+    name = comment[:comment.find('\n')][:50]
+
     r, created = range_usage_get_create(
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
         allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
-        is_reserved=not dhcp_enabled, domain=d)
+        is_reserved=not dhcp_enabled, domain=d, name=name, description=comment)
     r.views.add(public)
     r.views.add(private)
 
