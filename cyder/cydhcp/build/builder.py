@@ -14,7 +14,8 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
 
-from cyder.base.utils import dict_merge, log, MutexMixin, set_attrs, shell_out
+from cyder.base.utils import (dict_merge, log, MutexMixin, run_command,
+                              set_attrs, shell_out)
 from cyder.base.vcs import GitRepo
 from cyder.settings import DHCPBUILD
 
