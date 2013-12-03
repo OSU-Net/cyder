@@ -147,7 +147,7 @@ class Range(BaseModel, ObjectUrlMixin):
         start, end = four_to_two(
             self.start_upper, self.start_lower, self.end_upper, self.end_lower)
         return StaticInterface.objects.filter(
-                start_end_filter(start, end, self.ip_type)[2])
+            start_end_filter(start, end, self.ip_type)[2])
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
@@ -163,6 +163,8 @@ class Range(BaseModel, ObjectUrlMixin):
         data['data'] = [
             ('Name', 'name', self.name),
             ('Range', 'start_str', self.get_self_str(add_name=False)),
+            ('Type', 'range_type',
+             'static' if self.range_type == 'st' else 'dynamic'),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
