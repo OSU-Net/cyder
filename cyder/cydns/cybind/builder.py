@@ -486,7 +486,7 @@ class DNSBuilder(MutexMixin):
             msg = ("The stop file ({0}) exists. Build canceled.\n"
                    "Reason for skipped build:\n"
                    "{1}".format(self.stop_file, contents))
-            self.log_info(msg, to_stderr=False)
+            self.log_notice(msg, to_stderr=False)
             if now - last > self.stop_file_email_interval:
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DNS builds have stopped")
@@ -498,7 +498,7 @@ class DNSBuilder(MutexMixin):
             else:
                 raise
 
-        self.log_debug('Building...')
+        self.log_info('Building...')
 
         try:
             remove_dir_contents(self.stage_dir)

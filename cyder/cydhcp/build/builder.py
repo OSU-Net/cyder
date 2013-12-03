@@ -85,7 +85,7 @@ class DHCPBuilder(MutexMixin):
             msg = ('The stop file ({0}) exists. Build canceled.\n'
                    'Reason for skipped build:\n'
                    '{1}'.format(self.stop_file, contents))
-            self.log_info(msg, to_stderr=False)
+            self.log_notice(msg, to_stderr=False)
             if now - last > self.stop_file_email_interval:
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DHCP builds have stopped")
@@ -97,7 +97,7 @@ class DHCPBuilder(MutexMixin):
             else:
                 raise
 
-        self.log_debug('Building...')
+        self.log_info('Building...')
 
         try:
             with open(os.path.join(self.stage_dir, self.target_file), 'w') \
@@ -116,7 +116,7 @@ class DHCPBuilder(MutexMixin):
         if self.check_file:
             self.check_syntax()
 
-        self.log_debug('DHCP build successful')
+        self.log_info('DHCP build successful')
 
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
