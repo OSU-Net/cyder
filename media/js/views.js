@@ -75,6 +75,10 @@ $(document).ready(function() {
                     }, 150);
                     $('#obj-form form')[0].action = $createBtn.attr('href');
                     $('.form-btns a.submit').text('Create ' + formPrettyObjType);
+                    // Adjust this if statement to submit forms with ajax
+                    if (formObjType.indexOf('av') >= 0) {
+                        $('.form-btns a.submit').attr('class', 'btn c');
+                    };
                     $('#obj-form').slideToggle();
                 }, 'json');
         } else {
@@ -88,6 +92,11 @@ $(document).ready(function() {
                 };
             }, 150);
             $('.form-btns a.submit').text('Create ' + prettyObjType);
+
+            // Adjust this if statement to submit forms with ajax
+            if (objType.indexOf('av') >= 0) {
+                $('.form-btns a.submit').attr('class', 'btn c');
+            };
             $('#obj-form').slideToggle();
         }
     });
@@ -115,7 +124,50 @@ $(document).ready(function() {
                 initForms();
             }, 150);
             $('.form-btns a.submit').text('Update ' + pretty_obj_type);
+
+            // Adjust this if statement to submit forms with ajax
+            if (object_type.indexOf('av') >= 0) {
+                $('.form-btns a.submit').attr('class', 'btn c');
+            };
             $('#obj-form').slideDown();
         }, 'json');
+    });
+
+    function ajax_form_submit(url, form) {
+        var fields = form.find(':input').serializeArray();
+        var postData = {}
+        jQuery.each(fields, function (i, field) {
+            postData[field.name] = field.value;
+        });
+        $.post(url, postData, function(data) {
+            if (data.errors) {
+                if ($('#hidden-inner-form').find('#error').length) {
+                    $('#hidden-inner-form').find('#error').remove();
+                };
+                jQuery.each(fields, function (i, field) {
+                    if (data.errors[field.name]) {
+                        $('#id_' + field.name).after(
+                            '<p id="error"><font color="red">'
+                            + data.errors[field.name] + '</font></p>');
+                    };
+                });
+                if (data.errors['__all__']) {
+                    $('#hidden-inner-form').find('p:first').before(
+                        '<p id="error"><font color="red">'
+                        + data.errors['__all__'] + '</font></p>');
+                };
+            } else {
+                location.reload();
+            };
+        }, 'json');
+        return false;
+    };
+
+    $('#obj-form').live('submit', function(event) {
+        var url = $('#obj-form form')[0].action;
+        if (url.indexOf('av') >=0) {
+            event.preventDefault();
+            return ajax_form_submit(url, $('#obj-form'));
+        };
     });
 });

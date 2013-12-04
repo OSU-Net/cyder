@@ -85,7 +85,7 @@
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='staticinterface') and obj.range_type == 'st' %}
                   <a class="btn submit a" href={{ url('system-create', x[1].__str__()) }}>Static Interface</a>
                 {% endif %}
-                <td>
+              </td>
             </tr>
           {% else %}
             {% for record_ip, record_set in x %}

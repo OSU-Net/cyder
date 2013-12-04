@@ -1,3 +1,5 @@
+# encoding=utf-8
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -76,6 +78,13 @@ class Range(BaseModel, ObjectUrlMixin):
 
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
+
+    name = models.CharField(blank=True, max_length=50)
+    description = models.TextField(blank=True)
+
+    allow_voip_phones = models.BooleanField(
+        default=True, verbose_name='Allow VoIP phones')
+
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str')
@@ -87,19 +96,41 @@ class Range(BaseModel, ObjectUrlMixin):
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
 
-    def __str__(self):
-        if self.range_usage or self.range_usage == 0:
-            if self.range_usage == 100:
-                return get_display(self) + " (Full)"
+    @property
+    def range_str(self):
+        return u'{0}–{1}'.format(self.start_str, self.end_str)
 
-            elif self.range_usage > 100:
-                return get_display(self) + " (Over capacity)"
+    @property
+    def range_str_padded(self):
+        s = u'{0:*>15} – {1:*<15}'.format(self.start_str, self.end_str)
+        s = s.replace(u'*', u'\u00a0')
+        return s
 
-            else:
-                return get_display(self) + " ({0}% Used)".format(
-                    str(self.range_usage))
+    def get_self_str(self, padded=False, add_usage=True, add_name=True):
+        if padded:
+            range_str = self.range_str_padded
         else:
-            return get_display(self)
+            range_str = self.range_str
+
+        if add_name:
+            name = u' ' + self.name if self.name else u''
+        else:
+            name = u''
+
+        if add_usage and self.range_usage is not None:
+            if self.range_usage >= 100:
+                usage = u'full'
+            else:
+                usage = u'{0}%'.format(str(self.range_usage))
+
+            usage = u' ({0})'.format(usage)
+        else:
+            usage = u''
+
+        return u''.join((range_str, name, usage))
+
+    def __unicode__(self):
+        return self.get_self_str(padded=True)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -116,7 +147,7 @@ class Range(BaseModel, ObjectUrlMixin):
         start, end = four_to_two(
             self.start_upper, self.start_lower, self.end_upper, self.end_lower)
         return StaticInterface.objects.filter(
-                start_end_filter(start, end, self.ip_type)[2])
+            start_end_filter(start, end, self.ip_type)[2])
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
@@ -130,7 +161,10 @@ class Range(BaseModel, ObjectUrlMixin):
         data = super(Range, self).details()
         has_net = self.network is not None
         data['data'] = [
-            ('Range', 'start_str', self),
+            ('Name', 'name', self.name),
+            ('Range', 'start_str', self.get_self_str(add_name=False)),
+            ('Type', 'range_type',
+             'static' if self.range_type == 'st' else 'dynamic'),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
@@ -233,6 +267,8 @@ class Range(BaseModel, ObjectUrlMixin):
                 for ctnr in self.ctnr_set.all()]
         else:
             allow = []
+            if self.allow_voip_phones:
+                allow += ['allow members of "VoIP"']
             if self.allow == ALLOW_VRF:
                 allow += ['allow members of "{0}"'.format(
                     self.network.vrf.name)]
