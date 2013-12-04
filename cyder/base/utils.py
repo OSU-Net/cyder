@@ -167,3 +167,11 @@ class classproperty(property):
     """Enables you to make a classmethod a property"""
     def __get__(self, cls, obj):
         return self.fget.__get__(None, obj)()
+
+
+def simple_descriptor(func):
+    class SimpleDescriptor(object):
+        pass
+    SimpleDescriptor.__get__ = func
+
+    return SimpleDescriptor()

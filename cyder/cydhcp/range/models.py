@@ -9,6 +9,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
+from cyder.base.utils import simple_descriptor
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_VRF, RANGE_TYPE,
@@ -50,6 +51,15 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             existing range's `start` and `end` values to make sure that the new
             range does not overlap.
     """
+
+    @simple_descriptor
+    def pretty_type(self, obj, type):
+        if not obj:
+            return 'range'
+        elif obj.range_type == STATIC:
+            return 'static range'
+        else:  # DYNAMIC
+            return 'dynamic range'
 
     id = models.AutoField(primary_key=True)
     network = models.ForeignKey(Network, null=False, blank=False)
