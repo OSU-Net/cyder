@@ -2,7 +2,7 @@
 
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
-{% block title %}{{ pretty_obj_type + "s" }} {% endblock %}
+{% block title %}{{ pretty_obj_type|smart_capitalize + "s" }} {% endblock %}
 
 {% block sidebar %}
     {% include "core/includes/core_sidebar.html" %}
