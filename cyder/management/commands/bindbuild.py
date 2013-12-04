@@ -58,4 +58,7 @@ class Command(BaseCommand):
             if options['build']:
                 b.build(clean_up=options['push'], force=options['force_build'])
             if options['push']:
-                b.push(sanity_check=options['sanity_check'])
+                if options['build']:
+                    b.push(sanity_check=options['sanity_check'])
+                else:
+                    raise CommandError('--push requires --build')
