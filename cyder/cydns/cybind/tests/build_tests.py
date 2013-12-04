@@ -8,7 +8,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.view.models import View
 from cyder.cydns.tests.utils import random_label, random_byte
-from cyder.cydns.cybind.builder import DNSBuilder, BuildError
+from cyder.cydns.cybind.builder import DNSBuilder
 
 from cyder.cydns.tests.utils import create_fake_zone
 
@@ -165,7 +165,7 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
         for ns in root_domain3.nameserver_set.all():
             ns.delete()
 
-        self.assertRaises(BuildError, b.build_dns)
+        self.assertRaises(BaseException, b.build_dns)
 
     def test_two_file_svn_lines_changed(self):
         b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,

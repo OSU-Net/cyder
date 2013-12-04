@@ -7,7 +7,7 @@ import unittest
 
 from unittest import TestCase
 
-from cydns.cybind.builder import DNSBuilder, BuildError
+from cydns.cybind.builder import DNSBuilder
 from cydns.soa.models import SOA
 
 
@@ -86,14 +86,14 @@ class BuildScriptTests(object):
         # Make sure it made the staging dir
         self.assertTrue(os.path.isdir(self.stage_dir))
         # Ensure if fails if the directory exists
-        self.assertRaises(BuildError, b.build_staging)
+        self.assertRaises(BaseException, b.build_staging)
         # There shouldn't be errors because force=True
         b.build_staging(force=True)
 
         self.assertTrue(os.path.isdir(self.stage_dir))
         b.clear_staging()
         self.assertFalse(os.path.isdir(self.stage_dir))
-        self.assertRaises(BuildError, b.clear_staging)
+        self.assertRaises(BaseException, b.clear_staging)
         b.clear_staging(force=True)
         self.assertFalse(os.path.isdir(self.stage_dir))
 

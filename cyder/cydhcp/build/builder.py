@@ -152,7 +152,7 @@ class DHCPBuilder(MutexMixin):
                                        .format(self.dhcpd, err))
 
             self.log_err(log_msg, to_stderr=False)
-            raise BuildError(exception_message)
+            raise Exception(exception_message)
 
     def _lock_failure(self):
         self.log_err(
