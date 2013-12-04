@@ -1,3 +1,5 @@
+import os
+import fcntl
 from string import Template
 
 from django.core.urlresolvers import NoReverseMatch, reverse
@@ -143,3 +145,49 @@ class UsabilityFormMixin(object):
         self.alphabetize_all()
         self.autoselect_system()
         self.append_required_all()
+
+
+class MutexMixin(object):
+    def __enter__(self):
+        self.lock()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.unlock()
+
+    def lock(self):
+        """
+        Tries to write a lock file. Returns True if we get the lock, else
+        return False.
+        """
+        try:
+            if not os.path.exists(os.path.dirname(self.lock_file)):
+                os.makedirs(os.path.dirname(self.lock_file))
+            self.log_debug("Attempting to acquire mutex ({0})..."
+                     .format(self.lock_file))
+            self.lock_fd = open(self.lock_file, 'w+')
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.log_debug("Mutex acquired")
+            return True
+        except IOError, exc_value:
+            self.lock_fd = None
+            # IOError: [Errno 11] Resource temporarily unavailable
+            if exc_value[0] == 11:
+                self._lock_failure()
+                return False
+            else:
+                raise
+
+    def unlock(self):
+        """
+        Tries to remove the lock file.
+        """
+        if not self.lock_fd:
+            return False
+        self.log_debug("Releasing mutex ({0})...".format(self.lock_file))
+        fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+        self.log_debug("Unlock Complete.")
+        return True
+
+    def _lock_failure(self):
+        raise Exception('Failed to acquire mutex ({0})'.format(self.lock_file))
