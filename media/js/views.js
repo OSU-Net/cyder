@@ -152,7 +152,7 @@ $(document).ready(function() {
             $('.form-btns a.submit').text('Update ' + formPrettyObjType);
 
             // Adjust this if statement to submit forms with ajax
-            if (object_type.indexOf('av') >= 0) {
+            if (formObjType.indexOf('av') >= 0) {
                 $('.form-btns a.submit').attr('class', 'btn c');
             };
             $('#obj-form').slideDown();
