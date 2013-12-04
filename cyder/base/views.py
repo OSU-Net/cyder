@@ -436,14 +436,14 @@ def search_obj(request):
     return HttpResponse(json.dumps(records))
 
 
-def table_update(request, pk, object_type=None):
+def table_update(request, pk, obj_type=None):
     """
     Called from editableGrid tables when updating a field. Try to update
     an object specified by pk with the post data.
     """
-    # Infer object_type from URL, saves trouble of having to specify
+    # Infer obj_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
-    object_type = object_type or request.path.split('/')[2]
+    obj_type = obj_type or request.path.split('/')[2]
 
     Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
