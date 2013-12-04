@@ -2,9 +2,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.db.models.loading import get_model
 
-from cyder.cydns.cybind.builder import DNSBuilder, BuildError
-
-import subprocess
 from optparse import make_option
 
 import dns_migrate
@@ -12,27 +9,6 @@ import dhcp_migrate
 from lib import fix_maintain
 from lib.diffdns import diff_zones
 from lib.checkexcept import checkexcept
-
-
-def build_dns():
-    args = {'FIRST_RUN': False,
-            'PRESERVE_STAGE': False,
-            'PUSH_TO_PROD': False,
-            'BUILD_ZONES': True,
-            'LOG_SYSLOG': True,
-            'CLOBBER_STAGE': True,
-            'STAGE_ONLY': False,
-            'DEBUG': False
-            }
-    b = DNSBuilder(**args)
-
-    try:
-        b.build_dns()
-    except BuildError as why:
-        b.log(why, 'LOG_ERR')
-    except Exception as err:
-        b.log(err, 'LOG_CRIT')
-        raise
 
 
 class Command(BaseCommand):
@@ -53,11 +29,6 @@ class Command(BaseCommand):
                     dest='dns',
                     default=False,
                     help='Migrate DNS objects'),
-        make_option('-b', '--build',
-                    action='store_true',
-                    dest='build',
-                    default=False,
-                    help='Build zone files'),
         make_option('-f', '--diff',
                     action='store_true',
                     dest='diff',
@@ -105,18 +76,6 @@ class Command(BaseCommand):
         if options['dns']:
             print "Migrating DNS objects."
             dns_migrate.do_everything(skip_edu=False)
-
-        if options['build']:
-            print "Building zone files."
-            build_dns()
-
-            p = subprocess.Popen(["rndc", "reload"], stdout=subprocess.PIPE)
-            if "successful" in p.stdout.read():
-                print "rndc reloaded successfully"
-            else:
-                print "Failed to reload rndc. Do you have permission?"
-                exit(1)
-            p.stdout.close()
 
         if options['diff']:
             print "Comparing localhost to %s." % settings.VERIFICATION_SERVER
