@@ -59,18 +59,3 @@ class Command(BaseCommand):
                 b.build(clean_up=options['push'], force=options['force_build'])
             if options['push']:
                 b.push(sanity_check=options['sanity_check'])
-
-        #try:
-            #b.build_dns()
-        #except BuildError as err:
-            #msg = "FATAL: {0}".format(err)
-            #print msg
-            #b.log(msg, log_level='LOG_ERR')
-            #fail_mail(err)
-            #raise err
-        #except Exception as err:
-            #msg = "Exception: {0}".format(err)
-            #print msg
-            #b.log(msg, log_level='LOG_CRIT')
-            #fail_mail(err)
-            #raise err
