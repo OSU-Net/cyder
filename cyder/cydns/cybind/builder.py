@@ -545,7 +545,7 @@ class DNSBuilder(MutexMixin):
 
     def _lock_failure(self):
         self.log_err(
-            'DNS build script attempted to acquire the build mutux but '
+            'DNS build script attempted to acquire the build mutex but '
             'another process already has it.',
             to_stderr=False)
         fail_mail(
