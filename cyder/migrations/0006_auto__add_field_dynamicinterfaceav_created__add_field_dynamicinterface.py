@@ -356,7 +356,7 @@ class Migration(SchemaMigration):
             'prefixlen': ('django.db.models.fields.PositiveIntegerField', [], {}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Site']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'vlan': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Vlan']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
-            'vrf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Vrf']", 'null': 'True', 'blank': 'True'})
+            'vrf': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Vrf']"})
         },
         'cyder.networkav': {
             'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'NetworkAV', 'db_table': "'network_av'"},
@@ -387,6 +387,7 @@ class Migration(SchemaMigration):
         'cyder.range': {
             'Meta': {'unique_together': "(('start_upper', 'start_lower', 'end_upper', 'end_lower'),)", 'object_name': 'Range', 'db_table': "'range'"},
             'allow': ('django.db.models.fields.CharField', [], {'default': "'l'", 'max_length': '1'}),
+            'allow_voip_phones': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
             'dhcp_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'dhcpd_raw_include': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -399,6 +400,7 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
             'network': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Network']", 'null': 'True', 'blank': 'True'}),
             'range_type': ('django.db.models.fields.CharField', [], {'default': "'st'", 'max_length': '2'}),
+            'range_usage': ('django.db.models.fields.IntegerField', [], {'max_length': '3', 'null': 'True', 'blank': 'True'}),
             'start_lower': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'start_str': ('django.db.models.fields.CharField', [], {'max_length': '39'}),
             'start_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'})
@@ -443,7 +445,7 @@ class Migration(SchemaMigration):
             'primary': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1384481084'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1386205123'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'cyder.soaav': {
