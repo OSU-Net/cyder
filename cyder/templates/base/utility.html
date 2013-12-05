@@ -2,9 +2,6 @@
                        button_prefix="Create ", button_name=None) %}
   <a class="btn create-obj" data-objType="{{ obj_type }}"
      data-prettyObjType="{{ pretty_obj_type }}"
-     {% if obj_name %}
-       data-objName="{{ obj_name }}"
-     {% endif %}
      {% if data %}
        data-kwargs='{{ data }}'
      {% endif %}
