@@ -9,7 +9,7 @@
     data-objType="{{ obj_type }}"
     data-objPk="{{ obj.pk }}"
     data-prettyObjType="{{ obj.pretty_type }}"
-    data-getUrl="{{ url('core-get-record') }}"
+    data-getUrl="{{ url('get-update-form') }}"
     data-objName="{{ obj.name }}"
     data-csrfToken="{{ csrf_token }}">
   </span>
@@ -20,14 +20,14 @@
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class='static_interface') %}
     {{ create_button('static_interface', 'static_interface'|prettify_obj_type,
-                     url('cydhcp-get-record'), url('static_interface'), obj_name=obj.name) }}
+                     url('get-update-form'), url('static_interface'), obj_name=obj.name) }}
   {% endif %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamic_interface') %}
     {{ create_button('dynamic_interface', 'dynamic_interface'|prettify_obj_type,
-                     url('cydhcp-get-record'), url('dynamic_interface'), obj_name=obj.name) }}
+                     url('get-update-form'), url('dynamic_interface'), obj_name=obj.name) }}
   {% endif %}
   {% if obj_type_perm %}
-    {{ create_button('system_av', 'system_av'|prettify_obj_type, url('core-get-record'),
+    {{ create_button('system_av', 'system_av'|prettify_obj_type, url('get-update-form'),
                      url('system_av'), obj_name=obj.name, button_name="System Attribute") }}
   {% endif %}
 {% endblock %}

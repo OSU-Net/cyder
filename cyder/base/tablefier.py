@@ -4,16 +4,6 @@ from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
 from cyder.base.helpers import prettify_obj_type, cached_property
 
 
-def find_get_record_url(obj):
-    obj_type = obj._meta.db_table
-    if obj_type in DHCP_OBJECTS:
-        return reverse('cydhcp-get-record')
-    elif obj_type in DNS_OBJECTS:
-        return reverse('cydns-get-record')
-    elif obj_type in CORE_OBJECTS:
-        return reverse('core-get-record')
-
-
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
                  users=False, custom=None, update=True):
@@ -145,7 +135,7 @@ class Tablefier:
                'data': [[('pk', obj.id),
                          ('objName', obj.pretty_name),
                          ('objType', obj._meta.db_table),
-                         ('getUrl', find_get_record_url(obj)),
+                         ('getUrl', reverse('get-update-form')),
                          ('prettyObjType', obj.pretty_type)],
                         None],
                'data-kwargs': '{"obj_type": "' + str(obj._meta.db_table)

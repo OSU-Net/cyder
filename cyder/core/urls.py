@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import include, patterns, url
 
 from cyder.core.views import (core_index, core_view, core_table_update,
-                              core_get_update_form, core_search_obj)
+                              core_search_obj)
 from cyder.base.views import static_dynamic_view
 
 
@@ -21,7 +21,6 @@ urlpatterns = patterns(
     '',
     url(r'^$', core_index, name='core-index'),
 
-    url(r'^record/get/', core_get_update_form, name='core-get-record'),
     url(r'^record/search/', core_search_obj, name='core-search'),
 
     url(r'^ctnr/', include('cyder.core.ctnr.urls')),

@@ -4,7 +4,7 @@
 
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
-    {{ create_button('range_av', 'range_av'|prettify_obj_type, url('cydhcp-get-record'),
+    {{ create_button('range_av', 'range_av'|prettify_obj_type, url('get-update-form'),
                      url('range_av')) }}
   {% endif %}
 
@@ -64,7 +64,7 @@
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='address_record') %}
                   {{ create_button('address_record',
                                    'address_record'|prettify_obj_type,
-                                   url('cydns-get-record'),
+                                   url('get-update-form'),
                                    url('address_record'),
                                    data=x[-1],
                                    button_prefix="") }}
@@ -72,7 +72,7 @@
                 {% if request.user.get_profile().has_perm(request, 2, obj_class='ptr') %}
                   {{ create_button('ptr',
                                    'ptr'|prettify_obj_type,
-                                   url('cydns-get-record'),
+                                   url('get-update-form'),
                                    url('ptr'),
                                    data=x[-1],
                                    button_prefix="") }}

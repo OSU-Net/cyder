@@ -5,8 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from cyder.base.constants import get_klasses
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
-                              cy_view, cy_delete, get_update_form, search_obj,
-                              table_update)
+                              cy_view, cy_delete, search_obj, table_update)
 from cyder.cydhcp.forms import IpSearchForm
 from cyder.cydhcp.network.utils import calc_networks, calc_parent
 from cyder.cydns.address_record.models import AddressRecord
@@ -21,10 +20,6 @@ def cydhcp_view(request, pk=None):
 
 def cydhcp_create(request, pk=None):
     return cy_view(request, 'cydhcp/cydhcp_form.html', pk)
-
-
-def cydhcp_get_update_form(request):
-    return get_update_form(request)
 
 
 def cydhcp_search_obj(request):

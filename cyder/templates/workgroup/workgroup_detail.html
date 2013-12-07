@@ -5,7 +5,7 @@
 {% block extra_action_bar %}
   {% if request.user.get_profile().has_perm(request, 0, obj_class='WorkgroupAV') %}
     {{ create_button('workgroup_av', 'workgroup_av'|prettify_obj_type,
-                     url('cydhcp-get-record'), url('workgroup_av'), obj_name=obj.name,
+                     url('get-update-form'), url('workgroup_av'), obj_name=obj.name,
                      button_name="Workgroup Attribute") }}
   {% endif %}
 {% endblock %}

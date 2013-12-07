@@ -9,8 +9,7 @@ from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
 from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               BaseDetailView, BaseListView, BaseUpdateView,
-                              cy_delete, get_update_form, search_obj,
-                              table_update)
+                              cy_delete, search_obj, table_update)
 from cyder.core.cyuser.utils import perm
 
 from cyder.cydns.constants import DNS_EAV_MODELS
@@ -115,10 +114,6 @@ def _fqdn_to_domain(qd):
 
         qd['label'], qd['domain'] = label, str(domain.pk)
     return qd, domain, None
-
-
-def cydns_get_update_form(request):
-    return get_update_form(request)
 
 
 def cydns_table_update(request, pk, object_type=None):

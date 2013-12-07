@@ -1,17 +1,12 @@
 from django.shortcuts import render
 
 from cyder.base.views import (BaseCreateView, BaseDeleteView, BaseDetailView,
-                              BaseListView, BaseUpdateView,
-                              cy_view, cy_delete, get_update_form, search_obj,
-                              table_update)
+                              BaseListView, BaseUpdateView, cy_view, cy_delete,
+                              search_obj, table_update)
 
 
 def core_view(request, pk=None):
     return cy_view(request, 'core/core_view.html', pk)
-
-
-def core_get_update_form(request):
-    return get_update_form(request)
 
 
 def core_search_obj(request):
