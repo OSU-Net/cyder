@@ -52,6 +52,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             range does not overlap.
     """
 
+    @property
+    def pretty_name(self):
+        return u'{0} – {1}'.format(self.start_str, self.end_str)
+
     @simple_descriptor
     def pretty_type(self, obj, type):
         if not obj:
@@ -124,8 +128,8 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         else:
             range_str = self.range_str
 
-        if add_name:
-            name = u' ' + self.name if self.name else u''
+        if add_name and self.name:
+            name = u' ({0})'.format(self.name)
         else:
             name = u''
 
