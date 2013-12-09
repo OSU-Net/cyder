@@ -141,12 +141,15 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
-        if self.range and update_range_usage:
+        old_range = None
+        if self.range and self.id is not None and update_range_usage:
             old_range = DynamicInterface.objects.get(id=self.id).range
+
         super(DynamicInterface, self).save()
         if self.range and update_range_usage:
             self.range.save()
-            old_range.save()
+            if old_range:
+                old_range.save()
 
 
 class DynamicInterfaceAV(EAVBase):
