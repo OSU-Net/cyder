@@ -82,6 +82,36 @@ def login_session(request, username):
     return request
 
 
+def clone_perms(request, user_id):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    perms_qs = CtnrUser.objects.filter(user__id=user_id)
+    if not perms_qs.exists():
+        return HttpResponse(
+            json.dumps({'error': 'This user has no permissions'}))
+
+    users = request.POST.get('users', None)
+    if not users:
+        return HttpResponse(json.dumps({'error': 'No users provided'}))
+
+    users = users.split(',')
+
+    for user in users:
+        user = User.objects.filter(name=user)
+        if not user.exists():
+            user = User(name=user)
+            user.save()
+        else:
+            user.get()
+
+        for perm in perms_qs:
+            ctnr_user = CtnrUser(user=user, ctnr=perm.ctnr, level=perm.level)
+            ctnr_user.save()
+
+    HttpResponse(json.dumps({'success': True}))
+
+
 def delete(request, user_id):
     acting_user = User.objects.get(id=request.session['_auth_user_id'])
 
