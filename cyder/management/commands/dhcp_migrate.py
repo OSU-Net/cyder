@@ -169,11 +169,13 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
         n = None
         dhcp_enabled = False
 
+    name = comment[:comment.find('\n')][:50]
+
     r, created = range_usage_get_create(
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
         allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
-        is_reserved=not dhcp_enabled)
+        is_reserved=not dhcp_enabled, name=name, description=comment)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         attr = Attribute.objects.get(name=fix_attr_name('ipphone242'))

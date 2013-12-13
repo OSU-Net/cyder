@@ -30,12 +30,14 @@ def system_detail(request, pk):
     static_intr = []
     dynamic_intr = []
     for intr in static:
-        related_systems.update(intr.get_related_systems())
+        if intr.mac:
+            related_systems.update(intr.get_related_systems())
         static_intr.append((tablefy((intr,), request=request),
                             tablefy(intr.staticinterfaceav_set.all(),
                                     request=request)))
     for intr in dynamic:
-        related_systems.update(intr.get_related_systems())
+        if intr.mac:
+            related_systems.update(intr.get_related_systems())
         dynamic_intr.append((tablefy((intr,), request=request),
                              tablefy(intr.dynamicinterfaceav_set.all(),
                                      request=request)))

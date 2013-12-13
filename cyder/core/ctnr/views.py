@@ -33,7 +33,7 @@ def ctnr_detail(request, pk):
     ctnrWorkgroups = ctnr.workgroups.select_related()
 
     if request.user.get_profile().has_perm(
-            request, ACTION_UPDATE, obj_class='CtnrObject'):
+            request, ACTION_UPDATE, obj_class='CtnrObject', ctnr=ctnr):
 
         extra_cols, domains = create_obj_extra_cols(
             ctnr, ctnrDomains, 'domain')
@@ -64,14 +64,16 @@ def ctnr_detail(request, pk):
                                                      initial='user')
 
     if request.user.get_profile().has_perm(
-            request, ACTION_UPDATE, obj_class='CtnrUser'):
+            request, ACTION_UPDATE, obj_class='CtnrUser', ctnr=ctnr):
 
-        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers,
+                                                   actions=True)
         user_table = tablefy(users, extra_cols=extra_cols, users=True,
                              request=request)
     else:
-        users = [cu.user for cu in ctnrUsers]
-        user_table = tablefy(users, users=True, request=request)
+        extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
+        user_table = tablefy(users, extra_cols=extra_cols, users=True,
+                             request=request)
 
     add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
 
@@ -88,13 +90,14 @@ def ctnr_detail(request, pk):
     })
 
 
-def create_user_extra_cols(ctnr, ctnrusers):
+def create_user_extra_cols(ctnr, ctnrusers, actions=False):
     level_data = []
     action_data = []
     users = []
     extra_cols = [
-        {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'},
-        {'header': 'Remove', 'sort_field': 'user'}]
+        {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'}]
+    if actions:
+        extra_cols.append({'header': 'Remove', 'sort_field': 'user'})
 
     for ctnruser in ctnrusers:
         user = ctnruser.user
@@ -105,39 +108,49 @@ def create_user_extra_cols(ctnr, ctnrusers):
                 'url': '',
             }
         else:
-            level = {
-                'value': [LEVELS[ctnruser.level], '+', '-'],
-                'url': [
-                    '',
-                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id}),
-                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id})],
-                'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
-                'class': ['', 'minus', 'plus'],
-            }
+            if actions:
+                level = {
+                    'value': [LEVELS[ctnruser.level], '+', '-'],
+                    'url': [
+                        '',
+                        reverse('ctnr-update-user',
+                                kwargs={'ctnr_pk': ctnr.id}),
+                        reverse('ctnr-update-user',
+                                kwargs={'ctnr_pk': ctnr.id})],
+                    'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
+                    'class': ['', 'minus', 'plus']
+                }
+                if level['value'][0] == 'Admin':
+                    del level['value'][2]
+                    del level['url'][2]
+                    del level['img'][2]
+                    del level['class'][2]
 
-            if level['value'][0] == 'Admin':
-                del level['value'][2]
-                del level['url'][2]
-                del level['img'][2]
-                del level['class'][2]
-
-            elif level['value'][0] == 'Guest':
-                del level['value'][1]
-                del level['url'][1]
-                del level['img'][1]
-                del level['class'][1]
+                elif level['value'][0] == 'Guest':
+                    del level['value'][1]
+                    del level['url'][1]
+                    del level['img'][1]
+                    del level['class'][1]
+            else:
+                level = {
+                    'value': [LEVELS[ctnruser.level]],
+                    'url': ['']
+                }
 
         level_data.append(level)
         users.append(user)
-        action_data.append({
-            'value': 'Delete',
-            'url': reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id}),
-            'img': '/media/img/delete.png',
-            'class': 'delete remove-user'
-        })
+        if actions:
+            action_data.append({
+                'value': 'Delete',
+                'url': reverse('ctnr-update-user',
+                               kwargs={'ctnr_pk': ctnr.id}),
+                'img': '/media/img/delete.png',
+                'class': 'delete remove-user'
+            })
 
     extra_cols[0]['data'] = level_data
-    extra_cols[1]['data'] = action_data
+    if actions:
+        extra_cols[1]['data'] = action_data
 
     return extra_cols, users
 
