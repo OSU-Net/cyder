@@ -18,9 +18,9 @@ $(document).ready(function() {
         make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
 
-    $('#system_create, #delete').click( function(e) {
+    $('#system_create, #delete, .delete').click( function(e) {
         e.preventDefault();
-        if ($(this).attr('id') == 'delete') {
+        if ($(this).attr('id') == 'delete' || $(this).attr('class') == 'delete') {
             var msg = "Are you sure?";
             if (objType == 'system') {
                 msg = "Deleting this system will also delete its"
