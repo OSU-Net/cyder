@@ -290,6 +290,7 @@ def cy_delete(request):
         referer = referer.replace(referer.split(obj.get_list_url())[1], '')
     except:
         referer = request.META.get('HTTP_REFERER', '')
+
     return redirect(referer)
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
