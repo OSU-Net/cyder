@@ -46,7 +46,8 @@
       <div class="container">
         <span id="ctnr">
           <form action="{{ url('ctnr-change') }}" method="post">
-            <span>Container</span>
+              <span>Container</span>
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
             <select name="ctnr_name" class="submit-on-change">
               {% for ctnr in request.session.ctnrs %}
                 {% if ctnr == request.session.ctnr %}
