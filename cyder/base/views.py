@@ -75,9 +75,10 @@ def admin_page(request):
 
             extra_cols[0]['data'] = perma_delete_data
             user_table = tablefy(lost_users, extra_cols=extra_cols, users=True,
-                                 request=request)
+                                 request=request, update=False)
 
-            superuser_table = tablefy(superusers, users=True, request=request)
+            superuser_table = tablefy(superusers, users=True, request=request,
+                                      update=False)
             user_form = EditUserForm()
 
             return render(request, 'base/admin_page.html', {
@@ -315,15 +316,24 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
             obj_set = getattr(obj, obj_set).all()
         page_obj = make_paginator(
             request, obj_set, obj_type=name.lower().replace(' ', ''))
+        if obj_type == 'user':
+            table = tablefy(page_obj, request=request, update=False)
+        else:
+            table = tablefy(page_obj, request=request)
+
         tables.append({
             'name': name,
             'page_obj': page_obj,
-            'table': tablefy(page_obj, request=request)
+            'table': table
         })
+    if obj_type == 'user':
+        table = tablefy((obj,), info=False, request=request, update=False)
+    else:
+        table = tablefy((obj,), info=False, request=request)
 
     return render(request, template, dict({
         'obj': obj,
-        'obj_table': tablefy((obj,), info=False, request=request),
+        'obj_table': table,
         'obj_type': obj_type,
         'tables': tables
     }.items() + kwargs.items()))

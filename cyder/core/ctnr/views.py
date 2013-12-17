@@ -69,11 +69,11 @@ def ctnr_detail(request, pk):
         extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers,
                                                    actions=True)
         user_table = tablefy(users, extra_cols=extra_cols, users=True,
-                             request=request)
+                             request=request, update=False)
     else:
         extra_cols, users = create_user_extra_cols(ctnr, ctnrUsers)
         user_table = tablefy(users, extra_cols=extra_cols, users=True,
-                             request=request)
+                             request=request, update=False)
 
     add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
 
