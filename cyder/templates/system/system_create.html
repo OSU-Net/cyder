@@ -10,6 +10,8 @@
     <h3>Create a System</h3>
     <div class="inner-form" id="inner-form">
         {{ system_form.as_p() }}
+        <input type="hidden" name="csrfmiddlewaretoken"
+         value="{{ csrf_token }}"/>
     </div>
     <div class="form-btns">
         <hr>
