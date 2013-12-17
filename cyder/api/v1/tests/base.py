@@ -2,6 +2,7 @@ import json
 from django.contrib.auth.models import User
 from django.test.client import Client
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from cyder.api.authtoken.models import Token
 from cyder.base.eav.models import Attribute, EAVBase
@@ -94,16 +95,16 @@ class APITests(TestCase):
                 # further changes, such as adding views, can be done here
                 return obj
 
-    More complex implmentations are possible. For example, for records that
+    More complex implementations are possible. For example, for records that
     are mostly similar except for small differences (such as address records,
     PTR records, and interfaces), I have created abstract base classes that
     inherit from this class and create basic test data, while allowing the
     classes that inherit from it to define the case-specific data.
     """
-    __test__ = False
+    __test__ = False  # keep nose from trying to treat this as a test class
     fixtures = ['test_users/test_users.json']
 
-    client = Client()
+    client = APIClient()
 
     f_root_url = "/api/v{0}/"
     f_object_list_url = "/api/v{0}/{1}/{2}/"
