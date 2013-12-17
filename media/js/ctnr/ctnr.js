@@ -11,11 +11,13 @@ $(document).ready(function() {
     var obj_select = document.getElementsByName('obj_type');
     var add_user_form = document.getElementById('add-user-form');
     var user_clone = add_user_form.cloneNode(true);
+    var csrfToken = $('#view-metadata').attr('data-csrfToken');
     user_clone.id="user_clone";
     $(user_clone).removeAttr('style');
 
     $('.minus, .plus, .remove-user, .remove-object').click(function(e) {
         e.preventDefault();
+        alert('click');
         var url = $(this).attr('href');
         var lvl;
         var detailUrl = $(this).parent().parent().find('a:first').attr('href');
@@ -26,7 +28,7 @@ $(document).ready(function() {
             lvl = -1;
         } else if ($(this).attr('class') == 'plus') {
             lvl = 1;
-        } else if ($(this).attr('class') == 'delete.remove-user') {
+        } else if ($(this).attr('class') == 'remove-user') {
             action = 'user_remove';
         } else {
             action = 'obj_remove';
@@ -36,7 +38,9 @@ $(document).ready(function() {
             pk: pk,
             lvl: lvl,
             action: action,
+            csrfmiddlewaretoken: csrfToken,
         };
+        alert(postData.action);
 
         $.post(url, postData, function(data) {
             if (data.error) {
@@ -105,6 +109,7 @@ $(document).ready(function() {
             obj_pk: objPk,
             obj_name: objName,
             obj_type: objType,
+            csrfmiddlewaretoken: csrfToken,
         };
         if (objType == 'user') {
             postData.level = $('#user_clone input[name="level"]:checked')[0].value;

@@ -145,7 +145,7 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
                 'url': reverse('ctnr-update-user',
                                kwargs={'ctnr_pk': ctnr.id}),
                 'img': '/media/img/delete.png',
-                'class': 'delete remove-user'
+                'class': 'remove-user'
             })
 
     extra_cols[0]['data'] = level_data
