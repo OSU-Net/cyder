@@ -150,7 +150,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean_reverse()  # BasePTR
         old_range = None
-        if self.range and self.id is not None and update_range_usage:
+        if self.id is not None:
             old_range = StaticInterface.objects.get(id=self.id).range
 
         super(StaticInterface, self).save(*args, **kwargs)

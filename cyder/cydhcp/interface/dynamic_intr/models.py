@@ -142,7 +142,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
-        if self.range and self.id is not None and update_range_usage:
+        if self.id is not None:
             old_range = DynamicInterface.objects.get(id=self.id).range
 
         super(DynamicInterface, self).save()
