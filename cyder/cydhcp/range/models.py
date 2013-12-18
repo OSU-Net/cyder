@@ -104,8 +104,24 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     def range_str(self):
         return u'{0}–{1}'.format(self.start_str, self.end_str)
 
-    def __unicode__(self):
-        if self.range_usage is not None:
+    @property
+    def range_str_padded(self):
+        s = u'{0:*>15} – {1:*<15}'.format(self.start_str, self.end_str)
+        s = s.replace(u'*', u'\u00a0')
+        return s
+
+    def get_self_str(self, padded=False, add_usage=True, add_name=True):
+        if padded:
+            range_str = self.range_str_padded
+        else:
+            range_str = self.range_str
+
+        if add_name:
+            name = u' ' + self.name if self.name else u''
+        else:
+            name = u''
+
+        if add_usage and self.range_usage is not None:
             if self.range_usage >= 100:
                 usage = u'full'
             else:
@@ -115,9 +131,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         else:
             usage = u''
 
-        name = u' ' + self.name if self.name else u''
+        return u''.join((range_str, name, usage))
 
-        return u''.join((self.range_str, name, usage))
+    def __unicode__(self):
+        return self.get_self_str(padded=True)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -134,7 +151,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         start, end = four_to_two(
             self.start_upper, self.start_lower, self.end_upper, self.end_lower)
         return StaticInterface.objects.filter(
-                start_end_filter(start, end, self.ip_type)[2])
+            start_end_filter(start, end, self.ip_type)[2])
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
@@ -149,8 +166,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         has_net = self.network is not None
         data['data'] = [
             ('Name', 'name', self.name),
-            ('Range', 'start_str', self),
+            ('Range', 'start_str', self.get_self_str(add_name=False)),
             ('Domain', 'domain', self.domain),
+            ('Type', 'range_type',
+             'static' if self.range_type == 'st' else 'dynamic'),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
