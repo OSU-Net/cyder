@@ -412,8 +412,9 @@ def migrate_user():
     for username, preferred_zone_id in result:
         username = username.lower()
         user, _ = User.objects.get_or_create(username=username)
+        user = user.get_profile()
         default_ctnr = maintain_find_zone(preferred_zone_id)
-        if default_ctnr != user.default_ctnr:
+        if default_ctnr and default_ctnr != user.default_ctnr:
             user.default_ctnr = default_ctnr
             user.save()
 
