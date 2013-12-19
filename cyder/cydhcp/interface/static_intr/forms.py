@@ -42,6 +42,7 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
                                 'mac', 'vrf', 'site', 'range', 'ip_type',
                                 'next_ip', 'ip_str', 'ttl', 'workgroup',
                                 'dhcp_enabled', 'dns_enabled', 'ctnr']
+        self.fields['label'].label = "Hostname"
 
     class Meta:
         model = StaticInterface
