@@ -19,17 +19,17 @@ class DRCTTest(T):
     rule = 'DRCT'
 
     def test1(self):
-        self.assertEqual(('foo', 'bar'), self.parse('foo=:bar'))
+        self.assertEqual(('foo', 'bar'), self.parse('foo:bar'))
 
     def test2(self):
         lhs = 'foo'
         rhs = '-df:,832kjda_'
-        self.assertEqual((lhs, rhs), self.parse('{0}=:{1}'.format(lhs, rhs)))
+        self.assertEqual((lhs, rhs), self.parse('{0}:{1}'.format(lhs, rhs)))
 
     def test3(self):
         lhs = 'foo'
         rhs = '-=df:,832kjda_'
-        self.fail('{0}=:{1}'.format(lhs, rhs))
+        self.fail('{0}:{1}'.format(lhs, rhs))
 
     def test4(self):
         self.fail('foo')
@@ -48,10 +48,6 @@ class TextTest(T):
 
     def test2(self):
         t = '!foo'
-        self.fail(t)
-
-    def test3(self):
-        t = 'foo=:bar'
         self.fail(t)
 
     def test4(self):
@@ -187,7 +183,7 @@ class EXPRTests(T):
         self.assertEqual(out, self.parse(t))
 
     def test22(self):
-        t = "type=:a !(c OR !b)"
+        t = "type:a !(c OR !b)"
         out = "(('type', 'a') AND (NOT (c OR (NOT b))))"
         self.assertEqual(out, self.parse(t))
 
@@ -202,6 +198,6 @@ class EXPRTests(T):
         self.assertEqual(out, self.parse(t))
 
     def test26(self):
-        t = "type=:foo.bar !type=:baz"
+        t = "type:foo.bar !type:baz"
         out = "(('type', 'foo.bar') AND (NOT ('type', 'baz')))"
         self.assertEqual(out, self.parse(t))
