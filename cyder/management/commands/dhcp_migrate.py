@@ -169,7 +169,10 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
         n = None
         dhcp_enabled = False
 
-    name = comment[:comment.find('\n')][:50]
+    if '\n' in comment:
+        name = comment[:comment.find('\n')][:50]
+    else:
+        name = comment[:50]
 
     r, created = range_usage_get_create(
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
