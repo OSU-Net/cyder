@@ -10,10 +10,6 @@ import json
 import ipaddr
 
 
-def pretty_ranges(ranges):
-    return [(rng.str + " - " + rng.end_str) for rng in ranges]
-
-
 def find_range(ip_str):
     Range = get_model('cyder', 'range')
     ip_upper, ip_lower = one_to_two(int(ipaddr.IPAddress(ip_str)))
