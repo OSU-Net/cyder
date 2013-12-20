@@ -20,7 +20,9 @@ class FullNameTests(TestCase):
         c.save()
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.com')
+        f_c.save()
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
+                                         root_domain=f_c,
                                          description="foo.zfoo.comom")
         f_c.soa = s
         f_c.save()
@@ -63,7 +65,9 @@ class FullNameTests(TestCase):
         c.save()
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.edu')
+        f_c.save()
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
+                                         root_domain=f_c,
                                          description="foo.edu")
         f_c.soa = s
         f_c.save()
@@ -261,6 +265,7 @@ class FullNameTests(TestCase):
         cname = CNAME(label=label, domain=the_domain, target="foo")
         cname.save()
         fqdn = "*.www.x.y.z.foo.foo3"
+        the_domain.save()
         label2, the_domain2 = ensure_label_domain(fqdn)
         cname = CNAME.objects.get(fqdn=cname.fqdn)
         self.assertEqual('', cname.label)
