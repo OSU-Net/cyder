@@ -2,20 +2,19 @@ import time
 from gettext import gettext as _
 from string import Template
 
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db.models import Q, F
 from django.db import models
 
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
+from cyder.settings import MIGRATING
 
 # import reversion
 
@@ -71,11 +70,15 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM,
                                           validators=[validate_minimum])
     description = models.CharField(max_length=200, blank=True)
+    root_domain = models.ForeignKey("cyder.Domain", null=False, unique=True,
+                                    related_name="root_of_soa")
     # This indicates if this SOA's zone needs to be rebuilt
     dirty = models.BooleanField(default=False)
     is_signed = models.BooleanField(default=False)
-    search_fields = ('primary', 'contact', 'description')
-    display_fields = ('description',)
+    dns_enabled = models.BooleanField(default=True)
+
+    search_fields = ('primary', 'contact', 'description', 'root_domain__name')
+    display_fields = ('root_domain__name',)
     template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
                  "{refresh} {retry} {expire})")
@@ -88,7 +91,6 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         # We are using the description field here to stop the same SOA from
         # being assigned to multiple zones. See the documentation in the
         # Domain models.py file for more info.
-        unique_together = ('primary', 'contact', 'description')
 
     def bind_render_record(self):
         template = Template(self.template).substitute(**self.justs)
@@ -97,7 +99,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                                **self.__dict__)
 
     def __str__(self):
-        return get_display(self)
+        return self.root_domain.name
 
     def __repr__(self):
         return "<'{0}'>".format(str(self))
@@ -112,25 +114,15 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def rdtype(self):
         return 'SOA'
 
-    @property
-    def root_domain(self):
-        try:
-            return self.domain_set.get(~Q(master_domain__soa=F('soa')),
-                                       soa__isnull=False)
-        except ObjectDoesNotExist:
-            return None
-
     def details(self):
         """For tables."""
         data = super(SOA, self).details()
         data['data'] = [
-            ('Description', 'description', self),
+            ('Root Domain', 'root_domain__name', self.root_domain),
             ('Primary', 'primary', self.primary),
             ('Contact', 'contact', self.contact),
             ('Serial', 'serial', self.serial),
-            ('Expire', 'expire', self.expire),
-            ('Retry', 'retry', self.retry),
-            ('Refresh', 'refresh', self.refresh),
+            ('Enabled', 'dns_enabled', self.dns_enabled),
         ]
         return data
 
@@ -151,11 +143,13 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         return reverse('build-debug', args=[self.pk])
 
     def delete(self, *args, **kwargs):
-        if self.domain_set.exists():
+        if self.domain_set.exclude(pk=self.root_domain.pk).exists():
             raise ValidationError(
-                "Domains exist in this SOA's zone. Delete "
+                "Child domains exist in this SOA's zone. Delete "
                 "those domains or remove them from this zone before "
                 "deleting this SOA.")
+        self.root_domain.soa = None
+        self.root_domain.save(override_soa=True)
         super(SOA, self).delete(*args, **kwargs)
 
     def has_record_set(self, view=None, exclude_ns=False):
@@ -164,7 +158,10 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 return True
         return False
 
-    def schedule_rebuild(self, commit=True):
+    def schedule_rebuild(self, commit=True, force=False):
+        if MIGRATING and not force:
+            return
+
         Task.schedule_zone_rebuild(self)
         self.dirty = True
         if commit:
@@ -182,7 +179,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
             db_self = SOA.objects.get(pk=self.pk)
             fields = [
                 'primary', 'contact', 'expire', 'retry', 'refresh',
-                'description'
+                'root_domain',
             ]
             # Leave out serial and dirty so rebuilds don't cause a never ending
             # build cycle
@@ -190,7 +187,16 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 if getattr(db_self, field) != getattr(self, field):
                     self.schedule_rebuild(commit=False)
 
+        if self.pk:
+            root_children = [d.pk for d in
+                             self.root_domain.get_children_recursive()]
+            for domain in self.domain_set.exclude(pk__in=root_children):
+                domain.soa = None
+                domain.save(override_soa=True)
+
         super(SOA, self).save(*args, **kwargs)
+        self.root_domain.soa = self
+        self.root_domain.save()
 
         if new:
             # Need to call this after save because new objects won't have a pk

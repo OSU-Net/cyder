@@ -19,10 +19,12 @@ API_VERSION = '1'
 
 def build_sample_domain():
     """Build SOA, domain, view, and nameserver records for testing."""
+    domain, _ = Domain.objects.get_or_create(name="domain")
     soa, _ = SOA.objects.get_or_create(
         primary="ns1.oregonstate.edu", contact="hostmaster.oregonstate.edu",
-        description="Test SOA")
-    domain, _ = Domain.objects.get_or_create(name="domain", soa=soa)
+        root_domain=domain, description="Test SOA")
+    domain.soa = soa
+    domain.save()
     view, _ = View.objects.get_or_create(name='public')
     nameserver, _ = Nameserver.objects.get_or_create(
         domain=domain, server="ns1.oregonstate.edu", ttl=3600)
@@ -33,8 +35,7 @@ def build_sample_domain():
 def build_domain(label, domain_obj):
     """Create a domain from a label and domain object."""
     domain_name = label + "." + domain_obj.name
-    domain, _ = Domain.objects.get_or_create(
-        name=domain_name, soa=domain_obj.soa)
+    domain, _ = Domain.objects.get_or_create(name=domain_name)
     return domain
 
 

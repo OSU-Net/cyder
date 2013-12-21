@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.cydns.soa.models import SOA
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
@@ -85,8 +84,8 @@ class Domain(BaseModel, ObjectUrlMixin):
                             validators=[validate_domain_name])
     master_domain = models.ForeignKey("self", null=True,
                                       default=None, blank=True)
-    soa = models.ForeignKey(SOA, null=True, default=None, blank=True,
-                            verbose_name='SOA')
+    soa = models.ForeignKey("cyder.SOA", null=True, default=None,
+                            blank=True, verbose_name='SOA')
     is_reverse = models.BooleanField(default=False)
     # This indicates if this domain (and zone) needs to be rebuilt
     dirty = models.BooleanField(default=False)
@@ -123,8 +122,8 @@ class Domain(BaseModel, ObjectUrlMixin):
         data = super(Domain, self).details()
         data['data'] = [
             ('Name', 'name', self),
-            ('Master Domain', 'master_domain', self.master_domain),
-            ('SOA', 'soa', self.soa),
+            ('SOA', 'soa__root_domain__name', self.soa),
+            ('Master Domain', 'master_domain__name', self.master_domain),
             ('Delegated', 'delegated', self.delegated),
         ]
         return data
@@ -140,6 +139,10 @@ class Domain(BaseModel, ObjectUrlMixin):
         ]}
 
     def delete(self, *args, **kwargs):
+        override_soa = kwargs.pop('override_soa', False)
+        if not override_soa:
+            self.validate_root_domain()
+
         self.check_for_children()
         if self.is_reverse:
             self.reassign_reverse_delete()
@@ -150,30 +153,35 @@ class Domain(BaseModel, ObjectUrlMixin):
         super(Domain, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        override_soa = kwargs.pop('override_soa', False)
+        if not override_soa:
+            self.validate_root_domain()
+            self.full_clean()
+
         if not self.pk:
             new_domain = True
+            if self.master_domain and self.master_domain.soa:
+                self.soa = self.master_domain.soa
         else:
             new_domain = False
             db_self = Domain.objects.get(pk=self.pk)
             # Raise an exception...
             # If our soa is different AND it's non-null AND we have records in
-            # this domain AND EITHER
-            #       the new soa has a record domain with no nameservers
-            #   OR
-            #       it has no root domain, which means we are going to
-            #       be the root domain, and we have no nameserver records.
-            # TODO: fix the view bug
-            if (db_self.soa != self.soa and
-                self.soa and self.has_record_set() and
-                (self.soa.root_domain and
-                not self.soa.root_domain.nameserver_set.exists() or
-                not self.soa.root_domain and
-                 not self.nameserver_set.all().exists())):
+            # this domain AND the new soa has a record domain with no
+            # nameservers. NOTE: All SOAs now require a root domain.
+            # TODO: fix the view bug (???)
+            if db_self.soa != self.soa and self.soa and self.has_record_set():
+                if not self.soa.root_domain.nameserver_set.exists():
                     raise ValidationError("By changing this domain's SOA you "
                                           "are attempting to create a zone "
                                           "whose root domain has no NS "
                                           "record.")
+
+        if self.soa:
+            for dom in self.domain_set.filter(soa=None, master_domain=self):
+                dom.soa = self.soa
+                dom.save(override_soa=True)
+
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:
             # Collect any ptr's that belong to this new domain.
@@ -211,10 +219,23 @@ class Domain(BaseModel, ObjectUrlMixin):
                 raise ValidationError("Child domains rely on this domain's "
                                       "name remaining the same.")
 
+    def validate_root_domain(self):
+        root_of_soa = self.root_of_soa.all()
+        if root_of_soa and root_of_soa[0] != self.soa:
+            raise ValidationError("Cannot delete domain or change its SOA "
+                                  "because it is a root domain.")
+
     def check_for_children(self):
         if self.domain_set.exists():
             raise ValidationError("Before deleting this domain, please "
                                   "remove its children.")
+
+    def get_children_recursive(self):
+        children = set(self.domain_set.all())
+        for child in list(children):
+            children |= child.get_children_recursive()
+
+        return children
 
     def has_record_set(self, view=None, exclude_ns=False):
         object_sets = [

@@ -73,7 +73,7 @@ class Zone(object):
             soa, _ = SOA.objects.get_or_create(
                 primary=primary, contact=contact, refresh=refresh,
                 retry=retry, expire=expire, minimum=minimum,
-                description='SOA for %s zone' % self.dname)
+                root_domain=self.domain, description='')
             return soa
         else:
             return None

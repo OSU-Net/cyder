@@ -150,13 +150,12 @@ class PermissionsTest(TestCase):
         }
 
         # initialize obj into ctnrs
-        obj = SOA()
+        domain = Domain(id=None, name='foo')
+        domain.save()
+        obj = SOA(root_domain=domain)
         obj.primary = '192.168.1.1'
         obj.contact = '192.168.1.1'
         obj.save()
-        domain = Domain(id=None, name='foo')
-        domain.soa = obj
-        domain.save()
         self.ctnr_admin.domains.add(domain)
         self.ctnr_user.domains.add(domain)
         self.ctnr_guest.domains.add(domain)
