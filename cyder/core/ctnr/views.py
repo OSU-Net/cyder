@@ -144,7 +144,7 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
                 'value': 'Delete',
                 'url': reverse('ctnr-remove-user', kwargs={
                     'ctnr_pk': ctnr.id, 'user_pk': user.id}),
-                'img': '/media/img/delete.png',
+                'img': '/media/img/remove.png',
                 'class': 'delete'
             })
 
@@ -170,7 +170,7 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
             'value': 'Delete',
             'url': reverse('ctnr-remove-object', kwargs={
                 'ctnr_pk': ctnr.id, 'obj_type': obj_type, 'obj_pk': obj.pk}),
-            'img': '/media/img/delete.png',
+            'img': '/media/img/remove.png',
             'class': 'delete'
         })
         objs.append(obj)
