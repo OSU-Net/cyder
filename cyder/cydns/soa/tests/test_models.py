@@ -17,7 +17,8 @@ class SOATests(TestCase):
         pass
 
     def do_generic_add(self, primary, contact, retry, refresh, description):
-        soa = SOA(primary=primary, contact=contact,
+        d = Domain.objects.create(name=description)
+        soa = SOA(primary=primary, contact=contact, root_domain=d,
                   retry=retry, refresh=refresh, description=description)
         soa.save()
         soa.save()
@@ -31,7 +32,7 @@ class SOATests(TestCase):
         contact = "admin.oregonstate.edu"
         retry = 1234
         refresh = 1234123
-        description = "1"
+        description = "bluh"
         self.do_generic_add(primary, contact, retry, refresh,
                             description=description)
         soa = SOA.objects.filter(primary=primary, contact=contact,
@@ -46,7 +47,7 @@ class SOATests(TestCase):
         contact = "admf.asdf"
         retry = 432152
         refresh = 1235146134
-        description = "2"
+        description = "bloh"
         self.do_generic_add(primary, contact, retry, refresh,
                             description=description)
         soa = SOA.objects.filter(primary=primary, contact=contact,
@@ -57,7 +58,8 @@ class SOATests(TestCase):
 
         primary = "ns1.derp.com"
         contact = "admf.asdf"
-        soa = SOA(primary=primary, contact=contact)
+        d = Domain.objects.create(name="bwah")
+        soa = SOA(primary=primary, contact=contact, root_domain=d)
         soa.save()
         self.assertTrue(
             soa.serial and soa.expire and soa.retry and soa.refresh)
@@ -68,7 +70,7 @@ class SOATests(TestCase):
         contact = "admin.oregonstate.edu"
         retry = 1234
         refresh = 1234123
-        description = "3"
+        description = "bluk"
         soa = self.do_generic_add(
             primary, contact, retry, refresh, description=description)
         soa.delete()
@@ -80,7 +82,7 @@ class SOATests(TestCase):
         contact = "admf.asdf"
         retry = 432152
         refresh = 1235146134
-        description = "4"
+        description = "blook"
         soa = self.do_generic_add(
             primary, contact, retry, refresh, description=description)
         soa.delete()
@@ -89,7 +91,7 @@ class SOATests(TestCase):
         self.assertTrue(len(soa) == 0)
 
         # Add dup
-        description = "4"
+        description = "blork"
         soa = self.do_generic_add(
             primary, contact, retry, refresh, description=description)
         soa.save()
@@ -108,11 +110,12 @@ class SOATests(TestCase):
         self.assertRaises(ValidationError, soa.save)
 
     def test_chain_soa_domain_add(self):
-        data = {'primary': "ns1.foo.com", 'contact': "email.foo.com"}
-        soa = SOA(**data)
-        soa.save()
         d0 = Domain(name='com')
         d0.save()
+        data = {'primary': "ns1.foo.com", 'contact': "email.foo.com",
+                'root_domain':d0}
+        soa = SOA(**data)
+        soa.save()
         d1 = Domain(name='foo.com', soa=soa)
         d1.save()
         self.assertTrue(soa == d1.soa)

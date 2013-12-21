@@ -94,11 +94,11 @@ def validate_zone_soa(domain, master_domain):
     if not domain:
         raise Exception("You called this function wrong")
 
-    if not domain.soa:
+    if not domain.soa or domain.soa.pk is None:
         return
 
     zone_domains = domain.soa.domain_set.all()
-    root_domain = find_root_domain(domain.soa)
+    root_domain = domain.soa.root_domain
 
     if not root_domain:  # No one is using this domain.
         return
@@ -110,7 +110,7 @@ def validate_zone_soa(domain, master_domain):
         # Someone uses this soa, make sure the domain is part of that
         # zone (i.e. has a parent in the zone or is the root domain of
         # the zone).
-        if root_domain == domain or root_domain.master_domain == domain:
+        if root_domain == domain:
             return
         raise ValidationError("This SOA is used for a different zone.")
 
@@ -368,6 +368,12 @@ def validate_reverse_name(reverse_name, ip_type):
         :type reverse_name: str
     """
     _name_type_check(reverse_name)
+    for suffix in ["in-addr.arpa", "ip6.arpa", "arpa"]:
+        if reverse_name == suffix:
+            return
+        elif reverse_name[-1*len(suffix):] == suffix:
+            reverse_name = reverse_name[:-1*len(suffix)]
+            reverse_name = reverse_name.rstrip('.')
 
     valid_ipv6 = "0123456789AaBbCcDdEeFf"
 

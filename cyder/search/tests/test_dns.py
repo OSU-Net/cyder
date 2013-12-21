@@ -37,15 +37,15 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 2)
         self.assertEqual(len(res['DOMAIN']), 2)
 
-        res, error = self.search("wee1.wee.mozilla.com type=:SOA")
+        res, error = self.search("wee1.wee.mozilla.com type:SOA")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
         self.assertEqual(len(res['NS']), 0)
         self.assertEqual(len(res['DOMAIN']), 0)
 
         res, error = self.search(
-            "wee1.wee.mozilla.com type=:NS OR "
-            "wee.wee.mozilla.com type=:DOMAIN")
+            "wee1.wee.mozilla.com type:NS OR "
+            "wee.wee.mozilla.com type:DOMAIN")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 0)
         self.assertEqual(len(res['NS']), 1)
@@ -77,38 +77,38 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['A']), 1)
         self.assertEqual(len(res['PTR']), 1)
 
-        res, error = self.search("host1.wee2.wee.mozilla.com type=:A")
+        res, error = self.search("host1.wee2.wee.mozilla.com type:A")
         self.assertFalse(error)
         self.assertEqual(len(res['A']), 1)
         self.assertEqual(len(res['PTR']), 0)
 
-        res, error = self.search("host1.wee2.wee.mozilla.com type=:PTR")
+        res, error = self.search("host1.wee2.wee.mozilla.com type:PTR")
         self.assertFalse(error)
         self.assertEqual(len(res['A']), 0)
         self.assertEqual(len(res['PTR']), 1)
 
-        res, error = self.search("host1.wee2.wee.mozilla.com type=:A "
-                                 "type=:PTR")
+        res, error = self.search("host1.wee2.wee.mozilla.com type:A "
+                                 "type:PTR")
         self.assertFalse(error)
         self.assertEqual(len(res['A']), 0)
         self.assertEqual(len(res['PTR']), 0)
 
     def test_integration3_zone(self):
         root_domain = create_fake_zone("wee3.wee.mozilla.com", "")
-        res, error = self.search("zone=:wee3.wee.mozilla.com")
+        res, error = self.search("zone:wee3.wee.mozilla.com")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
         self.assertEqual(len(res['NS']), 1)
         cn = CNAME(label="host1", domain=root_domain, target="whop.whop")
         cn.save()
-        res, error = self.search("zone=:wee3.wee.mozilla.com host1")
+        res, error = self.search("zone:wee3.wee.mozilla.com host1")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 0)
         self.assertEqual(len(res['NS']), 0)
         self.assertEqual(len(res['CNAME']), 1)
 
-        res, error = self.search("zone=:wee3.wee.mozilla.com "
-                                 "type=:CNAME")
+        res, error = self.search("zone:wee3.wee.mozilla.com "
+                                 "type:CNAME")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 0)
         self.assertEqual(len(res['NS']), 0)

@@ -5,7 +5,15 @@ from django.core.exceptions import ValidationError
 from cyder.cydns.view.validation import validate_views
 
 
-class DNSForm(ModelForm):
+class ViewChoiceForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ViewChoiceForm, self).__init__(*args, **kwargs)
+        if 'views' in self.fields:
+            from cyder.cydns.view.models import View
+            self.fields['views'].initial = View.objects.all()
+
+
+class DNSForm(ViewChoiceForm):
     comment = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def clean(self):
