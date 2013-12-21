@@ -5,7 +5,7 @@ import sys
 from conrad import Conrad
 
 
-API_TOKEN = "b6ccef771d9a002ba3a2a3d4c4335f178fdc1e5f"
+API_TOKEN = "62251cb1a65617e329e48d1adec9666d3d6d2c6c"
 BASE_URL = "http://127.0.0.1:8000/api/v1/"
 
 
@@ -34,44 +34,49 @@ def api_get_csv(path, fields=None, params=None, attributes=None, separator=";",
         fields = c.result[0].keys()
 
     # Build the header row.
-    csv = separator.join(fields)
+    header = separator.join(fields)
     if attributes:
-        csv += (separator + separator.join(attributes))
-    csv += "\n"
+        header += (separator + separator.join(attributes))
+    header += "\n"
+    sys.stdout.write(header)
 
     num_results = 0
+
+    line = ""
 
     while True:
         for record in c.result:
             for field in fields:
-                csv += (str(record[field]) + separator)
+                line += (str(record[field]) + separator)
 
             if attributes:
-                #
-                keyvalues = record[
-                    next(itertools.ifilter(lambda x: x.endswith("keyvalue_set"),
-                                           record),
-                         None)]
+                avset_name = next(itertools.ifilter(
+                    lambda x: x.endswith("av_set"), record), None)
+                if avset_name is None:
+                    raise Exception("You tried to filter by attributes, but "
+                                    "this record type does not appear to "
+                                    "support them.")
+
+                keyvalues = record[avset_name]
 
                 for attribute in attributes:
                     for kv in keyvalues:
-                        if kv['key'] == attribute:
-                            csv += (str(kv['value']) + separator)
+                        if kv['attribute'].lower() == attribute.lower():
+                            line += (str(kv['value']) + separator)
                             break
                     else:
                         # Not found, but we still want a blank cell where the
                         # value would be.
-                        csv += separator
+                        line += separator
 
-            csv += '\n'
+            print line
+            line = ""
             num_results += 1
             if limit and num_results >= limit:
                 break
 
         if not c.get_next():
             break
-
-    return csv
 
 
 def main():
@@ -99,10 +104,10 @@ def main():
     if args.attributes:
         args.attributes = args.attributes.split(',')
 
-    #sys.stdout.write(api_get_csv(args.path, fields=args.fields,
-    #                             params=args.params, attributes=args.attributes,
-    #                             separator=args.separator, limit=args.limit))
-    sys.stdout.write(api_get_csv(**vars(args)))
+    if args.fields:
+        args.fields = args.fields.split(',')
+
+    api_get_csv(**vars(args))
 
 if __name__ == "__main__":
     main()
