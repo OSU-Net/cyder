@@ -19,6 +19,7 @@ class RangeBase(APITests, APIEAVTestMixin):
             'vlan': self.vlan,
             'site': self.site,
             'vrf': self.vrf,
+            'domain': self.domain,
         }
 
 
