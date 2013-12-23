@@ -11,18 +11,64 @@ class Migration(SchemaMigration):
         # Removing unique constraint on 'SOA', fields ['primary', 'contact', 'description']
         db.delete_unique('soa', ['primary', 'contact', 'description'])
 
-        # Adding field 'SOA.root_domain'
-        db.add_column('soa', 'root_domain',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='root_of_soa', unique=True, to=orm['cyder.Domain']),
+        # Adding field 'Range.domain'
+        db.add_column('range', 'domain',
+                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cyder.Domain'], null=True),
                       keep_default=False)
+
+        # Adding M2M table for field views on 'Range'
+        m2m_table_name = db.shorten_name('range_views')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('range', models.ForeignKey(orm['cyder.range'], null=False)),
+            ('view', models.ForeignKey(orm['cyder.view'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['range_id', 'view_id'])
+
+        # Deleting field 'DynamicInterface.domain'
+        db.delete_column('dynamic_interface', 'domain_id')
 
         # Adding field 'SOA.dns_enabled'
         db.add_column('soa', 'dns_enabled',
                       self.gf('django.db.models.fields.BooleanField')(default=True),
                       keep_default=False)
 
+        # Adding field 'SOA.root_domain'
+        if not db.dry_run:
+            soa_rdf = self.gf('django.db.models.fields.related.ForeignKey')
+            db.add_column('soa', 'root_domain',
+                          soa_rdf(default=0, related_name='root_of_soa', unique=False, to=orm['cyder.Domain']),
+                          keep_default=False)
+            for soa in orm.SOA.objects.all():
+                description = soa.description.split(' ')
+                if len(description) > 3:
+                    fqdn = description[2]
+                    root_domain = orm.Domain.objects.get(name=fqdn)
+                    existing = soa.objects.filter(root_domain=root_domain)
+                    if existing:
+                        existing = existing[0]
+                        for dom in soa.domain_set:
+                            dom.soa = existing
+                            dom.save(override_soa=True)
+                        soa.root_domain = None
+                        soa.delete()
+                    else:
+                        soa.root_domain = root_domain
+                        soa.save()
+
 
     def backwards(self, orm):
+        # Deleting field 'Range.domain'
+        db.delete_column('range', 'domain_id')
+
+        # Removing M2M table for field views on 'Range'
+        db.delete_table(db.shorten_name('range_views'))
+
+        # Adding field 'DynamicInterface.domain'
+        db.add_column('dynamic_interface', 'domain',
+                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cyder.Domain'], null=True),
+                      keep_default=False)
+
         # Deleting field 'SOA.root_domain'
         db.delete_column('soa', 'root_domain_id')
 
@@ -159,7 +205,6 @@ class Migration(SchemaMigration):
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
             'ctnr': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Ctnr']"}),
             'dhcp_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'domain': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Domain']", 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_seen': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'max_length': '11', 'blank': 'True'}),
             'mac': ('cyder.core.fields.MacAddrField', [], {'blank': 'True', 'max_length': '17', 'dhcp_enabled': "'dhcp_enabled'"}),
@@ -250,6 +295,7 @@ class Migration(SchemaMigration):
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'dhcp_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'dhcpd_raw_include': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'domain': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['cyder.Domain']", 'null': 'True'}),
             'end_lower': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'end_str': ('django.db.models.fields.CharField', [], {'max_length': '39'}),
             'end_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
@@ -263,7 +309,8 @@ class Migration(SchemaMigration):
             'range_usage': ('django.db.models.fields.IntegerField', [], {'max_length': '3', 'null': 'True', 'blank': 'True'}),
             'start_lower': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
             'start_str': ('django.db.models.fields.CharField', [], {'max_length': '39'}),
-            'start_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'})
+            'start_upper': ('django.db.models.fields.BigIntegerField', [], {'null': 'True'}),
+            'views': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['cyder.View']", 'symmetrical': 'False', 'blank': 'True'})
         },
         'cyder.rangeav': {
             'Meta': {'unique_together': "(('entity', 'attribute'),)", 'object_name': 'RangeAV', 'db_table': "'range_av'"},
@@ -303,7 +350,7 @@ class Migration(SchemaMigration):
             'refresh': ('django.db.models.fields.PositiveIntegerField', [], {'default': '180'}),
             'retry': ('django.db.models.fields.PositiveIntegerField', [], {'default': '86400'}),
             'root_domain': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'root_of_soa'", 'unique': 'True', 'to': "orm['cyder.Domain']"}),
-            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1387575056'}),
+            'serial': ('django.db.models.fields.PositiveIntegerField', [], {'default': '1387767588'}),
             'ttl': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3600', 'null': 'True', 'blank': 'True'})
         },
         'cyder.soaav': {
