@@ -1,15 +1,15 @@
 from django.forms import ModelForm
-from django import forms
-
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.eav.forms import get_eav_form
 from cyder.cydns.soa.models import SOA, SOAAV
 
 
-class SOAForm(ModelForm):
+class SOAForm(ModelForm, UsabilityFormMixin):
     class Meta:
         model = SOA
-        fields = ('description', 'primary', 'contact', 'expire', 'retry',
-                  'refresh', 'minimum', 'ttl', 'is_signed')
+        fields = ('root_domain', 'primary', 'contact', 'expire',
+                  'retry', 'refresh', 'minimum', 'ttl', 'description',
+                  'is_signed', 'dns_enabled')
         exclude = ('serial', 'dirty',)
 
 

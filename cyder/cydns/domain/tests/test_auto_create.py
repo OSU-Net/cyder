@@ -12,11 +12,10 @@ class AutoCreateTests(TestCase):
     """
 
     def test_delegation_block(self):
-        s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
-                                         description="foo")
         c = Domain(name='com')
-        c.soa = s
         c.save()
+        s, _ = SOA.objects.get_or_create(primary="foo", contact="Foo",
+                                         root_domain=c, description="foo")
         self.assertFalse(c.purgeable)
         f_c = Domain(name='foo.com')
         f_c.delegated = True
@@ -47,8 +46,6 @@ class AutoCreateTests(TestCase):
         f_c = Domain(name='foo.moo')
         f_c.save()
         s, _ = SOA.objects.get_or_create(primary="bar23", contact="Foo",
-                                         description="bar")
-        f_c.soa = s
-        f_c.save()
+                                         root_domain=f_c, description="bar")
 
         self.assertRaises(ValidationError, ensure_label_domain, "baz.moo")

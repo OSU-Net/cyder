@@ -21,7 +21,7 @@ AND = <letter+>:and_ ?(and_ == 'AND') -> self.AND_op()
 OR = <letter+>:or_ ?(or_ == 'OR') -> self.OR_op()
 
 # Directive
-EQ = '=:'
+EQ = ':'
 d_lhs = letter | '_'
 d_rhs = letterOrDigit | special | '/'
 DRCT = <d_lhs+>:d EQ <d_rhs+>:v -> self.directive(d, v)

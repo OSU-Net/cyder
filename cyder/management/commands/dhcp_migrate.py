@@ -420,13 +420,18 @@ def migrate_dynamic_hosts():
 
 def migrate_user():
     print "Migrating users."
-    cursor.execute("SELECT username FROM user "
+    cursor.execute("SELECT username, preferred_zone FROM user "
                    "WHERE username IN ( "
                    "SELECT DISTINCT username FROM zone_user )")
     result = cursor.fetchall()
-    for username, in result:
+    for username, preferred_zone_id in result:
         username = username.lower()
         user, _ = User.objects.get_or_create(username=username)
+        user = user.get_profile()
+        default_ctnr = maintain_find_zone(preferred_zone_id)
+        if default_ctnr and default_ctnr != user.default_ctnr:
+            user.default_ctnr = default_ctnr
+            user.save()
 
 
 def migrate_zone_user():

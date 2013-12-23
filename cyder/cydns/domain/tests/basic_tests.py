@@ -66,11 +66,9 @@ class DomainTests(TestCase):
         b_m = Domain(name='baz.moo')
         b_m.save()
 
-        s = SOA(primary="ns1.foo.com", contact="asdf", description="test")
+        s = SOA(primary="ns1.foo.com", contact="asdf",
+                description="test", root_domain=f_m)
         s.save()
-
-        f_m.soa = s
-        f_m.save()
 
         b_m.soa = s
         self.assertRaises(ValidationError, b_m.save)
@@ -88,31 +86,27 @@ class DomainTests(TestCase):
         m.soa = None
         self.assertRaises(ValidationError, m.save)
 
-        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2")
-        s2.save()
+        s2 = SOA(primary="ns1.foo.com", contact="asdf",
+                 description="test2", root_domain=m)
+        self.assertRaises(ValidationError, s2.save)
 
-        m.soa = s2
-        self.assertRaises(ValidationError, m.save)
 
     def test_2_soa_validators(self):
+        d, _ = Domain.objects.get_or_create(name="gaz")
+        d.save()
         s1, _ = SOA.objects.get_or_create(
             primary="ns1.foo.gaz", contact="hostmaster.foo",
-            description="foo.gaz2")
-        d, _ = Domain.objects.get_or_create(name="gaz")
-        d.soa = None
-        d.save()
+            description="foo.gaz2", root_domain=d)
         d1, _ = Domain.objects.get_or_create(name="foo.gaz")
-        d1.soa = s1
-        d1.save()
+        s1.root_domain = d1
+        s1.save()
 
     def test_3_soa_validators(self):
+        r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
+        r.save()
         s1, _ = SOA.objects.get_or_create(
             primary="ns1.foo2.gaz", contact="hostmaster.foo",
-            description="foo.gaz2")
-
-        r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
-        r.soa = s1
-        r.save()
+            description="foo.gaz2", root_domain=r)
 
         d, _ = Domain.objects.get_or_create(name="gaz")
         d.soa = s1
