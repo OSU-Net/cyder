@@ -14,6 +14,24 @@ class InvalidQuery(exceptions.APIException):
         super(InvalidQuery, self).__init__(self)
 
 
+
+def namehack(field):
+    """
+    This function is the meat of a hack to handle an issue where trying to
+    filter by attribute or view led to a very strange-seeming error. The issue
+    is that attribute names in records with attributes and view names in DNS
+    records are represented using SlugRelatedFields so they appear with friendly
+    names (like "Hardware type" in the former case and "public" in the latter
+    case), but because of how this filter module is written, it will just
+    attempt to search by the related field, confusing Django when it gets a
+    query requesting a field with a string primary key like "public".
+    """
+    if field.endswith(("attribute", "views")):
+        return field + "__name"
+    else:
+        return field
+
+
 class SearchFieldFilter(filters.BaseFilterBackend):
     """Filter based on record attributes."""
 
@@ -34,10 +52,10 @@ class SearchFieldFilter(filters.BaseFilterBackend):
                 continue
 
             elif q.startswith("i:"):
-                q_include[q[2:]] = p
+                q_include[namehack(q[2:])] = p
 
             elif q.startswith("e:"):
-                q_exclude[q[2:]] = p
+                q_exclude[namehack(q[2:])] = p
 
             elif q.startswith("a:"):
                 # key value matching
