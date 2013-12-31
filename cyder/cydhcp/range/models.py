@@ -54,7 +54,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     """
 
     id = models.AutoField(primary_key=True)
-    network = models.ForeignKey(Network, null=True, blank=True)
+    network = models.ForeignKey(Network, null=False, blank=True)
 
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
                                   default=STATIC)
