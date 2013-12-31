@@ -8,7 +8,6 @@ from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
@@ -25,7 +24,6 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
 
 import ipaddr
-# import reversion
 
 
 class Range(BaseModel, ViewMixin, ObjectUrlMixin):
@@ -294,10 +292,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         overlap with any of them.
         """
         self._range_ips()
-        if self.ip_type == IP_TYPE_4:
-            Ip = ipaddr.IPv4Address
-        else:
-            Ip = ipaddr.IPv6Address
 
         for range in Range.objects.all():
             if range.pk == self.pk:
@@ -467,9 +461,6 @@ def find_free_ip(start, end, ip_type='4'):
         raise NotImplemented
 
 
-# reversion.(Range)
-
-
 class RangeAV(EAVBase):
     class Meta(EAVBase.Meta):
         app_label = 'cyder'
@@ -477,9 +468,6 @@ class RangeAV(EAVBase):
 
     entity = models.ForeignKey(Range)
     attribute = EAVAttributeField(Attribute)
-
-
-# reversion.(RangeAV)
 
 
 class RangeOverflowError(ValidationError):
