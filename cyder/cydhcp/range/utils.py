@@ -217,7 +217,7 @@ def range_wizard(request):
         ip_str = ''
         ip_type = 4
 
-    ranges = [([r.get_self_str() for r in ranges]),
+    ranges = [([r.get_self_str(padded=True) for r in ranges]),
               ([r.id for r in ranges])]
     return HttpResponse(json.dumps({'ranges': ranges,
                                     'ip_type': ip_type,
