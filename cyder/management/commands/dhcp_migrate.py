@@ -176,8 +176,7 @@ def create_range(range_id, start, end, range_type, subnet_id,
         dhcp_enabled = bool(enabled and valid)
     else:
         # the Range doesn't have a Network
-        n = None
-        dhcp_enabled = False
+        return None
 
     if '\n' in comment:
         name = comment[:comment.find('\n')][:50]
