@@ -22,7 +22,7 @@
       </a>
     {% endif %}
     {% if request.user.is_superuser %}
-    <a class="btn btn-primary" id="user_perms" href="#">
+    <a class="btn btn-primary" id="user-perms-btn" href="#">
       Clone user permissions
     </a>
     {% endif %}
@@ -38,8 +38,10 @@
       <div class="form-btns">
         <hr>
           <a id="clone-perms" class="btn" href="#">Clone</a>
+          <a id="clone-perms-cancel" class="btn" href="#">Cancel</a>
       </div>
     </form>
   </div>
+  {{ js('cyuser') }}
 {% endblock %}
 

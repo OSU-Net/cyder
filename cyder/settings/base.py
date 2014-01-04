@@ -84,6 +84,9 @@ MINIFY_BUNDLES = {
         'ctnr': (
             'js/ctnr/ctnr.js',
         ),
+        'cyuser': (
+            'js/cyuser/cyuser.js',
+        ),
         'interface_delete': (
             'js/interface_delete.js',
         ),
