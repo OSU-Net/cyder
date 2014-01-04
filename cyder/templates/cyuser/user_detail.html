@@ -21,5 +21,10 @@
         Request API Token
       </a>
     {% endif %}
+    {% if request.user.is_superuser %}
+    <a class="btn btn-primary" id="user_perms" href="#">
+      Clone user permissions
+    </a>
+    {% endif %}
   {% endif %}
 {% endblock %}
