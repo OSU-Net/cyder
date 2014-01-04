@@ -239,11 +239,11 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
             'ip_type': '4',
             'ip_str': '196.168.1.2',
         }
-        Domain.objects.create(name='arpa')
-        Domain.objects.create(name='in-addr.arpa')
-        Domain.objects.create(name='196.in-addr.arpa')
-        Domain.objects.create(name='168.196.in-addr.arpa')
-        Domain.objects.create(name='1.168.196.in-addr.arpa')
+        Domain.objects.get_or_create(name='arpa')
+        Domain.objects.get_or_create(name='in-addr.arpa')
+        Domain.objects.get_or_create(name='196.in-addr.arpa')
+        Domain.objects.get_or_create(name='168.196.in-addr.arpa')
+        Domain.objects.get_or_create(name='1.168.196.in-addr.arpa')
 
         Domain.objects.create(name=ip_to_domain_name(test_data['ip_str']))
         do_setUp(self, PTR, test_data, use_domain=True, use_rdomain=True)

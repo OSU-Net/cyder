@@ -3,16 +3,15 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
-from sys import stderr
 
 from cyder.base.eav.models import Attribute
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
+from cyder.cydns.models import View
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, STATIC, DYNAMIC)
-from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicInterfaceAV)
 from cyder.cydhcp.network.models import Network, NetworkAV
 from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.site.models import Site
@@ -20,6 +19,8 @@ from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
+from sys import stderr
+from random import choice
 import ipaddr
 import MySQLdb
 from optparse import make_option
@@ -30,6 +31,8 @@ from lib.utilities import long2ip, fix_attr_name, range_usage_get_create
 cached = {}
 host_option_values = None
 
+public, _ = View.objects.get_or_create(name="public")
+private, _ = View.objects.get_or_create(name="private")
 
 allow_all_subnets = [
     '10.192.76.2', '10.192.103.150', '10.192.15.2',
@@ -38,6 +41,13 @@ allow_all_subnets = [
     '10.196.16.8', '10.196.24.8', '10.196.32.8', '10.196.40.8',
     '10.162.128.32', '10.162.136.32', '10.162.144.32', '10.198.0.80',
     '10.198.0.140', '10.192.131.9', '10.255.255.255', '10.214.64.32']
+
+
+voip_networks = {
+    '10.112.17.0/25', '10.112.21.0/25', '10.160.0.32/28', '10.160.16.0/27',
+    '10.160.48.0/25', '10.160.49.0/25', '10.195.128.0/22', '10.195.172.0/23',
+    '10.195.180.0/26', '10.195.180.128/26', '140.211.26.0/24',
+}
 
 
 class NotInMaintain(Exception):
@@ -67,28 +77,36 @@ def clean_zone_name(name):
     return name
 
 
-def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
+def create_subnet(subnet_id, name, subnet, netmask, status, vlan_id):
     """
     Takes a row from the Maintain subnet table
     returns a new network object and creates the vlan it is associated with
     """
+
     prefixlen = str(calc_prefixlen(netmask))
     network = str(ipaddr.IPv4Address(subnet & netmask))
+    network_str = network + '/' + prefixlen
     s, _ = Site.objects.get_or_create(name='Campus')
-    v = None
+    vlan = None
     enabled = (status == 'visible')
+
     if cursor.execute("SELECT * "
                       "FROM vlan "
-                      "WHERE vlan_id = %s" % vlan):
+                      "WHERE vlan_id = %s" % vlan_id):
         vlan_id, vlan_name, vlan_number = cursor.fetchone()
-        v = Vlan.objects.get(name=vlan_name)
+        vlan = Vlan.objects.get(name=vlan_name)
+    vrf = Vrf.objects.get(name=('VoIP' if network_str in voip_networks
+                                else 'Legacy'))
+
     n, created = Network.objects.get_or_create(
-        network_str=network + '/' + prefixlen, ip_type='4',
-        site=s, vlan=v, enabled=enabled)
+        network_str=network_str, ip_type='4',
+        site=s, vlan=vlan, enabled=enabled, vrf=vrf)
+
     cursor.execute("SELECT dhcp_option, value "
                    "FROM object_option "
                    "WHERE object_id = {0} "
                    "AND type = 'subnet'".format(subnet_id))
+
     results = cursor.fetchall()
     for dhcp_option, value in results:
         cursor.execute("SELECT name, type "
@@ -101,15 +119,23 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan):
         if eav_created:
             eav.full_clean()
             eav.save()
+
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment,
-                 enabled, known):
+def create_range(range_id, start, end, range_type, subnet_id,
+                 comment, enabled, known):
     """
     Takes a row from the Maintain range table.
     Returns a range which is saved in Cyder.
     """
+    # Set the allow statement
+    n = None
+    r = None
+    d = maintain_find_range_domain(range_id)
+    if not d and range_type == "dynamic":
+        stderr.write("Ignoring range %s: No default domain.\n" % range_id)
+        return None
 
     r_type = STATIC if range_type == 'static' else DYNAMIC
     allow = ALLOW_LEGACY
@@ -153,11 +179,18 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
         n = None
         dhcp_enabled = False
 
+    if '\n' in comment:
+        name = comment[:comment.find('\n')][:50]
+    else:
+        name = comment[:50]
+
     r, created = range_usage_get_create(
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
         allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
-        is_reserved=not dhcp_enabled)
+        is_reserved=not dhcp_enabled, domain=d, name=name, description=comment)
+    r.views.add(public)
+    r.views.add(private)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         attr = Attribute.objects.get(name=fix_attr_name('ipphone242'))
@@ -166,6 +199,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
         if eav_created:
             eav.full_clean()
             eav.save()
+
     return (r, created)
 
 
@@ -191,8 +225,10 @@ def migrate_ranges():
                    "FROM `ranges`")
     results = cursor.fetchall()
     migrated = []
-    for row in results:
-        migrated.append(create_range(*row))
+    for row in sorted(results):
+        r = create_range(*row)
+        if r:
+            migrated.append(r)
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
            "Records created {2}".format(
@@ -356,7 +392,7 @@ def migrate_dynamic_hosts():
                        "Adding it to the default group".format(
                             items['workgroup']))
 
-        if not all([r, c, d]):
+        if not all([r, c]):
             stderr.write("Trouble migrating host with mac {0}\n"
                          .format(items['ha']))
             continue
@@ -375,7 +411,7 @@ def migrate_dynamic_hosts():
             eav.save()
 
         intr, _ = range_usage_get_create(
-            DynamicInterface, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
+            DynamicInterface, range=r, workgroup=w, ctnr=c, mac=mac,
             system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         count += 1
@@ -387,13 +423,18 @@ def migrate_dynamic_hosts():
 
 def migrate_user():
     print "Migrating users."
-    cursor.execute("SELECT username FROM user "
+    cursor.execute("SELECT username, preferred_zone FROM user "
                    "WHERE username IN ( "
                    "SELECT DISTINCT username FROM zone_user )")
     result = cursor.fetchall()
-    for username, in result:
+    for username, preferred_zone_id in result:
         username = username.lower()
         user, _ = User.objects.get_or_create(username=username)
+        user = user.get_profile()
+        default_ctnr = maintain_find_zone(preferred_zone_id)
+        if default_ctnr and default_ctnr != user.default_ctnr:
+            user.default_ctnr = default_ctnr
+            user.save()
 
 
 def migrate_zone_user():
@@ -481,6 +522,17 @@ def migrate_zone_workgroup():
         c.save()
 
 
+def maintain_find_range_domain(range_id):
+    sql = ("SELECT default_domain FROM zone_range WHERE `range` = %s;"
+           % range_id)
+    cursor.execute(sql)
+    results = [r[0] for r in cursor.fetchall() if r[0] is not None]
+    if results:
+        return maintain_find_domain(choice(results))
+    else:
+        return None
+
+
 def maintain_find_range(range_id):
     start, end = maintain_get_cached('ranges', ['start', 'end'], range_id)
     if start and end:
@@ -547,7 +599,7 @@ def delete_all():
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()
-    Vrf.objects.filter(id__gt=1).delete() # First is a fixture
+    Vrf.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
     DynamicInterface.objects.all().delete()
     Workgroup.objects.all().delete()

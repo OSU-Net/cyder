@@ -34,7 +34,7 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
-    label = forms.CharField(max_length=128, required=True)
+    label = forms.CharField(max_length=128, required=True, label="Hostname")
 
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)

@@ -10,6 +10,7 @@ from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.range.models import Range
 
 from gettext import gettext as _
 from cyder.core.utils import fail_mail
@@ -38,14 +39,20 @@ def render_soa_only(soa, root_domain):
 
 
 def render_rdtype(rdtype_set, **kwargs):
-    rdtype_set = map(lambda obj: obj.bind_render_record(**kwargs) + "\n",
-                     rdtype_set)
-    return "".join(sorted(rdtype_set))
+    if len(rdtype_set) == 0:
+        return ""
+
+    rdtype_set = map(lambda obj: obj.bind_render_record(**kwargs), rdtype_set)
+    rdtype_set = (r.strip() for r in rdtype_set if r.strip())
+    if kwargs.pop('sort', True):
+        rdtype_set = sorted(rdtype_set, key=lambda s: s.lower())
+
+    return "\n".join(rdtype_set) + "\n"
 
 
 def _render_forward_zone(default_ttl, nameserver_set, mx_set,
                          addressrecord_set, interface_set, cname_set, srv_set,
-                         txt_set, sshfp_set):
+                         txt_set, sshfp_set, range_set):
     BUILD_STR = ""
     BUILD_STR += render_rdtype(nameserver_set)
     BUILD_STR += render_rdtype(mx_set)
@@ -55,6 +62,7 @@ def _render_forward_zone(default_ttl, nameserver_set, mx_set,
     BUILD_STR += render_rdtype(cname_set)
     BUILD_STR += render_rdtype(interface_set, rdtype='A')
     BUILD_STR += render_rdtype(addressrecord_set)
+    BUILD_STR += render_rdtype(range_set, sort=False)
     return BUILD_STR
 
 
@@ -98,15 +106,22 @@ def render_forward_zone(view, mega_filter):
         .filter(mega_filter)
         .filter(views__name=view.name)
         .order_by('pk', 'fqdn'),
+
+        range_set=Range.objects
+        .filter(mega_filter)
+        .filter(views__name=view.name)
+        .order_by('start_upper', 'start_lower'),
     )
     return data
 
 
-def _render_reverse_zone(default_ttl, nameserver_set, interface_set, ptr_set):
+def _render_reverse_zone(default_ttl, nameserver_set, interface_set,
+                         ptr_set, range_set):
     BUILD_STR = ''
     BUILD_STR += render_rdtype(nameserver_set)
     BUILD_STR += render_rdtype(ptr_set)
     BUILD_STR += render_rdtype(interface_set, reverse=True, rdtype='PTR')
+    BUILD_STR += render_rdtype(range_set, reverse=True)
     return BUILD_STR
 
 
@@ -125,6 +140,11 @@ def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter):
         ptr_set=PTR.objects.filter(rdomain_mega_filter).filter(
             views__name=view.name).order_by('pk', 'ip_upper',
                                             'ip_lower'),
+
+        range_set=Range.objects
+        .filter(domain_mega_filter)
+        .filter(views__name=view.name)
+        .order_by('start_upper', 'start_lower'),
 
     )
     return data

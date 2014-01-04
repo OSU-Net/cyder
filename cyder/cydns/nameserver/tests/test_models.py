@@ -455,7 +455,7 @@ class NSTestsModels(TestCase):
         # At his point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
-        ptr = PTR(fqdn="asdf", ip_str="22.1.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="22.1.1.1", ip_type="4")
         ptr.save()
 
         self.assertRaises(ValidationError, ns.delete)
@@ -475,7 +475,7 @@ class NSTestsModels(TestCase):
         cdomain.soa = root_domain.soa
         cdomain.save()
 
-        ptr = PTR(fqdn="asdf", ip_str="23.10.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="23.10.1.1", ip_type="4")
         ptr.save()
 
         self.assertRaises(ValidationError, ns.delete)
@@ -488,9 +488,10 @@ class NSTestsModels(TestCase):
 
         soa = ns.domain.soa
         ns.domain.soa = None
-        root_domain.soa = None  # Shit's getting cached
-        ns.domain.save()
         soa.delete()
+        root_domain.soa = None  # Shit's getting cached
+        root_domain.save()
+        ns.domain.save()
 
         # At his point we should have a domain pointed at no SOA record with no
         # records attached to it. It also has no child domains.
@@ -500,23 +501,19 @@ class NSTestsModels(TestCase):
             label='', domain=root_domain, ip_type="6", ip_str="1::")
         a.save()
 
-        s = SOA(primary="asdf.asdf", contact="asdf.asdf", description="asdf")
-        s.save()
-        root_domain.soa = s
+        s = SOA(primary="asdf.asdf", contact="asdf.asdf",
+                description="asdf", root_domain=root_domain)
 
-        self.assertRaises(ValidationError, root_domain.save)
+        self.assertRaises(ValidationError, s.save)
 
     def test_bad_nameserver_soa_state_case_3_1(self):
         # This is Case 3
         root_domain = create_fake_zone("asdf31")
-        for ns in root_domain.nameserver_set.all():
-            ns.delete()
 
-        # At his point we should have a domain pointed at an SOA record with no
-        # records attached to it (esspecially no ns recods). It also has no
-        # child domains.
         # Try case 3 but add a record to a child domain of root_domain
-        cdomain = Domain(name="test." + root_domain.name)
+        bad_root_domain = Domain(name="below." + root_domain.name)
+        bad_root_domain.save()
+        cdomain = Domain(name="test." + bad_root_domain.name)
         cdomain.save()
 
         # Add a record to the domain.
@@ -525,7 +522,11 @@ class NSTestsModels(TestCase):
 
         # Now try to add the domain to the zone that has no NS records at it's
         # root
-        cdomain.soa = root_domain.soa
+        SOA.objects.create(root_domain=bad_root_domain,
+                           contact="a", primary='b')
+        for ns in bad_root_domain.nameserver_set.all():
+            ns.delete()
+        cdomain.soa = bad_root_domain.soa
 
         self.assertRaises(ValidationError, cdomain.save)
 
@@ -536,44 +537,42 @@ class NSTestsModels(TestCase):
             ns.delete()
 
         soa = ns.domain.soa
-        ns.domain.soa = None
-        root_domain.soa = None  # Shit's getting cached
-        ns.domain.save()
         soa.delete()
+        ns.domain.soa = None
+        root_domain = Domain.objects.get(pk=root_domain.pk)
+        self.assertIsNone(root_domain.soa)
+        ns.domain.save()
 
         # At his point we should have a domain pointed at no SOA record with no
         # records attached to it. It also has no child domains.
 
         # Add a record to the domain.
 
-        ptr = PTR(fqdn="asdf", ip_str="32.1.1.1", ip_type="4")
+        ptr = PTR(fqdn="bloo.asdf", ip_str="32.1.1.1", ip_type="4")
         ptr.save()
 
-        s = SOA(primary="asdf.asdf", contact="asdf.asdf", description="asdf")
-        s.save()
-        root_domain.soa = s
+        s = SOA(primary="asdf.asdf", contact="asdf.asdf",
+                description="asdf", root_domain=root_domain)
 
-        self.assertRaises(ValidationError, root_domain.save)
+        self.assertRaises(ValidationError, s.save)
 
     def test_bad_nameserver_soa_state_case_3_3(self):
         # This is Case 3 ... with ptrs
         root_domain = create_fake_zone("33.in-addr.arpa", suffix="")
-        for ns in root_domain.nameserver_set.all():
-            ns.delete()
 
-        # At his point we should have a domain pointed at an SOA record with no
-        # records attached to it (esspecially no ns recods). It also has no
-        # child domains.
-        # Try case 3 but add a record to a child domain of root_domain
-        cdomain = Domain(name="10.33.in-addr.arpa")
+        bad_root_domain = Domain(name="10." + root_domain.name)
+        bad_root_domain.save()
+        cdomain = Domain(name="6.10.33.in-addr.arpa")
         cdomain.save()
 
-        # Add a record to the domain.
-        ptr = PTR(fqdn="asdf", ip_str="33.10.1.1", ip_type="4")
-        ptr.save()
+        p = PTR(label='eh', domain=cdomain, ip_type="4", ip_str="33.10.6.2")
+        p.save()
 
         # Now try to add the domain to the zone that has no NS records at it's
         # root
-        cdomain.soa = root_domain.soa
-
+        SOA.objects.create(root_domain=bad_root_domain,
+                           contact="a", primary='b')
+        for ns in bad_root_domain.nameserver_set.all():
+            ns.delete()
+        cdomain.soa = bad_root_domain.soa
         self.assertRaises(ValidationError, cdomain.save)

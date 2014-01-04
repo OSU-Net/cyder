@@ -5,5 +5,12 @@
     "fields": {
       "name": "Legacy"
     }
+  },
+  {
+    "pk": 2,
+    "model": "cyder.vrf",
+    "fields": {
+      "name": "VoIP"
+    }
   }
 ]

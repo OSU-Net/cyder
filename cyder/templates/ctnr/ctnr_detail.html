@@ -2,7 +2,7 @@
 {% from "base/tables.html" import render_table %}
 
 {% set obj = object %}
-{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type, ctnr=obj) %}
 
 
 {% block title %}Container {{ object.name }}{% endblock %}
@@ -18,7 +18,7 @@
         data-addObjectUrl="{{ url('ctnr-add-object', object.pk) }}">
   </span>
 
-  {% if request.user.get_profile().has_perm(request, 2, obj_class="CtnrUser") and obj == request.session.ctnr or request.user.is_superuser  %}
+  {% if request.user.get_profile().has_perm(request, 2, obj_class="CtnrUser", ctnr=obj) or request.user.is_superuser  %}
     <form class="form" id="add-object">
       {% if request.user.is_superuser %}
         <h3>Add Object to Container</h3>
