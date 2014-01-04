@@ -13,6 +13,7 @@ from cyder.api.authtoken.models import Token
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
+from cyder.core.cyuser.forms import UserPermForm
 from cyder import LEVEL_GUEST
 
 
@@ -248,6 +249,7 @@ def user_detail(request, pk):
     user = UserProfile.objects.get(id=pk)
     email = User.objects.get(id=pk).email
     contacts = []
+    form = UserPermForm()
     if email:
         contacts = (Ctnr.objects.filter(email_contact__contains=email))
     else:
@@ -265,4 +267,4 @@ def user_detail(request, pk):
         tables.update({'API Tokens': tokens})
 
     return cy_detail(request, UserProfile, 'cyuser/user_detail.html',
-                     tables, obj=user)
+                     tables, obj=user, user_perm_form=form)

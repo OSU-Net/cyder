@@ -28,3 +28,18 @@
     {% endif %}
   {% endif %}
 {% endblock %}
+{% block form %}
+  <div id="perm-hidden" style="display: none">
+    <form class="form" id="user-perm-form">
+      <h3>Clone user permissions</h3>
+      <div class="inner-form" id="user-perm-inner-form">
+        {{ user_perm_form.as_p() }}
+      </div>
+      <div class="form-btns">
+        <hr>
+          <a id="clone-perms" class="btn" href="#">Clone</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
