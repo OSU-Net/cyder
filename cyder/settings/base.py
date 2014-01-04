@@ -46,7 +46,8 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
-        'search': ('css/search.scss',)
+        'search': ('css/search.scss',),
+        'tags_css': ('css//lib/jquery.tagsinput.css',),
     },
     'js': {
         'cyder_js': (
@@ -92,6 +93,9 @@ MINIFY_BUNDLES = {
         ),
         'systemform': (
             'js/systemform.js',
+        ),
+        'tags_js': (
+            'js/lib/jquery.tagsinput.js',
         ),
     }
 }
