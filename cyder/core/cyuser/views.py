@@ -83,34 +83,78 @@ def login_session(request, username):
     return request
 
 
-def clone_perms(request, user_id):
+def clone_perms_check(request):
     if not request.POST:
         return redirect(request.META.get('HTTP_REFERER', ''))
 
+    users = request.POST.get('users', None)
+    new_users = []
+    if users:
+        users = users.split(',')
+        for user in users:
+            user_qs = User.objects.filter(username=user)
+            if not user_qs.exists():
+                new_users.append(user)
+    confirm_str = ''
+    if new_users:
+        if len(new_users) > 1:
+            confirm_str = 'Users: '
+            for user in new_users:
+                confirm_str += '{0}, '.format(user)
+
+            confirm_str += ('do not exist. Would you like to create '
+                            + 'these users?')
+        else:
+            confirm_str = ('User {0} does not exist. Would you like to '
+                           + 'create this user?').format(user)
+
+        return HttpResponse(json.dumps(
+            {'confirm_str': confirm_str, 'users': new_users}))
+
+    return HttpResponse(json.dumps({'success': True}))
+
+
+def clone_perms(request, user_id):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+    acting_user = request.user.get_profile()
+    if not acting_user.has_perm(request, 2, obj_class='User'):
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': 'You do not have permissions to perform '
+                        + 'this action'}}))
+    user = UserProfile.objects.get(id=user_id)
     perms_qs = CtnrUser.objects.filter(user__id=user_id)
     if not perms_qs.exists():
-        return HttpResponse(
-            json.dumps({'error': 'This user has no permissions'}))
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': '{0} has no permissions to '
+                        + 'clone'.format(user)}}))
 
     users = request.POST.get('users', None)
     if not users:
-        return HttpResponse(json.dumps({'error': 'No users provided'}))
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': 'No users provided'}}))
 
     users = users.split(',')
-
     for user in users:
-        user = User.objects.filter(name=user)
-        if not user.exists():
-            user = User(name=user)
+        user_qs = User.objects.filter(username=user)
+        if not user_qs.exists():
+            user = User(username=user)
             user.save()
         else:
-            user.get()
+            user = user_qs.get()
 
         for perm in perms_qs:
-            ctnr_user = CtnrUser(user=user, ctnr=perm.ctnr, level=perm.level)
+            ctnr_user_qs = CtnrUser.objects.filter(user=user, ctnr=perm.ctnr)
+            if not ctnr_user_qs.exists():
+                ctnr_user = CtnrUser(
+                    user=user, ctnr=perm.ctnr, level=perm.level)
+            else:
+                ctnr_user = ctnr_user_qs.get()
+                ctnr_user.level = perm.level
+
             ctnr_user.save()
 
-    HttpResponse(json.dumps({'success': True}))
+    return HttpResponse(json.dumps({'success': True}))
 
 
 def delete(request, user_id):

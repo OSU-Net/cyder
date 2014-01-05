@@ -133,35 +133,6 @@ $(document).ready(function() {
         }, 'json');
     });
 
-    function ajax_form_submit(url, form) {
-        var fields = form.find(':input').serializeArray();
-        var postData = {}
-        jQuery.each(fields, function (i, field) {
-            postData[field.name] = field.value;
-        });
-        $.post(url, postData, function(data) {
-            if (data.errors) {
-                if ($('#hidden-inner-form').find('#error').length) {
-                    $('#hidden-inner-form').find('#error').remove();
-                };
-                jQuery.each(fields, function (i, field) {
-                    if (data.errors[field.name]) {
-                        $('#id_' + field.name).after(
-                            '<p id="error"><font color="red">'
-                            + data.errors[field.name] + '</font></p>');
-                    };
-                });
-                if (data.errors['__all__']) {
-                    $('#hidden-inner-form').find('p:first').before(
-                        '<p id="error"><font color="red">'
-                        + data.errors['__all__'] + '</font></p>');
-                };
-            } else {
-                location.reload();
-            };
-        }, 'json');
-        return false;
-    };
 
     $('#obj-form').live('submit', function(event) {
         var url = $('#obj-form form')[0].action;
@@ -171,3 +142,34 @@ $(document).ready(function() {
         };
     });
 });
+
+
+function ajax_form_submit(url, form) {
+    var fields = form.find(':input').serializeArray();
+    var postData = {}
+    jQuery.each(fields, function (i, field) {
+        postData[field.name] = field.value;
+    });
+    $.post(url, postData, function(data) {
+        if (data.errors) {
+            if ($('#hidden-inner-form').find('#error').length) {
+                $('#hidden-inner-form').find('#error').remove();
+            };
+            jQuery.each(fields, function (i, field) {
+                if (data.errors[field.name]) {
+                    $('#id_' + field.name).after(
+                        '<p id="error"><font color="red">'
+                        + data.errors[field.name] + '</font></p>');
+                };
+            });
+            if (data.errors['__all__']) {
+                $('#hidden-inner-form').find('p:first').before(
+                    '<p id="error"><font color="red">'
+                    + data.errors['__all__'] + '</font></p>');
+            };
+        } else {
+            location.reload();
+        };
+    }, 'json');
+    return false;
+};
