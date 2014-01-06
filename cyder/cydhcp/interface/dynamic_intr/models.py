@@ -138,9 +138,15 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
+        old_range = None
+        if self.id is not None:
+            old_range = DynamicInterface.objects.get(id=self.id).range
+
         super(DynamicInterface, self).save()
         if self.range and update_range_usage:
             self.range.save()
+            if old_range:
+                old_range.save()
 
 
 class DynamicInterfaceAV(EAVBase):
@@ -148,7 +154,7 @@ class DynamicInterfaceAV(EAVBase):
         app_label = 'cyder'
         db_table = "dynamic_interface_av"
 
-
     entity = models.ForeignKey(DynamicInterface)
-    attribute = EAVAttributeField(Attribute,
+    attribute = EAVAttributeField(
+        Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))
