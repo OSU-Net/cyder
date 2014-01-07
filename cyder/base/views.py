@@ -185,7 +185,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     StaticInterface = get_model('cyder', 'staticinterface')
     DynamicInterface = get_model('cyder', 'dynamicinterface')
     if form._meta.model in [StaticInterface, DynamicInterface]:
-        form = forms.Form()
+        form = None
     else:
         if (obj_type in ['system', 'static_interface', 'dynamic_interface']
                 and not object_list):
