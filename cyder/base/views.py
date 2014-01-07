@@ -141,7 +141,6 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
 
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
-    form = FormKlass(instance=obj)
     if request.method == 'POST':
         post_data = qd_to_py_dict(request.POST)
         form = FormKlass(post_data, instance=obj)
@@ -176,23 +175,25 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                 })
     elif request.method == 'GET':
         form = FormKlass(initial=qd_to_py_dict(request.GET))
+    # Adjust this if statement to submit forms with ajax
+    elif 'AV' in FormKlass.__name__:
+        return HttpResponse(json.dumps({'errors': form.errors}))
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
-    if issubclass(type(form), UsabilityFormMixin):
-        form.make_usable(request)
+    StaticInterface = get_model('cyder', 'staticinterface')
+    DynamicInterface = get_model('cyder', 'dynamicinterface')
+    if form._meta.model in [StaticInterface, DynamicInterface]:
+        form = None
+    else:
+        if (obj_type in ['system', 'static_interface', 'dynamic_interface']
+                and not object_list):
+            return redirect(reverse('system-create', args=[None]))
 
-    # Adjust this if statement to submit forms with ajax
-    if 'AV' in FormKlass.__name__:
-        return HttpResponse(json.dumps({'errors': form.errors}))
-
-    if obj_type == 'system' and len(object_list) == 0:
-        return redirect(reverse('system-create', args=[None]))
-
-    if Klass.__name__ in [
-            "StaticInterface", "DynamicInterface"] and pk is None:
-        form.fields['system'].widget = forms.HiddenInput()
+        form = FormKlass(instance=obj)
+        if issubclass(type(form), UsabilityFormMixin):
+            form.make_usable(request)
 
     return render(request, template, {
         'form': form,
