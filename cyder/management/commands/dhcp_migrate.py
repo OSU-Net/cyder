@@ -352,7 +352,7 @@ def migrate_dynamic_hosts():
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
                 print ("Could not create dynamic interface %s: Range %s "
-                       "is in Maintain, but was not created in cyder." %
+                       "is in Maintain, but was not created in Cyder." %
                        (mac, items['dynamic_range']))
 
         if items['zone']:
@@ -434,7 +434,13 @@ def migrate_zone_range():
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
         c = maintain_find_zone(zone_id)
-        r = maintain_find_range(range_id)
+        try:
+            r = maintain_find_range(range_id)
+        except ObjectDoesNotExist:
+            print ("Cannot migrate zone-range %s-%s: Range exists in Maintain "
+                   "but was not created in Cyder" % (zone_id, range_id))
+            r = None
+
         if not (c and r):
             continue
 
