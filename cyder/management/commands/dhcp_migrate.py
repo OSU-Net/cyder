@@ -345,51 +345,21 @@ def migrate_dynamic_hosts():
         if mac == "":
             enabled = False
 
-        r = None
-        if not items['dynamic_range']:
-            print ("Host with MAC {0} "
-                   "has no dynamic_range in Maintain".format(items['ha']))
-        else:
+        # TODO: Verify that there is no valid range/zone/workgroup with id 0
+        r, c, w = None, None, None, default
+        if items['dynamic_range']:
             try:
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no dynamic range in Cyder".format(items['ha']))
+                print ("Could not create dynamic interface %s: Range %s "
+                       "is in Maintain, but was not created in cyder." %
+                       (mac, items['dynamic_range']))
 
-        c = None
-        if not items['zone']:
-            print "Host with MAC {0} has no zone in Maintain".format(
-                item['ha'])
-        else:
-            try:
-                c = maintain_find_zone(items['zone'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no ctnr in Cyder".format(items['ha']))
-                print "Failed to migrate zone_id {0}".format(items['zone'])
+        if items['zone']:
+            c = maintain_find_zone(items['zone'])
 
-        d = None
-        if not items['domain']:
-            print "Host with MAC {0} has no domain in Maintain".format(
-                items['ha'])
-        else:
-            try:
-                d = maintain_find_domain(items['domain'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no domain in Cyder".format(items['ha']))
-                print "Failed to migrate domain_id {0}".format(items['domain'])
-
-        w = default
         if items['workgroup']:
-            try:
-                w = maintain_find_workgroup(items['workgroup'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no workgroup in Cyder".format(items['ha']))
-                print ("Failed to migrate workgroup_id {0}\n"
-                       "Adding it to the default group".format(
-                            items['workgroup']))
+            w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c]):
             stderr.write("Trouble migrating host with mac {0}\n"
