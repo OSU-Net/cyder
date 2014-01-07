@@ -21,12 +21,12 @@
         Request API Token
       </a>
     {% endif %}
-    {% if request.user.is_superuser or
-        request.user.get_profile().has_perm(request, 2, obj_class='User') %}
-    <a class="btn btn-primary" id="clone-perms-btn" href="#">
-      Clone user permissions
-    </a>
-    {% endif %}
+  {% endif %}
+  {% if request.user.is_superuser or
+      request.user.get_profile().has_perm(request, 2, obj_class='User') %}
+  <a class="btn btn-primary" id="clone-perms-btn" href="#">
+    Clone user permissions
+  </a>
   {% endif %}
 {% endblock %}
 {% block form %}
