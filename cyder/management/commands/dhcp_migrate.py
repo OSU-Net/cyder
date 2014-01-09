@@ -346,7 +346,7 @@ def migrate_dynamic_hosts():
             enabled = False
 
         # TODO: Verify that there is no valid range/zone/workgroup with id 0
-        r, c, w = None, None, None, default
+        r, c, w = None, None, default
         if items['dynamic_range']:
             try:
                 r = maintain_find_range(items['dynamic_range'])
