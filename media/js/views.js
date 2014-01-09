@@ -138,19 +138,25 @@ $(document).ready(function() {
         var url = $('#obj-form form')[0].action;
         if (url.indexOf('av') >=0) {
             event.preventDefault();
-            return ajax_form_submit(url, $('#obj-form'));
+            var data = ajax_form_submit(url, $('#obj-form'));
+            if (!data.errors) {
+                location.reload();
+            };
         };
     });
 });
 
 
 function ajax_form_submit(url, form) {
+    $.ajaxSetup({async:false});
     var fields = form.find(':input').serializeArray();
     var postData = {}
     jQuery.each(fields, function (i, field) {
         postData[field.name] = field.value;
     });
+    var ret_data = null;
     $.post(url, postData, function(data) {
+        ret_data = data;
         if (data.errors) {
             if ($('#hidden-inner-form').find('#error').length) {
                 $('#hidden-inner-form').find('#error').remove();
@@ -167,9 +173,7 @@ function ajax_form_submit(url, form) {
                     '<p id="error"><font color="red">'
                     + data.errors['__all__'] + '</font></p>');
             };
-        } else {
-            location.reload();
         };
     }, 'json');
-    return false;
+    return ret_data;
 };

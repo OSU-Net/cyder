@@ -10,17 +10,20 @@ $(document).ready(function() {
         postData = {
             users: ($('#clone-perms-form').find(':input')[0].value),
         };
-        var new_users;
         $.post('/core/user/clone_perms_check/', postData, function(data) {
             if (data.confirm_str) {
-                if(!confirm((data.confirm_str))) {
+                var confirmation = confirm(data.confirm_str);
+                if (!confirmation) {
                     jQuery.each(data.users, function(i, user) {
                         $('#id_users').removeTag(user);
                     });
-                }
-            }
+                };
+            };
+            var url = $('#clone-perms-form').attr('action');
+            clone_perms_data = ajax_form_submit(url, $('#clone-perms-form'));
+            if (clone_perms_data.success) {
+                location.reload();
+            };
         }, 'json');
-        var url = $('#clone-perms-form').attr('action');
-        return ajax_form_submit(url, $('#clone-perms-form'));
     });
 });
