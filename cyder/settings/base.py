@@ -230,6 +230,7 @@ BINDBUILD = {
     'bind_prefix': '',
 
     'lock_file': '/tmp/cyder_dns.lock',
+    'pid_file': '/tmp/cyder_dns.pid',
     'named_checkzone': 'named-checkzone',
     'named_checkconf': 'named-checkconf',
     'named_checkzone_opts': '',
@@ -259,7 +260,8 @@ DHCPBUILD = {
     # should be a Git repo.
     'prod_dir': '/tmp/dhcp/prod',
 
-    'lock_file': '/tmp/cyder_dhcp_lock',
+    'lock_file': '/tmp/cyder_dhcp.lock',
+    'pid_file': '/tmp/cyder_dhcp.pid',
     'dhcpd': 'dhcpd',
 
     # target_file: The configuration file that will be generated

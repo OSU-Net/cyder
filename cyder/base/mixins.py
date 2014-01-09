@@ -156,38 +156,49 @@ class MutexMixin(object):
         self.unlock()
 
     def lock(self):
-        """
-        Tries to write a lock file. Returns True if we get the lock, else
-        return False.
-        """
         try:
             if not os.path.exists(os.path.dirname(self.lock_file)):
                 os.makedirs(os.path.dirname(self.lock_file))
-            self.log_debug("Attempting to acquire mutex ({0})..."
+            self.log_debug("Attempting to lock {0}..."
                      .format(self.lock_file))
-            self.lock_fd = open(self.lock_file, 'w+')
+
+            self.lock_fd = open(self.lock_file, 'w')
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self.log_debug("Mutex acquired")
+            self.log_debug("Lock acquired")
+
+            with open(self.pid_file, 'w') as pid_fd:
+                pid_fd.write(unicode(os.getpid()))
+
             return True
         except IOError, exc_value:
+            self.lock_fd.close()
             self.lock_fd = None
+
             # IOError: [Errno 11] Resource temporarily unavailable
             if exc_value[0] == 11:
-                self._lock_failure()
+                self.lock_fd = open(self.lock_file, 'r')
+                with open(self.pid_file, 'r') as pid_fd:
+                    self._lock_failure(pid_fd.read())
+                self.lock_fd.close()
+                self.lock_fd = None
                 return False
             else:
                 raise
 
     def unlock(self):
-        """
-        Tries to remove the lock file.
-        """
         if not self.lock_fd:
             return False
-        self.log_debug("Releasing mutex ({0})...".format(self.lock_file))
+
+        self.log_debug("Releasing lock ({0})...".format(self.lock_file))
+
         fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-        self.log_debug("Unlock Complete.")
+        self.lock_fd.close()
+        os.remove(self.pid_file)
+        os.remove(self.lock_file)
+
+        self.log_debug("Unlock complete")
         return True
 
-    def _lock_failure(self):
-        raise Exception('Failed to acquire mutex ({0})'.format(self.lock_file))
+    def _lock_failure(self, pid):
+        raise Exception('Failed to acquire lock on {0}. Process {1} currently '
+                        'has it.'.format(self.lock_file, pid))

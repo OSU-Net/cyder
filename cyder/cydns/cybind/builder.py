@@ -543,14 +543,14 @@ class DNSBuilder(MutexMixin):
 
         self.repo.commit_and_push('Update config', sanity_check=sanity_check)
 
-    def _lock_failure(self):
+    def _lock_failure(self, pid):
         self.log_err(
-            'DNS build script attempted to acquire the build mutex but '
-            'another process already has it.',
+            'Failed to acquire lock on {0}. Process {1} currently '
+            'has it.'.format(self.lock_file, pid),
             to_stderr=False)
         fail_mail(
             'An attempt was made to start the DNS build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
             subject="Concurrent DNS builds attempted.")
-        super(DNSBuilder, self)._lock_failure()
+        super(DNSBuilder, self)._lock_failure(pid)

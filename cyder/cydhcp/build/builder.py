@@ -154,14 +154,14 @@ class DHCPBuilder(MutexMixin):
             self.log_err(log_msg, to_stderr=False)
             raise Exception(exception_message)
 
-    def _lock_failure(self):
+    def _lock_failure(self, pid):
         self.log_err(
-            'DHCP build script attempted to acquire the build mutux but '
-            'another process already has it.',
+            'Failed to acquire lock on {0}. Process {1} currently '
+            'has it.'.format(self.lock_file, pid),
             to_stderr=False)
         fail_mail(
             'An attempt was made to start the DHCP build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
             subject="Concurrent DHCP builds attempted.")
-        super(DHCPBuilder, self)._lock_failure()
+        super(DHCPBuilder, self)._lock_failure(pid)
