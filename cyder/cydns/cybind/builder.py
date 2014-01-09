@@ -275,7 +275,7 @@ class DNSBuilder(MutexMixin):
             # Looks like someone made some changes... let's nuke them.
             # We should probably email someone too.
             self.log_notice(
-                "{0} has serial {1} in svn ({2}) and serial "
+                "{0} has serial {1} in VCS ({2}) and serial "
                 "{3} in the database. Zone will be rebuilt."
                 .format(soa, serial, file_meta['prod_fname'],
                         soa.serial),
@@ -293,7 +293,7 @@ class DNSBuilder(MutexMixin):
         Files:
             * rel_zone_dir
                 - This is the directory path to where the zone file will be
-                  placed. It's relative to where the script things the SVN root
+                  placed. It's relative to where the script things the VCS root
                   is. See :func:`calc_target` for more info.
             * fname
                 - This is the name of the file, which is usually in the format
