@@ -9,11 +9,6 @@ from cyder.cydhcp.build.builder import DHCPBuilder
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         ### action options ###
-        make_option('-b', '--build',
-                    dest='build',
-                    action='store_true',
-                    default=False,
-                    help="Build zone files."),
         make_option('-p', '--push',
                     dest='push',
                     action='store_true',
@@ -45,15 +40,11 @@ class Command(BaseCommand):
         builder_opts = {}
         for name in ('log_syslog', 'debug'):
             val = options.pop(name)
-            if val is not None:
+            if val is not None:  # user specified value
                 builder_opts[name] = val
-            # else use settings
+            # else get value from settings
 
         with DHCPBuilder(**builder_opts) as b:
-            if options['build']:
-                b.build()
+            b.build()
             if options['push']:
-                if options['build']:
-                    b.push(sanity_check=options['sanity_check'])
-                else:
-                    raise CommandError('--push requires --build')
+                b.push(sanity_check=options['sanity_check'])
