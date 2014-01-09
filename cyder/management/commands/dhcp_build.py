@@ -5,7 +5,6 @@ from django.core.management.base import BaseCommand, CommandError
 from cyder.cydhcp.build.builder import DHCPBuilder
 
 
-
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         ### action options ###
