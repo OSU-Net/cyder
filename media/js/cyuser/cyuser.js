@@ -1,6 +1,8 @@
 $(document).ready(function() {
     var formBlock = $('#perm-hidden');
-    $('#id_users').tagsInput({'defaultText': 'add a user'});
+    $('#id_users').tagsInput({
+        'defaultText': 'add a user',
+        'autocomplete_url': '/core/user/search'});
     $('#clone-perms-btn, #clone-perms-cancel').click(function(e) {
         formBlock.slideToggle("slow", function() {
         });
