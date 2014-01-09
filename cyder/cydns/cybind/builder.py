@@ -30,14 +30,6 @@ from cyder.cydns.cybind.serial_utils import get_serial
 
 
 class DNSBuilder(MutexMixin):
-    """
-    DNSBuilder must be instantiated from a `with` statement. Its __exit__
-    method releases a mutex, so it's critical that it be called regardless of
-    the reason the Python interpreter exits. __del__ is not sufficient because
-    CPython is not guaranteed to delete objects involved in circular
-    references even when every object in the circular reference goes out of
-    scope.
-    """
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
             'stage_only': False,

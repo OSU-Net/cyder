@@ -23,14 +23,6 @@ from cyder.settings import DHCPBUILD
 
 
 class DHCPBuilder(MutexMixin):
-    """
-    DHCPBuilder must be instantiated from a `with` statement. Its __exit__
-    method releases a mutex, so it's critical that it be called regardless of
-    the reason the Python interpreter exits. __del__ is not sufficient because
-    CPython is not guaranteed to delete objects involved in circular
-    references even when every object in the circular reference goes out of
-    scope.
-    """
     def __init__(self, *args, **kwargs):
         kwargs = dict_merge(DHCPBUILD, {
             'debug': True,
