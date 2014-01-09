@@ -52,7 +52,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     """
 
     id = models.AutoField(primary_key=True)
-    network = models.ForeignKey(Network, null=False, blank=True)
+    network = models.ForeignKey(Network, null=False, blank=False)
 
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
                                   default=STATIC)
@@ -161,16 +161,15 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     def details(self):
         """For tables."""
         data = super(Range, self).details()
-        has_net = self.network is not None
         data['data'] = [
             ('Name', 'name', self.name),
             ('Range', 'start_str', self.get_self_str(add_name=False)),
             ('Domain', 'domain', self.domain),
             ('Type', 'range_type',
              'static' if self.range_type == 'st' else 'dynamic'),
-            ('Network', 'network', self.network if has_net else ""),
-            ('Site', 'network__site', self.network.site if has_net else ""),
-            ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
+            ('Network', 'network', self.network),
+            ('Site', 'network__site', self.network.site),
+            ('Vlan', 'network__vlan', self.network.vlan)]
         return data
 
     @staticmethod
@@ -191,10 +190,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.network is None and not self.is_reserved:
-            raise ValidationError("ERROR: Range {0}-{1} is not associated "
-                                  "with a network and is not reserved".format(
-                                      self.start_str, self.end_str))
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
@@ -249,16 +244,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             if not self.domain:
                 raise ValidationError('A dynamic range must have a domain.')
 
-        if not self.is_reserved:
-            self.network.update_network()
-            if self.network.ip_type == IP_TYPE_4:
-                IPClass = ipaddr.IPv4Address
-            else:
-                IPClass = ipaddr.IPv6Address
-
-            if (IPClass(self.start_str) < self.network.network.network or
-                    IPClass(self.end_str) > self.network.network.broadcast):
-                raise RangeOverflowError("Range doesn't fit in network")
         self.check_for_overlaps()
 
     def get_allow_deny_list(self):
@@ -379,7 +364,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
             :returns: ipaddr.IPv4Address
         """
-        if self.network and self.network.ip_type != '4':
+        if self.network.ip_type != '4':
             return None
         elif self.ip_type != '4':
             return None
