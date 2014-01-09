@@ -244,6 +244,16 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             if not self.domain:
                 raise ValidationError('A dynamic range must have a domain.')
 
+        self.network.update_network()
+        if self.network.ip_type == IP_TYPE_4:
+            IPClass = ipaddr.IPv4Address
+        else:
+            IPClass = ipaddr.IPv6Address
+
+        if (IPClass(self.start_str) < self.network.network.network or
+                IPClass(self.end_str) > self.network.network.broadcast):
+            raise RangeOverflowError("Range doesn't fit in network")
+
         self.check_for_overlaps()
 
     def get_allow_deny_list(self):
