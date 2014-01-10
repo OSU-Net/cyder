@@ -52,8 +52,8 @@ class VCSRepo(object):
                 to_syslog=self.log_syslog, logger=self.logger)
 
     def _sanity_check(self):
-        lines_changed = self._lines_changed()
-        if sum(lines_changed) > self.diff_line_threshold:
+        added, removed = self._lines_changed()
+        if added + removed > self.diff_line_threshold:
             raise Exception('Too many lines changed. Aborting commit.\n'
                             '({0} lines added, {1} lines removed)'
                             .format(*lines_changed))
