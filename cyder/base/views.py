@@ -142,8 +142,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     if request.method == 'POST':
-        post_data = qd_to_py_dict(request.POST)
-        form = FormKlass(post_data, instance=obj)
+        form = FormKlass(request.POST, instance=obj)
         if form.is_valid():
             try:
                 if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
