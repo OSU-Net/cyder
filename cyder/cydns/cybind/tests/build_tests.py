@@ -17,6 +17,30 @@ from cyder.scripts.dnsbuilds.tests.build_tests import BuildScriptTests
 
 class MockBuildScriptTests(BuildScriptTests, TestCase):
     def setUp(self):
+        self.stage_dir = '/tmp/fake/stage/inv_zones/'
+        self.svn_dir = '/tmp/fake/dnsconfig/'
+        self.prod_dir = '/tmp/fake/dnsconfig/inv_zones/'
+        self.svn_repo = '/tmp/fake/svn_repo'
+        self.lock_file = '/tmp/fake/lock.fake'
+        if os.path.isdir('/tmp/fake/'):
+            shutil.rmtree('/tmp/fake')
+            os.makedirs('/tmp/fake')
+        command_str = "svnadmin create {0}".format(self.svn_repo)
+        os.makedirs(self.svn_repo)
+        rets = subprocess.Popen(shlex.split(command_str),
+                                stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        stdout, stderr = rets.communicate()
+        self.assertEqual(0, rets.returncode)
+
+        command_str = "svn co file://{0} {1}".format(self.svn_repo,
+                                                     self.prod_dir)
+        rets = subprocess.Popen(shlex.split(command_str),
+                                stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        stdout, stderr = rets.communicate()
+        self.assertEqual(0, rets.returncode)
+
         Domain.objects.get_or_create(name="arpa")
         Domain.objects.get_or_create(name="in-addr.arpa")
         self.r1, _ = Domain.objects.get_or_create(name="10.in-addr.arpa")
@@ -205,3 +229,72 @@ class MockBuildScriptTests(BuildScriptTests, TestCase):
         lc = b.svn_lines_changed(b.PROD_DIR)
         self.assertEqual((4, 3), lc)
         b.svn_checkin(lc)
+
+    def svn_info(self):
+        cwd = os.getcwd()
+        os.chdir('/tmp/fake/dnsconfig/inv_zones/')
+        command_str = "svn info"
+        rets = subprocess.Popen(shlex.split(command_str),
+                                stderr=subprocess.PIPE,
+                                stdout=subprocess.PIPE)
+        stdout, stderr = rets.communicate()
+        self.assertEqual(0, rets.returncode)
+        print stdout
+        os.chdir(cwd)
+
+    def test_build_svn(self):
+        print "This will take a while, be patient..."
+        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
+                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
+                       FIRST_RUN=True, PUSH_TO_PROD=True)
+        b.build_dns()
+        #self.svn_info()
+        s = SOA.objects.all()
+        if len(s) > 0:
+            s[0].dirty = True
+            s[0].save()
+        b.build_dns()
+        #self.svn_info()
+        b.build_dns()
+        #self.svn_info()
+
+    def test_build_staging(self):
+        if os.path.isdir(self.stage_dir):
+            shutil.rmtree(self.stage_dir)
+        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
+                       LOCK_FILE=self.lock_file)
+        b.build_staging()
+        # Make sure it made the staging dir
+        self.assertTrue(os.path.isdir(self.stage_dir))
+        # Ensure if fails if the directory exists
+        self.assertRaises(BaseException, b.build_staging)
+        # There shouldn't be errors because force=True
+        b.build_staging(force=True)
+
+        self.assertTrue(os.path.isdir(self.stage_dir))
+        b.clear_staging()
+        self.assertFalse(os.path.isdir(self.stage_dir))
+        self.assertRaises(BaseException, b.clear_staging)
+        b.clear_staging(force=True)
+        self.assertFalse(os.path.isdir(self.stage_dir))
+
+    def test_lock_unlock(self):
+        if os.path.exists(self.lock_file):
+            os.remove(self.lock_file)
+        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
+                       LOCK_FILE=self.lock_file)
+        self.assertFalse(os.path.exists(self.lock_file))
+        b.lock()
+        self.assertTrue(os.path.exists(self.lock_file))
+        for i in xrange(10):
+            b.unlock()
+            b.lock()
+
+        b.unlock()
+        self.assertTrue(os.path.exists(self.lock_file))
+
+        b.lock()
+        self.assertTrue(os.path.exists(self.lock_file))
+
+        b.unlock()
+        self.assertTrue(os.path.exists(self.lock_file))
