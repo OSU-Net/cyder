@@ -92,9 +92,9 @@ def clone_perms_check(request):
     if users:
         users = users.split(',')
         for user in users:
-            user_qs = User.objects.filter(username=user)
-            if not user_qs.exists():
+            if not User.objects.filter(username=user).exists():
                 new_users.append(user)
+
     confirm_str = ''
     if new_users:
         if len(new_users) > 1:
