@@ -3,6 +3,7 @@ from string import Template
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db.models.loading import get_model
 from django.forms import ModelChoiceField, HiddenInput
+from django import forms
 
 from cyder.base.utils import filter_by_ctnr
 
@@ -79,6 +80,13 @@ class ObjectUrlMixin(object):
         Return base details with generic postback URL for editable tables.
         """
         return {'url': self.get_table_update_url()}
+
+
+class ExpirableFormMixin(object):
+    expire = forms.DateTimeField(input_formats=['%m/%d/%Y %H:%M',
+                                                '%m/%d/%y %H:%M',
+                                                '%m/%d/%Y',
+                                                '%m/%d/%y'], required=False)
 
 
 class UsabilityFormMixin(object):
