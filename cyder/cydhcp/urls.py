@@ -1,9 +1,8 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import include, patterns, url
 from django.views.generic.simple import direct_to_template
 
 from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
-                                cydhcp_get_update_form, cydhcp_search_obj,
-                                cydhcp_delete)
+                                cydhcp_get_update_form, cydhcp_search_obj)
 from cyder.cydhcp.constants import DHCP_EAV_MODELS
 
 
@@ -14,8 +13,6 @@ def cydhcp_urls(object_type):
         url(r'^$', cydhcp_view, name=object_type),
         url(r'^(?P<pk>[\w-]+)/update/$', cydhcp_view,
             name=object_type + '-update'),
-        url(r'^(?P<pk>[\w-]+)/delete/$', cydhcp_delete,
-            name=object_type + '-delete'),
         url(r'^(?P<pk>[\w-]+)/tableupdate/$', cydhcp_table_update,
             name=object_type + '-table-update'),
     )

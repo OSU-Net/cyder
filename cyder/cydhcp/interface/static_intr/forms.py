@@ -12,6 +12,7 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
+from cyder.cydns.forms import ViewChoiceForm
 from cyder.cydns.validation import validate_label
 
 
@@ -30,7 +31,7 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
+class StaticInterfaceForm(RangeWizard, ViewChoiceForm, UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
@@ -41,13 +42,14 @@ class StaticInterfaceForm(RangeWizard, UsabilityFormMixin):
         self.fields.keyOrder = ['system', 'description', 'label', 'domain',
                                 'mac', 'vrf', 'site', 'range', 'ip_type',
                                 'next_ip', 'ip_str', 'ttl', 'workgroup',
-                                'dhcp_enabled', 'dns_enabled', 'ctnr']
+                                'views', 'dhcp_enabled', 'dns_enabled', 'ctnr']
 
     class Meta:
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn',
                    'last_seen')
-        widgets = {'ip_type': forms.RadioSelect}
+        widgets = {'ip_type': forms.RadioSelect,
+                   'views': forms.CheckboxSelectMultiple}
 
 
 StaticInterfaceAVForm = get_eav_form(StaticInterfaceAV, StaticInterface)
