@@ -188,7 +188,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     else:
         if (obj_type in ['system', 'static_interface', 'dynamic_interface']
                 and not object_list):
-            return redirect(reverse('system-create', args=[None]))
+            return redirect(reverse('system-create'))
 
         form = FormKlass(instance=obj)
         if issubclass(type(form), UsabilityFormMixin):
@@ -260,17 +260,27 @@ def static_dynamic_view(request):
     else:
         return render(request, template, {'no_interfaces': True})
 
-
-def cy_delete(request, pk, get_klasses_fn):
+def cy_delete(request):
     """DELETE. DELETE. DELETE."""
-    obj_type = request.path.split('/')[2]
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
-    obj = get_object_or_404(Klass, pk=pk)
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    object_type = request.POST.get('obj_type', None)
+    pk = request.POST.get('pk', None)
+    if object_type in ['static_interface', 'dynamic_interface']:
+        object_type = object_type.replace('_', '')
+    Klass = get_model('cyder', object_type)
+    obj = Klass.objects.filter(id=pk)
+    if obj.exists():
+        obj = obj.get();
+
+    else:
+        messages.error(request, "Object does not exist")
+        return redirect(request.META.get('HTTP_REFERER', ''))
     try:
         if perm(request, ACTION_DELETE, obj=obj):
             if Klass.__name__ == 'Ctnr':
                 request = ctnr_delete_session(request, obj)
-
             obj.delete()
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
@@ -281,8 +291,8 @@ def cy_delete(request, pk, get_klasses_fn):
         referer = referer.replace(referer.split(obj.get_list_url())[1], '')
     except:
         referer = request.META.get('HTTP_REFERER', '')
-    return redirect(referer)
 
+    return redirect(referer)
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     """Show bunches of related tables.

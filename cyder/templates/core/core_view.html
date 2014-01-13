@@ -3,7 +3,7 @@
 {% set pretty_obj_type = obj_type|prettify_obj_type %}
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
-{% block title %} {{ pretty_obj_type + "s" }} {% endblock %}
+{% block title %}{{ pretty_obj_type + "s" }} {% endblock %}
 
 {% block sidebar %}
     {% include "core/includes/core_sidebar.html" %}
@@ -12,7 +12,7 @@
 {% block action_bar %}
 {% if obj_type_perm %}
   {% if pretty_obj_type == 'System' %}
-    <a class="btn submit c" href={{ url('system-create', obj_type) }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+    <a class="btn submit c" href={{ url('system-create') }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
   {% else %}
     <a class="btn create-obj" id={{ pretty_obj_type }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
   {% endif %}
@@ -23,7 +23,8 @@
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"
         data-searchUrl="{{ url('core-search') }}"
-        data-getUrl="{{ url('core-get-record') }}">
+        data-getUrl="{{ url('core-get-record') }}"
+        data-csrfToken="{{ csrf_token }}">
   </span>
   {% if obj_type_perm %}
     <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">

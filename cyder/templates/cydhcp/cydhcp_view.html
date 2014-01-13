@@ -11,9 +11,11 @@
 
 {% block action_bar %}
   {% if obj_type_perm %}
-  {% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
+    {% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
       {{ js('interface_delete') }}
-      <a class="btn submit c" href={{ url('system-create', obj_type) }}>Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+      <a class="btn submit c" href={{ url('system-create') }}
+          data-kwargs='{"initial": "True", "interface_type": "{{ pretty_obj_type|replace(' Interface', '') }}"}'
+          id="system_create">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
     {% else %}
       <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
     {% endif %}
@@ -28,7 +30,8 @@
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"
         data-searchUrl="{{ url('cydhcp-search-record') }}"
-        data-getUrl="{{ url('cydhcp-get-record') }}">
+        data-getUrl="{{ url('cydhcp-get-record') }}"
+        data-csrfToken="{{ csrf_token }}">
   </span>
   {% if obj_type_perm and form %}
     <div {% if not form.errors and object_table %}class="hidden"{% endif %} id="obj-form">

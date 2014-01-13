@@ -11,8 +11,50 @@ $(document).ready(function() {
     var obj_select = document.getElementsByName('obj_type');
     var add_user_form = document.getElementById('add-user-form');
     var user_clone = add_user_form.cloneNode(true);
+    var csrfToken = $('#view-metadata').attr('data-csrfToken');
     user_clone.id="user_clone";
     $(user_clone).removeAttr('style');
+
+    $('.minus, .plus, .remove-user, .remove-object').click(function(e) {
+        e.preventDefault();
+        alert('click');
+        var url = $(this).attr('href');
+        var lvl;
+        var detailUrl = $(this).parent().parent().find('a:first').attr('href');
+        var pk = detailUrl.split('/').slice(-2)[0];
+        var obj_type = detailUrl.split('/').slice(2)[0];
+        var action = 'user_level';
+        if ($(this).attr('class') == 'minus') {
+            lvl = -1;
+        } else if ($(this).attr('class') == 'plus') {
+            lvl = 1;
+        } else if ($(this).attr('class') == 'remove-user') {
+            action = 'user_remove';
+        } else {
+            action = 'obj_remove';
+        };
+        postData = {
+            obj_type: obj_type,
+            pk: pk,
+            lvl: lvl,
+            action: action,
+            csrfmiddlewaretoken: csrfToken,
+        };
+        alert(postData.action);
+
+        $.post(url, postData, function(data) {
+            if (data.error) {
+                if ($('.container.message').find('.messages').length) {
+                    $('.container.message').find('.messages').remove();
+                };
+                $('.container.message').append(
+                    '<ul class="messages"><li class="error">' + data.error
+                    + '</li></ul>');
+            } else {
+                location.reload();
+            };
+        }, 'json');
+    });
 
     for(var i = 0; i < obj_select.length; i++) {
         // Check for type selected on refresh/redirect
@@ -67,6 +109,7 @@ $(document).ready(function() {
             obj_pk: objPk,
             obj_name: objName,
             obj_type: objType,
+            csrfmiddlewaretoken: csrfToken,
         };
         if (objType == 'user') {
             postData.level = $('#user_clone input[name="level"]:checked')[0].value;
@@ -93,23 +136,11 @@ $(document).ready(function() {
                 userPk = null;
             };
             // Not going to use ajax for other objects due to users tables being on top
-            if (data.redirect) {
+            if (data.success) {
                 $('.error').empty();
                 document.location.reload();
             };
-            if (data.user) {
-                $('.error').empty();
-                $('#add-object-errorlist').empty();
-                // Append row to user table.
-                if ($('.user-table tbody')[0]) {
-                    insertTablefyRow(data.user, $('.user-table tbody'));
-                    event.preventDefault();
-                    $('#object-searchbox').val('');
-                    userPk = null;
-                } else {
-                    document.location.reload();
-                }
-            }
         }, 'json');
     });
+
 });
