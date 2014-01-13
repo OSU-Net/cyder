@@ -17,7 +17,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView,
 from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
-                              make_paginator, model_to_post, tablefy)
+                              make_paginator, tablefy)
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
@@ -456,7 +456,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
             return HttpResponse(json.dumps({'error': e.messages}))
         qd['label'], qd['domain'] = label, str(domain.pk)
 
-    form = FormKlass(model_to_post(qd, obj), instance=obj)
+    form = FormKlass(qd, instance=obj)
     if form.is_valid():
         form.save()
         return HttpResponse()
