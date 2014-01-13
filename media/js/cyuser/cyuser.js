@@ -1,5 +1,6 @@
 $(document).ready(function() {
     var formBlock = $('#perm-hidden');
+    var csrfToken = $('#view-metadata').attr('data-csrfToken');
     $('#id_users').tagsInput({
         'defaultText': 'add a user',
         'autocomplete_url': '/core/user/search'});
@@ -11,6 +12,7 @@ $(document).ready(function() {
         e.preventDefault();
         postData = {
             users: ($('#clone-perms-form').find(':input')[0].value),
+            csrfmiddlewaretoken: csrfToken,
         };
         $.post('/core/user/clone_perms_check/', postData, function(data) {
             if (data.confirm_str) {
@@ -22,7 +24,8 @@ $(document).ready(function() {
                 };
             };
             var url = $('#clone-perms-form').attr('action');
-            clone_perms_data = ajax_form_submit(url, $('#clone-perms-form'));
+            clone_perms_data = ajax_form_submit(
+                url, $('#clone-perms-form'), csrfToken);
             if (clone_perms_data.success) {
                 location.reload();
             };
