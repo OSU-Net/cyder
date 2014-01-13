@@ -17,8 +17,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView,
 from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
-                              make_paginator, model_to_post, tablefy,
-                              qd_to_py_dict)
+                              make_paginator, tablefy)
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
@@ -92,7 +91,7 @@ def admin_page(request):
 
 def send_email(request):
     if request.POST:
-        form = BugReportForm(qd_to_py_dict(request.POST))
+        form = BugReportForm(request.POST)
 
         if form.is_valid():
             from_email = User.objects.get(
@@ -173,7 +172,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                     'pk': pk,
                 })
     elif request.method == 'GET':
-        form = FormKlass(initial=qd_to_py_dict(request.GET))
+        form = FormKlass(initial=request.GET)
     # Adjust this if statement to submit forms with ajax
     elif 'AV' in FormKlass.__name__:
         return HttpResponse(json.dumps({'errors': form.errors}))
@@ -467,7 +466,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
             return HttpResponse(json.dumps({'error': e.messages}))
         qd['label'], qd['domain'] = label, str(domain.pk)
 
-    form = FormKlass(model_to_post(qd, obj), instance=obj)
+    form = FormKlass(qd, instance=obj)
     if form.is_valid():
         form.save()
         return HttpResponse()
