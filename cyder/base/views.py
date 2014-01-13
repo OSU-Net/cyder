@@ -259,6 +259,7 @@ def static_dynamic_view(request):
     else:
         return render(request, template, {'no_interfaces': True})
 
+
 def cy_delete(request):
     """DELETE. DELETE. DELETE."""
     if not request.POST:
@@ -266,13 +267,14 @@ def cy_delete(request):
 
     object_type = request.POST.get('obj_type', None)
     pk = request.POST.get('pk', None)
-    if object_type in ['static_interface', 'dynamic_interface']:
+    if (object_type in ['static_interface', 'dynamic_interface'] or
+            'av' in object_type):
         object_type = object_type.replace('_', '')
+
     Klass = get_model('cyder', object_type)
     obj = Klass.objects.filter(id=pk)
     if obj.exists():
-        obj = obj.get();
-
+        obj = obj.get()
     else:
         messages.error(request, "Object does not exist")
         return redirect(request.META.get('HTTP_REFERER', ''))
@@ -292,6 +294,7 @@ def cy_delete(request):
         referer = request.META.get('HTTP_REFERER', '')
 
     return redirect(referer)
+
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     """Show bunches of related tables.
