@@ -82,6 +82,18 @@ def login_session(request, username):
     return request
 
 
+def set_default_ctnr(request):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    ctnr_id = request.POST.get('id', None)
+    if ctnr_id:
+        request.user.get_profile().default_ctnr = ctnr_id
+        request.user.save()
+
+    return redirect(request.META.get('HTTP_REFERER', ''))
+
+
 def delete(request, user_id):
     acting_user = User.objects.get(id=request.session['_auth_user_id'])
 
