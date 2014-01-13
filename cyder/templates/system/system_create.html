@@ -6,7 +6,10 @@
 {% endblock %}
 
 {% block form %}
-<form class="form" id="main-form" method="POST">
+  <span id="view-metadata"
+      data-csrfToken="{{ csrf_token }}">\
+  </span>
+  <form class="form" id="main-form" method="POST">
     <h3>Create a System</h3>
     <div class="inner-form" id="inner-form">
         {{ system_form.as_p() }}
@@ -16,8 +19,8 @@
     <div class="form-btns">
         <hr>
         <a class="btn submit c" id="create-system">Create System</a>
-</div>
-</form>
+    </div>
+  </form>
 <div id="static-form" style="display: none">
     {{ static_form.as_p() }}
 </div>
