@@ -13,4 +13,6 @@ class Command(BaseCommand):
         now = datetime.now()
         for model in MODEL_LIST:
             if issubclass(model, ExpirableMixin):
-                model.objects.filter(expire__lte=now).delete()
+                objects = model.objects.filter(expire__lte=now)
+                for obj in objects:
+                    obj.delete()
