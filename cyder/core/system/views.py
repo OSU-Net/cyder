@@ -1,4 +1,5 @@
 import ipaddr
+from copy import copy
 
 from django import forms
 from django.forms.util import ErrorDict, ErrorList
@@ -7,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from django.db.models.loading import get_model
 
-from cyder.base.utils import tablefy, qd_to_py_dict
+from cyder.base.utils import tablefy
 from cyder.core.system.models import System
 from cyder.core.system.forms import ExtendedSystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -62,13 +63,13 @@ def system_create_view(request, initial):
     system_form = ExtendedSystemForm()
 
     if request.POST:
-        post_data = qd_to_py_dict(request.POST)
+        post_data = copy(request.POST)
         if not post_data['ctnr']:
             post_data['ctnr'] = request.session['ctnr'].id
         system_data = {}
-        initial = post_data.pop('initial', None)
-        system_data['name'] = post_data.pop('name', None)
-        system_data['interface_type'] = post_data.pop('interface_type', None)
+        initial = post_data.get('initial', None)
+        system_data['name'] = post_data.get('name', None)
+        system_data['interface_type'] = post_data.get('interface_type', None)
         system_form = ExtendedSystemForm(system_data)
 
         if system_form.is_valid():
