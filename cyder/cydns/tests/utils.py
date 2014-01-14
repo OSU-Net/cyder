@@ -30,7 +30,9 @@ def create_fake_zone(random_str, suffix=".mozilla.com"):
     factory = RequestFactory()
     post_data = get_post_data(random_str, suffix=suffix)
     request = factory.post("/dont/matter", post_data)
-    create_zone_ajax(request)
+    response = create_zone_ajax(request)
+    if response.status_code == 500:
+        raise ValidationError(json.loads(response.content)['error'])
     return Domain.objects.get(name=post_data['root_domain'])
 
 
@@ -51,24 +53,27 @@ def create_zone_ajax(request):
     # See if the domain exists.
     # Fail if it already exists or if it's under a delegated domain.
     root_domain = qd.get('root_domain', None)
+    response_error = lambda error: HttpResponse(
+        json.dumps({'success': False, 'error': error}), status=500)
 
     if not root_domain:
         error = "Please specify a root_domain"
-        return HttpResponse(json.dumps({'success': False, 'error': error}))
+        return response_error(error)
 
     if Domain.objects.filter(name=root_domain).exists():
         error = gt("<b>{0}</b> is already a domain. To make it a new zone, "
                    "assign it a newly created SOA.".format(root_domain))
-        return HttpResponse(json.dumps({'success': False, 'error': error}))
+        return HttpResponse(json.dumps({'success': False, 'error': error}),
+                            status=400)
 
     primary = qd.get('soa_primary', None)
     if not primary:
         error = "Please specify a primary nameserver for the SOA record."
-        return HttpResponse(json.dumps({'success': False, 'error': error}))
+        return response_error(error)
     contact = qd.get('soa_contact', None)
     if not contact:
         error = "Please specify a contact address for the SOA record."
-        return HttpResponse(json.dumps({'success': False, 'error': error}))
+        return response_error(error)
     contact.replace('@', '.')
 
     # Find all the NS entries
@@ -83,7 +88,7 @@ def create_zone_ajax(request):
         # They must create at least one nameserver
         error = gt("You must choose an authoritative nameserver to serve this "
                    "zone")
-        return HttpResponse(json.dumps({'success': False, 'error': error}))
+        return response_error(error)
 
     # We want all domains created up to this point to inherit their
     # master_domain's soa. We will override the return domain's SOA.
@@ -91,17 +96,6 @@ def create_zone_ajax(request):
     # domain to non-purgeable. This will also allow us to call prune tree.
     domain = ensure_domain(
         root_domain, purgeable=True, inherit_soa=False, force=True)
-
-    soa = SOA(primary=primary, contact=contact, serial=int(time.time()),
-              description="SOA for {0}".format(root_domain))
-    try:
-        soa.save()
-    except ValidationError, e:
-        _clean_domain_tree(domain)
-        return HttpResponse(json.dumps({'success': False,
-                                        'error': e.messages[0]}))
-    domain.purgeable = False
-    domain.save()
 
     private_view, _ = View.objects.get_or_create(name='private')
     public_view, _ = View.objects.get_or_create(name='public')
@@ -114,10 +108,10 @@ def create_zone_ajax(request):
             if not domain.name.endswith('10.in-addr.arpa'):
                 ns.views.add(public_view)
             saved_nss.append(ns)
-        except ValidationError, e:
+        except ValidationError, error:
             suffixes = ["th", "st", "nd", "rd", ] + ["th"] * 16
             suffixed_i = str(i + 1) + suffixes[i + 1 % 100]
-            error_field, error_val = e.message_dict.items()[0]
+            error_field, error_val = error.message_dict.items()[0]
             error = gt("When trying to create the {0} nameserver entry, the "
                        "nameserver field '{1}' returned the error "
                        "'{2}'".format(suffixed_i, error_field, error_val[0]))
@@ -125,18 +119,32 @@ def create_zone_ajax(request):
             for s_ns in saved_nss:
                 s_ns.delete()
             _clean_domain_tree(domain)
-            soa.delete()
-            return HttpResponse(json.dumps({'success': False,
-                                            'error': error}))
+            return response_error(error)
+
+    soa = SOA(primary=primary, contact=contact, serial=int(time.time()),
+              description="SOA for {0}".format(root_domain),
+              root_domain=domain)
+
+    try:
+        soa.save()
+    except ValidationError, e:
+        error = e.messages[0]
+        _clean_domain_tree(domain)
+        for s_ns in saved_nss:
+            s_ns.delete()
+        return response_error(error)
+    domain.purgeable = False
+    domain.save()
+
     try:
         domain.soa = soa
         domain.save()
-    except ValidationError, e:
+    except ValidationError, error:
         for s_ns in saved_nss:
             s_ns.delete()
         _clean_domain_tree(domain)
         soa.delete()
-        return HttpResponse(json.dumps({'success': False, 'error': error}))
+        return response_error(error)
 
     return HttpResponse(json.dumps(
         {

@@ -34,8 +34,6 @@ class DynamicInterfaceSerializer(serializers.ModelSerializer):
     dynamicinterfaceav_set = DynamicInterfaceNestedAVSerializer(many=True)
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-core-system-detail')
-    domain = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dns-domain-detail')
     range = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dhcp-range-detail')
     ctnr = serializers.HyperlinkedRelatedField(

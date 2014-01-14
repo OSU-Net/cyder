@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.db.models.loading import get_model
 
 from cyder.cydns.cybind.builder import DNSBuilder, BuildError
 
@@ -79,7 +80,7 @@ class Command(BaseCommand):
             dns_migrate.delete_DNS()
             dns_migrate.delete_CNAME()
             dhcp_migrate.delete_all()
-            dns_migrate.gen_reverses()
+            dns_migrate.gen_domains_only()
             dhcp_migrate.migrate_zones()
             dhcp_migrate.migrate_zone_reverse()
             dhcp_migrate.migrate_vlans()
@@ -95,6 +96,17 @@ class Command(BaseCommand):
             dhcp_migrate.migrate_zone_reverse()
             dhcp_migrate.migrate_user()
             dhcp_migrate.migrate_zone_user()
+
+            print 'Updating range usage.'
+            Range = get_model('cyder', 'range')
+            ranges = Range.objects.all()
+            for rng in ranges:
+                rng.save()
+
+            print "Scheduling SOA rebuilds."
+            SOA = get_model('cyder', 'soa')
+            for s in SOA.objects.all():
+                s.schedule_rebuild(commit=True, force=True)
 
         if options['dns']:
             print "Migrating DNS objects."

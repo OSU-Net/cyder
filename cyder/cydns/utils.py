@@ -35,7 +35,7 @@ def slim_form(domain_pk=None, form=None):
     return form
 
 
-def get_clobbered(domain_name):
+def get_clobbered(domain_name, **kwargs):
     classes = [MX, AddressRecord, CNAME, TXT, SRV, StaticInterface, SSHFP]
     clobber_objects = []  # Objects that have the same name as a domain
     for Klass in classes:
@@ -46,7 +46,7 @@ def get_clobbered(domain_name):
             new_obj.id = None
             new_obj.label = ""
             clobber_objects.append((new_obj, obj_views))
-            kwargs = {'call_prune_tree': False}
+            kwargs['call_prune_tree'] = False
             if Klass == AddressRecord:
                 kwargs['check_cname'] = False
             elif Klass == StaticInterface:
@@ -57,11 +57,17 @@ def get_clobbered(domain_name):
             # function to skip calling prune_tree. We handle static interfaces
             # analogously, using the delete_system argument to skip system
             # deletion.
-            obj.delete(**kwargs)
+            if Klass not in [StaticInterface, AddressRecord]:
+                update_range_usage = kwargs.pop('update_range_usage', True)
+                obj.delete(**kwargs)
+                kwargs['update_range_usage'] = update_range_usage
+            else:
+                obj.delete(**kwargs)
     return clobber_objects
 
 
-def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
+def ensure_domain(name, purgeable=False, inherit_soa=False, force=False,
+                  **kwargs):
     """
     This function will take ``domain_name`` and make sure that that domain
     with that name exists in the db. If this function creates a domain it will
@@ -111,7 +117,7 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
     for i in range(len(parts)):
         domain_name = parts[i] + '.' + domain_name
         domain_name = domain_name.strip('.')
-        clobber_objects = get_clobbered(domain_name)
+        clobber_objects = get_clobbered(domain_name, **kwargs)
         # Need to be deleted and then recreated.
         domain, created = Domain.objects.get_or_create(name=domain_name)
         if purgeable and created:
@@ -126,11 +132,17 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False):
         for object_, views in clobber_objects:
             object_.domain = domain
             object_.clean()
-            object_.save()
+            if object_.__class__ in [AddressRecord, StaticInterface]:
+                object_.save(**kwargs)
+            else:
+                object_.save()
             for view_name in views:
                 view = View.objects.get(name=view_name)
                 object_.views.add(view)
-                object_.save()
+                if object_.__class__ in [AddressRecord, StaticInterface]:
+                    object_.save(**kwargs)
+                else:
+                    object_.save()
 
     return domain
 

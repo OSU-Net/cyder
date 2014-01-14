@@ -1,3 +1,5 @@
+# encoding=utf-8
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -10,13 +12,14 @@ from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
-                                    ALLOW_LEGACY, ALLOW_VRF,
-                                    ALLOW_LEGACY_AND_VRF, RANGE_TYPE, STATIC,
-                                    DYNAMIC)
+                                    ALLOW_LEGACY, ALLOW_VRF, RANGE_TYPE,
+                                    STATIC, DYNAMIC)
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
                                 start_end_filter)
+from cyder.cydns.models import ViewMixin
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -25,7 +28,7 @@ import ipaddr
 # import reversion
 
 
-class Range(BaseModel, ObjectUrlMixin):
+class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
@@ -70,6 +73,8 @@ class Range(BaseModel, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True, editable=False)
     end_str = models.CharField(max_length=39, verbose_name="End address")
 
+    domain = models.ForeignKey(Domain, null=True)
+
     is_reserved = models.BooleanField(default=False, blank=False)
 
     allow = models.CharField(max_length=1, choices=ALLOW_OPTIONS,
@@ -77,6 +82,14 @@ class Range(BaseModel, ObjectUrlMixin):
 
     dhcpd_raw_include = models.TextField(blank=True)
     dhcp_enabled = models.BooleanField(default=True)
+
+    name = models.CharField(blank=True, max_length=50)
+    description = models.TextField(blank=True)
+
+    allow_voip_phones = models.BooleanField(
+        default=True, verbose_name='Allow VoIP phones')
+
+    range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str')
     display_fields = ('start_str', 'end_str')
@@ -87,8 +100,41 @@ class Range(BaseModel, ObjectUrlMixin):
         unique_together = ('start_upper', 'start_lower', 'end_upper',
                            'end_lower')
 
-    def __str__(self):
-        return get_display(self)
+    @property
+    def range_str(self):
+        return u'{0}–{1}'.format(self.start_str, self.end_str)
+
+    @property
+    def range_str_padded(self):
+        s = u'{0:*>15} – {1:*<15}'.format(self.start_str, self.end_str)
+        s = s.replace(u'*', u'\u00a0')
+        return s
+
+    def get_self_str(self, padded=False, add_usage=True, add_name=True):
+        if padded:
+            range_str = self.range_str_padded
+        else:
+            range_str = self.range_str
+
+        if add_name:
+            name = u' ' + self.name if self.name else u''
+        else:
+            name = u''
+
+        if add_usage and self.range_usage is not None:
+            if self.range_usage >= 100:
+                usage = u'full'
+            else:
+                usage = u'{0}%'.format(str(self.range_usage))
+
+            usage = u' ({0})'.format(usage)
+        else:
+            usage = u''
+
+        return u''.join((range_str, name, usage))
+
+    def __unicode__(self):
+        return self.get_self_str(padded=True)
 
     def __repr__(self):
         return "<Range: {0}>".format(str(self))
@@ -105,7 +151,7 @@ class Range(BaseModel, ObjectUrlMixin):
         start, end = four_to_two(
             self.start_upper, self.start_lower, self.end_upper, self.end_lower)
         return StaticInterface.objects.filter(
-                start_end_filter(start, end, self.ip_type)[2])
+            start_end_filter(start, end, self.ip_type)[2])
 
     def _range_ips(self):
         self._start, self._end = four_to_two(
@@ -119,7 +165,11 @@ class Range(BaseModel, ObjectUrlMixin):
         data = super(Range, self).details()
         has_net = self.network is not None
         data['data'] = [
-            ('Range', 'start_str', self),
+            ('Name', 'name', self.name),
+            ('Range', 'start_str', self.get_self_str(add_name=False)),
+            ('Domain', 'domain', self.domain),
+            ('Type', 'range_type',
+             'static' if self.range_type == 'st' else 'dynamic'),
             ('Network', 'network', self.network if has_net else ""),
             ('Site', 'network__site', self.network.site if has_net else ""),
             ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
@@ -137,12 +187,16 @@ class Range(BaseModel, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         self.clean()
+        update_range_usage = kwargs.pop('update_range_usage', True)
+        if update_range_usage:
+            self.range_usage = self.get_usage()
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
         if self.network is None and not self.is_reserved:
-            raise ValidationError('Range must be associated with a network '
-                                  'unless it is reserved')
+            raise ValidationError("ERROR: Range {0}-{1} is not associated "
+                                  "with a network and is not reserved".format(
+                                      self.start_str, self.end_str))
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
@@ -185,13 +239,17 @@ class Range(BaseModel, ObjectUrlMixin):
             raise ValidationError("The start of a range cannot be greater "
                                   "than the end of the range.")
 
-        if self.range_type == STATIC and self.dynamicinterface_set.exists():
+        if (self.range_type == STATIC and
+                self.dynamicinterface_set.filter(dhcp_enabled=True).exists()):
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if self.range_type == DYNAMIC and self.staticinterfaces.exists():
-            raise ValidationError('A dynamic range cannot contain static '
-                                  'interfaces')
+        if self.range_type == DYNAMIC:
+            if self.staticinterfaces.filter(dhcp_enabled=True).exists():
+                raise ValidationError('A dynamic range cannot contain static '
+                                      'interfaces')
+            if not self.domain:
+                raise ValidationError('A dynamic range must have a domain.')
 
         if not self.is_reserved:
             self.network.update_network()
@@ -216,12 +274,12 @@ class Range(BaseModel, ObjectUrlMixin):
                 for ctnr in self.ctnr_set.all()]
         else:
             allow = []
-            if (self.allow == ALLOW_VRF or
-                    self.allow == ALLOW_LEGACY_AND_VRF):
+            if self.allow_voip_phones:
+                allow += ['allow members of "VoIP"']
+            if self.allow == ALLOW_VRF:
                 allow += ['allow members of "{0}"'.format(
                     self.network.vrf.name)]
-            if (self.allow == ALLOW_LEGACY or
-                    self.allow == ALLOW_LEGACY_AND_VRF):
+            if self.allow == ALLOW_LEGACY:
                 allow += ['allow members of "{0}:{1}:{2}"'.format(
                     ctnr.name, self.start_str, self.end_str)
                     for ctnr in self.ctnr_set.all()]
@@ -306,6 +364,20 @@ class Range(BaseModel, ObjectUrlMixin):
             site_name, vlan_name,
             self.network, self.start_str, self.end_str)
 
+    def get_usage(self):
+        if self.range_type == 'st':
+            from cyder.cydhcp.range.range_usage import range_usage
+            _, usage = range_usage(self.start_lower, self.end_lower,
+                                   self.ip_type)
+        else:
+            DynamicInterface = models.get_model('cyder', 'dynamicinterface')
+            used = float(DynamicInterface.objects.filter(
+                range=self, dhcp_enabled=True).count())
+            capacity = float(self.end_lower - self.start_lower + 1)
+            usage = (used/capacity)*100
+
+        return usage
+
     def get_next_ip(self):
         """Finds the most appropriate IP address within a range. If it can't
         find an IP it returns None. If it finds an IP it returns an IPv4Address
@@ -323,6 +395,35 @@ class Range(BaseModel, ObjectUrlMixin):
             return ip
         else:
             return None
+
+    def bind_render_record(self, **kwargs):
+        if self.range_type == STATIC or self.ip_type == IP_TYPE_6:
+            return ""
+
+        DEFAULT_TTL = 3600
+        if kwargs.pop('reverse', False):
+            template = ("$GENERATE {3:>3}-{4:<3}  {1:44} {2}  IN  PTR     {0}")
+        else:
+            template = ("$GENERATE {3:>3}-{4:<3}  {0:44} {2}  IN  A       {1}")
+
+        built = ""
+        start = map(int, self.start_str.split("."))
+        end = map(int, self.end_str.split("."))
+        for a in range(start[0], end[0] + 1):
+            b1 = start[1] if a == start[0] else 0
+            b2 = end[1] if a == end[0] else 255
+            for b in range(b1, b2 + 1):
+                c1 = start[2] if (a, b) == tuple(start[:2]) else 0
+                c2 = end[2] if (a, b) == tuple(end[:2]) else 255
+                for c in range(c1, c2 + 1):
+                    d1 = start[3] if (a, b, c) == tuple(start[:3]) else 0
+                    d2 = end[3] if (a, b, c) == tuple(end[:3]) else 255
+                    host = "{0}-{1}-{2}-$.{3}.".format(a, b, c, self.domain)
+                    ip = "{0}.{1}.{2}.$".format(a, b, c)
+                    rec = template.format(host, ip, DEFAULT_TTL, d1, d2)
+                    built = "\n".join([built, rec]).strip()
+
+        return built
 
 
 def find_free_ip(start, end, ip_type='4'):

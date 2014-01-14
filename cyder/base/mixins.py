@@ -16,7 +16,7 @@ class DisplayMixin(object):
         'rdtype_just':  7,
         'rdclass_just': 3,
         'prio_just':    2,
-        'lhs_just':     39,
+        'lhs_just':     61,
         'extra_just':   1
     }
 
@@ -57,7 +57,7 @@ class ObjectUrlMixin(object):
 
     def get_delete_url(self):
         """Return the delete url of an object."""
-        return reverse(self._meta.db_table + '-delete', args=[self.pk])
+        return reverse('delete')
 
     def get_detail_url(self):
         """Return the detail url of an object."""
@@ -99,6 +99,7 @@ class UsabilityFormMixin(object):
 
     def filter_by_ctnr_all(self, request, allow_reverse_domains=False):
         from cyder.core.ctnr.models import Ctnr
+        from cyder.cydns.domain.models import Domain
         ctnr = request.session['ctnr']
         for fieldname, field in self.fields.items():
             if not hasattr(field, 'queryset'):
@@ -119,7 +120,7 @@ class UsabilityFormMixin(object):
                 queryset = filter_by_ctnr(ctnr=ctnr,
                                           objects=field.queryset).distinct()
 
-            if fieldname == 'domain' and not allow_reverse_domains:
+            if queryset.model == Domain and not allow_reverse_domains:
                 queryset = queryset.filter(is_reverse=False)
 
             if queryset.count() == 1:
@@ -128,18 +129,20 @@ class UsabilityFormMixin(object):
             self.fields[fieldname].queryset = queryset
 
     def autoselect_system(self):
+        System = get_model('cyder', 'system')
         if 'system' in self.initial:
-            System = get_model('cyder', 'system')
             system_name = System.objects.get(
                 pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(
                 widget=HiddenInput(attrs={'title': system_name}),
                 empty_label='',
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
+        elif 'system' in self.fields:
+            del(self.fields['system'])
 
     def make_usable(self, request):
+        self.autoselect_system()
         if 'ctnr' in request.session:
             self.filter_by_ctnr_all(request)
         self.alphabetize_all()
-        self.autoselect_system()
         self.append_required_all()

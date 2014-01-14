@@ -17,8 +17,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView,
 from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
-                              make_paginator, model_to_post, tablefy,
-                              qd_to_py_dict)
+                              make_paginator, tablefy)
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
@@ -75,9 +74,10 @@ def admin_page(request):
 
             extra_cols[0]['data'] = perma_delete_data
             user_table = tablefy(lost_users, extra_cols=extra_cols, users=True,
-                                 request=request)
+                                 request=request, update=False)
 
-            superuser_table = tablefy(superusers, users=True, request=request)
+            superuser_table = tablefy(superusers, users=True, request=request,
+                                      update=False)
             user_form = EditUserForm()
 
             return render(request, 'base/admin_page.html', {
@@ -91,7 +91,7 @@ def admin_page(request):
 
 def send_email(request):
     if request.POST:
-        form = BugReportForm(qd_to_py_dict(request.POST))
+        form = BugReportForm(request.POST)
 
         if form.is_valid():
             from_email = User.objects.get(
@@ -140,10 +140,8 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
 
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
-    form = FormKlass(instance=obj)
     if request.method == 'POST':
-        post_data = qd_to_py_dict(request.POST)
-        form = FormKlass(post_data, instance=obj)
+        form = FormKlass(request.POST, instance=obj)
         if form.is_valid():
             try:
                 if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
@@ -155,6 +153,10 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                     if (hasattr(obj, 'ctnr_set') and
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
+
+                    # Adjust this if statement to submit forms with ajax
+                    if 'AV' in FormKlass.__name__:
+                        return HttpResponse(json.dumps({'success': True}))
 
                     return redirect(
                         request.META.get('HTTP_REFERER', obj.get_list_url()))
@@ -170,20 +172,26 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                     'pk': pk,
                 })
     elif request.method == 'GET':
-        form = FormKlass(initial=qd_to_py_dict(request.GET))
+        form = FormKlass(initial=request.GET)
+    # Adjust this if statement to submit forms with ajax
+    elif 'AV' in FormKlass.__name__:
+        return HttpResponse(json.dumps({'errors': form.errors}))
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
-    if issubclass(type(form), UsabilityFormMixin):
-        form.make_usable(request)
+    StaticInterface = get_model('cyder', 'staticinterface')
+    DynamicInterface = get_model('cyder', 'dynamicinterface')
+    if form._meta.model in [StaticInterface, DynamicInterface]:
+        form = None
+    else:
+        if (obj_type in ['system', 'static_interface', 'dynamic_interface']
+                and not object_list):
+            return redirect(reverse('system-create'))
 
-    if obj_type == 'system' and len(object_list) == 0:
-        return redirect(reverse('system-create', args=[None]))
-
-    if Klass.__name__ in [
-            "StaticInterface", "DynamicInterface"] and pk is None:
-        form.fields['system'].widget = forms.HiddenInput()
+        form = FormKlass(instance=obj)
+        if issubclass(type(form), UsabilityFormMixin):
+            form.make_usable(request)
 
     return render(request, template, {
         'form': form,
@@ -195,16 +203,85 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     })
 
 
-def cy_delete(request, pk, get_klasses_fn):
+def static_dynamic_view(request):
+    template = 'core/core_interfaces.html'
+    if request.session['ctnr'].name == 'global':
+        return render(request, template, {})
+
+    StaticInterface = get_model('cyder', 'staticinterface')
+    DynamicInterface = get_model('cyder', 'dynamicinterface')
+    statics = _filter(request, StaticInterface).select_related('system')
+    dynamics = (_filter(request, DynamicInterface)
+                .select_related('system', 'range'))
+    page_obj = list(statics) + list(dynamics)
+
+    def details(obj):
+        data = {}
+        data['url'] = obj.get_table_update_url()
+        data['data'] = []
+        if isinstance(obj, StaticInterface):
+            data['data'].append(('System', '1', obj.system))
+            data['data'].append(('Type', '2', 'static'))
+            data['data'].append(('MAC', '3', obj.mac_str))
+            data['data'].append(('IP', '4', obj.ip_str))
+        elif isinstance(obj, DynamicInterface):
+            data['data'].append(('System', '1', obj.system))
+            data['data'].append(('Type', '2', 'dynamic'))
+            data['data'].append(('MAC', '3', obj))
+            data['data'].append(('IP', '4', obj.range))
+
+        if obj.last_seen == 0:
+            date = ''
+        else:
+            import datetime
+            date = datetime.datetime.fromtimestamp(obj.last_seen)
+            date = date.strftime('%B %d, %Y, %I:%M %p')
+
+        data['data'].append(('Last seen', '5', date))
+        return data
+
+    from cyder.base.tablefier import Tablefier
+    table = Tablefier(page_obj, request, custom=details).get_table()
+    if table:
+        if 'sort' not in request.GET:
+            sort, order = 1, 'asc'
+        else:
+            sort = int(request.GET['sort'])
+            order = request.GET['order'] if 'order' in request.GET else 'asc'
+
+        sort_fn = lambda x: str(x[sort]['value'][0]).lower()
+        table['data'] = sorted(table['data'], key=sort_fn,
+                               reverse=(order == 'desc'))
+        return render(request, template, {
+            'page_obj': page_obj,
+            'obj_table': table,
+        })
+    else:
+        return render(request, template, {'no_interfaces': True})
+
+
+def cy_delete(request):
     """DELETE. DELETE. DELETE."""
-    obj_type = request.path.split('/')[2]
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
-    obj = get_object_or_404(Klass, pk=pk)
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    object_type = request.POST.get('obj_type', None)
+    pk = request.POST.get('pk', None)
+    if (object_type in ['static_interface', 'dynamic_interface'] or
+            'av' in object_type):
+        object_type = object_type.replace('_', '')
+
+    Klass = get_model('cyder', object_type)
+    obj = Klass.objects.filter(id=pk)
+    if obj.exists():
+        obj = obj.get()
+    else:
+        messages.error(request, "Object does not exist")
+        return redirect(request.META.get('HTTP_REFERER', ''))
     try:
         if perm(request, ACTION_DELETE, obj=obj):
             if Klass.__name__ == 'Ctnr':
                 request = ctnr_delete_session(request, obj)
-
             obj.delete()
     except ValidationError as e:
         messages.error(request, ', '.join(e.messages))
@@ -215,6 +292,7 @@ def cy_delete(request, pk, get_klasses_fn):
         referer = referer.replace(referer.split(obj.get_list_url())[1], '')
     except:
         referer = request.META.get('HTTP_REFERER', '')
+
     return redirect(referer)
 
 
@@ -240,15 +318,24 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
             obj_set = getattr(obj, obj_set).all()
         page_obj = make_paginator(
             request, obj_set, obj_type=name.lower().replace(' ', ''))
+        if obj_type == 'user':
+            table = tablefy(page_obj, request=request, update=False)
+        else:
+            table = tablefy(page_obj, request=request)
+
         tables.append({
             'name': name,
             'page_obj': page_obj,
-            'table': tablefy(page_obj, request=request)
+            'table': table
         })
+    if obj_type == 'user':
+        table = tablefy((obj,), info=False, request=request, update=False)
+    else:
+        table = tablefy((obj,), info=False, request=request)
 
     return render(request, template, dict({
         'obj': obj,
-        'obj_table': tablefy((obj,), info=False, request=request),
+        'obj_table': table,
         'obj_type': obj_type,
         'tables': tables
     }.items() + kwargs.items()))
@@ -382,7 +469,7 @@ def table_update(request, pk, get_klasses_fn, object_type=None):
             return HttpResponse(json.dumps({'error': e.messages}))
         qd['label'], qd['domain'] = label, str(domain.pk)
 
-    form = FormKlass(model_to_post(qd, obj), instance=obj)
+    form = FormKlass(qd, instance=obj)
     if form.is_valid():
         form.save()
         return HttpResponse()

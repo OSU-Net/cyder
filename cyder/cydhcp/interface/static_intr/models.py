@@ -146,12 +146,23 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         return related_systems
 
     def save(self, *args, **kwargs):
+        update_range_usage = kwargs.pop('update_range_usage', True)
         self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean_reverse()  # BasePTR
+        old_range = None
+        if self.id is not None:
+            old_range = StaticInterface.objects.get(id=self.id).range
+
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
+        if self.range and update_range_usage:
+            self.range.save()
+            if old_range:
+                old_range.save()
 
     def delete(self, *args, **kwargs):
+        rng = self.range
+        update_range_usage = kwargs.pop('update_range_usage', True)
         delete_system = kwargs.pop('delete_system', True)
         if self.reverse_domain and self.reverse_domain.soa:
             self.reverse_domain.soa.schedule_rebuild()
@@ -164,6 +175,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 self.system.delete()
 
         super(StaticInterface, self).delete(*args, **kwargs)
+        if rng and update_range_usage:
+            rng.save()
         # ^ goes to BaseAddressRecord
 
     def check_A_PTR_collision(self):
@@ -278,7 +291,7 @@ class StaticInterfaceAV(EAVBase):
         app_label = 'cyder'
         db_table = 'static_interface_av'
 
-
     entity = models.ForeignKey(StaticInterface)
-    attribute = EAVAttributeField(Attribute,
+    attribute = EAVAttributeField(
+        Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))

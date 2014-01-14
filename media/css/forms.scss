@@ -66,6 +66,10 @@
     }
 }
 
+#id_range, #id_network, #id_ip_str {
+    font-family: "Courier New", Courier, monospace;
+}
+
 .ui-dialog {
     @include default-box-shadow();
     .ui-dialog-titlebar {

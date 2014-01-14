@@ -8,6 +8,8 @@ from funfactory.settings_base import *
 from cyder.settings.dns import *
 
 TESTING = True if sys.argv[1:] and sys.argv[1] == 'test' else False
+MIGRATING = (True if sys.argv[1:] and sys.argv[1] == 'maintain_migrate'
+             else False)
 
 ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True
@@ -116,6 +118,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     #'django_cas.middleware.CASMiddleware',
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
 )

@@ -129,6 +129,19 @@ class EAVAttributeField(models.ForeignKey):
 
         super(EAVAttributeField, self).__init__(*args, **kwargs)
 
+    def validate(self, value, model_instance):
+        from cyder.base.eav.models import Attribute
+
+        attr = Attribute.objects.get(pk=value)
+        type_ = attr.attribute_type
+        valid = any(type_choice == type_
+                    for (type_choice, _) in self.type_choices)
+        if not valid:
+            raise ValidationError("Attribute '%s' is not allowed on this "
+                                  "object" % attr)
+
+        super(EAVAttributeField, self).validate(value, model_instance)
+
     def formfield(self, **kwargs):
         return AttributeFormField(choices_query=self.rel.limit_choices_to,
                                   **kwargs)
@@ -156,7 +169,11 @@ class AttributeFormField(forms.CharField):
         try:
             return Attribute.objects.get(name=value, **self.choices_query)
         except Attribute.DoesNotExist:
-            raise ValidationError("No such attribute")
+            if Attribute.objects.filter(name=value).exists():
+                raise ValidationError('This attribute is not allowed on this '
+                                      'object')
+            else:
+                raise ValidationError('No such attribute')
 
 
 # "Introspection rules" tell South which custom field arguments it needs to

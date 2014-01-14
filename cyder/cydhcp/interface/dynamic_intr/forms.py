@@ -11,7 +11,7 @@ from cyder.cydhcp.range.models import Range
 class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(DynamicInterfaceForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['system', 'domain', 'mac', 'vrf', 'site',
+        self.fields.keyOrder = ['system', 'mac', 'vrf', 'site',
                                 'range', 'workgroup', 'dhcp_enabled', 'ctnr']
         self.fields['range'].required = True
         self.fields['range'].queryset = Range.objects.filter(

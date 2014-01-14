@@ -1,4 +1,5 @@
 import ipaddr
+from copy import copy
 
 from django import forms
 from django.forms.util import ErrorDict, ErrorList
@@ -6,8 +7,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 
-
-from cyder.base.utils import tablefy, qd_to_py_dict
+from cyder.base.utils import tablefy
 from cyder.core.system.models import System
 from cyder.core.system.forms import ExtendedSystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -31,12 +31,14 @@ def system_detail(request, pk):
     static_intr = []
     dynamic_intr = []
     for intr in static:
-        related_systems.update(intr.get_related_systems())
+        if intr.mac:
+            related_systems.update(intr.get_related_systems())
         static_intr.append((tablefy((intr,), request=request),
                             tablefy(intr.staticinterfaceav_set.all(),
                                     request=request)))
     for intr in dynamic:
-        related_systems.update(intr.get_related_systems())
+        if intr.mac:
+            related_systems.update(intr.get_related_systems())
         dynamic_intr.append((tablefy((intr,), request=request),
                              tablefy(intr.dynamicinterfaceav_set.all(),
                                      request=request)))
@@ -54,44 +56,42 @@ def system_detail(request, pk):
     })
 
 
-def system_create_view(request, initial):
+def system_create_view(request):
     static_form = StaticInterfaceForm()
     dynamic_form = DynamicInterfaceForm()
     system_form = ExtendedSystemForm()
-
     if request.POST:
-        post_data = qd_to_py_dict(request.POST)
-        if not post_data['ctnr']:
+        system = None
+        post_data = copy(request.POST)
+        if not post_data.get('ctnr'):
             post_data['ctnr'] = request.session['ctnr'].id
-        system_data = {}
-        initial = post_data.pop('initial', None)
-        system_data['name'] = post_data.pop('name', None)
-        system_data['interface_type'] = post_data.pop('interface_type', None)
-        system_form = ExtendedSystemForm(system_data)
 
+        system_form = ExtendedSystemForm(post_data)
         if system_form.is_valid():
-            system = system_form.save()
-            post_data['system'] = system.id
-
-        else:
-            system = None
-
-        if system_data.get('interface_type', '') is None:
+            system = system_form.save(commit=False)
+        if post_data.get('interface_type', '') is not None:
             if system:
-                system.delete()
+                system.save()
+                post_data['system'] = system.id
 
-        else:
-            if system_data.get('interface_type', '') == 'Static':
+            if post_data.get('interface_type', None) == 'Static':
+                try:
+                    post_data['ip_type'] = ipaddr.IPAddress(
+                        post_data.get('ip_str', None)).version
+                except:
+                    post_data['ip_type'] = None
+
                 form = StaticInterfaceForm(post_data)
                 static_form = form
-            elif system_data.get('interface_type', '') == 'Dynamic':
+            elif post_data.get('interface_type', None) == 'Dynamic':
                 form = DynamicInterfaceForm(post_data)
                 dynamic_form = form
 
             if form.is_valid():
                 try:
                     form.save()
-                    return redirect(reverse('system-detail', args=[system.id]))
+                    return redirect(
+                        reverse('system-detail', args=[system.id]))
                 except ValidationError, e:
                     form._errors = ErrorDict()
                     form._errors['__all__'] = ErrorList(e.messages)
@@ -107,37 +107,14 @@ def system_create_view(request, initial):
                 if system:
                     system.delete()
 
-    if initial == 'static_interface':
-        interface_type = 'Static'
-
-    elif initial == 'dynamic_interface':
-        interface_type = 'Dynamic'
-
-    else:
-        try:
-            ipaddr.IPAddress(initial)
-            ip_type = ipaddr.IPAddress(initial).version
-            interface_type = 'Static'
-            static_form.initial = dict({'ip_str': initial, 'ip_type': ip_type})
-            for field in ['vrf', 'site', 'range', 'next_ip']:
-                static_form.fields[field].widget = forms.HiddenInput()
-
-            static_form.fields['ip_str'].widget.attrs['readonly'] = True
-            static_form.fields['ip_type'].widget.attrs['readonly'] = True
-            static_form.fields['ip_type'].choices = [
-                (str(ip_type), "IPv{0}".format(ip_type))]
-
-        except ValueError:
-            interface_type = None
-
-    if interface_type:
-        system_form.fields['interface_type'].initial = interface_type
-        system_form.fields['interface_type'].widget.attrs['readonly'] = True
-        system_form.fields['interface_type'].choices = [
-            (str(interface_type), "{0} Interface".format(interface_type))]
+            if request.POST.get('initial', None):
+                system_form.errors.clear()
+                static_form.errors.clear()
+                dynamic_form.errors.clear()
 
     static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()
+    static_form.fields['ip_type'].widget = forms.HiddenInput()
 
     if request.session['ctnr'].name != 'global':
         dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
@@ -146,9 +123,7 @@ def system_create_view(request, initial):
     system_form.make_usable(request)
     static_form.make_usable(request)
     dynamic_form.make_usable(request)
-
     return render(request, 'system/system_create.html', {
         'system_form': system_form,
         'static_form': static_form,
-        'dynamic_form': dynamic_form,
-        'initial': initial})
+        'dynamic_form': dynamic_form})

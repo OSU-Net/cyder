@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.base.constants import ACTION_CREATE
@@ -11,8 +12,6 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               cy_delete, get_update_form, search_obj,
                               table_update)
 from cyder.core.cyuser.utils import perm
-
-from cyder.cydhcp.constants import DHCP_EAV_MODELS
 
 from cyder.cydns.constants import DNS_EAV_MODELS
 from cyder.cydns.address_record.forms import (AddressRecordForm,
@@ -37,6 +36,8 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.forms import FQDNTXTForm, TXTForm
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
+
+import json
 
 
 def get_klasses(obj_type):
@@ -80,6 +81,9 @@ def cydns_view(request, pk=None):
             form = FormKlass(request.POST)
             form._errors = ErrorDict()
             form._errors['__all__'] = ErrorList(errors)
+            if obj_type in DNS_EAV_MODELS:
+                return HttpResponse(json.dumps({'errors': form.errors}))
+
             return render(request, 'cydns/cydns_view.html', {
                 'form': form,
                 'obj_type': obj_type,
@@ -92,8 +96,8 @@ def cydns_view(request, pk=None):
             if perm(request, ACTION_CREATE, obj=record, obj_class=Klass):
                 record = form.save()
                 # If domain, add to current ctnr.
-                if obj_type in DNS_EAV_MODELS or obj_type in DHCP_EAV_MODELS:
-                    return redirect(request.META.get('HTTP_REFERER', ''))
+                if obj_type in DNS_EAV_MODELS:
+                    return HttpResponse(json.dumps({'success': True}))
 
                 if (hasattr(record, 'ctnr_set') and
                         not record.ctnr_set.all().exists()):
@@ -108,6 +112,9 @@ def cydns_view(request, pk=None):
             if not form._errors:
                 form._errors = ErrorDict()
                 form._errors['__all__'] = ErrorList(e)
+
+            if obj_type in DNS_EAV_MODELS:
+                return HttpResponse(json.dumps({'errors': form.errors}))
 
     object_list = _filter(request, Klass)
     page_obj = make_paginator(
@@ -147,10 +154,6 @@ def _fqdn_to_domain(qd):
 
         qd['label'], qd['domain'] = label, str(domain.pk)
     return qd, domain, None
-
-
-def cydns_delete(request, pk):
-    return cy_delete(request, pk, get_klasses)
 
 
 def cydns_get_update_form(request):

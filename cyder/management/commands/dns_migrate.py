@@ -6,9 +6,9 @@ from sys import stderr
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
+
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticInterfaceAV)
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -23,7 +23,8 @@ from cyder.cydns.models import View
 import MySQLdb
 from optparse import make_option
 from lib import maintain_dump, fix_maintain
-from lib.utilities import clean_mac, ip2long, long2ip, fix_attr_name
+from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
+                           range_usage_get_create)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -39,19 +40,20 @@ cursor = connection.cursor()
 
 class Zone(object):
 
-    def __init__(self, domain_id=None, dname=None, soa=None):
+    def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
         self.domain_id = 541 if domain_id is None else domain_id
         self.dname = self.get_dname() if dname is None else dname
 
         self.domain = self.gen_domain()
         if self.domain:
-            self.gen_MX()
-            self.gen_static()
-            self.gen_AR()
-            self.gen_NS()
-            self.domain.soa = self.gen_SOA() or soa
+            if gen_recs:
+                self.gen_MX()
+                self.gen_static()
+                self.gen_AR()
+                self.gen_NS()
+                self.domain.soa = self.gen_SOA() or soa
             self.domain.save()
-            self.walk_zone()
+            self.walk_zone(gen_recs=gen_recs)
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -71,7 +73,7 @@ class Zone(object):
             soa, _ = SOA.objects.get_or_create(
                 primary=primary, contact=contact, refresh=refresh,
                 retry=retry, expire=expire, minimum=minimum,
-                description='SOA for %s zone' % self.dname)
+                root_domain=self.domain, description='')
             return soa
         else:
             return None
@@ -82,7 +84,8 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
-            return ensure_domain(name=self.dname, force=True)
+            return ensure_domain(name=self.dname, force=True,
+                                 update_range_usage=False)
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -129,8 +132,8 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import (maintain_find_zone, migrate_zones,
-                                  get_host_option_values)
+        from dhcp_migrate import maintain_find_zone, migrate_zones
+
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
             migrate_zones()
@@ -173,6 +176,15 @@ class Zone(object):
             if ha == "":
                 enabled = False
 
+            # check for duplicate
+            static = StaticInterface.objects.filter(
+                label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+            if static:
+                stderr.write("Ignoring host %s: already exists.\n"
+                             % items['id'])
+                continue
+
+            # create system
             system = System(name=name)
             system.save()
             for key in sys_value_keys.keys():
@@ -185,6 +197,7 @@ class Zone(object):
                 eav.full_clean()
                 eav.save()
 
+            # check for workgroup
             if items['workgroup'] is not None:
                 cursor.execute("SELECT name "
                                "FROM workgroup "
@@ -194,48 +207,33 @@ class Zone(object):
             else:
                 w = None
 
-            if not (StaticInterface.objects.filter(
-                    label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
-                    .exists()):
+            static = StaticInterface(
+                label=name, domain=self.domain, mac=clean_mac(ha),
+                system=system, ip_str=long2ip(ip), ip_type='4',
+                workgroup=w, ctnr=ctnr, ttl=items['ttl'],
+                dns_enabled=enabled, dhcp_enabled=enabled,
+                last_seen=items['last_seen'])
+
+            # create static interface
+            try:
+                static.full_clean()
+                static.save(update_range_usage=False)
+            except ValidationError:
                 try:
-                    static = StaticInterface(label=name, domain=self.domain,
-                                             mac=clean_mac(ha), system=system,
-                                             ip_str=long2ip(ip), ip_type='4',
-                                             workgroup=w, ctnr=ctnr,
-                                             ttl=items['ttl'],
-                                             dns_enabled=enabled,
-                                             dhcp_enabled=enabled,
-                                             last_seen=items['last_seen'])
-
-                    # Static Interfaces need to be cleaned independently.
-                    # (no get_or_create)
+                    static.dhcp_enabled = False
+                    static.dns_enabled = enabled
                     static.full_clean()
-                    static.save()
+                    static.save(update_range_usage=False)
+                except ValidationError, e:
+                    stderr.write("Error creating static interface for host"
+                                 "with IP {0}\n".format(static.ip_str))
+                    stderr.write("Original exception: {0}\n".format(e))
+                    static = None
+                    system.delete()
 
-                    static.views.add(public)
-                    static.views.add(private)
-
-                    for key, value in get_host_option_values(items['id']):
-                        attr = Attribute.objects.get(name=fix_attr_name(key))
-                        eav = StaticInterfaceAV(entity=static,
-                                                attribute=attr, value=value)
-                        eav.full_clean()
-                        eav.save()
-
-                except ValidationError:
-                    try:
-                        static.dhcp_enabled = False
-                        static.dns_enabled = False
-                        static.full_clean()
-                        static.save()
-                    except ValidationError, e:
-                        stderr.write("Error generating static interface for "
-                                     "host with IP {0}\n"
-                                     .format(static.ip_str))
-                        stderr.write("Original exception: {0}\n".format(e))
-            else:
-                stderr.write("Ignoring host %s: already exists.\n"
-                             % items['id'])
+            if static:
+                static.views.add(public)
+                static.views.add(private)
 
     def gen_AR(self):
         """
@@ -278,9 +276,14 @@ class Zone(object):
                     pass
 
             if ptr_type == 'forward':
-                arec, _ = AddressRecord.objects.get_or_create(
-                    label=label, domain=self.domain,
+                if AddressRecord.objects.filter(
+                        fqdn=hostname, ip_str=long2ip(ip)).exists():
+                    continue
+
+                arec, _ = range_usage_get_create(
+                    AddressRecord, label=label, domain=self.domain,
                     ip_str=long2ip(ip), ip_type='4')
+
                 if enabled:
                     arec.views.add(public)
                     arec.views.add(private)
@@ -293,7 +296,7 @@ class Zone(object):
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
                     ptr.full_clean()
-                    ptr.save()
+                    ptr.save(update_range_usage=False)
                     if enabled:
                         ptr.views.add(public)
                         ptr.views.add(private)
@@ -319,7 +322,7 @@ class Zone(object):
             except ValidationError, e:
                 stderr.write("Error generating NS. %s\n" % e)
 
-    def walk_zone(self):
+    def walk_zone(self, gen_recs=True):
         """
         Recursively traverses the domain tree, creating Zone objects and
         migrating related DNS objects along the way.
@@ -335,7 +338,7 @@ class Zone(object):
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
             child_name = child_name.lower()
-            Zone(child_id, child_name, self.domain.soa)
+            Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs)
 
     def get_dname(self):
         """
@@ -406,7 +409,7 @@ def gen_CNAME():
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
             print "Removing duplicate PTR for %s" % cn.fqdn
-            dup_ptrs.delete()
+            dup_ptrs.delete(update_range_usage=False)
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
         cn.full_clean()
@@ -443,7 +446,16 @@ def gen_DNS(skip_edu=False):
         if "edu" in dname and skip_edu:
             continue
         print "Creating %s zone." % dname
-        Zone(domain_id=domain_id, dname=dname,)
+        Zone(domain_id=domain_id, dname=dname)
+
+
+def gen_domains_only():
+    gen_reverses()
+
+    cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
+    for domain_id, dname, _, _ in cursor.fetchall():
+        print "Creating %s. (domain only)" % dname
+        Zone(domain_id=domain_id, dname=dname, gen_recs=False)
 
 
 def add_pointers_manual():

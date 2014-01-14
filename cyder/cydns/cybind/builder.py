@@ -19,7 +19,7 @@ from cyder.settings import (
 
 from cyder.core.task.models import Task
 
-from cyder.cydns.domain.models import SOA
+from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
 from cyder.cydns.cybind.zone_builder import build_zone_data
 from cyder.cydns.cybind.models import DNSBuildRun
@@ -611,7 +611,7 @@ class DNSBuilder(SVNBuilderMixin):
     def build_zone_files(self, soa_pks_to_rebuild):
         zone_stmts = {}
 
-        for soa in SOA.objects.all():
+        for soa in SOA.objects.filter(dns_enabled=True):
             # If anything happens during this soa's build we need to mark
             # it as dirty so it can be rebuild
             try:
