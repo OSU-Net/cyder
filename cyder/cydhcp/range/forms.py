@@ -10,9 +10,9 @@ class RangeForm(ViewChoiceForm, UsabilityFormMixin):
     class Meta:
         model = Range
         exclude = ('start_upper', 'start_lower', 'end_upper', 'end_lower')
-        fields = ('network', 'ip_type', 'start_str', 'end_str', 'domain',
-                  'is_reserved', 'allow', 'views', 'dhcpd_raw_include',
-                  'dhcp_enabled')
+        fields = ('network', 'ip_type', 'range_type', 'start_str', 'end_str',
+                  'domain', 'is_reserved', 'allow', 'views',
+                  'dhcpd_raw_include', 'dhcp_enabled')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'range_type': forms.RadioSelect,
                    'ip_type': forms.RadioSelect}
