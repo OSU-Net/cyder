@@ -83,10 +83,7 @@ class ObjectUrlMixin(object):
 
 
 class ExpirableFormMixin(object):
-    expire = forms.DateTimeField(input_formats=['%m/%d/%Y %H:%M',
-                                                '%m/%d/%y %H:%M',
-                                                '%m/%d/%Y',
-                                                '%m/%d/%y'], required=False)
+    expire = forms.DateTimeField()
 
 
 class UsabilityFormMixin(object):

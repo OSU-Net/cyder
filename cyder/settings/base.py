@@ -265,3 +265,15 @@ DHCP_REPO_DIR = DHCP_STAGE_DIR
 
 DHCP_VERBOSE_ERROR_LOG = True
 DHCP_VERBOSE_ERROR_LOG_LOCATION = '/tmp/error.log'
+
+DATETIME_INPUT_FORMATS = (
+    '%m/%d/%y %H:%M',
+    '%Y-%m-%d %H:%M:%S',     # '2006-10-25 14:30:59'
+    '%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
+    '%Y-%m-%d',              # '2006-10-25'
+    '%m/%d/%Y %H:%M:%S',     # '10/25/2006 14:30:59'
+    '%m/%d/%Y %H:%M',        # '10/25/2006 14:30'
+    '%m/%d/%Y',              # '10/25/2006'
+    '%m/%d/%y %H:%M:%S',     # '10/25/06 14:30:59'
+    '%m/%d/%y',              # '10/25/06'
+)
