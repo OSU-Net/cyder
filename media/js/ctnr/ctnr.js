@@ -1,6 +1,7 @@
 $(document).ready(function() {
     var form = document.getElementById('add-object-inner-form');
     var ctnr = $('#ctnr-data');
+    var ctnr_name = $('#title').text().split(' ')[1];
     var searchUrl = null;
     var addObjectUrl = ctnr.attr('data-addObjectUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
@@ -17,43 +18,50 @@ $(document).ready(function() {
 
     $('.minus, .plus, .remove-user, .remove-object').click(function(e) {
         e.preventDefault();
-        alert('click');
         var url = $(this).attr('href');
         var lvl;
         var detailUrl = $(this).parent().parent().find('a:first').attr('href');
         var pk = detailUrl.split('/').slice(-2)[0];
         var obj_type = detailUrl.split('/').slice(2)[0];
         var action = 'user_level';
+        var acknowledge = true;
         if ($(this).attr('class') == 'minus') {
             lvl = -1;
         } else if ($(this).attr('class') == 'plus') {
             lvl = 1;
         } else if ($(this).attr('class') == 'remove-user') {
             action = 'user_remove';
+            acknowledge = confirm("Are you sure you want to remove this " +
+                "user from " + ctnr_name);
         } else {
             action = 'obj_remove';
+            acknowledge = confirm("Are you sure you want to remove this " +
+                obj_type + " from " + ctnr_name);
         };
-        postData = {
-            obj_type: obj_type,
-            pk: pk,
-            lvl: lvl,
-            action: action,
-            csrfmiddlewaretoken: csrfToken,
-        };
-        alert(postData.action);
 
-        $.post(url, postData, function(data) {
-            if (data.error) {
-                if ($('.container.message').find('.messages').length) {
-                    $('.container.message').find('.messages').remove();
-                };
-                $('.container.message').append(
-                    '<ul class="messages"><li class="error">' + data.error
-                    + '</li></ul>');
-            } else {
-                location.reload();
+        if (acknowledge) {
+            postData = {
+                obj_type: obj_type,
+                pk: pk,
+                lvl: lvl,
+                action: action,
+                csrfmiddlewaretoken: csrfToken,
             };
-        }, 'json');
+
+            $.post(url, postData, function(data) {
+                if (data.error) {
+                    if ($('.container.message').find('.messages').length) {
+                        $('.container.message').find('.messages').remove();
+                    };
+                    $('.container.message').append(
+                        '<ul class="messages"><li class="error">' + data.error
+                        + '</li></ul>');
+                } else {
+                    location.reload();
+                };
+            }, 'json');
+        };
+        return false;
     });
 
     for(var i = 0; i < obj_select.length; i++) {
