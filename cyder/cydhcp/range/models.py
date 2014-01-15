@@ -18,6 +18,8 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.utils import (IPFilter, four_to_two, join_dhcp_args,
                                 start_end_filter)
+from cyder.cydns.models import ViewMixin
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
@@ -26,7 +28,7 @@ import ipaddr
 # import reversion
 
 
-class Range(BaseModel, ObjectUrlMixin):
+class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     """The Range class.
 
         >>> Range(start=start_ip, end=end_ip,
@@ -70,6 +72,8 @@ class Range(BaseModel, ObjectUrlMixin):
     end_lower = models.BigIntegerField(null=True, editable=False)
     end_upper = models.BigIntegerField(null=True, editable=False)
     end_str = models.CharField(max_length=39, verbose_name="End address")
+
+    domain = models.ForeignKey(Domain, null=True)
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
@@ -163,6 +167,7 @@ class Range(BaseModel, ObjectUrlMixin):
         data['data'] = [
             ('Name', 'name', self.name),
             ('Range', 'start_str', self.get_self_str(add_name=False)),
+            ('Domain', 'domain', self.domain),
             ('Type', 'range_type',
              'static' if self.range_type == 'st' else 'dynamic'),
             ('Network', 'network', self.network if has_net else ""),
@@ -239,10 +244,12 @@ class Range(BaseModel, ObjectUrlMixin):
             raise ValidationError('A static range cannot contain dynamic '
                                   'interfaces')
 
-        if (self.range_type == DYNAMIC and
-                self.staticinterfaces.filter(dhcp_enabled=True).exists()):
-            raise ValidationError('A dynamic range cannot contain static '
-                                  'interfaces')
+        if self.range_type == DYNAMIC:
+            if self.staticinterfaces.filter(dhcp_enabled=True).exists():
+                raise ValidationError('A dynamic range cannot contain static '
+                                      'interfaces')
+            if not self.domain:
+                raise ValidationError('A dynamic range must have a domain.')
 
         if not self.is_reserved:
             self.network.update_network()
@@ -388,6 +395,35 @@ class Range(BaseModel, ObjectUrlMixin):
             return ip
         else:
             return None
+
+    def bind_render_record(self, **kwargs):
+        if self.range_type == STATIC or self.ip_type == IP_TYPE_6:
+            return ""
+
+        DEFAULT_TTL = 3600
+        if kwargs.pop('reverse', False):
+            template = ("$GENERATE {3:>3}-{4:<3}  {1:44} {2}  IN  PTR     {0}")
+        else:
+            template = ("$GENERATE {3:>3}-{4:<3}  {0:44} {2}  IN  A       {1}")
+
+        built = ""
+        start = map(int, self.start_str.split("."))
+        end = map(int, self.end_str.split("."))
+        for a in range(start[0], end[0] + 1):
+            b1 = start[1] if a == start[0] else 0
+            b2 = end[1] if a == end[0] else 255
+            for b in range(b1, b2 + 1):
+                c1 = start[2] if (a, b) == tuple(start[:2]) else 0
+                c2 = end[2] if (a, b) == tuple(end[:2]) else 255
+                for c in range(c1, c2 + 1):
+                    d1 = start[3] if (a, b, c) == tuple(start[:3]) else 0
+                    d2 = end[3] if (a, b, c) == tuple(end[:3]) else 255
+                    host = "{0}-{1}-{2}-$.{3}.".format(a, b, c, self.domain)
+                    ip = "{0}.{1}.{2}.$".format(a, b, c)
+                    rec = template.format(host, ip, DEFAULT_TTL, d1, d2)
+                    built = "\n".join([built, rec]).strip()
+
+        return built
 
 
 def find_free_ip(start, end, ip_type='4'):

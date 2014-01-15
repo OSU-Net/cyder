@@ -11,6 +11,8 @@
   <h3>User Administration</h3>
   <div class="inner-form">
     {{ user_form.as_p() }}
+    <input type="hidden" name="csrfmiddlewaretoken"
+     value="{{ csrf_token }}"</input>
   </div>
   <div class="form-btns">
     <hr>

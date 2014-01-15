@@ -24,16 +24,6 @@
               {% if col['url'][loop.index0] %}
                 <a{% if col['class'] %} class="{{ col['class'][loop.index0] }}"{% endif %}
                   {% if col['data'] %}{% if col['data'][loop.index0] %}{% for data in col['data'][loop.index0] %} data-{{ data[0] }}="{{ data[1] }}"{% endfor %}{% endif %}{% endif %}
-                  {% if cell == 'Delete' %}
-                    {% if class == 'system' %}
-                      onclick="return confirm('Deleting this system will also delete its interfaces. Are you sure you want to continue?');"
-                    {% else %}
-                      onclick="return confirm('Are you sure you want to delete this?');"
-                    {% endif %}
-                  {% endif %}
-                  {% if cell == 'Remove' %}
-                      onclick="return confirm('Are you sure you want to remove this from the container?');"
-                  {% endif %}
                   href="{{ col['url'][loop.index0] }}">
                   {% if col['img'] and col['img'][loop.index0] %}
                     <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}">

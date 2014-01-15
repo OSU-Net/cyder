@@ -30,10 +30,6 @@ def core_search_obj(request):
     return search_obj(request, get_klasses)
 
 
-def core_delete(request, pk):
-    return cy_delete(request, pk, get_klasses)
-
-
 def core_table_update(request, pk, obj_type=None):
     return table_update(request, pk, get_klasses, obj_type)
 

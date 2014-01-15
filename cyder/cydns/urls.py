@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import include, patterns, url
 
 from cyder.cydns.views import *
 from cyder.cydns.constants import DNS_EAV_MODELS
@@ -11,8 +11,6 @@ def cydns_urls(obj_type):
         url(r'^$', cydns_view, name=obj_type),
         url(r'(?P<pk>[\w-]+)/update/$', cydns_view,
             name=obj_type + '-update'),
-        url(r'(?P<pk>[\w-]+)/delete/$', cydns_delete,
-            name=obj_type + '-delete'),
         url(r'(?P<pk>[\w-]+)/tableupdate/$', cydns_table_update,
             name=obj_type + '-table-update'),
     )

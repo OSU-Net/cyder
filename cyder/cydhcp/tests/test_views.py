@@ -10,6 +10,7 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydns.domain.models import Domain
 
 
 def do_setUp(self, test_class, test_data):
@@ -44,6 +45,7 @@ class NetworkViewTests(cyder.base.tests.TestCase):
 class RangeViewTests(cyder.base.tests.TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'range'
+    domain, _ = Domain.objects.get_or_create(name="dummy")
 
     def setUp(self):
         test_data = {
@@ -53,6 +55,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'is_reserved': True,
             'allow': ALLOW_VRF,
             'range_type': STATIC,
+            'domain': self.domain,
         }
         do_setUp(self, Range, test_data)
 
@@ -64,6 +67,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'is_reserved': True,
             'allow': ALLOW_VRF,
             'range_type': STATIC,
+            'domain': self.domain.pk,
         }
 
 

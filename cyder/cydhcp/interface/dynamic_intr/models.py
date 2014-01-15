@@ -11,7 +11,6 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 
@@ -26,7 +25,6 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
                                                  "the interface with")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
                        help_text='(required if DHCP is enabled)')
-    domain = models.ForeignKey(Domain, null=True)
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True,
                                        verbose_name='Enable DHCP?')
@@ -67,7 +65,6 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
             ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('Domain', 'domain', self.domain),
             ('Last seen', 'last_seen', date)]
         return data
 
@@ -119,9 +116,9 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def get_fqdn(self):
         if not self.system.name:
-            return self.domain.name
+            return self.range.domain.name
         else:
-            return "{0}.{1}".format(self.system.name, self.domain.name)
+            return "{0}.{1}".format(self.system.name, self.range.domain.name)
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
@@ -141,9 +138,15 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
+        old_range = None
+        if self.id is not None:
+            old_range = DynamicInterface.objects.get(id=self.id).range
+
         super(DynamicInterface, self).save()
         if self.range and update_range_usage:
             self.range.save()
+            if old_range:
+                old_range.save()
 
 
 class DynamicInterfaceAV(EAVBase):
@@ -151,7 +154,7 @@ class DynamicInterfaceAV(EAVBase):
         app_label = 'cyder'
         db_table = "dynamic_interface_av"
 
-
     entity = models.ForeignKey(DynamicInterface)
-    attribute = EAVAttributeField(Attribute,
+    attribute = EAVAttributeField(
+        Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))

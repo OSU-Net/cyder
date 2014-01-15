@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    var csrfToken = $('#view-metadata').attr('data-csrfToken');
     $('.wizard').live('change', function() {
         var rng, free_ip;
         var rng_type = $(
@@ -23,6 +24,7 @@ $(document).ready(function() {
             range: rng,
             range_type: rng_type,
             free_ip: free_ip,
+            csrfmiddlewaretoken: csrfToken,
         };
         if(this.id == 'id_next_ip' && rng != '' || this.id != 'id_next_ip') {
             $.post('/dhcp/range/range_wizard/', postData, function(data) {

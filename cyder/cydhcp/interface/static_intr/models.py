@@ -149,10 +149,16 @@ class StaticInterface(BaseAddressRecord, BasePTR):
         update_range_usage = kwargs.pop('update_range_usage', True)
         self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean_reverse()  # BasePTR
+        old_range = None
+        if self.id is not None:
+            old_range = StaticInterface.objects.get(id=self.id).range
+
         super(StaticInterface, self).save(*args, **kwargs)
         self.rebuild_reverse()
         if self.range and update_range_usage:
             self.range.save()
+            if old_range:
+                old_range.save()
 
     def delete(self, *args, **kwargs):
         rng = self.range
@@ -285,7 +291,7 @@ class StaticInterfaceAV(EAVBase):
         app_label = 'cyder'
         db_table = 'static_interface_av'
 
-
     entity = models.ForeignKey(StaticInterface)
-    attribute = EAVAttributeField(Attribute,
+    attribute = EAVAttributeField(
+        Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))
