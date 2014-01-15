@@ -32,7 +32,6 @@ from cyder.cydns.cybind.serial_utils import get_serial
 class DNSBuilder(MutexMixin):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
-            'stage_only': False,
             'debug': False,
             'bs': DNSBuildRun(),  # Build statistic
         }, kwargs)
@@ -236,7 +235,6 @@ class DNSBuilder(MutexMixin):
         self.log_debug(
             "Built stage_{0}_file to {1}".format(view.name, stage_fname),
             root_domain=root_domain)
-        self.run_checkzone(stage_fname, root_domain)
 
     def calc_fname(self, view, root_domain):
         return "{0}.{1}".format(root_domain.name, view.name)
@@ -432,14 +430,9 @@ class DNSBuilder(MutexMixin):
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain
                         )
-                        # Run named-checkzone for good measure.
-                        if self.stage_only:
-                            self.log_debug("Not calling named-checkconf.",
-                                     root_domain=root_domain)
-                        else:
-                            self.run_checkzone(
-                                file_meta['prod_fname'], root_domain
-                            )
+
+                    # Run named-checkzone for good measure.
+                    self.run_checkzone(file_meta['prod_fname'], root_domain)
             except Exception:
                 soa.schedule_rebuild()
                 raise
