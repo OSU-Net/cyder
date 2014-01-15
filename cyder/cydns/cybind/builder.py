@@ -33,12 +33,7 @@ class DNSBuilder(MutexMixin):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
             'stage_only': False,
-            'clobber_stage': False,
-            'push_to_prod': False,
-            'build_zones': True,
-            'preserve_stage': False,
             'debug': False,
-            'force': False,
             'bs': DNSBuildRun(),  # Build statistic
         }, kwargs)
         set_attrs(self, kwargs)
@@ -504,9 +499,7 @@ class DNSBuilder(MutexMixin):
 
             # zone files
             soa_pks_to_rebuild = set(int(t.task) for t in dns_tasks)
-            self.build_config_files(
-                self.build_zone_files(soa_pks_to_rebuild)
-            )
+            self.build_config_files(self.build_zone_files(soa_pks_to_rebuild))
 
             if clean_up:
                 # Only delete the scheduled tasks we saw at the top of the
