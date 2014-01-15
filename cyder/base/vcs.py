@@ -6,7 +6,7 @@ from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
 def chdir_wrapper(func):
-    """A decorator that handles changing to and from stage_dir"""
+    """A decorator that handles changing to and from repo_dir"""
     def wrapped(self, *args, **kwargs):
         old_dir = os.getcwd()
         os.chdir(self.repo_dir)
@@ -38,7 +38,7 @@ class VCSRepo(object):
 
     @chdir_wrapper
     def reset_and_pull(self):
-        """Make the working tree match what's currently on the server."""
+        """Make the working tree match what's currently upstream."""
 
         self._reset_to_head()
         self._pull()
@@ -73,7 +73,7 @@ class VCSRepo(object):
 
 
 class GitRepo(VCSRepo):
-    def _is_index_dirty(self):  # sorry for function name
+    def _is_index_dirty(self):
         _, _, returncode = self._run_command('git diff --cached --quiet',
             ignore_failure=True)
         return returncode != 0

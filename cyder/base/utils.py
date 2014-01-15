@@ -17,7 +17,7 @@ from cyder.base.tablefier import Tablefier
 def shell_out(command, use_shlex=True):
     """
     A little helper function that will shell out and return stdout,
-    stderr and the return code.
+    stderr, and the return code.
     """
     if use_shlex:
         command_args = shlex.split(command)
