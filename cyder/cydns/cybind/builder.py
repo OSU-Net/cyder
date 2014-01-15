@@ -46,8 +46,9 @@ class DNSBuilder(MutexMixin):
         if self.log_syslog:
             syslog.openlog(b'dnsbuild', 0, syslog.LOG_LOCAL6)
 
-        self.repo = GitRepo(self.prod_dir, self.max_allowed_lines_changed,
-            debug=self.debug, log_syslog=self.log_syslog, logger=syslog)
+        self.repo = GitRepo(self.prod_dir, self.line_change_limit,
+            self.line_removal_limit, debug=self.debug,
+            log_syslog=self.log_syslog, logger=syslog)
 
     def log(self, msg, *args, **kwargs):
         kwargs = dict_merge({

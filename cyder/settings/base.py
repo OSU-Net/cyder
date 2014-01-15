@@ -234,15 +234,15 @@ BINDBUILD = {
     'named_checkzone': 'named-checkzone',
     'named_checkconf': 'named-checkconf',
     'named_checkzone_opts': '',
-    'max_allowed_lines_changed': 500,
 
+    'line_change_limit': 500,
     # Only one zone at a time should be removed
-    'max_allowed_config_lines_removed': 10,
+    'line_removal_limit': 10,
 
     'stop_file': '/tmp/cyder_dns.stop',
     'stop_file_email_interval': 1800,  # 30 minutes
 
-    'last_run_file': '/tmp/last.run',
+    'last_run_file': '/tmp/cyder.last_run',
     'log_syslog': False,
 }
 
@@ -271,7 +271,8 @@ DHCPBUILD = {
     # check any file)
     'check_file': None,
 
-    'max_allowed_lines_changed': 500,
+    'line_change_limit': 500,
+    'line_removal_limit': None,
 
     'stop_file': '/tmp/cyder_dhcp.stop',
     'stop_file_email_interval': 1800,  # 30 minutes

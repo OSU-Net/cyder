@@ -22,11 +22,12 @@ def chdir_wrapper(func):
 
 
 class VCSRepo(object):
-    def __init__(self, repo_dir, diff_line_threshold,
+    def __init__(self, repo_dir, line_change_limit, line_removal_limit,
                  debug=False, log_syslog=False, logger=syslog):
         set_attrs(self, {
             'repo_dir': repo_dir,
-            'diff_line_threshold': diff_line_threshold,
+            'line_change_limit': line_change_limit,
+            'line_removal_limit': line_removal_limit,
             'debug': debug,
             'log_syslog': log_syslog,
             'logger': logger,
@@ -53,10 +54,19 @@ class VCSRepo(object):
 
     def _sanity_check(self):
         added, removed = self._lines_changed()
-        if added + removed > self.diff_line_threshold:
-            raise Exception('Too many lines changed. Aborting commit.\n'
-                            '({0} lines added, {1} lines removed)'
-                            .format(*lines_changed))
+        if (self.line_change_limit is not None and
+                added + removed > self.line_change_limit):
+            raise Exception('Lines changed ({0}) exceeded limit ({1}).\n'
+                            'Aborting commit.\n'
+                            .format(added + removed,
+                                    self.line_change_limit))
+
+        if (self.line_removal_limit is not None and
+                removed > self.line_removal_limit):
+            raise Exception('Lines removed ({0}) exceeded limit ({1}).\n'
+                            'Aborting commit.\n'
+                            .format(removed, self.line_removal_limit))
+
 
     def _run_command(self, command, log=True, failure_msg=None,
                      ignore_failure=False):
