@@ -424,15 +424,14 @@ class DNSBuilder(MutexMixin):
                             view_data.format(serial=soa.serial + 1),
                             root_domain
                         )
+                        self.run_checkzone(os.path.join(self.stage_dir,
+                            file_meta['rel_fname']), root_domain)
                     else:
                         self.log_debug(
                             'NO REBUILD needed for < {0} > view file {1}'
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain
                         )
-
-                    # Run named-checkzone for good measure.
-                    self.run_checkzone(file_meta['prod_fname'], root_domain)
             except Exception:
                 soa.schedule_rebuild()
                 raise
