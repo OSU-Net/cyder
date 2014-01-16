@@ -100,7 +100,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     @property
     def range_str(self):
-        return u'{0}–{1}'.format(self.start_str, self.end_str)
+        return u'{0}-{1}'.format(self.start_str, self.end_str)
 
     @property
     def range_str_padded(self):
@@ -288,18 +288,19 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         """
         self._range_ips()
 
-        for range in Range.objects.all():
-            if range.pk == self.pk:
+        for oldrange in Range.objects.all():
+            if oldrange.pk == self.pk:
                 continue
-            range._range_ips()
+            oldrange._range_ips()
             #the range being tested is above this range
-            if self._start > range._end:
+            if self._start > oldrange._end:
                 continue
             # start > end
-            if self._end < range._start:
+            if self._end < oldrange._start:
                 continue
-            raise ValidationError("Stored range {0} - {1} would overlap with "
-                                  "this range")
+            raise ValidationError(u"Old range {0} would overlap with new "
+                                  "range {1}".format(oldrange.range_str,
+                                                     self.range_str))
 
     def build_range(self):
         range_options = self.rangeav_set.filter(
