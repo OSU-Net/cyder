@@ -29,6 +29,22 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
+def format_log_message(msg, root_domain=None):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+
+        frame_number = 2
+        while calframe[frame_number][3] == 'run_command':
+            frame_number += 1
+        callername = "[{0}]".format(calframe[frame_number][3])
+
+        if root_domain:
+            return "{0:24} < {1} > {2}".format(callername,
+                                               root_domain.name, msg)
+        else:
+            return "{0:24} {1}".format(callername, msg)
+
+
 class DNSBuilder(MutexMixin):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
@@ -38,52 +54,30 @@ class DNSBuilder(MutexMixin):
         set_attrs(self, kwargs)
 
         if self.log_syslog:
-            syslog.openlog(b'dnsbuild', 0, syslog.LOG_LOCAL6)
+            syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
 
         self.repo = GitRepo(self.prod_dir, self.line_change_limit,
             self.line_removal_limit, debug=self.debug,
             log_syslog=self.log_syslog, logger=syslog)
 
-    def log(self, msg, *args, **kwargs):
-        kwargs = dict_merge({
-            'to_syslog': self.log_syslog,
-            'logger': syslog,
-        }, kwargs)
-
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-
-        frame_number = 2
-        while calframe[frame_number][3] == 'run_command':
-            frame_number += 1
-        callername = "[{0}]".format(calframe[frame_number][3])
-
-        root_domain = kwargs.pop('root_domain', None)
-        if root_domain:
-            fullmsg = "{0:24} < {1} > {2}".format(callername,
-                                                  root_domain.name, msg)
-        else:
-            fullmsg = "{0:24} {1}".format(callername, msg)
-
-        log(fullmsg, *args, **kwargs)
-
     def log_debug(self, msg, root_domain=None, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.debug
-        self.log(msg, log_level='LOG_DEBUG', to_syslog=False,
-                 to_stderr=to_stderr, root_domain=root_domain)
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
+                logger=syslog)
 
     def log_info(self, msg, root_domain=None, to_stderr=True):
-        self.log(msg, log_level='LOG_INFO', to_stderr=to_stderr,
-                 root_domain=root_domain)
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
 
     def log_notice(self, msg, root_domain=None, to_stderr=True):
-        self.log(msg, log_level='LOG_NOTICE', to_stderr=to_stderr,
-                 root_domain=root_domain)
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
 
     def log_err(self, msg, root_domain=None, to_stderr=True):
-        self.log(msg, log_level='LOG_ERR', to_stderr=to_stderr,
-                 root_domain=root_domain)
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_ERR', to_stderr=to_stderr, logger=syslog)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:

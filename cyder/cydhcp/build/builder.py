@@ -30,34 +30,29 @@ class DHCPBuilder(MutexMixin):
         set_attrs(self, kwargs)
 
         if self.log_syslog:
-            syslog.openlog(b'dhcpbuild', 0, syslog.LOG_LOCAL6)
+            syslog.openlog(b'dhcp_build', 0, syslog.LOG_LOCAL6)
 
         self.repo = GitRepo(self.prod_dir, self.line_change_limit,
             self.line_removal_limit, debug=True, log_syslog=True,
             logger=syslog)
 
-    def log(self, *args, **kwargs):
-        kwargs = dict_merge({
-            'to_syslog': self.log_syslog,
-            'logger': syslog,
-        }, kwargs)
-
-        log(*args, **kwargs)
-
     def log_debug(self, msg, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.debug
-        self.log(msg, log_level='LOG_DEBUG', to_syslog=False,
-                 to_stderr=to_stderr)
+        log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
+                logger=syslog)
 
     def log_info(self, msg, to_stderr=True):
-        self.log(msg, log_level='LOG_INFO', to_stderr=to_stderr)
+        log(msg, log_level='LOG_INFO', to_syslog=self.log_syslog,
+                to_stderr=to_stderr, logger=syslog)
 
     def log_notice(self, msg, to_stderr=True):
-        self.log(msg, log_level='LOG_NOTICE', to_stderr=to_stderr)
+        log(msg, log_level='LOG_NOTICE', to_syslog=self.log_syslog,
+                to_stderr=to_stderr, logger=syslog)
 
     def log_err(self, msg, to_stderr=True):
-        self.log(msg, log_level='LOG_ERR', to_stderr=to_stderr)
+        log(msg, log_level='LOG_ERR', to_syslog=self.log_syslog,
+                to_stderr=to_stderr, logger=syslog)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
