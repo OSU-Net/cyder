@@ -154,9 +154,10 @@ def create_range(range_id, start, end, range_type, subnet_id,
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                        ipaddr.IPv4Address(end))
 
-        valid_start = int(n.network.network) < start < int(n.network.broadcast)
+        valid_start = (int(n.network.network) <= start
+                       <= int(n.network.broadcast))
         valid_order = start <= end
-        valid_end = int(n.network.network) < end < int(n.network.broadcast)
+        valid_end = int(n.network.network) <= end <= int(n.network.broadcast)
 
         valid = all((valid_start, valid_order, valid_end))
 
