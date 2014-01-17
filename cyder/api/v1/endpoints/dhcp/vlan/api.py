@@ -7,8 +7,8 @@ from cyder.cydhcp.vlan.models import Vlan, VlanAV
 
 class VlanAVSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field(source='id')
-    vlan = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-vlan-detail')
+    entity = serializers.HyperlinkedRelatedField(
+        view_name='api-dhcp-vlan-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
