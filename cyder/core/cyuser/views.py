@@ -125,9 +125,9 @@ def clone_perms(request, user_id):
     user = UserProfile.objects.get(id=user_id)
     perms_qs = CtnrUser.objects.filter(user__id=user_id)
     if not perms_qs.exists():
+        error_msg = '{0} currently has no permissions to clone'.format(user)
         return HttpResponse(json.dumps(
-            {'errors': {'__all__': '{0} has no permissions to '
-                        + 'clone'.format(user)}}))
+            {'errors': {'__all__': error_msg}}))
 
     users = request.POST.get('users', None)
     if not users:
@@ -142,6 +142,7 @@ def clone_perms(request, user_id):
             user.save()
         else:
             user = user_qs.get()
+            CtnrUser.objects.filter(user=user).delete()
 
         for perm in perms_qs:
             ctnr_user_qs = CtnrUser.objects.filter(user=user, ctnr=perm.ctnr)
