@@ -9,7 +9,7 @@ API_TOKEN = "62251cb1a65617e329e48d1adec9666d3d6d2c6c"
 BASE_URL = "http://127.0.0.1:8000/api/v1/"
 
 
-def api_get_csv(path, fields=None, params=None, attributes=None, separator=";",
+def api_get_csv(path, fields=None, params=None, attributes=None, delimiter=";",
                 limit=None):
     """
     Params:
@@ -34,9 +34,9 @@ def api_get_csv(path, fields=None, params=None, attributes=None, separator=";",
         fields = c.result[0].keys()
 
     # Build the header row.
-    header = separator.join(fields)
+    header = delimiter.join(fields)
     if attributes:
-        header += (separator + separator.join(attributes))
+        header += (delimiter + delimiter.join(attributes))
     header += "\n"
     sys.stdout.write(header)
 
@@ -47,7 +47,7 @@ def api_get_csv(path, fields=None, params=None, attributes=None, separator=";",
     while True:
         for record in c.result:
             for field in fields:
-                line += (str(record[field]) + separator)
+                line += (str(record[field]) + delimiter)
 
             if attributes:
                 avset_name = next(itertools.ifilter(
@@ -62,12 +62,12 @@ def api_get_csv(path, fields=None, params=None, attributes=None, separator=";",
                 for attribute in attributes:
                     for kv in keyvalues:
                         if kv['attribute'].lower() == attribute.lower():
-                            line += (str(kv['value']) + separator)
+                            line += (str(kv['value']) + delimiter)
                             break
                     else:
                         # Not found, but we still want a blank cell where the
                         # value would be.
-                        line += separator
+                        line += delimiter
 
             print line
             line = ""
