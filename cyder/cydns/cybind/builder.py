@@ -8,7 +8,6 @@ import sys
 import syslog
 import time
 from distutils.dir_util import copy_tree
-from gettext import gettext as _
 from itertools import ifilter
 from traceback import format_exception
 
