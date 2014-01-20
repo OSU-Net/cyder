@@ -12,11 +12,40 @@ $(document).ready(function() {
     var getUrl = metadata.attr('data-getUrl');
     var domainsUrl = metadata.attr('data-domainsUrl');
     var objPk = metadata.attr('data-objPk');
+    var csrfToken = metadata.attr('data-csrfToken');
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     if (domainsUrl) {
-        make_smart_name_get_domains($('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
+        make_smart_name_get_domains(
+            $('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
+
+    $('#system_create, #delete, .delete').click( function(e) {
+        e.preventDefault();
+        if ($(this).attr('id') == 'delete'
+                || $(this).attr('class') == 'delete') {
+            var msg = "Are you sure?";
+            if (objType == 'system') {
+                msg = "Deleting this system will also delete its"
+                    + " interfaces. Are you sure you want to continue?";
+            }
+            if (!confirm(msg)) {
+                return false;
+            }
+        }
+        var url = $(this).attr('href');
+        var postData = JSON.parse($(this).attr('data-kwargs'));
+        var postForm = $('<form style="display: none" action="' + url
+            + '" method="post"></form>');
+        $.each(postData, function(key, value) {
+            postForm.append($('<input>').attr(
+                {type: 'text', name: key, value: value}));
+        });
+        postForm.append($('<input>').attr(
+            {type: 'hidden', name: 'csrfmiddlewaretoken', value: csrfToken}));
+        $('.content').append(postForm);
+        $(postForm).submit();
+    });
 
     $('#id_attribute').live('focus', function() {
         $('#id_attribute').autocomplete({
@@ -65,16 +94,20 @@ $(document).ready(function() {
                 function(data) {
                     setTimeout(function() {
                         if(formObjName) {
-                            $('#form-title').html('Creating ' + formPrettyObjType + ' for ' + formObjName);
+                            $('#form-title').html(
+                                'Creating ' + formPrettyObjType
+                                + ' for ' + formObjName);
                         } else {
-                            $('#form-title').html('Creating ' + formPrettyObjType);
+                            $('#form-title').html(
+                                'Creating ' + formPrettyObjType);
                         }
                         data.form.action = $createBtn.attr('href');
                         $('.inner-form').empty().append(data.form);
                         initForms();
                     }, 150);
                     $('#obj-form form')[0].action = $createBtn.attr('href');
-                    $('.form-btns a.submit').text('Create ' + formPrettyObjType);
+                    $('.form-btns a.submit').text(
+                        'Create ' + formPrettyObjType);
                     // Adjust this if statement to submit forms with ajax
                     if (formObjType.indexOf('av') >= 0) {
                         $('.form-btns a.submit').attr('class', 'btn c');
@@ -99,6 +132,9 @@ $(document).ready(function() {
             };
             $('#obj-form').slideToggle();
         }
+        $('.form').append($('<input>',
+                          {type: 'hidden', name: 'csrfmiddlewaretoken',
+                           value: csrfToken}));
     });
 
     $('.update').click(function(e) {
@@ -113,13 +149,17 @@ $(document).ready(function() {
         };
         var object_type = $(this).attr('data-object_type') || objType;
         var pretty_obj_type = $(this).attr('data-prettyObjType');
-        $.get($(this).attr('data-getUrl') || getUrl, {'object_type': object_type,
-                       'pk': $(this).attr('data-pk')}, function(data) {
+        $.get($(this).attr('data-getUrl') || getUrl,
+                {'object_type': object_type, 'pk': $(this).attr('data-pk')},
+                function(data) {
             setTimeout(function() {
-                if (objType.indexOf('interface') != -1 && data.form.indexOf('title=') != -1) {
-                    extra_title = ' for ' + data.form.split('title=')[1].split('/')[0].replace(/"/g, "");
+                if (objType.indexOf('interface') != -1
+                        && data.form.indexOf('title=') != -1) {
+                    extra_title = ' for ' + data.form.split(
+                        'title=')[1].split('/')[0].replace(/"/g, "");
                 };
-                $('#form-title').html('Updating ' + pretty_obj_type + extra_title);
+                $('#form-title').html(
+                    'Updating ' + pretty_obj_type + extra_title);
                 $('#hidden-inner-form').empty().append(data.form);
                 initForms();
             }, 150);
@@ -131,6 +171,8 @@ $(document).ready(function() {
             };
             $('#obj-form').slideDown();
         }, 'json');
+    $('.form').append($('<input>', {type: 'hidden',
+        name: 'csrfmiddlewaretoken', value: csrfToken}));
     });
 
     function ajax_form_submit(url, form) {
@@ -139,7 +181,9 @@ $(document).ready(function() {
         jQuery.each(fields, function (i, field) {
             postData[field.name] = field.value;
         });
+        postData['csrfmiddlewaretoken'] = csrfToken;
         $.post(url, postData, function(data) {
+
             if (data.errors) {
                 if ($('#hidden-inner-form').find('#error').length) {
                     $('#hidden-inner-form').find('#error').remove();

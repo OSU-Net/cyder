@@ -57,7 +57,7 @@ class ObjectUrlMixin(object):
 
     def get_delete_url(self):
         """Return the delete url of an object."""
-        return reverse(self._meta.db_table + '-delete', args=[self.pk])
+        return reverse('delete')
 
     def get_detail_url(self):
         """Return the detail url of an object."""
@@ -129,18 +129,20 @@ class UsabilityFormMixin(object):
             self.fields[fieldname].queryset = queryset
 
     def autoselect_system(self):
+        System = get_model('cyder', 'system')
         if 'system' in self.initial:
-            System = get_model('cyder', 'system')
             system_name = System.objects.get(
                 pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(
                 widget=HiddenInput(attrs={'title': system_name}),
                 empty_label='',
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
+        elif 'system' in self.fields:
+            del(self.fields['system'])
 
     def make_usable(self, request):
+        self.autoselect_system()
         if 'ctnr' in request.session:
             self.filter_by_ctnr_all(request)
         self.alphabetize_all()
-        self.autoselect_system()
         self.append_required_all()

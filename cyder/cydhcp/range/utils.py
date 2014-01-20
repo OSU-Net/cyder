@@ -1,7 +1,6 @@
 from django.db.models import get_model, Q
 
 from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
-from cyder.base.utils import qd_to_py_dict
 
 from django.http import HttpResponse
 
@@ -156,7 +155,7 @@ def range_wizard(request):
     site_networks = None
     networks = []
     all_ranges = False
-    data = qd_to_py_dict(request.POST)
+    data = request.POST
     if data['range']:
         Range = get_model('cyder', 'range')
         rng = Range.objects.get(id=data['range'])
