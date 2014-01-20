@@ -137,6 +137,7 @@ a.btn {
 }
 
 #header {
+        display: none;
     background-color: $dark-gray;
     height: 50px;
     padding-top: 10px;
@@ -254,6 +255,43 @@ a.btn {
     background-color: $dark-blue;
     height: 30px;
     padding-top: 5px;
+    #home {
+        background-image: url(../img/home.png);
+        display: block;
+        width: 25px;
+        height: 25px;
+        margin-left: 5px;
+        position: absolute;
+        z-index: 1;
+    }
+    #home:hover {
+        background-image: url(../img/home-hover.png);
+    }
+    #settings {
+        background-image: url(../img/settings.png);
+        display: block;
+        width: 25px;
+        height: 25px;
+        margin-left: 40px;
+        position: absolute;
+        z-index: 1;
+    }
+    #settings:hover {
+        background-image: url(../img/settings-hover.png);
+    }
+    #logout {
+        background-image: url(../img/logout.png);
+        display: block;
+        width: 25px;
+        height: 25px;
+        margin-right: 5px;
+        right: 5px;
+        position: absolute;
+        z-index: 1;
+    }
+    #logout:hover {
+        background-image: url(../img/logout-hover.png);
+    }
     #ctnr {
         top: 2px;
         float: left;
@@ -268,22 +306,59 @@ a.btn {
             padding-left: 2px;
         }
     }
-    #bugreport {
-        font-size: 13px;
+    #cydns-tab, #system-tab, #cydhcp-tab, #admin-tab, #bugreport {
         top: 5px;
-        width: 100px;
+        width: auto;
         float: left;
-        padding-left: 230px;
+        padding-left: 50px;
         position: relative;
+        background: $white;
+        border-radius: 2px;
+        bottom: 0;
+        color: $white;
+        font-weight: normal;
+        margin-right: 10px;
+        padding: 5px 10px;
+        position: relative;
+        text-decoration: none;
+        right: 0;
+        transition: .1s .1s;
+        &:hover {
+            bottom: 2px;
+            color: $white;
+            cursor: pointer;
+            right: 2px;
+        }
+        &:active {
+            @include box-shadow(none);
+            bottom: 5px;
+            right: 0;
+            transition: .03s 0s;
+        }
+        &.red {
+            background: $red;
+            &:hover {
+                background: lighten($red, 5%);
+            }
+            &:active {
+                background: darken($red, 10%);
+            }
+        }
+        &.cancel {
+            background: $dark-gray;
+            &:hover {
+                background: lighten($dark-gray, 5%);
+            }
+            &:active {
+                background: darken($dark-gray, 10%);
+            }
+        }
     }
     #search {
-        form {
-            bottom: 8px;
-            clear: right;
-            float: right;
-            display: inline;
-            position: relative;
-        }
+        display: block;
+        position: absolute;
+        right: 35px;
+        top: 10px;
     }
 }
 
