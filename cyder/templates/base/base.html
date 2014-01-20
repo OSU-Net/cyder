@@ -45,6 +45,16 @@
     <div id="subheader">
       <a id="home" href="/"></a>
       <a id="settings" href="#"></a>
+      <a id=user-info href="{{ request.user.get_profile().get_detail_url() }}">
+        {{ request.user.username }}:
+          {% if request.session.level == 0 %}
+            guest
+          {% elif request.session.level == 1 %}
+            user
+          {% else %}
+            admin
+          {% endif %}
+      </a>
       <a id="logout" href="{{ url('logout') }}"></a>
       <span id="search">
         <form action="{{ url('search') }}" method="get">
