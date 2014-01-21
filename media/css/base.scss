@@ -303,20 +303,6 @@ a.btn {
     #logout:hover {
         background-image: url(../img/logout-hover.png);
     }
-    #ctnr {
-        top: 2px;
-        float: left;
-        position: relative;
-        span {
-            color: $white;
-            font-size: 13px;
-            font-weight: bold;
-            margin-right: 5px;
-        }
-        select {
-            padding-left: 2px;
-        }
-    }
     #cydns-tab, #system-tab, #cydhcp-tab, #admin-tab, #bugreport {
         top: 5px;
         width: auto;
@@ -408,7 +394,28 @@ a.btn {
         }
     }
 }
-
+.settings-menu {
+    padding: 13px;
+    position: absolute;
+    display: none;
+    color: $white;
+    width: 200px;
+    background-color: $dark-gray;
+    z-index: 2;
+    .ctnr {
+        span {
+            color: $white;
+            margin-left: 5px;
+        }
+        select {
+            padding-left: 2px;
+            width: auto;
+        }
+    }
+    .ctnr-default {
+        color: $white;
+    }
+}
 .main {
     clear: both;
     font-size: 13px;
