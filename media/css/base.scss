@@ -223,7 +223,10 @@ a.btn {
             right: 0;
             transition: .1s .1s;
             &.selected {
-                top: 5px;
+                top: 3px;
+                border-top-style:solid;
+                border-width: 5px;
+                border-color: $teal;
             }
             &:hover {
                 top: 5px;
