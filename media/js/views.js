@@ -24,7 +24,7 @@ $(document).ready(function() {
         e.preventDefault();
         if ($(this).attr('id') == 'delete'
                 || $(this).attr('class') == 'delete') {
-            var msg = "Are you sure?";
+            var msg = "Are you sure you want to delete this?";
             if (objType == 'system') {
                 msg = "Deleting this system will also delete its"
                     + " interfaces. Are you sure you want to continue?";
