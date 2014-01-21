@@ -93,7 +93,7 @@ def main():
     parser.add_argument('--params', '-p', type=str,
                         help="Query string parameters to submit with the "
                              "request, in query string format.")
-    parser.add_argument('--separator', '-s', type=str, default=';',
+    parser.add_argument('--delimiter', '-d', type=str, default=';',
                         help="The character to separate values with.")
     parser.add_argument('--limit', '-l', type=int,
                         help="The number of records to retrieve before "
