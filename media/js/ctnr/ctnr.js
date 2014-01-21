@@ -32,11 +32,11 @@ $(document).ready(function() {
         } else if ($(this).attr('class') == 'remove-user') {
             action = 'user_remove';
             acknowledge = confirm("Are you sure you want to remove this " +
-                "user from " + ctnr_name);
+                "user from " + ctnr_name + "?");
         } else {
             action = 'obj_remove';
             acknowledge = confirm("Are you sure you want to remove this " +
-                obj_type + " from " + ctnr_name);
+                obj_type + " from " + ctnr_name + "?");
         };
 
         if (acknowledge) {
