@@ -303,8 +303,8 @@ a.btn {
     #logout:hover {
         background-image: url(../img/logout-hover.png);
     }
-    #cydns-tab, #system-tab, #cydhcp-tab, #admin-tab, #bugreport {
-        top: 5px;
+    .tab {
+        top: 10px;
         width: auto;
         float: left;
         padding-left: 50px;
@@ -320,6 +320,9 @@ a.btn {
         text-decoration: none;
         right: 0;
         transition: .1s .1s;
+        &.selected {
+        top: 0px;
+        }
         &:hover {
             bottom: 2px;
             color: $white;
