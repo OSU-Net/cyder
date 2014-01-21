@@ -19,7 +19,7 @@ $(document).ready(function() {
         make_smart_name_get_domains(
             $('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
-    $('#settings').click( function(e) {
+    $('#settings-btn').click( function(e) {
         $('.settings-menu').slideToggle();
     });
 
