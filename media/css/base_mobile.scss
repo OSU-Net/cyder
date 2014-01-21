@@ -3,14 +3,17 @@
     div#header {
         width: 640px;
     }
-
-    #subheader {
-        width: 640px;
+    div.settings-menu {
+        width: 615px;
     }
+
 }
 @media all and (max-width: 980px) {
     div.container {
         width: 640px;
+    }
+    div.settings-menu {
+        width: 615px;
     }
 
     div#header {
@@ -18,32 +21,6 @@
             margin-left: .5%;
             a {
                 margin-left: .5%;
-            }
-        }
-        .nav {
-            padding-left: 5px;
-            &.nav-right {
-                margin-right: 3%;
-            }
-            li {
-                a.navlink {
-                    padding: 30px 10px 17px;
-                }
-            }
-        }
-    }
-
-    #subheader {
-        #ctnr {
-            margin-left: .5%;
-        }
-        #bugreport {
-            padding-left: 60px !important;
-        }
-
-        #search {
-            form {
-                margin-right: 1.5%;
             }
         }
     }
