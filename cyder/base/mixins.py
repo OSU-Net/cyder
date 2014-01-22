@@ -156,32 +156,36 @@ class MutexMixin(object):
         self.unlock()
 
     def lock(self):
+        if not os.path.exists(os.path.dirname(self.lock_file)):
+            os.makedirs(os.path.dirname(self.lock_file))
+        self.log_debug("Attempting to lock {0}..."
+                 .format(self.lock_file))
+
+        self.lock_fd = open(self.lock_file, 'w')
+
         try:
-            if not os.path.exists(os.path.dirname(self.lock_file)):
-                os.makedirs(os.path.dirname(self.lock_file))
-            self.log_debug("Attempting to lock {0}..."
-                     .format(self.lock_file))
-
-            self.lock_fd = open(self.lock_file, 'w')
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self.log_debug("Lock acquired")
-
-            with open(self.pid_file, 'w') as pid_fd:
-                pid_fd.write(unicode(os.getpid()))
-
-            return True
-        except IOError, exc_value:
+        except IOError as exc_value:
             self.lock_fd.close()
-            self.lock_fd = None
-
             # IOError: [Errno 11] Resource temporarily unavailable
             if exc_value[0] == 11:
-                self.lock_fd = open(self.lock_file, 'r')
                 with open(self.pid_file, 'r') as pid_fd:
                     self._lock_failure(pid_fd.read())
-                self.lock_fd.close()
-                self.lock_fd = None
-                return False
+            else:
+                raise
+
+        self.log_debug("Lock acquired")
+
+        try:
+            with open(self.pid_file, 'w') as pid_fd:
+                pid_fd.write(unicode(os.getpid()))
+        except IOError as exc_value:
+            # IOError: [Errno 2] No such file or directory
+            if exc_value[0] == 2:
+                raise Exception("Failed to acquire lock on {0}, but the "
+                                "the process that has it hasn't written "
+                                "the PID file {1} yet."
+                                .format(self.lock_file, self.pid_file))
             else:
                 raise
 
