@@ -11,6 +11,7 @@
     <p><b>Created:</b> {{ token.created }}</p>
     <form method="post">
         {{ form.as_p() }}
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <input type="submit" value="Permanently Revoke Token" />
     </form>
 {% endblock %}

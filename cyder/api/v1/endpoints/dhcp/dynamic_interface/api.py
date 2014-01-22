@@ -8,12 +8,13 @@ from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
 
 class DynamicInterfaceAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
-    dynamic_interface = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-dynamicinterface-detail')
+    entity = serializers.HyperlinkedRelatedField(
+        view_name='api-dhcp-dynamicinterface-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
         model = DynamicInterfaceAV
+
 
 
 class DynamicInterfaceAVViewSet(api.CommonDHCPViewSet):

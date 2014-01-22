@@ -1,4 +1,4 @@
-djangorestframework
+djangorestframework==2.3.12
 ipaddr
 mimeparse
 python-ldap
