@@ -514,6 +514,11 @@ class Command(BaseCommand):
                     default=False,
                     action='store_true',
                     help='Migrate DNS objects'),
+        make_option('-o', '--domains-only',
+                    dest='domains',
+                    default=False,
+                    action='store_true',
+                    help='Migrate domains only'),
         make_option('-c', '--cname',
                     action='store_true',
                     dest='cname',
@@ -548,3 +553,6 @@ class Command(BaseCommand):
 
         if options['cname']:
             gen_CNAME()
+
+        if options['domains']:
+            gen_domains_only()
