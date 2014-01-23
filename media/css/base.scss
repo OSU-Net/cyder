@@ -138,7 +138,7 @@ a.btn {
 
 #header {
     background-color: $dark-blue;
-    height: 60px;
+    height: 30px;
     padding-top: 5px;
     .icon {
         width: 25px;
@@ -206,6 +206,7 @@ a.btn {
     }
 
     #tabs {
+        display: none;
         float: left;
         .tab {
             top: 10px;
@@ -295,6 +296,26 @@ a.btn {
         color: $white;
         display: block;
         padding: 13px;
+        &.child {
+            background: $light-gray;
+            color: $black;
+            border: none;
+            margin-left: 15px;
+            border-left:2px solid $teal;
+            border-bottom:1px solid $dark-gray;
+            border-top:1px solid $dark-gray;
+            &:hover {
+                margin-left: 5px;
+            }
+            &.selected {
+                border-bottom:1px solid $dark-gray;
+                background: $black;
+                color: $white;
+                &:hover {
+                    margin-left: 15px;
+                }
+            }
+        }
         &:hover {
             color: $teal;
             background: $dark-gray;
@@ -303,9 +324,13 @@ a.btn {
         &.selected {
             background: $light-gray;
             border: none;
+            border-left-style:solid;
+            border-bottom-style:solid;
+            border-width: 2px;
+            border-color: $teal;
             color: $dark-gray;
             &:hover {
-                color: $dark-gray;
+                color: $teal;
             }
         }
     }

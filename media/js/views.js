@@ -22,6 +22,10 @@ $(document).ready(function() {
     $('#settings-btn').click( function(e) {
         $('.settings-menu').slideToggle();
     });
+    $('.nav-item.parent').click( function(e) {
+        $('#' + this.id + '-children').slideToggle();
+    });
+
 
 
     $('#system_create, #delete, .delete').click( function(e) {

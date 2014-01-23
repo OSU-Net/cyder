@@ -1,8 +1,20 @@
-{% from 'base/includes/sidebars.html' import render_sidebar %}
+{% from 'base/includes/sidebar.html' import render_sidebar %}
 
 <!-- CORE NAV -->
 {{ render_sidebar(request, [
-  ('ctnr', 'Container'),
-  ('system', 'System'),
-  ('interfaces', 'Interfaces'),
-]) }}
+  ('core-index', 'System',
+    [('ctnr', 'Containers'),
+     ('interfaces', 'Interfaces'),
+     ('system', 'Systems')]),
+  ('cydns-index', 'DNS',
+    [('address_record', 'Address Record'),
+    ('cname', 'CNAME'),
+    ('domain', 'Domains'),
+    ('nameserver', 'NS'),
+    ('mx', 'MX'),
+    ('ptr', 'PTR'),
+    ('soa', 'SOA'),
+    ('sshfp', 'SSHFP'),
+    ('txt', 'TXT')]),
+  ]) }}
+
