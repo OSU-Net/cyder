@@ -21,14 +21,16 @@
           <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
             {{ request.user.username }}:
           </a>
-          <span class="user-info level">
+          <span class="user-info">
+            <a class="level" href="{{ request.session.ctnr.get_detail_url() }}">
             {% if request.session.level == 0 %}
               guest on
             {% elif request.session.level == 1 %}
               user on
             {% else %}
               admin on
-            {% endif %}
+              {% endif %}
+            </a>
           </span>
             <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
               <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>

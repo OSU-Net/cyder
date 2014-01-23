@@ -187,6 +187,12 @@ a.btn {
             &.name:hover {
                 color: $teal;
             }
+            .level {
+                color:$white;
+            }
+            .level:hover {
+                color: $teal;
+            }
         }
         #ctnr-change {
             position: relative;
