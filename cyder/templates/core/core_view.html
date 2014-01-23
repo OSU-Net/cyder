@@ -10,7 +10,7 @@
 
 {% block action_bar %}
 {% if obj_type_perm %}
-  {% if pretty_obj_type == 'System' %}
+  {% if obj_type == 'system' %}
     <a class="btn submit c" href={{ url('system-create') }}>Create {{ pretty_obj_type }}</a>
   {% else %}
     <a class="btn create-obj" id={{ pretty_obj_type }}>Create {{ pretty_obj_type }}</a>
