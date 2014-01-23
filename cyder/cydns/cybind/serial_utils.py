@@ -9,10 +9,14 @@ def get_serial(file_):
     :param file_: The file with the SOA in it.
     :type file_: file
     """
-    if not os.path.exists(file_):
-        return ''
-    with open(file_, 'r') as fd:
-        return _str_get_serial(fd)
+    try:
+        with open(file_, 'r') as fd:
+            return _str_get_serial(fd)
+    except IOError as e:
+        if e.errno == 2:  # IOError: [Errno 2] No such file or directory
+            return None
+        else:
+            raise
 
 
 def _str_get_serial(text):
