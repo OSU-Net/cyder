@@ -8,8 +8,7 @@ from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
 
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
-                                                       StaticInterfaceAV)
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -41,19 +40,20 @@ cursor = connection.cursor()
 
 class Zone(object):
 
-    def __init__(self, domain_id=None, dname=None, soa=None):
+    def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
         self.domain_id = 541 if domain_id is None else domain_id
         self.dname = self.get_dname() if dname is None else dname
 
         self.domain = self.gen_domain()
         if self.domain:
-            self.gen_MX()
-            self.gen_static()
-            self.gen_AR()
-            self.gen_NS()
-            self.domain.soa = self.gen_SOA() or soa
+            if gen_recs:
+                self.gen_MX()
+                self.gen_static()
+                self.gen_AR()
+                self.gen_NS()
+                self.domain.soa = self.gen_SOA() or soa
             self.domain.save()
-            self.walk_zone()
+            self.walk_zone(gen_recs=gen_recs)
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -276,9 +276,14 @@ class Zone(object):
                     pass
 
             if ptr_type == 'forward':
+                if AddressRecord.objects.filter(
+                        fqdn=hostname, ip_str=long2ip(ip)).exists():
+                    continue
+
                 arec, _ = range_usage_get_create(
                     AddressRecord, label=label, domain=self.domain,
                     ip_str=long2ip(ip), ip_type='4')
+
                 if enabled:
                     arec.views.add(public)
                     arec.views.add(private)
@@ -317,7 +322,7 @@ class Zone(object):
             except ValidationError, e:
                 stderr.write("Error generating NS. %s\n" % e)
 
-    def walk_zone(self):
+    def walk_zone(self, gen_recs=True):
         """
         Recursively traverses the domain tree, creating Zone objects and
         migrating related DNS objects along the way.
@@ -333,7 +338,7 @@ class Zone(object):
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
             child_name = child_name.lower()
-            Zone(child_id, child_name, self.domain.soa)
+            Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs)
 
     def get_dname(self):
         """
@@ -441,7 +446,16 @@ def gen_DNS(skip_edu=False):
         if "edu" in dname and skip_edu:
             continue
         print "Creating %s zone." % dname
-        Zone(domain_id=domain_id, dname=dname,)
+        Zone(domain_id=domain_id, dname=dname)
+
+
+def gen_domains_only():
+    gen_reverses()
+
+    cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
+    for domain_id, dname, _, _ in cursor.fetchall():
+        print "Creating %s. (domain only)" % dname
+        Zone(domain_id=domain_id, dname=dname, gen_recs=False)
 
 
 def add_pointers_manual():
@@ -500,6 +514,11 @@ class Command(BaseCommand):
                     default=False,
                     action='store_true',
                     help='Migrate DNS objects'),
+        make_option('-o', '--domains-only',
+                    dest='domains',
+                    default=False,
+                    action='store_true',
+                    help='Migrate domains only'),
         make_option('-c', '--cname',
                     action='store_true',
                     dest='cname',
@@ -534,3 +553,6 @@ class Command(BaseCommand):
 
         if options['cname']:
             gen_CNAME()
+
+        if options['domains']:
+            gen_domains_only()

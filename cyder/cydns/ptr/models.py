@@ -112,6 +112,11 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
 
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
+        old_range = None
+        if self.id is not None:
+            old_ip = PTR.objects.get(id=self.id).ip_str
+            old_range = find_range(old_ip)
+
         self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean()
         super(PTR, self).save(*args, **kwargs)
@@ -119,6 +124,8 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
         rng = find_range(self.ip_str)
         if rng and update_range_usage:
             rng.save()
+            if old_range:
+                old_range.save()
 
     def delete(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)

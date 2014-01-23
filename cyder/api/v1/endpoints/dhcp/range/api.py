@@ -7,8 +7,8 @@ from cyder.cydhcp.range.models import Range, RangeAV
 
 class RangeAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
-    range = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-range-detail')
+    entity = serializers.HyperlinkedRelatedField(
+        view_name='api-dhcp-range-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
@@ -31,6 +31,8 @@ class RangeNestedKeyValueSerializer(CommonAPINestedAVSerializer):
 
 class RangeSerializer(api.CommonDHCPSerializer):
     rangeav_set = RangeNestedKeyValueSerializer(many=True)
+    domain = serializers.HyperlinkedRelatedField(
+        read_only=True, view_name='api-dns-domain-detail')
 
     class Meta(api.CommonDHCPMeta):
         model = Range

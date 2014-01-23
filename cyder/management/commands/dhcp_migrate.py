@@ -3,16 +3,15 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import transaction
-from sys import stderr
 
 from cyder.base.eav.models import Attribute
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
 from cyder.cydns.domain.models import Domain
-from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
+from cyder.cydns.models import View
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
+from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, STATIC, DYNAMIC)
-from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicInterfaceAV)
 from cyder.cydhcp.network.models import Network, NetworkAV
 from cyder.cydhcp.range.models import Range, RangeAV
 from cyder.cydhcp.site.models import Site
@@ -20,6 +19,8 @@ from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
+from sys import stderr
+from random import choice
 import ipaddr
 import MySQLdb
 from optparse import make_option
@@ -30,6 +31,8 @@ from lib.utilities import long2ip, fix_attr_name, range_usage_get_create
 cached = {}
 host_option_values = None
 
+public, _ = View.objects.get_or_create(name="public")
+private, _ = View.objects.get_or_create(name="private")
 
 allow_all_subnets = [
     '10.192.76.2', '10.192.103.150', '10.192.15.2',
@@ -120,12 +123,19 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan_id):
     return (n, created)
 
 
-def create_range(range_id, start, end, range_type, subnet_id, comment,
-                 enabled, known):
+def create_range(range_id, start, end, range_type, subnet_id,
+                 comment, enabled, known):
     """
     Takes a row from the Maintain range table.
     Returns a range which is saved in Cyder.
     """
+    # Set the allow statement
+    n = None
+    r = None
+    d = maintain_find_range_domain(range_id)
+    if not d and range_type == "dynamic":
+        stderr.write("Ignoring range %s: No default domain.\n" % range_id)
+        return None
 
     r_type = STATIC if range_type == 'static' else DYNAMIC
     allow = ALLOW_LEGACY
@@ -144,14 +154,15 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                        ipaddr.IPv4Address(end))
 
-        valid_start = int(n.network.network) < start < int(n.network.broadcast)
+        valid_start = (int(n.network.network) <= start
+                       <= int(n.network.broadcast))
         valid_order = start <= end
-        valid_end = int(n.network.network) < end < int(n.network.broadcast)
+        valid_end = int(n.network.network) <= end <= int(n.network.broadcast)
 
         valid = all((valid_start, valid_order, valid_end))
 
         # If the range is disabled, we don't need to print warnings.
-        if not valid and enabled:
+        if not valid:
             print 'Range {0} in network {1} is invalid:'.format(range_str, n)
 
             if not valid_start:
@@ -163,19 +174,25 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
                 print ('\tEnd is not inside network'
                        .format(n.network.broadcast))
 
+            return None
+
         dhcp_enabled = bool(enabled and valid)
     else:
         # the Range doesn't have a Network
-        n = None
-        dhcp_enabled = False
+        return None
 
-    name = comment[:comment.find('\n')][:50]
+    if '\n' in comment:
+        name = comment[:comment.find('\n')][:50]
+    else:
+        name = comment[:50]
 
     r, created = range_usage_get_create(
         Range, start_lower=start, start_str=ipaddr.IPv4Address(start),
         end_lower=end, end_str=ipaddr.IPv4Address(end), range_type=r_type,
         allow=allow, ip_type='4', network=n, dhcp_enabled=dhcp_enabled,
-        is_reserved=not dhcp_enabled, name=name, description=comment)
+        is_reserved=not dhcp_enabled, domain=d, name=name, description=comment)
+    r.views.add(public)
+    r.views.add(private)
 
     if '128.193.166.81' == str(ipaddr.IPv4Address(start)):
         attr = Attribute.objects.get(name=fix_attr_name('ipphone242'))
@@ -184,6 +201,7 @@ def create_range(range_id, start, end, range_type, subnet_id, comment,
         if eav_created:
             eav.full_clean()
             eav.save()
+
     return (r, created)
 
 
@@ -209,8 +227,10 @@ def migrate_ranges():
                    "FROM `ranges`")
     results = cursor.fetchall()
     migrated = []
-    for row in results:
-        migrated.append(create_range(*row))
+    for row in sorted(results):
+        r = create_range(*row)
+        if r:
+            migrated.append(r)
     print ("Records in Maintain {0}\n"
            "Records Migrated {1}\n"
            "Records created {2}".format(
@@ -328,53 +348,23 @@ def migrate_dynamic_hosts():
         if mac == "":
             enabled = False
 
-        r = None
-        if not items['dynamic_range']:
-            print ("Host with MAC {0} "
-                   "has no dynamic_range in Maintain".format(items['ha']))
-        else:
+        # TODO: Verify that there is no valid range/zone/workgroup with id 0
+        r, c, w = None, None, default
+        if items['dynamic_range']:
             try:
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no dynamic range in Cyder".format(items['ha']))
+                print ("Could not create dynamic interface %s: Range %s "
+                       "is in Maintain, but was not created in Cyder." %
+                       (mac, items['dynamic_range']))
 
-        c = None
-        if not items['zone']:
-            print "Host with MAC {0} has no zone in Maintain".format(
-                item['ha'])
-        else:
-            try:
-                c = maintain_find_zone(items['zone'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no ctnr in Cyder".format(items['ha']))
-                print "Failed to migrate zone_id {0}".format(items['zone'])
+        if items['zone']:
+            c = maintain_find_zone(items['zone'])
 
-        d = None
-        if not items['domain']:
-            print "Host with MAC {0} has no domain in Maintain".format(
-                items['ha'])
-        else:
-            try:
-                d = maintain_find_domain(items['domain'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no domain in Cyder".format(items['ha']))
-                print "Failed to migrate domain_id {0}".format(items['domain'])
-
-        w = default
         if items['workgroup']:
-            try:
-                w = maintain_find_workgroup(items['workgroup'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no workgroup in Cyder".format(items['ha']))
-                print ("Failed to migrate workgroup_id {0}\n"
-                       "Adding it to the default group".format(
-                            items['workgroup']))
+            w = maintain_find_workgroup(items['workgroup'])
 
-        if not all([r, c, d]):
+        if not all([r, c]):
             stderr.write("Trouble migrating host with mac {0}\n"
                          .format(items['ha']))
             continue
@@ -393,7 +383,7 @@ def migrate_dynamic_hosts():
             eav.save()
 
         intr, _ = range_usage_get_create(
-            DynamicInterface, range=r, workgroup=w, ctnr=c, domain=d, mac=mac,
+            DynamicInterface, range=r, workgroup=w, ctnr=c, mac=mac,
             system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
 
         count += 1
@@ -447,7 +437,13 @@ def migrate_zone_range():
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
         c = maintain_find_zone(zone_id)
-        r = maintain_find_range(range_id)
+        try:
+            r = maintain_find_range(range_id)
+        except ObjectDoesNotExist:
+            print ("Cannot migrate zone-range %s-%s: Range exists in Maintain "
+                   "but was not created in Cyder" % (zone_id, range_id))
+            r = None
+
         if not (c and r):
             continue
 
@@ -502,6 +498,17 @@ def migrate_zone_workgroup():
 
         c.workgroups.add(w)
         c.save()
+
+
+def maintain_find_range_domain(range_id):
+    sql = ("SELECT default_domain FROM zone_range WHERE `range` = %s;"
+           % range_id)
+    cursor.execute(sql)
+    results = [r[0] for r in cursor.fetchall() if r[0] is not None]
+    if results:
+        return maintain_find_domain(choice(results))
+    else:
+        return None
 
 
 def maintain_find_range(range_id):

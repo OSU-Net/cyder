@@ -7,8 +7,8 @@ from cyder.cydns.soa.models import SOA, SOAAV
 
 class SOAAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
-    soa = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dns-soa-detail')
+    entity = serializers.HyperlinkedRelatedField(
+        view_name='api-dns-soa-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:  # don't import from api.CommonDNSMeta so we get all fields

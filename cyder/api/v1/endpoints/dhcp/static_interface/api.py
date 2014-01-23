@@ -9,8 +9,8 @@ from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
 
 class StaticInterfaceAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
-    static_interface = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name="api-dhcp-staticinterface-detail")
+    entity = serializers.HyperlinkedRelatedField(
+        view_name="api-dhcp-staticinterface-detail")
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:

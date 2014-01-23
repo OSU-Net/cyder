@@ -7,7 +7,7 @@ from cyder.core.system.models import System, SystemAV
 class SystemAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
     entity = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-system-detail')
+        view_name='api-core-system-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:

@@ -7,8 +7,8 @@ from cyder.cydhcp.network.models import Network, NetworkAV
 
 class NetworkAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
-    network = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-network-detail')
+    entity = serializers.HyperlinkedRelatedField(
+        view_name='api-dhcp-network-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:
