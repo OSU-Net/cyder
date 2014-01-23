@@ -239,28 +239,34 @@ a.btn {
         border-radius: 0 0 2px 2px;
     }
     .nav-link {
-        background: $black;
+        background: $dark-gray;
         border: 1px solid $dark-gray;
+        border-right:2px solid $dark-gray;
+        border-bottom:1px solid $teal;
+        border-top:1px solid $teal;
         color: $white;
         display: block;
         padding: 13px;
         &.child {
-            background: $light-gray;
-            color: $black;
+            background: $dark-gray;
+            color: $white;
             border: none;
-            margin-left: 15px;
+            margin-left: 12px;
             border-left:2px solid $teal;
-            border-bottom:1px solid $dark-gray;
-            border-top:1px solid $dark-gray;
+            border-bottom:1px solid $black;
+            border-top:1px solid $black;
+            border-right:2px solid $black;
             &:hover {
-                margin-left: 5px;
+                margin-left: 3px;
             }
             &.selected {
+                background: $light-gray;
                 border-bottom:1px solid $dark-gray;
-                background: $black;
-                color: $white;
+                border-right: none;
+                border-right: none;
+                color: $black;
                 &:hover {
-                    margin-left: 15px;
+                    margin-left: 12px;
                 }
             }
         }
@@ -273,7 +279,9 @@ a.btn {
             background: $light-gray;
             border: none;
             border-left:2px solid $teal;
+            border-right: none;
             border-bottom:2px solid $teal;
+            border-top:1px solid $teal;
             color: $dark-gray;
             &:hover {
                 color: $teal;
