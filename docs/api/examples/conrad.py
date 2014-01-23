@@ -1,4 +1,5 @@
 import json
+import urllib
 import urllib2
 from time import sleep
 
@@ -34,23 +35,28 @@ class Conrad(object):
         self.prev_url = None
         self.next_url = None
 
-    def get(self, path, query="", verbatim=False):
+    def get(self, path, query=None, verbatim=False):
         """
         Params:
         path    The specific path to access under self.base_url. May or
                 may not need a leading slash depending on the value of
                 base_url.
-        query   A dict of GET parameters.
+        query   A dict or string of GET parameters.
         verbatim    Whether or not to treat path as the entire URL.
 
         Returns the deserialized output of the API if succeessful or False if
         unsuccessful.
         """
 
-        if query is None:
-            query = ""
-        else:
+        if query:
+            if isinstance(query, dict):
+                query = urllib.urlencode(query)
+
             query = "&" + query
+        else:
+            query = ""
+
+        query = ("&" + query) if query else ""
 
         if verbatim:
             url = path
