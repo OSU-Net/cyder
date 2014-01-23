@@ -230,14 +230,7 @@ def static_dynamic_view(request):
             data['data'].append(('MAC', '3', obj))
             data['data'].append(('IP', '4', obj.range))
 
-        if obj.last_seen == 0:
-            date = ''
-        else:
-            import datetime
-            date = datetime.datetime.fromtimestamp(obj.last_seen)
-            date = date.strftime('%B %d, %Y, %I:%M %p')
-
-        data['data'].append(('Last seen', '5', date))
+        data['data'].append(('Last seen', '5', obj.last_seen))
         return data
 
     from cyder.base.tablefier import Tablefier
