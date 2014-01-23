@@ -19,7 +19,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
 
     class Meta:
         model = DynamicInterface
-        exclude = ('last_seen')
+        exclude = ('last_seen',)
 
 
 DynamicInterfaceAVForm = get_eav_form(DynamicInterfaceAV, DynamicInterface)
