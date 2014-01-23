@@ -23,7 +23,29 @@ $(document).ready(function() {
         $('.settings-menu').slideToggle();
     });
     $('.nav-item.parent').click( function(e) {
-        $('#' + this.id + '-children').slideToggle();
+        var parentsChild = ('#' + this.id + '-children');
+        if ($(parentsChild).css('display') != 'none') {
+            $(parentsChild).slideUp();
+        } else {
+            var children = [
+                '#dns-sidebar-children',
+                '#dhcp-sidebar-children',
+                '#core-sidebar-children'];
+            $.each(children, function(i, child) {
+                if (parentsChild != child) {
+                    //alert(child);
+                    //alert('parent: ' + parentsChild);
+                    if ($(child).css('display') != 'none') {
+                        $(child).slideToggle('slow');
+                    };
+                };
+            });
+            $(parentsChild).slideToggle();
+
+        };
+
+        //$('#dns-sidebar-children').slideToggle();
+        //$('#dhcp-sidebar-children').slideToggle();
     });
 
 
