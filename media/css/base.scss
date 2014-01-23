@@ -151,6 +151,15 @@ a.btn {
         width: auto;
         position: relative;
         float: left;
+        #logout-btn {
+            background-image: url(../img/logout.png);
+            position: relative;
+            float: left;
+            margin-left: 5px;
+        }
+        #logout-btn:hover {
+            background-image: url(../img/logout-hover.png);
+        }
         #home-btn {
             background-image: url(../img/home.png);
             margin-left: 5px;
@@ -186,78 +195,12 @@ a.btn {
         }
     }
     #right-header {
-        width: 275px;
+        width: auto;
         position: relative;
         float: right;
         #search {
             position: relative;
             top: 5px;
-            float: left;
-        }
-        #logout-btn {
-            background-image: url(../img/logout.png);
-            position: relative;
-            float: right;
-            margin-right: 5px;
-        }
-        #logout-btn:hover {
-            background-image: url(../img/logout-hover.png);
-        }
-    }
-
-    #tabs {
-        display: none;
-        float: left;
-        .tab {
-            top: 10px;
-            width: auto;
-            float: left;
-            background: $white;
-            border-radius: 3px;
-            bottom: 0;
-            color: $white;
-            font-weight: normal;
-            margin-right: 10px;
-            padding: 5px 10px;
-            position: relative;
-            text-decoration: none;
-            right: 0;
-            transition: .1s .1s;
-            &.selected {
-                top: 3px;
-                border-top-style:solid;
-                border-width: 5px;
-                border-color: $teal;
-            }
-            &:hover {
-                top: 5px;
-                color: $white;
-                cursor: pointer;
-            }
-            &:active {
-                @include box-shadow(none);
-                bottom: 5px;
-                right: 0;
-                transition: .03s 0s;
-            }
-            &.red {
-                background: $red;
-                &:hover {
-                    background: lighten($red, 5%);
-                }
-                &:active {
-                    background: darken($red, 10%);
-                }
-            }
-            &.cancel {
-                background: $dark-gray;
-                &:hover {
-                    background: lighten($dark-gray, 5%);
-                }
-                &:active {
-                    background: darken($dark-gray, 10%);
-                }
-            }
         }
     }
 }

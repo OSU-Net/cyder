@@ -15,6 +15,7 @@
     <div id="header">
       <div class="container">
         <span id="left-header">
+          <a id="logout-btn" class="icon" href="{{ url('logout') }}"></a>
           <a id="home-btn" class="icon" href="/"></a>
           <a id="settings-btn" class="icon" href="#"></a>
           <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
@@ -46,26 +47,6 @@
           <form id="search" action="{{ url('search') }}" method="get">
             <input type="search" name="search" placeholder="Search...">
           </form>
-          <a id="logout-btn" class="icon" href="{{ url('logout') }}"></a>
-        </span>
-        <span id="tabs">
-          <span class="tab {{ 'selected' if url('system') in request.path }}" id="system-tab">
-            <h3><a href="{{ url('system') }}">System</a></h3>
-          </span>
-          <span class="tab {{ 'selected' if url('cydns-index') in request.path }}"id="cydns-tab">
-            <h3><a href="{{ url('cydns-index') }}">DNS</a></h3>
-          </span>
-          <span class="tab {{ 'selected' if url('cydhcp-index') in request.path }}" id="cydhcp-tab">
-            <h3><a href="{{ url('cydhcp-index') }}">DHCP</a></h3>
-          </span>
-          {% if request.user.is_superuser %}
-          <span class="tab {{ 'selected' if url('admin-page') in request.path }}" id="admin-tab">
-            <h3><a href="{{ url('admin-page') }}">Admin</a></h3>
-          </span>
-          {% endif %}
-          <span class="tab {{ 'selected' if url('bug-report') in request.path }}" id="bugreport">
-            <a href="{{ url('bug-report') }}">Report a Bug</a>
-          </span>
         </span>
       </div>
     </div>
