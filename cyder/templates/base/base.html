@@ -17,33 +17,38 @@
         <span id="left-header">
           <a id="logout-btn" class="icon" href="{{ url('logout') }}"></a>
           <a id="home-btn" class="icon" href="/"></a>
-          <a id="settings-btn" class="icon" href="#"></a>
-          <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
-            {{ request.user.username }}:
-          </a>
-          <span class="user-info">
-            <a class="level" href="{{ request.session.ctnr.get_detail_url() }}">
-            {% if request.session.level == 0 %}
-              guest on
-            {% elif request.session.level == 1 %}
-              user on
-            {% else %}
-              admin on
-              {% endif %}
+          <div class="settings-btn">
+            <a id="settings-btn" class="icon" href="#"></a>
+          </div>
+          <div class="settings-info">
+            <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
+              {{ request.user.username }}:
             </a>
-          </span>
-            <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
-              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
-              <select name="ctnr_name" class="submit-on-change">
-                {% for ctnr in request.session.ctnrs %}
-                  {% if ctnr == request.session.ctnr %}
+            <span class="user-info">
+              <a class="level" href="{{ request.session.ctnr.get_detail_url() }}">
+              {% if request.session.level == 0 %}
+                guest on
+              {% elif request.session.level == 1 %}
+                user on
+              {% else %}
+                admin on
+              {% endif %}
+              </a>
+            </span>
+              <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+                <select name="ctnr_name" class="submit-on-change">
+                  {% for ctnr in request.session.ctnrs %}
+                    {% if ctnr == request.session.ctnr %}
                       <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
-                  {% else %}
+                    {% else %}
                       <option value="{{ ctnr }}">{{ ctnr.name }}</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-            </form>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </form>
+            <a id="bug-report" class="bug-report" href="{{ url('bug-report') }}">Report a Bug</a>
+          </div>
         </span>
         <span id="right-header">
           <form id="search" action="{{ url('search') }}" method="get">
@@ -53,24 +58,33 @@
       </div>
     </div>
     <div class="settings-menu">
-      <p class="ctnr">
-        <form action="{{ url('ctnr-change') }}" method="post">
-          <span>Container</span>
+      <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
+        {{ request.user.username }}:
+      </a>
+      <span class="user-info">
+        <a class="level" href="{{ request.session.ctnr.get_detail_url() }}">
+        {% if request.session.level == 0 %}
+          guest on
+        {% elif request.session.level == 1 %}
+          user on
+        {% else %}
+          admin on
+          {% endif %}
+        </a>
+      </span>
+        <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
           <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
           <select name="ctnr_name" class="submit-on-change">
             {% for ctnr in request.session.ctnrs %}
               {% if ctnr == request.session.ctnr %}
-                <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
+                  <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
               {% else %}
-                <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+                  <option value="{{ ctnr }}">{{ ctnr.name }}</option>
               {% endif %}
             {% endfor %}
           </select>
         </form>
-      </p>
-      <p>
-        <span class="ctnr-default">Set as default container?</span>
-      </p>
+    <a id="bug-report" class="bug-report" href="{{ url('bug-report') }}">Report a Bug</a>
     </div>
     <div class="container message">
       {% if messages %}
