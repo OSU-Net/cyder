@@ -14,7 +14,7 @@ def get_serial(file_):
             return _str_get_serial(fd)
     except IOError as e:
         if e.errno == 2:  # IOError: [Errno 2] No such file or directory
-            return None
+            return ''
         else:
             raise
 
