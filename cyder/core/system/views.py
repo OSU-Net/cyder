@@ -75,7 +75,7 @@ def system_create_view(request):
                 system.save()
                 post_data['system'] = system.id
 
-            if post_data.get('interface_type', None) == 'Static':
+            if post_data.get('interface_type', None) == 'static_interface':
                 try:
                     post_data['ip_type'] = ipaddr.IPAddress(
                         post_data.get('ip_str', None)).version
@@ -84,9 +84,11 @@ def system_create_view(request):
 
                 form = StaticInterfaceForm(post_data)
                 static_form = form
-            elif post_data.get('interface_type', None) == 'Dynamic':
+            elif post_data.get('interface_type', None) == 'dynamic_interface':
                 form = DynamicInterfaceForm(post_data)
                 dynamic_form = form
+            else:
+                raise Exception("Invalid interface_type")
 
             if form.is_valid():
                 try:

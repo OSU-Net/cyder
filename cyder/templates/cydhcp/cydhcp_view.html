@@ -11,7 +11,7 @@
     {% if obj_type in ["static_interface", "dynamic_interface"] %}
       {{ js('interface_delete') }}
       <a class="btn submit c" href={{ url('system-create') }}
-          data-kwargs='{"initial": "True", "interface_type": "{{ pretty_obj_type|replace(' Interface', '') }}"}'
+          data-kwargs='{"initial": "True", "interface_type": "{{ obj_type }}"}'
           id="system_create">Create {{ pretty_obj_type }}</a>
     {% else %}
       <a id="btn create-obj" class="btn create-obj">
