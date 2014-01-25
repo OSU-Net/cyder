@@ -50,6 +50,6 @@ class Command(BaseCommand):
             # else get value from settings
 
         with DNSBuilder(**builder_opts) as b:
-            b.build(clean_up=options['push'], force=options['force_build'])
+            b.build(force=options['force_build'])
             if options['push']:
                 b.push(sanity_check=options['sanity_check'])

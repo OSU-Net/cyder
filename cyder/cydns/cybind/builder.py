@@ -90,25 +90,6 @@ class DNSBuilder(MutexMixin):
                            failure_logger=failure_logger,
                            failure_msg=failure_msg)
 
-    def status(self):
-        """Print the status of the build system"""
-
-        for name in dir(self):
-            value = getattr(self, name)
-            if isinstance(value, (bool, basestring, int, long)):
-                print u'{0} = {1}'.format(name, unicode(value))
-
-        #print "is_locked={0}".format(self.is_locked())
-        #print "lock_file={0}".format(self.lock_file)
-        #print ("stop_file_exists={0}"
-               #.format(os.path.exists(self.stop_file)))
-        #print "stop_file={0}".format(self.stop_file)
-        #print "stage_dir_exists={0}".format(os.path.exists(self.stage_dir))
-        #print "stage_dir={0}".format(self.stage_dir)
-        #print "prod_dir_exists={0}".format(os.path.exists(self.prod_dir))
-        #print "prod_dir={0}".format(self.prod_dir)
-        #print "last_run_file={0}".format(self.last_run_file)
-
     def format_title(self, title):
         return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
 
@@ -451,7 +432,7 @@ class DNSBuilder(MutexMixin):
                      format(view_name))
             self.build_view_config(view_name, 'master', view_stmts)
 
-    def build(self, clean_up=True, force=False):
+    def build(self, force=False):
         try:
             with open(self.stop_file) as stop_fd:
                 now = time.time()
