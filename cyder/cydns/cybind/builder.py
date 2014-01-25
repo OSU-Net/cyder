@@ -477,21 +477,16 @@ class DNSBuilder(MutexMixin):
 
         try:
             remove_dir_contents(self.stage_dir)
-            dns_tasks = self.get_scheduled()
+            self.dns_tasks = self.get_scheduled()
 
-            if not dns_tasks and not force:
+            if not self.dns_tasks and not force:
                 self.log_info('Nothing to do!')
                 return
 
             # zone files
-            soa_pks_to_rebuild = set(int(t.task) for t in dns_tasks)
+            soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
             self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
                     force=force))
-
-            if clean_up:
-                # Only delete the scheduled tasks we saw at the top of the
-                # function
-                map(lambda t: t.delete(), dns_tasks)
 
             self.log_info('DNS build successful')
         except:
@@ -515,6 +510,7 @@ class DNSBuilder(MutexMixin):
             raise
 
         self.repo.commit_and_push('Update config', sanity_check=sanity_check)
+        map(lambda t: t.delete(), self.dns_tasks)
 
     def _lock_failure(self, pid):
         self.log_err(
