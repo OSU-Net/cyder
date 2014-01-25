@@ -306,7 +306,7 @@ class DNSBuilder(MutexMixin):
                                                file_meta['rel_fname'])
         return file_meta
 
-    def build_zone_files(self, soa_pks_to_rebuild):
+    def build_zone_files(self, soa_pks_to_rebuild, force=False):
         zone_stmts = {}
 
         for soa in SOA.objects.all():
@@ -332,7 +332,8 @@ class DNSBuilder(MutexMixin):
                 # Also generate a zone statement and add it to a dictionary for
                 # later use during BIND configuration generation.
 
-                force_rebuild = soa.pk in soa_pks_to_rebuild or soa.dirty
+                force_rebuild = (soa.pk in soa_pks_to_rebuild or soa.dirty
+                                 or force)
                 if force_rebuild:
                     soa.dirty = False
                     soa.save()
@@ -484,7 +485,8 @@ class DNSBuilder(MutexMixin):
 
             # zone files
             soa_pks_to_rebuild = set(int(t.task) for t in dns_tasks)
-            self.build_config_files(self.build_zone_files(soa_pks_to_rebuild))
+            self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
+                    force=force))
 
             if clean_up:
                 # Only delete the scheduled tasks we saw at the top of the
