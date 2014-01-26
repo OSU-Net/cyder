@@ -173,15 +173,11 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
         elif 'AV' in FormKlass.__name__:
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
+        form = FormKlass(instance=obj)
         object_list = _filter(request, Klass)
 
-        if obj_type in ('static_interface', 'dynamic_interface'):
-            form = None
-        else:
-            if obj_type == 'system' and not object_list:
-                return redirect(reverse('system-create'))
-
-            form = FormKlass(instance=obj)
+        if obj_type == 'system' and not object_list:
+            return redirect(reverse('system-create'))
 
         page_obj = make_paginator(request, do_sort(request, object_list), 50)
         object_table = tablefy(page_obj, request=request)
