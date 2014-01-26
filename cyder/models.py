@@ -24,9 +24,3 @@ from cyder.cydns.srv.models import *
 from cyder.cydns.sshfp.models import *
 from cyder.cydns.txt.models import *
 from cyder.cydns.view.models import *
-
-MODEL_LIST = [
-    Token, Ctnr, UserProfile, System, Task, DynamicInterface,
-    StaticInterface, Network, Range, Site, Vlan, Vrf, Workgroup,
-    AddressRecord, CNAME, DNSBuildRun, BuildManifest, Domain, MX,
-    Nameserver, PTR, SOA, SRV, SSHFP, TXT, View]
