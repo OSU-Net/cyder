@@ -189,7 +189,6 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     if isinstance(form, UsabilityFormMixin):
         form.make_usable(request)
 
-
     return render(request, template, {
         'form': form,
         'obj': obj,
