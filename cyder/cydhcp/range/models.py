@@ -71,7 +71,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True, editable=False)
     end_str = models.CharField(max_length=39, verbose_name="End address")
 
-    domain = models.ForeignKey(Domain, null=True)
+    domain = models.ForeignKey(Domain, null=True, blank=True)
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
