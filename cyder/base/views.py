@@ -141,6 +141,9 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
     Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     if request.method == 'POST':
+        object_table = None
+        page_obj = None
+
         form = FormKlass(request.POST, instance=obj)
         if form.is_valid():
             try:
@@ -165,39 +168,33 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                 if form._errors is None:
                     form._errors = ErrorDict()
                 form._errors["__all__"] = ErrorList(e.messages)
-                return render(request, template, {
-                    'form': form,
-                    'obj': obj,
-                    'obj_type': obj_type,
-                    'pk': pk,
-                })
+
+        # Adjust this if statement to submit forms with ajax
+        elif 'AV' in FormKlass.__name__:
+            return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
-        form = FormKlass(initial=request.GET)
-    # Adjust this if statement to submit forms with ajax
-    elif 'AV' in FormKlass.__name__:
-        return HttpResponse(json.dumps({'errors': form.errors}))
+        object_list = _filter(request, Klass)
 
-    object_list = _filter(request, Klass)
-    page_obj = make_paginator(request, do_sort(request, object_list), 50)
+        if obj_type in ('static_interface', 'dynamic_interface'):
+            form = None
+        else:
+            if obj_type == 'system' and not object_list:
+                return redirect(reverse('system-create'))
 
-    StaticInterface = get_model('cyder', 'staticinterface')
-    DynamicInterface = get_model('cyder', 'dynamicinterface')
-    if form._meta.model in [StaticInterface, DynamicInterface]:
-        form = None
-    else:
-        if (obj_type in ['system', 'static_interface', 'dynamic_interface']
-                and not object_list):
-            return redirect(reverse('system-create'))
+            form = FormKlass(instance=obj)
 
-        form = FormKlass(instance=obj)
-        if issubclass(type(form), UsabilityFormMixin):
-            form.make_usable(request)
+        page_obj = make_paginator(request, do_sort(request, object_list), 50)
+        object_table = tablefy(page_obj, request=request)
+
+    if isinstance(form, UsabilityFormMixin):
+        form.make_usable(request)
+
 
     return render(request, template, {
         'form': form,
         'obj': obj,
         'page_obj': page_obj,
-        'object_table': tablefy(page_obj, request=request),
+        'object_table': object_table,
         'obj_type': obj_type,
         'pk': pk,
     })
