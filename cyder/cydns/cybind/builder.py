@@ -351,9 +351,13 @@ class DNSBuilder(MutexMixin):
                              'config.'.format(view.name),
                              root_domain=root_domain)
                     file_meta = self.get_file_meta(view, root_domain, soa)
-                    was_bad_prev, new_serial = self.verify_previous_build(
-                        file_meta, view, root_domain, soa
-                    )
+
+                    if force:
+                        was_bad_prev = True
+                        new_serial = int(time.time())
+                    else:
+                        was_bad_prev, new_serial = self.verify_previous_build(
+                                file_meta, view, root_domain, soa)
 
                     if was_bad_prev:
                         soa.serial = new_serial
