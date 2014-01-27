@@ -304,8 +304,8 @@ class DNSBuilder(MutexMixin):
                 # to a list.
                 # * If any of the view's zone file have been tampered with or
                 # the zone is new, trigger the rebuilding of all the zone's
-                # view files. (rebuil all views in a zone keeps the serial
-                # synced across all views)
+                # view files. (Rebuilding all views in a zone keeps the serial
+                # synced across all views.)
                 # * Either rebuild all of a zone's view files because one view
                 # needed to be rebuilt due to tampering or the zone was dirty
                 # (again, this is to keep their serial synced) or just call
