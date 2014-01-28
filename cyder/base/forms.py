@@ -30,9 +30,9 @@ class EditUserForm(forms.Form):
             ('Delete', 'Permanently delete user')))
 
 
-def stripCharField(self, value):
-    return charFieldClean(self, value.strip())
+def strip_charfield(self, value):
+    return charfield_clean(self, value.strip())
 
 
-charFieldClean = forms.fields.CharField.clean
-forms.fields.CharField.clean = stripCharField
+charfield_clean = forms.fields.CharField.clean
+forms.fields.CharField.clean = strip_charfield
