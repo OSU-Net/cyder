@@ -175,3 +175,10 @@ def simple_descriptor(func):
     SimpleDescriptor.__get__ = func
 
     return SimpleDescriptor()
+
+
+def django_pretty_type(obj_type):
+    if obj_type == 'user':
+        return 'user'
+    else:
+        return None

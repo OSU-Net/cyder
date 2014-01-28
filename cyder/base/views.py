@@ -20,6 +20,7 @@ from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, tablefy)
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.base.utils import django_pretty_type
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
 from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_update_session
@@ -331,7 +332,8 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
         'obj': obj,
         'obj_table': table,
         'obj_type': obj_type,
-        'pretty_obj_type': get_klasses(obj_type)[0].pretty_type,
+        'pretty_obj_type': (django_pretty_type(obj_type) or
+                            get_klasses(obj_type)[0].pretty_type),
         'tables': tables
     }.items() + kwargs.items()))
 
