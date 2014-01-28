@@ -86,10 +86,9 @@ def set_default_ctnr(request):
     if not request.POST:
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    ctnr_id = request.POST.get('id', None)
-    if ctnr_id:
-        request.user.get_profile().default_ctnr = ctnr_id
-        request.user.save()
+    user = request.user.get_profile()
+    user.default_ctnr = request.session['ctnr']
+    user.save()
 
     return redirect(request.META.get('HTTP_REFERER', ''))
 

@@ -58,6 +58,11 @@
               {% endfor %}
             </select>
           </form>
+          <form action="{{ url('set-default-ctnr') }}" method="post">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+              <a id="defaultCtnrBtn" class="btn submit c">Set as default container?</a>
+          </form>
+
         </span>
         <span id="bugreport">
             <a href="{{ url('bug-report') }}"><font color=white>Report a Bug</font></a>
