@@ -74,7 +74,12 @@
   };
 
 	$.fn.addTag = function(value,options) {
-			options = jQuery.extend({focus:false,callback:true},options);
+		if (value.indexOf(',') >= 0) {
+            jQuery.each(value.split(','), function (i, val) {
+                $('#id_users').addTag(val.trim());
+            });
+        } else {
+            options = jQuery.extend({focus:false,callback:true},options);
 			this.each(function() {
 				var id = $(this).attr('id');
 
@@ -133,6 +138,7 @@
 			});
 
 			return false;
+        }
 		};
 
 	$.fn.removeTag = function(value) {
