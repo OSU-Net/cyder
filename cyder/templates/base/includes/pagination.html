@@ -22,7 +22,10 @@
           {% if page_obj.number == page %}
             <li class="active"><a href="#">{{ page }}</a></li>
           {% else %}
-          <li><a href="{{ page_url|urlparams(**{page_name: page}) }}">{{ page }}</a></li>
+            <li><a href="{{ page_url|urlparams(**{page_name: page}) }}">{{ page }}</a></li>
+            {% if page_obj.number > page and page_obj.number < page + page_interval %}
+              <li class="active"><a href="#">{{ page_obj.number }}</a></li>
+            {% endif %}
           {% endif %}
         {% endif %}
       {% endfor %}
