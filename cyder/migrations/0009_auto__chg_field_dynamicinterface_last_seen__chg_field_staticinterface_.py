@@ -3,11 +3,15 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from warnings import filterwarnings, resetwarnings
+import MySQLdb
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+
+        filterwarnings('ignore', category=MySQLdb.Warning)
 
         # Changing field 'DynamicInterface.last_seen'
         db.alter_column('dynamic_interface', 'last_seen', self.gf('django.db.models.fields.DateTimeField')(null=True))
@@ -15,13 +19,19 @@ class Migration(SchemaMigration):
         # Changing field 'StaticInterface.last_seen'
         db.alter_column('static_interface', 'last_seen', self.gf('django.db.models.fields.DateTimeField')(null=True))
 
+        resetwarnings()
+
     def backwards(self, orm):
+
+        filterwarnings('ignore', category=MySQLdb.Warning)
 
         # Changing field 'DynamicInterface.last_seen'
         db.alter_column('dynamic_interface', 'last_seen', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=11))
 
         # Changing field 'StaticInterface.last_seen'
         db.alter_column('static_interface', 'last_seen', self.gf('django.db.models.fields.PositiveIntegerField')(max_length=11))
+
+        resetwarnings()
 
     models = {
         'auth.group': {
