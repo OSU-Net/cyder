@@ -25,7 +25,7 @@ $(document).ready(function() {
     $('.nav-item.parent').click( function(e) {
         var parentsChild = ('#' + this.id + '-children');
         if ($(parentsChild).css('display') != 'none') {
-            $(parentsChild).slideUp();
+            $(parentsChild).slideUp('slow');
         } else {
             var children = [
                 '#dns-sidebar-children',
@@ -33,22 +33,14 @@ $(document).ready(function() {
                 '#core-sidebar-children'];
             $.each(children, function(i, child) {
                 if (parentsChild != child) {
-                    //alert(child);
-                    //alert('parent: ' + parentsChild);
                     if ($(child).css('display') != 'none') {
                         $(child).slideToggle('slow');
                     };
                 };
             });
-            $(parentsChild).slideToggle();
-
+            $(parentsChild).slideToggle('slow');
         };
-
-        //$('#dns-sidebar-children').slideToggle();
-        //$('#dhcp-sidebar-children').slideToggle();
     });
-
-
 
     $('#system_create, #delete, .delete').click( function(e) {
         e.preventDefault();
