@@ -8,7 +8,7 @@
           style="{{ 'display:none' if url(named_url) not in request.path }}">
     {% for child_named_url, child_name in children %}
     <span class="nav-item child">
-      <a class="nav-link child {{ 'selected' if url(child_named_url) == request.path }}"
+      <a class="nav-link child {{ 'selected' if url(child_named_url) in request.path }}"
          href="{{ url(child_named_url) }}">{{ child_name }}</a>
     </span>
     {% endfor %}
