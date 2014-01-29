@@ -7,7 +7,7 @@ from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 class WorkgroupAVSerializer(serializers.ModelSerializer):
     id = serializers.Field(source='id')
-    workgroup = serializers.HyperlinkedRelatedField(
+    entity = serializers.HyperlinkedRelatedField(
         view_name='api-dhcp-workgroup-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 

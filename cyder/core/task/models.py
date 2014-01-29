@@ -27,7 +27,7 @@ class Task(models.Model):
     def save(self):
         super(Task, self).save()
 
-    @classmethod
-    def schedule_zone_rebuild(cls, soa):
+    @staticmethod
+    def schedule_zone_rebuild(soa):
         if not Task.objects.filter(task=str(soa.pk), ttype='dns').exists():
             Task(task=str(soa.pk), ttype='dns').save()

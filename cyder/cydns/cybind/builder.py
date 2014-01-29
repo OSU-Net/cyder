@@ -1,23 +1,25 @@
-#!/usr/bin/python
-from gettext import gettext as _
+from __future__ import unicode_literals
+
 import inspect
-import fcntl
-import shutil
-import shlex
-import subprocess
-import syslog
 import os
 import re
+import shutil
+import sys
+import syslog
 import time
+from distutils.dir_util import copy_tree
+from itertools import ifilter
+from traceback import format_exception
 
-from cyder.settings import (
-    DNS_STAGE_DIR, DNS_PROD_DIR, DNS_LOCK_FILE, DNS_STOP_UPDATE_FILE,
-    DNS_NAMED_CHECKZONE_OPTS, DNS_MAX_ALLOWED_LINES_CHANGED,
-    DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED, DNS_NAMED_CHECKZONE,
-    DNS_NAMED_CHECKCONF, DNS_LAST_RUN_FILE, DNS_BIND_PREFIX
-)
+from cyder.settings import BINDBUILD
+
+from cyder.base.mixins import MutexMixin
+from cyder.base.utils import (dict_merge, log, remove_dir_contents,
+                              run_command, set_attrs, shell_out)
+from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
+from cyder.core.utils import fail_mail
 
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
@@ -25,219 +27,68 @@ from cyder.cydns.cybind.zone_builder import build_zone_data
 from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
-from cyder.core.utils import fail_mail
 
+def format_log_message(msg, root_domain=None):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
 
-class BuildError(Exception):
-    """Exception raised when there is an error in the build process."""
+        frame_number = 2
+        while calframe[frame_number][3] == 'run_command':
+            frame_number += 1
+        callername = "[{0}]".format(calframe[frame_number][3])
 
-
-class SVNBuilderMixin(object):
-    svn_ignore = [re.compile("---\s.+\s+\(revision\s\d+\)"),
-                  re.compile("\+\+\+.*")]
-
-    vcs_type = 'svn'
-
-    def svn_lines_changed(self, dirname):
-        """
-        This function will collect some metrics on how many lines were added
-        and removed during the build process.
-
-        :returns: (int, int) -> (lines_added, lines_removed)
-
-        The current implementation of this function uses the underlying svn
-        repo to generate a diff and then counts the number of lines that start
-        with '-' or '+'. This causes the accuracy of this function to have
-        slight errors because some lines in the diff output start with '-' or
-        '+' but aren't indicative of a line being removed or added. Since the
-        threashold of lines changing is in the hundreds of lines, an error of
-        tens of lines is not a large concern.
-        """
-        cwd = os.getcwd()
-        os.chdir(dirname)
-        try:
-            command_str = "svn add --force .".format(dirname)
-            self.log("Calling `{0}` in {1}".
-                     format(command_str, dirname))
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to add files to svn."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-            command_str = "svn diff --depth=infinity ."
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to add files to svn."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-        except Exception:
-            raise
-        finally:
-            self.log("Changing pwd to {0}".format(cwd))
-            os.chdir(cwd)  # go back!
-
-        la, lr = 0, 0
-
-        def svn_ignore(line):
-            for ignore in self.svn_ignore:
-                if ignore.match(line):
-                    return True
-            return False
-
-        for line in stdout.split('\n'):
-            if svn_ignore(line):
-                continue
-            if line.startswith('-'):
-                lr += 1
-            elif line.startswith('+'):
-                la += 1
-        return la, lr
-
-    def svn_sanity_check(self, lines_changed):
-        """
-        If sanity checks fail, this function will return a string which is
-        True-ish. If all sanity cheecks pass, a Falsy value will be
-        returned.
-        """
-        # svn diff changes and react if changes are too large
-        if sum(lines_changed) > DNS_MAX_ALLOWED_LINES_CHANGED:
-            if self.FORCE:
-                self.log("Sanity check failed but FORCE == True. "
-                         "Ignoring thresholds.")
-            else:
-                raise BuildError("Wow! Too many lines changed during this "
-                                 "checkin. {0} lines add, {1} lines removed."
-                                 .format(*lines_changed))
-
-    def svn_checkin(self, lines_changed):
-        # svn add has already been called
-        cwd = os.getcwd()
-        os.chdir(self.PROD_DIR)
-        self.log("Changing pwd to {0}".format(self.PROD_DIR))
-        try:
-            ci_message = _("Checking in DNS. {0} lines were added and {1} were"
-                           " removed".format(*lines_changed))
-            self.log("Commit message: {0}".format(ci_message))
-            command_str = "svn ci {0} -m \"{1}\"".format(
-                self.PROD_DIR, ci_message)
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to check in changes."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-            else:
-                self.log("Changes have been checked in.")
-        finally:
-            os.chdir(cwd)  # go back!
-            self.log("Changing pwd to {0}".format(cwd))
-        return
-
-    def vcs_checkin(self):
-        command_str = "svn add --force .".format(self.PROD_DIR)
-        stdout, stderr, returncode = self.shell_out(command_str)
-        try:
-            cwd = os.getcwd()
-            os.chdir(self.PROD_DIR)
-            self.log("Calling `svn up` in {0}".format(self.PROD_DIR))
-            command_str = "svn up"
-            stdout, stderr, returncode = self.shell_out(command_str)
-            if returncode != 0:
-                raise BuildError("Failed to svn up."
-                                 "\ncommand: {0}:\nstdout: {1}\nstderr:{2}".
-                                 format(command_str, stdout, stderr))
-        finally:
-            os.chdir(cwd)  # go back!
-            self.log("Changing pwd to {0}".format(cwd))
-
-        lines_changed = self.svn_lines_changed(self.PROD_DIR)
-        self.svn_sanity_check(lines_changed)
-        if lines_changed == (0, 0):
-            self.log("PUSH_TO_PROD is True but "
-                     "svn_lines_changed found that no lines differ "
-                     "from last svn checkin.")
+        if root_domain:
+            return "{0:24} < {1} > {2}".format(callername,
+                                               root_domain.name, msg)
         else:
-            config_lines_changed = self.svn_lines_changed(
-                os.path.join(self.PROD_DIR, 'config')
-            )
-            config_lines_removed = config_lines_changed[1]
-            if config_lines_removed > DNS_MAX_ALLOWED_CONFIG_LINES_REMOVED:
-                if self.FORCE:
-                    self.log("Config sanity check failed but "
-                             "FORCE == True. Ignoring thresholds.")
-                else:
-                    raise BuildError(
-                        "Wow! Too many lines removed from the config dir ({0} "
-                        "lines removed). Manually make sure this commit is "
-                        "okay." .format(config_lines_removed)
-                    )
-
-            self.log("PUSH_TO_PROD is True. Checking into "
-                     "svn.")
-            self.svn_checkin(lines_changed)
+            return "{0:24} {1}".format(callername, msg)
 
 
-class DNSBuilder(SVNBuilderMixin):
+class DNSBuilder(MutexMixin):
     def __init__(self, **kwargs):
-        defaults = {
-            'STAGE_DIR': DNS_STAGE_DIR,
-            'PROD_DIR': DNS_PROD_DIR,
-            'BIND_PREFIX': DNS_BIND_PREFIX,
-            'LOCK_FILE': DNS_LOCK_FILE,
-            'STOP_UPDATE_FILE': DNS_STOP_UPDATE_FILE,
-            'LAST_RUN_FILE': DNS_LAST_RUN_FILE,
-            'STAGE_ONLY': False,
-            'NAMED_CHECKZONE_OPTS': DNS_NAMED_CHECKZONE_OPTS,
-            'CLOBBER_STAGE': False,
-            'PUSH_TO_PROD': False,
-            'BUILD_ZONES': True,
-            'PRESERVE_STAGE': False,
-            'LOG_SYSLOG': True,
-            'DEBUG': False,
-            'FORCE': False,
-            'bs': DNSBuildRun()  # Build statistic
-        }
-        for k, default in defaults.iteritems():
-            setattr(self, k, kwargs.get(k, default))
+        kwargs = dict_merge(BINDBUILD, {
+            'debug': False,
+            'bs': DNSBuildRun(),  # Build statistic
+        }, kwargs)
+        set_attrs(self, kwargs)
 
-        # This is very specific to python 2.6
-        syslog.openlog('dnsbuild', 0, syslog.LOG_LOCAL6)
-        self.lock_fd = None
+        if self.log_syslog:
+            syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
 
-    def status(self):
-        """Print the status of the build system"""
-        is_locked = False
-        try:
-            self.lock_fd = open(self.LOCK_FILE, 'w+')
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-        except IOError, exc_value:
-            if exc_value[0] == 11:
-                is_locked = True
-        if is_locked:
-            print "IS_LOCKED=True"
+        self.repo = GitRepo(self.prod_dir, self.line_change_limit,
+            self.line_removal_limit, debug=self.debug,
+            log_syslog=self.log_syslog, logger=syslog)
+
+    def log_debug(self, msg, root_domain=None, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.debug
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
+                logger=syslog)
+
+    def log_info(self, msg, root_domain=None, to_stderr=True):
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
+
+    def log_notice(self, msg, root_domain=None, to_stderr=True):
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
+
+    def log_err(self, msg, root_domain=None, to_stderr=True):
+        log(format_log_message(msg, root_domain=root_domain),
+                log_level='LOG_ERR', to_stderr=to_stderr, logger=syslog)
+
+    def run_command(self, command, log=True, failure_msg=None):
+        if log:
+            command_logger = self.log_debug
+            failure_logger = self.log_err
         else:
-            print "IS_LOCKED=False"
-        print "LOCK_FILE={0}".format(self.LOCK_FILE)
+            command_logger = None
+            failure_logger = None
 
-        if os.path.exists(self.STOP_UPDATE_FILE):
-            print "STOP_UPDATE_FILE_EXISTS=True"
-        else:
-            print "STOP_UPDATE_FILE_EXISTS=False"
-        print "STOP_UPDATE_FILE={0}".format(self.STOP_UPDATE_FILE)
-
-        if os.path.exists(self.STAGE_DIR):
-            print "STAGE_DIR_EXISTS=True"
-        else:
-            print "STAGE_DIR_EXISTS=False"
-        print "STAGE_DIR={0}".format(self.STAGE_DIR)
-
-        if os.path.exists(self.PROD_DIR):
-            print "PROD_DIR_EXISTS=True"
-        else:
-            print "PROD_DIR_EXISTS=False"
-        print "PROD_DIR={0}".format(self.PROD_DIR)
-
-        print "LAST_RUN_FILE={0}".format(self.LAST_RUN_FILE)
+        return run_command(command, command_logger=command_logger,
+                           failure_logger=failure_logger,
+                           failure_msg=failure_msg)
 
     def format_title(self, title):
         return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
@@ -254,117 +105,16 @@ class DNSBuilder(SVNBuilderMixin):
         return by this function
 
         note::
-            When we are not checking files into SVN we do not need to delete
-            the scheduled tasks. Not checking files into SVN is indicative of a
+            When we are not checking files into Git we do not need to delete
+            the scheduled tasks. Not checking files into Git is indicative of a
             troubleshoot build.
         """
-        ts = [t for t in Task.dns.all()]
+        ts = list(Task.dns.all())
         ts_len = len(ts)
-        self.log("{0} zone{1} requested to be rebuilt".format(
+        self.log_debug("{0} zone{1} requested to be rebuilt".format(
             ts_len, 's' if ts_len != 1 else '')
         )
         return ts
-
-    def log(self, msg, log_level='LOG_INFO', **kwargs):
-        # Eventually log this stuff into bs
-        # Let's get the callers name and log that
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        callername = "[{0}]".format(calframe[1][3])
-        root_domain = kwargs.get('root_domain', None)
-        if root_domain:
-            fmsg = "{0:20} < {1} > {2}".format(callername,
-                                               root_domain.name, msg)
-        else:
-            fmsg = "{0:20} {1}".format(callername, msg)
-        if hasattr(syslog, log_level):
-            ll = getattr(syslog, log_level)
-        else:
-            ll = syslog.LOG_INFO
-
-        if self.LOG_SYSLOG:
-            syslog.syslog(ll, fmsg)
-        if self.DEBUG:
-            print "{0} {1}".format(log_level, fmsg)
-
-    def build_staging(self, force=False):
-        """
-        Create the stage folder. Fail if it already exists unless
-        force=True.
-        """
-        if os.path.exists(self.STAGE_DIR) and not force:
-            raise BuildError("The DNS build scripts tried to build the staging"
-                             " area but the area already exists.")
-        try:
-            os.makedirs(self.STAGE_DIR)
-        except OSError:
-            if not force:
-                raise
-
-    def clear_staging(self, force=False):
-        """
-        rm -rf the staging area. Fail if the staging area doesn't exist.
-        """
-        self.log("Attempting rm -rf staging "
-                 "area. ({0})...".format(self.STAGE_DIR))
-        if os.path.exists(self.STAGE_DIR) or force:
-            try:
-                shutil.rmtree(self.STAGE_DIR)
-            except OSError, e:
-                if e.errno == 2:
-                    self.log("Staging was not present.",
-                             log_level='LOG_WARNING')
-                else:
-                    raise
-            self.log("Staging area cleared")
-        else:
-            if not force:
-                raise BuildError("The DNS build scripts tried to remove the "
-                                 "staging area but the staging area didn't "
-                                 "exist.")
-
-    def lock(self):
-        """
-        Tryies to write a lock file. Returns True if we get the lock, else
-        return False.
-        """
-        try:
-            if not os.path.exists(os.path.dirname(self.LOCK_FILE)):
-                os.makedirs(os.path.dirname(self.LOCK_FILE))
-            self.log("Attempting acquire mutext "
-                     "({0})...".format(self.LOCK_FILE))
-            self.lock_fd = open(self.LOCK_FILE, 'w+')
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            self.log(self.format_title("Mutex Acquired"))
-            return True
-        except IOError, exc_value:
-            self.lock_fd = None
-            #  IOError: [Errno 11] Resource temporarily unavailable
-            if exc_value[0] == 11:
-                self.log(
-                    "DNS build script attempted to acquire the "
-                    "build mutux but another process already has it."
-                )
-                fail_mail(
-                    "An attempt was made to start the DNS build script "
-                    "while an instance of the script was already running. "
-                    "The attempt was denied.",
-                    subject="Concurrent DNS builds attempted.")
-                return False
-            else:
-                raise
-
-    def unlock(self):
-        """
-        Trys to remove the lock file.
-        """
-        if not self.lock_fd:
-            return False
-        self.log("Attempting release mutex "
-                 "({0})...".format(self.LOCK_FILE))
-        fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
-        self.log("Unlock Complete.")
-        return True
 
     def calc_target(self, root_domain, soa):
         """
@@ -395,8 +145,8 @@ class DNSBuilder(SVNBuilderMixin):
             elif root_domain.name.endswith('arpa'):
                 zone_path = "reverse/in-addr.arpa/"
             else:
-                raise Exception("WTF type of reverse domain is this "
-                                "{0}?!?".format(root_domain))
+                raise Exception('Invalid root domain "{0}"'
+                                .format(root_domain))
         else:
             tmp_path = '/'.join(reversed(root_domain.name.split('.')))
             zone_path = tmp_path + '/'
@@ -409,100 +159,37 @@ class DNSBuilder(SVNBuilderMixin):
         """
         if not os.path.exists(os.path.dirname(stage_fname)):
             os.makedirs(os.path.dirname(stage_fname))
-        self.log("Stage zone file is {0}".format(stage_fname),
+        self.log_debug("Stage zone file is {0}".format(stage_fname),
                  root_domain=root_domain)
         with open(stage_fname, 'w+') as fd:
             fd.write(data)
         return stage_fname
 
-    def shell_out(self, command, use_shlex=True):
-        """A little helper function that will shell out and return stdout,
-        stderr and the return code."""
-        if use_shlex:
-            command_args = shlex.split(command)
-        else:
-            command_args = command
-        p = subprocess.Popen(command_args, stderr=subprocess.PIPE,
-                             stdout=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        return stdout, stderr, p.returncode
-
-    def named_checkzone(self, zone_file, root_domain):
+    def run_checkzone(self, zone_file, root_domain):
         """Shell out and call named-checkzone on the zone file. If it returns
-        with errors raise a BuildError.
+        with errors raise an exception.
         """
-        # Make sure we have the write tools to do the job
-        command_str = "test -f {0}".format(DNS_NAMED_CHECKZONE)
-        stdout, stderr, returncode = self.shell_out(command_str)
-        if returncode != 0:
-            raise BuildError("Couldn't find named-checkzone.")
-
         # Check the zone file.
-        command_str = "{0} {1} {2} {3}".format(
-                      DNS_NAMED_CHECKZONE, self.NAMED_CHECKZONE_OPTS,
-                      root_domain.name, zone_file)
-        self.log(
-            "Calling `{0} {1} {2}`".
-            format(DNS_NAMED_CHECKZONE, root_domain.name, zone_file),
-            root_domain=root_domain
+        self.run_command(
+            ' '.join((self.named_checkzone, self.named_checkzone_opts,
+                      root_domain.name, zone_file)),
+            log=True,
+            failure_msg='named-checkzone failed on zone {0}'
+                        .format(root_domain.name)
         )
-        stdout, stderr, returncode = self.shell_out(command_str)
-        if returncode != 0:
-            raise BuildError("\nnamed-checkzone failed on zone {0}. "
-                             "\ncommand: {1}\nstdout: {2}\nstderr:{3}\n".
-                             format(root_domain.name, command_str, stdout,
-                                    stderr))
 
-    def named_checkconf(self, conf_file):
-        command_str = "test -f {0}".format(DNS_NAMED_CHECKCONF)
-        stdout, stderr, returncode = self.shell_out(command_str)
-        if returncode != 0:
-            raise BuildError("Couldn't find {0}".format(DNS_NAMED_CHECKCONF))
-
-        command_str = "{0} {1}".format(DNS_NAMED_CHECKCONF, conf_file)
-        self.log("Calling `{0} {1}` ".
-                 format(DNS_NAMED_CHECKCONF, conf_file))
-        stdout, stderr, returncode = self.shell_out(command_str)
-        if returncode != 0:
-            raise BuildError("\nnamed-checkconf rejected config {0}. "
-                             "\ncommand: {1}\nstdout: {2}\nstderr:{3}\n".
-                             format(conf_file, command_str, stdout,
-                                    stderr))
-
-    def stage_to_prod(self, src):
-        """Copy file over to PROD_DIR. Return the new location of the
-        file.
-        """
-
-        if not src.startswith(self.STAGE_DIR):
-            raise BuildError("Improper file '{0}' passed to "
-                             "stage_to_prod".format(src))
-        dst = src.replace(self.STAGE_DIR, self.PROD_DIR)
-        dst_dir = os.path.dirname(dst)
-
-        if self.STAGE_ONLY:
-            self.log("Did not copy {0} to {1}".format(src, dst))
-            return dst
-
-        if not os.path.exists(dst_dir):
-            os.makedirs(dst_dir)
-        # copy2 will copy file metadata
-        try:
-            shutil.copy2(src, dst)
-            self.log("Copied {0} to {1}".format(src, dst))
-        except (IOError, os.error) as why:
-            raise BuildError("cp -p {0} {1} caused {2}".format(src,
-                             dst, str(why)))
-        except shutil.Error:
-            raise
-        return dst
+    def run_checkconf(self, conf_file):
+        self.run_command(
+            ' '.join((self.named_checkconf, conf_file)),
+            failure_msg='named-checkconf rejected config {0}'.format(conf_file)
+        )
 
     def write_stage_config(self, config_fname, stmts):
         """
         Write config files to the correct area in staging.
         Return the path to the file.
         """
-        stage_config = os.path.join(self.STAGE_DIR, "config", config_fname)
+        stage_config = os.path.join(self.stage_dir, "config", config_fname)
 
         if not os.path.exists(os.path.dirname(stage_config)):
             os.makedirs(os.path.dirname(stage_config))
@@ -513,23 +200,15 @@ class DNSBuilder(SVNBuilderMixin):
     def build_zone(self, view, file_meta, view_data, root_domain):
         """
         This function will write the zone's zone file to the the staging area
-        and call named-checkconf on the files before they are copied over to
-        PROD_DIR. If will return a tuple of files corresponding to where the
-        `privat_file` and `public_file` are written to. If a file is not
-        written to the file system `None` will be returned instead of the path
-        to the file.
+        and call named-checkconf on the files.
         """
-        stage_fname = os.path.join(self.STAGE_DIR, file_meta['rel_fname'])
+        stage_fname = os.path.join(self.stage_dir, file_meta['rel_fname'])
         self.write_stage_zone(
             stage_fname, root_domain, file_meta['rel_fname'], view_data
         )
-        self.log("Built stage_{0}_file to {1}".format(view.name, stage_fname),
-                 root_domain=root_domain)
-        self.named_checkzone(stage_fname, root_domain)
-
-        prod_fname = self.stage_to_prod(stage_fname)
-
-        return prod_fname
+        self.log_debug(
+            "Built stage_{0}_file to {1}".format(view.name, stage_fname),
+            root_domain=root_domain)
 
     def calc_fname(self, view, root_domain):
         return "{0}.{1}".format(root_domain.name, view.name)
@@ -555,16 +234,16 @@ class DNSBuilder(SVNBuilderMixin):
             new_serial = int(time.time())
             force_rebuild = True
             # it's a new serial
-            self.log(
-                'LOG_NOTICE', "{0} appears to be a new zone. Building {1} "
+            self.log_debug(
+                "{0} appears to be a new zone. Building {1} "
                 "with initial serial {2}".format(soa, file_meta['prod_fname'],
                                                  new_serial),
                 root_domain=root_domain)
         elif int(serial) != soa.serial:
             # Looks like someone made some changes... let's nuke them.
             # We should probably email someone too.
-            self.log(
-                'LOG_NOTICE', "{0} has serial {1} in svn ({2}) and serial "
+            self.log_notice(
+                "{0} has serial {1} in VCS ({2}) and serial "
                 "{3} in the database. Zone will be rebuilt."
                 .format(soa, serial, file_meta['prod_fname'],
                         soa.serial),
@@ -582,7 +261,7 @@ class DNSBuilder(SVNBuilderMixin):
         Files:
             * rel_zone_dir
                 - This is the directory path to where the zone file will be
-                  placed. It's relative to where the script things the SVN root
+                  placed. It's relative to where the script things the VCS root
                   is. See :func:`calc_target` for more info.
             * fname
                 - This is the name of the file, which is usually in the format
@@ -602,13 +281,13 @@ class DNSBuilder(SVNBuilderMixin):
         rel_zone_dir = self.calc_target(root_domain, soa)
         file_meta['fname'] = self.calc_fname(view, root_domain)
         file_meta['rel_fname'] = os.path.join(rel_zone_dir, file_meta['fname'])
-        file_meta['prod_fname'] = os.path.join(self.PROD_DIR,
+        file_meta['prod_fname'] = os.path.join(self.prod_dir,
                                                file_meta['rel_fname'])
-        file_meta['bind_fname'] = os.path.join(self.BIND_PREFIX,
+        file_meta['bind_fname'] = os.path.join(self.bind_prefix,
                                                file_meta['rel_fname'])
         return file_meta
 
-    def build_zone_files(self, soa_pks_to_rebuild):
+    def build_zone_files(self, soa_pks_to_rebuild, force=False):
         zone_stmts = {}
 
         for soa in SOA.objects.filter(dns_enabled=True):
@@ -625,8 +304,8 @@ class DNSBuilder(SVNBuilderMixin):
                 # to a list.
                 # * If any of the view's zone file have been tampered with or
                 # the zone is new, trigger the rebuilding of all the zone's
-                # view files. (rebuil all views in a zone keeps the serial
-                # synced across all views)
+                # view files. (Rebuilding all views in a zone keeps the serial
+                # synced across all views.)
                 # * Either rebuild all of a zone's view files because one view
                 # needed to be rebuilt due to tampering or the zone was dirty
                 # (again, this is to keep their serial synced) or just call
@@ -634,16 +313,17 @@ class DNSBuilder(SVNBuilderMixin):
                 # Also generate a zone statement and add it to a dictionary for
                 # later use during BIND configuration generation.
 
-                force_rebuild = soa.pk in soa_pks_to_rebuild or soa.dirty
+                force_rebuild = (soa.pk in soa_pks_to_rebuild or soa.dirty
+                                 or force)
                 if force_rebuild:
                     soa.dirty = False
                     soa.save()
 
-                self.log('====== Processing {0} {1} ======'.format(
+                self.log_debug('====== Processing {0} {1} ======'.format(
                     root_domain, soa.serial)
                 )
                 views_to_build = []
-                self.log(
+                self.log_debug(
                     "SOA was seen with dirty == {0}".format(force_rebuild),
                     root_domain=root_domain
                 )
@@ -651,29 +331,33 @@ class DNSBuilder(SVNBuilderMixin):
                 # This for loop decides which views will be canidates for
                 # rebuilding.
                 for view in View.objects.all():
-                    self.log("++++++ Looking at < {0} > view ++++++".
+                    self.log_debug("++++++ Looking at < {0} > view ++++++".
                              format(view.name), root_domain=root_domain)
                     t_start = time.time()  # tic
                     view_data = build_zone_data(view, root_domain, soa,
-                                                logf=self.log)
+                                                logf=self.log_debug)
                     build_time = time.time() - t_start  # toc
-                    self.log('< {0} > Built {1} data in {2} seconds'
+                    self.log_debug('< {0} > Built {1} data in {2} seconds'
                              .format(view.name, soa, build_time),
-                             root_domain=root_domain, build_time=build_time)
+                             root_domain=root_domain)
                     if not view_data:
-                        self.log('< {0} > No data found in this view. '
+                        self.log_debug('< {0} > No data found in this view. '
                                  'No zone file will be made or included in any'
                                  ' config for this view.'.format(view.name),
                                  root_domain=root_domain)
                         continue
-                    self.log('< {0} > Non-empty data set for this '
+                    self.log_debug('< {0} > Non-empty data set for this '
                              'view. Its zone file will be included in the '
                              'config.'.format(view.name),
                              root_domain=root_domain)
                     file_meta = self.get_file_meta(view, root_domain, soa)
-                    was_bad_prev, new_serial = self.verify_previous_build(
-                        file_meta, view, root_domain, soa
-                    )
+
+                    if force:
+                        was_bad_prev = True
+                        new_serial = int(time.time())
+                    else:
+                        was_bad_prev, new_serial = self.verify_previous_build(
+                                file_meta, view, root_domain, soa)
 
                     if was_bad_prev:
                         soa.serial = new_serial
@@ -683,7 +367,7 @@ class DNSBuilder(SVNBuilderMixin):
                         (view, file_meta, view_data)
                     )
 
-                self.log(
+                self.log_debug(
                     '----- Building < {0} > ------'.format(
                         ' | '.join([v.name for v, _, _ in views_to_build])
                     ), root_domain=root_domain
@@ -693,10 +377,10 @@ class DNSBuilder(SVNBuilderMixin):
                     # Bypass save so we don't have to save a possible stale
                     # 'dirty' value to the db.
                     SOA.objects.filter(pk=soa.pk).update(serial=soa.serial + 1)
-                    self.log('Zone will be rebuilt at serial {0}'
+                    self.log_debug('Zone will be rebuilt at serial {0}'
                              .format(soa.serial + 1), root_domain=root_domain)
                 else:
-                    self.log('Zone is stable at serial {0}'
+                    self.log_debug('Zone is stable at serial {0}'
                              .format(soa.serial), root_domain=root_domain)
 
                 for view, file_meta, view_data in views_to_build:
@@ -709,31 +393,24 @@ class DNSBuilder(SVNBuilderMixin):
                     # If it's dirty or we are rebuilding another view, rebuild
                     # the zone
                     if force_rebuild:
-                        self.log(
+                        self.log_debug(
                             'Rebuilding < {0} > view file {1}'
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain)
-                        prod_fname = self.build_zone(
+                        self.build_zone(
                             view, file_meta,
                             # Lazy string evaluation
                             view_data.format(serial=soa.serial + 1),
                             root_domain
                         )
-                        assert prod_fname == file_meta['prod_fname']
+                        self.run_checkzone(os.path.join(self.stage_dir,
+                            file_meta['rel_fname']), root_domain)
                     else:
-                        self.log(
+                        self.log_debug(
                             'NO REBUILD needed for < {0} > view file {1}'
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain
                         )
-                        # Run named-checkzone for good measure.
-                        if self.STAGE_ONLY:
-                            self.log("Not calling named-checkconf.",
-                                     root_domain=root_domain)
-                        else:
-                            self.named_checkzone(
-                                file_meta['prod_fname'], root_domain
-                            )
             except Exception:
                 soa.schedule_rebuild()
                 raise
@@ -744,101 +421,90 @@ class DNSBuilder(SVNBuilderMixin):
         config_fname = "{0}.{1}".format(ztype, view_name)
         zone_stmts = '\n'.join(stmts).format(ztype=ztype)
         stage_config = self.write_stage_config(config_fname, zone_stmts)
-        self.named_checkconf(stage_config)
-        return self.stage_to_prod(stage_config)
+        self.run_checkconf(stage_config)
 
     def build_config_files(self, zone_stmts):
         # named-checkconf on config files
-        self.log(self.format_title("Building config files"))
-        configs = []
-        self.log(
+        self.log_info("Building config files")
+        self.log_debug(
             "Building configs for views < {0} >".format(
                 ' | '.join([view_name for view_name in zone_stmts.keys()])
             )
         )
         for view_name, view_stmts in zone_stmts.iteritems():
-            self.log("Building config for view < {0} >".
+            self.log_debug("Building config for view < {0} >".
                      format(view_name))
-            configs.append(
-                self.build_view_config(view_name, 'master', view_stmts)
-            )
-        return configs
+            self.build_view_config(view_name, 'master', view_stmts)
 
-    def stop_update_exists(self):
-        """
-        Look for a file referenced by `STOP_UPDATE_FILE` and if it exists,
-        cancel the build.
-        """
-        if os.path.exists(self.STOP_UPDATE_FILE):
-            msg = ("The STOP_UPDATE_FILE ({0}) exists. Build canceled. \n"
-                   "Reason for skipped build: \n"
-                   "{1}".format(self.STOP_UPDATE_FILE,
-                                open(self.STOP_UPDATE_FILE).read()))
-            fail_mail(msg, subject="DNS builds have stoped")
-            self.log(msg)
-            return True
+    def build(self, force=False):
+        try:
+            with open(self.stop_file) as stop_fd:
+                now = time.time()
+                contents = stop_fd.read()
+            last = os.path.getmtime(self.stop_file)
 
-    def goto_out(self):
-        self.log(self.format_title("Release Mutex"))
-        self.unlock()
+            msg = ("The stop file ({0}) exists. Build canceled.\n"
+                   "Reason for skipped build:\n"
+                   "{1}".format(self.stop_file, contents))
+            self.log_notice(msg, to_stderr=False)
+            if now - last > self.stop_file_email_interval:
+                os.utime(self.stop_file, (now, now))
+                fail_mail(msg, subject="DNS builds have stopped")
 
-    def build_dns(self):
-        if self.stop_update_exists():
-            return
-        self.log('Building...')
-        if not self.lock():
-            return
+            raise Exception(msg)
+        except IOError as e:
+            if e.errno == 2:  # IOError: [Errno 2] No such file or directory
+                pass
+            else:
+                raise
 
-        dns_tasks = self.get_scheduled()
-
-        if not dns_tasks and not self.FORCE:
-            self.log("Nothing to do!")
-            self.goto_out()
-            return
+        self.log_info('Building...')
 
         try:
-            if self.CLOBBER_STAGE or self.FORCE:
-                self.clear_staging(force=True)
-            self.build_staging()
+            remove_dir_contents(self.stage_dir)
+            self.dns_tasks = self.get_scheduled()
+
+            if not self.dns_tasks and not force:
+                self.log_info('Nothing to do!')
+                return
 
             # zone files
-            if self.BUILD_ZONES:
-                soa_pks_to_rebuild = set(int(t.task) for t in dns_tasks)
-                self.build_config_files(
-                    self.build_zone_files(soa_pks_to_rebuild)
-                )
-            else:
-                self.log("BUILD_ZONES is False. Not "
-                         "building zone files.")
+            soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
+            self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
+                    force=force))
 
-            self.log(self.format_title("VCS Checkin"))
-            if self.BUILD_ZONES and self.PUSH_TO_PROD:
-                self.vcs_checkin()
-            else:
-                self.log("PUSH_TO_PROD is False. Not checking "
-                         "into {0}".format(self.vcs_type))
+            self.log_info('DNS build successful')
+        except:
+            self.error()
 
-            self.log(self.format_title("Handle Staging"))
-            if self.PRESERVE_STAGE:
-                self.log("PRESERVE_STAGE is True. Not "
-                         "removing staging. You will need to use "
-                         "--clobber-stage on the next run.")
-            else:
-                self.clear_staging()
+    def error(self):
+        ei = sys.exc_info()
+        exc_msg = ''.join(format_exception(*ei)).rstrip('\n')
 
-            if self.PUSH_TO_PROD:
-                # Only delete the scheduled tasks we saw at the top of the
-                # function
-                map(lambda t: t.delete(), dns_tasks)
+        self.log_err('DNS build failed.\nOriginal exception: ' + exc_msg,
+                     to_stderr=False)
+        raise
 
-        # All errors are handled by caller (this function)
-        except BuildError:
-            self.log('Error during build. Not removing staging')
+    def push(self, sanity_check=True):
+        self.repo.reset_and_pull()
+
+        try:
+            copy_tree(self.stage_dir, self.prod_dir)
+        except:
+            self.repo.reset_to_head()
             raise
-        except Exception:
-            self.log('Error during build. Not removing staging')
-            raise
-        finally:
-            # Clean up
-            self.goto_out()
-        self.log('Successful build is successful.')
+
+        self.repo.commit_and_push('Update config', sanity_check=sanity_check)
+        map(lambda t: t.delete(), self.dns_tasks)
+
+    def _lock_failure(self, pid):
+        self.log_err(
+            'Failed to acquire lock on {0}. Process {1} currently '
+            'has it.'.format(self.lock_file, pid),
+            to_stderr=False)
+        fail_mail(
+            'An attempt was made to start the DNS build script while an '
+            'instance of the script was already running. The attempt was '
+            'denied.',
+            subject="Concurrent DNS builds attempted.")
+        super(DNSBuilder, self)._lock_failure(pid)

@@ -8,7 +8,6 @@ from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
@@ -25,7 +24,6 @@ from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ptr.models import PTR
 
 import ipaddr
-# import reversion
 
 
 class Range(BaseModel, ViewMixin, ObjectUrlMixin):
@@ -54,7 +52,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     """
 
     id = models.AutoField(primary_key=True)
-    network = models.ForeignKey(Network, null=True, blank=True)
+    network = models.ForeignKey(Network, null=False, blank=False)
 
     range_type = models.CharField(max_length=2, choices=RANGE_TYPE,
                                   default=STATIC)
@@ -73,7 +71,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True, editable=False)
     end_str = models.CharField(max_length=39, verbose_name="End address")
 
-    domain = models.ForeignKey(Domain, null=True)
+    domain = models.ForeignKey(Domain, null=True, blank=True)
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
@@ -102,7 +100,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     @property
     def range_str(self):
-        return u'{0}–{1}'.format(self.start_str, self.end_str)
+        return u'{0}-{1}'.format(self.start_str, self.end_str)
 
     @property
     def range_str_padded(self):
@@ -163,16 +161,15 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     def details(self):
         """For tables."""
         data = super(Range, self).details()
-        has_net = self.network is not None
         data['data'] = [
             ('Name', 'name', self.name),
             ('Range', 'start_str', self.get_self_str(add_name=False)),
             ('Domain', 'domain', self.domain),
             ('Type', 'range_type',
              'static' if self.range_type == 'st' else 'dynamic'),
-            ('Network', 'network', self.network if has_net else ""),
-            ('Site', 'network__site', self.network.site if has_net else ""),
-            ('Vlan', 'network__vlan', self.network.vlan if has_net else "")]
+            ('Network', 'network', self.network),
+            ('Site', 'network__site', self.network.site),
+            ('Vlan', 'network__vlan', self.network.vlan)]
         return data
 
     @staticmethod
@@ -193,10 +190,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         super(Range, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.network is None and not self.is_reserved:
-            raise ValidationError("ERROR: Range {0}-{1} is not associated "
-                                  "with a network and is not reserved".format(
-                                      self.start_str, self.end_str))
         try:
             if self.ip_type == IP_TYPE_4:
                 self.start_upper, self.start_lower = 0, int(
@@ -251,16 +244,16 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             if not self.domain:
                 raise ValidationError('A dynamic range must have a domain.')
 
-        if not self.is_reserved:
-            self.network.update_network()
-            if self.network.ip_type == IP_TYPE_4:
-                IPClass = ipaddr.IPv4Address
-            else:
-                IPClass = ipaddr.IPv6Address
+        self.network.update_network()
+        if self.network.ip_type == IP_TYPE_4:
+            IPClass = ipaddr.IPv4Address
+        else:
+            IPClass = ipaddr.IPv6Address
 
-            if (IPClass(self.start_str) < self.network.network.network or
-                    IPClass(self.end_str) > self.network.network.broadcast):
-                raise RangeOverflowError("Range doesn't fit in network")
+        if (IPClass(self.start_str) < self.network.network.network or
+                IPClass(self.end_str) > self.network.network.broadcast):
+            raise RangeOverflowError("Range doesn't fit in network")
+
         self.check_for_overlaps()
 
     def get_allow_deny_list(self):
@@ -294,23 +287,20 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         overlap with any of them.
         """
         self._range_ips()
-        if self.ip_type == IP_TYPE_4:
-            Ip = ipaddr.IPv4Address
-        else:
-            Ip = ipaddr.IPv6Address
 
-        for range in Range.objects.all():
-            if range.pk == self.pk:
+        for oldrange in Range.objects.all():
+            if oldrange.pk == self.pk:
                 continue
-            range._range_ips()
+            oldrange._range_ips()
             #the range being tested is above this range
-            if self._start > range._end:
+            if self._start > oldrange._end:
                 continue
             # start > end
-            if self._end < range._start:
+            if self._end < oldrange._start:
                 continue
-            raise ValidationError("Stored range {0} - {1} would overlap with "
-                                  "this range")
+            raise ValidationError(u"Old range {0} would overlap with new "
+                                  "range {1}".format(oldrange.range_str,
+                                                     self.range_str))
 
     def build_range(self):
         range_options = self.rangeav_set.filter(
@@ -385,7 +375,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
             :returns: ipaddr.IPv4Address
         """
-        if self.network and self.network.ip_type != '4':
+        if self.network.ip_type != '4':
             return None
         elif self.ip_type != '4':
             return None
@@ -467,9 +457,6 @@ def find_free_ip(start, end, ip_type='4'):
         raise NotImplemented
 
 
-# reversion.(Range)
-
-
 class RangeAV(EAVBase):
     class Meta(EAVBase.Meta):
         app_label = 'cyder'
@@ -477,9 +464,6 @@ class RangeAV(EAVBase):
 
     entity = models.ForeignKey(Range)
     attribute = EAVAttributeField(Attribute)
-
-
-# reversion.(RangeAV)
 
 
 class RangeOverflowError(ValidationError):

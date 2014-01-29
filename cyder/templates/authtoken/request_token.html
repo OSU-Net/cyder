@@ -7,11 +7,12 @@
     <form class="form" method="post">
         <div class="inner-form">
             <h3>Request Token</h3>
-            <p>[Insert rant about privileges and responsibility here.] Please enter 
+            <p>[Insert rant about privileges and responsibility here.] Please enter
             the purpose of this key below and then submit.
             </p>
             <ul style="float:top; left:0;" id="add-object-errorlist"></ul>
             {{ form.as_p() }}
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         </div>
         <div class="form-btns">
             <hr>
