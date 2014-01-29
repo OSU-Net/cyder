@@ -398,6 +398,8 @@ def get_update_form(request, get_klasses_fn):
                     network_str = network.network_str.split('/')
                     initial = '.'.join(
                         network_str[0].split('.')[:int(network_str[1])/8])
+                    if int(network_str[1]) < 32:
+                        initial += '.'
                     form = FormKlass(initial=dict(
                         {'start_str': initial,
                          'end_str': initial,
