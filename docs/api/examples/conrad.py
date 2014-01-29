@@ -56,8 +56,6 @@ class Conrad(object):
         else:
             query = ""
 
-        query = ("&" + query) if query else ""
-
         if verbatim:
             url = path
         else:
