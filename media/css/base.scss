@@ -249,6 +249,7 @@ a.btn {
         display: block;
         padding: 13px;
         &.child {
+            transition: margin-left .25s;
             background: $dark-gray;
             color: $white;
             border: none;
