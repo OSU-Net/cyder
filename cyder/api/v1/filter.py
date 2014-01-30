@@ -9,11 +9,6 @@ UNHANDLED_PARAMS = 'page', 'count',
 class InvalidQuery(exceptions.APIException):
     status_code = 400
 
-    def __init__(self, detail):
-        self.detail = detail
-        super(InvalidQuery, self).__init__(self)
-
-
 
 def namehack(field):
     """
