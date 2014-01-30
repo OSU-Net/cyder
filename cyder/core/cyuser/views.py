@@ -13,6 +13,7 @@ from cyder.api.authtoken.models import Token
 from cyder.base.utils import make_megafilter
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.models import UserProfile
+from cyder.core.cyuser.forms import UserPermForm
 from cyder import LEVEL_GUEST
 
 
@@ -80,6 +81,80 @@ def login_session(request, username):
     request.session['ctnrs'] = ctnrs
 
     return request
+
+
+def clone_perms_check(request):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    users = request.POST.get('users', None)
+    new_users = []
+    if users:
+        users = users.split(',')
+        for user in users:
+            if not User.objects.filter(username=user).exists():
+                new_users.append(user)
+
+    confirm_str = ''
+    if new_users:
+        if len(new_users) > 1:
+            confirm_str = 'Users: '
+            for user in new_users:
+                confirm_str += '{0}, '.format(user)
+
+            confirm_str += ('do not exist. Would you like to create '
+                            + 'these users?')
+        else:
+            confirm_str = ('User {0} does not exist. Would you like to '
+                           + 'create this user?').format(user)
+
+        return HttpResponse(json.dumps(
+            {'confirm_str': confirm_str, 'users': new_users}))
+
+    return HttpResponse(json.dumps({'success': True}))
+
+
+def clone_perms(request, user_id):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+    acting_user = request.user.get_profile()
+    if not acting_user.has_perm(request, 2, obj_class='User'):
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': 'You do not have permissions to perform '
+                        + 'this action'}}))
+
+    user = UserProfile.objects.get(id=user_id)
+    perms_qs = CtnrUser.objects.filter(user__id=user_id)
+    if not perms_qs.exists():
+        perms_qs = []
+
+    users = request.POST.get('users', None)
+    if not users:
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': 'No users provided'}}))
+
+    users = users.split(',')
+    for user in users:
+        user_qs = User.objects.filter(username=user)
+        if not user_qs.exists():
+            user = User(username=user)
+            user.save()
+        else:
+            user = user_qs.get()
+            CtnrUser.objects.filter(user=user).delete()
+
+        for perm in perms_qs:
+            ctnr_user_qs = CtnrUser.objects.filter(user=user, ctnr=perm.ctnr)
+            if not ctnr_user_qs.exists():
+                ctnr_user = CtnrUser(
+                    user=user, ctnr=perm.ctnr, level=perm.level)
+            else:
+                ctnr_user = ctnr_user_qs.get()
+                ctnr_user.level = perm.level
+
+            ctnr_user.save()
+
+    return HttpResponse(json.dumps({'success': True}))
 
 
 def delete(request, user_id):
@@ -218,6 +293,7 @@ def user_detail(request, pk):
     user = UserProfile.objects.get(id=pk)
     email = User.objects.get(id=pk).email
     contacts = []
+    form = UserPermForm()
     if email:
         contacts = (Ctnr.objects.filter(email_contact__contains=email))
     else:
@@ -235,4 +311,4 @@ def user_detail(request, pk):
         tables.update({'API Tokens': tokens})
 
     return cy_detail(request, UserProfile, 'cyuser/user_detail.html',
-                     tables, obj=user)
+                     tables, obj=user, user_perm_form=form)

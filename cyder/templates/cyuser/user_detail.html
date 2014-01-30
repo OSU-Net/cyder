@@ -1,8 +1,8 @@
 {% extends "core/core_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% block title %} User  {{ obj.user.username }} {% endblock %}
-{% block header %} User {{ obj.user.username }} {% endblock %}
+{% block title %} User {{ obj.user.username }} {% endblock %}
+{% block header %} User  {{ obj.user.username }} {% endblock %}
 
 {% block action_bar %}
   {% if request.user.is_superuser and request.user.username != obj.user.username %}
@@ -22,4 +22,29 @@
       </a>
     {% endif %}
   {% endif %}
+  {% if request.user.is_superuser or
+      request.user.get_profile().has_perm(request, 2, obj_class='User') %}
+  <a class="btn btn-primary" id="clone-perms-btn" href="#">
+    Clone user permissions
+  </a>
+  {% endif %}
 {% endblock %}
+{% block form %}
+  <div id="perm-hidden" style="display: none">
+      <form class="form" id="clone-perms-form" action="{{ url('clone-perms', user_id=obj.user.id) }}">
+      <h3>Clone user permissions</h3>
+      <div class="inner-form" id="hidden-inner-form">
+        {{ user_perm_form.as_p() }}
+      </div>
+      <div class="form-btns">
+        <hr>
+          <a id="clone-perms-submit" class="btn" href="#">Clone</a>
+          <a id="clone-perms-cancel" class="btn" href="#">Cancel</a>
+      </div>
+    </form>
+  </div>
+  {{ js('cyuser') }}
+  {{ js('tags_js') }}
+  {{ css('tags_css') }}
+{% endblock %}
+

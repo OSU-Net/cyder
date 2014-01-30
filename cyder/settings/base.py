@@ -46,7 +46,8 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
-        'search': ('css/search.scss',)
+        'search': ('css/search.scss',),
+        'tags_css': ('css//lib/jquery.tagsinput.css',),
     },
     'js': {
         'cyder_js': (
@@ -84,11 +85,17 @@ MINIFY_BUNDLES = {
         'ctnr': (
             'js/ctnr/ctnr.js',
         ),
+        'cyuser': (
+            'js/cyuser/cyuser.js',
+        ),
         'interface_delete': (
             'js/interface_delete.js',
         ),
         'systemform': (
             'js/systemform.js',
+        ),
+        'tags_js': (
+            'js/lib/jquery.tagsinput.js',
         ),
     }
 }
