@@ -94,6 +94,16 @@ $(document).ready(function() {
 		$('#id_attribute').val('');
 	});
 
+    $('#action-bar').find('a').each(function() {
+        $('#action-bar').find('a').addClass('hover');
+        $(this).click(function(e) {
+            $('#action-bar').find('a').removeClass('selected').addClass('hover');
+            $(this).removeClass('hover').addClass('selected');
+        });
+    });
+
+
+
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
