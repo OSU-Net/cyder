@@ -280,20 +280,20 @@ a.btn {
             background: $dark-gray;
             color: $white;
             border: none;
-            margin-left: 12px;
+            margin-left: 10px;
             border-left:2px solid $black;
             border-bottom:1px solid $black;
             border-top:1px solid $black;
             border-right:2px solid $black;
             &:hover {
-                margin-left: 3px;
+                margin-left: 0px;
             }
             &.selected {
                 background: $white;
                 border-left:5px solid $teal;
                 color: $black;
                 &:hover {
-                    margin-left: 12px;
+                    margin-left: 10px;
                 }
             }
         }
