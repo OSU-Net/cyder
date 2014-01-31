@@ -21,6 +21,7 @@ $(document).ready(function() {
     }
     $('#settings-btn').click( function(e) {
         $('.settings-menu').slideToggle();
+        $('#settings-btn').toggleClass('selected');
     });
     $('.nav-item.parent').click( function(e) {
         var parentsChild = ('#' + this.id + '-children');

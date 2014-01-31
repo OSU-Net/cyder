@@ -161,6 +161,9 @@ a.btn {
         &:hover {
             background-image: url(../img/home-hover.png);
         }
+        &.selected {
+            background-image: url(../img/home-hover.png);
+        }
     }
     &.logout {
         background-image: url(../img/logout.png);
@@ -173,7 +176,11 @@ a.btn {
         &:hover {
             background-image: url(../img/settings-hover.png);
         }
+        &.selected {
+            background-image: url(../img/settings-hover.png);
+        }
     }
+
 }
 
 .header {
@@ -190,6 +197,9 @@ a.btn {
         margin-left: 100px;
         color: $white;
         &:hover {
+            color: $teal;
+        }
+        &.selected {
             color: $teal;
         }
     }

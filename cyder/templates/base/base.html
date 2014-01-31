@@ -15,7 +15,7 @@
     <div id="header">
       <div class="container">
         <span class="header buttons" id="buttons-header">
-          <a id="home-btn" class="header-icon home" href="/"></a>
+            <a id="home-btn" class="header-icon home {{ 'selected' if '/' == request.path }}" href="/"></a>
           <div class="settings-btn-container">
             <a id="settings-btn" class="header-icon settings" href="#"></a>
           </div>
@@ -49,7 +49,7 @@
               </select>
             </form>
           </div>
-            <a id="bug-report" class="header bug" href="{{ url('bug-report') }}">Report a Bug</a>
+          <a id="bug-report" class="header bug {{ 'selected' if url('bug-report') == request.path }}" href="{{ url('bug-report') }}">Report a Bug</a>
         </span>
         <span id="search-header" class="header search">
           <form id="search" action="{{ url('search') }}" method="get">
