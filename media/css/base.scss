@@ -290,7 +290,6 @@ a.btn {
         &.selected {
             background: $white;
             border-left:5px solid $teal;
-            border-right: none;
             color: $dark-gray;
             &:hover {
                 color: $teal;
