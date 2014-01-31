@@ -384,8 +384,8 @@ a.btn {
       }
     }
     .active a {
-      background-color: #f5f5f5;
-      color: #999999;
+      background-color: $black;
+      color: $teal;
       cursor: default;
     }
     .disabled {

@@ -154,14 +154,15 @@ def create_range(range_id, start, end, range_type, subnet_id,
         range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
                                        ipaddr.IPv4Address(end))
 
-        valid_start = int(n.network.network) < start < int(n.network.broadcast)
+        valid_start = (int(n.network.network) <= start
+                       <= int(n.network.broadcast))
         valid_order = start <= end
-        valid_end = int(n.network.network) < end < int(n.network.broadcast)
+        valid_end = int(n.network.network) <= end <= int(n.network.broadcast)
 
         valid = all((valid_start, valid_order, valid_end))
 
         # If the range is disabled, we don't need to print warnings.
-        if not valid and enabled:
+        if not valid:
             print 'Range {0} in network {1} is invalid:'.format(range_str, n)
 
             if not valid_start:
@@ -173,11 +174,12 @@ def create_range(range_id, start, end, range_type, subnet_id,
                 print ('\tEnd is not inside network'
                        .format(n.network.broadcast))
 
+            return None
+
         dhcp_enabled = bool(enabled and valid)
     else:
         # the Range doesn't have a Network
-        n = None
-        dhcp_enabled = False
+        return None
 
     if '\n' in comment:
         name = comment[:comment.find('\n')][:50]
@@ -346,51 +348,21 @@ def migrate_dynamic_hosts():
         if mac == "":
             enabled = False
 
-        r = None
-        if not items['dynamic_range']:
-            print ("Host with MAC {0} "
-                   "has no dynamic_range in Maintain".format(items['ha']))
-        else:
+        # TODO: Verify that there is no valid range/zone/workgroup with id 0
+        r, c, w = None, None, default
+        if items['dynamic_range']:
             try:
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no dynamic range in Cyder".format(items['ha']))
+                print ("Could not create dynamic interface %s: Range %s "
+                       "is in Maintain, but was not created in Cyder." %
+                       (mac, items['dynamic_range']))
 
-        c = None
-        if not items['zone']:
-            print "Host with MAC {0} has no zone in Maintain".format(
-                item['ha'])
-        else:
-            try:
-                c = maintain_find_zone(items['zone'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no ctnr in Cyder".format(items['ha']))
-                print "Failed to migrate zone_id {0}".format(items['zone'])
+        if items['zone']:
+            c = maintain_find_zone(items['zone'])
 
-        d = None
-        if not items['domain']:
-            print "Host with MAC {0} has no domain in Maintain".format(
-                items['ha'])
-        else:
-            try:
-                d = maintain_find_domain(items['domain'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no domain in Cyder".format(items['ha']))
-                print "Failed to migrate domain_id {0}".format(items['domain'])
-
-        w = default
         if items['workgroup']:
-            try:
-                w = maintain_find_workgroup(items['workgroup'])
-            except ObjectDoesNotExist:
-                print ("Host with MAC {0} has "
-                       "no workgroup in Cyder".format(items['ha']))
-                print ("Failed to migrate workgroup_id {0}\n"
-                       "Adding it to the default group".format(
-                            items['workgroup']))
+            w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c]):
             stderr.write("Trouble migrating host with mac {0}\n"
@@ -465,7 +437,13 @@ def migrate_zone_range():
     result = cursor.fetchall()
     for _, zone_id, range_id, _, comment, _ in result:
         c = maintain_find_zone(zone_id)
-        r = maintain_find_range(range_id)
+        try:
+            r = maintain_find_range(range_id)
+        except ObjectDoesNotExist:
+            print ("Cannot migrate zone-range %s-%s: Range exists in Maintain "
+                   "but was not created in Cyder" % (zone_id, range_id))
+            r = None
+
         if not (c and r):
             continue
 

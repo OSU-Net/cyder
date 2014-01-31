@@ -7,8 +7,8 @@ from cyder.cydhcp.site.models import Site, SiteAV
 
 class SiteAVSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.Field(source='id')
-    site = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-site-detail')
+    entity = serializers.HyperlinkedRelatedField(
+        view_name='api-dhcp-site-detail')
     attribute = serializers.SlugRelatedField(slug_field='name')
 
     class Meta:

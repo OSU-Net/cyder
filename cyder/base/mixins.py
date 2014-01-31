@@ -1,3 +1,5 @@
+import os
+import fcntl
 from string import Template
 
 from django.core.urlresolvers import NoReverseMatch, reverse
@@ -146,3 +148,64 @@ class UsabilityFormMixin(object):
             self.filter_by_ctnr_all(request)
         self.alphabetize_all()
         self.append_required_all()
+
+
+class MutexMixin(object):
+    def __enter__(self):
+        self.lock()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.unlock()
+
+    def lock(self):
+        if not os.path.exists(os.path.dirname(self.lock_file)):
+            os.makedirs(os.path.dirname(self.lock_file))
+        self.log_debug("Attempting to lock {0}..."
+                 .format(self.lock_file))
+
+        self.lock_fd = open(self.lock_file, 'w')
+
+        try:
+            fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except IOError as exc_value:
+            self.lock_fd.close()
+            # IOError: [Errno 11] Resource temporarily unavailable
+            if exc_value[0] == 11:
+                with open(self.pid_file, 'r') as pid_fd:
+                    self._lock_failure(pid_fd.read())
+            else:
+                raise
+
+        self.log_debug("Lock acquired")
+
+        try:
+            with open(self.pid_file, 'w') as pid_fd:
+                pid_fd.write(unicode(os.getpid()))
+        except IOError as exc_value:
+            # IOError: [Errno 2] No such file or directory
+            if exc_value[0] == 2:
+                raise Exception("Failed to acquire lock on {0}, but the "
+                                "the process that has it hasn't written "
+                                "the PID file {1} yet."
+                                .format(self.lock_file, self.pid_file))
+            else:
+                raise
+
+    def unlock(self):
+        if not self.lock_fd:
+            return False
+
+        self.log_debug("Releasing lock ({0})...".format(self.lock_file))
+
+        fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
+        self.lock_fd.close()
+        os.remove(self.pid_file)
+        os.remove(self.lock_file)
+
+        self.log_debug("Unlock complete")
+        return True
+
+    def _lock_failure(self, pid):
+        raise Exception('Failed to acquire lock on {0}. Process {1} currently '
+                        'has it.'.format(self.lock_file, pid))

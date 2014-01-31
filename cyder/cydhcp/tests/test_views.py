@@ -46,6 +46,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'range'
     domain, _ = Domain.objects.get_or_create(name="dummy")
+    network, _ = Network.objects.get_or_create(network_str="196.168.1.0/24")
 
     def setUp(self):
         test_data = {
@@ -56,6 +57,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'allow': ALLOW_VRF,
             'range_type': STATIC,
             'domain': self.domain,
+            'network': self.network,
         }
         do_setUp(self, Range, test_data)
 
@@ -68,6 +70,7 @@ class RangeViewTests(cyder.base.tests.TestCase):
             'allow': ALLOW_VRF,
             'range_type': STATIC,
             'domain': self.domain.pk,
+            'network': self.network.pk,
         }
 
 

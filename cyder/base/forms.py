@@ -28,3 +28,15 @@ class EditUserForm(forms.Form):
             ('Demote', 'Demote from Superuser'),
             ('Create', 'Create a user'),
             ('Delete', 'Permanently delete user')))
+
+
+charfield_clean = forms.fields.CharField.clean
+
+
+def strip_charfield(self, value):
+    if hasattr(value, 'strip'):
+        value = value.strip()
+    return charfield_clean(self, value)
+
+
+forms.fields.CharField.clean = strip_charfield

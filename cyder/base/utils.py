@@ -1,12 +1,14 @@
 import operator
+import os
 import shlex
+import shutil
 import subprocess
-from copy import copy
+import syslog
+from sys import stderr
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.db.models.loading import get_model
-from django.forms.models import model_to_dict
 
 from cyder.base.tablefier import Tablefier
 
@@ -14,7 +16,7 @@ from cyder.base.tablefier import Tablefier
 def shell_out(command, use_shlex=True):
     """
     A little helper function that will shell out and return stdout,
-    stderr and the return code.
+    stderr, and the return code.
     """
     if use_shlex:
         command_args = shlex.split(command)
@@ -22,8 +24,56 @@ def shell_out(command, use_shlex=True):
         command_args = command
     p = subprocess.Popen(command_args, stderr=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    return stdout, stderr, p.returncode
+    out, err = p.communicate()
+    return out, err, p.returncode
+
+
+def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
+        logger=syslog):
+    msg = unicode(msg)
+
+    ll = getattr(logger, log_level)
+
+    if to_syslog:
+        for line in msg.splitlines():
+            logger.syslog(ll, line)
+    if to_stderr:
+        stderr.write(msg + '\n')
+
+
+def run_command(command, command_logger=None, failure_logger=None,
+                failure_msg=None, ignore_failure=False):
+    if command_logger:
+        command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
+
+    out, err, returncode = shell_out(command)
+
+    if returncode != 0 and not ignore_failure:
+        msg = ('`{0}` failed in {1}\n\n'
+               'command: {2}\n\n'
+               .format(command, os.getcwd(), failure_msg, command))
+        if out:
+            msg += '=== stdout ===\n{0}\n'.format(out)
+        if err:
+            msg += '=== stderr ===\n{0}\n'.format(err)
+        msg = msg.rstrip('\n') + '\n'
+
+        if failure_logger:
+            failure_logger(msg)
+
+        raise Exception(msg)
+
+    return out, err, returncode
+
+
+def set_attrs(obj, attrs):
+    for name, value in attrs.iteritems():
+        setattr(obj, name, value)
+
+
+def dict_merge(*dicts):
+    """Later keys override earlier ones"""
+    return dict(reduce(lambda x,y: x + y.items(), dicts, []))
 
 
 def make_paginator(request, qs, num=20, obj_type=None):
@@ -102,3 +152,12 @@ def _filter(request, Klass):
             pass
 
     return objects.distinct()
+
+
+def remove_dir_contents(dir_name):
+    for file_name in os.listdir(dir_name):
+        file_path = os.path.join(dir_name, file_name)
+        if os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+        else:
+            os.remove(file_path)

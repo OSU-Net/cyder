@@ -141,10 +141,10 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
         users.append(user)
         if actions:
             action_data.append({
-                'value': 'Delete',
+                'value': 'Remove',
                 'url': reverse('ctnr-update-user',
                                kwargs={'ctnr_pk': ctnr.id}),
-                'img': '/media/img/delete.png',
+                'img': '/media/img/remove.png',
                 'class': 'remove-user'
             })
 
@@ -167,11 +167,11 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
 
     for obj in obj_set:
         remove_data.append({
-            'value': 'Delete',
+            'value': 'Remove',
             'url': reverse('ctnr-remove-object', kwargs={
                 'ctnr_pk': ctnr.id}),
-            'img': '/media/img/delete.png',
-            'class': 'delete remove-object'
+            'img': '/media/img/remove.png',
+            'class': 'remove-object'
         })
         objs.append(obj)
     extra_cols[0]['data'] = remove_data

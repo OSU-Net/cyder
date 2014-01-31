@@ -9,11 +9,6 @@ UNHANDLED_PARAMS = 'page', 'count',
 class InvalidQuery(exceptions.APIException):
     status_code = 400
 
-    def __init__(self, detail):
-        self.detail = detail
-        super(InvalidQuery, self).__init__(self)
-
-
 
 def namehack(field):
     """
@@ -44,7 +39,6 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         f_queryset = None
 
         parent_model = queryset.model
-        parent_name = parent_model.__name__.lower()
 
         for q in request.QUERY_PARAMS:
             p = request.QUERY_PARAMS[q]
@@ -83,13 +77,13 @@ class SearchFieldFilter(filters.BaseFilterBackend):
         if q_attributes:
             avmodel = getattr(view, 'avmodel', None)
             if avmodel:
-                avmodel_entity = getattr(view, 'avmodel_entity', None)
+                avmodel_entity = getattr(view, 'avmodel_entity', 'entity')
                 matching = lambda k, v: set(
                     avmodel.objects.filter(
                         attribute__name__iexact=k,
                         value__iexact=v
                     ).values_list(
-                        avmodel_entity or parent_name,
+                        avmodel_entity,
                         flat=True
                     )
                 )

@@ -3,7 +3,7 @@ import uuid
 from hashlib import sha1
 
 from django.db import models
-from rest_framework.compat import AUTH_USER_MODEL
+from rest_framework.authtoken.models import AUTH_USER_MODEL
 
 from cyder.base.mixins import ObjectUrlMixin
 
