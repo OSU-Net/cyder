@@ -102,8 +102,7 @@ $(document).ready(function() {
                     $('#obj-form form')[0].action = $createBtn.attr('href');
                     $('.form-btns a.submit').text(
                         'Create ' + formPrettyObjType);
-                    // Adjust this if statement to submit forms with ajax
-                    if (formObjType.indexOf('av') >= 0) {
+                    if (is_ajax_form(formObjType)) {
                         $('.form-btns a.submit').attr('class', 'btn c');
                     };
                     $('#obj-form').slideToggle();
@@ -120,8 +119,7 @@ $(document).ready(function() {
             }, 150);
             $('.form-btns a.submit').text('Create ' + prettyObjType);
 
-            // Adjust this if statement to submit forms with ajax
-            if (objType.indexOf('av') >= 0) {
+            if (is_ajax_form(formObjType)) {
                 $('.form-btns a.submit').attr('class', 'btn c');
             };
             $('#obj-form').slideToggle();
@@ -151,8 +149,7 @@ $(document).ready(function() {
             }, 150);
             $('.form-btns a.submit').text('Update ' + formPrettyObjType);
 
-            // Adjust this if statement to submit forms with ajax
-            if (formObjType.indexOf('av') >= 0) {
+            if (is_ajax_form(formObjType)) {
                 $('.form-btns a.submit').attr('class', 'btn c');
             };
             $('#obj-form').slideDown();
