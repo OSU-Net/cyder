@@ -15,11 +15,11 @@
     <div id="header">
       <div class="container">
         <span class="header buttons" id="buttons-header">
-            <a id="home-btn" class="header-icon home {{ 'selected' if '/' == request.path }}" href="/"></a>
+          <a id="home-btn" class="header-icon home {{ 'selected' if '/' == request.path }}" href="/"></a>
+          <a id="logout-btn" class="header-icon logout" href="{{ url('logout') }}"></a>
           <div class="settings-btn-container">
             <a id="settings-btn" class="header-icon settings" href="#"></a>
           </div>
-          <a id="logout-btn" class="header-icon logout" href="{{ url('logout') }}"></a>
         </span>
         <div class="header settings" id="settings-header">
           <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
@@ -49,7 +49,6 @@
               </select>
             </form>
           </div>
-          <a id="bug-report" class="header bug {{ 'selected' if url('bug-report') == request.path }}" href="{{ url('bug-report') }}">Report a Bug</a>
         </span>
         <span id="search-header" class="header search">
           <form id="search" action="{{ url('search') }}" method="get">
@@ -122,8 +121,9 @@
           </label>
         </div>
       </div>
-    <div id="footer">
-      <a href="https://github.com/OSU-Net/cyder">Source Code</a>
+    <div id="footer" class="footer">
+      <a class="footer source" href="https://github.com/OSU-Net/cyder">Source Code</a>
+      <a id="bug-report" class="footer bug {{ 'selected' if url('bug-report') == request.path }}" href="{{ url('bug-report') }}">Report a Bug</a>
     </div>
   </body>
 </html>

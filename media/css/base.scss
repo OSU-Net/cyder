@@ -193,16 +193,6 @@ a.btn {
     &.settings {
         margin-left: 35px;
     }
-    &.bug {
-        margin-left: 100px;
-        color: $white;
-        &:hover {
-            color: $teal;
-        }
-        &.selected {
-            color: $teal;
-        }
-    }
     &.search {
         float: right;
     }
@@ -290,9 +280,11 @@ a.btn {
             &.selected {
                 background: $white;
                 border-left:5px solid $teal;
+                border-right: none;
                 color: $black;
+                margin-left: 10px;
                 &:hover {
-                    margin-left: 0px;
+                    margin-left: 10px;
                 }
             }
         }
@@ -304,6 +296,7 @@ a.btn {
         &.selected {
             background: $white;
             border-left:5px solid $teal;
+            border-right: none;
             color: $dark-gray;
             &:hover {
                 color: $teal;
@@ -439,7 +432,7 @@ a.btn {
     margin-bottom: 26px;
 }
 
-#footer {
+.footer {
     background-color: $dark-blue;
     color: $white;
     font-size: 13px;
@@ -447,6 +440,8 @@ a.btn {
     text-align: center;
     a {
         color: $white;
+        display: block;
+        position: relative;
         &:hover {
             color: $teal;
         }
