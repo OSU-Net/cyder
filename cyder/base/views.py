@@ -160,7 +160,7 @@ def cy_view(request, template, pk=None, obj_type=None):
                         obj.ctnr_set.add(request.session['ctnr'])
 
                     # Adjust this if statement to submit forms with ajax
-                    if obj_type.endswith('_av'):
+                    if obj_type.endswith('_av') or obj_type == 'network':
                         return HttpResponse(json.dumps({'success': True}))
 
                     return redirect(
@@ -172,7 +172,7 @@ def cy_view(request, template, pk=None, obj_type=None):
                 form._errors["__all__"] = ErrorList(e.messages)
 
         # Adjust this if statement to submit forms with ajax
-        elif obj_type.endswith('_av'):
+        elif obj_type.endswith('_av') or obj_type == 'network':
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
         form = FormKlass(instance=obj)
