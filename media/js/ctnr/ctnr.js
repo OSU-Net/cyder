@@ -16,7 +16,7 @@ $(document).ready(function() {
     user_clone.id="user_clone";
     $(user_clone).removeAttr('style');
 
-    $('.minus, .plus, .remove-user, .remove-object').click(function(e) {
+    $('.minus, .plus, .remove.user, .remove.object').click(function(e) {
         e.preventDefault();
         var url = $(this).attr('href');
         var lvl;
