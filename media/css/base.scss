@@ -147,7 +147,8 @@ a.btn {
     height: 30px;
     padding-top: 5px;
 }
-.icon {
+
+.header-icon {
     width: 25px;
     height: 25px;
     z-index: 1;
@@ -155,41 +156,57 @@ a.btn {
     position: relative;
     float: left;
     margin-left: 5px;
+    &.home {
+        background-image: url(../img/home.png);
+        &:hover {
+            background-image: url(../img/home-hover.png);
+        }
+    }
+    &.logout {
+        bottom: 2px;
+        background-image: url(../img/logout.png);
+        &:hover {
+            background-image: url(../img/logout-hover.png);
+        }
+    }
+    &.settings {
+        background-image: url(../img/settings.png);
+        &:hover {
+            background-image: url(../img/settings-hover.png);
+        }
+    }
 }
-#left-header {
+
+.header {
     width: auto;
     position: relative;
     float: left;
-}
-#logout-btn {
-    background-image: url(../img/logout.png);
-    &:hover {
-        background-image: url(../img/logout-hover.png);
+    &.buttons {
+        float: none;
+    }
+    &.settings {
+        margin-left: 35px;
+    }
+    &.bug {
+        margin-left: 100px;
+        color: $white;
+        &:hover {
+            color: $teal;
+        }
+    }
+    &.search {
+        float: right;
     }
 }
-#home-btn {
-    background-image: url(../img/home.png);
-    &:hover {
-        background-image: url(../img/home-hover.png);
-    }
-}
-#settings-btn {
-    background-image: url(../img/settings.png);
-    &:hover {
-        background-image: url(../img/settings-hover.png);
-    }
-}
-#right-header {
-    width: auto;
-    position: relative;
-    float: right;
-}
-.settings-btn {
+
+.settings-btn-container {
     display: none;
 }
+
 .settings-info {
     display: inline;
 }
+
 .user-info {
     display: block;
     height: 25px;
@@ -202,32 +219,26 @@ a.btn {
     }
     .level {
         color:$white;
-    }
-    .level:hover {
-        color: $teal;
+        &:hover {
+            color: $teal;
+        }
     }
 }
+
 #ctnr-change {
     position: relative;
     float: left;
     margin-left: 5px;
 }
-#bug-report {
-    margin-left: 5px;
-    color: $white;
-    &:hover {
-        color: $teal;
-    }
-}
 
 .settings-menu {
-    width: 935px;
-    margin: 0 auto;
+    width: auto;
+    height: 20px;
+    margin: auto;
     padding: 13px;
     position: relative;
     background-color: $dark-gray;
     display: none;
-    color: $white;
     z-index: 2;
 }
 

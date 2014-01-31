@@ -3,6 +3,7 @@
     div#header {
         width: 640px;
     }
+
     div.settings-menu {
         width: 615px;
     }
@@ -12,13 +13,12 @@
     div.container {
         width: 640px;
     }
-    div.settings-menu {
-        width: 615px;
-    }
-    div.settings-info {
+
+    div#settings-header {
         display: none;
     }
-    div.settings-btn {
+
+    div.settings-btn-container {
         display: inline;
     }
 
