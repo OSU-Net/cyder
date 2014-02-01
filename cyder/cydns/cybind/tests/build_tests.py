@@ -1,300 +1,52 @@
-# These tests are similar to the ones in the scripts directory. They not ran on
-# real data so the testing db needs to be filled with info.
 import os
+import shutil
+from django.core.management import call_command
 from django.test import TestCase
 
-from cyder.cydns.soa.models import SOA
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.view.models import View
-from cyder.cydns.tests.utils import random_label, random_byte
-from cyder.cydns.cybind.builder import DNSBuilder
-
-from cyder.cydns.tests.utils import create_fake_zone
-
-from cyder.scripts.dnsbuilds.tests.build_tests import BuildScriptTests
+from cyder.base.vcs import GitRepo
 
 
-class MockBuildScriptTests(BuildScriptTests, TestCase):
+BINDBUILD = {
+    'stage_dir': '/tmp/cyder_dns_test/stage/',
+    'prod_dir': '/tmp/cyder_dns_test/prod/',
+    'bind_prefix': '',
+    'lock_file': '/tmp/cyder_dns_test.lock',
+    'pid_file': '/tmp/cyder_dns_test.pid',
+    'line_change_limit': 500,
+    'line_removal_limit': 10,
+    'stop_file': '/tmp/cyder_dns_test.stop',
+    'stop_file_email_interval': 1800,  # 30 minutes
+    'last_run_file': '/tmp/last.run',
+    'log_syslog': False,
+}
+
+PROD_ORIGIN_DIR = '/tmp/cyder_dns_test/prod_origin/'
+DEBUG = False
+
+
+class DNSBuildTest(TestCase):
+    fixtures = ['build_test/build_test.json']
+
     def setUp(self):
-        self.stage_dir = '/tmp/fake/stage/inv_zones/'
-        self.svn_dir = '/tmp/fake/dnsconfig/'
-        self.prod_dir = '/tmp/fake/dnsconfig/inv_zones/'
-        self.svn_repo = '/tmp/fake/svn_repo'
-        self.lock_file = '/tmp/fake/lock.fake'
-        if os.path.isdir('/tmp/fake/'):
-            shutil.rmtree('/tmp/fake')
-            os.makedirs('/tmp/fake')
-        command_str = "svnadmin create {0}".format(self.svn_repo)
-        os.makedirs(self.svn_repo)
-        rets = subprocess.Popen(shlex.split(command_str),
-                                stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE)
-        stdout, stderr = rets.communicate()
-        self.assertEqual(0, rets.returncode)
+        if os.path.isdir(BINDBUILD['prod_dir']):
+            shutil.rmtree(BINDBUILD['prod_dir'])
+        os.makedirs(BINDBUILD['prod_dir'])
 
-        command_str = "svn co file://{0} {1}".format(self.svn_repo,
-                                                     self.prod_dir)
-        rets = subprocess.Popen(shlex.split(command_str),
-                                stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE)
-        stdout, stderr = rets.communicate()
-        self.assertEqual(0, rets.returncode)
+        if os.path.isdir(PROD_ORIGIN_DIR):
+            shutil.rmtree(PROD_ORIGIN_DIR)
+        os.makedirs(PROD_ORIGIN_DIR)
 
-        Domain.objects.get_or_create(name="arpa")
-        Domain.objects.get_or_create(name="in-addr.arpa")
-        self.r1, _ = Domain.objects.get_or_create(name="10.in-addr.arpa")
-        Domain.objects.get_or_create(name="edu")
-        Domain(name="oregonstate.edu")
-        super(MockBuildScriptTests, self).setUp()
-        self.stop_update_file = '/tmp/fake/stop.update'
+        repo_origin = GitRepo(PROD_ORIGIN_DIR)
+        repo_origin.init(bare=True)
 
-    def get_post_data(self, random_str):
-        """Return a valid set of data"""
-        return {
-            'root_domain': '{0}.{0}.oregonstate.edu'.format(
-                random_label() + random_str),
-            'soa_primary': 'ns1.oregonstate.edu',
-            'soa_contact': 'noc.oregonstate.edu',
-            'nameserver_1': 'ns1.oregonstate.edu',
-            'nameserver_2': 'ns2.oregonstate.edu',
-            'nameserver_3': 'ns3.oregonstate.edu',
-            'ttl_1': random_byte(),
-            'ttl_2': random_byte(),
-            'ttl_3': random_byte(),
-        }
+        GitRepo.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
 
-    def test_build_zone(self):
-        create_fake_zone('asdf1')
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
-                       FIRST_RUN=True, PUSH_TO_PROD=False,
-                       STOP_UPDATE_FILE=self.stop_update_file)
-        b.build_dns()
-        create_fake_zone('asdf2')
-        b.build_dns()
-        create_fake_zone('asdf3')
-        create_fake_zone('asdf4')
-        b.build_dns()
-        create_fake_zone('asdf5')
-        b.build_dns()
+        self.repo = GitRepo(
+            BINDBUILD['prod_dir'], BINDBUILD['line_change_limit'],
+            BINDBUILD['line_removal_limit'], debug=DEBUG,
+            log_syslog=False)
 
-    def test_change_a_record(self):
-        root_domain = create_fake_zone('asdfz1')
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
-                       FIRST_RUN=True, PUSH_TO_PROD=False,
-                       STOP_UPDATE_FILE=self.stop_update_file)
+        super(DNSBuildTest, self).setUp()
 
-        b.build_dns()  # This won't check anything in since PUSH_TO_PROD==False
-        self.assertEqual((26, 0), b.svn_lines_changed(b.PROD_DIR))
-        b.PUSH_TO_PROD = True
-        b.build_dns()  # This checked stuff in
-
-        # no lines should have changed
-        b.build_dns()
-        self.assertEqual((0, 0), b.svn_lines_changed(b.PROD_DIR))
-
-        # Now add a record.
-        a, c = AddressRecord.objects.get_or_create(
-            label='', domain=root_domain, ip_str="10.0.0.1", ip_type='4'
-        )
-        a.views.add(View.objects.get_or_create(name='private')[0])
-        if not c:
-            a.ttl = 8
-            a.save()
-
-        self.assertTrue(SOA.objects.get(pk=root_domain.soa.pk).dirty)
-        tmp_serial = SOA.objects.get(pk=root_domain.soa.pk).serial
-
-        b.PUSH_TO_PROD = False  # Task isn't deleted
-        b.build_dns()  # Serial get's incrimented
-        self.assertEqual(
-            SOA.objects.get(pk=root_domain.soa.pk).serial, tmp_serial + 1
-        )
-        self.assertFalse(SOA.objects.get(pk=root_domain.soa.pk).dirty)
-        # added new record (1) and new serials (2 for both views), old serials
-        # removed.
-        self.assertEqual((3, 2), b.svn_lines_changed(b.PROD_DIR))
-
-        tmp_serial = SOA.objects.get(pk=root_domain.soa.pk).serial
-        self.assertFalse(SOA.objects.get(pk=root_domain.soa.pk).dirty)
-
-        b.PUSH_TO_PROD = True
-        b.build_dns()
-        self.assertFalse(SOA.objects.get(pk=root_domain.soa.pk).dirty)
-        # Serial is again incremented because PUSH_TO_PROD was False during the
-        # last build. When PUSH_TO_PROD is false, no scheduled tasts are
-        # deleted so we should still see this soa being rebuilt.
-        self.assertEqual(
-            SOA.objects.get(pk=root_domain.soa.pk).serial, tmp_serial + 1
-        )
-        self.assertEqual((0, 0), b.svn_lines_changed(b.PROD_DIR))
-
-        # no lines should have changed if we would have built again
-
-        self.assertFalse(SOA.objects.get(pk=root_domain.soa.pk).dirty)
-        tmp_serial = SOA.objects.get(pk=root_domain.soa.pk).serial
-        b.PUSH_TO_PROD = False
-        b.build_dns()
-        self.assertEqual(SOA.objects.get(pk=root_domain.soa.pk).serial,
-                         tmp_serial)
-        self.assertFalse(SOA.objects.get(pk=root_domain.soa.pk).dirty)
-        self.assertEqual((0, 0), b.svn_lines_changed(b.PROD_DIR))
-
-    def test_one_file_svn_lines_changed(self):
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
-                       FIRST_RUN=True, PUSH_TO_PROD=False,
-                       STOP_UPDATE_FILE=self.stop_update_file)
-        test_file = os.path.join(self.prod_dir, 'test')
-        with open(test_file, 'w+') as fd:
-            fd.write('line 1\n')
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((1, 0), lc)
-        b.svn_checkin(lc)
-
-        with open(test_file, 'w+') as fd:
-            fd.write('line 1\nline 2\n')
-
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((1, 0), lc)
-        b.svn_checkin(lc)
-
-        with open(test_file, 'w+') as fd:
-            fd.write('line 1\n')
-
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((0, 1), lc)
-        b.svn_checkin(lc)
-
-    def test_too_many_config_lines_changed(self):
-        create_fake_zone('asdf86')
-        root_domain1 = create_fake_zone('asdf87')
-        root_domain2 = create_fake_zone('asdf88')
-        root_domain3 = create_fake_zone('asdf89')
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
-                       FIRST_RUN=True, PUSH_TO_PROD=True,
-                       STOP_UPDATE_FILE=self.stop_update_file)
-        b.build_dns()
-        for ns in root_domain1.nameserver_set.all():
-            ns.delete()
-
-        b.build_dns()  # One zone removed should be okay
-
-        for ns in root_domain2.nameserver_set.all():
-            ns.delete()
-
-        for ns in root_domain3.nameserver_set.all():
-            ns.delete()
-
-        self.assertRaises(BaseException, b.build_dns)
-
-    def test_two_file_svn_lines_changed(self):
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
-                       FIRST_RUN=True, PUSH_TO_PROD=False,
-                       STOP_UPDATE_FILE=self.stop_update_file)
-        test1_file = os.path.join(self.prod_dir, 'test1')
-        test2_file = os.path.join(self.prod_dir, 'test2')
-        with open(test1_file, 'w+') as fd:
-            fd.write('line 1.1\n')
-
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((1, 0), lc)
-        b.svn_checkin(lc)
-
-        with open(test1_file, 'w+') as fd:
-            fd.write('line 1.1\nline 1.2\n')
-        with open(test2_file, 'w+') as fd:
-            fd.write('line 2.1\nline 2.2\n')
-
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((3, 0), lc)
-        b.svn_checkin(lc)
-
-        with open(test1_file, 'w+') as fd:
-            fd.write('line 1\n')
-
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((1, 2), lc)
-        b.svn_checkin(lc)
-
-        with open(test1_file, 'w+') as fd:
-            fd.write('line 1.1\nline 1.2\n')
-        with open(test2_file, 'w+') as fd:
-            fd.write('line 2.3\nline 2.4\n')
-
-        lc = b.svn_lines_changed(b.PROD_DIR)
-        self.assertEqual((4, 3), lc)
-        b.svn_checkin(lc)
-
-    def svn_info(self):
-        cwd = os.getcwd()
-        os.chdir('/tmp/fake/dnsconfig/inv_zones/')
-        command_str = "svn info"
-        rets = subprocess.Popen(shlex.split(command_str),
-                                stderr=subprocess.PIPE,
-                                stdout=subprocess.PIPE)
-        stdout, stderr = rets.communicate()
-        self.assertEqual(0, rets.returncode)
-        print stdout
-        os.chdir(cwd)
-
-    def test_build_svn(self):
-        print "This will take a while, be patient..."
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file, LOG_SYSLOG=False,
-                       FIRST_RUN=True, PUSH_TO_PROD=True)
-        b.build_dns()
-        #self.svn_info()
-        s = SOA.objects.all()
-        if len(s) > 0:
-            s[0].dirty = True
-            s[0].save()
-        b.build_dns()
-        #self.svn_info()
-        b.build_dns()
-        #self.svn_info()
-
-    def test_build_staging(self):
-        if os.path.isdir(self.stage_dir):
-            shutil.rmtree(self.stage_dir)
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file)
-        b.build_staging()
-        # Make sure it made the staging dir
-        self.assertTrue(os.path.isdir(self.stage_dir))
-        # Ensure if fails if the directory exists
-        self.assertRaises(BaseException, b.build_staging)
-        # There shouldn't be errors because force=True
-        b.build_staging(force=True)
-
-        self.assertTrue(os.path.isdir(self.stage_dir))
-        b.clear_staging()
-        self.assertFalse(os.path.isdir(self.stage_dir))
-        self.assertRaises(BaseException, b.clear_staging)
-        b.clear_staging(force=True)
-        self.assertFalse(os.path.isdir(self.stage_dir))
-
-    def test_lock_unlock(self):
-        if os.path.exists(self.lock_file):
-            os.remove(self.lock_file)
-        b = DNSBuilder(STAGE_DIR=self.stage_dir, PROD_DIR=self.prod_dir,
-                       LOCK_FILE=self.lock_file)
-        self.assertFalse(os.path.exists(self.lock_file))
-        b.lock()
-        self.assertTrue(os.path.exists(self.lock_file))
-        for i in xrange(10):
-            b.unlock()
-            b.lock()
-
-        b.unlock()
-        self.assertTrue(os.path.exists(self.lock_file))
-
-        b.lock()
-        self.assertTrue(os.path.exists(self.lock_file))
-
-        b.unlock()
-        self.assertTrue(os.path.exists(self.lock_file))
+    def test_build(self):
+        pass
