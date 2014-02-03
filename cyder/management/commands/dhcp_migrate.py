@@ -178,7 +178,8 @@ def create_range(range_id, start, end, range_type, subnet_id,
         dhcp_enabled = bool(enabled and valid)
     else:
         # the Range doesn't have a Network
-        print 'Range {0} is invalid: no network'.format(range_str)
+        print 'Range #{0} {1} is invalid: no network'.format(range_id,
+                                                             range_str)
         return None
 
     if '\n' in comment:
