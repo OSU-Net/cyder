@@ -162,7 +162,8 @@ def create_range(range_id, start, end, range_type, subnet_id,
 
         # If the range is disabled, we don't need to print warnings.
         if not valid:
-            print 'Range {0} in network {1} is invalid:'.format(range_str, n)
+            print 'Range {0}, {1} in network {2} is invalid:'.format(
+                range_id, range_str, n)
 
             if not valid_start:
                 print ('\tStart is not inside network'
@@ -178,7 +179,7 @@ def create_range(range_id, start, end, range_type, subnet_id,
         dhcp_enabled = bool(enabled and valid)
     else:
         # the Range doesn't have a Network
-        print 'Range #{0} {1} is invalid: no network'.format(range_id,
+        print 'Range {0}, {1} is invalid: no network'.format(range_id,
                                                              range_str)
         return None
 
