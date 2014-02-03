@@ -4,6 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from cyder.base.vcs import GitRepo
+from cyder.cydhcp.range.models import Range
 
 
 BINDBUILD = {
@@ -41,6 +42,8 @@ class DNSBuildTest(TestCase):
 
         GitRepo.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
 
+        self.builder = DNSBuilder(**BINDBUILD)
+
         self.repo = GitRepo(
             BINDBUILD['prod_dir'], BINDBUILD['line_change_limit'],
             BINDBUILD['line_removal_limit'], debug=DEBUG,
@@ -48,5 +51,30 @@ class DNSBuildTest(TestCase):
 
         super(DNSBuildTest, self).setUp()
 
-    def test_build(self):
-        pass
+    def test_force(self):
+        self.builder.build(force=True)
+        self.builder.push(sanity_check=False)
+
+        rev1 = self.repo.get_revision()
+
+        self.builder.build()
+        self.builder.push(sanity_check=False)
+
+        rev2 = self.repo.get_revision()
+
+        self.assert_equal(rev1, rev2)
+
+        self.builder.build(force=True)
+        self.builder.push(sanity_check=False)
+
+        rev3 = self.repo.get_revision()
+
+        self.assert_not_equal(rev2, rev3)
+
+    def test_build_queue(self):
+        self.builder.build(force=True)
+        self.builder.push(sanity_check=False)
+
+        rev1 = self.repo.get_revision()
+
+        Range.objects.get(start_str='192.168.0.2')
