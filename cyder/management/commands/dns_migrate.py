@@ -165,6 +165,7 @@ class Zone(object):
 
             name = items['name']
             enabled = bool(items['enabled'])
+            dns_enabled, dhcp_enabled = enabled, enabled
             ip = items['ip']
             ha = items['ha']
             if ip == 0:
@@ -174,7 +175,7 @@ class Zone(object):
                 ha = ""
 
             if ha == "":
-                enabled = False
+                dhcp_enabled = False
 
             # check for duplicate
             static = StaticInterface.objects.filter(
@@ -211,7 +212,7 @@ class Zone(object):
                 label=name, domain=self.domain, mac=clean_mac(ha),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
-                dns_enabled=enabled, dhcp_enabled=enabled,
+                dns_enabled=dns_enabled, dhcp_enabled=dhcp_enabled,
                 last_seen=items['last_seen'])
 
             # create static interface
@@ -221,7 +222,7 @@ class Zone(object):
             except ValidationError:
                 try:
                     static.dhcp_enabled = False
-                    static.dns_enabled = enabled
+                    static.dns_enabled = dns_enabled
                     static.full_clean()
                     static.save(update_range_usage=False)
                 except ValidationError, e:
