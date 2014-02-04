@@ -26,7 +26,7 @@
             {{ request.user.username }}:
           </a>
           <span class="user-info">
-            <a class="level" href="{{ request.session.ctnr.get_detail_url() }}">
+            <a class="level">
             {% if request.session.level == 0 %}
               guest on
             {% elif request.session.level == 1 %}
@@ -36,19 +36,23 @@
             {% endif %}
             </a>
           </span>
-            <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
-              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
-              <select name="ctnr_name" class="submit-on-change">
-                {% for ctnr in request.session.ctnrs %}
-                  {% if ctnr == request.session.ctnr %}
-                    <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
-                  {% else %}
-                    <option value="{{ ctnr }}">{{ ctnr.name }}</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-            </form>
-          </div>
+          <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+            <select name="ctnr_name" class="submit-on-change">
+              {% for ctnr in request.session.ctnrs %}
+                {% if ctnr == request.session.ctnr %}
+                  <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
+                {% else %}
+                  <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </form>
+          <a id="ctnr-detail-btn"
+             class="header-icon currentCtnr {{ 'selected' if
+                request.session.ctnr.get_detail_url() == request.path }}"
+             href="{{ request.session.ctnr.get_detail_url() }}"></a>
+      </div>
         </span>
         <span id="search-header" class="header search">
           <form id="search" action="{{ url('search') }}" method="get">

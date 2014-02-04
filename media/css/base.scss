@@ -144,7 +144,6 @@ a.btn {
 .header-icon {
     width: 25px;
     height: 25px;
-    z-index: 1;
     display: block;
     position: relative;
     float: left;
@@ -162,6 +161,15 @@ a.btn {
         background-image: url(../img/logout.png);
         &:hover {
             background-image: url(../img/logout-hover.png);
+        }
+    }
+    &.currentCtnr {
+        background-image: url(../img/magnify-large.png);
+        &:hover {
+            background-image: url(../img/magnify-large-hover.png);
+        }
+        &.selected {
+            background-image: url(../img/magnify-large-hover.png);
         }
     }
     &.settings {
@@ -211,9 +219,6 @@ a.btn {
     }
     .level {
         color:$white;
-        &:hover {
-            color: $teal;
-        }
     }
 }
 
