@@ -14,62 +14,89 @@
   <body>
     <div id="header">
       <div class="container">
-        <h1><a href="/">Cyder</a></h1>
-        <ul class="nav">
-          <li class="userinfo">
-            <span>
-                <a href="{{ request.user.get_profile().get_detail_url() }}">{{ request.user.username }}</a>
-                {% if request.session.level == 0 %}
-                  <p> guest on </p>
-                {% elif request.session.level == 1 %}
-                  <p> user on </p>
-                {% else %}
-                  <p> admin on </p>
-                {% endif %}
-              <a href="{{ request.session.ctnr.get_detail_url() }}">{{ request.session.ctnr.name }}</a>
-            </span>
-          </li>
-          <li class="{{ 'selected' if url('system') == request.path }}"><a class="navlink" href="{{ url('system') }}">System</a></li>
-          <li class="{{ 'selected' if url('cydns-index') in request.path }}"><a class="navlink" href="{{ url('cydns-index') }}">DNS</a></li>
-          <li class="{{ 'selected' if url('cydhcp-index') in request.path }}"><a class="navlink" href="{{ url('cydhcp-index') }}">DHCP</a></li>
-        </ul>
-        <ul class="nav nav-right">
-          {% if request.user.is_superuser == 1 %}
-            <li><a class="navlink" href="{{ url('admin-page') }}">Admin</a></li>
-          {% endif %}
-            <li><a class="navlink" href="{{ url('logout') }}">Logout</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div id="subheader">
-      <div class="container">
-        <span id="ctnr">
-          <form action="{{ url('ctnr-change') }}" method="post">
-              <span>Container</span>
+        <span class="header buttons" id="buttons-header">
+          <a id="home-btn" class="header-icon home {{ 'selected' if '/' == request.path }}" href="/"></a>
+          <a id="logout-btn" class="header-icon logout" href="{{ url('logout') }}"></a>
+          <div class="settings-btn-container">
+            <a id="settings-btn" class="header-icon settings" href="#"></a>
+          </div>
+        </span>
+        <div class="header settings" id="settings-header">
+            <a class="user-info name {{ 'selected' if
+                 request.user.get_profile().get_detail_url() == request.path }}"
+               href="{{ request.user.get_profile().get_detail_url() }}">
+            {{ request.user.username }}:
+          </a>
+          <span class="user-info">
+            <a class="level">
+            {% if request.session.level == 0 %}
+              guest on
+            {% elif request.session.level == 1 %}
+              user on
+            {% else %}
+              admin on
+            {% endif %}
+            </a>
+          </span>
+          <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
             <select name="ctnr_name" class="submit-on-change">
               {% for ctnr in request.session.ctnrs %}
                 {% if ctnr == request.session.ctnr %}
-                    <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
+                  <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
                 {% else %}
-                    <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+                  <option value="{{ ctnr }}">{{ ctnr.name }}</option>
                 {% endif %}
               {% endfor %}
             </select>
           </form>
+          <a id="ctnr-detail-btn"
+             class="header-icon currentCtnr {{ 'selected' if
+                request.session.ctnr.get_detail_url() == request.path }}"
+             href="{{ request.session.ctnr.get_detail_url() }}"></a>
+      </div>
         </span>
-        <span id="bugreport">
-            <a href="{{ url('bug-report') }}"><font color=white>Report a Bug</font></a>
-        </span>
-        <span id="search">
-          <form action="{{ url('search') }}" method="get">
+        <span id="search-header" class="header search">
+          <form id="search" action="{{ url('search') }}" method="get">
             <input type="search" name="search" placeholder="Search...">
           </form>
         </span>
       </div>
     </div>
-
+    <div class="settings-menu">
+      <a class="user-info name {{ 'selected' if
+           request.user.get_profile().get_detail_url() == request.path }}"
+         href="{{ request.user.get_profile().get_detail_url() }}">
+         {{ request.user.username }}:
+     </a>
+     <span class="user-info">
+       <a class="level">
+       {% if request.session.level == 0 %}
+         guest on
+       {% elif request.session.level == 1 %}
+         user on
+       {% else %}
+         admin on
+       {% endif %}
+       </a>
+     </span>
+     <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
+       <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+       <select name="ctnr_name" class="submit-on-change">
+         {% for ctnr in request.session.ctnrs %}
+           {% if ctnr == request.session.ctnr %}
+             <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
+           {% else %}
+             <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+           {% endif %}
+         {% endfor %}
+       </select>
+     </form>
+     <a id="ctnr-detail-btn"
+        class="header-icon currentCtnr {{ 'selected' if
+           request.session.ctnr.get_detail_url() == request.path }}"
+        href="{{ request.session.ctnr.get_detail_url() }}"></a>
+    </div>
     <div class="container message">
       {% if messages %}
       <ul class="messages">
@@ -106,8 +133,10 @@
           </label>
         </div>
       </div>
-    <div id="footer">
-      <a href="https://github.com/OSU-Net/cyder">Source Code</a>
+    <div id="footer" class="footer">
+      <a class="footer source" href="https://github.com/OSU-Net/cyder">Source Code</a>
+      <a id="bug-report" class="footer bug {{ 'selected' if url('bug-report') == request.path }}" href="{{ url('bug-report') }}">Report a Bug</a>
+      <a id="linkware" class="footer linkware" href="http://www.visualpharm.com ">Icons provided by http://www.visualpharm.com</a>
     </div>
   </body>
 </html>

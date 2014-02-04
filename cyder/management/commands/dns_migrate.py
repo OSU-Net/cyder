@@ -22,6 +22,7 @@ from cyder.cydns.models import View
 
 import MySQLdb
 from optparse import make_option
+from datetime import datetime
 from lib import maintain_dump, fix_maintain
 from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
                            range_usage_get_create)
@@ -209,12 +210,16 @@ class Zone(object):
             else:
                 w = None
 
+            last_seen = items['last_seen'] or None
+            if last_seen:
+                last_seen = datetime.fromtimestamp(last_seen)
+
             static = StaticInterface(
                 label=name, domain=self.domain, mac=clean_mac(ha),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
                 dns_enabled=dns_enabled, dhcp_enabled=dhcp_enabled,
-                last_seen=items['last_seen'])
+                last_seen=last_seen)
 
             # create static interface
             try:

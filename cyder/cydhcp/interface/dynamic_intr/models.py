@@ -28,8 +28,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
     range = models.ForeignKey(Range, validators=[is_dynamic_range])
     dhcp_enabled = models.BooleanField(default=True,
                                        verbose_name='Enable DHCP?')
-    last_seen = models.PositiveIntegerField(
-        max_length=11, blank=True, default=0)
+    last_seen = models.DateTimeField(null=True, blank=True)
     search_fields = ('mac',)
 
     class Meta:
@@ -53,19 +52,12 @@ class DynamicInterface(BaseModel, ObjectUrlMixin):
 
     def details(self):
         data = super(DynamicInterface, self).details()
-        if self.last_seen == 0:
-            date = 0
-
-        else:
-            date = datetime.datetime.fromtimestamp(self.last_seen)
-            date = date.strftime('%B %d, %Y, %I:%M %p')
-
         data['data'] = [
             ('System', 'system', self.system),
             ('Mac', 'mac', self),
             ('Range', 'range', self.range),
             ('Workgroup', 'workgroup', self.workgroup),
-            ('Last seen', 'last_seen', date)]
+            ('Last seen', 'last_seen', self.last_seen)]
         return data
 
     @staticmethod

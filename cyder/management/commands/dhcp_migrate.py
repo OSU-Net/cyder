@@ -21,6 +21,7 @@ from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 from sys import stderr
 from random import choice
+from datetime import datetime
 import ipaddr
 import MySQLdb
 from optparse import make_option
@@ -384,9 +385,13 @@ def migrate_dynamic_hosts():
             eav.full_clean()
             eav.save()
 
+        last_seen = items['last_seen'] or None
+        if last_seen:
+            last_seen = datetime.fromtimestamp(last_seen)
+
         intr, _ = range_usage_get_create(
             DynamicInterface, range=r, workgroup=w, ctnr=c, mac=mac,
-            system=s, dhcp_enabled=enabled, last_seen=items['last_seen'])
+            system=s, dhcp_enabled=enabled, last_seen=last_seen)
 
         count += 1
         if not count % 1000:

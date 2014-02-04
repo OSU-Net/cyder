@@ -26,6 +26,10 @@ table.table {
         top: 2px;
         right: 2px;
     }
+    .remove:hover {
+        position: relative;
+        top: 2px;
+    }
     td, th {
         padding: 5px 0;
     }

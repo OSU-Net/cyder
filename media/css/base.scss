@@ -82,6 +82,7 @@ input[type="text"], input[type="search"] {
 }
 
 a.btn {
+    @include box-shadow(2px 2px 2px $dark-gray);
     background: $blue;
     border-radius: 2px;
     bottom: 0;
@@ -93,20 +94,18 @@ a.btn {
     text-decoration: none;
     right: 0;
     transition: .1s .1s;
-    &:hover {
-        @include box-shadow(2px 2px 2px $dark-gray);
+    &.hover:active {
+        @include box-shadow(none);
         background: lighten($blue, 5%);
-        bottom: 2px;
         color: $white;
         cursor: pointer;
-        right: 2px;
+        transition: .25s 0s;
     }
-    &:active {
+    &.selected {
         @include box-shadow(none);
         background: darken($blue, 10%);
-        bottom: 0;
-        right: 0;
-        transition: .03s 0s;
+        color: $white;
+        cursor: default;
     }
     &.red {
         background: $red;
@@ -137,154 +136,110 @@ a.btn {
 }
 
 #header {
-    background-color: $dark-gray;
-    height: 50px;
-    padding-top: 10px;
-    h1 {
-        top: 3px;
-        display: inline;
-        font-family: 'Gravitas One', serif;
-        font-size: 30px;
-        a {
-            color: $white;
-            float: left;
-            font-weight: normal;
-            &:hover {
-                color: $teal;
-            }
-        }
-    }
-    .nav {
-        bottom: 18px;
-        clear: left;
-        display: inline;
-        padding-left: 13px;
-        position: relative;
-        &.nav-right {
-            bottom: 18px;
-            clear: none;
-            float: right;
-            /* Remove with blueprint */
-            margin-bottom: 0;
-            margin-right: 0;
-            li {
-                border-width: 0 1px 0 0;
-                display: inline-block;
-                padding-bottom: 13px;
-                &:first-child {
-                    border-width: 0 1px;
-                }
-                a.navlink {
-                    padding-bottom: 19px;
-                }
-            }
-        }
-        li {
-            border: solid $black 1px;
-            border-width: 0 1px 0 0;
-            display: inline;
-            margin-right: -5px;
-            padding: 30px 0 13px;
-            &:first-child {
-                border-width: 0 1px 0 1px;
-            }
-            &:not(:first-child) {
-                padding-left: 2px;
-            }
-            &.selected {
-                border: none;
-                a.navlink, a.navlink:hover {
-                    background: $light-gray;
-                    color: $dark-gray;
-                }
-            }
-            &.userinfo {
-                background: darken($dark-gray, 3%);
-                display: inline-block;
-                padding-top: 0;
-                padding-bottom: 13px;
-                text-align: center;
-                span {
-                    font-size: 12px;
-                    position: relative;
-                    top: 10px;
-                }
-                a {
-                    color: $teal;
-                    font-size: 13px;
-                    padding: 5px 10px;
-                    &:hover {
-                        color: $white;
-                    }
-                }
-                p {
-                    color: $white;
-                    line-height: 13px;
-                    margin-bottom: 0;
-                }
-            }
-            a.navlink {
-                bottom: 4px;
-                color: $white;
-                font-size: 18px;
-                font-weight: normal;
-                position: relative;
-                padding: 30px 30px 17px;
-                &:hover {
-                    background: $black;
-                    color: $teal;
-                }
-            }
-            div.logged-in {
-                color: $white;
-                font-size: 13px;
-                position: absolute;
-                a {
-                    color: $white;
-                    &:hover {
-                        color: $teal;
-                    }
-                }
-            }
-        }
-    }
-}
-
-#subheader {
     background-color: $dark-blue;
     height: 30px;
     padding-top: 5px;
-    #ctnr {
-        top: 2px;
-        float: left;
-        position: relative;
-        span {
-            color: $white;
-            font-size: 13px;
-            font-weight: bold;
-            margin-right: 5px;
+}
+
+.header-icon {
+    width: 25px;
+    height: 25px;
+    display: block;
+    position: relative;
+    float: left;
+    margin-left: 5px;
+    &.home {
+        background-image: url(../img/home.png);
+        &:hover {
+            background-image: url(../img/home-hover.png);
         }
-        select {
-            padding-left: 2px;
-        }
-    }
-    #bugreport {
-        font-size: 13px;
-        top: 5px;
-        width: 100px;
-        float: left;
-        padding-left: 230px;
-        position: relative;
-    }
-    #search {
-        form {
-            bottom: 8px;
-            clear: right;
-            float: right;
-            display: inline;
-            position: relative;
+        &.selected {
+            background-image: url(../img/home-hover.png);
         }
     }
+    &.logout {
+        background-image: url(../img/logout.png);
+        &:hover {
+            background-image: url(../img/logout-hover.png);
+        }
+    }
+    &.currentCtnr {
+        background-image: url(../img/magnify-large.png);
+        &:hover {
+            background-image: url(../img/magnify-large-hover.png);
+        }
+        &.selected {
+            background-image: url(../img/magnify-large-hover.png);
+        }
+    }
+    &.settings {
+        background-image: url(../img/settings.png);
+        &:hover {
+            background-image: url(../img/settings-hover.png);
+        }
+        &.selected {
+            background-image: url(../img/settings-hover.png);
+        }
+    }
+
+}
+
+.header {
+    width: auto;
+    position: relative;
+    float: left;
+    &.buttons {
+        float: none;
+    }
+    &.settings {
+        margin-left: 35px;
+    }
+    &.search {
+        float: right;
+    }
+}
+
+.settings-btn-container {
+    display: none;
+}
+
+.settings-info {
+    display: inline;
+}
+
+.user-info {
+    display: block;
+    height: 25px;
+    position: relative;
+    color: $white;
+    float: left;
+    margin-left: 5px;
+    &.name:hover {
+        color: $teal;
+    }
+    &.name.selected {
+        color: $teal;
+    }
+    .level {
+        color:$white;
+    }
+}
+
+#ctnr-change {
+    position: relative;
+    float: left;
+    margin-left: 5px;
+}
+
+.settings-menu {
+    width: auto;
+    height: 20px;
+    margin: auto;
+    padding: 13px;
+    position: relative;
+    background-color: $dark-gray;
+    display: none;
+    z-index: 2;
 }
 
 #sidebar {
@@ -293,8 +248,10 @@ a.btn {
     }
     float: left;
     height: 100%;
-    margin-right: 26px;
-    width: 145px;
+    margin-right: 25px;
+    width: 110px;
+    display: block;
+    word-spacing: 100px;
     .nav-item:first-child .nav-link {
         border-radius: 2px 2px 0 0;
     }
@@ -304,20 +261,46 @@ a.btn {
     .nav-link {
         background: $black;
         border: 1px solid $dark-gray;
+        border-right:2px solid $dark-gray;
+        border-bottom:1px solid $dark-gray;
+        border-top:1px solid $dark-gray;
         color: $white;
         display: block;
         padding: 13px;
+        &.child {
+            transition: margin-left .25s;
+            background: $dark-gray;
+            color: $white;
+            border: none;
+            border-left:2px solid $black;
+            border-bottom:1px solid $black;
+            border-top:1px solid $black;
+            border-right:2px solid $black;
+            &:hover {
+                margin-left: 10px;
+            }
+            &.selected {
+                background: $white;
+                border-left:5px solid $teal;
+                border-right: none;
+                color: $black;
+                margin-left: 10px;
+                &:hover {
+                    margin-left: 10px;
+                }
+            }
+        }
         &:hover {
             color: $teal;
             background: $dark-gray;
             text-decoration: none;
         }
         &.selected {
-            background: $light-gray;
-            border: none;
+            background: $white;
+            border-left:5px solid $teal;
             color: $dark-gray;
             &:hover {
-                color: $dark-gray;
+                color: $teal;
             }
         }
     }
@@ -336,7 +319,7 @@ a.btn {
         overflow: visible;
         // Container - sidebar width - sidebar gutter - gutter.
         // TODO: gridding.
-        width: 771px;
+        width: 825px;
     }
 }
 
@@ -450,14 +433,16 @@ a.btn {
     margin-bottom: 26px;
 }
 
-#footer {
+.footer {
     background-color: $dark-blue;
     color: $white;
     font-size: 13px;
-    padding-top: 13px;
+    padding: 3px;
     text-align: center;
     a {
         color: $white;
+        display: block;
+        position: relative;
         &:hover {
             color: $teal;
         }
