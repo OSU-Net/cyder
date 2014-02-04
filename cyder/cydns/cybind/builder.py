@@ -69,14 +69,12 @@ class DNSBuilder(MutexMixin):
     def log_info(self, msg, root_domain=None, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.verbose
-
         log(format_log_message(msg, root_domain=root_domain),
                 log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
 
     def log_notice(self, msg, root_domain=None, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.verbose
-
         log(format_log_message(msg, root_domain=root_domain),
                 log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
 

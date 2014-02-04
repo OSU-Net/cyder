@@ -24,7 +24,8 @@ from cyder.settings import DHCPBUILD
 class DHCPBuilder(MutexMixin):
     def __init__(self, *args, **kwargs):
         kwargs = dict_merge(DHCPBUILD, {
-            'debug': True,
+            'verbose': True,
+            'debug': False,
         }, kwargs)
         set_attrs(self, kwargs)
 
@@ -41,11 +42,15 @@ class DHCPBuilder(MutexMixin):
         log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
                 logger=syslog)
 
-    def log_info(self, msg, to_stderr=True):
+    def log_info(self, msg, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.verbose
         log(msg, log_level='LOG_INFO', to_syslog=self.log_syslog,
                 to_stderr=to_stderr, logger=syslog)
 
-    def log_notice(self, msg, to_stderr=True):
+    def log_notice(self, msg, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.verbose
         log(msg, log_level='LOG_NOTICE', to_syslog=self.log_syslog,
                 to_stderr=to_stderr, logger=syslog)
 
