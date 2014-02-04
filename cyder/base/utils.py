@@ -1,3 +1,4 @@
+import distutils.dir_util
 import operator
 import os
 import shlex
@@ -11,6 +12,11 @@ from django.db.models import Q
 from django.db.models.loading import get_model
 
 from cyder.base.tablefier import Tablefier
+
+
+def copy_tree(*args, **kwargs):
+    distutils.dir_util._path_created = {}
+    distutils.dir_util.copy_tree(*args, **kwargs)
 
 
 def shell_out(command, use_shlex=True):

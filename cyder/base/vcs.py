@@ -97,6 +97,12 @@ class VCSRepo(object):
 
 
 class GitRepo(VCSRepo):
+    @repo_chdir_wrapper
+    def commit_and_push(self, message, sanity_check=True,
+                        allow_empty=False):
+        self._commit_and_push(message, sanity_check=sanity_check,
+                              allow_empty=allow_empty)
+
     @classmethod
     def clone(cls, source, dest):
         run_command('git clone {0} {1}'.format(dirname(source), dest))
@@ -105,14 +111,6 @@ class GitRepo(VCSRepo):
     def init(self, bare=False):
         cmd = 'git init' + (' --bare' if bare else '')
         self._run_command(cmd)
-
-    @repo_chdir_wrapper
-    def commit(self, allow_empty=False):
-        self._commit(allow_empty)
-
-    @repo_chdir_wrapper
-    def push(self):
-        self._push()
 
     def _get_revision(self):
         revision, _, _ = self._run_command('git rev-parse HEAD')
@@ -123,10 +121,10 @@ class GitRepo(VCSRepo):
                                              ignore_failure=True)
         return returncode != 0
 
-    def _commit_and_push(self, message, sanity_check=True):
+    def _commit_and_push(self, message, sanity_check=True, allow_empty=False):
         self._add_all()
 
-        if not self._is_index_dirty():
+        if not self._is_index_dirty() and not allow_empty:
             self._log('There were no changes. Nothing to commit.',
                       log_level='LOG_INFO')
             return
@@ -137,7 +135,7 @@ class GitRepo(VCSRepo):
             self._log('Skipping sanity check because sanity_check=False was '
                       'passed.')
 
-        self._commit(message)
+        self._commit(message, allow_empty=allow_empty)
         self._push()
 
     def _reset_to_head(self):

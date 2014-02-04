@@ -2,14 +2,18 @@ import os
 import shutil
 from django.core.management import call_command
 from django.test import TestCase
+from time import sleep
 
+from cyder.base.utils import remove_dir_contents
 from cyder.base.vcs import GitRepo
 from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydns.cybind.builder import DNSBuilder
 
 
 BINDBUILD = {
-    'stage_dir': '/tmp/cyder_dns_test/stage/',
-    'prod_dir': '/tmp/cyder_dns_test/prod/',
+    'stage_dir': '/tmp/cyder_dns_test/stage',
+    'prod_dir': '/tmp/cyder_dns_test/prod',
     'bind_prefix': '',
     'lock_file': '/tmp/cyder_dns_test.lock',
     'pid_file': '/tmp/cyder_dns_test.pid',
@@ -22,32 +26,34 @@ BINDBUILD = {
 }
 
 PROD_ORIGIN_DIR = '/tmp/cyder_dns_test/prod_origin/'
-DEBUG = False
 
 
 class DNSBuildTest(TestCase):
     fixtures = ['build_test/build_test.json']
 
     def setUp(self):
-        if os.path.isdir(BINDBUILD['prod_dir']):
-            shutil.rmtree(BINDBUILD['prod_dir'])
-        os.makedirs(BINDBUILD['prod_dir'])
+        if not os.path.isdir(BINDBUILD['stage_dir']):
+            os.makedirs(BINDBUILD['stage_dir'])
 
-        if os.path.isdir(PROD_ORIGIN_DIR):
-            shutil.rmtree(PROD_ORIGIN_DIR)
-        os.makedirs(PROD_ORIGIN_DIR)
+        if not os.path.isdir(BINDBUILD['prod_dir']):
+            os.makedirs(BINDBUILD['prod_dir'])
+        remove_dir_contents(BINDBUILD['prod_dir'])
+
+        if not os.path.isdir(PROD_ORIGIN_DIR):
+            os.makedirs(PROD_ORIGIN_DIR)
+        remove_dir_contents(PROD_ORIGIN_DIR)
 
         repo_origin = GitRepo(PROD_ORIGIN_DIR)
         repo_origin.init(bare=True)
 
         GitRepo.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
 
-        self.builder = DNSBuilder(**BINDBUILD)
+        self.builder = DNSBuilder(verbose=False, debug=False, **BINDBUILD)
 
-        self.repo = GitRepo(
-            BINDBUILD['prod_dir'], BINDBUILD['line_change_limit'],
-            BINDBUILD['line_removal_limit'], debug=DEBUG,
-            log_syslog=False)
+        self.builder.repo.commit_and_push(allow_empty=True,
+                                          message='Initial commit')
+
+        self.builder.repo.get_revision()
 
         super(DNSBuildTest, self).setUp()
 
@@ -55,26 +61,37 @@ class DNSBuildTest(TestCase):
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
 
-        rev1 = self.repo.get_revision()
+        rev1 = self.builder.repo.get_revision()
 
+        sleep(1)  # ensure different serial if rebuilt
         self.builder.build()
         self.builder.push(sanity_check=False)
 
-        rev2 = self.repo.get_revision()
+        rev2 = self.builder.repo.get_revision()
 
-        self.assert_equal(rev1, rev2)
+        self.assertEqual(rev1, rev2)
 
+        sleep(1)
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
 
-        rev3 = self.repo.get_revision()
+        rev3 = self.builder.repo.get_revision()
 
-        self.assert_not_equal(rev2, rev3)
+        self.assertNotEqual(rev2, rev3)
 
     def test_build_queue(self):
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
 
-        rev1 = self.repo.get_revision()
+        rev1 = self.builder.repo.get_revision()
 
-        Range.objects.get(start_str='192.168.0.2')
+        s = StaticInterface.objects.get(fqdn='www.example.com')
+        s.schedule_rebuild_check()
+
+        sleep(1)
+        self.builder.build()
+        self.builder.push(sanity_check=False)
+
+        rev2 = self.builder.repo.get_revision()
+
+        self.assertNotEqual(rev1, rev2)

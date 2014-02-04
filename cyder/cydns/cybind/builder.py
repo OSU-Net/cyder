@@ -7,14 +7,13 @@ import shutil
 import sys
 import syslog
 import time
-from distutils.dir_util import copy_tree
 from itertools import ifilter
 from traceback import format_exception
 
 from cyder.settings import BINDBUILD
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (dict_merge, log, remove_dir_contents,
+from cyder.base.utils import (copy_tree, dict_merge, log, remove_dir_contents,
                               run_command, set_attrs, shell_out)
 from cyder.base.vcs import GitRepo
 
@@ -47,6 +46,7 @@ def format_log_message(msg, root_domain=None):
 class DNSBuilder(MutexMixin):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
+            'verbose': True,
             'debug': False,
             'bs': DNSBuildRun(),  # Build statistic
         }, kwargs)
@@ -66,11 +66,17 @@ class DNSBuilder(MutexMixin):
                 log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
                 logger=syslog)
 
-    def log_info(self, msg, root_domain=None, to_stderr=True):
+    def log_info(self, msg, root_domain=None, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.verbose
+
         log(format_log_message(msg, root_domain=root_domain),
                 log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
 
-    def log_notice(self, msg, root_domain=None, to_stderr=True):
+    def log_notice(self, msg, root_domain=None, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.verbose
+
         log(format_log_message(msg, root_domain=root_domain),
                 log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
 

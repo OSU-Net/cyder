@@ -5,12 +5,11 @@ import shlex
 import subprocess
 import sys
 import syslog
-from distutils.dir_util import copy_tree
 from traceback import format_exception
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (dict_merge, log, run_command, set_attrs,
-                              shell_out)
+from cyder.base.utils import (copy_tree, dict_merge, log, run_command,
+                              set_attrs, shell_out)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.utils import fail_mail
