@@ -22,7 +22,9 @@
           </div>
         </span>
         <div class="header settings" id="settings-header">
-          <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
+            <a class="user-info name {{ 'selected' if
+                 request.user.get_profile().get_detail_url() == request.path }}"
+               href="{{ request.user.get_profile().get_detail_url() }}">
             {{ request.user.username }}:
           </a>
           <span class="user-info">
@@ -62,32 +64,38 @@
       </div>
     </div>
     <div class="settings-menu">
-      <a class="user-info name" href="{{ request.user.get_profile().get_detail_url() }}">
-        {{ request.user.username }}:
-      </a>
-      <span class="user-info">
-        <a class="level" href="{{ request.session.ctnr.get_detail_url() }}">
-        {% if request.session.level == 0 %}
-          guest on
-        {% elif request.session.level == 1 %}
-          user on
-        {% else %}
-          admin on
-          {% endif %}
-        </a>
-      </span>
-        <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
-          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
-          <select name="ctnr_name" class="submit-on-change">
-            {% for ctnr in request.session.ctnrs %}
-              {% if ctnr == request.session.ctnr %}
-                  <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
-              {% else %}
-                  <option value="{{ ctnr }}">{{ ctnr.name }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-        </form>
+      <a class="user-info name {{ 'selected' if
+           request.user.get_profile().get_detail_url() == request.path }}"
+         href="{{ request.user.get_profile().get_detail_url() }}">
+         {{ request.user.username }}:
+     </a>
+     <span class="user-info">
+       <a class="level">
+       {% if request.session.level == 0 %}
+         guest on
+       {% elif request.session.level == 1 %}
+         user on
+       {% else %}
+         admin on
+       {% endif %}
+       </a>
+     </span>
+     <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
+       <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+       <select name="ctnr_name" class="submit-on-change">
+         {% for ctnr in request.session.ctnrs %}
+           {% if ctnr == request.session.ctnr %}
+             <option selected="selected" value="{{ ctnr }}">{{ ctnr.name }}</option>
+           {% else %}
+             <option value="{{ ctnr }}">{{ ctnr.name }}</option>
+           {% endif %}
+         {% endfor %}
+       </select>
+     </form>
+     <a id="ctnr-detail-btn"
+        class="header-icon currentCtnr {{ 'selected' if
+           request.session.ctnr.get_detail_url() == request.path }}"
+        href="{{ request.session.ctnr.get_detail_url() }}"></a>
     </div>
     <div class="container message">
       {% if messages %}

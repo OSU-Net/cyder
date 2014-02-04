@@ -217,6 +217,9 @@ a.btn {
     &.name:hover {
         color: $teal;
     }
+    &.name.selected {
+        color: $teal;
+    }
     .level {
         color:$white;
     }
