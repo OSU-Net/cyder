@@ -71,8 +71,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     dns_enabled = models.BooleanField(verbose_name='Enable DNS?',
                                       default=True)
 
-    last_seen = models.PositiveIntegerField(
-        max_length=11, blank=True, default=0)
+    last_seen = models.DateTimeField(null=True, blank=True)
 
     search_fields = ('mac', 'ip_str', 'fqdn')
 
@@ -105,13 +104,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def details(self):
         data = super(StaticInterface, self).details()
-        if self.last_seen == 0:
-            date = 0
-
-        else:
-            date = datetime.datetime.fromtimestamp(self.last_seen)
-            date = date.strftime('%B %d, %Y, %I:%M %p')
-
         data['data'] = (
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
@@ -122,7 +114,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
                 'True: A/PTR' if self.dns_enabled else 'False'),
-            ('Last seen', 'last_seen', date),
+            ('Last seen', 'last_seen', self.last_seen),
         )
         return data
 
