@@ -439,8 +439,27 @@ def gen_reverses():
                                      is_reverse=True)
 
 
+def gen_reverse_soa():
+    dom, _ = Domain.objects.get_or_create(name='in-addr.arpa')
+    ns1, _ = Nameserver.objects.get_or_create(domain=dom,
+                                              server="ns1.oregonstate.edu")
+    ns2, _ = Nameserver.objects.get_or_create(domain=dom,
+                                              server="ns2.oregonstate.edu")
+    SOA.objects.get_or_create(root_domain=dom, primary="ns1.oregonstate.edu",
+                              contact="hostmaster.oregonstate.edu")
+    SOA.objects.get_or_create(root_domain=dom, primary="ns2.oregonstate.edu",
+                              contact="hostmaster.oregonstate.edu")
+    public = View.objects.get(name="public")
+    private = View.objects.get(name="private")
+    ns1.views.add(public)
+    ns2.views.add(public)
+    ns1.views.add(private)
+    ns2.views.add(private)
+
+
 def gen_DNS(skip_edu=False):
     gen_reverses()
+    gen_reverse_soa()
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
