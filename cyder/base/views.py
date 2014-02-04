@@ -176,7 +176,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
         form = FormKlass(instance=obj)
         object_list = _filter(request, Klass)
 
-        if obj_type == 'system' and not object_list:
+        if obj_type == 'system' and not object_list.exists():
             return redirect(reverse('system-create'))
 
         page_obj = make_paginator(request, do_sort(request, object_list), 50)
