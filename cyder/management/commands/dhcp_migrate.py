@@ -139,6 +139,8 @@ def create_range(range_id, start, end, range_type, subnet_id,
 
     r_type = STATIC if range_type == 'static' else DYNAMIC
     allow = ALLOW_LEGACY
+    range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
+                                   ipaddr.IPv4Address(end))
     if cursor.execute("SELECT subnet, netmask "
                       "FROM subnet WHERE id = {0}".format(subnet_id)):
         subnet, netmask = cursor.fetchone()
@@ -151,9 +153,6 @@ def create_range(range_id, start, end, range_type, subnet_id,
         elif known:
             allow = ALLOW_KNOWN
 
-        range_str = "{0} - {1}".format(ipaddr.IPv4Address(start),
-                                       ipaddr.IPv4Address(end))
-
         valid_start = (int(n.network.network) <= start
                        <= int(n.network.broadcast))
         valid_order = start <= end
@@ -163,7 +162,8 @@ def create_range(range_id, start, end, range_type, subnet_id,
 
         # If the range is disabled, we don't need to print warnings.
         if not valid:
-            print 'Range {0} in network {1} is invalid:'.format(range_str, n)
+            print 'Range {0}, {1} in network {2} is invalid:'.format(
+                range_id, range_str, n)
 
             if not valid_start:
                 print ('\tStart is not inside network'
@@ -179,6 +179,8 @@ def create_range(range_id, start, end, range_type, subnet_id,
         dhcp_enabled = bool(enabled and valid)
     else:
         # the Range doesn't have a Network
+        print 'Range {0}, {1} is invalid: no network'.format(range_id,
+                                                             range_str)
         return None
 
     if '\n' in comment:
