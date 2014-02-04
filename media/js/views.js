@@ -119,7 +119,7 @@ $(document).ready(function() {
             }, 150);
             $('.form-btns a.submit').text('Create ' + prettyObjType);
 
-            if (is_ajax_form(formObjType)) {
+            if (is_ajax_form(objType)) {
                 $('.form-btns a.submit').attr('class', 'btn c');
             };
             $('#obj-form').slideToggle();
