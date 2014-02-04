@@ -21,13 +21,13 @@ html, body {
 
 .main {
     display: block;
-    min-height: 200%;
+    min-height: 100%;
     overflow:auto;
 }  /* must be same height as the footer */
 
 #footer {
     clear: both;
-    height: 140px;
+    height: auto;
 }
 
 /*Opera Fix*/
