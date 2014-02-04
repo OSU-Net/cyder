@@ -29,7 +29,7 @@ PROD_ORIGIN_DIR = '/tmp/cyder_dns_test/prod_origin/'
 
 
 class DNSBuildTest(TestCase):
-    fixtures = ['build_test/build_test.json']
+    fixtures = ['build_test.json']
 
     def setUp(self):
         if not os.path.isdir(BINDBUILD['stage_dir']):
