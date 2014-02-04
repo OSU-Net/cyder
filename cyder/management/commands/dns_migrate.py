@@ -43,6 +43,7 @@ class Zone(object):
     def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
         self.domain_id = 541 if domain_id is None else domain_id
         self.dname = self.get_dname() if dname is None else dname
+        self.dname = self.dname.lower()
 
         self.domain = self.gen_domain()
         if self.domain:
