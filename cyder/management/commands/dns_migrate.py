@@ -448,8 +448,6 @@ def gen_reverse_soa():
                                               server="ns2.oregonstate.edu")
     SOA.objects.get_or_create(root_domain=dom, primary="ns1.oregonstate.edu",
                               contact="hostmaster.oregonstate.edu")
-    SOA.objects.get_or_create(root_domain=dom, primary="ns2.oregonstate.edu",
-                              contact="hostmaster.oregonstate.edu")
     public = View.objects.get(name="public")
     private = View.objects.get(name="private")
     ns1.views.add(public)
