@@ -157,6 +157,17 @@ def clone_perms(request, user_id):
     return HttpResponse(json.dumps({'success': True}))
 
 
+def set_default_ctnr(request):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    user = request.user.get_profile()
+    user.default_ctnr = request.session['ctnr']
+    user.save()
+
+    return redirect(request.META.get('HTTP_REFERER', ''))
+
+
 def delete(request, user_id):
     acting_user = User.objects.get(id=request.session['_auth_user_id'])
 
