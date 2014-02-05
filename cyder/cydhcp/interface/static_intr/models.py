@@ -113,7 +113,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
-                'True: A/PTR' if self.dns_enabled else 'False'),
+                'True' if self.dns_enabled else 'False'),
             ('Last seen', 'last_seen', self.last_seen),
         )
         return data
