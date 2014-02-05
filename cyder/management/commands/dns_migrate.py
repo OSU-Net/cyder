@@ -44,6 +44,7 @@ class Zone(object):
     def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
         self.domain_id = 541 if domain_id is None else domain_id
         self.dname = self.get_dname() if dname is None else dname
+        self.dname = self.dname.lower()
 
         self.domain = self.gen_domain()
         if self.domain:
@@ -166,6 +167,7 @@ class Zone(object):
 
             name = items['name']
             enabled = bool(items['enabled'])
+            dns_enabled, dhcp_enabled = enabled, enabled
             ip = items['ip']
             ha = items['ha']
             if ip == 0:
@@ -175,7 +177,7 @@ class Zone(object):
                 ha = ""
 
             if ha == "":
-                enabled = False
+                dhcp_enabled = False
 
             # check for duplicate
             static = StaticInterface.objects.filter(
@@ -216,7 +218,7 @@ class Zone(object):
                 label=name, domain=self.domain, mac=clean_mac(ha),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
-                dns_enabled=enabled, dhcp_enabled=enabled,
+                dns_enabled=dns_enabled, dhcp_enabled=dhcp_enabled,
                 last_seen=last_seen)
 
             # create static interface
@@ -226,7 +228,7 @@ class Zone(object):
             except ValidationError:
                 try:
                     static.dhcp_enabled = False
-                    static.dns_enabled = enabled
+                    static.dns_enabled = dns_enabled
                     static.full_clean()
                     static.save(update_range_usage=False)
                 except ValidationError, e:
@@ -443,8 +445,25 @@ def gen_reverses():
                                      is_reverse=True)
 
 
+def gen_reverse_soa():
+    dom, _ = Domain.objects.get_or_create(name='in-addr.arpa')
+    ns1, _ = Nameserver.objects.get_or_create(domain=dom,
+                                              server="ns1.oregonstate.edu")
+    ns2, _ = Nameserver.objects.get_or_create(domain=dom,
+                                              server="ns2.oregonstate.edu")
+    SOA.objects.get_or_create(root_domain=dom, primary="ns1.oregonstate.edu",
+                              contact="hostmaster.oregonstate.edu")
+    public = View.objects.get(name="public")
+    private = View.objects.get(name="private")
+    ns1.views.add(public)
+    ns2.views.add(public)
+    ns1.views.add(private)
+    ns2.views.add(private)
+
+
 def gen_DNS(skip_edu=False):
     gen_reverses()
+    gen_reverse_soa()
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
