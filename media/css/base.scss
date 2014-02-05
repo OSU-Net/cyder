@@ -181,7 +181,6 @@ a.btn {
             background-image: url(../img/settings-hover.png);
         }
     }
-
 }
 
 .header {
@@ -229,6 +228,20 @@ a.btn {
     position: relative;
     float: left;
     margin-left: 5px;
+}
+
+#setDefaultCtnr {
+    #defaultCtnrBtn {
+        color: $white;
+        &:hover {
+            color: $teal;
+            cursor: pointer;
+        }
+    }
+    position: relative;
+    float: left;
+    margin-left: 10px;
+    width: auto;
 }
 
 .settings-menu {
