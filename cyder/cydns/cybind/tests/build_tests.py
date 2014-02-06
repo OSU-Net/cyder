@@ -50,7 +50,7 @@ class DNSBuildTest(TestCase):
 
         self.builder = DNSBuilder(verbose=False, debug=False, **BINDBUILD)
 
-        self.builder.repo.commit_and_push(allow_empty=True,
+        self.builder.repo.commit_and_push(empty=True,
                                           message='Initial commit')
 
         self.builder.repo.get_revision()
