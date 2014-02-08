@@ -29,7 +29,7 @@ PROD_ORIGIN_DIR = '/tmp/cyder_dns_test/prod_origin/'
 
 
 class DNSBuildTest(TestCase):
-    fixtures = ['build_test.json']
+    fixtures = ['dns_build_test.json']
 
     def setUp(self):
         if not os.path.isdir(BINDBUILD['stage_dir']):
@@ -52,8 +52,6 @@ class DNSBuildTest(TestCase):
 
         self.builder.repo.commit_and_push(empty=True,
                                           message='Initial commit')
-
-        self.builder.repo.get_revision()
 
         super(DNSBuildTest, self).setUp()
 
