@@ -33,8 +33,8 @@ class DHCPBuilder(MutexMixin):
             syslog.openlog(b'dhcp_build', 0, syslog.LOG_LOCAL6)
 
         self.repo = GitRepo(self.prod_dir, self.line_change_limit,
-            self.line_removal_limit, debug=True, log_syslog=True,
-            logger=syslog)
+            self.line_removal_limit, debug=self.debug,
+            log_syslog=self.log_syslog, logger=syslog)
 
     def log_debug(self, msg, to_stderr=None):
         if to_stderr is None:
@@ -81,7 +81,8 @@ class DHCPBuilder(MutexMixin):
                    'Reason for skipped build:\n'
                    '{1}'.format(self.stop_file, contents))
             self.log_notice(msg, to_stderr=False)
-            if now - last > self.stop_file_email_interval:
+            if (self.stop_file_email_interval is not None and
+                    now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DHCP builds have stopped")
 

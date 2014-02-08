@@ -451,7 +451,8 @@ class DNSBuilder(MutexMixin):
                    "Reason for skipped build:\n"
                    "{1}".format(self.stop_file, contents))
             self.log_notice(msg, to_stderr=False)
-            if now - last > self.stop_file_email_interval:
+            if (self.stop_file_email_interval is not None and
+                    now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DNS builds have stopped")
 

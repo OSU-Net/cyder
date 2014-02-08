@@ -105,7 +105,7 @@ class GitRepo(VCSRepo):
 
     @classmethod
     def clone(cls, source, dest):
-        run_command('git clone {0} {1}'.format(dirname(source), dest))
+        run_command('git clone {0} {1}'.format(source, dest))
 
     @repo_chdir_wrapper
     def init(self, bare=False):
