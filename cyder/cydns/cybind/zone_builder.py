@@ -182,7 +182,7 @@ def build_zone_data(view, root_domain, soa, logf=None):
                "to find the troublesome record(s)".format(root_domain,
                    view.name))
         fail_mail(msg, subject="Shitty edge case detected.")
-        logf('LOG_WARNING', msg)
+        logf(msg)
         return ''
 
     domains = soa.domain_set.all().order_by('name')
