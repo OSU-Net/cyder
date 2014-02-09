@@ -121,6 +121,5 @@ function clear_form_all(form) {
 }
 
 function is_ajax_form(obj_type) {
-    return obj_type.indexOf('av') >= 0 || obj_type == 'network' ||
-		obj_type == 'range' || obj_type == 'vrf';
+    return obj_type !== undefined && obj_type != 'system-extended';
 }

@@ -135,6 +135,10 @@ def send_email(request):
                       {'form': form})
 
 
+def is_ajax_form(request):
+    return request.META['HTTP_REFERER'].split('/', 1)[1] != 'system/create/'
+
+
 def cy_view(request, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
@@ -159,8 +163,7 @@ def cy_view(request, template, pk=None, obj_type=None):
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
-                    # Adjust this if statement to submit forms with ajax
-                    if obj_type.endswith('_av') or obj_type == 'network':
+                    if is_ajax_form(request):
                         return HttpResponse(json.dumps({'success': True}))
 
                     return redirect(
@@ -171,9 +174,7 @@ def cy_view(request, template, pk=None, obj_type=None):
                     form._errors = ErrorDict()
                 form._errors["__all__"] = ErrorList(e.messages)
 
-        # Adjust this if statement to submit forms with ajax
-        elif obj_type.endswith('_av') or \
-                obj_type in ('network', 'range', 'vrf'):
+        elif is_ajax_form(request):
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
         form = FormKlass(instance=obj)
