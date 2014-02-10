@@ -107,8 +107,6 @@ $(document).ready(function() {
         });
     });
 
-
-
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
@@ -180,7 +178,8 @@ $(document).ready(function() {
         // Show update form on clicking update icon.
         slideUp($('#obj-form'));
         e.preventDefault();
-        if ($(this).hasClass('selected')) {
+        if ($(this).hasClass('selected') |
+                $(this).parents().attr('class') == 'actions_column') {
             form.action = this.href;
             var extra_title = ''
             if(this.href.indexOf(document.location) == -1) {
