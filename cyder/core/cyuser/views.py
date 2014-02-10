@@ -42,7 +42,9 @@ def login_session(request, username):
                              ctnr_id=request.user.get_profile().default_ctnr)
     except CtnrUser.DoesNotExist:
         new_default_ctnr = Ctnr.objects.get(id=2)
-        CtnrUser(user=request.user, ctnr=new_default_ctnr, level=0).save()
+        if not CtnrUser.objects.filter(
+                user=request.user, ctnr=new_default_ctnr).exists():
+            CtnrUser(user=request.user, ctnr=new_default_ctnr, level=0).save()
 
     # Set session ctnr.
     default_ctnr = request.user.get_profile().default_ctnr
