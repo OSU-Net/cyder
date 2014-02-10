@@ -31,6 +31,7 @@
       <form class="form" method="POST">
         <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_obj_type }}</h2>
         <div class="inner-form" id="hidden-inner-form">
+          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
           {{ form.as_p() }}
         </div>
         <div class="form-btns">
