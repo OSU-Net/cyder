@@ -283,8 +283,6 @@ DHCPBUILD = {
     'log_syslog': False,
 }
 
-DHCP_VERBOSE_ERROR_LOG = True
-DHCP_VERBOSE_ERROR_LOG_LOCATION = '/tmp/error.log'
 
 DATETIME_INPUT_FORMATS = (
     '%m/%d/%y %H:%M',
