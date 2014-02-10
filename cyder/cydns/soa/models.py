@@ -196,7 +196,13 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
 
         super(SOA, self).save(*args, **kwargs)
         self.root_domain.soa = self
-        self.root_domain.save()
+        try:
+            self.root_domain.save()
+        except Exception, e:
+            if new:
+                self.delete()
+
+            raise e
 
         if new:
             # Need to call this after save because new objects won't have a pk
