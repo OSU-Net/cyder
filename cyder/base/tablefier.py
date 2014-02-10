@@ -146,9 +146,8 @@ class Tablefier:
                          ('object_type', obj._meta.db_table),
                          ('getUrl', find_get_record_url(obj)),
                          ('prettyObjType', prettify_obj_type(obj_type))],
-                        None],
-               'data-kwargs': '{"obj_type": "' + str(obj._meta.db_table)
-                              + '", "pk": "' + str(obj.id) + '"}',
+                         [('kwargs', '{"obj_type": "' + str(obj._meta.db_table)
+                              + '", "pk": "' + str(obj.id) + '"}')]],
                'class': ['update', 'delete'],
                'img': ['/media/img/update.png', '/media/img/delete.png']}
         return col
