@@ -28,3 +28,10 @@ class BaseModel(models.Model):
                 obj.get().get_detail_url(), obj.get())
             error = mark_safe(error)
         return error
+
+
+class ExpirableMixin(models.Model):
+    expire = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
