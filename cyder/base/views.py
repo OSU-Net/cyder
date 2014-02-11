@@ -142,6 +142,7 @@ def is_ajax_form(request):
 def cy_view(request, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
     obj_type = obj_type or request.path.split('/')[2]
 
     Klass, FormKlass = get_klasses(obj_type)
