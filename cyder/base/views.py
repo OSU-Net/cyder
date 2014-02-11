@@ -252,11 +252,7 @@ def cy_delete(request):
 
     object_type = request.POST.get('obj_type', None)
     pk = request.POST.get('pk', None)
-    if (object_type in ['static_interface', 'dynamic_interface'] or
-            'av' in object_type):
-        object_type = object_type.replace('_', '')
-
-    Klass = get_model('cyder', object_type)
+    Klass = get_model('cyder', object_type.replace('_', ''))
     obj = Klass.objects.filter(id=pk)
     if obj.exists():
         obj = obj.get()
