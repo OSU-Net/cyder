@@ -20,7 +20,6 @@ urlpatterns = patterns(
     '',
     url(r'^$', cydns_index, name='cydns-index'),
 
-    url(r'^record/get/', cydns_get_update_form, name='cydns-get-record'),
     url(r'^record/search/', cydns_search_obj, name='cydns-search-record'),
 
     url(r'^address_record/', include('cyder.cydns.address_record.urls')),

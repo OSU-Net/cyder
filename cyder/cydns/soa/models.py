@@ -53,6 +53,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     similar ``primary`` and ``contact`` value.
     """
 
+    pretty_type = 'SOA'
+
     id = models.AutoField(primary_key=True)
     ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
                                       validators=[validate_ttl],

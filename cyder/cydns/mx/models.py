@@ -18,6 +18,8 @@ class MX(LabelDomainMixin, CydnsRecord):
     >>> MX(label=label, domain=domain, server=server, priority=prio,
     ...     ttl=tll)
     """
+    pretty_type = 'MX'
+
     id = models.AutoField(primary_key=True)
     # The mail server this record should point to.
     server = models.CharField(max_length=100, validators=[validate_fqdn],
