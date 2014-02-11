@@ -14,11 +14,13 @@ from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
 from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
-from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
+from cyder.base.constants import (ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE,
+                                  get_klasses)
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, tablefy)
 from cyder.base.mixins import UsabilityFormMixin
+from cyder.base.utils import django_pretty_type
 from cyder.core.cyuser.utils import perm, perm_soft
 from cyder.core.cyuser.models import User
 from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_update_session
@@ -27,7 +29,7 @@ from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.views import edit_user
 from cyder.core.ctnr.models import CtnrUser
 
-import settings
+import cyder.settings
 
 
 def home(request):
@@ -133,12 +135,12 @@ def send_email(request):
                       {'form': form})
 
 
-def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
+def cy_view(request, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
     obj_type = obj_type or request.path.split('/')[2]
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
     if request.method == 'POST':
         object_table = None
@@ -158,7 +160,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                         obj.ctnr_set.add(request.session['ctnr'])
 
                     # Adjust this if statement to submit forms with ajax
-                    if 'AV' in FormKlass.__name__:
+                    if obj_type.endswith('_av'):
                         return HttpResponse(json.dumps({'success': True}))
 
                     return redirect(
@@ -170,7 +172,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
                 form._errors["__all__"] = ErrorList(e.messages)
 
         # Adjust this if statement to submit forms with ajax
-        elif 'AV' in FormKlass.__name__:
+        elif obj_type.endswith('_av'):
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
         form = FormKlass(instance=obj)
@@ -191,6 +193,7 @@ def cy_view(request, get_klasses_fn, template, pk=None, obj_type=None):
         'page_obj': page_obj,
         'object_table': object_table,
         'obj_type': obj_type,
+        'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
     })
 
@@ -250,9 +253,9 @@ def cy_delete(request):
     if not request.POST:
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    object_type = request.POST.get('obj_type', None)
+    obj_type = request.POST.get('obj_type', None)
     pk = request.POST.get('pk', None)
-    Klass = get_model('cyder', object_type.replace('_', ''))
+    Klass, _ = get_klasses(obj_type)
     obj = Klass.objects.filter(id=pk)
     if obj.exists():
         obj = obj.get()
@@ -318,15 +321,17 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
         'obj': obj,
         'obj_table': table,
         'obj_type': obj_type,
+        'pretty_obj_type': (django_pretty_type(obj_type) or
+                            get_klasses(obj_type)[0].pretty_type),
         'tables': tables
     }.items() + kwargs.items()))
 
 
-def get_update_form(request, get_klasses_fn):
+def get_update_form(request):
     """
     Update view called asynchronously from the list_create view
     """
-    obj_type = request.GET.get('object_type', '')
+    obj_type = request.GET.get('obj_type', '')
     record_pk = request.GET.get('pk', '')
     related_type = request.GET.get('related_type', '')
     related_pk = request.GET.get('related_pk', '')
@@ -337,16 +342,13 @@ def get_update_form(request, get_klasses_fn):
     if not obj_type:
         raise Http404
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = get_klasses(obj_type)
     try:
         # Get the object if updating.
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
             if perm(request, ACTION_UPDATE, obj=record):
-                if FormKlass:
-                    form = FormKlass(instance=record)
-                else:
-                    form = FQDNFormKlass(instance=record)
+                form = FormKlass(instance=record)
         else:
             #  Get form to create a new object and prepopulate
             if related_type and related_pk:
@@ -393,22 +395,19 @@ def get_update_form(request, get_klasses_fn):
         raise Http404
 
     if related_type in form.fields:
-        if 'interface' in related_type:
-            related_type = related_type.replace('_', '')
-
-        RelatedKlass = get_model('cyder', related_type)
+        RelatedKlass, _ = get_klasses(related_type)
         form.fields[related_type] = ModelChoiceField(
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
-    if issubclass(type(form), UsabilityFormMixin):
+    if isinstance(form, UsabilityFormMixin):
         form.make_usable(request)
 
     return HttpResponse(
         json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
 
 
-def search_obj(request, get_klasses_fn):
+def search_obj(request):
     """
     Returns a list of objects of 'obj_type' matching 'term'.
     """
@@ -417,7 +416,7 @@ def search_obj(request, get_klasses_fn):
     if not (obj_type and term):
         raise Http404
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(obj_type)
+    Klass, FormKlass = get_klasses(obj_type)
 
     records = Klass.objects.filter(make_megafilter(Klass, term))[:15]
     records = [{'label': str(record), 'pk': record.pk} for record in records]
@@ -425,16 +424,16 @@ def search_obj(request, get_klasses_fn):
     return HttpResponse(json.dumps(records))
 
 
-def table_update(request, pk, get_klasses_fn, object_type=None):
+def table_update(request, pk, obj_type=None):
     """
     Called from editableGrid tables when updating a field. Try to update
     an object specified by pk with the post data.
     """
-    # Infer object_type from URL, saves trouble of having to specify
+    # Infer obj_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
-    object_type = object_type or request.path.split('/')[2]
+    obj_type = obj_type or request.path.split('/')[2]
 
-    Klass, FormKlass, FQDNFormKlass = get_klasses_fn(object_type)
+    Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk)
 
     if not perm_soft(request, ACTION_UPDATE, obj=obj):

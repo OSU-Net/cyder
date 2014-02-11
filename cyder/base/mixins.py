@@ -5,6 +5,7 @@ from string import Template
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db.models.loading import get_model
 from django.forms import ModelChoiceField, HiddenInput
+from django import forms
 
 from cyder.base.utils import filter_by_ctnr
 
@@ -83,6 +84,10 @@ class ObjectUrlMixin(object):
         return {'url': self.get_table_update_url()}
 
 
+class ExpirableFormMixin(object):
+    expire = forms.DateTimeField()
+
+
 class UsabilityFormMixin(object):
     def append_required_all(self):
         for fieldname, field in self.fields.items():
@@ -136,7 +141,7 @@ class UsabilityFormMixin(object):
             system_name = System.objects.get(
                 pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(
-                widget=HiddenInput(attrs={'title': system_name}),
+                widget=HiddenInput(),
                 empty_label='',
                 queryset=System.objects.filter(pk=int(self.initial['system'])))
         elif 'system' in self.fields:

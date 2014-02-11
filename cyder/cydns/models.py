@@ -41,6 +41,10 @@ class LabelDomainMixin(models.Model):
     "the total number of octets that represent a name (i.e., the sum of
     all label octets and label lengths) is limited to 255" - RFC 4471
     """
+    @property
+    def pretty_name(self):
+        return self.fqdn
+
     domain = models.ForeignKey(Domain, null=False)
     # "The length of any one label is limited to between 1 and 63 octets."
     # -- RFC218

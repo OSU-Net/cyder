@@ -14,8 +14,8 @@ class SystemForm(forms.ModelForm):
 class ExtendedSystemForm(forms.ModelForm, UsabilityFormMixin):
     interface_type = forms.ChoiceField(
         widget=forms.RadioSelect, choices=(
-            ('Static', 'Static Interface'),
-            ('Dynamic', 'Dynamic Interface')))
+            ('static_interface', 'Static Interface'),
+            ('dynamic_interface', 'Dynamic Interface')))
 
     class Meta:
         model = System

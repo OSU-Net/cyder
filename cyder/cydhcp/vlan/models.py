@@ -13,6 +13,12 @@ from cyder.cydhcp.utils import networks_to_Q
 
 
 class Vlan(BaseModel, ObjectUrlMixin):
+    @property
+    def pretty_name(self):
+        return self.name
+
+    pretty_type = 'VLAN'
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     number = models.PositiveIntegerField()

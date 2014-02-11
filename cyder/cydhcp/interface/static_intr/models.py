@@ -15,6 +15,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.models import ExpirableMixin
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -27,7 +28,7 @@ from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
 from cyder.cydns.domain.models import Domain
 
 
-class StaticInterface(BaseAddressRecord, BasePTR):
+class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     # Keep in mind that BaseAddressRecord will have it's methods called before
     # BasePTR
     """The StaticInterface Class.
@@ -53,6 +54,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     'update_reverse_domain' set to True. This will ensure that its A record is
     valid *and* that its PTR record is valid.
     """
+
+    pretty_type = 'static interface'
 
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('cyder.Ctnr', null=False,

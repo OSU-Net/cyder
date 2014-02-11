@@ -15,6 +15,9 @@ class SRV(CydnsRecord):
     >>> SRV(label=label, domain=domain, target=target, port=port,
     ... priority=priority, weight=weight, ttl=ttl)
     """
+
+    pretty_type = 'SRV'
+
     id = models.AutoField(primary_key=True)
     label = models.CharField(max_length=63, blank=True,
                              validators=[validate_srv_label],

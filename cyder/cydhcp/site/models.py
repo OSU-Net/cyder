@@ -26,11 +26,10 @@ class Site(BaseModel, ObjectUrlMixin):
         unique_together = ('name', 'parent')
 
     def __str__(self):
-        name = self.name.title()
         if self.parent:
-            return "%s in %s" % (name, self.parent.get_full_name())
+            return "%s in %s" % (self.name, self.parent.get_full_name())
         else:
-            return name
+            return self.name
 
     def __repr__(self):
         return "<Site {0}>".format(str(self))

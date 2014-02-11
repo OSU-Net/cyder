@@ -2,7 +2,7 @@ from django.conf.urls.defaults import include, patterns, url
 from django.views.generic.simple import direct_to_template
 
 from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
-                                cydhcp_get_update_form, cydhcp_search_obj)
+                                cydhcp_search_obj)
 from cyder.cydhcp.constants import DHCP_EAV_MODELS
 
 
@@ -22,7 +22,6 @@ urlpatterns = patterns(
     '',
     url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_index.html'},
         name='cydhcp-index'),
-    url(r'^record/get/', cydhcp_get_update_form, name='cydhcp-get-record'),
     url(r'^record/search/', cydhcp_search_obj, name='cydhcp-search-record'),
     url(r'^build/', include('cyder.cydhcp.build.urls')),
     url(r'^network/', include('cyder.cydhcp.network.urls')),
