@@ -121,7 +121,7 @@ class GenericViewTests(object):
             res = self.client.post(
                 self.test_obj.get_delete_url(),
                 {'follow': True, 'pk': self.test_obj.id,
-                 'obj_type': self.test_obj.__class__._meta.db_table})
+                 'obj_type': self.test_obj._meta.db_table})
 
             self.assertTrue(res.status_code in (302, 200),
                             'Response code %s' % res.status_code)
