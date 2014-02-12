@@ -8,10 +8,12 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
+from cyder.core.system.validators import validate_no_spaces
 
 
 class System(BaseModel, ObjectUrlMixin):
-    name = models.CharField(max_length=255, unique=False)
+    name = models.CharField(max_length=255, unique=False,
+                            validators=[validate_no_spaces])
 
     search_fields = ('name',)
     display_fields = ('name',)
