@@ -255,7 +255,6 @@ def cy_delete(request):
 
     obj_type = request.POST.get('obj_type', None)
     pk = request.POST.get('pk', None)
-
     Klass, _ = get_klasses(obj_type)
     obj = Klass.objects.filter(id=pk)
     if obj.exists():
