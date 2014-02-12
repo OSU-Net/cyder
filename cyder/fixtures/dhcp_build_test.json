@@ -2295,7 +2295,7 @@
    "range": 1,
    "dhcp_enabled": false,
    "ctnr": 3,
-   "last_seen": 0
+   "last_seen": "2014-02-08T14:30:46"
   }
  },
  {
@@ -2310,7 +2310,7 @@
    "range": 1,
    "dhcp_enabled": true,
    "ctnr": 3,
-   "last_seen": 0
+   "last_seen": "2014-02-08T14:33:07"
   }
  },
  {
@@ -2325,7 +2325,7 @@
    "range": 3,
    "dhcp_enabled": true,
    "ctnr": 3,
-   "last_seen": 0
+   "last_seen": "2014-02-08T14:35:18"
   }
  },
  {
@@ -2340,7 +2340,7 @@
    "range": 4,
    "dhcp_enabled": true,
    "ctnr": 3,
-   "last_seen": 0
+   "last_seen": "2014-02-08T14:37:58"
   }
  }
 ]
