@@ -21,6 +21,9 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     >>> CNAME(label = label, domain = domain, target = target)
 
     """
+
+    pretty_type = 'CNAME'
+
     # TODO cite an RFC for that ^ (it's around somewhere)
     id = models.AutoField(primary_key=True)
     target = models.CharField(max_length=100, validators=[validate_fqdn])

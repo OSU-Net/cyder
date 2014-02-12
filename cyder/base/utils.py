@@ -165,3 +165,24 @@ def remove_dir_contents(dir_name):
             shutil.rmtree(file_path)
         else:
             os.remove(file_path)
+
+
+class classproperty(property):
+    """Enables you to make a classmethod a property"""
+    def __get__(self, cls, obj):
+        return self.fget.__get__(None, obj)()
+
+
+def simple_descriptor(func):
+    class SimpleDescriptor(object):
+        pass
+    SimpleDescriptor.__get__ = func
+
+    return SimpleDescriptor()
+
+
+def django_pretty_type(obj_type):
+    if obj_type == 'user':
+        return 'user'
+    else:
+        return None

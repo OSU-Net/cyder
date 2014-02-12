@@ -339,7 +339,7 @@ class DNSBuilder(MutexMixin):
                              format(view.name), root_domain=root_domain)
                     t_start = time.time()  # tic
                     view_data = build_zone_data(view, root_domain, soa,
-                                                logf=self.log_debug)
+                                                logf=self.log_notice)
                     build_time = time.time() - t_start  # toc
                     self.log_debug('< {0} > Built {1} data in {2} seconds'
                              .format(view.name, soa, build_time),

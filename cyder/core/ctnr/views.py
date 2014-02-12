@@ -13,7 +13,6 @@ from cyder.base.utils import tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm, CtnrObjectForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.backends import _has_perm
-from cyder.core.views import CoreCreateView
 
 
 class CtnrView(object):
@@ -78,7 +77,8 @@ def ctnr_detail(request, pk):
     add_user_form = CtnrUserForm(initial={'ctnr': ctnr})
 
     return render(request, 'ctnr/ctnr_detail.html', {
-        'object': ctnr,
+        'obj': ctnr,
+        'pretty_obj_type': ctnr.pretty_type,
         'obj_type': 'ctnr',
         'user_table': user_table,
         'domain_table': domain_table,
@@ -145,7 +145,7 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
                 'url': reverse('ctnr-update-user',
                                kwargs={'ctnr_pk': ctnr.id}),
                 'img': '/media/img/remove.png',
-                'class': 'remove-user'
+                'class': 'remove user'
             })
 
     extra_cols[0]['data'] = level_data
@@ -171,7 +171,7 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
             'url': reverse('ctnr-remove-object', kwargs={
                 'ctnr_pk': ctnr.id}),
             'img': '/media/img/remove.png',
-            'class': 'remove-object'
+            'class': 'remove object'
         })
         objs.append(obj)
     extra_cols[0]['data'] = remove_data
@@ -319,31 +319,6 @@ def add_user(request, ctnr, name):
 
     ctnruser.save()
     return HttpResponse(json.dumps({'success': True}))
-
-
-class CtnrCreateView(CtnrView, CoreCreateView):
-    def post(self, request, *args, **kwargs):
-        ctnr_form = CtnrForm(request.POST)
-
-        # Try to save the ctnr.
-        try:
-            # TODO: ACLs
-            ctnr = ctnr_form.save(commit=False)
-        except ValueError:
-            return render(request, 'ctnr/ctnr_form.html', {'form': ctnr_form})
-
-        ctnr.save()
-
-        # Update ctnr-related session variables.
-        request.session['ctnrs'].append(ctnr)
-        ctnr_names = json.loads(request.session['ctnr_names_json'])
-        ctnr_names.append(ctnr.name)
-        request.session['ctnr_names_json'] = json.dumps(ctnr_names)
-
-        return redirect(reverse('ctnr-detail', args=[ctnr.id]))
-
-    def get(self, request, *args, **kwargs):
-        return super(CtnrCreateView, self).get(request, *args, **kwargs)
 
 
 def change_ctnr(request, pk=None):

@@ -14,6 +14,8 @@ from cyder.core.validation import validate_ctnr_name
 
 
 class Ctnr(BaseModel, ObjectUrlMixin):
+    pretty_type = 'container'
+
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True,
                             validators=[validate_ctnr_name])

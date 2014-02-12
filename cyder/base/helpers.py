@@ -11,6 +11,8 @@ from django.db.models import ForeignKey
 
 from jingo import register
 
+from cyder.base.constants import get_klasses
+
 
 mac_re = re.compile("(([0-9a-f]){2}:){5}([0-9a-f]){2}$")
 
@@ -120,28 +122,11 @@ urlparams = register.filter(urlparams)
 
 @register.filter
 def prettify_obj_type(obj_type, *args, **kwargs):
-    """
-    Turns all-lowercase record type string to all caps or splits into
-    words if underscore.
-    e.g. 'cname' to 'CNAME' and 'address_record' to 'Address Record'
-    """
-    if not obj_type:
-        return
+    return get_klasses(obj_type)[0].pretty_type
 
-    acronyms = ('cname', 'mx', 'ptr', 'srv', 'sshfp', 'txt', 'ns', 'soa',
-                'vlan', 'vrf')
-
-    obj_type = obj_type.lower()
-
-    if obj_type in acronyms:
-        return obj_type.upper()
-    else:
-        prettified = capwords(obj_type.replace('_', ' '))
-
-        if prettified.endswith(' Av'):
-            prettified = prettified[:-len('Av')] + 'attribute'
-        return prettified
-
+@register.filter
+def smart_capitalize(x):
+    return x[0].upper() + x[1:]
 
 @register.function
 def a_or_an(next_word):

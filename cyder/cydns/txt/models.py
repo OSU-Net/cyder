@@ -11,6 +11,7 @@ class TXT(LabelDomainMixin, CydnsRecord):
     """
     >>> TXT(label=label, domain=domain, txt_data=txt_data)
     """
+    pretty_type = 'TXT'
 
     id = models.AutoField(primary_key=True)
     txt_data = models.TextField(
@@ -53,6 +54,10 @@ class TXT(LabelDomainMixin, CydnsRecord):
                  "{rdtype:$rdtype_just} {txt_data:$rhs_just}")
 
     @property
+    def escaped_txt_data(self):
+        return self.txt_data.replace('"', '\\"').replace('\\', '\\\\')
+
+    @property
     def rdtype(self):
         return 'TXT'
 
@@ -62,14 +67,14 @@ class TXT(LabelDomainMixin, CydnsRecord):
         if not self.ttl:
             self.ttl = 3600
 
-        txt_lines = self.txt_data.split('\n')
+        txt_lines = self.escaped_txt_data.split('\n')
         if len(txt_lines) > 1:
             txt_data = '('
-            for line in self.txt_data.split('\n'):
+            for line in self.escaped_txt_data.split('\n'):
                 txt_data += '"{0}"\n'.format(line)
             txt_data = txt_data.strip('\n') + ')'
         else:
-            txt_data = '"{0}"'.format(self.txt_data)
+            txt_data = '"{0}"'.format(self.escaped_txt_data)
 
         return template.format(
             bind_name=bind_name, ttl=self.ttl, rdtype=self.rdtype,

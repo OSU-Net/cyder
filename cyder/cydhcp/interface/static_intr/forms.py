@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 import ipaddr
 
 from cyder.base.eav.forms import get_eav_form
-from cyder.base.mixins import UsabilityFormMixin
+from cyder.base.mixins import UsabilityFormMixin, ExpirableFormMixin
 from cyder.core.system.models import System
 from cyder.cydhcp.forms import RangeWizard
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
@@ -31,7 +31,8 @@ class CombineForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
-class StaticInterfaceForm(RangeWizard, ViewChoiceForm, UsabilityFormMixin):
+class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
+                          UsabilityFormMixin, ExpirableFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
@@ -42,7 +43,8 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm, UsabilityFormMixin):
         self.fields.keyOrder = ['system', 'description', 'label', 'domain',
                                 'mac', 'vrf', 'site', 'range', 'ip_type',
                                 'next_ip', 'ip_str', 'ttl', 'workgroup',
-                                'views', 'dhcp_enabled', 'dns_enabled', 'ctnr']
+                                'expire', 'views', 'dhcp_enabled',
+                                'dns_enabled', 'ctnr']
 
     class Meta:
         model = StaticInterface

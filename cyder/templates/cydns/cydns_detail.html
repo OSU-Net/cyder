@@ -2,15 +2,15 @@
 
 
 {% block sidebar %}
-  {% include "cydns/includes/cydns_sidebar.html" %}
+  {% include "base/sidebar.html" %}
 {% endblock %}
 
 {% block view_metadata %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-objPK="{{ obj.pk }}"
-        data-prettyObjType="{{ obj_type|prettify_obj_type + 's' }}"
-        data-getUrl="{{ url('cydns-get-record') }}"
+        data-prettyObjType="{{ obj.pretty_type }}"
+        data-getUrl="{{ url('get-update-form') }}"
         data-objName="{{ obj }}"
         data-csrfToken="{{ csrf_token }}">
   </span>

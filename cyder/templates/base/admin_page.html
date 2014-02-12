@@ -3,6 +3,11 @@
 {% block title %}Administration {% endblock %}
 
 {% block header %}Administration {% endblock %}
+
+{% block sidebar %}
+    {% include "base/sidebar.html" %}
+{% endblock %}
+
 {% block content %}
 <span id="data"
     data-SearchUserUrl="{{ url('user-search') }}"

@@ -15,6 +15,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.models import ExpirableMixin
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -27,7 +28,7 @@ from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
 from cyder.cydns.domain.models import Domain
 
 
-class StaticInterface(BaseAddressRecord, BasePTR):
+class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     # Keep in mind that BaseAddressRecord will have it's methods called before
     # BasePTR
     """The StaticInterface Class.
@@ -54,6 +55,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     valid *and* that its PTR record is valid.
     """
 
+    pretty_type = 'static interface'
+
     id = models.AutoField(primary_key=True)
     ctnr = models.ForeignKey('cyder.Ctnr', null=False,
                              verbose_name="Container")
@@ -71,8 +74,7 @@ class StaticInterface(BaseAddressRecord, BasePTR):
     dns_enabled = models.BooleanField(verbose_name='Enable DNS?',
                                       default=True)
 
-    last_seen = models.PositiveIntegerField(
-        max_length=11, blank=True, default=0)
+    last_seen = models.DateTimeField(null=True, blank=True)
 
     search_fields = ('mac', 'ip_str', 'fqdn')
 
@@ -105,13 +107,6 @@ class StaticInterface(BaseAddressRecord, BasePTR):
 
     def details(self):
         data = super(StaticInterface, self).details()
-        if self.last_seen == 0:
-            date = 0
-
-        else:
-            date = datetime.datetime.fromtimestamp(self.last_seen)
-            date = date.strftime('%B %d, %Y, %I:%M %p')
-
         data['data'] = (
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
@@ -121,8 +116,8 @@ class StaticInterface(BaseAddressRecord, BasePTR):
             ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
-                'True: A/PTR' if self.dns_enabled else 'False'),
-            ('Last seen', 'last_seen', date),
+                'True' if self.dns_enabled else 'False'),
+            ('Last seen', 'last_seen', self.last_seen),
         )
         return data
 

@@ -70,6 +70,7 @@ def range_detail(request, pk):
     return render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
+        'pretty_obj_type': mrange.pretty_type,
         'ranges_table': tablefy((mrange,), info=False, request=request),
         'range_data': make_paginator(request, range_data, 50),
         'range_type': range_type,

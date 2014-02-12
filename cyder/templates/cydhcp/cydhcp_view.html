@@ -1,23 +1,22 @@
 {% extends "base/list.html" %}
 
-{% set pretty_obj_type = obj_type|prettify_obj_type %}
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
-{% block title %} {{ pretty_obj_type + "s" }} {% endblock %}
-
 {% block sidebar %}
-    {% include "cydhcp/includes/cydhcp_sidebar.html" %}
+    {% include "base/sidebar.html" %}
 {% endblock %}
 
 {% block action_bar %}
   {% if obj_type_perm %}
-    {% if pretty_obj_type in ["Static Interface", "Dynamic Interface"] %}
+    {% if obj_type in ["static_interface", "dynamic_interface"] %}
       {{ js('interface_delete') }}
       <a class="btn submit c" href={{ url('system-create') }}
-          data-kwargs='{"initial": "True", "interface_type": "{{ pretty_obj_type|replace(' Interface', '') }}"}'
-          id="system_create">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+          data-kwargs='{"initial": "True", "interface_type": "{{ obj_type }}"}'
+          id="system_create">Create {{ pretty_obj_type }}</a>
     {% else %}
-      <a id ="btn create-obj" class="btn create-obj">Create {{ a_or_an(obj_type) }} {{ pretty_obj_type }}</a>
+      <a id="btn create-obj" class="btn create-obj">
+        Create {{ pretty_obj_type }}
+      </a>
     {% endif %}
   {% endif %}
 {% endblock %}
@@ -30,7 +29,7 @@
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"
         data-searchUrl="{{ url('cydhcp-search-record') }}"
-        data-getUrl="{{ url('cydhcp-get-record') }}"
+        data-getUrl="{{ url('get-update-form') }}"
         data-csrfToken="{{ csrf_token }}">
   </span>
   {% if obj_type_perm and form %}
@@ -38,6 +37,7 @@
       <form class="form" method="POST">
         <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_obj_type }}</h2>
         <div class="inner-form" id="hidden-inner-form">
+          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
           {{ form.as_p() }}
         </div>
         <div class="form-btns">

@@ -32,6 +32,8 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
     ... algorithm_number=algo_num, fingerprint_type=fing_type)
     """
 
+    pretty_type = 'SSHFP'
+
     id = models.AutoField(primary_key=True)
     key = models.CharField(max_length=256, validators=[validate_sha1])
     algorithm_number = models.PositiveIntegerField(

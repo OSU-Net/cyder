@@ -2,6 +2,11 @@
 {% block title %}Bug Report {% endblock %}
 
 {% block header %}Bug Report {% endblock %}
+
+{% block sidebar %}
+    {% include "base/sidebar.html" %}
+{% endblock %}
+
 {% block content %}
 <form class="form" id="Bug-Report" method="POST" action="">
   <h3>Report a Bug</h3>

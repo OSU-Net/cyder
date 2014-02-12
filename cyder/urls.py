@@ -7,7 +7,7 @@ patch()
 from cyder.api.v1.routes import router
 
 from cyder.core.views import core_index
-from cyder.base.views import send_email, admin_page, cy_delete
+from cyder.base.views import send_email, admin_page, cy_delete, get_update_form
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -23,6 +23,7 @@ urlpatterns = patterns(
     url(r'^dhcp/',   include('cyder.cydhcp.urls')),
     url(r'^dns/',    include('cyder.cydns.urls')),
     url(r'^eav/',    include('cyder.base.eav.urls')),
+    url(r'^get-update-form/', get_update_form, name='get-update-form'),
     url(r'^api/api', include('rest_framework.urls',
         namespace='rest_framework')),
     url(r'^search/', include('cyder.search.urls')),
