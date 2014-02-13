@@ -125,7 +125,8 @@ def _render_reverse_zone(default_ttl, nameserver_set, interface_set,
     return BUILD_STR
 
 
-def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter):
+def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter,
+                        ip_type='4'):
     data = _render_reverse_zone(
         default_ttl=DEFAULT_TTL,
 
@@ -142,7 +143,7 @@ def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter):
                                             'ip_lower'),
 
         range_set=Range.objects
-        .filter(domain_mega_filter)
+        .filter(ip_type=ip_type)
         .filter(views__name=view.name)
         .order_by('start_upper', 'start_lower'),
 
@@ -202,8 +203,9 @@ def build_zone_data(view, root_domain, soa, logf=None):
         if ztype == "forward":
             view_data = render_forward_zone(view, domain_mega_filter)
         else:
+            ip_type = '6' if 'ip6.arpa' in root_domain.name else '4'
             view_data = render_reverse_zone(view, domain_mega_filter,
-                                            rdomain_mega_filter)
+                                            rdomain_mega_filter, ip_type=ip_type)
     except View.DoesNotExist:
         view_data = ""
 
