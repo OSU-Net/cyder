@@ -1,5 +1,6 @@
 from django.db.models import Q
 
+from cyder.base.constants import IP_TYPE_4, IP_TYPE_6
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.mx.models import MX
@@ -126,17 +127,18 @@ def _render_reverse_zone(default_ttl, nameserver_set, interface_set,
 
 
 def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter,
-                        ip_type='4'):
+                        ip_type=IP_TYPE_4):
     data = _render_reverse_zone(
         default_ttl=DEFAULT_TTL,
 
         nameserver_set=Nameserver.objects.filter(domain_mega_filter).filter(
             views__name=view.name).order_by('server'),
 
-        interface_set=StaticInterface.objects.filter(
-            rdomain_mega_filter, dns_enabled=True).filter(
-                views__name=view.name).order_by(
-                    'pk', 'ip_type', 'label', 'ip_upper', 'ip_lower'),
+        interface_set=(
+            StaticInterface.objects
+            .filter(rdomain_mega_filter, dns_enabled=True)
+            .filter(views__name=view.name)
+            .order_by('pk', 'ip_type', 'label', 'ip_upper', 'ip_lower')),
 
         ptr_set=PTR.objects.filter(rdomain_mega_filter).filter(
             views__name=view.name).order_by('pk', 'ip_upper',
@@ -180,8 +182,8 @@ def build_zone_data(view, root_domain, soa, logf=None):
         msg = ("The {0} zone has at least one record in the {1} view, but "
                "there are no nameservers in that view. A zone file for {1} "
                "won't be built. Use the search string 'zone=:{0} view=:{1}' "
-               "to find the troublesome record(s)".format(root_domain,
-                   view.name))
+               "to find the troublesome record(s)"
+               .format(root_domain, view.name))
         fail_mail(msg, subject="Shitty edge case detected.")
         logf(msg)
         return ''
@@ -203,9 +205,10 @@ def build_zone_data(view, root_domain, soa, logf=None):
         if ztype == "forward":
             view_data = render_forward_zone(view, domain_mega_filter)
         else:
-            ip_type = '6' if 'ip6.arpa' in root_domain.name else '4'
-            view_data = render_reverse_zone(view, domain_mega_filter,
-                                            rdomain_mega_filter, ip_type=ip_type)
+            ip_type = (IP_TYPE_6 if root_domain.name.endswith('ip6.arpa')
+                       else IP_TYPE_4)
+            view_data = render_reverse_zone(
+                view, domain_mega_filter, rdomain_mega_filter, ip_type=ip_type)
     except View.DoesNotExist:
         view_data = ""
 
