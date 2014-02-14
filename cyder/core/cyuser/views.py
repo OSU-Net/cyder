@@ -42,7 +42,9 @@ def login_session(request, username):
                              ctnr_id=request.user.get_profile().default_ctnr)
     except CtnrUser.DoesNotExist:
         new_default_ctnr = Ctnr.objects.get(id=2)
-        CtnrUser(user=request.user, ctnr=new_default_ctnr, level=0).save()
+        if not CtnrUser.objects.filter(
+                user=request.user, ctnr=new_default_ctnr).exists():
+            CtnrUser(user=request.user, ctnr=new_default_ctnr, level=0).save()
 
     # Set session ctnr.
     default_ctnr = request.user.get_profile().default_ctnr
@@ -155,6 +157,17 @@ def clone_perms(request, user_id):
             ctnr_user.save()
 
     return HttpResponse(json.dumps({'success': True}))
+
+
+def set_default_ctnr(request):
+    if not request.POST:
+        return redirect(request.META.get('HTTP_REFERER', ''))
+
+    user = request.user.get_profile()
+    user.default_ctnr = request.session['ctnr']
+    user.save()
+
+    return redirect(request.META.get('HTTP_REFERER', ''))
 
 
 def delete(request, user_id):

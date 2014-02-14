@@ -54,7 +54,12 @@
              class="header-icon currentCtnr {{ 'selected' if
                 request.session.ctnr.get_detail_url() == request.path }}"
              href="{{ request.session.ctnr.get_detail_url() }}"></a>
+          <form id="setDefaultCtnr" action="{{ url('set-default-ctnr') }}" method="post">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+              <a id="defaultCtnrBtn" class="submit">Set as default container?</a>
+          </form>
       </div>
+
         </span>
         <span id="search-header" class="header search">
           <form id="search" action="{{ url('search') }}" method="get">
@@ -96,6 +101,10 @@
         class="header-icon currentCtnr {{ 'selected' if
            request.session.ctnr.get_detail_url() == request.path }}"
         href="{{ request.session.ctnr.get_detail_url() }}"></a>
+          <form id="setDefaultCtnr" action="{{ url('set-default-ctnr') }}" method="post">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+              <a id="defaultCtnrBtn" class="submit">Set as default container?</a>
+          </form>
     </div>
     <div class="container message">
       {% if messages %}
