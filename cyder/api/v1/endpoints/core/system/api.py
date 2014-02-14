@@ -1,6 +1,7 @@
 from rest_framework import serializers, viewsets
 
-from cyder.api.v1.endpoints.api import CommonAPINestedAVSerializer
+from cyder.api.v1.endpoints.api import (CommonAPINestedAVSerializer,
+                                        CommonAPIViewSet)
 from cyder.core.system.models import System, SystemAV
 
 
@@ -37,7 +38,7 @@ class SystemSerializer(serializers.ModelSerializer):
         model = System
 
 
-class SystemViewSet(viewsets.ModelViewSet):
+class SystemViewSet(CommonAPIViewSet):
     queryset = System.objects.all()
     serializer_class = SystemSerializer
     avmodel = SystemAV
