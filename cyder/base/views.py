@@ -256,13 +256,9 @@ def cy_delete(request):
     if not request.POST:
         return redirect(request.META.get('HTTP_REFERER', ''))
 
-    object_type = request.POST.get('obj_type', None)
+    obj_type = request.POST.get('obj_type', None)
     pk = request.POST.get('pk', None)
-    if (object_type in ['static_interface', 'dynamic_interface'] or
-            'av' in object_type):
-        object_type = object_type.replace('_', '')
-
-    Klass = get_model('cyder', object_type)
+    Klass, _ = get_klasses(obj_type)
     obj = Klass.objects.filter(id=pk)
     if obj.exists():
         obj = obj.get()
@@ -402,15 +398,12 @@ def get_update_form(request):
         raise Http404
 
     if related_type in form.fields:
-        if 'interface' in related_type:
-            related_type = related_type.replace('_', '')
-
-        RelatedKlass = get_model('cyder', related_type)
+        RelatedKlass, _ = get_klasses(related_type)
         form.fields[related_type] = ModelChoiceField(
             widget=HiddenInput, empty_label=None,
             queryset=RelatedKlass.objects.filter(pk=int(related_pk)))
 
-    if issubclass(type(form), UsabilityFormMixin):
+    if isinstance(form, UsabilityFormMixin):
         form.make_usable(request)
 
     return HttpResponse(
