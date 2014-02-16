@@ -139,9 +139,7 @@ $(document).ready(function() {
                         $('#obj-form form')[0].action = $createBtn.attr('href');
                         $('.form-btns a.submit').text(
                             'Create ' + formPrettyObjType);
-                        if (is_ajax_form(formObjType)) {
-                            $('.form-btns a.submit').attr('class', 'btn c');
-                        };
+                        $('.form-btns a.submit').attr('class', 'btn c');
                         $('#obj-form').slideToggle();
                     }, 'json');
             } else {
@@ -157,9 +155,7 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit').text('Create ' + prettyObjType);
 
-                if (is_ajax_form(objType)) {
-                    $('.form-btns a.submit').attr('class', 'btn c');
-                };
+                $('.form-btns a.submit').attr('class', 'btn c');
                 $('#obj-form').slideToggle();
             }
             $('.form').append($('<input>',
@@ -191,9 +187,7 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit').text('Update ' + formPrettyObjType);
 
-                if (is_ajax_form(formObjType)) {
-                    $('.form-btns a.submit').attr('class', 'btn c');
-                };
+                $('.form-btns a.submit').attr('class', 'btn c');
                 $('#obj-form').slideDown();
             }, 'json');
 
@@ -204,12 +198,10 @@ $(document).ready(function() {
 
     $('#obj-form form').live('submit', function(event) {
         var url = $('#obj-form form')[0].action;
-        if (is_ajax_form($(this).attr('objType'))) {
-            event.preventDefault();
-            var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
-            if (!data.errors) {
-                location.reload();
-            };
+        event.preventDefault();
+        var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
+        if (!data.errors) {
+            location.reload();
         };
     });
 });

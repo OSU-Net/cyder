@@ -135,10 +135,6 @@ def send_email(request):
                       {'form': form})
 
 
-def is_ajax_form(request):
-    return request.META['HTTP_REFERER'].split('/', 1)[1] != 'system/create/'
-
-
 def cy_view(request, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
@@ -164,18 +160,14 @@ def cy_view(request, template, pk=None, obj_type=None):
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
-                    if is_ajax_form(request):
-                        return HttpResponse(json.dumps({'success': True}))
-
-                    return redirect(
-                        request.META.get('HTTP_REFERER', obj.get_list_url()))
+                    return HttpResponse(json.dumps({'success': True}))
 
             except (ValidationError, ValueError) as e:
                 if form._errors is None:
                     form._errors = ErrorDict()
                 form._errors["__all__"] = ErrorList(e.messages)
 
-        elif is_ajax_form(request):
+        else:
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
         form = FormKlass(instance=obj)
