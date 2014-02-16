@@ -9,11 +9,11 @@
   <span id="view-metadata"
       data-csrfToken="{{ csrf_token }}">
   </span>
-  <form class="form" id="main-form" method="POST" objType="system-extended">
+  <form class="form" id="system-form" method="POST" objType="system-extended">
     <h3>Create a System</h3>
-    <div class="inner-form" id="inner-form">
+    <div class="inner-form" id="hidden-inner-form">
         {{ system_form.as_p() }}
-        <input type="hidden" name="csrfmiddlewaretoken"
+        <input id="csrfToken" type="hidden" name="csrfmiddlewaretoken"
          value="{{ csrf_token }}"/>
     </div>
     <div class="form-btns">

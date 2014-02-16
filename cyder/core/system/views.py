@@ -1,10 +1,12 @@
 import ipaddr
+import simplejson as json
 from copy import copy
 
 from django import forms
 from django.forms.util import ErrorDict, ErrorList
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from cyder.base.utils import tablefy
@@ -61,7 +63,7 @@ def system_create_view(request):
     static_form = StaticInterfaceForm()
     dynamic_form = DynamicInterfaceForm()
     system_form = ExtendedSystemForm()
-    if request.POST:
+    if request.method == 'POST':
         system = None
         post_data = copy(request.POST)
         if not post_data.get('ctnr'):
@@ -93,11 +95,12 @@ def system_create_view(request):
             if form.is_valid():
                 try:
                     form.save()
-                    return redirect(
-                        reverse('system-detail', args=[system.id]))
+                    return HttpResponse(json.dumps({'success': True}))
                 except ValidationError, e:
                     form._errors = ErrorDict()
                     form._errors['__all__'] = ErrorList(e.messages)
+
+                    return HttpResponse(json.dumps({'errors': form.errors}))
             else:
                 if '__all__' in form.errors and (
                         MAC_ERR in form.errors['__all__']):
@@ -109,6 +112,8 @@ def system_create_view(request):
 
                 if system:
                     system.delete()
+
+                return HttpResponse(json.dumps({'errors': form.errors}))
 
             if request.POST.get('initial', None):
                 system_form.errors.clear()
@@ -126,6 +131,7 @@ def system_create_view(request):
     system_form.make_usable(request)
     static_form.make_usable(request)
     dynamic_form.make_usable(request)
+
     return render(request, 'system/system_create.html', {
         'system_form': system_form,
         'static_form': static_form,
