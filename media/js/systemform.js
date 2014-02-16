@@ -34,11 +34,18 @@ $(document).ready(function() {
 
     $('form#system-form').live('submit', function(event) {
         event.preventDefault();
+
         var url = $('form#system-form')[0].action;
         var data = ajax_form_submit(url, $('form#system-form'),
             $('#csrfToken').val());
         if (!data.errors) {
             location.reload();
+        };
+
+        if ($("input[name=interface_type]:checked").val() === undefined) {
+            $("label[for=id_interface_type_0]:first").after(
+                '<p id="error"><font color="red">This field is required.' +
+                '</font></p>')
         };
     });
 });

@@ -72,53 +72,54 @@ def system_create_view(request):
         system_form = ExtendedSystemForm(post_data)
         if system_form.is_valid():
             system = system_form.save(commit=False)
-        if post_data.get('interface_type', '') is not None:
-            if system:
-                system.save()
-                post_data['system'] = system.id
+        else:
+            return HttpResponse(json.dumps({'errors': system_form.errors}))
 
-            if post_data.get('interface_type', None) == 'static_interface':
-                try:
-                    post_data['ip_type'] = ipaddr.IPAddress(
-                        post_data.get('ip_str', None)).version
-                except:
-                    post_data['ip_type'] = None
+        system.save()
+        post_data['system'] = system.id
 
-                form = StaticInterfaceForm(post_data)
-                static_form = form
-            elif post_data.get('interface_type', None) == 'dynamic_interface':
-                form = DynamicInterfaceForm(post_data)
-                dynamic_form = form
-            else:
-                raise Exception("Invalid interface_type")
+        if post_data.get('interface_type', None) == 'static_interface':
+            try:
+                post_data['ip_type'] = ipaddr.IPAddress(
+                    post_data.get('ip_str', None)).version
+            except:
+                post_data['ip_type'] = None
 
-            if form.is_valid():
-                try:
-                    form.save()
-                    return HttpResponse(json.dumps({'success': True}))
-                except ValidationError, e:
-                    form._errors = ErrorDict()
-                    form._errors['__all__'] = ErrorList(e.messages)
+            form = StaticInterfaceForm(post_data)
+            static_form = form
+        elif post_data.get('interface_type', None) == 'dynamic_interface':
+            form = DynamicInterfaceForm(post_data)
+            dynamic_form = form
+        else:
+            raise Exception("Invalid interface_type")
 
-                    return HttpResponse(json.dumps({'errors': form.errors}))
-            else:
-                if '__all__' in form.errors and (
-                        MAC_ERR in form.errors['__all__']):
-                    form.errors['__all__'].remove(MAC_ERR)
-                    if 'mac' not in form.errors:
-                        form.errors['mac'] = []
-                    if MAC_ERR not in form.errors['mac']:
-                        form.errors['mac'].append(MAC_ERR)
-
-                if system:
-                    system.delete()
+        if form.is_valid():
+            try:
+                form.save()
+                return HttpResponse(json.dumps({'success': True}))
+            except ValidationError, e:
+                form._errors = ErrorDict()
+                form._errors['__all__'] = ErrorList(e.messages)
 
                 return HttpResponse(json.dumps({'errors': form.errors}))
+        else:
+            if '__all__' in form.errors and (
+                    MAC_ERR in form.errors['__all__']):
+                form.errors['__all__'].remove(MAC_ERR)
+                if 'mac' not in form.errors:
+                    form.errors['mac'] = []
+                if MAC_ERR not in form.errors['mac']:
+                    form.errors['mac'].append(MAC_ERR)
 
-            if request.POST.get('initial', None):
-                system_form.errors.clear()
-                static_form.errors.clear()
-                dynamic_form.errors.clear()
+            if system:
+                system.delete()
+
+            return HttpResponse(json.dumps({'errors': form.errors}))
+
+        if request.POST.get('initial', None):
+            system_form.errors.clear()
+            static_form.errors.clear()
+            dynamic_form.errors.clear()
 
     static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()
