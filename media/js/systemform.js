@@ -14,7 +14,7 @@ $(document).ready(function() {
             if (form.lastChild.textContent != '') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
             };
-            if (interface_type[i].value =='Static') {
+            if (interface_type[i].value =='static_interface') {
                 form.appendChild(static_clone);
             } else {
                 form.appendChild(dynamic_clone);
@@ -24,7 +24,7 @@ $(document).ready(function() {
             if (form.lastChild.textContent != '') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
             };
-            if (this.value =='Static') {
+            if (this.value =='static_interface') {
                 form.appendChild(static_clone);
             } else {
                 form.appendChild(dynamic_clone);
