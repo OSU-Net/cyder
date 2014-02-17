@@ -254,14 +254,21 @@ a.btn {
     display: none;
     z-index: 2;
 }
+#sidebar_div {
+    float: left;
+    position: relative;
+    width: 110px;
+    height: 1000px;
+    display: block;
+    margin-right: 25px;
+}
 
 #sidebar {
+    position: fixed;
     .expand {
         opacity: 0;
     }
-    float: left;
     height: 100%;
-    margin-right: 25px;
     width: 110px;
     display: block;
     word-spacing: 100px;

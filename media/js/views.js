@@ -24,6 +24,7 @@ $(document).ready(function() {
         $('#settings-btn').toggleClass('selected');
     });
     $('.nav-item.parent').click( function(e) {
+        e.preventDefault();
         var parentsChild = ('#' + this.id + '-children');
         if ($(parentsChild).css('display') != 'none') {
             $(parentsChild).slideUp('slow');

@@ -119,9 +119,9 @@
     <div class="main wrap container">
       <input type="checkbox" id="sidebar_toggle">
 
-      {% if self.sidebar() %}<div id="sidebar">{% endif %}
+      {% if self.sidebar() %}<div id="sidebar_div"><div id="sidebar">{% endif %}
       {% block sidebar %}{% endblock %}
-      {% if self.sidebar() %}</div>{% endif %}
+      {% if self.sidebar() %}</div></div>{% endif %}
 
       <div class="page-header">
         <h1 id="title">{{ self.title() }}</h1>
