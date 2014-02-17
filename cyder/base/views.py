@@ -142,6 +142,7 @@ def cy_view(request, template, pk=None, obj_type=None):
 
     Klass, FormKlass = get_klasses(obj_type)
     obj = get_object_or_404(Klass, pk=pk) if pk else None
+    form = None
     if request.method == 'POST':
         object_table = None
         page_obj = None
@@ -175,7 +176,9 @@ def cy_view(request, template, pk=None, obj_type=None):
         elif obj_type.endswith('_av'):
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
-        form = FormKlass(instance=obj)
+        if 'interface' not in obj_type:
+            form = FormKlass(instance=obj)
+
         object_list = _filter(request, Klass)
 
         if obj_type == 'system' and not object_list.exists():
