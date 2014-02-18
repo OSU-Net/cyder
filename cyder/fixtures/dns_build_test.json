@@ -114,7 +114,7 @@
   }
  },
  {
-  "pk": 3,
+  "pk": 2,
   "model": "cyder.system",
   "fields": {
    "modified": "2014-02-01T12:15:42",
@@ -266,7 +266,7 @@
   "pk": 4,
   "model": "cyder.staticinterface",
   "fields": {
-   "system": 3,
+   "system": 2,
    "dns_enabled": true,
    "domain": 7,
    "fqdn": "www.example.org",
