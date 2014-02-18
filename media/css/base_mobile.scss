@@ -1,4 +1,3 @@
-
 @media all and (max-width: 650px) {
     div#header {
         width: 640px;
@@ -9,9 +8,24 @@
     }
 
 }
-@media all and (max-width: 980px) {
+@media all and (max-width: 1275px) {
+    div.container {
+        width: 960px;
+    }
+    div.main {
+        .content {
+            width: 824px;
+        }
+    }
+}
+@media all and (max-width: 970px) {
     div.container {
         width: 640px;
+    }
+    div.main {
+        .content {
+            width: 640px;
+        }
     }
 
     div#settings-header {
@@ -82,10 +96,5 @@
         }
     }
 
-    div.main {
-        .content {
-            width: 640px;
-        }
-    }
 }
 

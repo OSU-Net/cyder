@@ -68,7 +68,6 @@ table.table {
         }
     }
 }
-
 table {
     &.tablesorter {
       font-family: arial;
@@ -121,54 +120,7 @@ table {
       }
     }
 }
-
 .editable-grid {
     float: right;
     margin-right: 1.5%;
 }
-
-@media all and (max-width: 980px){
-    div.editable-grid {
-        margin-right: 3%;
-        margin-top: 1%;
-    }
-
-    table.table {
-        margin-left: .5%;
-        width: 96%;
-        .update:focus {
-            transition: all .25s;
-            position: absolute;
-            right: 300px;
-            transform: scale(3,3);
-            -webkit-transform: scale(3,3);
-        }
-        .delete:focus {
-            transition: all .25s;
-            position: absolute;
-            right: 300px;
-            transform: scale(3,3);
-            -webkit-transform: scale(3,3);
-        }
-        .detail:focus {
-            transition: all .25s;
-            position: absolute;
-            right: 300px;
-            transform: scale(3,3);
-            -webkit-transform: scale(3,3);
-        }
-        tbody {
-            tr {
-                td {
-                    a.btn {
-                        padding-right: 0 !important;
-                        padding-left: 0 !important;
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-
