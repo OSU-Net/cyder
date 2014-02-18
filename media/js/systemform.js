@@ -39,7 +39,7 @@ $(document).ready(function() {
         var data = ajax_form_submit(url, $('form#system-form'),
             $('#csrfToken').val());
         if (!data.errors) {
-            location.reload();
+            location.href = '/core/system/' + data.system_id.toString();
         };
 
         if ($("input[name=interface_type]:checked").val() === undefined) {

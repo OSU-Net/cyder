@@ -96,7 +96,8 @@ def system_create_view(request):
         if form.is_valid():
             try:
                 form.save()
-                return HttpResponse(json.dumps({'success': True}))
+                return HttpResponse(json.dumps(
+                    {'success': True, 'system_id': system.id}))
             except ValidationError, e:
                 form._errors = ErrorDict()
                 form._errors['__all__'] = ErrorList(e.messages)
