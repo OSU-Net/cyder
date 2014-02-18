@@ -100,40 +100,6 @@ class DNSBuildTest(TestCase):
         self.assertNotEqual(rev1, rev2)
 
     def test_sanity_check1(self):
-        """Test that the sanity check fails when too many lines are removed"""
-
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 2
-
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
-
-        CNAME.objects.get(fqdn='foo.example.com').delete()
-        StaticInterface.objects.get(fqdn='www.example.com').delete()
-        StaticInterface.objects.get(fqdn='www2.example.com').delete()
-
-        self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
-
-    def test_sanity_check2(self):
-        """Test that the sanity check succeeds when changes are sane"""
-
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 100
-
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
-
-        CNAME.objects.get(fqdn='foo.example.com').delete()
-        StaticInterface.objects.get(fqdn='www.example.com').delete()
-        StaticInterface.objects.get(fqdn='www2.example.com').delete()
-
-        self.builder.build()
-        self.builder.push(sanity_check=True)
-
-    def test_sanity_check3(self):
         """Test that the sanity check fails when too many lines are changed"""
 
         self.builder.repo.line_change_limit = 2
@@ -149,6 +115,7 @@ class DNSBuildTest(TestCase):
             ip_str='192.168.0.50',
             ctnr=Ctnr.objects.get(name='Global')
         )
+        s.full_clean()
         s.save()
         s.views.add(
             View.objects.get(name='public'),
@@ -157,5 +124,38 @@ class DNSBuildTest(TestCase):
         self.builder.build()
         def bad_push():
             self.builder.push(sanity_check=True)
-
         self.assertRaises(SanityCheckFailure, bad_push)
+
+    def test_sanity_check2(self):
+        """Test that the sanity check fails when too many lines are removed"""
+
+        self.builder.repo.line_change_limit = 100
+        self.builder.repo.line_removal_limit = 2
+
+        self.builder.build(force=True)
+        self.builder.push(sanity_check=False)
+
+        CNAME.objects.get(fqdn='foo.example.com').delete()
+        StaticInterface.objects.filter(
+            fqdn__in=('www.example.com', 'www2.example.com')).delete()
+
+        self.builder.build()
+        def bad_push():
+            self.builder.push(sanity_check=True)
+        self.assertRaises(SanityCheckFailure, bad_push)
+
+    def test_sanity_check3(self):
+        """Test that the sanity check succeeds when changes are sane"""
+
+        self.builder.repo.line_change_limit = 100
+        self.builder.repo.line_removal_limit = 100
+
+        self.builder.build(force=True)
+        self.builder.push(sanity_check=False)
+
+        CNAME.objects.get(fqdn='foo.example.com').delete()
+        StaticInterface.objects.filter(
+            fqdn__in=('www.example.com', 'www2.example.com')).delete()
+
+        self.builder.build()
+        self.builder.push(sanity_check=True)
