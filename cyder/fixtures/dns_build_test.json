@@ -123,17 +123,17 @@
   }
  },
  {
-  "pk": 2,
-  "model": "cyder.view",
-  "fields": {
-   "name": "private"
-  }
- },
- {
   "pk": 1,
   "model": "cyder.view",
   "fields": {
    "name": "public"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.view",
+  "fields": {
+   "name": "private"
   }
  },
  {
@@ -211,6 +211,35 @@
    "system": 1,
    "dns_enabled": true,
    "domain": 5,
+   "fqdn": "www2.example.com",
+   "ip_lower": 3232235560,
+   "created": "2014-02-01T11:14:36",
+   "views": [
+    2,
+    1
+   ],
+   "ip_upper": 0,
+   "ttl": 3600,
+   "modified": "2014-02-01T12:06:20",
+   "dhcp_enabled": false,
+   "label": "www",
+   "mac": "",
+   "ip_type": "4",
+   "ip_str": "192.168.0.30",
+   "last_seen": "2014-02-01T12:06:20",
+   "reverse_domain": 3,
+   "workgroup": null,
+   "ctnr": 3,
+   "description": ""
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.staticinterface",
+  "fields": {
+   "system": 1,
+   "dns_enabled": true,
+   "domain": 5,
    "fqdn": "relay.example.com",
    "ip_lower": 3232235523,
    "created": "2014-02-01T11:55:57",
@@ -234,7 +263,7 @@
   }
  },
  {
-  "pk": 3,
+  "pk": 4,
   "model": "cyder.staticinterface",
   "fields": {
    "system": 3,
@@ -371,6 +400,7 @@
     2,
     3,
     4,
+    5,
     6
    ],
    "email_contact": "",

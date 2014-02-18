@@ -6,6 +6,10 @@ from os.path import dirname, basename
 from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
+class SanityCheckFailure(Exception):
+    pass
+
+
 class ChdirHandler(object):
     def __init__(self, path):
         self.path = path
@@ -70,16 +74,15 @@ class VCSRepo(object):
         added, removed = self._lines_changed()
         if (self.line_change_limit is not None and
                 added + removed > self.line_change_limit):
-            raise Exception('Lines changed ({0}) exceeded limit ({1}).\n'
-                            'Aborting commit.\n'
-                            .format(added + removed,
-                                    self.line_change_limit))
+            raise SanityCheckFailure(
+                'Lines changed ({0}) exceeded limit ({1}).\nAborting commit.\n'
+                .format(added + removed, self.line_change_limit))
 
         if (self.line_removal_limit is not None and
                 removed > self.line_removal_limit):
-            raise Exception('Lines removed ({0}) exceeded limit ({1}).\n'
-                            'Aborting commit.\n'
-                            .format(removed, self.line_removal_limit))
+            raise SanityCheckFailure(
+                'Lines removed ({0}) exceeded limit ({1}).\nAborting commit.\n'
+                .format(removed, self.line_removal_limit))
 
 
     def _run_command(self, command, log=True, failure_msg=None,
