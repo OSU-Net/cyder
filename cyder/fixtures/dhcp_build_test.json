@@ -66,6 +66,15 @@
   }
  },
  {
+  "pk": 5,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-08T14:35:18",
+   "name": "Test_system_5",
+   "created": "2014-02-08T14:35:18"
+  }
+ },
+ {
   "pk": 1,
   "model": "cyder.workgroup",
   "fields": {
