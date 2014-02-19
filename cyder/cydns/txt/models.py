@@ -55,7 +55,7 @@ class TXT(LabelDomainMixin, CydnsRecord):
 
     @property
     def escaped_txt_data(self):
-        return self.txt_data.replace('"', '\\"').replace('\\', '\\\\')
+        return self.txt_data.replace('\\', '\\\\').replace('"', '\\"')
 
     @property
     def rdtype(self):
