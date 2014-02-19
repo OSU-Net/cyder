@@ -178,4 +178,4 @@ class GitRepo(VCSRepo):
         self._run_command(cmd)
 
     def _push(self):
-        self._run_command('git push')
+        self._run_command('git push origin master')
