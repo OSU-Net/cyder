@@ -190,7 +190,7 @@ def update_user(request, ctnr_pk):
             cu_qs = CtnrUser.objects.filter(ctnr_id=ctnr_pk, user_id=user_pk)
             if cu_qs.exists():
                 ctnr_user = cu_qs.get()
-                if request.POST.get('action', None) == 'user_remove':
+                if request.POST.get('action', None) == 'obj_remove':
                     ctnr_user.delete()
                 else:
                     lvl = request.POST.get('lvl', None)
