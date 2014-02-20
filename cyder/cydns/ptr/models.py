@@ -86,7 +86,7 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
                                        related_name='reverse_ptr_set')
 
-    template = _("{ip_str:$lhs_just} {ttl:$ttl_just}  "
+    template = _("{reverse_domain:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {bind_name:1}")
     search_fields = ('ip_str', 'fqdn')
@@ -111,6 +111,19 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     @property
     def rdtype(self):
         return 'PTR'
+
+    def bind_render_record(self):
+        if self.ip_type == '6':
+            ip = "%x" % ((self.ip_upper << 64) | self.ip_lower)
+            reverse_domain = '.'.join(reversed(ip)) + ".ip6.arpa"
+        else:
+            reverse_domain = self.reverse_domain.name
+
+        if reverse_domain[-1] != '.':
+            reverse_domain = reverse_domain + '.'
+
+        return super(PTR, self).bind_render_record(
+            custom={'reverse_domain': reverse_domain})
 
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
