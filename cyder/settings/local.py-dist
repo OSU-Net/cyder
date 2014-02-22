@@ -61,12 +61,12 @@ SECRET_KEY = ''
 REMOTE_LOGINS_ON = True
 
 SYSADMINS = (
-                'you@domain.com',
-            )
+    'you@domain.com',
+)
 
 BUILD_TEAM = (
-                'you@domain.com',
-              )
+    'you@domain.com',
+)
 
 SERVICES_URL = SITE_URL = STATIC_URL = 'http://localhost:8000/'
 
