@@ -1,7 +1,3 @@
-[submodule "vendor"]
-	path = vendor
-	url = https://github.com/mozilla/playdoh-lib.git
-	ignore = dirty
 [submodule "vendor-local/src/iscpy"]
 	path = vendor-local/src/iscpy
 	url = https://github.com/uberj/iscpy
