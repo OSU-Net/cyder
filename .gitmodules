@@ -1,9 +1,6 @@
 [submodule "vendor-local/src/iscpy"]
 	path = vendor-local/src/iscpy
 	url = https://github.com/uberj/iscpy
-[submodule "vendor/src/funfactory"]
-	path = vendor/src/funfactory
-	url = https://github.com/mozilla/funfactory.git
 [submodule "vendor/src/bleach"]
 	path = vendor/src/bleach
 	url = https://github.com/jsocol/bleach.git

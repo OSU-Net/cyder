@@ -2,7 +2,7 @@ from django.conf.urls.defaults import include, patterns, url
 from django.conf import settings
 from django.contrib import admin
 
-from funfactory.monkeypatches import patch
+from lib.monkeypatches import patch
 patch()
 from cyder.api.v1.routes import router
 

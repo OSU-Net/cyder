@@ -116,8 +116,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'session_csrf.context_processor',
     'django.contrib.messages.context_processors.messages',
-    'funfactory.context_processors.i18n',
-    'funfactory.context_processors.globals',
+    'lib.context_processors.i18n',
+    'lib.context_processors.globals',
     #'jingo_minify.helpers.build_ids',
 )
 
@@ -326,7 +326,6 @@ MINIFY_BUNDLES = {
 
 INSTALLED_APPS = [
     # Local apps
-    'funfactory',  # Content common to most playdoh-based apps.
     'compressor',
 
     'tower',  # for ./manage.py extract (L10n)
