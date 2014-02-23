@@ -2,7 +2,7 @@ djangorestframework==2.3.12
 ipaddr
 mimeparse
 python-ldap
-django-reversion==1.5
+django-reversion==1.5.1
 ply
 simplejson
 South>=0.8.1

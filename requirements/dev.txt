@@ -2,7 +2,7 @@
 # needed to run the site, it belongs in requirements/prod.txt. If it's a
 # package for developers (testing, docs, etc.), it goes in this file.
 
-django-debug-toolbar
+django-debug-toolbar==0.9.4
 django-extensions
 
 -r prod.txt
