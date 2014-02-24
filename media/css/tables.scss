@@ -1,5 +1,8 @@
 @import "globals.scss";
 
+.info_column, .actions_column {
+    width: 50px;
+}
 table.table {
     clear: both;
     margin-bottom: 13px;
