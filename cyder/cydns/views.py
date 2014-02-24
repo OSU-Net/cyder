@@ -18,50 +18,44 @@ from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 import json
 
 
+def is_ajax_form(request):
+    return True
+
+
 def cydns_view(request, pk=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
     # kwargs everywhere in the dispatchers.
     obj_type = request.path.split('/')[2]
 
-    # Get the record form.
     Klass, FormKlass = get_klasses(obj_type)
-
-    # Get the object if updating.
-    record = get_object_or_404(Klass, pk=pk) if pk else None
-    form = FormKlass(instance=record)
+    obj = get_object_or_404(Klass, pk=pk) if pk else None
 
     if request.method == 'POST':
+        object_table = None
+        page_obj = None
+
         qd, domain, errors = _fqdn_to_domain(request.POST.copy())
         # Validate form.
         if errors:
-
             form = FormKlass(request.POST)
             form._errors = ErrorDict()
             form._errors['__all__'] = ErrorList(errors)
-            if obj_type in DNS_EAV_MODELS:
+            if is_ajax_form(request):
                 return HttpResponse(json.dumps({'errors': form.errors}))
-
-            return render(request, 'cydns/cydns_view.html', {
-                'form': form,
-                'obj_type': obj_type,
-                'pretty_obj_type': Klass.pretty_type,
-                'pk': pk,
-                'obj': record
-            })
         else:
-            form = FormKlass(qd, instance=record)
+            form = FormKlass(qd, instance=obj)
         try:
-            if perm(request, ACTION_CREATE, obj=record, obj_class=Klass):
-                record = form.save()
+            if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
+                obj = form.save()
                 # If domain, add to current ctnr.
-                if obj_type in DNS_EAV_MODELS:
+                if is_ajax_form(request):
                     return HttpResponse(json.dumps({'success': True}))
 
-                if (hasattr(record, 'ctnr_set') and
-                        not record.ctnr_set.all().exists()):
-                    record.ctnr_set.add(request.session['ctnr'])
-                    return redirect(record.get_list_url())
+                if (hasattr(obj, 'ctnr_set') and
+                        not obj.ctnr_set.all().exists()):
+                    obj.ctnr_set.add(request.session['ctnr'])
+                    return redirect(obj.get_list_url())
 
         except (ValidationError, ValueError), e:
             form = _revert(domain, request.POST, form, FormKlass)
@@ -72,22 +66,23 @@ def cydns_view(request, pk=None):
                 form._errors = ErrorDict()
                 form._errors['__all__'] = ErrorList(e)
 
-            if obj_type in DNS_EAV_MODELS:
+            if is_ajax_form(request):
                 return HttpResponse(json.dumps({'errors': form.errors}))
+    elif request.method == 'GET':
+        form = FormKlass(instance=obj)
 
-    object_list = _filter(request, Klass)
-    page_obj = make_paginator(
-        request, do_sort(request, object_list), 50)
+        object_list = _filter(request, Klass)
+        page_obj = make_paginator(request, do_sort(request, object_list), 50)
 
     if issubclass(type(form), UsabilityFormMixin):
         form.make_usable(request)
 
     return render(request, 'cydns/cydns_view.html', {
         'form': form,
-        'obj': record,
-        'page_obj': page_obj,
-        'object_table': tablefy(page_obj, request=request),
+        'obj': obj,
         'obj_type': obj_type,
+        'object_table': tablefy(page_obj, request=request),
+        'page_obj': page_obj,
         'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
     })

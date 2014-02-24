@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var form = document.getElementById('inner-form');
+    var form = document.getElementById('hidden-inner-form');
     var interface_type = document.getElementsByName('interface_type');
     var static_form = document.getElementById('static-form');
     var static_clone = static_form.cloneNode(true);
@@ -31,4 +31,21 @@ $(document).ready(function() {
             };
         };
     };
+
+    $('form#system-form').live('submit', function(event) {
+        event.preventDefault();
+
+        var url = $('form#system-form')[0].action;
+        var data = ajax_form_submit(url, $('form#system-form'),
+            $('#csrfToken').val());
+        if (!data.errors) {
+            location.href = '/core/system/' + data.system_id.toString();
+        };
+
+        if ($("input[name=interface_type]:checked").val() === undefined) {
+            $("label[for=id_interface_type_0]:first").after(
+                '<p id="error"><font color="red">This field is required.' +
+                '</font></p>')
+        };
+    });
 });

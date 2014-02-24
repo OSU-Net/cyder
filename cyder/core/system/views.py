@@ -1,10 +1,12 @@
 import ipaddr
+import simplejson as json
 from copy import copy
 
 from django import forms
 from django.forms.util import ErrorDict, ErrorList
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from cyder.base.utils import tablefy
@@ -61,7 +63,7 @@ def system_create_view(request):
     static_form = StaticInterfaceForm()
     dynamic_form = DynamicInterfaceForm()
     system_form = ExtendedSystemForm()
-    if request.POST:
+    if request.method == 'POST':
         system = None
         post_data = copy(request.POST)
         if not post_data.get('ctnr'):
@@ -70,50 +72,55 @@ def system_create_view(request):
         system_form = ExtendedSystemForm(post_data)
         if system_form.is_valid():
             system = system_form.save(commit=False)
-        if post_data.get('interface_type', '') is not None:
+        else:
+            return HttpResponse(json.dumps({'errors': system_form.errors}))
+
+        system.save()
+        post_data['system'] = system.id
+
+        if post_data.get('interface_type', None) == 'static_interface':
+            try:
+                post_data['ip_type'] = ipaddr.IPAddress(
+                    post_data.get('ip_str', None)).version
+            except:
+                post_data['ip_type'] = None
+
+            form = StaticInterfaceForm(post_data)
+            static_form = form
+        elif post_data.get('interface_type', None) == 'dynamic_interface':
+            form = DynamicInterfaceForm(post_data)
+            dynamic_form = form
+        else:
+            raise Exception("Invalid interface_type")
+
+        if form.is_valid():
+            try:
+                form.save()
+                return HttpResponse(json.dumps(
+                    {'success': True, 'system_id': system.id}))
+            except ValidationError, e:
+                form._errors = ErrorDict()
+                form._errors['__all__'] = ErrorList(e.messages)
+
+                return HttpResponse(json.dumps({'errors': form.errors}))
+        else:
+            if '__all__' in form.errors and (
+                    MAC_ERR in form.errors['__all__']):
+                form.errors['__all__'].remove(MAC_ERR)
+                if 'mac' not in form.errors:
+                    form.errors['mac'] = []
+                if MAC_ERR not in form.errors['mac']:
+                    form.errors['mac'].append(MAC_ERR)
+
             if system:
-                system.save()
-                post_data['system'] = system.id
+                system.delete()
 
-            if post_data.get('interface_type', None) == 'static_interface':
-                try:
-                    post_data['ip_type'] = ipaddr.IPAddress(
-                        post_data.get('ip_str', None)).version
-                except:
-                    post_data['ip_type'] = None
+            return HttpResponse(json.dumps({'errors': form.errors}))
 
-                form = StaticInterfaceForm(post_data)
-                static_form = form
-            elif post_data.get('interface_type', None) == 'dynamic_interface':
-                form = DynamicInterfaceForm(post_data)
-                dynamic_form = form
-            else:
-                raise Exception("Invalid interface_type")
-
-            if form.is_valid():
-                try:
-                    form.save()
-                    return redirect(
-                        reverse('system-detail', args=[system.id]))
-                except ValidationError, e:
-                    form._errors = ErrorDict()
-                    form._errors['__all__'] = ErrorList(e.messages)
-            else:
-                if '__all__' in form.errors and (
-                        MAC_ERR in form.errors['__all__']):
-                    form.errors['__all__'].remove(MAC_ERR)
-                    if 'mac' not in form.errors:
-                        form.errors['mac'] = []
-                    if MAC_ERR not in form.errors['mac']:
-                        form.errors['mac'].append(MAC_ERR)
-
-                if system:
-                    system.delete()
-
-            if request.POST.get('initial', None):
-                system_form.errors.clear()
-                static_form.errors.clear()
-                dynamic_form.errors.clear()
+        if request.POST.get('initial', None):
+            system_form.errors.clear()
+            static_form.errors.clear()
+            dynamic_form.errors.clear()
 
     static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()
@@ -126,6 +133,7 @@ def system_create_view(request):
     system_form.make_usable(request)
     static_form.make_usable(request)
     dynamic_form.make_usable(request)
+
     return render(request, 'system/system_create.html', {
         'system_form': system_form,
         'static_form': static_form,

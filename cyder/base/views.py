@@ -138,6 +138,7 @@ def send_email(request):
 def cy_view(request, template, pk=None, obj_type=None):
     """List, create, update view in one for a flatter heirarchy. """
     # Infer obj_type from URL, saves trouble of having to specify
+    # kwargs everywhere in the dispatchers.
     obj_type = obj_type or request.path.split('/')[2]
 
     Klass, FormKlass = get_klasses(obj_type)
@@ -160,20 +161,14 @@ def cy_view(request, template, pk=None, obj_type=None):
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
-                    # Adjust this if statement to submit forms with ajax
-                    if obj_type.endswith('_av'):
-                        return HttpResponse(json.dumps({'success': True}))
-
-                    return redirect(
-                        request.META.get('HTTP_REFERER', obj.get_list_url()))
+                    return HttpResponse(json.dumps({'success': True}))
 
             except (ValidationError, ValueError) as e:
                 if form._errors is None:
                     form._errors = ErrorDict()
                 form._errors["__all__"] = ErrorList(e.messages)
 
-        # Adjust this if statement to submit forms with ajax
-        elif obj_type.endswith('_av'):
+        else:
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
         if 'interface' not in obj_type:
