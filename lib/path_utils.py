@@ -1,3 +1,5 @@
+"""Originally from funfactory (funfactory/path_utils.py) on a380a54"""
+
 import os
 
 
@@ -24,5 +26,4 @@ def _dot_lookup(thing, comp, import_path):
         __import__(import_path)
         return getattr(thing, comp)
 
-#ROOT = os.path.dirname(os.path.abspath(manage_file))
 ROOT = os.getcwd()

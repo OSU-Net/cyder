@@ -1,3 +1,5 @@
+"""Originally from funfactory (funfactory/log_settings.py) on a380a54"""
+
 import logging
 import logging.handlers
 

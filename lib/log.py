@@ -1,3 +1,5 @@
+"""Taken from funfactory (funfactory/log.py) on a380a54"""
+
 import logging
 
 from django.conf import settings

@@ -1,3 +1,5 @@
+"""Originally from funfactory (funfactory/admin.py) on a380a54"""
+
 from django.contrib import admin as django_admin
 from django.contrib.admin.sites import AdminSite
 

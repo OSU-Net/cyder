@@ -1,3 +1,5 @@
+"""Originally from funfactory (funfactory/context_processors.py) on a380a54"""
+
 from django.conf import settings
 from django.utils import translation
 

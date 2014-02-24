@@ -1,3 +1,5 @@
+"""Originally from funfactory (funfactory/monkeypatches.py) on a380a54"""
+
 import logging
 from django.conf import settings
 
