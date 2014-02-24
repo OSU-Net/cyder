@@ -1,0 +1,163 @@
+# Copyright (c) 2003 Oregon State University - Network Engineering
+# All rights reserved.
+#
+# The header file for ISC dhcpd -- we use this to set some
+# global options and things that don't quite fit anywhere else.
+# Compatible with ISC DHCPD >3.0
+#
+# NOTE: for static file entries (stuff not in Maintain) please edit
+# the dhcp.conf.footer and dhcp.conf.header in CFEngine
+
+#
+# Global options   (see dhcp-options(5) for additional options)
+#
+option domain-name-servers 128.193.15.13, 128.193.15.12;
+option ntp-servers 128.193.10.15;   # time.oregonstate.edu
+option time-offset 28800;           # 8 hours from GMT (PST, adjust for PDT)
+option netbios-name-servers 128.193.132.84, 128.193.132.85;
+option netbios-node-type 8;  # 1=b-node, 2=p-node, 4=m-node, 8=h-node
+
+# Some obvious things
+authoritative;
+allow bootp;
+# deny unknown-clients;
+ddns-update-style none;
+
+# Set the syslog facility
+log-facility local2;
+
+default-lease-time 32400;            # 9 hrs
+max-lease-time 172800;               # 2 days
+
+# This option is needed for HP Ignite and Sun Jumpstart
+# servers.  It allows the hosts to acquire a hostname from
+# dhcpd automatically.
+#
+# See dhcpd.conf(8) for more information
+#
+use-host-decl-names true;
+get-lease-hostnames true;
+dynamic-bootp-lease-length 172800;   # 2 days
+option trailer-encapsulation false;
+option ieee802-3-encapsulation false;
+option slp-directory-agent code 78 = { boolean, ip-address };
+option slp-scope code 79 = { boolean, text };
+option ipphone code 176 = text;
+option ipphone242 code 242 = text;
+
+option ipphone242 "L2Q=1,L2QVLAN=503";
+
+# COB custom option
+option ftp-server       code 161 = ip-address;
+option ftp-root-path    code 162 = string;
+
+######
+# Proxy Autoconfiguration
+######
+option wpad-curl code 252 = text;
+#option wpad-curl "http://oregonstate.edu/proxy.pac";
+
+# dhcp version 3 special options
+option option-144 code 144 = string;
+
+######
+# College of Engineering specific settings
+
+# Entries required to make APC UPS work with dhcp
+class "APC" {
+    match if option vendor-class-identifier="APC";
+    option vendor-encapsulated-options 01:04:31:41:50:43;
+}
+
+# stuff needed for solaris jumpstart via dhcpd
+option space SUNW;
+option SUNW.root-mount-options          code 1 = text;
+option SUNW.root-server-ip-address      code 2 = ip-address;
+option SUNW.root-server-hostname        code 3 = text;
+option SUNW.root-path-name              code 4 = text;
+option SUNW.swap-server-ip-address      code 5 = ip-address;
+option SUNW.swap-file-path              code 6 = text;
+option SUNW.boot-file-path              code 7 = text;
+option SUNW.posix-timezone-string       code 8 = text;
+option SUNW.boot-read-size              code 9 = unsigned integer 16;
+option SUNW.install-server-ip-address   code 10 = ip-address;
+option SUNW.install-server-hostname     code 11 = text;
+option SUNW.install-path                code 12 = text;
+option SUNW.sysid-config-file-server    code 13 = text;
+option SUNW.JumpStart-server            code 14 = text;
+option SUNW.terminal-name               code 15 = text;
+option SUNW.bootURI                     code 16 = text;
+option SUNW.HTTPproxy		            code 17 = text;
+
+class "class.Solaris-Install" {
+    match if substring (option vendor-class-identifier, 0, 5) = "SUNW.";
+    vendor-option-space SUNW;
+}
+
+# End of College of Engineering special settings
+######
+
+# Lync IP Phone settings
+
+class "vendor-classes" {
+    match option vendor-class-identifier;
+}
+
+# vendor sepecific sub-options
+option space MSUCClient;
+option MSUCClient.UCIdentifier code 1 = string;
+option MSUCClient.URLScheme code 2 = string;
+option MSUCClient.WebServerFqdn code 3 = string;
+option MSUCClient.WebServerPort code 4 = string;
+option MSUCClient.CertProvRelPath code 5 = string;
+
+# SIP Server Option 120
+option UCSipServer code 120 = string;
+
+subclass "vendor-classes" "MS-UC-Client" {
+  vendor-option-space MSUCClient;
+  option MSUCClient.UCIdentifier 4D:53:2D:55:43:2D:43:6C:69:65:6E:74;
+  option MSUCClient.URLScheme 68:74:74:70:73;
+  option MSUCClient.WebServerFqdn 6C:79:6E:63:70:6F:6F:6C:30:31:2E:6F:72:65:67:6F:6E:73:74:61:74:65:2E:65:64:75;
+  option MSUCClient.WebServerPort 34:34:33;
+  option MSUCClient.CertProvRelPath 2F:43:65:72:74:50:72:6F:76:2F:43:65:72:74:50:72:6F:76:69:73:69:6F:6E:69:6E:67:53:65:72:76:69:63:65:2E:73:76:63;
+}
+
+## IP Phone hack for Avaya phones
+#class "ip-phones-hack:128.193.177.71:128.193.177.253" {
+  #match if ( (substring (hardware,1,3) = 00:1b:4f) or
+             #(substring (hardware,1,3) = 00:04:0d) or
+             #(substring (hardware,1,3) = cc:f9:54) or
+             #(substring (hardware,1,3) = 00:09:6e) or
+             #(substring (hardware,1,3) = 00:07:3b)
+  #);
+##   log (info, concat ("Matched class rule - 128.193.177.1 - ", hardware));
+##   match if substring (option vendor-class-identifier, 0, 13) = "ccp.avaya.com";
+#}
+
+## i love me some hackathon
+#class "avaya-hack:128.193.166.81:128.193.166.253" {
+    #log (info, concat("Matched class rule - 128.193.166.1 - ", hardware));
+    #match if (  (substring(option host-name,0,4) = "AV") or
+                #(substring(option vendor-class-identifier, 0, 13) = "ccp.avaya.com"));
+#}
+
+option mitel-125 code 125 = string;
+option mitel-128 code 128 = ip-address;
+option mitel-129 code 129 = ip-address;
+option mitel-130 code 130 = string;
+option mitel-132-vlan code 132 = unsigned integer 32;
+option mitel-133-pri code 133 = unsigned integer 32;
+
+class "MITEL" {
+	log (info, concat("Matched class rule for MITEL - 10.160.80.193 - ", hardware));
+	match if substring(hardware, 1, 3) = 08:00:0f;
+	option mitel-125 "id:ipphone.mitel.com;sw_tftp=192.168.1.3;call_srv=192.168.1.3;vlan=2;l2p=6;dscp=56";
+	option mitel-128 192.168.1.3;
+	option mitel-129 192.168.1.3;
+	option mitel-130 "MITEL IP PHONE";
+	option mitel-132-vlan 2;
+	option mitel-133-pri 6;
+}
+
+

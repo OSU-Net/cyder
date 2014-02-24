@@ -1,0 +1,564 @@
+[
+ {
+  "pk": 1,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "arpa",
+   "created": "2014-02-01T10:52:54",
+   "master_domain": null,
+   "is_reverse": true,
+   "modified": "2014-02-01T10:52:54",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "in-addr.arpa",
+   "created": "2014-02-01T10:52:58",
+   "master_domain": 1,
+   "is_reverse": true,
+   "modified": "2014-02-01T10:52:58",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "192.in-addr.arpa",
+   "created": "2014-02-01T10:53:05",
+   "master_domain": 2,
+   "is_reverse": true,
+   "modified": "2014-02-01T10:53:05",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 4,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "com",
+   "created": "2014-02-01T10:54:05",
+   "master_domain": null,
+   "is_reverse": false,
+   "modified": "2014-02-01T10:54:05",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 5,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": 1,
+   "purgeable": false,
+   "name": "example.com",
+   "created": "2014-02-01T10:54:11",
+   "master_domain": 4,
+   "is_reverse": false,
+   "modified": "2014-02-01T12:16:15",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 6,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "org",
+   "created": "2014-02-01T11:17:57",
+   "master_domain": null,
+   "is_reverse": false,
+   "modified": "2014-02-01T11:17:57",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 7,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": 2,
+   "purgeable": false,
+   "name": "example.org",
+   "created": "2014-02-01T11:18:15",
+   "master_domain": 6,
+   "is_reverse": false,
+   "modified": "2014-02-01T12:16:16",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-01T11:14:35",
+   "name": "Test system",
+   "created": "2014-02-01T11:14:35"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-01T12:15:42",
+   "name": "Test system 2",
+   "created": "2014-02-01T12:15:42"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.view",
+  "fields": {
+   "name": "public"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.view",
+  "fields": {
+   "name": "private"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.cname",
+  "fields": {
+   "domain": 5,
+   "fqdn": "foo.example.com",
+   "description": "",
+   "created": "2014-02-01T11:15:47",
+   "views": [
+    2,
+    1
+   ],
+   "modified": "2014-02-01T12:06:40",
+   "label": "foo",
+   "ttl": 3600,
+   "target": "www.example.com"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.addressrecord",
+  "fields": {
+   "domain": 5,
+   "fqdn": "ns1.example.com",
+   "ip_lower": 3232235522,
+   "created": "2014-02-01T11:12:01",
+   "ip_upper": 0,
+   "ttl": 3600,
+   "modified": "2014-02-01T11:12:01",
+   "label": "ns1",
+   "ip_type": "4",
+   "ip_str": "192.168.0.2",
+   "views": [
+    2,
+    1
+   ],
+   "description": ""
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.staticinterface",
+  "fields": {
+   "system": 1,
+   "dns_enabled": true,
+   "domain": 5,
+   "fqdn": "www.example.com",
+   "ip_lower": 3232235550,
+   "created": "2014-02-01T11:14:36",
+   "views": [
+    2,
+    1
+   ],
+   "ip_upper": 0,
+   "ttl": 3600,
+   "modified": "2014-02-01T12:06:20",
+   "dhcp_enabled": false,
+   "label": "www",
+   "mac": "",
+   "ip_type": "4",
+   "ip_str": "192.168.0.30",
+   "last_seen": "2014-02-01T12:06:20",
+   "reverse_domain": 3,
+   "workgroup": null,
+   "ctnr": 3,
+   "description": ""
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.staticinterface",
+  "fields": {
+   "system": 1,
+   "dns_enabled": true,
+   "domain": 5,
+   "fqdn": "www2.example.com",
+   "ip_lower": 3232235560,
+   "created": "2014-02-01T11:14:36",
+   "views": [
+    2,
+    1
+   ],
+   "ip_upper": 0,
+   "ttl": 3600,
+   "modified": "2014-02-01T12:06:20",
+   "dhcp_enabled": false,
+   "label": "www",
+   "mac": "",
+   "ip_type": "4",
+   "ip_str": "192.168.0.30",
+   "last_seen": "2014-02-01T12:06:20",
+   "reverse_domain": 3,
+   "workgroup": null,
+   "ctnr": 3,
+   "description": ""
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.staticinterface",
+  "fields": {
+   "system": 1,
+   "dns_enabled": true,
+   "domain": 5,
+   "fqdn": "relay.example.com",
+   "ip_lower": 3232235523,
+   "created": "2014-02-01T11:55:57",
+   "views": [
+    2,
+    1
+   ],
+   "ip_upper": 0,
+   "ttl": 3600,
+   "modified": "2014-02-01T11:55:57",
+   "dhcp_enabled": false,
+   "label": "relay",
+   "mac": "",
+   "ip_type": "4",
+   "ip_str": "192.168.0.3",
+   "last_seen": "2014-02-01T11:55:57",
+   "reverse_domain": 3,
+   "workgroup": null,
+   "ctnr": 3,
+   "description": ""
+  }
+ },
+ {
+  "pk": 4,
+  "model": "cyder.staticinterface",
+  "fields": {
+   "system": 2,
+   "dns_enabled": true,
+   "domain": 7,
+   "fqdn": "www.example.org",
+   "ip_lower": 3232235541,
+   "created": "2014-02-01T12:15:42",
+   "views": [
+    2,
+    1
+   ],
+   "ip_upper": 0,
+   "ttl": 3600,
+   "modified": "2014-02-01T12:15:42",
+   "dhcp_enabled": false,
+   "label": "www",
+   "mac": "",
+   "ip_type": "4",
+   "ip_str": "192.168.0.21",
+   "last_seen": "2014-02-01T12:15:42",
+   "reverse_domain": 3,
+   "workgroup": null,
+   "ctnr": 3,
+   "description": ""
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.vrf",
+  "fields": {
+   "modified": null,
+   "name": "Legacy",
+   "created": null
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.vrf",
+  "fields": {
+   "modified": null,
+   "name": "VoIP",
+   "created": null
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.network",
+  "fields": {
+   "ip_lower": 3232235520,
+   "created": "2014-02-01T11:10:46",
+   "dhcpd_raw_include": "",
+   "ip_upper": 0,
+   "vlan": null,
+   "enabled": true,
+   "site": null,
+   "modified": "2014-02-01T11:10:46",
+   "vrf": 1,
+   "prefixlen": 24,
+   "ip_type": "4",
+   "network_str": "192.168.0.0/24"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.range",
+  "fields": {
+   "domain": null,
+   "is_reserved": false,
+   "network": 1,
+   "name": "Test static range",
+   "created": "2014-02-01T11:11:09",
+   "end_lower": 3232235620,
+   "start_upper": 0,
+   "description": "",
+   "end_str": "192.168.0.100",
+   "modified": "2014-02-01T12:15:43",
+   "dhcp_enabled": true,
+   "range_type": "st",
+   "dhcpd_raw_include": "",
+   "allow_voip_phones": true,
+   "start_str": "192.168.0.2",
+   "allow": "l",
+   "start_lower": 3232235522,
+   "range_usage": 4,
+   "ip_type": "4",
+   "views": [
+    2,
+    1
+   ],
+   "end_upper": 0
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.range",
+  "fields": {
+   "domain": 5,
+   "is_reserved": false,
+   "network": 1,
+   "name": "Test dynamic range",
+   "created": "2014-02-01T11:11:36",
+   "end_lower": 3232235720,
+   "start_upper": 0,
+   "description": "",
+   "end_str": "192.168.0.200",
+   "modified": "2014-02-01T11:39:31",
+   "dhcp_enabled": true,
+   "range_type": "dy",
+   "dhcpd_raw_include": "",
+   "allow_voip_phones": true,
+   "start_str": "192.168.0.101",
+   "allow": "l",
+   "start_lower": 3232235621,
+   "range_usage": 0,
+   "ip_type": "4",
+   "views": [
+    2,
+    1
+   ],
+   "end_upper": 0
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.ctnr",
+  "fields": {
+   "description": "Global Ctnr",
+   "created": null,
+   "modified": null,
+   "ranges": [],
+   "domains": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "email_contact": "",
+   "workgroups": [],
+   "name": "global"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.ctnr",
+  "fields": {
+   "description": "Default Ctnr",
+   "created": null,
+   "modified": null,
+   "ranges": [],
+   "domains": [],
+   "email_contact": "",
+   "workgroups": [],
+   "name": "default"
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.ctnr",
+  "fields": {
+   "description": "",
+   "created": "2014-02-01T11:15:16",
+   "modified": "2014-02-01T11:15:16",
+   "ranges": [
+    1,
+    2
+   ],
+   "domains": [
+    5,
+    7
+   ],
+   "email_contact": "",
+   "workgroups": [],
+   "name": "campus"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.ctnruser",
+  "fields": {
+   "user": 1,
+   "level": 2,
+   "modified": null,
+   "ctnr": 1,
+   "created": null
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.userprofile",
+  "fields": {
+   "phone_number": 1234567890,
+   "user": 1,
+   "default_ctnr": 1,
+   "modified": null,
+   "created": null
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.mx",
+  "fields": {
+   "domain": 5,
+   "fqdn": "mail.example.com",
+   "description": "",
+   "created": "2014-02-01T11:41:49",
+   "views": [
+    2,
+    1
+   ],
+   "modified": "2014-02-01T11:41:49",
+   "label": "mail",
+   "priority": 1,
+   "ttl": 3600,
+   "server": "relay.example.com"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.nameserver",
+  "fields": {
+   "domain": 5,
+   "description": "",
+   "created": "2014-02-01T11:09:14",
+   "intr_glue": null,
+   "views": [
+    2,
+    1
+   ],
+   "modified": "2014-02-01T11:12:12",
+   "server": "ns1.example.com",
+   "addr_glue": 1,
+   "ttl": 3600
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.nameserver",
+  "fields": {
+   "domain": 7,
+   "description": "",
+   "created": "2014-02-01T12:14:34",
+   "intr_glue": null,
+   "views": [
+    2,
+    1
+   ],
+   "modified": "2014-02-01T12:14:58",
+   "server": "ns1.example.com",
+   "addr_glue": null,
+   "ttl": 3600
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.soa",
+  "fields": {
+   "dns_enabled": true,
+   "retry": 86400,
+   "is_signed": false,
+   "description": "",
+   "created": "2014-02-01T10:54:52",
+   "minimum": 180,
+   "primary": "ns1.example.com",
+   "refresh": 180,
+   "modified": "2014-02-01T12:16:15",
+   "root_domain": 5,
+   "contact": "contact.example.com",
+   "dirty": false,
+   "expire": 1209600,
+   "ttl": 3600,
+   "serial": 1391285776
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.soa",
+  "fields": {
+   "dns_enabled": true,
+   "retry": 86400,
+   "is_signed": false,
+   "description": "",
+   "created": "2014-02-01T11:22:24",
+   "minimum": 180,
+   "primary": "ns1.example.com",
+   "refresh": 180,
+   "modified": "2014-02-01T12:16:16",
+   "root_domain": 7,
+   "contact": "contact.example.com",
+   "dirty": false,
+   "expire": 1209600,
+   "ttl": 3600,
+   "serial": 1391285777
+  }
+ }
+]

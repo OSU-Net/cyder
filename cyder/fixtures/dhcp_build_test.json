@@ -1,0 +1,375 @@
+[
+ {
+  "pk": 1,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "com",
+   "created": "2014-02-08T14:18:29",
+   "master_domain": null,
+   "is_reverse": false,
+   "modified": "2014-02-08T14:18:29",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.domain",
+  "fields": {
+   "soa": null,
+   "purgeable": false,
+   "name": "example.com",
+   "created": "2014-02-08T14:18:37",
+   "master_domain": 1,
+   "is_reverse": false,
+   "modified": "2014-02-08T14:18:37",
+   "dirty": false,
+   "delegated": false
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-08T14:22:23",
+   "name": "Test_system_1",
+   "created": "2014-02-08T14:22:23"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-08T14:33:07",
+   "name": "Test_system_2",
+   "created": "2014-02-08T14:33:07"
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-08T14:35:18",
+   "name": "Test_system_3",
+   "created": "2014-02-08T14:35:18"
+  }
+ },
+ {
+  "pk": 4,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-08T14:35:18",
+   "name": "Test_system_4",
+   "created": "2014-02-08T14:35:18"
+  }
+ },
+ {
+  "pk": 5,
+  "model": "cyder.system",
+  "fields": {
+   "modified": "2014-02-08T14:35:18",
+   "name": "Test_system_5",
+   "created": "2014-02-08T14:35:18"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.workgroup",
+  "fields": {
+   "modified": "2014-02-08T14:21:13",
+   "name": "Test workgroup",
+   "created": "2014-02-08T14:21:13"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.workgroupav",
+  "fields": {
+   "attribute": 4,
+   "value": "time.example.com",
+   "entity": 1
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.vrf",
+  "fields": {
+   "modified": "2014-02-08T15:44:31",
+   "name": "Legacy",
+   "created": null
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.vrf",
+  "fields": {
+   "modified": "2014-02-08T15:44:31",
+   "name": "VoIP",
+   "created": null
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.network",
+  "fields": {
+   "ip_lower": 3232235520,
+   "created": "2014-02-08T14:16:58",
+   "dhcpd_raw_include": "",
+   "ip_upper": 0,
+   "vlan": null,
+   "enabled": true,
+   "site": null,
+   "modified": "2014-02-08T14:16:58",
+   "vrf": 1,
+   "prefixlen": 16,
+   "ip_type": "4",
+   "network_str": "192.168.0.0/16"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.range",
+  "fields": {
+   "domain": 2,
+   "is_reserved": false,
+   "network": 1,
+   "name": "Test range 1",
+   "created": "2014-02-08T14:18:57",
+   "end_lower": 3232235620,
+   "start_upper": 0,
+   "description": "",
+   "end_str": "192.168.0.100",
+   "modified": "2014-02-08T14:33:08",
+   "dhcp_enabled": true,
+   "range_type": "dy",
+   "dhcpd_raw_include": "",
+   "allow_voip_phones": true,
+   "start_str": "192.168.0.2",
+   "allow": "a",
+   "start_lower": 3232235522,
+   "range_usage": 1,
+   "ip_type": "4",
+   "views": [],
+   "end_upper": 0
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.range",
+  "fields": {
+   "domain": 2,
+   "is_reserved": false,
+   "network": 1,
+   "name": "Test range 2",
+   "created": "2014-02-08T14:19:28",
+   "end_lower": 3232235779,
+   "start_upper": 0,
+   "description": "",
+   "end_str": "192.168.1.3",
+   "modified": "2014-02-08T14:19:51",
+   "dhcp_enabled": true,
+   "range_type": "dy",
+   "dhcpd_raw_include": "",
+   "allow_voip_phones": true,
+   "start_str": "192.168.0.101",
+   "allow": "k",
+   "start_lower": 3232235621,
+   "range_usage": 0,
+   "ip_type": "4",
+   "views": [],
+   "end_upper": 0
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.range",
+  "fields": {
+   "domain": 2,
+   "is_reserved": false,
+   "network": 1,
+   "name": "Test range 3",
+   "created": "2014-02-08T14:20:26",
+   "end_lower": 3232238335,
+   "start_upper": 0,
+   "description": "",
+   "end_str": "192.168.10.255",
+   "modified": "2014-02-08T14:35:18",
+   "dhcp_enabled": true,
+   "range_type": "dy",
+   "dhcpd_raw_include": "",
+   "allow_voip_phones": true,
+   "start_str": "192.168.1.10",
+   "allow": "l",
+   "start_lower": 3232235786,
+   "range_usage": 0,
+   "ip_type": "4",
+   "views": [],
+   "end_upper": 0
+  }
+ },
+ {
+  "pk": 4,
+  "model": "cyder.range",
+  "fields": {
+   "domain": 2,
+   "is_reserved": false,
+   "network": 1,
+   "name": "Test range 4",
+   "created": "2014-02-08T14:20:58",
+   "end_lower": 3232286975,
+   "start_upper": 0,
+   "description": "",
+   "end_str": "192.168.200.255",
+   "modified": "2014-02-08T14:37:58",
+   "dhcp_enabled": true,
+   "range_type": "dy",
+   "dhcpd_raw_include": "",
+   "allow_voip_phones": true,
+   "start_str": "192.168.40.0",
+   "allow": "v",
+   "start_lower": 3232245760,
+   "range_usage": 0,
+   "ip_type": "4",
+   "views": [],
+   "end_upper": 0
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.ctnr",
+  "fields": {
+   "description": "Global Ctnr",
+   "created": null,
+   "modified": "2014-02-08T15:44:31",
+   "ranges": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "domains": [
+    1,
+    2
+   ],
+   "email_contact": "",
+   "workgroups": [
+    1
+   ],
+   "name": "global"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.ctnr",
+  "fields": {
+   "description": "Default Ctnr",
+   "created": null,
+   "modified": "2014-02-08T15:44:33",
+   "ranges": [],
+   "domains": [],
+   "email_contact": "",
+   "workgroups": [],
+   "name": "default"
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.ctnr",
+  "fields": {
+   "description": "",
+   "created": "2014-02-08T14:27:01",
+   "modified": "2014-02-08T14:27:01",
+   "ranges": [],
+   "domains": [
+    2
+   ],
+   "email_contact": "",
+   "workgroups": [],
+   "name": "Test_ctnr"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.ctnruser",
+  "fields": {
+   "user": 1,
+   "level": 2,
+   "modified": "2014-02-08T15:44:33",
+   "ctnr": 1,
+   "created": null
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.userprofile",
+  "fields": {
+   "phone_number": 1234567890,
+   "user": 1,
+   "default_ctnr": 1,
+   "modified": "2014-02-08T15:44:33",
+   "created": null
+  }
+ },
+ {
+  "pk": 1,
+  "model": "cyder.dynamicinterface",
+  "fields": {
+   "workgroup": null,
+   "created": "2014-02-08T14:22:23",
+   "system": 1,
+   "modified": "2014-02-08T14:30:46",
+   "mac": "010204081020",
+   "range": 1,
+   "dhcp_enabled": false,
+   "ctnr": 3,
+   "last_seen": "2014-02-08T14:30:46"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.dynamicinterface",
+  "fields": {
+   "workgroup": 1,
+   "created": "2014-02-08T14:33:07",
+   "system": 2,
+   "modified": "2014-02-08T14:33:07",
+   "mac": "aabbccddeeff",
+   "range": 1,
+   "dhcp_enabled": true,
+   "ctnr": 3,
+   "last_seen": "2014-02-08T14:33:07"
+  }
+ },
+ {
+  "pk": 3,
+  "model": "cyder.dynamicinterface",
+  "fields": {
+   "workgroup": 1,
+   "created": "2014-02-08T14:35:18",
+   "system": 3,
+   "modified": "2014-02-08T14:35:18",
+   "mac": "ffeeddaabbcc",
+   "range": 3,
+   "dhcp_enabled": true,
+   "ctnr": 3,
+   "last_seen": "2014-02-08T14:35:18"
+  }
+ },
+ {
+  "pk": 4,
+  "model": "cyder.dynamicinterface",
+  "fields": {
+   "workgroup": 1,
+   "created": "2014-02-08T14:37:58",
+   "system": 4,
+   "modified": "2014-02-08T14:37:58",
+   "mac": "0a1b2c3d4e5f",
+   "range": 4,
+   "dhcp_enabled": true,
+   "ctnr": 3,
+   "last_seen": "2014-02-08T14:37:58"
+  }
+ }
+]
