@@ -5,6 +5,7 @@ import shlex
 import subprocess
 import sys
 import syslog
+import time
 from traceback import format_exception
 
 from cyder.base.mixins import MutexMixin
@@ -145,7 +146,7 @@ class DHCPBuilder(MutexMixin):
                                        .format(self.dhcpd, err))
 
             self.log_err(log_msg, to_stderr=False)
-            raise Exception(exception_message)
+            raise Exception(exception_msg)
 
     def _lock_failure(self, pid):
         self.log_err(
