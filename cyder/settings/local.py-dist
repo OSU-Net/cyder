@@ -136,3 +136,7 @@ DEBUG_TOOLBAR_CONFIG = {
     'TAG': 'div',
     'ENABLE_STACKTRACES' : True,
 }
+
+CAS_IGNORE_URL_PATTERNS = (
+    '^/api/v1',
+)
