@@ -64,44 +64,44 @@ First let's construct a basic request to the API.
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/"
 
 Assuming the requested token and URL are valid, you should now be presented with a listing of all available API endpoints.
 
 .. code:: json
 
     {
-        "core/ctnr": "http://127.0.0.1:8000/api/v1/core/ctnr/",
-        "core/system": "http://127.0.0.1:8000/api/v1/core/system/",
-        "core/system/attributes": "http://127.0.0.1:8000/api/v1/core/system/attributes/",
-        "core/user": "http://127.0.0.1:8000/api/v1/core/user/",
-        "dhcp/dynamic_interface": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/",
-        "dhcp/dynamic_interface/attributes": "http://127.0.0.1:8000/api/v1/dhcp/dynamic_interface/attributes/",
-        "dhcp/network": "http://127.0.0.1:8000/api/v1/dhcp/network/",
-        "dhcp/network/attributes": "http://127.0.0.1:8000/api/v1/dhcp/network/attributes/",
-        "dhcp/range": "http://127.0.0.1:8000/api/v1/dhcp/range/",
-        "dhcp/range/attributes": "http://127.0.0.1:8000/api/v1/dhcp/range/attributes/",
-        "dhcp/site": "http://127.0.0.1:8000/api/v1/dhcp/site/",
-        "dhcp/site/attributes": "http://127.0.0.1:8000/api/v1/dhcp/site/attributes/",
-        "dhcp/static_interface": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/",
-        "dhcp/static_interface/attributes": "http://127.0.0.1:8000/api/v1/dhcp/static_interface/attributes/",
-        "dhcp/vlan": "http://127.0.0.1:8000/api/v1/dhcp/vlan/",
-        "dhcp/vlan/attributes": "http://127.0.0.1:8000/api/v1/dhcp/vlan/attributes/",
-        "dhcp/vrf": "http://127.0.0.1:8000/api/v1/dhcp/vrf/",
-        "dhcp/vrf/attributes": "http://127.0.0.1:8000/api/v1/dhcp/vrf/attributes/",
-        "dhcp/workgroup": "http://127.0.0.1:8000/api/v1/dhcp/workgroup/",
-        "dhcp/workgroup/attributes": "http://127.0.0.1:8000/api/v1/dhcp/workgroup/attributes/",
-        "dns/address_record": "http://127.0.0.1:8000/api/v1/dns/address_record/",
-        "dns/cname": "http://127.0.0.1:8000/api/v1/dns/cname/",
-        "dns/domain": "http://127.0.0.1:8000/api/v1/dns/domain/",
-        "dns/mx": "http://127.0.0.1:8000/api/v1/dns/mx/",
-        "dns/nameserver": "http://127.0.0.1:8000/api/v1/dns/nameserver/",
-        "dns/ptr": "http://127.0.0.1:8000/api/v1/dns/ptr/",
-        "dns/soa": "http://127.0.0.1:8000/api/v1/dns/soa/",
-        "dns/soa/attributes": "http://127.0.0.1:8000/api/v1/dns/soa/attributes/",
-        "dns/srv": "http://127.0.0.1:8000/api/v1/dns/srv/",
-        "dns/sshfp": "http://127.0.0.1:8000/api/v1/dns/sshfp/",
-        "dns/txt": "http://127.0.0.1:8000/api/v1/dns/txt/"
+        "core/ctnr": "https://cyder.nws.oregonstate.edu/api/v1/core/ctnr/",
+        "core/system": "https://cyder.nws.oregonstate.edu/api/v1/core/system/",
+        "core/system/attributes": "https://cyder.nws.oregonstate.edu/api/v1/core/system/attributes/",
+        "core/user": "https://cyder.nws.oregonstate.edu/api/v1/core/user/",
+        "dhcp/dynamic_interface": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/dynamic_interface/",
+        "dhcp/dynamic_interface/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/dynamic_interface/attributes/",
+        "dhcp/network": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/network/",
+        "dhcp/network/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/network/attributes/",
+        "dhcp/range": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/range/",
+        "dhcp/range/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/range/attributes/",
+        "dhcp/site": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/site/",
+        "dhcp/site/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/site/attributes/",
+        "dhcp/static_interface": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/static_interface/",
+        "dhcp/static_interface/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/static_interface/attributes/",
+        "dhcp/vlan": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/vlan/",
+        "dhcp/vlan/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/vlan/attributes/",
+        "dhcp/vrf": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/vrf/",
+        "dhcp/vrf/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/vrf/attributes/",
+        "dhcp/workgroup": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/workgroup/",
+        "dhcp/workgroup/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dhcp/workgroup/attributes/",
+        "dns/address_record": "https://cyder.nws.oregonstate.edu/api/v1/dns/address_record/",
+        "dns/cname": "https://cyder.nws.oregonstate.edu/api/v1/dns/cname/",
+        "dns/domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/",
+        "dns/mx": "https://cyder.nws.oregonstate.edu/api/v1/dns/mx/",
+        "dns/nameserver": "https://cyder.nws.oregonstate.edu/api/v1/dns/nameserver/",
+        "dns/ptr": "https://cyder.nws.oregonstate.edu/api/v1/dns/ptr/",
+        "dns/soa": "https://cyder.nws.oregonstate.edu/api/v1/dns/soa/",
+        "dns/soa/attributes": "https://cyder.nws.oregonstate.edu/api/v1/dns/soa/attributes/",
+        "dns/srv": "https://cyder.nws.oregonstate.edu/api/v1/dns/srv/",
+        "dns/sshfp": "https://cyder.nws.oregonstate.edu/api/v1/dns/sshfp/",
+        "dns/txt": "https://cyder.nws.oregonstate.edu/api/v1/dns/txt/"
     }
 
 This response contains no information from the database, but it is immediately useful because it provides us with information about the API itself in the form of the **root view**. First, it tells us the types of data that we can access, and second, it tells us where this data can be found. This also shows a common trend in the Cyder API: where appropriate, URLs to related records are provided in place of data from the records themselves. This allows you to traverse relations in the Cyder database without constructing URLs or even knowing the structure of the API in advance.
@@ -113,7 +113,7 @@ Let's see what happens when we request one of the returned URLs.
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/domain/"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/"
 
 This returns a **list view** of Domain records. List views allow you to navigate through sets of records and are automatically paginated to lessen the load on the server and the client. Later, when you learn about filtering, list views will become the most important part of the Cyder API. Here's an example response to the above query:
 
@@ -121,7 +121,7 @@ This returns a **list view** of Domain records. List views allow you to navigate
 
     {
         "count": 2148,
-        "next": "http://127.0.0.1:8000/api/v1/dns/domain/?page=2",
+        "next": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/?page=2",
         "previous": null,
         "results": [
             {
@@ -135,7 +135,7 @@ This returns a **list view** of Domain records. List views allow you to navigate
                 "name": "arpa",
                 "purgeable": false,
                 "soa": null,
-                "url": "http://127.0.0.1:8000/dns/domain/1/"
+                "url": "https://cyder.nws.oregonstate.edu/dns/domain/1/"
             },
             {
                 "created": "2013-11-07T12:35:06",
@@ -143,12 +143,12 @@ This returns a **list view** of Domain records. List views allow you to navigate
                 "dirty": false,
                 "id": 2,
                 "is_reverse": true,
-                "master_domain": "http://127.0.0.1:8000/api/v1/dns/domain/1/",
+                "master_domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1/",
                 "modified": "2013-11-07T12:35:06",
                 "name": "in-addr.arpa",
                 "purgeable": false,
                 "soa": null,
-                "url": "http://127.0.0.1:8000/dns/domain/2/"
+                "url": "https://cyder.nws.oregonstate.edu/dns/domain/2/"
             },
             ...
         ]
@@ -169,7 +169,7 @@ Now we know how to retrieve general lists of objects, but what if we want to acc
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/domain/2/"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/2/"
 
 This returns a **detail view** of the Domain record with an ``id`` of 2.
 
@@ -181,12 +181,12 @@ This returns a **detail view** of the Domain record with an ``id`` of 2.
         "dirty": false,
         "id": 2,
         "is_reverse": true,
-        "master_domain": "http://127.0.0.1:8000/api/v1/dns/domain/1/",
+        "master_domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1/",
         "modified": "2013-11-07T12:35:06",
         "name": "in-addr.arpa",
         "purgeable": false,
         "soa": null,
-        "url": "http://127.0.0.1:8000/dns/domain/2/"
+        "url": "https://cyder.nws.oregonstate.edu/dns/domain/2/"
     }
 
 You can see that the structure of this record is the same as it was in the list view. Once again, the ``master_domain`` field contains a hyperlink to the related record.
@@ -207,7 +207,7 @@ Let's say we want to query for every CNAME that aliases a non ``orst.edu`` domai
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/cname/"
 
 Here's the first record we get back:
 
@@ -216,7 +216,7 @@ Here's the first record we get back:
     {
         "created": "2013-11-08T18:37:24",
         "description": "",
-        "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1416/",
+        "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1416/",
         "fqdn": "www.emt.orst.edu",
         "id": 1,
         "label": "www",
@@ -263,19 +263,19 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/cname/?i:target__exact=www.orst.edu"
 
 .. code:: json
 
     {
         "count": 235,
-        "next": "http://127.0.0.1:8000/api/v1/dns/cname/?i%3Atarget__exact=www.orst.edu&page=2",
+        "next": "https://cyder.nws.oregonstate.edu/api/v1/dns/cname/?i%3Atarget__exact=www.orst.edu&page=2",
         "previous": null,
         "results": [
             {
                 "created": "2013-11-08T18:37:24",
                 "description": "",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1416/",
+                "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1416/",
                 "fqdn": "www.emt.orst.edu",
                 "id": 1,
                 "label": "www",
@@ -290,7 +290,7 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
             {
                 "created": "2013-11-08T18:37:26",
                 "description": "",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1416/",
+                "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1416/",
                 "fqdn": "emt.orst.edu",
                 "id": 7,
                 "label": "",
@@ -305,7 +305,7 @@ With this basic format, let's write our query. Remember, we want every CNAME tha
             {
                 "created": "2013-11-08T18:37:41",
                 "description": "",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1611/",
+                "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1611/",
                 "fqdn": "cla-dev.cws.oregonstate.edu",
                 "id": 40,
                 "label": "cla-dev",
@@ -325,19 +325,19 @@ Here we can see the first two results are both domains under ``orst.edu``. Let's
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/cname/?i:target__exact=www.orst.edu&e:fqdn__contains=orst.edu"
 
 .. code:: json
 
     {
         "count": 184,
-        "next": "http://127.0.0.1:8000/api/v1/dns/cname/?e%3Afqdn__contains=orst.edu&i%3Atarget__exact=www.orst.edu&page=2",
+        "next": "https://cyder.nws.oregonstate.edu/api/v1/dns/cname/?e%3Afqdn__contains=orst.edu&i%3Atarget__exact=www.orst.edu&page=2",
         "previous": null,
         "results": [
             {
                 "created": "2013-11-08T18:37:41",
                 "description": "",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1611/",
+                "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1611/",
                 "fqdn": "cla-dev.cws.oregonstate.edu",
                 "id": 40,
                 "label": "cla-dev",
@@ -362,19 +362,19 @@ Basic queries are not only limited to top-level fields. Sometime it is desirable
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/mx/"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/mx/"
 
 .. code:: json
 
     {
         "count": 523,
-        "next": "http://127.0.0.1:8000/api/v1/dns/mx/?page=2",
+        "next": "https://cyder.nws.oregonstate.edu/api/v1/dns/mx/?page=2",
         "previous": null,
         "results": [
             {
                 "created": "2013-11-07T12:48:40",
                 "description": "",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1167/",
+                "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1167/",
                 "fqdn": "rattusdev.nacse.org",
                 "id": 2,
                 "label": "rattusdev",
@@ -395,7 +395,7 @@ We know that domain records have a ``name`` field containing their FQDN, so we s
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/dns/mx/?i:domain__name__exact=orst.edu"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/dns/mx/?i:domain__name__exact=orst.edu"
 
 Now our results look like this:
 
@@ -403,13 +403,13 @@ Now our results look like this:
 
     {
         "count": 9,
-        "next": "http://127.0.0.1:8000/api/v1/dns/mx/?i%3Adomain__name__exact=orst.edu&count=1&page=2",
+        "next": "https://cyder.nws.oregonstate.edu/api/v1/dns/mx/?i%3Adomain__name__exact=orst.edu&count=1&page=2",
         "previous": null,
         "results": [
             {
                 "created": "2013-11-07T12:56:21",
                 "description": "",
-                "domain": "http://127.0.0.1:8000/api/v1/dns/domain/1411/",
+                "domain": "https://cyder.nws.oregonstate.edu/api/v1/dns/domain/1411/",
                 "fqdn": "exchangemail.orst.edu",
                 "id": 126,
                 "label": "exchangemail",
@@ -454,7 +454,7 @@ The basic format of a keyvalue query parameter is as follows:
 
 .. code::
 
-    http://127.0.0.1:8000/api/v1/[endpoint]/?a:[attribute+name]=[attribute+value]
+    https://cyder.nws.oregonstate.edu/api/v1/[endpoint]/?a:[attribute+name]=[attribute+value]
 
 As usual, the name and value must be properly URL encoded.
 
@@ -462,13 +462,13 @@ As an example, let's try finding all systems running Linux.
 
 .. code::
 
-    curl -H "Authorization: Token MY_TOKEN" "http://127.0.0.1:8000/api/v1/core/system/?a:operating+system=linux"
+    curl -H "Authorization: Token MY_TOKEN" "https://cyder.nws.oregonstate.edu/api/v1/core/system/?a:operating+system=linux"
 
 .. code:: json
 
     {
         "count": 368,
-        "next": "http://127.0.0.1:8000/api/v1/core/system/?page=2&a%3AOperating+System=linux",
+        "next": "https://cyder.nws.oregonstate.edu/api/v1/core/system/?page=2&a%3AOperating+System=linux",
         "previous": null,
         "results": [
             {
@@ -479,12 +479,12 @@ As an example, let's try finding all systems running Linux.
                 "systemav_set": [
                     {
                         "attribute": "Hardware type",
-                        "id": "http://127.0.0.1:8000/api/v1/core/system/attributes/16/",
+                        "id": "https://cyder.nws.oregonstate.edu/api/v1/core/system/attributes/16/",
                         "value": "VM"
                     },
                     {
                         "attribute": "Operating system",
-                        "id": "http://127.0.0.1:8000/api/v1/core/system/attributes/17/",
+                        "id": "https://cyder.nws.oregonstate.edu/api/v1/core/system/attributes/17/",
                         "value": "Linux"
                     }
                 ]
