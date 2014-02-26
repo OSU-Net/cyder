@@ -15,6 +15,9 @@ def get_saml_assertion(ticket):
 class AuthenticationMiddleware(object):
 
     def process_request(self, request):
+        if request.path.startswith('/api/v1'):
+            return
+
         if request.user.is_authenticated() and not request.user.is_anonymous():
             pass
         elif request.path in (reverse('login'), reverse('logout')):
