@@ -1,17 +1,21 @@
-
-@media all and (max-width: 650px) {
-    div#header {
-        width: 640px;
-    }
-
-    div.settings-menu {
-        width: 615px;
-    }
-
-}
-@media all and (max-width: 980px) {
+@media all and (max-width: 1275px) {
     div.container {
-        width: 640px;
+        width: 950px;
+    }
+    div.main {
+        .content {
+            width: 814px;
+        }
+    }
+}
+@media all and (max-width: 950px) {
+    div.container {
+        width: 630px;
+    }
+    div.main {
+        .content {
+            width: 630px;
+        }
     }
 
     div#settings-header {
@@ -82,10 +86,5 @@
         }
     }
 
-    div.main {
-        .content {
-            width: 640px;
-        }
-    }
 }
 

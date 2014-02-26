@@ -6,9 +6,9 @@
     <tr>
       {% for header, sort_field in object_table['headers'] %}
         {% if sort_field %}
-          <th>{{ sort_link(request, header, sort_field)|safe }}</th>
+        <th class="{{ header | lower }}_column">{{ sort_link(request, header, sort_field)|safe }}</th>
         {% else %}
-          <th>{{ header }}</th>
+        <th class="{{ header | lower }}_column">{{ header }}</th>
         {% endif %}
       {% endfor %}
     </tr>
