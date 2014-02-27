@@ -137,6 +137,10 @@ DEBUG_TOOLBAR_CONFIG = {
     'ENABLE_STACKTRACES' : True,
 }
 
+CAS_IGNORE_URL_PATTERNS = (
+    '^/api/v1',
+)
+
 
 ##########################
 # copied from funfactory #

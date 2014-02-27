@@ -1,3 +1,4 @@
+import re
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
@@ -6,6 +7,7 @@ from django.shortcuts import redirect
 # import requests
 
 from cyder.core.cyuser.views import login_session
+from cyder.settings import CAS_IGNORE_URL_PATTERNS
 
 
 def get_saml_assertion(ticket):
@@ -15,6 +17,9 @@ def get_saml_assertion(ticket):
 class AuthenticationMiddleware(object):
 
     def process_request(self, request):
+        if any(re.match(pattern, request.path) for pattern in CAS_IGNORE_URL_PATTERNS):
+            return
+
         if request.user.is_authenticated() and not request.user.is_anonymous():
             pass
         elif request.path in (reverse('login'), reverse('logout')):
