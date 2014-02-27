@@ -1,0 +1,13 @@
+language: python
+python: 2.7
+install:
+    - gem install sass
+    - pip install -r requirements/dev.txt
+    - cp cyder/settings/local.py-travis cyder/settings/local.py
+    - sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
+before_script:
+    - mysql -e 'create database cyder;'
+script: python manage.py test cyder
+
+notifications:
+    email: false
