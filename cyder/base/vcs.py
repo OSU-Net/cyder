@@ -6,6 +6,20 @@ from os.path import dirname, basename
 from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
+def _run_command(self, command, log=True, failure_msg=None,
+                 ignore_failure=False):
+    if log:
+        command_logger = self._log
+        failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
+    else:
+        command_logger, failure_logger = None, None
+
+    return run_command(
+        command, command_logger=command_logger,
+        failure_logger=failure_logger, failure_msg=failure_msg,
+        ignore_failure=ignore_failure)
+
+
 class SanityCheckFailure(Exception):
     pass
 
@@ -35,6 +49,8 @@ def repo_chdir_wrapper(func):
 
 
 class VCSRepo(object):
+    _run_command = _run_command
+
     def __init__(self, repo_dir, line_change_limit=None,
                  line_removal_limit=None, debug=False, log_syslog=False,
                  logger=syslog):
@@ -85,35 +101,12 @@ class VCSRepo(object):
                 .format(removed, self.line_removal_limit))
 
 
-    def _run_command(self, command, log=True, failure_msg=None,
-                     ignore_failure=False):
-        if log:
-            command_logger = self._log
-            failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
-        else:
-            command_logger, failure_logger = None, None
-
-        return run_command(
-            command, command_logger=command_logger,
-            failure_logger=failure_logger, failure_msg=failure_msg,
-            ignore_failure=ignore_failure)
-
-
 class GitRepo(VCSRepo):
     @repo_chdir_wrapper
     def commit_and_push(self, message, sanity_check=True,
                         empty=False):
         self._commit_and_push(message, sanity_check=sanity_check,
                               empty=empty)
-
-    @classmethod
-    def clone(cls, source, dest):
-        run_command('git clone {0} {1}'.format(source, dest))
-
-    @repo_chdir_wrapper
-    def init(self, bare=False):
-        cmd = 'git init' + (' --bare' if bare else '')
-        self._run_command(cmd)
 
     def _get_revision(self):
         revision, _, _ = self._run_command('git rev-parse HEAD')
@@ -179,3 +172,40 @@ class GitRepo(VCSRepo):
 
     def _push(self):
         self._run_command('git push origin master')
+
+
+class VCSRepoManager(object):
+    _run_command = _run_command
+
+    def __init__(self, debug=False, log_syslog=False, logger=syslog):
+        set_attrs(self, {
+            'debug': debug,
+            'log_syslog': log_syslog,
+            'logger': logger,
+        })
+
+    def open(self, *args, **kwargs):
+        return VCSRepo(*args, **kwargs)
+
+
+class GitRepoManager(VCSRepoManager):
+    def open(self, *args, **kwargs):
+        if 'config' in kwargs:
+            self._update_git_config(kwargs.pop['config'])
+        return GitRepo(*args, **kwargs)
+
+    def _update_git_config(self, config):
+        for name, value in config.iteritems():
+            self._run_command("git config '{0}' '{1}'".format(name, value))
+
+    def clone(self, source, dest, config={}):
+        run_command('git clone {0} {1}'.format(source, dest))
+        with ChdirHandler(dest):
+            self._update_git_config(config)
+
+    @repo_chdir_wrapper
+    def init(self, repo_dir, bare=False, config={}):
+        with ChdirHandler(repo_dir):
+            cmd = 'git init' + (' --bare' if bare else '')
+            self._run_command(cmd)
+            self._update_git_config(config)
