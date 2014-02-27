@@ -61,12 +61,12 @@ SECRET_KEY = ''
 REMOTE_LOGINS_ON = True
 
 SYSADMINS = (
-                'you@domain.com',
-            )
+    'you@domain.com',
+)
 
 BUILD_TEAM = (
-                'you@domain.com',
-              )
+    'you@domain.com',
+)
 
 SERVICES_URL = SITE_URL = STATIC_URL = 'http://localhost:8000/'
 
@@ -136,3 +136,49 @@ DEBUG_TOOLBAR_CONFIG = {
     'TAG': 'div',
     'ENABLE_STACKTRACES' : True,
 }
+
+
+##########################
+# copied from funfactory #
+##########################
+
+
+# Site ID is used by Django's Sites framework.
+SITE_ID = 1
+
+## Internationalization.
+
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+TIME_ZONE = 'America/Los_Angeles'
+
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+USE_I18N = True
+
+# If you set this to False, Django will not format dates, numbers and
+# calendars according to the current locale
+USE_L10N = True
+
+# Gettext text domain
+TEXT_DOMAIN = 'messages'
+STANDALONE_DOMAINS = [TEXT_DOMAIN, 'javascript']
+TOWER_KEYWORDS = {'_lazy': None}
+TOWER_ADD_HEADERS = True
+
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en-US'
+
+## Accepted locales
+
+# On stage/prod, the list of accepted locales is manually maintained.  Only
+# locales whose localizers have signed off on their work should be listed here.
+PROD_LANGUAGES = (
+    'en-US',
+)

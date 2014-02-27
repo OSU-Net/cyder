@@ -1,7 +1,76 @@
-[submodule "vendor"]
-	path = vendor
-	url = https://github.com/mozilla/playdoh-lib.git
-	ignore = dirty
 [submodule "vendor-local/src/iscpy"]
 	path = vendor-local/src/iscpy
 	url = https://github.com/uberj/iscpy
+	ignore = dirty
+[submodule "vendor/src/bleach"]
+	path = vendor/src/bleach
+	url = https://github.com/jsocol/bleach.git
+	ignore = dirty
+[submodule "vendor/src/commonware"]
+	path = vendor/src/commonware
+	url = https://github.com/jsocol/commonware.git
+	ignore = dirty
+[submodule "vendor/src/django-appconf"]
+	path = vendor/src/django-appconf
+	url = https://github.com/jezdez/django-appconf.git
+	ignore = dirty
+[submodule "vendor/src/django-arecibo"]
+	path = vendor/src/django-arecibo
+	url = https://github.com/andymckay/django-arecibo.git
+	ignore = dirty
+[submodule "vendor/src/django-compressor"]
+	path = vendor/src/django-compressor
+	url = https://github.com/django-compressor/django-compressor.git
+	ignore = dirty
+[submodule "vendor/src/django-cronjobs"]
+	path = vendor/src/django-cronjobs
+	url = https://github.com/jsocol/django-cronjobs.git
+	ignore = dirty
+[submodule "vendor/src/django-mobility"]
+	path = vendor/src/django-mobility
+	url = https://github.com/jbalogh/django-mobility.git
+	ignore = dirty
+[submodule "vendor/src/django-mozilla-product-details"]
+	path = vendor/src/django-mozilla-product-details
+	url = https://github.com/fwenzel/django-mozilla-product-details.git
+	ignore = dirty
+[submodule "vendor/src/django-multidb-router"]
+	path = vendor/src/django-multidb-router
+	url = https://github.com/jbalogh/django-multidb-router.git
+	ignore = dirty
+[submodule "vendor/src/django-nose"]
+	path = vendor/src/django-nose
+	url = https://github.com/django-nose/django-nose.git
+	ignore = dirty
+[submodule "vendor/src/django-session-csrf"]
+	path = vendor/src/django-session-csrf
+	url = https://github.com/mozilla/django-session-csrf.git
+	ignore = dirty
+[submodule "vendor/src/django-sha2"]
+	path = vendor/src/django-sha2
+	url = https://github.com/fwenzel/django-sha2.git
+	ignore = dirty
+[submodule "vendor/src/jingo"]
+	path = vendor/src/jingo
+	url = https://github.com/jbalogh/jingo.git
+	ignore = dirty
+[submodule "vendor/src/jingo-minify"]
+	path = vendor/src/jingo-minify
+	url = https://github.com/jsocol/jingo-minify.git
+	ignore = dirty
+[submodule "vendor/src/nuggets"]
+	path = vendor/src/nuggets
+	url = https://github.com/mozilla/nuggets.git
+	ignore = dirty
+[submodule "vendor/src/schematic"]
+	path = vendor/src/schematic
+	url = https://github.com/jbalogh/schematic.git
+	ignore = dirty
+[submodule "vendor/src/test-utils"]
+	path = vendor/src/test-utils
+	url = https://github.com/jbalogh/test-utils.git
+	ignore = dirty
+[submodule "vendor/src/tower"]
+	path = vendor/src/tower
+	url = https://github.com/clouserw/tower.git
+	ignore = dirty

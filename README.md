@@ -70,7 +70,6 @@ virtualenv .env
     ```
 git submodule update --init --recursive
 pip install -r requirements/dev.txt
-cd vendor/src/jingo-minify && git pull origin master && cd -
     ```
 - Set up settings
 
