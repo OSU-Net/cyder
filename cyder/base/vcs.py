@@ -6,6 +6,11 @@ from os.path import dirname, basename
 from cyder.base.utils import set_attrs, dict_merge, log, run_command
 
 
+def _log(self, message, log_level='LOG_DEBUG'):
+    log(message, log_level=log_level, to_stderr=self.debug,
+            to_syslog=self.log_syslog, logger=self.logger)
+
+
 def _run_command(self, command, log=True, failure_msg=None,
                  ignore_failure=False):
     if log:
@@ -51,6 +56,8 @@ def repo_chdir_wrapper(func):
 class VCSRepo(object):
     _run_command = _run_command
 
+    _log = _log
+
     def __init__(self, repo_dir, line_change_limit=None,
                  line_removal_limit=None, debug=False, log_syslog=False,
                  logger=syslog):
@@ -81,10 +88,6 @@ class VCSRepo(object):
     @repo_chdir_wrapper
     def get_revision(self):
         return self._get_revision()
-
-    def _log(self, message, log_level='LOG_DEBUG'):
-        log(message, log_level=log_level, to_stderr=self.debug,
-                to_syslog=self.log_syslog, logger=self.logger)
 
     def _sanity_check(self):
         added, removed = self._lines_changed()
@@ -189,6 +192,8 @@ class VCSRepoManager(object):
 
 
 class GitRepoManager(VCSRepoManager):
+    _log = _log
+
     def open(self, *args, **kwargs):
         if 'config' in kwargs:
             self._update_git_config(kwargs.pop['config'])
@@ -203,9 +208,12 @@ class GitRepoManager(VCSRepoManager):
         with ChdirHandler(dest):
             self._update_git_config(config)
 
-    @repo_chdir_wrapper
-    def init(self, repo_dir, bare=False, config={}):
+    def init(self, repo_dir, **kwargs):
+        bare = kwargs.pop('bare', None)
+        config = kwargs.pop('config', None)
+
         with ChdirHandler(repo_dir):
             cmd = 'git init' + (' --bare' if bare else '')
             self._run_command(cmd)
-            self._update_git_config(config)
+            if config:
+                self._update_git_config(config)
