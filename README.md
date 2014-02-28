@@ -1,7 +1,7 @@
 Cyder
 =====
 
-![Build status](https://travis-ci.org/OSU-Net/cyder.png?branch=master)
+[![Build Status](https://travis-ci.org/OSU-Net/cyder.png?branch=master)](https://travis-ci.org/OSU-Net/cyder)
 
 Django DNS/DHCP web manager.
 
