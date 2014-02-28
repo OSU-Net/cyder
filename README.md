@@ -1,6 +1,8 @@
 Cyder
 =====
 
+![Build status](https://travis-ci.org/OSU-Net/cyder.png?branch=master)
+
 Django DNS/DHCP web manager.
 
 Meant as a ground-up rewrite of Oregon State University's DNS/DHCP network web
