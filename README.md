@@ -1,6 +1,8 @@
 Cyder
 =====
 
+[![Build Status](https://travis-ci.org/OSU-Net/cyder.png?branch=master)](https://travis-ci.org/OSU-Net/cyder)
+
 Django DNS/DHCP web manager.
 
 Meant as a ground-up rewrite of Oregon State University's DNS/DHCP network web
@@ -70,7 +72,6 @@ virtualenv .env
     ```
 git submodule update --init --recursive
 pip install -r requirements/dev.txt
-cd vendor/src/jingo-minify && git pull origin master && cd -
     ```
 - Set up settings
 

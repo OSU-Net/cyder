@@ -32,8 +32,8 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': '',
-        'USER': '',
+        'NAME': 'cyder',
+        'USER': 'travis',
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '',
@@ -136,10 +136,6 @@ DEBUG_TOOLBAR_CONFIG = {
     'TAG': 'div',
     'ENABLE_STACKTRACES' : True,
 }
-
-CAS_IGNORE_URL_PATTERNS = (
-    '^/api/v1',
-)
 
 
 ##########################
