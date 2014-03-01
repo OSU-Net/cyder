@@ -32,7 +32,7 @@ class SystemNestedAVSerializer(CommonAPINestedAVSerializer):
 
 
 class SystemSerializer(serializers.ModelSerializer):
-    systemav_set = SystemNestedAVSerializer(many=True)
+    systemav_set = SystemNestedAVSerializer(many=True, required=False)
 
     class Meta:
         model = System
@@ -42,3 +42,4 @@ class SystemViewSet(CommonAPIViewSet):
     queryset = System.objects.all()
     serializer_class = SystemSerializer
     avmodel = SystemAV
+    model = System
