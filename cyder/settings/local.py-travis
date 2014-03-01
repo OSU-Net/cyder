@@ -140,7 +140,7 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 
-DHCPBUILD['dhcpd'] = '/usr/sbin/dhcpd'
+DHCPBUILD['dhcpd'] = 'sudo dhcpd'
 
 
 ##########################
