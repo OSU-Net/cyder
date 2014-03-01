@@ -1,7 +1,7 @@
 language: python
 python: 2.7
 install:
-    - sudo apt-get install isc-dhcp-server
+    - sudo apt-get install isc-dhcp-server bind9utils
     - gem install sass
     - pip install -r requirements/dev.txt
     - cp cyder/settings/local.py-travis cyder/settings/local.py
