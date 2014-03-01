@@ -48,11 +48,11 @@ class DNSBuildTest(TestCase):
             os.makedirs(PROD_ORIGIN_DIR)
         remove_dir_contents(PROD_ORIGIN_DIR)
 
-        mgr = GitRepoManager(debug=False, log_syslog=False)
-        mgr.init(PROD_ORIGIN_DIR, bare=True, config={
+        mgr = GitRepoManager(debug=False, log_syslog=False, config={
             'user.name': 'test',
             'user.email': '',
         })
+        mgr.init(PROD_ORIGIN_DIR, bare=True)
         mgr.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
 
         self.builder = DNSBuilder(verbose=False, debug=False, **BINDBUILD)

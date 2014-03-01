@@ -194,26 +194,24 @@ class VCSRepoManager(object):
 class GitRepoManager(VCSRepoManager):
     _log = _log
 
+    def __init__(self, **kwargs):
+        self.config = kwargs.pop('config', {})
+        super(GitRepoManager, self).__init__(**kwargs)
+
     def open(self, *args, **kwargs):
-        if 'config' in kwargs:
-            self._update_git_config(kwargs.pop['config'])
         return GitRepo(*args, **kwargs)
 
     def _update_git_config(self, config):
         for name, value in config.iteritems():
             self._run_command("git config '{0}' '{1}'".format(name, value))
 
-    def clone(self, source, dest, config={}):
+    def clone(self, source, dest):
         run_command('git clone {0} {1}'.format(source, dest))
         with ChdirHandler(dest):
-            self._update_git_config(config)
+            self._update_git_config(self.config)
 
     def init(self, repo_dir, **kwargs):
-        bare = kwargs.pop('bare', None)
-        config = kwargs.pop('config', None)
-
+        bare = kwargs.pop('bare', False)
         with ChdirHandler(repo_dir):
-            cmd = 'git init' + (' --bare' if bare else '')
-            self._run_command(cmd)
-            if config:
-                self._update_git_config(config)
+            self._run_command('git init' + (' --bare' if bare else ''))
+            self._update_git_config(self.config)
