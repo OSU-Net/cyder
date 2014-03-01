@@ -73,14 +73,13 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         s = str(option)
         s = s.replace('%h', self.system.name)
         s = s.replace('%i', self.ip_str)
-        s = s.replace('%m', self.mac)
-        s = s.replace('%6m', self.mac[0:6])
+        s = s.replace('%m', self.mac.replace(':', ''))
+        s = s.replace('%6m', self.mac.replace(':', '')[0:6])
         return s
 
     def build_host(self, options=None):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
-        build_str += "\t\thardware ethernet {0};\n".format(
-            format_mac(self.mac))
+        build_str += "\t\thardware ethernet {0};\n".format(self.mac)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
         options = self.dynamicinterfaceav_set.filter(
@@ -97,8 +96,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         return build_str
 
     def build_subclass(self, classname):
-        return 'subclass "{0}" 1:{1};\n'.format(
-            classname, format_mac(self.mac))
+        return 'subclass "{0}" 1:{1};\n'.format(classname, self.mac)
 
     def get_related_systems(self):
         related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
