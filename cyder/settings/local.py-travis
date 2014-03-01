@@ -2,6 +2,8 @@
 import sys
 import os
 
+from .base import DHCPBUILD
+
 
 SASS_BIN = '/usr/local/bin/sass'
 
@@ -136,6 +138,9 @@ DEBUG_TOOLBAR_CONFIG = {
     'TAG': 'div',
     'ENABLE_STACKTRACES' : True,
 }
+
+
+DHCPBUILD['dhcpd'] = 'sudo dhcpd'
 
 
 ##########################

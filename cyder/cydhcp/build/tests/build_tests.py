@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from cyder.base.eav.models import Attribute
 from cyder.base.utils import copy_tree, remove_dir_contents
-from cyder.base.vcs import GitRepo, SanityCheckFailure
+from cyder.base.vcs import GitRepo, GitRepoManager, SanityCheckFailure
 
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
@@ -46,13 +46,14 @@ class DHCPBuildTest(TestCase):
             os.makedirs(PROD_ORIGIN_DIR)
         remove_dir_contents(PROD_ORIGIN_DIR)
 
-        repo_origin = GitRepo(PROD_ORIGIN_DIR)
-        repo_origin.init(bare=True)
-
-        GitRepo.clone(PROD_ORIGIN_DIR, DHCPBUILD['prod_dir'])
+        mgr = GitRepoManager(debug=False, log_syslog=False, config={
+            'user.name': 'test',
+            'user.email': '',
+        })
+        mgr.init(PROD_ORIGIN_DIR, bare=True)
+        mgr.clone(PROD_ORIGIN_DIR, DHCPBUILD['prod_dir'])
 
         self.builder = DHCPBuilder(verbose=False, debug=False, **DHCPBUILD)
-
         self.builder.repo.commit_and_push(empty=True,
                                           message='Initial commit')
 
