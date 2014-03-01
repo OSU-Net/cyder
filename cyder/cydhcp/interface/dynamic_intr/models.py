@@ -43,11 +43,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         return objects.filter(ctnr=ctnr)
 
     def __str__(self):
-        return "{0}".format(self.mac_str)
-
-    @property
-    def mac_str(self):
-        return (':').join(re.findall('..', self.mac))
+        return "{0}".format(self.mac)
 
     def __repr__(self):
         return "Interface {0}".format(str(self))

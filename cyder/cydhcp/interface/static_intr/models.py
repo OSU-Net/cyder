@@ -97,10 +97,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         return self.fqdn
 
     @property
-    def mac_str(self):
-        return (':').join(re.findall('..', self.mac))
-
-    @property
     def range(self):
         if self.ip_str:
             return find_range(self.ip_str)
@@ -111,7 +107,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
-            ('MAC', 'mac', self.mac_str),
+            ('MAC', 'mac', self.mac),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),
