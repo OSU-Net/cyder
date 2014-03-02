@@ -43,3 +43,4 @@ class SystemViewSet(CommonAPIViewSet):
     serializer_class = SystemSerializer
     avmodel = SystemAV
     model = System
+
