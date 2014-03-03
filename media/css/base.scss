@@ -46,6 +46,9 @@ hr {
 a, tr, li, div, span, h1, h2, h3 {
     @include transition(background .15s, color .25s);
 }
+input[type="radio"], input[type="checkbox"], .btn {
+    cursor: pointer;
+};
 
 input[type="text"], input[type="search"], select {
     background: $white;
@@ -222,6 +225,7 @@ a.btn {
     }
     .level {
         color:$white;
+        cursor: default;
     }
 }
 
