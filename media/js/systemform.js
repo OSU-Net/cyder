@@ -9,6 +9,12 @@ $(document).ready(function() {
     var dynamic_clone = dynamic_form.cloneNode(true);
     dynamic_clone.id ="static_clone";
     $(dynamic_clone).removeAttr('style');
+    initial_interface_type = $('#view-metadata').attr(
+        'data-initial_interface_type');
+    if (initial_interface_type) {
+        $('input[name=interface_type][value=' +
+            initial_interface_type + ']').attr('checked', true);
+    };
     for(var i = 0; i < interface_type.length; i++) {
         if (interface_type[i].checked) {
             if (form.lastChild.textContent != '') {

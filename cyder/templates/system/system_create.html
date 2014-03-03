@@ -7,7 +7,8 @@
 
 {% block form %}
   <span id="view-metadata"
-      data-csrfToken="{{ csrf_token }}">
+      data-csrfToken="{{ csrf_token }}"
+      data-initial_interface_type="{{ initial_interface_type }}">
   </span>
   <form class="form" id="system-form" method="POST" objType="system-extended">
     <h3>Create a System</h3>
