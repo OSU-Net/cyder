@@ -43,7 +43,7 @@ $(document).ready(function() {
         };
     });
 
-    $('#system_create, #delete, .delete').click( function(e) {
+    $('#delete, .delete').click( function(e) {
         e.preventDefault();
         if ($(this).attr('id') == 'delete'
                 || $(this).attr('class') == 'delete') {

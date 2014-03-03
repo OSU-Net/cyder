@@ -134,7 +134,11 @@ def system_create_view(request):
     static_form.make_usable(request)
     dynamic_form.make_usable(request)
 
+    initial_interface_type = request.GET.get('interface_type', '')
+
     return render(request, 'system/system_create.html', {
         'system_form': system_form,
         'static_form': static_form,
-        'dynamic_form': dynamic_form})
+        'dynamic_form': dynamic_form,
+        'initial_interface_type': initial_interface_type,
+    })
