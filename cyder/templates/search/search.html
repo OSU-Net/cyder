@@ -11,6 +11,12 @@
   {% include "base/sidebar.html" %}
 {% endblock %}
 
+{% block view_metadata %}
+    <span id="view-metadata"
+        data-csrfToken="{{ csrf_token }}">
+    </span>
+{% endblock %}
+
 {% block filter_bar %}
   <form class="search" action="/search/" method="get">
     <input type="search" name="search" value="{{ search if search else '' }}"
