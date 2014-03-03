@@ -1,4 +1,4 @@
-from django.db.models import CharField, NOT_PROVIDED
+from django.db.models import CharField, NOT_PROVIDED, SubfieldBase
 from django.core.exceptions import ValidationError
 from south.modelsinspector import add_introspection_rules
 
@@ -18,6 +18,8 @@ class MacAddrField(CharField):
                            validate.
     """
 
+    __metaclass__ = SubfieldBase
+
     def __init__(self, *args, **kwargs):
         if 'dhcp_enabled' in kwargs:
             self.dhcp_enabled = kwargs.pop('dhcp_enabled')
@@ -29,17 +31,30 @@ class MacAddrField(CharField):
 
         super(MacAddrField, self).__init__(*args, **kwargs)
 
-    def clean(self, value, model_instance):
-        # [   always validate   ]  [             DHCP is enabled              ]
-        if not self.dhcp_enabled or getattr(model_instance, self.dhcp_enabled):
-            if value == '':
-                raise ValidationError(
-                    "This field is required when DHCP is enabled")
+    def get_prep_value(self, value):
+        value = super(MacAddrField, self).get_prep_value(value)
+        if value:
+            value = value.lower().replace(':', '').replace('-', '')
+        return value
+
+    def to_python(self, value):
+        value = super(MacAddrField, self).to_python(value)
+
+        if value:
             value = value.lower().replace(':', '').replace('-', '')
             validate_mac(value)
-
-        value = super(CharField, self).clean(value, model_instance)
+            value = reduce(lambda x,y: x + ':' + y,
+                           (value[i:i+2] for i in xrange(0, 12, 2)))
         return value
+
+    def clean(self, value, model_instance):
+        if ((not self.dhcp_enabled
+                or getattr(model_instance, self.dhcp_enabled))
+                and value == ''):
+            raise ValidationError(
+                "This field is required when DHCP is enabled")
+
+        return super(MacAddrField, self).clean(value, model_instance)
 
 
 add_introspection_rules([

@@ -215,7 +215,7 @@ def static_dynamic_view(request):
         if isinstance(obj, StaticInterface):
             data['data'].append(('System', '1', obj.system))
             data['data'].append(('Type', '2', 'static'))
-            data['data'].append(('MAC', '3', obj.mac_str))
+            data['data'].append(('MAC', '3', obj.mac))
             data['data'].append(('IP', '4', obj.ip_str))
         elif isinstance(obj, DynamicInterface):
             data['data'].append(('System', '1', obj.system))

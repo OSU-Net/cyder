@@ -97,10 +97,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         return self.fqdn
 
     @property
-    def mac_str(self):
-        return (':').join(re.findall('..', self.mac))
-
-    @property
     def range(self):
         if self.ip_str:
             return find_range(self.ip_str)
@@ -111,7 +107,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
             ('IP', 'ip_str', str(self.ip_str)),
-            ('MAC', 'mac', self.mac_str),
+            ('MAC', 'mac', self.mac),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',
                 'True' if self.dhcp_enabled else 'False'),
@@ -187,14 +183,13 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         s = str(option)
         s = s.replace('%h', self.label)
         s = s.replace('%i', self.ip_str)
-        s = s.replace('%m', self.mac)
-        s = s.replace('%6m', self.mac[0:6])
+        s = s.replace('%m', self.mac.replace(':', ''))
+        s = s.replace('%6m', self.mac.replace(':', '')[0:6])
         return s
 
     def build_host(self, options=None):
         build_str = '\thost {0} {{\n'.format(self.fqdn)
-        build_str += '\t\thardware ethernet {0};\n'.format(
-            format_mac(self.mac))
+        build_str += '\t\thardware ethernet {0};\n'.format(self.mac)
         if self.ip_type == IP_TYPE_6:
             build_str += '\t\tfixed-address6 {0};\n'.format(self.ip_str)
         else:
@@ -215,8 +210,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         return build_str
 
     def build_subclass(self, classname):
-        return 'subclass "{0}" 1:{1};\n'.format(
-            classname, format_mac(self.mac))
+        return 'subclass "{0}" 1:{1};\n'.format(classname, self.mac)
 
     def clean(self, *args, **kwargs):
         check_for_reverse_domain(self.ip_str, self.ip_type)

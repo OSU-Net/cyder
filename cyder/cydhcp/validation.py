@@ -5,8 +5,9 @@ import re
 mac_match = "^[0-9a-f]{12}$"
 is_mac = re.compile(mac_match)
 
-MAC_ERR = "Mac Address not of valid type."
-EMPTY_MAC_ERR = "If you want to use a blank mac address, uncheck Dhcp enabled"
+MAC_ERR = "MAC address not of valid type."
+EMPTY_MAC_ERR = ('If you want to use a blank MAC address, uncheck "DHCP '
+                 'enabled"')
 
 def validate_mac(mac):
     if not isinstance(mac, basestring) or not is_mac.match(mac):
