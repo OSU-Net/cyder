@@ -27,4 +27,4 @@ def _dot_lookup(thing, comp, import_path):
         __import__(import_path)
         return getattr(thing, comp)
 
-ROOT = dirname(abspath(__name__))
+ROOT = dirname(dirname(abspath(__file__)))
