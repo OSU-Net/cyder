@@ -173,7 +173,7 @@ def cy_view(request, template, pk=None, obj_type=None):
     elif request.method == 'GET':
         object_list = _filter(request, Klass)
 
-        if 'interface' not in obj_type or object_list:
+        if 'interface' not in obj_type or object_list.exists():
             form = FormKlass(instance=obj)
 
 
