@@ -1,5 +1,7 @@
 language: python
 python: 2.7
+before_install:
+    - git rev-list --parents -n1 HEAD
 install:
     - sudo apt-get install isc-dhcp-server bind9utils
     - gem install sass
