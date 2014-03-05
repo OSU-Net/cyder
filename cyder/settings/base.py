@@ -462,7 +462,8 @@ ZONE_BLACKLIST = []
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'cyder.api.v1.permissions.ReadOnlyIfAuthenticated',
+        # 'cyder.api.v1.permissions.ReadOnlyIfAuthenticated',
+        'cyder.api.v1.permissions.ReadOnlyIfAuthenticatedWriteIfSpecialCase',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'cyder.api.v1.authentication.CyderTokenAuthentication',
