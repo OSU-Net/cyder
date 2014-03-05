@@ -78,7 +78,7 @@ def get_label_domain(fqdn):
 def tiny2txt(fqdn, s, ttl=3600):
     ttl = int(ttl)
     label, domain = get_label_domain(fqdn)
-    s = s.replace(r'\072', ':')
+    s = s.replace(r'\072', ':').replace(r'\040', ' ').replace(r'\057', '.')
     txt, _ = TXT.objects.get_or_create(label=label, domain=domain,
                                        txt_data=s, ttl=ttl)
     return txt
