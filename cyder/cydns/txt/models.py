@@ -85,7 +85,7 @@ class TXT(LabelDomainMixin, CydnsRecord):
 
         txt_data = txt_data.strip('\n')
         if '\n' in txt_data:
-            txt_data = '(\n{0})'.format(txt_data)
+            txt_data = '(\n{0})'.format(txt_data).replace('\n', '\n    ')
 
         return template.format(
             bind_name=bind_name, ttl=self.ttl, rdtype=self.rdtype,
