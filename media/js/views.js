@@ -200,9 +200,15 @@ $(document).ready(function() {
         var url = $('#obj-form form')[0].action;
         event.preventDefault();
         var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
+        alert($(this).attr('action'));
         if (!data.errors) {
-            location.reload();
+            if ($(this).attr('action').indexOf('_av') >= 0) {
+                $(this)[0].reset();
+            } else {
+                location.reload();
+            };
         };
+
     });
 });
 
@@ -218,10 +224,10 @@ function ajax_form_submit(url, form, csrfToken) {
     var ret_data = null;
     $.post(url, postData, function(data) {
         ret_data = data;
+        if ($('#hidden-inner-form').find('#error').length) {
+            $('#hidden-inner-form').find('#error').remove();
+        };
         if (data.errors) {
-            if ($('#hidden-inner-form').find('#error').length) {
-                $('#hidden-inner-form').find('#error').remove();
-            };
             jQuery.each(fields, function (i, field) {
                 if (data.errors[field.name]) {
                     $('#id_' + field.name).after(
