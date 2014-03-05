@@ -1,6 +1,7 @@
 """Originally from funfactory (funfactory/path_utils.py) on a380a54"""
 
 import os
+from os.path import abspath, dirname
 
 
 def path(*a):
@@ -26,4 +27,4 @@ def _dot_lookup(thing, comp, import_path):
         __import__(import_path)
         return getattr(thing, comp)
 
-ROOT = os.getcwd()
+ROOT = dirname(dirname(abspath(__file__)))

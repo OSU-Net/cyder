@@ -495,7 +495,7 @@ BINDBUILD = {
     # bind_prefix: This is the path to where Cyder zone files are built
     # relative to the root of the Git repo. This is usually a substring of
     # prod_dir.
-    'bind_prefix': '',
+    'bind_prefix': '/tmp/dns_prod/cyzones/',
 
     'lock_file': '/tmp/cyder_dns.lock',
     'pid_file': '/tmp/cyder_dns.pid',
