@@ -425,11 +425,14 @@ def gen_CNAME():
             dup_ptrs.delete(update_range_usage=False)
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
-        cn.full_clean()
-        cn.save()
-        if enabled:
-            cn.views.add(public)
-            cn.views.add(private)
+        try:
+            cn.full_clean()
+            cn.save()
+            if enabled:
+                cn.views.add(public)
+                cn.views.add(private)
+        except ValidationError, e:
+            print "Error:", e
 
 
 def gen_reverses():
