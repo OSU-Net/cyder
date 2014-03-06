@@ -386,7 +386,7 @@ def gen_CNAME():
         server, name = server.lower(), name.lower()
         if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
                               % domain_id):
-            stderr.write('Ignoring CNAME {0}; domain does not exist.\n'
+            stderr.write('Ignoring CNAME {0}; domain unknown.\n'
                          .format(name))
             continue
         dname, = cursor.fetchone()
