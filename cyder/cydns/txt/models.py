@@ -62,19 +62,30 @@ class TXT(LabelDomainMixin, CydnsRecord):
         return 'TXT'
 
     def bind_render_record(self, pk=False):
+        TXT_LINE_LENGTH = 120
+
+        def length_format(line):
+            if len(line) <= TXT_LINE_LENGTH:
+                return '"{0}"'.format(line)
+            return (('"%s"' % line[:TXT_LINE_LENGTH]) + "\n"
+                    + length_format(line[TXT_LINE_LENGTH:]))
+
         template = Template(self.template).substitute(**self.justs)
         bind_name = self.fqdn + "."
         if not self.ttl:
             self.ttl = 3600
 
         txt_lines = self.escaped_txt_data.split('\n')
+        txt_data = ""
         if len(txt_lines) > 1:
-            txt_data = '('
-            for line in self.escaped_txt_data.split('\n'):
-                txt_data += '"{0}"\n'.format(line)
-            txt_data = txt_data.strip('\n') + ')'
+            for line in txt_lines:
+                txt_data += length_format(line) + "\n"
         else:
-            txt_data = '"{0}"'.format(self.escaped_txt_data)
+            txt_data = length_format(self.escaped_txt_data)
+
+        txt_data = txt_data.strip('\n')
+        if '\n' in txt_data:
+            txt_data = '(\n{0})'.format(txt_data).replace('\n', '\n    ')
 
         return template.format(
             bind_name=bind_name, ttl=self.ttl, rdtype=self.rdtype,
