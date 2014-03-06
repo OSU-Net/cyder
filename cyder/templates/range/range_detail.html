@@ -35,7 +35,7 @@
 
   {% if attrs_table %}
     <h3>Range Attributes</h3>
-    {{ render_table(request, attrs_table) }}
+    {{ render_table(request, attrs_table, 'attrs_table') }}
   {% endif %}
   {% if range_used %}
     <h3>Range Usage: {{ range_used }}</h3>

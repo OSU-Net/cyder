@@ -43,12 +43,12 @@ $(document).ready(function() {
         };
     });
 
-    $('#delete, .delete').click( function(e) {
+    $('#delete, .delete').live( 'click', function(e) {
         e.preventDefault();
         if ($(this).attr('id') == 'delete'
                 || $(this).attr('class') == 'delete') {
             var msg = "Are you sure you want to delete this?";
-            if (objType == 'system') {
+            if ($(this).attr('data-kwargs').indexOf('"system"') >= 0) {
                 msg = "Deleting this system will also delete its"
                     + " interfaces. Are you sure you want to continue?";
             }
@@ -164,7 +164,7 @@ $(document).ready(function() {
         };
     });
 
-    $('.update').click(function(e) {
+    $('.update').live( 'click', function(e) {
         // Show update form on clicking update icon.
         slideUp($('#obj-form'));
         e.preventDefault();
@@ -200,10 +200,10 @@ $(document).ready(function() {
         var url = $('#obj-form form')[0].action;
         event.preventDefault();
         var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
-        alert($(this).attr('action'));
         if (!data.errors) {
             if ($(this).attr('action').indexOf('_av') >= 0) {
                 $(this)[0].reset();
+                insertTablefyRow(data.row, $('.attrs_table > tbody'));
             } else {
                 location.reload();
             };

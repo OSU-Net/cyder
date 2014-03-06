@@ -7,18 +7,28 @@ function insertTablefyRow(tablefy, tbody) {
         var newRow = $('<tr></tr>');
 
         for (col in row) {
-            var col = row[col];
             var newCol = $('<td>');
+            newCol.attr('class', tablefy.headers[col][0].toLowerCase() + '_column');
+            var col = row[col];
             if (col.url) {
                 for (i in col.value) {
-                    if (col.url[i] == '') {
+                    if (col.url[i] == '' || col.url[i] == null) {
                         newCol.text(col.value[i]);
                     } else {
                         if (col.img) {
                             if (col.img[i] == '') {
                                 var newLink = $('<a>' + col.value[i] + '</a>');
                             } else {
-                                var newLink = $('<a><img src=' + col.img[i] + '></a>');
+                                var newLink = $('<a><img src=' + col.img[i] + '></a>');i
+                                if (col.class) {
+                                    newLink.attr('class', col.class[i]);
+                                };
+                                if (col.data[i]) {
+                                    jQuery.each(col.data[i], function (i, value) {
+                                        newLink.attr('data-' + value[0], value[1]);
+                                    });
+                                };
+
                             }
                         } else {
                             var newLink = $('<a>' + col.value[i] + '</a>');

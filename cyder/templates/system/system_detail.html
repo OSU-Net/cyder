@@ -37,7 +37,7 @@
 
   {% if attrs_table %}
     <h3>System Attributes</h3>
-    {{ render_table(request, attrs_table) }}
+    {{ render_table(request, attrs_table, 'attrs_table') }}
   {% endif %}
   {% if static_intr_tables %}
     {% for table in static_intr_tables %}
