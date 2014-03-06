@@ -2,8 +2,9 @@
 from django.core.management.base import LabelCommand
 from django.core.exceptions import ValidationError
 
-from cyder.models import (Domain, TXT, AddressRecord, Nameserver, MX, CNAME,
-                          SOA, PTR, SRV, StaticInterface, View)
+from cyder.models import (TXT, AddressRecord, Nameserver, MX, CNAME,
+                          SOA, PTR, SRV, View)
+from lib.utilities import ensure_domain_workaround, get_label_domain_workaround
 
 import subprocess
 
@@ -30,54 +31,15 @@ public = View.objects.get(name="public")
 private = View.objects.get(name="private")
 
 
-def ensure_domain(name):
-    parts = name.split('.')
-    parts, dom = parts[:-1], parts[-1]
-    while parts:
-        Domain.objects.get_or_create(name=dom)
-        parts, dom = parts[:-1], ".".join([parts[-1], dom])
-    dom, _ = Domain.objects.get_or_create(name=dom)
-    return dom
-
-
 def diglet(rdtype, target, ns='ns1.oregonstate.edu'):
     cmd = "dig %s %s @%s +short +norecurse" % (rdtype, target, ns)
     result = subprocess.check_output(cmd.split(' ')).strip()
     return result or None
 
 
-def get_label_domain(fqdn):
-    conflict_objects = [MX, StaticInterface, AddressRecord, CNAME]
-    label, domain_name = tuple(fqdn.split('.', 1))
-    objs = []
-    for obj_type in conflict_objects:
-        objs.extend(list(obj_type.objects
-                         .filter(fqdn=domain_name).exclude(label="")))
-
-    if objs:
-        for obj in objs:
-            obj.label = "not_a_real_label_please_delete"
-            obj.save()
-        domain, _ = Domain.objects.get_or_create(name=domain_name)
-        for obj in objs:
-            obj.label = ""
-            obj.domain = domain
-            obj.save()
-
-        objs = []
-        for obj_type in conflict_objects:
-            objs.extend(list(obj_type.objects
-                             .filter(fqdn=domain_name).exclude(label="")))
-        assert not objs
-
-    ensure_domain(domain_name)
-    domain, _ = Domain.objects.get_or_create(name=domain_name)
-    return label, domain
-
-
 def tiny2txt(fqdn, s, ttl=3600):
     ttl = int(ttl)
-    label, domain = get_label_domain(fqdn)
+    label, domain = get_label_domain_workaround(fqdn)
     s = s.replace(r'\072', ':').replace(r'\040', ' ').replace(r'\057', '/')
     txt, _ = TXT.objects.get_or_create(label=label, domain=domain,
                                        txt_data=s, ttl=ttl)
@@ -85,7 +47,7 @@ def tiny2txt(fqdn, s, ttl=3600):
 
 
 def tiny2ar(fqdn, ip):
-    label, domain = get_label_domain(fqdn)
+    label, domain = get_label_domain_workaround(fqdn)
     if AddressRecord.objects.filter(label=label, domain=domain,
                                     ip_str=ip).exists():
         print "AddressRecord %s already exists." % domain.name
@@ -98,7 +60,7 @@ def tiny2ar(fqdn, ip):
 
 def tiny2ns(fqdn, ip, x, ttl=86400, timestamp=None, lo=None):
     ttl = int(ttl)
-    domain = ensure_domain(fqdn)
+    domain = ensure_domain_workaround(fqdn)
     ns, _ = Nameserver.objects.get_or_create(domain=domain, server=x, ttl=ttl)
     return ns
 
@@ -113,7 +75,7 @@ def tiny2wut(fqdn, n, rdata, ttl=86400):
 
         priority, weight, port, target = digged.split(' ')
         target = target.rstrip('.')
-        label, domain = get_label_domain(fqdn)
+        label, domain = get_label_domain_workaround(fqdn)
         try:
             srv, _ = SRV.objects.get_or_create(label=label, domain=domain,
                                                target=target, port=port,
@@ -124,7 +86,7 @@ def tiny2wut(fqdn, n, rdata, ttl=86400):
             print "INVALID: %s for SRV %s" % (e, fqdn)
     elif n == 28:
         digged = diglet('AAAA', fqdn)
-        label, domain = get_label_domain(fqdn)
+        label, domain = get_label_domain_workaround(fqdn)
         if AddressRecord.objects.filter(label=label, domain=domain,
                                         ip_str=digged).exists():
             print "AddressRecord %s already exists." % domain.name
@@ -141,7 +103,7 @@ def tiny2wut(fqdn, n, rdata, ttl=86400):
 def tiny2mx(fqdn, ip, x, dist=5, ttl=600):
     dist = int(dist)
     ttl = int(ttl)
-    domain = ensure_domain(fqdn)
+    domain = ensure_domain_workaround(fqdn)
     existing = MX.objects.filter(label="", domain=domain,
                                  server=x, priority=dist)
     if existing.exists():
@@ -152,7 +114,7 @@ def tiny2mx(fqdn, ip, x, dist=5, ttl=600):
 
 
 def tiny2cname(fqdn, p):
-    label, domain = get_label_domain(fqdn)
+    label, domain = get_label_domain_workaround(fqdn)
     cname, _ = CNAME.objects.get_or_create(label=label, domain=domain,
                                            target=p)
     return cname
@@ -160,7 +122,7 @@ def tiny2cname(fqdn, p):
 
 def tiny2soa(fqdn, mname, rname, ser, ref=300, ret=900, exp=604800, _min=86400,
              ttl=86400, timestamp=None, lo=None):
-    domain = ensure_domain(fqdn)
+    domain = ensure_domain_workaround(fqdn)
     if SOA.objects.filter(root_domain=domain).exists():
         print "SOA %s already exists." % domain.name
         return
@@ -172,7 +134,7 @@ def tiny2soa(fqdn, mname, rname, ser, ref=300, ret=900, exp=604800, _min=86400,
 
 
 def tiny2ptr(fqdn, p, ttl=3600):
-    label, domain = get_label_domain(p)
+    label, domain = get_label_domain_workaround(p)
     for rdtype in ['A', 'AAAA']:
         ip_type = '6' if rdtype == 'AAAA' else '4'
         ip_str = diglet(rdtype, p)
