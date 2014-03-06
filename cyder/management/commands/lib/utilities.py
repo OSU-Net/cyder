@@ -71,8 +71,9 @@ def ensure_domain_workaround(name):
 def get_label_domain_workaround(fqdn):
     # This creates a label/domain from a fqdn and resolves any conflicts with
     # existing objects by giving them a blank label
-    from cyder.models import Domain, MX, StaticInterface, AddressRecord, CNAME
-    conflict_objects = [MX, StaticInterface, AddressRecord, CNAME]
+    from cyder.models import (Domain, MX, StaticInterface, AddressRecord,
+                              CNAME, TXT)
+    conflict_objects = [MX, StaticInterface, AddressRecord, CNAME, TXT]
     label, domain_name = tuple(fqdn.split('.', 1))
     objs = []
     for obj_type in conflict_objects:
@@ -81,8 +82,11 @@ def get_label_domain_workaround(fqdn):
 
     if objs:
         for obj in objs:
+            print "Clobbering %s %s %s" % (obj.pretty_type, obj.label,
+                                           obj.domain.name)
             obj.label = "not_a_real_label_please_delete"
             obj.save()
+
         domain, _ = Domain.objects.get_or_create(name=domain_name)
         for obj in objs:
             obj.label = ""

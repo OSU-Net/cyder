@@ -25,7 +25,7 @@ from optparse import make_option
 from datetime import datetime
 from lib import maintain_dump, fix_maintain
 from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
-                           range_usage_get_create)
+                           range_usage_get_create, get_label_domain_workaround)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -403,12 +403,15 @@ def gen_CNAME():
         elif Domain.objects.filter(name=dname).exists():
             domain = Domain.objects.get(name=dname)
         else:
-            print "Ignoring CNAME %s: No domain." % fqdn
-            continue
+            _, domain = get_label_domain_workaround(fqdn)
 
         if server == ".".join([name, domain.name]):
             # In maintain, at least one CNAME is a loop: biosys.bioe.orst.edu
             print "Ignoring CNAME %s: Is a loop." % server
+            continue
+
+        if CNAME.objects.filter(label=name, domain=domain,
+                                target=server).exists():
             continue
 
         cn = CNAME(label=name, domain=domain, target=server)
