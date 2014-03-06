@@ -410,8 +410,11 @@ def gen_CNAME():
             print "Ignoring CNAME %s: Is a loop." % server
             continue
 
-        if CNAME.objects.filter(label=name, domain=domain,
-                                target=server).exists():
+        if CNAME.objects.filter(label=name, domain=domain).exists():
+            c = CNAME.objects.get(label=name, domain=domain)
+            if c.target != server:
+                print ("ALERT: Conflicting CNAME with fqdn %s already exists."
+                       % fqdn)
             continue
 
         cn = CNAME(label=name, domain=domain, target=server)
