@@ -32,15 +32,16 @@ class DynamicInterfaceNestedAVSerializer(CommonAPINestedAVSerializer):
 
 
 class DynamicInterfaceSerializer(serializers.ModelSerializer):
-    dynamicinterfaceav_set = DynamicInterfaceNestedAVSerializer(many=True)
+    dynamicinterfaceav_set = DynamicInterfaceNestedAVSerializer(
+        many=True, required=False)
     system = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-system-detail')
+        view_name='api-core-system-detail')
     range = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-range-detail')
+        view_name='api-dhcp-range-detail')
     ctnr = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-ctnr-detail')
+        view_name='api-core-ctnr-detail')
     workgroup = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-dhcp-workgroup-detail')
+        view_name='api-dhcp-workgroup-detail', required=False)
 
     class Meta(api.CommonDHCPMeta):
         model = DynamicInterface
