@@ -11,6 +11,9 @@ class ReadOnlyIfAuthenticatedWriteIfSpecialCase(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         token = request.auth
 
+        if not token:
+            return False
+
         if token.can_write:
             return True
 
