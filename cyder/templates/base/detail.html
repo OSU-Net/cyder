@@ -45,7 +45,11 @@
       {% with page_obj = table.page_obj %}
         {% include "base/includes/pagination.html" %}
       {% endwith %}
-      {{ render_table(request, table.table) }}
+      {% if "Attributes" in table.name %}
+        {{ render_table(request, table.table, 'attrs_table') }}
+      {% else %}
+        {{ render_table(request, table.table) }}
+      {% endif %}
     {% endif %}
   {% endfor %}
 {% endblock %}
