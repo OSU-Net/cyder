@@ -29,7 +29,7 @@ from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.core.cyuser.views import edit_user
 from cyder.core.ctnr.models import CtnrUser
 
-import cyder.settings
+from cyder.settings import BUG_REPORT_EMAIL
 
 
 def home(request):
@@ -111,7 +111,7 @@ def send_email(request):
                 + request.POST.get('session_data', ''))
             try:
                 send_mail(subject, message, from_email,
-                          [settings.BUG_REPORT_EMAIL])
+                          [BUG_REPORT_EMAIL])
                 return redirect(reverse('core-index'))
 
             except BadHeaderError:
@@ -175,7 +175,6 @@ def cy_view(request, template, pk=None, obj_type=None):
 
         if 'interface' not in obj_type or object_list.exists():
             form = FormKlass(instance=obj)
-
 
         if obj_type == 'system' and not object_list.exists():
             return redirect(reverse('system-create'))
