@@ -455,6 +455,10 @@ REVERSE_DOMAINS = [
     '127', '131.80.252.131', '5.68.98.207'
 ]
 
+REVERSE_SOAS = [
+    '10', '193.128', '18.211.140', '139.201.199', '0.0.127',
+]
+
 VERIFICATION_SERVER = "ns1.oregonstate.edu"
 ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
 ZONE_PATH = "cyder/management/commands/lib/zones"

@@ -25,7 +25,8 @@ from optparse import make_option
 from datetime import datetime
 from lib import maintain_dump, fix_maintain
 from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
-                           range_usage_get_create, get_label_domain_workaround)
+                           range_usage_get_create, get_label_domain_workaround,
+                           ensure_domain_workaround)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -453,6 +454,8 @@ def gen_reverses():
         Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
                                      is_reverse=True)
 
+    gen_reverse_soa()
+
 
 def gen_reverse_soa():
     dom, _ = Domain.objects.get_or_create(name='in-addr.arpa')
@@ -462,6 +465,21 @@ def gen_reverse_soa():
                                               server="ns2.oregonstate.edu")
     SOA.objects.get_or_create(root_domain=dom, primary="ns1.oregonstate.edu",
                               contact="hostmaster.oregonstate.edu")
+
+    for rname in settings.REVERSE_SOAS:
+        if not rname.endswith(".arpa"):
+            rname = rname + ".in-addr.arpa"
+
+        print "Creating reverse SOA %s" % rname
+        dom = ensure_domain_workaround(rname)
+        ns1, _ = Nameserver.objects.get_or_create(domain=dom,
+                                                  server="ns1.oregonstate.edu")
+        ns2, _ = Nameserver.objects.get_or_create(domain=dom,
+                                                  server="ns2.oregonstate.edu")
+        SOA.objects.get_or_create(root_domain=dom,
+                                  primary="ns1.oregonstate.edu",
+                                  contact="hostmaster.oregonstate.edu")
+
     public = View.objects.get(name="public")
     private = View.objects.get(name="private")
     ns1.views.add(public)
@@ -472,7 +490,6 @@ def gen_reverse_soa():
 
 def gen_DNS(skip_edu=False):
     gen_reverses()
-    gen_reverse_soa()
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
