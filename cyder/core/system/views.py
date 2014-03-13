@@ -16,7 +16,6 @@ from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
-from cyder.cydhcp.validation import MAC_ERR
 
 
 def system_detail(request, pk):
@@ -104,14 +103,6 @@ def system_create_view(request):
 
                 return HttpResponse(json.dumps({'errors': form.errors}))
         else:
-            if '__all__' in form.errors and (
-                    MAC_ERR in form.errors['__all__']):
-                form.errors['__all__'].remove(MAC_ERR)
-                if 'mac' not in form.errors:
-                    form.errors['mac'] = []
-                if MAC_ERR not in form.errors['mac']:
-                    form.errors['mac'].append(MAC_ERR)
-
             if system:
                 system.delete()
 
