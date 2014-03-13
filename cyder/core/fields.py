@@ -21,13 +21,10 @@ class MacAddrField(CharField):
     __metaclass__ = SubfieldBase
 
     def __init__(self, *args, **kwargs):
-        if 'dhcp_enabled' in kwargs:
-            self.dhcp_enabled = kwargs.pop('dhcp_enabled')
-        else:
-            self.dhcp_enabled = None # always validate
+        self.dhcp_enabled = kwargs.pop('dhcp_enabled', True)
 
         kwargs['max_length'] = 17
-        kwargs['blank'] = True
+        kwargs['blank'] = False  # always call MacAddrField.clean
 
         super(MacAddrField, self).__init__(*args, **kwargs)
 
@@ -48,13 +45,19 @@ class MacAddrField(CharField):
         return value
 
     def clean(self, value, model_instance):
-        if ((not self.dhcp_enabled
-                or getattr(model_instance, self.dhcp_enabled))
-                and value == ''):
+        value_required = (self.dhcp_enabled is True
+            or (isinstance(self.dhcp_enabled, basestring) and
+                getattr(model_instance, self.dhcp_enabled)))
+
+        if (value_required and not value):
             raise ValidationError(
                 "This field is required when DHCP is enabled")
 
-        return super(MacAddrField, self).clean(value, model_instance)
+        if value:
+            return super(MacAddrField, self).clean(value, model_instance)
+        else:
+            # If value is blank, CharField.clean will choke.
+            return value
 
 
 add_introspection_rules([
