@@ -199,16 +199,12 @@ $(document).ready(function() {
     $('#obj-form form').live('submit', function(event) {
         var url = $('#obj-form form')[0].action;
         event.preventDefault();
-        var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
-        if (!data.errors) {
-            location.reload();
-        };
+        ajax_form_submit(url, $('#obj-form'), csrfToken);
     });
 });
 
 
 function ajax_form_submit(url, form, csrfToken) {
-    $.ajaxSetup({async:false});
     var fields = form.find(':input').serializeArray();
     var postData = {}
     jQuery.each(fields, function (i, field) {
@@ -234,7 +230,8 @@ function ajax_form_submit(url, form, csrfToken) {
                     '<p id="error"><font color="red">'
                     + data.errors['__all__'] + '</font></p>');
             };
+        } else {
+            location.reload();
         };
     }, 'json');
-    return ret_data;
 };
