@@ -139,7 +139,7 @@ $(document).ready(function() {
                         $('#obj-form form')[0].action = $createBtn.attr('href');
                         $('.form-btns a.submit').text(
                             'Create ' + formPrettyObjType);
-                        $('.form-btns a.submit').attr('class', 'btn c');
+                        $('.form-btns a.submit').attr('class', 'btn c submit_create');
                         $('#obj-form').slideToggle();
                     }, 'json');
             } else {
@@ -153,11 +153,16 @@ $(document).ready(function() {
                         clear_form_all(form);
                     };
                 }, 150);
-                $('.form-btns a.submit').text('Create ' + prettyObjType);
+                $('.form-btns a.submit').text('Create' + prettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c');
+                $('.form-btns a.submit').attr('class', 'btn c submit_create');
                 $('#obj-form').slideToggle();
-            }
+            };
+            $('#id_value').live("keypress", function(e) {
+                if (e.which == 13) {
+                    jQuery('.submit_create').focus().click();
+                };
+            });
             $('.form').append($('<input>',
                               {type: 'hidden', name: 'csrfmiddlewaretoken',
                                value: csrfToken}));
@@ -187,9 +192,14 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit').text('Update ' + formPrettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c');
+                $('.form-btns a.submit').attr('class', 'btn c submit_update');
                 $('#obj-form').slideDown();
             }, 'json');
+            $('#id_value').live("keypress", function(e) {
+                if (e.which == 13) {
+                    jQuery('.submit_update').focus().click();
+                };
+            });
 
             $('.form').append($('<input>', {type: 'hidden',
                 name: 'csrfmiddlewaretoken', value: csrfToken}));
