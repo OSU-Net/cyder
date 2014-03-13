@@ -50,7 +50,7 @@ class DNSBuildTest(TestCase):
 
         mgr = GitRepoManager(debug=False, log_syslog=False, config={
             'user.name': 'test',
-            'user.email': '',
+            'user.email': 'test',
         })
         mgr.init(PROD_ORIGIN_DIR, bare=True)
         mgr.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
