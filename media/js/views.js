@@ -211,7 +211,8 @@ $(document).ready(function() {
         event.preventDefault();
         var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
         if (!data.errors) {
-            if ($(this).attr('action').indexOf('_av') >= 0) {
+            if ($(this).attr('action').indexOf('_av') >= 0 &&
+                    $('.attrs_table').length) {
                 $(this)[0].reset();
                 insertTablefyRow(data.row, $('.attrs_table > tbody'));
             } else {
