@@ -153,7 +153,7 @@ $(document).ready(function() {
                         clear_form_all(form);
                     };
                 }, 150);
-                $('.form-btns a.submit').text('Create' + prettyObjType);
+                $('.form-btns a.submit').text('Create ' + prettyObjType);
 
                 $('.form-btns a.submit').attr('class', 'btn c submit_create');
                 $('#obj-form').slideToggle();
