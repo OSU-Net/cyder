@@ -73,10 +73,14 @@ class Zone(object):
             primary, contact, refresh, retry, expire, minimum = record
             primary, contact = primary.lower(), contact.lower()
 
-            soa, _ = SOA.objects.get_or_create(
-                primary=primary, contact=contact, refresh=refresh,
-                retry=retry, expire=expire, minimum=minimum,
-                root_domain=self.domain, description='')
+            try:
+                soa = SOA.objects.get(root_domain=self.domain)
+            except SOA.DoesNotExist:
+                soa, _ = SOA.objects.get_or_create(
+                    primary=primary, contact=contact, refresh=refresh,
+                    retry=retry, expire=expire, minimum=minimum,
+                    root_domain=self.domain, description='')
+
             return soa
         else:
             return None
@@ -86,7 +90,7 @@ class Zone(object):
 
         :uniqueness: domain
         """
-        if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
+        if not (self.dname in BAD_DNAMES):
             return ensure_domain(name=self.dname, force=True,
                                  update_range_usage=False)
 
@@ -341,8 +345,7 @@ class Zone(object):
         """
         sql = ("SELECT id, name "
                "FROM domain "
-               "WHERE name NOT LIKE \"%%.in-addr.arpa\" "
-               "AND master_domain = %s;" % self.domain_id)
+               "WHERE master_domain = %s;" % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
             child_name = child_name.lower()
