@@ -25,7 +25,7 @@ from optparse import make_option
 from datetime import datetime
 from lib import maintain_dump, fix_maintain
 from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
-                           range_usage_get_create)
+                           range_usage_get_create, get_label_domain_workaround)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -386,7 +386,7 @@ def gen_CNAME():
         server, name = server.lower(), name.lower()
         if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
                               % domain_id):
-            stderr.write('Ignoring CNAME {0}; domain does not exist.\n'
+            stderr.write('Ignoring CNAME {0}; domain unknown.\n'
                          .format(name))
             continue
         dname, = cursor.fetchone()
@@ -403,12 +403,18 @@ def gen_CNAME():
         elif Domain.objects.filter(name=dname).exists():
             domain = Domain.objects.get(name=dname)
         else:
-            print "Ignoring CNAME %s: No domain." % fqdn
-            continue
+            _, domain = get_label_domain_workaround(fqdn)
 
         if server == ".".join([name, domain.name]):
             # In maintain, at least one CNAME is a loop: biosys.bioe.orst.edu
             print "Ignoring CNAME %s: Is a loop." % server
+            continue
+
+        if CNAME.objects.filter(label=name, domain=domain).exists():
+            c = CNAME.objects.get(label=name, domain=domain)
+            if c.target != server:
+                print ("ALERT: Conflicting CNAME with fqdn %s already exists."
+                       % fqdn)
             continue
 
         cn = CNAME(label=name, domain=domain, target=server)
@@ -419,11 +425,14 @@ def gen_CNAME():
             dup_ptrs.delete(update_range_usage=False)
 
         # CNAMEs need to be cleaned independently of saving (no get_or_create)
-        cn.full_clean()
-        cn.save()
-        if enabled:
-            cn.views.add(public)
-            cn.views.add(private)
+        try:
+            cn.full_clean()
+            cn.save()
+            if enabled:
+                cn.views.add(public)
+                cn.views.add(private)
+        except ValidationError, e:
+            print "Error:", e
 
 
 def gen_reverses():
