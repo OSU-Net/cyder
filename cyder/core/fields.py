@@ -1,3 +1,4 @@
+from django import forms
 from django.db.models import CharField, NOT_PROVIDED, SubfieldBase
 from django.core.exceptions import ValidationError
 from south.modelsinspector import add_introspection_rules
@@ -58,6 +59,13 @@ class MacAddrField(CharField):
         else:
             # If value is blank, CharField.clean will choke.
             return value
+
+    def formfield(self, **kwargs):
+        kwargs.update({
+            'required': False,
+            'max_length': self.max_length,
+        })
+        return forms.CharField(**kwargs)
 
 
 add_introspection_rules([

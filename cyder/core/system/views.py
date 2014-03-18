@@ -97,10 +97,10 @@ def system_create_view(request):
                 form.save()
                 return HttpResponse(json.dumps(
                     {'success': True, 'system_id': system.id}))
-            except ValidationError, e:
-                form._errors = ErrorDict()
-                form._errors['__all__'] = ErrorList(e.messages)
-
+            except ValidationError as e:
+                if form.errors is None:
+                    form.errors = ErrorDict()
+                form.errors.update(e.message_dict)
                 return HttpResponse(json.dumps({'errors': form.errors}))
         else:
             if system:
