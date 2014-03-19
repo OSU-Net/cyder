@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
@@ -110,6 +111,13 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
+
+        siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
+        if self.id:
+            siblings.exclude(id=self.id)
+        if siblings.exists():
+            raise ValidationError(
+                "MAC address must be unique in this interface's range")
 
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
