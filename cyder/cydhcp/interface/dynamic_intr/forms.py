@@ -1,13 +1,12 @@
 from cyder.base.eav.forms import get_eav_form
-from cyder.base.mixins import UsabilityFormMixin, ExpirableFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.forms import RangeWizard
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicInterfaceAV)
 from cyder.cydhcp.range.models import Range
 
 
-class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin,
-                           ExpirableFormMixin):
+class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(DynamicInterfaceForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['system', 'mac', 'vrf', 'site', 'range',
