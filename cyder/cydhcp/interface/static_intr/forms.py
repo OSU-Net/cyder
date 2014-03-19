@@ -46,6 +46,7 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
                    'last_seen')
         widgets = {'ip_type': forms.RadioSelect,
                    'views': forms.CheckboxSelectMultiple}
+        always_validate = ('mac',)
 
 
 StaticInterfaceAVForm = get_eav_form(StaticInterfaceAV, StaticInterface)
