@@ -1,5 +1,6 @@
 from cyder.base.eav.forms import get_eav_form
 from cyder.base.mixins import UsabilityFormMixin, ExpirableFormMixin
+from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.forms import RangeWizard
 from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
                                                         DynamicInterfaceAV)
@@ -14,7 +15,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin,
                                 'workgroup', 'expire', 'dhcp_enabled', 'ctnr']
         self.fields['range'].required = True
         self.fields['range'].queryset = Range.objects.filter(
-            range_type='dy')
+            range_type=DYNAMIC)
 
     class Meta:
         model = DynamicInterface
