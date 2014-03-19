@@ -136,7 +136,10 @@ def filter_by_ctnr(ctnr, Klass=None, objects=None):
         Klass = objects.model
 
     if ctnr.name in ['global', 'default']:
-        return objects or Klass.objects
+        if objects is None:
+            return Klass.objects
+        else:
+            return objects
 
     return Klass.filter_by_ctnr(ctnr, objects)
 
