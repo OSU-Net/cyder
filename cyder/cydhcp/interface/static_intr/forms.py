@@ -10,7 +10,6 @@ from cyder.cydhcp.forms import RangeWizard
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticInterfaceAV)
 from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.validation import validate_mac
 from cyder.cydns.view.models import View
 from cyder.cydns.forms import ViewChoiceForm
 from cyder.cydns.validation import validate_label
@@ -24,11 +23,6 @@ def validate_ip(ip):
             ipaddr.IPv6Address(ip)
         except ipaddr.AddressValueError:
             raise ValidationError("IP address not in valid form.")
-
-
-class CombineForm(forms.Form):
-    mac = forms.CharField(validators=[validate_mac])
-    system = forms.ModelChoiceField(queryset=System.objects.all())
 
 
 class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
@@ -52,6 +46,7 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
                    'last_seen')
         widgets = {'ip_type': forms.RadioSelect,
                    'views': forms.CheckboxSelectMultiple}
+        always_validate = ('mac',)
 
 
 StaticInterfaceAVForm = get_eav_form(StaticInterfaceAV, StaticInterface)
@@ -66,20 +61,3 @@ class FullStaticInterfaceForm(forms.ModelForm):
         model = StaticInterface
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain',
                    'fqdn')
-
-
-class StaticInterfaceQuickForm(forms.Form):
-    mac = forms.CharField(validators=[validate_mac])
-    label = forms.CharField(validators=[validate_label])
-    views = forms.ModelMultipleChoiceField(
-        queryset=View.objects.all(),
-        widget=forms.widgets.CheckboxSelectMultiple, required=False)
-
-    range_choices = []
-    ranges = Range.objects.all().select_related(depth=4).filter(
-        network__vlan__id__isnull=False)
-    ranges = sorted(ranges, key=lambda a: a.network.site is not None and
-                    (a.network.site.get_full_name(), a.start_str))
-    for r in ranges:
-        range_choices.append((str(r.pk), r.display()))
-    range = forms.ChoiceField(choices=range_choices)

@@ -8,8 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from cyder.base.views import cy_detail
 from cyder.core.system.models import System
-from cyder.cydhcp.interface.static_intr.forms import (
-    StaticInterfaceForm, StaticInterfaceQuickForm)
+from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticInterfaceAV)
 from cyder.cydhcp.range.models import Range
@@ -131,85 +130,4 @@ def create_static_interface(request, system_pk):
         return render(request, 'static_intr/static_intr_form.html', {
             'form': interface_form,
             'form_title': 'New Interface for System {0}'.format(system)
-        })
-
-
-def quick_create(request, system_pk):
-    # TODO, make sure the user has access to this system
-    system = get_object_or_404(System, pk=system_pk)
-    if request.method == 'POST':
-        interface_form = StaticInterfaceQuickForm(request.POST)
-
-        a, ptr, r = None, None, None
-        if interface_form.is_valid():
-            try:
-                #mac = interface_form.cleaned_data['mac']
-                if 'label' in interface_form.cleaned_data:
-                    label = interface_form.cleaned_data['label']
-                else:
-                    label = ""
-                mrange_pk = interface_form.cleaned_data['range']
-                mrange = get_object_or_404(Range, pk=mrange_pk)
-                network = mrange.network
-                ip_type = network.ip_type
-                vlan = network.vlan
-                site = network.site
-
-                networks = []
-                for network in vlan.network_set.all():
-                    if not network.site:
-                        continue
-                    if network.site.get_site_path() == site.get_site_path():
-                        networks.append(network)
-                if not networks:
-                    raise ValidationError(
-                        "No appropriate networks found. "
-                        "Consider adding this interface manually.")
-
-                ip = mrange.get_next_ip()
-                if ip is None:
-                    raise ValidationError(
-                        "No appropriate IP found in {0} Vlan {1} "
-                        "Range {2} - {3}. Consider adding this interface "
-                        "manually.".format(site.name, vlan.name,
-                                           mrange.start_str, mrange.end_str))
-
-                expected_name = "{0}.{1}.mozilla.com".format(
-                    vlan.name, site.get_site_path())
-                try:
-                    domain = Domain.objects.get(name=expected_name)
-                except ObjectDoesNotExist, e:
-                    raise ValidationError(
-                        "The domain '{0}' doesn't seem to exist. "
-                        "Consider creating this interface "
-                        "manually.".format(expected_name))
-
-                intr = StaticInterface(label=label, domain=domain,
-                                       ip_str=str(ip), ip_type=ip_type,
-                                       system=system)
-                intr.full_clean()
-                intr.save()
-            except ValidationError, e:
-                interface_form._errors['__all__'] = ErrorList(e.messages)
-                return render(request, 'static_intr/static_intr_form.html', {
-                    'form': interface_form,
-                    'form_title': "Quick Interface Create for System "
-                    "{0}".format(system)
-                })
-        else:
-            return render(request, 'static_intr/static_intr_form.html', {
-                'form': interface_form,
-                'form_title': 'Quick Interface Create for System {0}'.format(
-                    system)
-            })
-
-        messages.success(request, "Success! Interface Created.")
-        return redirect(system)
-
-    else:
-        interface_form = StaticInterfaceQuickForm()
-        return render(request, 'static_intr/static_intr_form.html', {
-            'form': interface_form,
-            'form_title': 'Quick Interface Create for System {0}'.format(
-                system)
         })

@@ -164,9 +164,10 @@ def cy_view(request, template, pk=None, obj_type=None):
                     return HttpResponse(json.dumps({'success': True}))
 
             except (ValidationError, ValueError) as e:
-                if form._errors is None:
-                    form._errors = ErrorDict()
-                form._errors["__all__"] = ErrorList(e.messages)
+                if form.errors is None:
+                    form.errors = ErrorDict()
+                form.errors.update(e.message_dict)
+                return HttpResponse(json.dumps({'errors': form.errors}))
 
         else:
             return HttpResponse(json.dumps({'errors': form.errors}))

@@ -114,6 +114,7 @@ class DNSBuildTest(TestCase):
             label='www3',
             domain=Domain.objects.get(name='example.com'),
             ip_str='192.168.0.50',
+            mac='01:23:45:01:23:45',
             ctnr=Ctnr.objects.get(name='Global')
         )
         s.full_clean()

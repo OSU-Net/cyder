@@ -19,6 +19,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin,
     class Meta:
         model = DynamicInterface
         exclude = ('last_seen',)
+        always_validate = ('mac',)
 
 
 DynamicInterfaceAVForm = get_eav_form(DynamicInterfaceAV, DynamicInterface)
