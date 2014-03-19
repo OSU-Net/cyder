@@ -5,7 +5,10 @@ class CyderModelForm(forms.ModelForm):
     def _get_validation_exclusions(self):
         exclude = \
             super(CyderModelForm, self)._get_validation_exclusions()
-        return filter(lambda x: x not in self.Meta.always_validate, exclude)
+        if hasattr(self.Meta, 'always_validate'):
+            exclude = filter(lambda x: x not in self.Meta.always_validate,
+                             exclude)
+        return exclude
 
 
 class BugReportForm(forms.Form):
