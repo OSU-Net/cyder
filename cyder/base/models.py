@@ -42,7 +42,8 @@ class BaseModel(models.Model):
 
 
 class ExpirableMixin(models.Model):
-    expire = models.DateTimeField(null=True, blank=True)
+    expire = models.DateTimeField(null=True, blank=True,
+                                  help_text='Format: MM/DD/YYYY')
 
     class Meta:
         abstract = True
