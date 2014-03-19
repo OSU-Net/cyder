@@ -6,6 +6,7 @@ import ipaddr
 from cyder.base.eav.forms import get_eav_form
 from cyder.base.mixins import UsabilityFormMixin, ExpirableFormMixin
 from cyder.core.system.models import System
+from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.forms import RangeWizard
 from cyder.cydhcp.interface.static_intr.models import (StaticInterface,
                                                        StaticInterfaceAV)
@@ -39,6 +40,7 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
                                 'next_ip', 'ip_str', 'ttl', 'workgroup',
                                 'expire', 'views', 'dhcp_enabled',
                                 'dns_enabled', 'ctnr']
+        self.fields['range'].queryset = Range.objects.filter(range_type=STATIC)
 
     class Meta:
         model = StaticInterface
