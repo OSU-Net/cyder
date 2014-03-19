@@ -43,20 +43,24 @@ cursor = connection.cursor()
 class Zone(object):
 
     def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
-        self.domain_id = 541 if domain_id is None else domain_id
+        self.domain_id = domain_id
         self.dname = self.get_dname() if dname is None else dname
         self.dname = self.dname.lower()
 
         self.domain = self.gen_domain()
         if self.domain:
             if gen_recs:
-                self.gen_MX()
-                self.gen_static()
-                self.gen_AR()
-                self.gen_NS()
-                self.domain.soa = self.gen_SOA() or soa
+                if self.domain_id is not None:
+                    self.gen_MX()
+                    self.gen_static()
+                    self.gen_AR()
+                    self.gen_NS()
+                    self.domain.soa = self.gen_SOA() or soa
+                else:
+                    self.gen_AR()
             self.domain.save()
-            self.walk_zone(gen_recs=gen_recs)
+            if self.domain_id is not None:
+                self.walk_zone(gen_recs=gen_recs)
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -487,6 +491,9 @@ def gen_reverse_soa():
 def gen_DNS(skip_edu=False):
     gen_reverses()
 
+    for dname in settings.NONAUTHORITATIVE_DOMAINS:
+        Zone(domain_id=None, dname=dname)
+
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
         if "edu" in dname and skip_edu:
@@ -497,6 +504,9 @@ def gen_DNS(skip_edu=False):
 
 def gen_domains_only():
     gen_reverses()
+
+    for dname in settings.NONAUTHORITATIVE_DOMAINS:
+        Zone(domain_id=None, dname=dname, gen_recs=False)
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
