@@ -213,8 +213,21 @@ $(document).ready(function() {
         if (!data.errors) {
             if ($(this).attr('action').indexOf('_av') >= 0 &&
                     $('.attrs_table').length) {
-                $(this)[0].reset();
+                var is_update = false;
+                jQuery.each($('.attrs_table > tbody > tr'), function(i, row) {
+                    if (row.cells[0].innerHTML.indexOf(
+                            data.row.data[0][0].value[0]) >= 0) {
+                        $(this.remove());
+                        is_update = true;
+
+                    };
+                });
                 insertTablefyRow(data.row, $('.attrs_table > tbody'));
+                if (is_update) {
+                    $(this).find('.cancel').click();
+                } else {
+                    $(this).trigger('reset');
+                };
             } else {
                 location.reload();
             };
