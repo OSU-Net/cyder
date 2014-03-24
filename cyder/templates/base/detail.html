@@ -40,14 +40,22 @@
 {% block content %}
   {{ render_table(request, obj_table) }}
   {% for table in tables %}
-    {% if table.table %}
-      <h2>{{ table.name }}</h2>
-      {% with page_obj = table.page_obj %}
-        {% include "base/includes/pagination.html" %}
-      {% endwith %}
+    {% if table.table or "Attributes" in table.name %}
       {% if "Attributes" in table.name %}
-        {{ render_table(request, table.table, 'attrs_table') }}
+        {% if table.table %}
+          <h3 id="attr_title">Range Attributes</h3>
+          {% with page_obj = table.page_obj %}
+            {% include "base/includes/pagination.html" %}
+          {% endwith %}
+          {{ render_table(request, table.table, 'attrs_table') }}
+        {% else %}
+          {% include "base/attrs_table.html" %}
+        {% endif %}
       {% else %}
+        <h2>{{ table.name }}</h2>
+        {% with page_obj = table.page_obj %}
+          {% include "base/includes/pagination.html" %}
+        {% endwith %}
         {{ render_table(request, table.table) }}
       {% endif %}
     {% endif %}
