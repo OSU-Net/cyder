@@ -67,7 +67,7 @@ class LibTestsFreeIP(TestCase):
         count = calc_free_ips_str("15.0.0.200", "15.0.0.204")
         self.assertEqual(count, 4)
         intr, errors = create_ipv4_intr_from_range(
-            "foo", "private.corp.phx1.oregonstate.com", self.system,
+            "foo1", "private.corp.phx1.oregonstate.com", self.system,
             "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
@@ -77,7 +77,7 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 3)
 
         intr, errors = create_ipv4_intr_from_range(
-            "foo", "private.corp.phx1.oregonstate.com", self.system,
+            "foo2", "private.corp.phx1.oregonstate.com", self.system,
             "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
@@ -87,7 +87,7 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 2)
 
         intr, errors = create_ipv4_intr_from_range(
-            "foo", "private.corp.phx1.oregonstate.com", self.system,
+            "foo3", "private.corp.phx1.oregonstate.com", self.system,
             "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)
@@ -97,7 +97,7 @@ class LibTestsFreeIP(TestCase):
         self.assertEqual(count, 1)
 
         intr, errors = create_ipv4_intr_from_range(
-            "foo", "private.corp.phx1.oregonstate.com", self.system,
+            "foo4", "private.corp.phx1.oregonstate.com", self.system,
             "11:22:33:44:55:66", "15.0.0.200", "15.0.0.204", ctnr=self.ctnr)
         intr.save()
         self.assertEqual(errors, None)

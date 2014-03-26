@@ -222,7 +222,7 @@
    "ttl": 3600,
    "modified": "2014-02-01T12:06:20",
    "dhcp_enabled": false,
-   "label": "www",
+   "label": "www2",
    "mac": "",
    "ip_type": "4",
    "ip_str": "192.168.0.30",

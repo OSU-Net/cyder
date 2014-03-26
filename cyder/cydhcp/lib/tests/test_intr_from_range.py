@@ -92,7 +92,7 @@ class LibTestsRange(TestCase):
     def test3_create_ipv4_interface_from_range(self):
         # Test for an error when all the IP's are in use.
         intr, errors = create_ipv4_intr_from_range(
-            label="foo", domain_name="private.corp.phx1.oregonstate.com",
+            label="foo1", domain_name="private.corp.phx1.oregonstate.com",
             system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
@@ -101,7 +101,7 @@ class LibTestsRange(TestCase):
         self.assertEqual(intr.ip_str, "15.0.0.2")
 
         intr, errors = create_ipv4_intr_from_range(
-            label="foo", domain_name="private.corp.phx1.oregonstate.com",
+            label="foo2", domain_name="private.corp.phx1.oregonstate.com",
             system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
@@ -110,7 +110,7 @@ class LibTestsRange(TestCase):
         self.assertEqual(intr.ip_str, "15.0.0.3")
 
         intr, errors = create_ipv4_intr_from_range(
-            label="foo", domain_name="private.corp.phx1.oregonstate.com",
+            label="foo3", domain_name="private.corp.phx1.oregonstate.com",
             system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
@@ -119,7 +119,7 @@ class LibTestsRange(TestCase):
         self.assertEqual(intr.ip_str, "15.0.0.4")
 
         intr, errors = create_ipv4_intr_from_range(
-            label="foo", domain_name="private.corp.phx1.oregonstate.com",
+            label="foo4", domain_name="private.corp.phx1.oregonstate.com",
             system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         intr.save()
@@ -128,7 +128,7 @@ class LibTestsRange(TestCase):
         self.assertEqual(intr.ip_str, "15.0.0.5")
 
         intr, errors = create_ipv4_intr_from_range(
-            label="foo", domain_name="private.corp.phx1.oregonstate.com",
+            label="foo5", domain_name="private.corp.phx1.oregonstate.com",
             system=self.system, mac="11:22:33:44:55:66", ctnr=self.ctnr,
             range_start_str="15.0.0.2", range_end_str="15.0.0.5")
         self.assertEqual(intr, None)
