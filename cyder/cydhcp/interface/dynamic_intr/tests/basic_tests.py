@@ -81,7 +81,8 @@ class BasicDynamicInterfaceTests(TestCase):
 
         with self.assertRaises(ValidationError):
             i2 = DynamicInterface(
-                ctnr=self.c, system=self.s2, range=self.r1, mac='12:34:56:78:9a:bc'
+                ctnr=self.c, system=self.s2, range=self.r1,
+                mac='12:34:56:78:9a:bc'
             )
             i2.full_clean()
             i2.save()
