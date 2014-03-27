@@ -141,6 +141,16 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 
     handling_function = handling_functions.get(obj_type, None)
 
+    # TODO: pay off the technical debt this ugly hack has incurred
+    user_handling_functions = {
+        'Token': has_token_perm
+    }
+
+    if handling_function:
+        handling_function = user_handling_functions.get(obj_type, None)
+        if handling_function:
+            return handling_function(user, obj, ctnr, action)
+
     if not handling_function:
         if '_' in obj_type:
             obj_type = obj_type.replace('_', '')
@@ -387,3 +397,6 @@ def has_dynamic_registration_perm(user_level, obj, ctnr, action):
         'user': True,  # ?
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
+
+def has_token_perm(user, obj, ctnr, action):
+    return user.is_superuser() or user == obj.user
