@@ -25,7 +25,8 @@ from optparse import make_option
 from datetime import datetime
 from lib import maintain_dump, fix_maintain
 from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
-                           range_usage_get_create, get_label_domain_workaround)
+                           range_usage_get_create, get_label_domain_workaround,
+                           ensure_domain_workaround)
 
 public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
@@ -42,20 +43,24 @@ cursor = connection.cursor()
 class Zone(object):
 
     def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
-        self.domain_id = 541 if domain_id is None else domain_id
+        self.domain_id = domain_id
         self.dname = self.get_dname() if dname is None else dname
         self.dname = self.dname.lower()
 
         self.domain = self.gen_domain()
         if self.domain:
             if gen_recs:
-                self.gen_MX()
-                self.gen_static()
-                self.gen_AR()
-                self.gen_NS()
-                self.domain.soa = self.gen_SOA() or soa
+                if self.domain_id is not None:
+                    self.gen_MX()
+                    self.gen_static()
+                    self.gen_AR()
+                    self.gen_NS()
+                    self.domain.soa = self.gen_SOA() or soa
+                else:
+                    self.gen_AR()
             self.domain.save()
-            self.walk_zone(gen_recs=gen_recs)
+            if self.domain_id is not None:
+                self.walk_zone(gen_recs=gen_recs)
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -72,10 +77,14 @@ class Zone(object):
             primary, contact, refresh, retry, expire, minimum = record
             primary, contact = primary.lower(), contact.lower()
 
-            soa, _ = SOA.objects.get_or_create(
-                primary=primary, contact=contact, refresh=refresh,
-                retry=retry, expire=expire, minimum=minimum,
-                root_domain=self.domain, description='')
+            try:
+                soa = SOA.objects.get(root_domain=self.domain)
+            except SOA.DoesNotExist:
+                soa, _ = SOA.objects.get_or_create(
+                    primary=primary, contact=contact, refresh=refresh,
+                    retry=retry, expire=expire, minimum=minimum,
+                    root_domain=self.domain, description='')
+
             return soa
         else:
             return None
@@ -85,7 +94,7 @@ class Zone(object):
 
         :uniqueness: domain
         """
-        if not (self.dname in BAD_DNAMES or 'in-addr.arpa' in self.dname):
+        if not (self.dname in BAD_DNAMES):
             return ensure_domain(name=self.dname, force=True,
                                  update_range_usage=False)
 
@@ -340,8 +349,7 @@ class Zone(object):
         """
         sql = ("SELECT id, name "
                "FROM domain "
-               "WHERE name NOT LIKE \"%%.in-addr.arpa\" "
-               "AND master_domain = %s;" % self.domain_id)
+               "WHERE master_domain = %s;" % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
             child_name = child_name.lower()
@@ -453,26 +461,38 @@ def gen_reverses():
         Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
                                      is_reverse=True)
 
+    gen_reverse_soa()
+
 
 def gen_reverse_soa():
-    dom, _ = Domain.objects.get_or_create(name='in-addr.arpa')
-    ns1, _ = Nameserver.objects.get_or_create(domain=dom,
-                                              server="ns1.oregonstate.edu")
-    ns2, _ = Nameserver.objects.get_or_create(domain=dom,
-                                              server="ns2.oregonstate.edu")
-    SOA.objects.get_or_create(root_domain=dom, primary="ns1.oregonstate.edu",
-                              contact="hostmaster.oregonstate.edu")
     public = View.objects.get(name="public")
     private = View.objects.get(name="private")
-    ns1.views.add(public)
-    ns2.views.add(public)
-    ns1.views.add(private)
-    ns2.views.add(private)
+
+    for rname in settings.REVERSE_SOAS:
+        if not rname.endswith(".arpa"):
+            rname = rname + ".in-addr.arpa"
+
+        print "Creating reverse SOA %s" % rname
+        dom = ensure_domain_workaround(rname)
+        ns1, _ = Nameserver.objects.get_or_create(domain=dom,
+                                                  server="ns1.oregonstate.edu")
+        ns2, _ = Nameserver.objects.get_or_create(domain=dom,
+                                                  server="ns2.oregonstate.edu")
+        SOA.objects.get_or_create(root_domain=dom,
+                                  primary="ns1.oregonstate.edu",
+                                  contact="hostmaster.oregonstate.edu")
+
+        ns1.views.add(public)
+        ns2.views.add(public)
+        ns1.views.add(private)
+        ns2.views.add(private)
 
 
 def gen_DNS(skip_edu=False):
     gen_reverses()
-    gen_reverse_soa()
+
+    for dname in settings.NONAUTHORITATIVE_DOMAINS:
+        Zone(domain_id=None, dname=dname)
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
@@ -484,6 +504,9 @@ def gen_DNS(skip_edu=False):
 
 def gen_domains_only():
     gen_reverses()
+
+    for dname in settings.NONAUTHORITATIVE_DOMAINS:
+        Zone(domain_id=None, dname=dname, gen_recs=False)
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
