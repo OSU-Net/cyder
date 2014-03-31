@@ -43,7 +43,7 @@
     {% if table.table or "Attributes" in table.name %}
       {% if "Attributes" in table.name %}
         {% if table.table %}
-          <h3 id="attr_title">Range Attributes</h3>
+          <h3 id="attr_title">{{ table.name }}</h3>
           {% with page_obj = table.page_obj %}
             {% include "base/includes/pagination.html" %}
           {% endwith %}
@@ -52,7 +52,7 @@
           {% include "base/attrs_table.html" %}
         {% endif %}
       {% else %}
-        <h2>{{ table.name }}</h2>
+        <h3>{{ table.name }}</h3>
         {% with page_obj = table.page_obj %}
           {% include "base/includes/pagination.html" %}
         {% endwith %}
