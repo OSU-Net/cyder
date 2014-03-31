@@ -212,7 +212,9 @@ $(document).ready(function() {
         var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
         if (!data.errors) {
             if ($(this).attr('action').indexOf('_av') >= 0) {
-                if (!$('.attrs_table').attr('style').indexOf(
+                var style = $('.attrs_table').attr('style');
+                if (style != undefined && style != false &&
+                        !$('.attrs_table').attr('style').indexOf(
                         'display:none') >= 0) {
                     $('#attr_title').slideDown();
                     $('.attrs_table').attr('style', '');
