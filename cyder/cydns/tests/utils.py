@@ -14,6 +14,7 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
 from cyder.cydns.utils import ensure_domain, prune_tree
+from cyder.cydhcp.vrf.models import Vrf
 
 
 def get_post_data(random_str, suffix):
@@ -180,13 +181,13 @@ def random_byte():
     return random.randint(1, 255)
 
 
-def create_basic_dns_test_data():
-    c = Ctnr(name='test_container')
-    c.full_clean()
-    c.save()
-
+def create_basic_dns_test_data(dhcp=False):
     for name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
         d = Domain(name=name)
         d.full_clean()
         d.save()
-        d.ctnr_set.add(c)
+
+    if dhcp:
+        v = Vrf(name='test_vrf')
+        v.full_clean()
+        v.save()

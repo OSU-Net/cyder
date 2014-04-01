@@ -14,21 +14,17 @@ class PTRTests(cyder.base.tests.TestCase):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
 
-        create_basic_dns_test_data()
+        create_basic_dns_test_data(dhcp=True)
 
         self._128 = self.create_domain(name='128', ip_type='4')
         self._128.save()
         boot_strap_ipv6_reverse_domain("8.6.2.0")
         self.osu_block = "8620:105:F000:"
-        self.o = Domain(name="edu")
-        self.o.save()
-        self.o_e = Domain(name="oregonstate.edu")
-        self.o_e.save()
-        self.b_o_e = Domain(name="bar.oregonstate.edu")
-        self.b_o_e.save()
-        Domain(name="nothing").save()
-        Domain(name="nothing.nothing").save()
-        Domain(name="nothing.nothing.nothing").save()
+        for name in ('edu', 'oregonstate.edu', 'bar.oregonstate.edu',
+                     'nothing', 'nothing.nothing', 'nothing.nothing.nothing'):
+            d = Domain(name=name)
+            d.full_clean()
+            d.save()
 
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
