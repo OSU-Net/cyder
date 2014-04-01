@@ -181,7 +181,7 @@ def random_byte():
     return random.randint(1, 255)
 
 
-def create_basic_dns_test_data(dhcp=False):
+def create_basic_dns_data(dhcp=False):
     for name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
         d = Domain(name=name)
         d.full_clean()

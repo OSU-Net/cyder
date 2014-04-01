@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
 import cyder.base.tests
-from cyder.cydns.tests.utils import create_basic_dns_test_data
+from cyder.cydns.tests.utils import create_basic_dns_data
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
@@ -14,7 +14,7 @@ class PTRTests(cyder.base.tests.TestCase):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
 
-        create_basic_dns_test_data(dhcp=True)
+        create_basic_dns_data(dhcp=True)
 
         self._128 = self.create_domain(name='128', ip_type='4')
         self._128.save()
