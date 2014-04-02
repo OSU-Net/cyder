@@ -1,12 +1,15 @@
 from django.core.exceptions import ValidationError
 
 import cyder.base.tests
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.tests.utils import create_basic_dns_data
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import Ip
-from cyder.core.ctnr.models import Ctnr
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.vrf.models import Vrf
 
 
 class PTRTests(cyder.base.tests.TestCase):
@@ -38,8 +41,12 @@ class PTRTests(cyder.base.tests.TestCase):
         self.assertTrue(d.is_reverse)
         return d
 
-    def do_generic_add(self, ip_str, fqdn, ip_type, domain=None):
-        ret = PTR(ctnr=self.ctnr, fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
+    def do_generic_add(self, ip_str, fqdn, ip_type, domain=None, ctnr=None):
+        if ctnr is None:
+            ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
+        else:
+            ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type,
+                      ctnr=Ctnr.objects.get(name=ctnr))
         ret.clean()
         ret.full_clean()
         ret.save()
@@ -298,3 +305,31 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_invalid_update(ptr, fqdn, '6', ValidationError)
         fqdn = "%.s#.com"
         self.do_generic_invalid_update(ptr, fqdn, '6', ValidationError)
+
+    def test_ptr_ctnr_range(self):
+        """Test that a PTR is allowed in its IP's range's containers and not in
+        any other containers"""
+        for name in ('test_ctnr1', 'test_ctnr2', 'test_ctnr3'):
+            c = Ctnr(name=name)
+            c.full_clean()
+            c.save()
+
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='st', start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        Ctnr.objects.get(name='test_ctnr1').ranges.add(r)
+        Ctnr.objects.get(name='test_ctnr2').ranges.add(r)
+
+        self.do_generic_add('128.193.0.2', 'www1.oregonstate.edu', '4',
+                            ctnr='test_ctnr1')
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
+                                ctnr='test_ctnr3')
