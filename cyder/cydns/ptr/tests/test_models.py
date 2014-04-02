@@ -333,3 +333,9 @@ class PTRTests(cyder.base.tests.TestCase):
         with self.assertRaises(ValidationError):
             self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
                                 ctnr='test_ctnr3')
+
+    def test_ptr_target(self):
+        """Test that a PTR's target is not required to exist"""
+        self.do_generic_add(
+            ip_str='128.193.0.2', fqdn='nonexistent.oregonstate.edu',
+            ip_type='4')
