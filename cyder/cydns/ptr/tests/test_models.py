@@ -307,8 +307,7 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_invalid_update(ptr, fqdn, '6', ValidationError)
 
     def test_ptr_ctnr_range(self):
-        """Test that a PTR is allowed in its IP's range's containers and not in
-        any other containers"""
+        """Test that a PTR is allowed only in its IP's range's containers"""
         for name in ('test_ctnr1', 'test_ctnr2', 'test_ctnr3'):
             c = Ctnr(name=name)
             c.full_clean()
