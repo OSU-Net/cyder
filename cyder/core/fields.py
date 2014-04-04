@@ -1,3 +1,4 @@
+from django import forms
 from django.db.models import CharField, NOT_PROVIDED, SubfieldBase
 from django.core.exceptions import ValidationError
 from south.modelsinspector import add_introspection_rules
@@ -21,13 +22,10 @@ class MacAddrField(CharField):
     __metaclass__ = SubfieldBase
 
     def __init__(self, *args, **kwargs):
-        if 'dhcp_enabled' in kwargs:
-            self.dhcp_enabled = kwargs.pop('dhcp_enabled')
-        else:
-            self.dhcp_enabled = None # always validate
+        self.dhcp_enabled = kwargs.pop('dhcp_enabled', True)
 
         kwargs['max_length'] = 17
-        kwargs['blank'] = True
+        kwargs['blank'] = False  # always call MacAddrField.clean
 
         super(MacAddrField, self).__init__(*args, **kwargs)
 
@@ -42,19 +40,32 @@ class MacAddrField(CharField):
 
         if value:
             value = value.lower().replace(':', '').replace('-', '')
-            validate_mac(value)
             value = reduce(lambda x,y: x + ':' + y,
                            (value[i:i+2] for i in xrange(0, 12, 2)))
         return value
 
     def clean(self, value, model_instance):
-        if ((not self.dhcp_enabled
-                or getattr(model_instance, self.dhcp_enabled))
-                and value == ''):
+        value_required = (self.dhcp_enabled is True
+            or (isinstance(self.dhcp_enabled, basestring) and
+                getattr(model_instance, self.dhcp_enabled)))
+
+        if (value_required and not value):
             raise ValidationError(
                 "This field is required when DHCP is enabled")
 
-        return super(MacAddrField, self).clean(value, model_instance)
+        if value:
+            validate_mac(value)
+            return super(MacAddrField, self).clean(value, model_instance)
+        else:
+            # If value is blank, CharField.clean will choke.
+            return value
+
+    def formfield(self, **kwargs):
+        kwargs.update({
+            'required': False,
+            'max_length': self.max_length,
+        })
+        return forms.CharField(**kwargs)
 
 
 add_introspection_rules([

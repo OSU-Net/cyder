@@ -1,4 +1,5 @@
 import simplejson as json
+from copy import copy
 
 from django import forms
 from django.contrib import messages
@@ -166,9 +167,10 @@ def cy_view(request, template, pk=None, obj_type=None):
                         json.dumps({'row': object_table}))
 
             except (ValidationError, ValueError) as e:
-                if form._errors is None:
-                    form._errors = ErrorDict()
-                form._errors["__all__"] = ErrorList(e.messages)
+                if form.errors is None:
+                    form.errors = ErrorDict()
+                form.errors.update(e.message_dict)
+                return HttpResponse(json.dumps({'errors': form.errors}))
 
         else:
             return HttpResponse(json.dumps({'errors': form.errors}))
@@ -363,8 +365,14 @@ def get_update_form(request):
                 except:     # no 'entity' field
                     pass
 
-                form = FormKlass(initial=dict(
-                    {related_type: related_pk}.items() + kwargs.items()))
+                initial = copy(kwargs)
+                initial[related_type] = related_pk
+                if 'ctnr' in FormKlass.base_fields:
+                    initial['ctnr'] = request.session['ctnr']
+                form = FormKlass(initial=initial)
+                if 'ctnr' in FormKlass.base_fields and \
+                        request.session['ctnr'].name != 'global':
+                    form.fields['ctnr'].widget = forms.HiddenInput()
 
                 if related_type == 'range' and not obj_type.endswith('_av'):
                     for field in ['vrf', 'site', 'next_ip']:

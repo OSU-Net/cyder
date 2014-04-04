@@ -50,7 +50,7 @@ class DNSBuildTest(TestCase):
 
         mgr = GitRepoManager(debug=False, log_syslog=False, config={
             'user.name': 'test',
-            'user.email': '',
+            'user.email': 'test',
         })
         mgr.init(PROD_ORIGIN_DIR, bare=True)
         mgr.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
@@ -114,6 +114,7 @@ class DNSBuildTest(TestCase):
             label='www3',
             domain=Domain.objects.get(name='example.com'),
             ip_str='192.168.0.50',
+            mac='01:23:45:01:23:45',
             ctnr=Ctnr.objects.get(name='Global')
         )
         s.full_clean()

@@ -36,7 +36,7 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     class Meta:
         app_label = 'cyder'
         db_table = 'cname'
-        unique_together = ('domain', 'label', 'target')
+        unique_together = ('domain', 'label')
 
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)

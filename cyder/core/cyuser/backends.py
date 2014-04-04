@@ -137,6 +137,8 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'DynamicInterface': has_dynamic_registration_perm,
 
         'WorkgroupAV': has_workgroupav_perm,
+
+        'Token': has_token_perm
     }
 
     handling_function = handling_functions.get(obj_type, None)
@@ -387,3 +389,12 @@ def has_dynamic_registration_perm(user_level, obj, ctnr, action):
         'user': True,  # ?
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
+
+def has_token_perm(user, obj, ctnr, action):
+    """
+    This function returns true unconditionally because the user detail view
+    template handles permissions itself. This pointless function has been
+    created in order to deal with an issue that arose due to Tokens not having
+    a handler here.
+    """
+    return True
