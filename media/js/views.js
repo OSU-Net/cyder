@@ -95,13 +95,13 @@ $(document).ready(function() {
         $('#id_attribute').val('');
     });
 
-    $('#action-bar').find('a').each(function() {
-        $('#action-bar').find('a').addClass('hover');
+    $('.create-obj, .update, .cancel').each(function() {
+        $('.create-obj, .update, .cancel').addClass('hover');
         $(this).click(function(e) {
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
             } else {
-                $('#action-bar').find('a').removeClass('selected');
+                $('.create-obj, .update, .cancel').removeClass('selected');
                 $(this).removeClass('hover').addClass('selected');
             };
         });
@@ -110,6 +110,7 @@ $(document).ready(function() {
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
+
         slideUp($('#obj-form'));
         if ($(this).hasClass('selected')) {
             form.action = this.href;
