@@ -138,9 +138,9 @@ $(document).ready(function() {
                             initForms();
                         }, 150);
                         $('#obj-form form')[0].action = $createBtn.attr('href');
-                        $('.form-btns a.submit').text(
+                        $('.form-btns a.submit, .btn.ajax').text(
                             'Create ' + formPrettyObjType);
-                        $('.form-btns a.submit').attr('class', 'btn c');
+                        $('.form-btns a.submit').attr('class', 'btn c ajax');
                         $('#obj-form').slideToggle();
                     }, 'json');
             } else {
@@ -154,9 +154,9 @@ $(document).ready(function() {
                         clear_form_all(form);
                     };
                 }, 150);
-                $('.form-btns a.submit').text('Create ' + prettyObjType);
+                $('.form-btns a.submit, .btn.ajax').text('Create ' + prettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c');
+                $('.form-btns a.submit').attr('class', 'btn c ajax');
                 $('#obj-form').slideToggle();
             }
             $('.form').append($('<input>',
@@ -186,9 +186,9 @@ $(document).ready(function() {
                     $('#hidden-inner-form').empty().append(data.form);
                     initForms();
                 }, 150);
-                $('.form-btns a.submit').text('Update ' + formPrettyObjType);
+                $('.form-btns a.submit, .btn.ajax').text('Update ' + formPrettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c');
+                $('.form-btns a.submit').attr('class', 'btn c ajax');
                 $('#obj-form').slideDown();
             }, 'json');
 
