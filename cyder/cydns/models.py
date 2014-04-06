@@ -3,7 +3,6 @@ from django.db import models
 from django.db.models import get_model
 
 from cyder.base.models import BaseModel
-from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.view.models import View
@@ -90,7 +89,8 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
                                       validators=[validate_ttl],
                                       verbose_name="Time to live")
     description = models.CharField(max_length=1000, blank=True)
-    ctnr = models.ForeignKey(Ctnr, null=False)
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     class Meta:
         abstract = True
