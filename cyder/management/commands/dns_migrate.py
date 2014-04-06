@@ -387,19 +387,18 @@ def gen_CNAME():
 
     :uniqueness: label, domain, target
     """
-    print "Creating CNAMEs."
-    cursor.execute("SELECT * FROM zone_cname")
+    from dhcp_migrate import clean_zone_name
 
-    for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
+    print "Creating CNAMEs."
+    sql = ("SELECT zone_cname.server, zone_cname.name, zone_cname.enabled, "
+           "zone.name, domain.name FROM zone_cname "
+           "JOIN zone ON zone_cname.zone = zone.id "
+           "JOIN domain ON zone_cname.domain = domain.id")
+    cursor.execute(sql)
+
+    for server, name, enabled, zone_name, dname in cursor.fetchall():
+        zone_name = clean_zone_name(zone_name)
         server, name = server.lower(), name.lower()
-        if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
-                              % domain_id):
-            stderr.write('Ignoring CNAME {0}; domain unknown.\n'
-                         .format(name))
-            continue
-        dname, = cursor.fetchone()
-        if not dname:
-            continue
         dname = dname.lower()
 
         fqdn = ".".join([name, dname])
@@ -425,7 +424,13 @@ def gen_CNAME():
                        % fqdn)
             continue
 
-        cn = CNAME(label=name, domain=domain, target=server)
+        try:
+            ctnr = Ctnr.objects.get(name=zone_name)
+        except Ctnr.DoesNotExist:
+            print "CNAME migration error; cntr %s does not exist." % zone_name
+            continue
+
+        cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
         cn.set_fqdn()
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
