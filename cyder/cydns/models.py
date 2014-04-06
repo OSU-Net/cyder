@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import get_model
 
 from cyder.base.models import BaseModel
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.cydns.view.models import View
@@ -59,12 +60,6 @@ class LabelDomainMixin(models.Model):
     class Meta:
         abstract = True
 
-    @classmethod
-    def filter_by_ctnr(cls, ctnr, objects=None):
-        objects = objects or cls.objects
-        objects = objects.filter(domain__in=ctnr.domains.all())
-        return objects
-
 
 class ViewMixin(models.Model):
 
@@ -95,6 +90,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
                                       validators=[validate_ttl],
                                       verbose_name="Time to live")
     description = models.CharField(max_length=1000, blank=True)
+    ctnr = models.ForeignKey(Ctnr, null=False)
 
     class Meta:
         abstract = True
@@ -108,7 +104,12 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
 
     @classmethod
     def filter_by_ctnr(cls, ctnr, objects=None):
-        return objects or cls.objects.all()
+        objects = objects or cls.objects
+        if ctnr.name == "global":
+            return objects
+
+        objects = objects.filter(ctnr=ctnr)
+        return objects
 
     @classmethod
     def get_api_fields(cls):
