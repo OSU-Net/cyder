@@ -107,11 +107,16 @@ class Zone(object):
 
         :uniqueness: label, domain, server, priority
         """
-        cursor.execute("SELECT name, server, priority, ttl, enabled "
-                       "FROM zone_mx "
+        from dhcp_migrate import clean_zone_name
+
+        cursor.execute("SELECT name, server, priority, ttl, "
+                       "enabled, zone.name FROM zone_mx "
+                       "JOIN zone ON zone_mx.zone = zone.id "
                        "WHERE domain = '%s';" % self.domain_id)
 
-        for name, server, priority, ttl, enabled in cursor.fetchall():
+        for (name, server, priority, ttl,
+                enabled, zone) in cursor.fetchall():
+            zone = clean_zone_name(zone)
             name, server = name.lower(), server.lower()
             if MX.objects.filter(label=name,
                                  domain=self.domain,
@@ -121,11 +126,17 @@ class Zone(object):
                 continue
 
             try:
+                ctnr = Ctnr.objects.get(name=zone)
+            except Ctnr.DoesNotExist:
+                print "CNAME migration error; cntr %s does not exist." % zone
+                continue
+
+            try:
                 mx, _ = MX.objects.get_or_create(label=name,
                                                  domain=self.domain,
                                                  server=server,
                                                  priority=priority,
-                                                 ttl=ttl)
+                                                 ttl=ttl, ctnr=ctnr)
                 if enabled:
                     mx.views.add(public)
                     mx.views.add(private)
@@ -396,8 +407,8 @@ def gen_CNAME():
            "JOIN domain ON zone_cname.domain = domain.id")
     cursor.execute(sql)
 
-    for server, name, enabled, zone_name, dname in cursor.fetchall():
-        zone_name = clean_zone_name(zone_name)
+    for server, name, enabled, zone, dname in cursor.fetchall():
+        zone = clean_zone_name(zone)
         server, name = server.lower(), name.lower()
         dname = dname.lower()
 
@@ -425,9 +436,9 @@ def gen_CNAME():
             continue
 
         try:
-            ctnr = Ctnr.objects.get(name=zone_name)
+            ctnr = Ctnr.objects.get(name=zone)
         except Ctnr.DoesNotExist:
-            print "CNAME migration error; cntr %s does not exist." % zone_name
+            print "CNAME migration error; cntr %s does not exist." % zone
             continue
 
         cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
