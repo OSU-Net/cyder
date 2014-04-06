@@ -209,10 +209,15 @@ $(document).ready(function() {
 
 function ajax_form_submit(url, form, csrfToken) {
     $.ajaxSetup({async:false});
+    jQuery.ajaxSettings.traditional = true;
     var fields = form.find(':input').serializeArray();
     var postData = {}
     jQuery.each(fields, function (i, field) {
-        postData[field.name] = field.value;
+        if (i > 0 && fields[i-1].name == field.name) {
+            postData[field.name].push(field.value);
+        } else {
+            postData[field.name] = [field.value];
+        };
     });
     postData['csrfmiddlewaretoken'] = csrfToken;
     var ret_data = null;
