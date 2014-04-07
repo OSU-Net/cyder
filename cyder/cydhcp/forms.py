@@ -1,6 +1,7 @@
 from django import forms
 
 from cyder.base.constants import IP_TYPES
+from cyder.base.forms import CyderModelForm
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.range.models import Range
@@ -12,7 +13,7 @@ class IpSearchForm(forms.Form):
     search_ip = forms.CharField(label='IP Address or IP Network')
 
 
-class RangeWizard(forms.ModelForm):
+class RangeWizard(CyderModelForm):
     vrf = forms.ModelChoiceField(
         queryset=Vrf.objects.all(),
         required=False,

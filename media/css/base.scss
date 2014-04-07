@@ -5,6 +5,7 @@
 .container {
     margin: 0 auto;
     width: 960px;
+    width: 1280px;
 }
 
 html {
@@ -45,6 +46,9 @@ hr {
 a, tr, li, div, span, h1, h2, h3 {
     @include transition(background .15s, color .25s);
 }
+input[type="radio"], input[type="checkbox"], .btn {
+    cursor: pointer;
+};
 
 input[type="text"], input[type="search"], select {
     background: $white;
@@ -221,6 +225,7 @@ a.btn {
     }
     .level {
         color:$white;
+        cursor: default;
     }
 }
 
@@ -340,6 +345,7 @@ a.btn {
         // Container - sidebar width - sidebar gutter - gutter.
         // TODO: gridding.
         width: 825px;
+        width: 1145px;
     }
 }
 

@@ -5,12 +5,12 @@ import shlex
 import subprocess
 import sys
 import syslog
-from distutils.dir_util import copy_tree
+import time
 from traceback import format_exception
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (dict_merge, log, run_command, set_attrs,
-                              shell_out)
+from cyder.base.utils import (copy_tree, dict_merge, log, run_command,
+                              set_attrs, shell_out)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.utils import fail_mail
@@ -25,7 +25,8 @@ from cyder.settings import DHCPBUILD
 class DHCPBuilder(MutexMixin):
     def __init__(self, *args, **kwargs):
         kwargs = dict_merge(DHCPBUILD, {
-            'debug': True,
+            'verbose': True,
+            'debug': False,
         }, kwargs)
         set_attrs(self, kwargs)
 
@@ -33,8 +34,8 @@ class DHCPBuilder(MutexMixin):
             syslog.openlog(b'dhcp_build', 0, syslog.LOG_LOCAL6)
 
         self.repo = GitRepo(self.prod_dir, self.line_change_limit,
-            self.line_removal_limit, debug=True, log_syslog=True,
-            logger=syslog)
+            self.line_removal_limit, debug=self.debug,
+            log_syslog=self.log_syslog, logger=syslog)
 
     def log_debug(self, msg, to_stderr=None):
         if to_stderr is None:
@@ -42,11 +43,15 @@ class DHCPBuilder(MutexMixin):
         log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
                 logger=syslog)
 
-    def log_info(self, msg, to_stderr=True):
+    def log_info(self, msg, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.verbose
         log(msg, log_level='LOG_INFO', to_syslog=self.log_syslog,
                 to_stderr=to_stderr, logger=syslog)
 
-    def log_notice(self, msg, to_stderr=True):
+    def log_notice(self, msg, to_stderr=None):
+        if to_stderr is None:
+            to_stderr = self.verbose
         log(msg, log_level='LOG_NOTICE', to_syslog=self.log_syslog,
                 to_stderr=to_stderr, logger=syslog)
 
@@ -77,7 +82,8 @@ class DHCPBuilder(MutexMixin):
                    'Reason for skipped build:\n'
                    '{1}'.format(self.stop_file, contents))
             self.log_notice(msg, to_stderr=False)
-            if now - last > self.stop_file_email_interval:
+            if (self.stop_file_email_interval is not None and
+                    now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="DHCP builds have stopped")
 
@@ -140,7 +146,7 @@ class DHCPBuilder(MutexMixin):
                                        .format(self.dhcpd, err))
 
             self.log_err(log_msg, to_stderr=False)
-            raise Exception(exception_message)
+            raise Exception(exception_msg)
 
     def _lock_failure(self, pid):
         self.log_err(

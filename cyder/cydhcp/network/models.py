@@ -130,6 +130,10 @@ class Network(BaseModel, ObjectUrlMixin):
                                   "child ranges")
         super(Network, self).delete(*args, **kwargs)
 
+    def full_clean(self, *args, **kwargs):
+        self.update_network()
+        super(Network, self).full_clean(*args, **kwargs)
+
     def clean(self, *args, **kwargs):
         self.check_valid_range()
         allocated = Network.objects.filter(prefixlen=self.prefixlen,

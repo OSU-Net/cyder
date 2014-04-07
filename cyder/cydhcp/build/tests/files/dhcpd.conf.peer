@@ -1,0 +1,30 @@
+# This will be /etc/dhcpd.conf on the primary server
+
+# See 'man dhcpd.conf' for configuration directive descriptions
+
+failover peer "dhcp" {
+    primary;
+    address 127.0.0.1;
+    port 520;
+
+    peer address 127.0.0.2;
+    peer port 520;
+
+    max-response-delay 60;
+    max-unacked-updates 10;
+    #mclt 3600;
+    mclt 600;
+    split 128;
+    load balance max seconds 3;
+
+    max-lease-misbalance 5;
+    max-lease-ownership 3;
+}
+
+#key omapi_key {
+#    algorithm hmac-md5;
+#    secret "";
+#};
+
+#omapi-key omapi_key;
+#omapi-port 9991;

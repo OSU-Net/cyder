@@ -44,7 +44,7 @@ $(document).ready(function() {
         };
     });
 
-    $('#system_create, #delete, .delete').click( function(e) {
+    $('#delete, .delete').click( function(e) {
         e.preventDefault();
         if ($(this).attr('id') == 'delete'
                 || $(this).attr('class') == 'delete') {
@@ -92,9 +92,9 @@ $(document).ready(function() {
         });
     });
 
-	$('#id_attribute_type').live('change', function() {
-		$('#id_attribute').val('');
-	});
+    $('#id_attribute_type').live('change', function() {
+        $('#id_attribute').val('');
+    });
 
     $('#action-bar').find('a').each(function() {
         $('#action-bar').find('a').addClass('hover');
@@ -118,6 +118,7 @@ $(document).ready(function() {
                 var $createBtn = $(this);
                 var formPrettyObjType = $createBtn.attr('data-prettyobjtype');
                 var formObjType = $createBtn.attr('data-objType');
+                $('#obj-form form').attr('objType', formObjType);
                 var formGetUrl = $createBtn.attr('data-getUrl');
                 var data_to_post = $createBtn.attr('data-kwargs');
                 var formTitle = 'Creating ' + formPrettyObjType;
@@ -139,12 +140,11 @@ $(document).ready(function() {
                         $('#obj-form form')[0].action = $createBtn.attr('href');
                         $('.form-btns a.submit').text(
                             'Create ' + formPrettyObjType);
-                        if (is_ajax_form(formObjType)) {
-                            $('.form-btns a.submit').attr('class', 'btn c');
-                        };
+                        $('.form-btns a.submit').attr('class', 'btn c');
                         $('#obj-form').slideToggle();
                     }, 'json');
             } else {
+                $('#obj-form form').attr('objType', objType);
                 setTimeout(function() {
                     $('#form-title').html('Creating ' + prettyObjType);
 
@@ -156,9 +156,7 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit').text('Create ' + prettyObjType);
 
-                if (is_ajax_form(objType)) {
-                    $('.form-btns a.submit').attr('class', 'btn c');
-                };
+                $('.form-btns a.submit').attr('class', 'btn c');
                 $('#obj-form').slideToggle();
             }
             $('.form').append($('<input>',
@@ -176,6 +174,7 @@ $(document).ready(function() {
             form.action = this.href;
             var formObjName = $(this).attr('data-objName') || objName;
             var formObjType = $(this).attr('data-objType');
+            $('#obj-form form').attr('objType', formObjType);
             var formPrettyObjType = $(this).attr('data-prettyObjType');
             var formTitle = 'Updating ' + formPrettyObjType + ' ' + formObjName;
 
@@ -189,9 +188,7 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit').text('Update ' + formPrettyObjType);
 
-                if (is_ajax_form(formObjType)) {
-                    $('.form-btns a.submit').attr('class', 'btn c');
-                };
+                $('.form-btns a.submit').attr('class', 'btn c');
                 $('#obj-form').slideDown();
             }, 'json');
 
@@ -200,14 +197,12 @@ $(document).ready(function() {
         };
     });
 
-    $('#obj-form').live('submit', function(event) {
+    $('#obj-form form').live('submit', function(event) {
         var url = $('#obj-form form')[0].action;
-        if (url.indexOf('av') >=0) {
-            event.preventDefault();
-            var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
-            if (!data.errors) {
-                location.reload();
-            };
+        event.preventDefault();
+        var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
+        if (!data.errors) {
+            location.reload();
         };
     });
 });
@@ -215,10 +210,15 @@ $(document).ready(function() {
 
 function ajax_form_submit(url, form, csrfToken) {
     $.ajaxSetup({async:false});
+    jQuery.ajaxSettings.traditional = true;
     var fields = form.find(':input').serializeArray();
     var postData = {}
     jQuery.each(fields, function (i, field) {
-        postData[field.name] = field.value;
+        if (i > 0 && fields[i-1].name == field.name) {
+            postData[field.name].push(field.value);
+        } else {
+            postData[field.name] = [field.value];
+        };
     });
     postData['csrfmiddlewaretoken'] = csrfToken;
     var ret_data = null;

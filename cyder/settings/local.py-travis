@@ -1,0 +1,189 @@
+# Copy to local.py.
+import sys
+import os
+
+from .base import DHCPBUILD
+
+
+SASS_BIN = '/usr/local/bin/sass'
+
+DEV = True
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+#INSTALLED_APPS += (
+#    'debug_toolbar',
+#)
+
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'reversion.middleware.RevisionMiddleware',
+)
+
+MANAGERS = ADMINS
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'cyder',
+        'USER': 'travis',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '',
+        'OPTIONS': {
+            'init_command': 'SET storage_engine=InnoDB',
+            'charset' : 'utf8',
+            'use_unicode' : True,
+        },
+        'TEST_CHARSET': 'utf8',
+        'TEST_COLLATION': 'utf8_general_ci',
+    },
+    # 'slave': {
+    #     ...
+    # },
+}
+
+MIGRATION_HOST=''
+MIGRATION_USER=''
+MIGRATION_PASSWD=''
+MIGRATION_DB=''
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = ''
+
+REMOTE_LOGINS_ON = True
+
+SYSADMINS = (
+    'you@domain.com',
+)
+
+BUILD_TEAM = (
+    'you@domain.com',
+)
+
+SERVICES_URL = SITE_URL = STATIC_URL = 'http://localhost:8000/'
+
+WIKI_USER = ''
+WIKI_PASSWORD = ''
+
+USE_LDAP = False
+if USE_LDAP:
+    LDAP_HOST = 'localhost'
+    LDAP_USER = ''
+    LDAP_PASS = ''
+BUG_URL = ''
+#import mysite.monitor
+#mysite.monitor.start(interval=1.0)
+# Specify your custom test runner to use
+#TEST_RUNNER='test_runner_with_coverage'
+
+ # List of modules to enable for code coverage
+#COVERAGE_MODULES = ['api.views']
+#TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
+USER_SYSTEM_ALLOWED_DELETE = ('')
+
+TEMPLATE_DIRS = (
+)
+
+import logging
+error = dict(level=logging.ERROR)
+info = dict(level=logging.INFO)
+debug = dict(level=logging.DEBUG)
+
+LOGGING = {
+    'loggers': {
+        'product_details': error,
+        'nose.plugins.manager': error,
+        'django.db.backends': error,
+        'elasticsearch': info,
+        'inventory': debug,
+    },
+}
+
+# CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+API_ACCESS = ('GET','POST','PUT','DELETE')
+SCRIPT_URL = 'https://localhost.com'
+DESKTOP_EMAIL_ADDRESS = 'desktop@example.com'
+FROM_EMAIL_ADDRESS = 'inventory@example.com'
+DHCP_CONFIG_OUTPUT_DIRECTORY = '/data/dhcpconfig-autodeploy'
+UNAUTHORIZED_EMAIL_ADDRESS = ('manager@example.com')
+
+def custom_show_toolbar(request):
+    # Always show toolbar, for example purposes only.
+    return True
+DEBUG_TOOLBAR_PANELS = (
+    'debug_toolbar.panels.version.VersionDebugPanel',
+    'debug_toolbar.panels.timer.TimerDebugPanel',
+    'debug_toolbar.panels.settings_vars.SettingsVarsDebugPanel',
+    'debug_toolbar.panels.headers.HeaderDebugPanel',
+    'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
+    'debug_toolbar.panels.template.TemplateDebugPanel',
+    'debug_toolbar.panels.sql.SQLDebugPanel',
+    'debug_toolbar.panels.signals.SignalDebugPanel',
+    'debug_toolbar.panels.logger.LoggingPanel',
+)
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
+    'HIDE_DJANGO_SQL': False,
+    'TAG': 'div',
+    'ENABLE_STACKTRACES' : True,
+}
+
+
+DHCPBUILD['dhcpd'] = 'sudo dhcpd'
+
+
+##########################
+# copied from funfactory #
+##########################
+
+
+# Site ID is used by Django's Sites framework.
+SITE_ID = 1
+
+## Internationalization.
+
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+TIME_ZONE = 'America/Los_Angeles'
+
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+USE_I18N = True
+
+# If you set this to False, Django will not format dates, numbers and
+# calendars according to the current locale
+USE_L10N = True
+
+# Gettext text domain
+TEXT_DOMAIN = 'messages'
+STANDALONE_DOMAINS = [TEXT_DOMAIN, 'javascript']
+TOWER_KEYWORDS = {'_lazy': None}
+TOWER_ADD_HEADERS = True
+
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en-US'
+
+## Accepted locales
+
+# On stage/prod, the list of accepted locales is manually maintained.  Only
+# locales whose localizers have signed off on their work should be listed here.
+PROD_LANGUAGES = (
+    'en-US',
+)

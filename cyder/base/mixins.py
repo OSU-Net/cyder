@@ -23,7 +23,12 @@ class DisplayMixin(object):
         'extra_just':   1
     }
 
-    def bind_render_record(self, pk=False):
+    def bind_render_record(self, pk=False, custom=None):
+        kwargs = vars(self)
+        if custom:
+            for key, value in custom.items():
+                kwargs[key] = value
+
         template = Template(self.template).substitute(**self.justs)
         bind_name = self.fqdn + "."
 
@@ -31,7 +36,7 @@ class DisplayMixin(object):
             self.ttl = 3600
 
         return template.format(bind_name=bind_name, rdtype=self.rdtype,
-                               rdclass='IN', **vars(self))
+                               rdclass='IN', **kwargs)
 
 
 class ObjectUrlMixin(object):

@@ -18,6 +18,9 @@ class Token(models.Model, ObjectUrlMixin):
     user = models.ForeignKey(AUTH_USER_MODEL)
     purpose = models.CharField(max_length=100)  # purpose of token
     created = models.DateTimeField(auto_now_add=True)
+    can_write = models.BooleanField(default=False)  # allow requests sent with
+                                                    # this token
+                                                    # to alter data
 
     class Meta:
         app_label = 'cyder'

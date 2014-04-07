@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
@@ -43,11 +44,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         return objects.filter(ctnr=ctnr)
 
     def __str__(self):
-        return "{0}".format(self.mac_str)
-
-    @property
-    def mac_str(self):
-        return (':').join(re.findall('..', self.mac))
+        return "{0}".format(self.mac)
 
     def __repr__(self):
         return "Interface {0}".format(str(self))
@@ -73,14 +70,13 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         s = str(option)
         s = s.replace('%h', self.system.name)
         s = s.replace('%i', self.ip_str)
-        s = s.replace('%m', self.mac)
-        s = s.replace('%6m', self.mac[0:6])
+        s = s.replace('%m', self.mac.replace(':', ''))
+        s = s.replace('%6m', self.mac.replace(':', '')[0:6])
         return s
 
     def build_host(self, options=None):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
-        build_str += "\t\thardware ethernet {0};\n".format(
-            format_mac(self.mac))
+        build_str += "\t\thardware ethernet {0};\n".format(self.mac)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
         options = self.dynamicinterfaceav_set.filter(
@@ -97,8 +93,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         return build_str
 
     def build_subclass(self, classname):
-        return 'subclass "{0}" 1:{1};\n'.format(
-            classname, format_mac(self.mac))
+        return 'subclass "{0}" 1:{1};\n'.format(classname, self.mac)
 
     def get_related_systems(self):
         related_interfaces = DynamicInterface.objects.filter(mac=self.mac)
@@ -116,6 +111,13 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
+
+        siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
+        if self.id:
+            siblings.exclude(id=self.id)
+        if siblings.exists():
+            raise ValidationError(
+                "MAC address must be unique in this interface's range")
 
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
