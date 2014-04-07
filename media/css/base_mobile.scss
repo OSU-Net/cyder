@@ -9,6 +9,10 @@
     }
 }
 @media all and (max-width: 950px) {
+    div#sidebar_div {
+        display: none;
+    }
+
     div.container {
         width: 630px;
     }

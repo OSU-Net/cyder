@@ -185,6 +185,15 @@ a.btn {
             background-image: url(../img/settings-hover.png);
         }
     }
+    &.menu {
+        background-image: url(../img/menu.png);
+        &:hover {
+            background-image: url(../img/menu-hover.png);
+        }
+        &.selected {
+            background-image: url(../img/menu-hover.png);
+        }
+    }
 }
 
 .header {
