@@ -107,8 +107,6 @@ class Zone(object):
 
         :uniqueness: label, domain, server, priority
         """
-        from dhcp_migrate import clean_zone_name
-
         cursor.execute("SELECT zone_mx.name, server, priority, ttl, "
                        "enabled, zone.name FROM zone_mx "
                        "JOIN zone ON zone_mx.zone = zone.id "
@@ -116,7 +114,6 @@ class Zone(object):
 
         for (name, server, priority, ttl,
                 enabled, zone) in cursor.fetchall():
-            zone = clean_zone_name(zone)
             name, server = name.lower(), server.lower()
             if MX.objects.filter(label=name,
                                  domain=self.domain,
@@ -125,10 +122,8 @@ class Zone(object):
                 print "Ignoring MX %s; MX already exists." % server
                 continue
 
-            try:
-                ctnr = Ctnr.objects.get(name=zone)
-            except Ctnr.DoesNotExist:
-                print "MX migration error; cntr %s does not exist." % zone
+            ctnr = self.ctnr_from_zone_name(zone, 'MX')
+            if ctnr is None:
                 continue
 
             try:
@@ -154,7 +149,7 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import maintain_find_zone, migrate_zones
+        from dhcp_migrate import migrate_zones
 
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
@@ -183,7 +178,9 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
-            ctnr = maintain_find_zone(items['zone'])
+            ctnr = self.ctnr_from_zone_name(items['zone'], 'Static Interface')
+            if ctnr is None:
+                continue
 
             name = items['name']
             enabled = bool(items['enabled'])
@@ -281,6 +278,7 @@ class Zone(object):
 
         :PTR uniqueness: name, ip_str, ip_type
         """
+
         name = self.domain.name
         cursor.execute("SELECT ip, hostname, type, zone.name, enabled "
                        "FROM pointer JOIN zone ON pointer.zone = zone.id "
@@ -302,10 +300,8 @@ class Zone(object):
                 else:
                     pass
 
-            try:
-                ctnr = Ctnr.objects.get(name=zone)
-            except Ctnr.DoesNotExist:
-                print "AR/PTR migration error; cntr %s does not exist." % zone
+            ctnr = self.ctnr_from_zone_name(zone, 'AR/PTR')
+            if ctnr is None:
                 continue
 
             if ptr_type == 'forward':
@@ -381,8 +377,15 @@ class Zone(object):
         dname = dname.lower()
         return dname
 
-    #TODO: Cleanup functions for leftover objects to migrate
-    # (static interfaces and PTRs)
+    @staticmethod
+    def ctnr_from_zone_name(zone, obj_type="Object"):
+        from dhcp_migrate import maintain_find_zone
+        ctnr = maintain_find_zone(zone)
+        if ctnr is None:
+            print ("%s migration error; ctnr %s does not exist." %
+                   (obj_type, zone))
+
+        return ctnr
 
 
 def gen_CNAME():
@@ -404,8 +407,6 @@ def gen_CNAME():
 
     :uniqueness: label, domain, target
     """
-    from dhcp_migrate import clean_zone_name
-
     print "Creating CNAMEs."
     sql = ("SELECT zone_cname.server, zone_cname.name, zone_cname.enabled, "
            "zone.name, domain.name FROM zone_cname "
@@ -414,7 +415,6 @@ def gen_CNAME():
     cursor.execute(sql)
 
     for server, name, enabled, zone, dname in cursor.fetchall():
-        zone = clean_zone_name(zone)
         server, name = server.lower(), name.lower()
         dname = dname.lower()
 
@@ -441,10 +441,8 @@ def gen_CNAME():
                        % fqdn)
             continue
 
-        try:
-            ctnr = Ctnr.objects.get(name=zone)
-        except Ctnr.DoesNotExist:
-            print "CNAME migration error; cntr %s does not exist." % zone
+        ctnr = Zone.ctnr_from_zone_name(zone, 'CNAME')
+        if ctnr is None:
             continue
 
         cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
