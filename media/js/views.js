@@ -23,6 +23,14 @@ $(document).ready(function() {
         $('.settings-menu').slideToggle();
         $('#settings-btn').toggleClass('selected');
     });
+    $('#menu-btn').click( function(e) {
+        if ($('#sidebar_div').css('display') == 'none') {
+            $('#sidebar_div').css('display', 'block');
+        } else {
+            $('#sidebar_div').css('display', 'none');
+        };
+        $('#menu-btn').toggleClass('selected');
+    });
     $('.nav-item.parent').click( function(e) {
         e.preventDefault();
         var parentsChild = ('#' + this.id + '-children');
