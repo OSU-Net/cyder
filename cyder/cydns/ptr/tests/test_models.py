@@ -348,14 +348,14 @@ class PTRTests(cyder.base.tests.TestCase):
         d.full_clean()
         d.save()
 
-        c = Ctnr(name='test_ctnr1')
-        c.full_clean()
-        c.save()
-        c.domains.add(d)
+        c1 = Ctnr(name='test_ctnr1')
+        c1.full_clean()
+        c1.save()
+        c1.domains.add(d)
 
-        c = Ctnr(name='test_ctnr2')
-        c.full_clean()
-        c.save()
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
 
         self.do_generic_add(
             ip_str='128.193.0.2', fqdn='nonexistent1.test.edu',
