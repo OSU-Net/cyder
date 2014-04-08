@@ -425,3 +425,22 @@ class PTRTests(cyder.base.tests.TestCase):
         with self.assertRaises(ValidationError):
             self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
                                 fqdn='foo2.oregonstate.edu', ctnr='test_ctnr')
+
+    def test_ptr_in_dynamic_range(self):
+        c = Ctnr(name='test_ctnr')
+        c.full_clean()
+        c.save()
+
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='dy', start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                fqdn='foo.oregonstate.edu', ctnr='test_ctnr')
