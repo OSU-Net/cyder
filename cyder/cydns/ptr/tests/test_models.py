@@ -344,24 +344,20 @@ class PTRTests(cyder.base.tests.TestCase):
     def test_ptr_domain_ctnr(self):
         """Test that a PTR's container is independent of its domain's container
         """
-        d = Domain(name='test.edu')
-        d.full_clean()
-        d.save()
-
         c1 = Ctnr(name='test_ctnr1')
         c1.full_clean()
         c1.save()
-        c1.domains.add(d)
+        c1.domains.add(Domain.objects.get(name='oregonstate.edu'))
 
         c2 = Ctnr(name='test_ctnr2')
         c2.full_clean()
         c2.save()
 
         self.do_generic_add(
-            ip_str='128.193.0.2', fqdn='nonexistent1.test.edu',
+            ip_str='128.193.0.2', fqdn='foo1.oregonstate.edu',
             ip_type='4', ctnr='test_ctnr1')
         self.do_generic_add(
-            ip_str='128.193.0.3', fqdn='nonexistent2.test.edu',
+            ip_str='128.193.0.3', fqdn='foo2.oregonstate.edu',
             ip_type='4', ctnr='test_ctnr2')
 
     def test_ptr_target_resembles_ip(self):
