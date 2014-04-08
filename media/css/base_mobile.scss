@@ -41,26 +41,6 @@
         display: none;
     }
 
-    div#chevronfooter {
-        display: inline;
-    }
-
-    #sidebar_toggle:checked ~ div#sidebar {
-            z-index: 1;
-            visibility: visible;
-            opacity: 1;
-            transition: all .5s;
-            height: 100%;
-            width: 15%;
-    }
-
-    #sidebar_toggle:checked ~ #chevronfooter {
-        #chevron {
-            #chevronimg {
-                transform: scaleX(-1);
-            }
-        }
-    }
     /* Pagination */
     div.pagination {
         margin: 18px 0 0 .5%;

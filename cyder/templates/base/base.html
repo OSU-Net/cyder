@@ -118,7 +118,6 @@
     </div>
 
     <div class="main wrap container">
-      <input type="checkbox" id="sidebar_toggle">
 
       {% if self.sidebar() %}<div id="sidebar_div"><div id="sidebar">{% endif %}
       {% block sidebar %}{% endblock %}
@@ -137,12 +136,7 @@
         {% block form %}{% endblock %}
         {% block content %}{% endblock %}
       </div>
-        <div id="chevronfooter">
-          <label id="chevron" for="sidebar_toggle">
-              <img id="chevronimg" src="/media/img/chevron.png"></img>
-          </label>
-        </div>
-      </div>
+    </div>
     <div id="footer" class="footer">
       <a class="footer source" href="https://github.com/OSU-Net/cyder">Source Code</a>
       <a id="bug-report" class="footer bug {{ 'selected' if url('bug-report') == request.path }}" href="{{ url('bug-report') }}">Report a Bug</a>
