@@ -412,3 +412,16 @@ class PTRTests(cyder.base.tests.TestCase):
             self.do_generic_add(
                 ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu',
                 ctnr='test_ctnr')
+
+    def test_ptrs_same_ip(self):
+        """Test that two PTRs cannot have the same IP"""
+        c = Ctnr(name='test_ctnr')
+        c.full_clean()
+        c.save()
+
+        self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                            fqdn='foo1.oregonstate.edu', ctnr='test_ctnr')
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                fqdn='foo2.oregonstate.edu', ctnr='test_ctnr')
