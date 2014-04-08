@@ -2,13 +2,15 @@ from django.core.exceptions import ValidationError
 
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
 from cyder.cydns.tests.utils import create_basic_dns_data
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import Ip
-from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.vrf.models import Vrf
 
 
@@ -369,3 +371,48 @@ class PTRTests(cyder.base.tests.TestCase):
                 self.do_generic_add(
                     ip_str='128.193.0.2', fqdn=fqdn,
                     ip_type='4')
+
+    def test_ptr_same_ip_as_static_intr(self):
+        """Test that a PTR and a static inteface cannot share an IP
+
+        (It doesn't matter whether the static interface is enabled.)
+        """
+        c = Ctnr(name='test_ctnr')
+        c.full_clean()
+        c.save()
+
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='st', start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        s = System(name='test_system')
+        s.full_clean()
+        s.save()
+
+        i = StaticInterface(
+            mac='be:ef:fa:ce:12:34', label='foo1',
+            domain=Domain.objects.get(name='oregonstate.edu'),
+            ip_str='128.193.0.2', ip_type='4', system=s,
+            ctnr=c, dns_enabled=True)
+        i.full_clean()
+        i.save()
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add(
+                ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu',
+                ctnr='test_ctnr')
+
+        i.dns_enabled = False
+        i.full_clean()
+        i.save()
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add(
+                ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu',
+                ctnr='test_ctnr')
