@@ -333,7 +333,7 @@ class PTRTests(cyder.base.tests.TestCase):
             self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
                                 ctnr='test_ctnr3')
 
-    def test_ptr_target(self):
+    def test_ptr_target_existence(self):
         """Test that a PTR's target is not required to exist"""
         self.do_generic_add(
             ip_str='128.193.0.2', fqdn='nonexistent.oregonstate.edu',
@@ -361,3 +361,11 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_add(
             ip_str='128.193.0.3', fqdn='nonexistent2.test.edu',
             ip_type='4', ctnr='test_ctnr2')
+
+    def test_ptr_target_resembles_ip(self):
+        """Test that a PTR's target cannot resemble an IP address"""
+        for fqdn in ('10.274.30.253', '127.0.0.1', 'fe80::e1c9:1:228d:d8'):
+            with self.assertRaises(ValidationError):
+                self.do_generic_add(
+                    ip_str='128.193.0.2', fqdn=fqdn,
+                    ip_type='4')
