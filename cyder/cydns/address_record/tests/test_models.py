@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
+from cyder.cydns.tests.utils import create_basic_dns_data
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
@@ -27,12 +28,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def setUp(self):
         self.ctnr, _ = Ctnr.objects.get_or_create(name='abloobloobloo')
-        self.arpa = self.create_domain(name='arpa')
-        self.arpa.save()
-        self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i_arpa.save()
-        self.i6_arpa = self.create_domain(name='ip6.arpa')
-        self.i6_arpa.save()
+
+        create_basic_dns_data()
 
         self.osu_block = "633:105:F000:"
         boot_strap_ipv6_reverse_domain("0.6.3")
