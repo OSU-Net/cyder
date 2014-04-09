@@ -31,6 +31,10 @@ class PTRTests(cyder.base.tests.TestCase):
             d.full_clean()
             d.save()
 
+        self.c1 = Ctnr(name='test_ctnr1')
+        self.c1.full_clean()
+        self.c1.save()
+
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'
@@ -45,10 +49,10 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def do_generic_add(self, ip_str, fqdn, ip_type, domain=None, ctnr=None):
         if ctnr is None:
-            ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
-        else:
-            ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type,
-                      ctnr=Ctnr.objects.get(name=ctnr))
+            ctnr = self.c1
+
+        ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type,
+                  ctnr=ctnr)
         ret.clean()
         ret.full_clean()
         ret.save()
@@ -310,10 +314,9 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def test_ptr_ctnr_range(self):
         """Test that a PTR is allowed only in its IP's range's containers"""
-        for name in ('test_ctnr1', 'test_ctnr2', 'test_ctnr3'):
-            c = Ctnr(name=name)
-            c.full_clean()
-            c.save()
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
 
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                     network_str='128.193.0.0/24')
@@ -325,15 +328,14 @@ class PTRTests(cyder.base.tests.TestCase):
         r.full_clean()
         r.save()
 
-        Ctnr.objects.get(name='test_ctnr1').ranges.add(r)
-        Ctnr.objects.get(name='test_ctnr2').ranges.add(r)
+        self.c1.ranges.add(r)
 
         self.do_generic_add('128.193.0.2', 'www1.oregonstate.edu', '4',
-                            ctnr='test_ctnr1')
+                            ctnr=self.c1)
 
         with self.assertRaises(ValidationError):
             self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
-                                ctnr='test_ctnr3')
+                                ctnr=c2)
 
     def test_ptr_target_existence(self):
         """Test that a PTR's target is not required to exist"""
@@ -344,10 +346,7 @@ class PTRTests(cyder.base.tests.TestCase):
     def test_ptr_domain_ctnr(self):
         """Test that a PTR's container is independent of its domain's container
         """
-        c1 = Ctnr(name='test_ctnr1')
-        c1.full_clean()
-        c1.save()
-        c1.domains.add(Domain.objects.get(name='oregonstate.edu'))
+        self.c1.domains.add(Domain.objects.get(name='oregonstate.edu'))
 
         c2 = Ctnr(name='test_ctnr2')
         c2.full_clean()
@@ -355,28 +354,23 @@ class PTRTests(cyder.base.tests.TestCase):
 
         self.do_generic_add(
             ip_str='128.193.0.2', fqdn='foo1.oregonstate.edu',
-            ip_type='4', ctnr='test_ctnr1')
+            ip_type='4', ctnr=self.c1)
         self.do_generic_add(
             ip_str='128.193.0.3', fqdn='foo2.oregonstate.edu',
-            ip_type='4', ctnr='test_ctnr2')
+            ip_type='4', ctnr=c2)
 
     def test_ptr_target_resembles_ip(self):
         """Test that a PTR's target cannot resemble an IP address"""
         for fqdn in ('10.274.30.253', '127.0.0.1', 'fe80::e1c9:1:228d:d8'):
             with self.assertRaises(ValidationError):
-                self.do_generic_add(
-                    ip_str='128.193.0.2', fqdn=fqdn,
-                    ip_type='4')
+                self.do_generic_add(ip_str='128.193.0.2', fqdn=fqdn,
+                                    ip_type='4')
 
     def test_ptr_same_ip_as_static_intr(self):
         """Test that a PTR and a static inteface cannot share an IP
 
         (It doesn't matter whether the static interface is enabled.)
         """
-        c = Ctnr(name='test_ctnr')
-        c.full_clean()
-        c.save()
-
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                     network_str='128.193.0.0/24')
         n.full_clean()
@@ -395,42 +389,32 @@ class PTRTests(cyder.base.tests.TestCase):
             mac='be:ef:fa:ce:12:34', label='foo1',
             domain=Domain.objects.get(name='oregonstate.edu'),
             ip_str='128.193.0.2', ip_type='4', system=s,
-            ctnr=c, dns_enabled=True)
+            ctnr=self.c1, dns_enabled=True)
         i.full_clean()
         i.save()
 
         with self.assertRaises(ValidationError):
-            self.do_generic_add(
-                ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu',
-                ctnr='test_ctnr')
+            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                fqdn='foo2.oregonstate.edu')
 
         i.dns_enabled = False
         i.full_clean()
         i.save()
 
         with self.assertRaises(ValidationError):
-            self.do_generic_add(
-                ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu',
-                ctnr='test_ctnr')
+            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                fqdn='foo2.oregonstate.edu')
 
     def test_ptrs_same_ip(self):
         """Test that two PTRs cannot have the same IP"""
-        c = Ctnr(name='test_ctnr')
-        c.full_clean()
-        c.save()
-
         self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
-                            fqdn='foo1.oregonstate.edu', ctnr='test_ctnr')
+                            fqdn='foo1.oregonstate.edu')
 
         with self.assertRaises(ValidationError):
             self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
-                                fqdn='foo2.oregonstate.edu', ctnr='test_ctnr')
+                                fqdn='foo2.oregonstate.edu')
 
     def test_ptr_in_dynamic_range(self):
-        c = Ctnr(name='test_ctnr')
-        c.full_clean()
-        c.save()
-
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                     network_str='128.193.0.0/24')
         n.full_clean()
@@ -443,4 +427,4 @@ class PTRTests(cyder.base.tests.TestCase):
 
         with self.assertRaises(ValidationError):
             self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
-                                fqdn='foo.oregonstate.edu', ctnr='test_ctnr')
+                                fqdn='foo.oregonstate.edu')
