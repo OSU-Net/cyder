@@ -1,17 +1,15 @@
 import ipaddr
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.models import ipv6_to_longs
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain
-from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
+from cyder.cydns.ip.models import ipv6_to_longs
+from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.nameserver.models import Nameserver
 
 
 class AddressRecordTests(cyder.base.tests.TestCase):
@@ -38,61 +36,27 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         self.osu_block = "633:105:F000:"
         boot_strap_ipv6_reverse_domain("0.6.3")
-        try:
-            self.e = Domain(name='edu')
-            self.e.save()
-        except IntegrityError:
-            pass
-        try:
-            self.o_e = Domain(name='oregonstate.edu')
-            self.o_e.save()
-        except IntegrityError:
-            self.o_e = Domain.objects.filter(name='oregonstate.edu')[0]
-            pass
+        self.e = Domain(name='edu')
+        self.e.save()
+        self.o_e = Domain(name='oregonstate.edu')
+        self.o_e.save()
 
-        try:
-            self.f_o_e = Domain(name='foo.oregonstate.edu')
-            self.f_o_e.save()
-        except IntegrityError:
-            self.f_o_e = Domain.objects.filter(name='foo.oregonstate.edu')[0]
-            pass
+        self.f_o_e = Domain(name='foo.oregonstate.edu')
+        self.f_o_e.save()
 
-        try:
-            self.m_o_e = Domain(name='max.oregonstate.edu')
-            self.m_o_e.save()
-        except IntegrityError:
-            self.m_o_e = Domain.objects.filter(name='max.oregonstate.edu')[0]
-            pass
+        self.m_o_e = Domain(name='max.oregonstate.edu')
+        self.m_o_e.save()
 
-        try:
-            self.z_o_e = Domain(name='zax.oregonstate.edu')
-            self.z_o_e.save()
-        except IntegrityError:
-            self.z_o_e = Domain.objects.filter(name='zax.oregonstate.edu')[0]
-            pass
-        try:
-            self.g_o_e = Domain(name='george.oregonstate.edu')
-            self.g_o_e.save()
-        except IntegrityError:
-            self.g_o_e = Domain.objects.filter(name=
-                                               'george.oregonstate.edu')[0]
-            pass
+        self.z_o_e = Domain(name='zax.oregonstate.edu')
+        self.z_o_e.save()
+        self.g_o_e = Domain(name='george.oregonstate.edu')
+        self.g_o_e.save()
 
-        try:
-            self._128 = self.create_domain(name='128')
-            self._128.save()
-        except IntegrityError:
-            raise Exception
-            self._128 = self.create_domain.objects.filter(name='128')[0]
-            pass
+        self._128 = self.create_domain(name='128')
+        self._128.save()
 
-        try:
-            self._128_193 = self.create_domain(name='128.193')
-            self._128_193.save()
-        except IntegrityError:
-            raise Exception
-            self._128_193 = Domain.objects.filter(name='128.193')[0]
-            pass
+        self._128_193 = self.create_domain(name='128.193')
+        self._128_193.save()
 
     def build_ar(self, *args, **kwargs):
         kwargs['ctnr'] = self.ctnr
