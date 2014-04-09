@@ -134,6 +134,8 @@ class StaticInterTests(TestCase):
 
         # Change the mac by one.
         mac = "00:00:00:00:00:02"
+        label = "foo2"
+        ip_str = "10.0.0.3"
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         self.do_add(**kwargs)

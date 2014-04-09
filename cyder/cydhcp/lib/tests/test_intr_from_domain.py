@@ -116,19 +116,19 @@ class LibTestsDomain(TestCase):
         r.clean()
         r.save()
 
-        s = StaticInterface(label="fab", domain=d, ip_type="4",
+        s = StaticInterface(label="fab1", domain=d, ip_type="4",
                             ip_str="11.0.0.0", system=self.system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
         s.clean()
         s.save()
 
-        s = StaticInterface(label="fab", domain=d, ip_type="4",
+        s = StaticInterface(label="fab2", domain=d, ip_type="4",
                             ip_str="11.0.0.1", system=self.system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
         s.clean()
         s.save()
 
-        s = StaticInterface(label="fab", domain=d, ip_type="4",
+        s = StaticInterface(label="fab3", domain=d, ip_type="4",
                             ip_str="11.0.0.2", system=self.system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
         s.clean()
