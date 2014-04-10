@@ -273,8 +273,11 @@ a.btn {
     position: relative;
     width: 110px;
     height: 1000px;
-    display: block;
     margin-right: 25px;
+    display: block;
+    &.displayed {
+        display: block;
+    }
 }
 
 #sidebar {

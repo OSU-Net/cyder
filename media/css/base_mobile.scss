@@ -38,7 +38,10 @@
     }
     div#sidebar_div {
         position: fixed;
-        display: none;
+        display: block;
+        &.displayed {
+            display: none;
+        }
     }
 
     /* Pagination */

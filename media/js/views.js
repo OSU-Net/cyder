@@ -24,12 +24,8 @@ $(document).ready(function() {
         $('#settings-btn').toggleClass('selected');
     });
     $('#menu-btn').click( function(e) {
-        if ($('#sidebar_div').css('display') == 'none') {
-            $('#sidebar_div').css('display', 'block');
-        } else {
-            $('#sidebar_div').css('display', 'none');
-        };
         $('#menu-btn').toggleClass('selected');
+        $('#sidebar_div').toggleClass('displayed');
     });
     $('.nav-item.parent').click( function(e) {
         e.preventDefault();
