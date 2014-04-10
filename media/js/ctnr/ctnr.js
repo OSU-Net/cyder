@@ -1,7 +1,8 @@
 $(document).ready(function() {
     var form = document.getElementById('add-object-inner-form');
     var ctnr = $('#ctnr-data');
-    var ctnr_name = $('#title').text().split(' ')[1];
+    var title = $('#title').text().split(' ');
+    var ctnr_name = title[title.length - 1];
     var searchUrl = null;
     var addObjectUrl = ctnr.attr('data-addObjectUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
