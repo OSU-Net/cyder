@@ -103,7 +103,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
-    search_fields = ('start_str', 'end_str')
+    search_fields = ('start_str', 'end_str', 'name')
     display_fields = ('start_str', 'end_str')
 
     class Meta:
