@@ -113,13 +113,14 @@ def send_email(request):
             try:
                 send_mail(subject, message, from_email,
                           [BUG_REPORT_EMAIL])
-                return redirect(reverse('core-index'))
+                return HttpResponse(json.dumps({'success': True}))
 
             except BadHeaderError:
-                return HttpResponse('Invalid header found.')
+                return HttpResponse(json.dumps(
+                    {'error': {'__all__': 'Invalid header found.'}}))
 
         else:
-            return render(request, 'base/email_form.html', {'form': form})
+            return HttpResponse(json.dumps({'errors': form.errors}))
 
     else:
         session_data = (

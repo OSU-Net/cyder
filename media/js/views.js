@@ -195,6 +195,17 @@ $(document).ready(function() {
                 name: 'csrfmiddlewaretoken', value: csrfToken}));
         };
     });
+    $('#Bug-Report').live('submit', function(event) {
+        event.preventDefault();
+        url = $(location).attr('href');
+        var data = ajax_form_submit(url, $('#Bug-Report'), csrfToken);
+        if (!data.errors) {
+            alert('Your bug report was sent successfully. '
+                  + 'Thank you for your input!');
+            $('#Bug-Report')[0].reset();
+            location.reload();
+        };
+    });
 
     $('#obj-form form').live('submit', function(event) {
         var url = $('#obj-form form')[0].action;
