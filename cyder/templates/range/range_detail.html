@@ -80,7 +80,7 @@
                 {% if request.user.get_profile().has_perm(
                     request, 2, obj_class='staticinterface') and obj.range_type == 'st' %}
                     <a class="btn submit a"
-                        data-kwargs='{"initial": "True", "interface_type": "Static",
+                        data-kwargs='{"initial": "True", "interface_type": "static_interface",
                             "ip_str":"{{ x[1].__str__() }}" }'
                         id=system_create
                         href={{ url('system-create') }}>Static Interface</a>
