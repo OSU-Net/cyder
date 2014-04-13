@@ -117,7 +117,7 @@ def send_email(request):
 
             except BadHeaderError:
                 return HttpResponse(json.dumps(
-                    {'error': {'__all__': 'Invalid header found.'}}))
+                    {'errors': {'__all__': 'Invalid header found.'}}))
 
         else:
             return HttpResponse(json.dumps({'errors': form.errors}))
