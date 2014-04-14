@@ -312,7 +312,7 @@ class PTRTests(cyder.base.tests.TestCase):
         fqdn = "%.s#.com"
         self.do_generic_invalid_update(ptr, fqdn, '6', ValidationError)
 
-    def test_ptr_ctnr_range(self):
+    def test_ctnr_range(self):
         """Test that a PTR is allowed only in its IP's range's containers"""
         c2 = Ctnr(name='test_ctnr2')
         c2.full_clean()
@@ -337,13 +337,13 @@ class PTRTests(cyder.base.tests.TestCase):
             self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
                                 ctnr=c2)
 
-    def test_ptr_target_existence(self):
+    def test_target_existence(self):
         """Test that a PTR's target is not required to exist"""
         self.do_generic_add(
             ip_str='128.193.0.2', fqdn='nonexistent.oregonstate.edu',
             ip_type='4')
 
-    def test_ptr_domain_ctnr(self):
+    def test_domain_ctnr(self):
         """Test that a PTR's container is independent of its domain's container
         """
         self.c1.domains.add(Domain.objects.get(name='oregonstate.edu'))
@@ -359,14 +359,14 @@ class PTRTests(cyder.base.tests.TestCase):
             ip_str='128.193.0.3', fqdn='foo2.oregonstate.edu',
             ip_type='4', ctnr=c2)
 
-    def test_ptr_target_resembles_ip(self):
+    def test_target_resembles_ip(self):
         """Test that a PTR's target cannot resemble an IP address"""
         for fqdn in ('10.274.30.253', '127.0.0.1', 'fe80::e1c9:1:228d:d8'):
             with self.assertRaises(ValidationError):
                 self.do_generic_add(ip_str='128.193.0.2', fqdn=fqdn,
                                     ip_type='4')
 
-    def test_ptr_same_ip_as_static_intr(self):
+    def test_same_ip_as_static_intr(self):
         """Test that a PTR and a static inteface cannot share an IP
 
         (It doesn't matter whether the static interface is enabled.)
@@ -405,7 +405,7 @@ class PTRTests(cyder.base.tests.TestCase):
             self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
                                 fqdn='foo2.oregonstate.edu')
 
-    def test_ptrs_same_ip(self):
+    def test_same_ip(self):
         """Test that two PTRs cannot have the same IP"""
         self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
                             fqdn='foo1.oregonstate.edu')
