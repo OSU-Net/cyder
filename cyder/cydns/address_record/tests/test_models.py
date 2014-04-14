@@ -611,3 +611,23 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         cn.save()
         self.assertRaises(ValidationError, a.delete)
         a.delete(check_cname=False)
+
+    def test_duplicate_names(self):
+        """Test that two AddressRecords cannot have the same name"""
+        c1 = Ctnr(name='test_ctnr1')
+        c1.full_clean()
+        c1.save()
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        a1 = AddressRecord(label="foo", domain=self.o_e, ip_str='128.193.0.2',
+                           ctnr=c1)
+        a1.full_clean()
+        a1.save()
+
+        with self.assertRaises(ValidationError):
+            a2 = AddressRecord(label="foo", domain=self.o_e,
+                               ip_str='128.193.0.3', ctnr=c2)
+            a2.full_clean()
+            a2.save()
