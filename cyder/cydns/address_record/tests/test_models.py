@@ -621,7 +621,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         c2.full_clean()
         c2.save()
 
-        a1 = AddressRecord(label="foo", domain=self.o_e, ip_str='128.193.0.2',
+        a1 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.2',
                            ctnr=c1)
         a1.full_clean()
         a1.save()
@@ -634,12 +634,12 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_address_record_conflicts_with_cname(self):
         """Test that an AddressRecord and a CNAME can't have the same name"""
-        cn = CNAME(label="bar", domain=self.o_e, target="foo.oregonstate.edu")
+        cn = CNAME(label='bar', domain=self.o_e, target='foo.oregonstate.edu')
         cn.full_clean()
         cn.save()
 
         with self.assertRaises(ValidationError):
-            a = AddressRecord(label="bar", domain=self.o_e,
+            a = AddressRecord(label='bar', domain=self.o_e,
                               ip_str='128.193.0.2')
             a.full_clean()
             a.save()
