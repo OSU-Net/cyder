@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
 from cyder.cydns.tests.utils import create_basic_dns_data
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -11,6 +12,10 @@ from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.vrf.models import Vrf
 
 
 class AddressRecordTests(cyder.base.tests.TestCase):
@@ -29,7 +34,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.ctnr, _ = Ctnr.objects.get_or_create(name='abloobloobloo')
 
-        create_basic_dns_data()
+        create_basic_dns_data(dhcp=True)
 
         self.osu_block = "633:105:F000:"
         boot_strap_ipv6_reverse_domain("0.6.3")
@@ -649,3 +654,46 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                               ip_str='128.193.0.2')
             a.full_clean()
             a.save()
+
+    def test_same_name_as_static_interface(self):
+        """Test that ARs and SIs can share a name iff they have the same ctnr
+        """
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='st', start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        c1 = Ctnr(name='test_ctnr1')
+        c1.full_clean()
+        c1.save()
+
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        s = System(name='test_system')
+        s.full_clean()
+        s.save()
+
+        si = StaticInterface(
+            mac='be:ef:fa:ce:12:34', label='foo', domain=self.o_e,
+            ip_str='128.193.0.2', ip_type='4', system=s,
+            ctnr=c1)
+        si.full_clean()
+        si.save()
+
+        a1 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.3',
+                           ctnr=c1)
+        a1.full_clean()
+        a1.save()
+
+        with self.assertRaises(ValidationError):
+            a2 = AddressRecord(label='foo', domain=self.o_e,
+                               ip_str='128.193.0.3', ctnr=c2)
+            a2.full_clean()
+            a2.save()
