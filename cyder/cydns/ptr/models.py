@@ -93,6 +93,8 @@ class PTR(BaseModel, BasePTR, Ip):
                                       validators=[validate_ttl],
                                       verbose_name="Time to live")
     description = models.CharField(max_length=1000, blank=True)
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     template = _("{reverse_domain:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
