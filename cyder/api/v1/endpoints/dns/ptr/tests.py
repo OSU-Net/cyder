@@ -13,8 +13,7 @@ class PTRBase(APITests):
             'ctnr': self.ctnr,
             'description': 'PTR Record',
             'ttl': 420,
-            'label': 'ptr',
-            'domain': self.domain,
+            'fqdn': 'ptr.' + self.domain.name,
         }
 
 
