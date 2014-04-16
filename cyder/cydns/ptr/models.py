@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.base.models import BaseModel
 from cyder.cydhcp.range.utils import find_range
+from cyder.cydns.models import ViewMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
@@ -74,7 +75,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BaseModel, BasePTR, Ip):
+class PTR(BaseModel, BasePTR, Ip, ViewMixin):
     """
     A PTR is used to map an IP to a domain name.
 
