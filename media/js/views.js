@@ -203,7 +203,7 @@ $(document).ready(function() {
                 alert('Your bug report was sent successfully. '
                       + 'Thank you for your input!');
                 $('#Bug-Report')[0].reset();
-                location.reload();
+                window.location.href = '/';
             };
         });
     });
