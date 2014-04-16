@@ -102,12 +102,6 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     def __repr__(self):
         return "<{0}>".format(str(self))
 
-    @staticmethod
-    def filter_by_ctnr(ctnr, objects=None):
-        objects = objects or PTR.objects
-        objects = objects.filter(reverse_domain__in=ctnr.domains.all())
-        return objects
-
     @property
     def rdtype(self):
         return 'PTR'

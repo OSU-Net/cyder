@@ -107,11 +107,13 @@ class Zone(object):
 
         :uniqueness: label, domain, server, priority
         """
-        cursor.execute("SELECT name, server, priority, ttl, enabled "
-                       "FROM zone_mx "
+        cursor.execute("SELECT zone_mx.name, server, priority, ttl, "
+                       "enabled, zone.name FROM zone_mx "
+                       "JOIN zone ON zone_mx.zone = zone.id "
                        "WHERE domain = '%s';" % self.domain_id)
 
-        for name, server, priority, ttl, enabled in cursor.fetchall():
+        for (name, server, priority, ttl,
+                enabled, zone) in cursor.fetchall():
             name, server = name.lower(), server.lower()
             if MX.objects.filter(label=name,
                                  domain=self.domain,
@@ -120,12 +122,16 @@ class Zone(object):
                 print "Ignoring MX %s; MX already exists." % server
                 continue
 
+            ctnr = self.ctnr_from_zone_name(zone, 'MX')
+            if ctnr is None:
+                continue
+
             try:
                 mx, _ = MX.objects.get_or_create(label=name,
                                                  domain=self.domain,
                                                  server=server,
                                                  priority=priority,
-                                                 ttl=ttl)
+                                                 ttl=ttl, ctnr=ctnr)
                 if enabled:
                     mx.views.add(public)
                     mx.views.add(private)
@@ -143,7 +149,7 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import maintain_find_zone, migrate_zones
+        from dhcp_migrate import migrate_zones
 
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
@@ -172,7 +178,9 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
-            ctnr = maintain_find_zone(items['zone'])
+            ctnr = self.ctnr_from_zone_name(items['zone'], 'Static Interface')
+            if ctnr is None:
+                continue
 
             name = items['name']
             enabled = bool(items['enabled'])
@@ -270,11 +278,12 @@ class Zone(object):
 
         :PTR uniqueness: name, ip_str, ip_type
         """
+
         name = self.domain.name
-        cursor.execute("SELECT ip, hostname, type, enabled "
-                       "FROM pointer "
+        cursor.execute("SELECT ip, hostname, type, zone.name, enabled "
+                       "FROM pointer JOIN zone ON pointer.zone = zone.id "
                        "WHERE hostname LIKE '%%.%s';" % name)
-        for ip, hostname, ptr_type, enabled, in cursor.fetchall():
+        for ip, hostname, ptr_type, zone, enabled, in cursor.fetchall():
             hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
             if dname != name:
@@ -291,6 +300,10 @@ class Zone(object):
                 else:
                     pass
 
+            ctnr = self.ctnr_from_zone_name(zone, 'AR/PTR')
+            if ctnr is None:
+                continue
+
             if ptr_type == 'forward':
                 if AddressRecord.objects.filter(
                         fqdn=hostname, ip_str=long2ip(ip)).exists():
@@ -298,7 +311,7 @@ class Zone(object):
 
                 arec, _ = range_usage_get_create(
                     AddressRecord, label=label, domain=self.domain,
-                    ip_str=long2ip(ip), ip_type='4')
+                    ip_str=long2ip(ip), ip_type='4', ctnr=ctnr)
 
                 if enabled:
                     arec.views.add(public)
@@ -307,7 +320,7 @@ class Zone(object):
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(ip_str=long2ip(ip)).exists():
                     ptr = PTR(label=label, domain=self.domain,
-                              ip_str=long2ip(ip), ip_type='4')
+                              ip_str=long2ip(ip), ip_type='4', ctnr=ctnr)
 
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
@@ -364,8 +377,18 @@ class Zone(object):
         dname = dname.lower()
         return dname
 
-    #TODO: Cleanup functions for leftover objects to migrate
-    # (static interfaces and PTRs)
+    @staticmethod
+    def ctnr_from_zone_name(zone, obj_type="Object"):
+        from dhcp_migrate import clean_zone_name
+        zone = clean_zone_name(zone)
+        try:
+            ctnr = Ctnr.objects.get(name=zone)
+        except Ctnr.DoesNotExist:
+            print ("%s migration error; ctnr %s does not exist." %
+                   (obj_type, zone))
+            ctnr = None
+
+        return ctnr
 
 
 def gen_CNAME():
@@ -388,18 +411,14 @@ def gen_CNAME():
     :uniqueness: label, domain, target
     """
     print "Creating CNAMEs."
-    cursor.execute("SELECT * FROM zone_cname")
+    sql = ("SELECT zone_cname.server, zone_cname.name, zone_cname.enabled, "
+           "zone.name, domain.name FROM zone_cname "
+           "JOIN zone ON zone_cname.zone = zone.id "
+           "JOIN domain ON zone_cname.domain = domain.id")
+    cursor.execute(sql)
 
-    for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
+    for server, name, enabled, zone, dname in cursor.fetchall():
         server, name = server.lower(), name.lower()
-        if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
-                              % domain_id):
-            stderr.write('Ignoring CNAME {0}; domain unknown.\n'
-                         .format(name))
-            continue
-        dname, = cursor.fetchone()
-        if not dname:
-            continue
         dname = dname.lower()
 
         fqdn = ".".join([name, dname])
@@ -425,7 +444,11 @@ def gen_CNAME():
                        % fqdn)
             continue
 
-        cn = CNAME(label=name, domain=domain, target=server)
+        ctnr = Zone.ctnr_from_zone_name(zone, 'CNAME')
+        if ctnr is None:
+            continue
+
+        cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
         cn.set_fqdn()
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:

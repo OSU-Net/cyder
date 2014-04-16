@@ -4,6 +4,7 @@ from gettext import gettext as _
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
@@ -45,6 +46,8 @@ class Nameserver(CydnsRecord):
                                   related_name="nameserver_set")
     intr_glue = models.ForeignKey(StaticInterface, null=True, blank=True,
                                   related_name="nameserver_set")
+
+    exclude = ('ctnr',)
 
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
@@ -130,6 +133,11 @@ class Nameserver(CydnsRecord):
             raise AttributeError("'Nameserver' object has no attribute 'glue'")
 
     glue = property(get_glue, set_glue, del_glue, "The Glue property.")
+
+    def save(self, *args, **kwargs):
+        if not hasattr(self, 'ctnr') or self.ctnr.pk != 1:
+            self.ctnr = Ctnr.objects.get(pk=1)
+        super(Nameserver, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         self.check_no_ns_soa_condition(self.domain)
