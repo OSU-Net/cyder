@@ -43,7 +43,9 @@ $(document).ready(function() {
 
         var url = $('form#system-form')[0].action;
         var data = ajax_form_submit(url, $('form#system-form'),
-            $('#csrfToken').val());
+                $('#csrfToken').val(), function (ret_data) {
+            location.reload();
+        });
         if (!data.errors) {
             location.href = '/core/system/' + data.system_id.toString();
         };
