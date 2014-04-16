@@ -3,12 +3,13 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.models import BaseModel
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.models import CydnsRecord, LabelDomainMixin
+from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
@@ -73,7 +74,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
+class PTR(BaseModel, BasePTR, Ip):
     """
     A PTR is used to map an IP to a domain name.
 
@@ -85,6 +86,15 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     id = models.AutoField(primary_key=True)
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
                                        related_name='reverse_ptr_set')
+    fqdn = models.CharField(
+        max_length=255, blank=True, validators=[validate_fqdn], db_index=True
+    )
+    ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
+                                      validators=[validate_ttl],
+                                      verbose_name="Time to live")
+    description = models.CharField(max_length=1000, blank=True)
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     template = _("{reverse_domain:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
@@ -120,6 +130,15 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
             custom={'reverse_domain': reverse_domain})
 
     def save(self, *args, **kwargs):
+        label = kwargs.pop('label', None)
+        domain = kwargs.pop('domain', None)
+        if label is not None and domain is not None:
+            fqdn = ".".join([label, domain.name]).strip('.')
+            if 'fqdn' in kwargs and kwargs['fqdn'] != fqdn:
+                raise ValidationError("FQDN & label/domain mismatch.")
+            elif 'fqdn' not in kwargs:
+                kwargs['fqdn'] = fqdn
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -162,8 +181,7 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
         """For tables."""
         data = super(PTR, self).details()
         data['data'] = [
-            ('Label', 'label', self.label),
-            ('Domain', 'domain', self.domain),
+            ('Target', 'fqdn', self.fqdn),
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
@@ -172,7 +190,6 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'label', 'datatype': 'string', 'editable': True},
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
