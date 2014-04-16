@@ -167,22 +167,24 @@ class Zone(object):
                           "owning_unit": "Owning Unit",
                           "user_id": "User ID"}
 
-        keys = ("id", "ip", "name", "workgroup", "enabled", "ha", "zone",
-                "type", "os", "location", "department", "serial", "other_id",
-                "purchase_date", "po_number", "warranty_date", "owning_unit",
-                "user_id", "last_seen", "expire", "ttl", "last_update")
+        keys = ("host.id", "ip", "host.name", "zone.name", "workgroup",
+                "enabled", "ha", "zone", "type", "os", "location",
+                "department", "serial", "other_id", "purchase_date",
+                "po_number", "warranty_date", "owning_unit", "user_id",
+                "last_seen", "expire", "ttl", "last_update")
 
-        sql = ("SELECT %s FROM host WHERE ip != 0 AND domain = '%s';" %
+        sql = ("SELECT %s FROM host JOIN zone ON host.zone = zone.id "
+               "WHERE ip != 0 AND domain = '%s';" %
                (", ".join(keys), self.domain_id))
 
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
-            ctnr = self.ctnr_from_zone_id(items['zone'])
+            ctnr = self.ctnr_from_zone_name(items['zone.name'])
             if ctnr is None:
                 continue
 
-            name = items['name']
+            name = items['host.name']
             enabled = bool(items['enabled'])
             dns_enabled, dhcp_enabled = enabled, enabled
             ip = items['ip']
@@ -201,7 +203,7 @@ class Zone(object):
                 label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
             if static:
                 stderr.write("Ignoring host %s: already exists.\n"
-                             % items['id'])
+                             % items['host.id'])
                 continue
 
             # create system
