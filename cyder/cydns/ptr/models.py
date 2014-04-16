@@ -13,7 +13,7 @@ from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
-class BasePTR(BaseModel):
+class BasePTR(object):
     urd = True
 
     def clean_reverse(self, update_reverse_domain=None):
@@ -74,7 +74,7 @@ class BasePTR(BaseModel):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip):
+class PTR(BaseModel, BasePTR, Ip):
     """
     A PTR is used to map an IP to a domain name.
 
