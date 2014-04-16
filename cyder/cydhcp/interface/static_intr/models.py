@@ -81,7 +81,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     class Meta:
         app_label = 'cyder'
         db_table = 'static_interface'
-        unique_together = ('ip_upper', 'ip_lower', 'label', 'domain', 'mac')
+        unique_together = (('ip_upper', 'ip_lower'), ('label', 'domain'))
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
