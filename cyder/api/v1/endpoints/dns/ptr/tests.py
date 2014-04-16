@@ -10,6 +10,7 @@ class PTRBase(APITests):
         Domain.objects.get_or_create(name='arpa')
 
         return {
+            'ctnr': self.ctnr,
             'description': 'PTR Record',
             'ttl': 420,
             'label': 'ptr',

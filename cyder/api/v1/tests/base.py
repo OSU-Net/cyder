@@ -8,6 +8,7 @@ from cyder.api.authtoken.models import Token
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.validators import VALUE_TYPES
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
@@ -118,6 +119,7 @@ class APITests(TestCase):
             url = self.model.get_list_url()
         root, urlname = tuple(url.strip("/").split("/"))
 
+        self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.domain, self.view = build_sample_domain()
         self.token = Token.objects.create(
             user=User.objects.get(username="test_superuser")).key

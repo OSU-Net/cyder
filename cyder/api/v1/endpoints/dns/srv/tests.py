@@ -8,6 +8,7 @@ class SRVAPI_Test(APITests):
 
     def create_data(self):
         data = {
+            'ctnr': self.ctnr,
             'description': 'SRV',
             'ttl': 420,
             'label': '_srv',

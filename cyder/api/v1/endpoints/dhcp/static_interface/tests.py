@@ -1,4 +1,3 @@
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
@@ -10,7 +9,6 @@ class StaticInterfaceBase(APITests):
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
-        self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.system, _ = System.objects.get_or_create(name="TestSystem")
         super(StaticInterfaceBase, self).setUp()
 
