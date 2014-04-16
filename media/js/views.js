@@ -19,6 +19,12 @@ $(document).ready(function() {
         make_smart_name_get_domains(
             $('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
+    $('.load').ajaxStart(function() {
+        $(this).show();
+    }).ajaxStop(function() {
+        $(this).hide();
+    });
+
     $('#settings-btn').click( function(e) {
         $('.settings-menu').slideToggle();
         $('#settings-btn').toggleClass('selected');
