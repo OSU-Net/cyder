@@ -178,7 +178,7 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
-            ctnr = self.ctnr_from_zone_name(items['zone'], 'Static Interface')
+            ctnr = self.ctnr_from_zone_id(items['zone'])
             if ctnr is None:
                 continue
 
@@ -389,6 +389,11 @@ class Zone(object):
             ctnr = None
 
         return ctnr
+
+    @staticmethod
+    def ctnr_from_zone_id(zone_id):
+        from dhcp_migrate import maintain_find_zone
+        return maintain_find_zone(zone_id)
 
 
 def gen_CNAME():
