@@ -379,11 +379,14 @@ class Zone(object):
 
     @staticmethod
     def ctnr_from_zone_name(zone, obj_type="Object"):
-        from dhcp_migrate import maintain_find_zone
-        ctnr = maintain_find_zone(zone)
-        if ctnr is None:
+        from dhcp_migrate import clean_zone_name
+        zone = clean_zone_name(zone)
+        try:
+            ctnr = Ctnr.objects.get(name=zone)
+        except Ctnr.DoesNotExist:
             print ("%s migration error; ctnr %s does not exist." %
                    (obj_type, zone))
+            ctnr = None
 
         return ctnr
 
