@@ -62,7 +62,7 @@ class AStaticRegTests(TestCase):
 
     def do_add_a(self, label, domain, ip_str, ip_type='4'):
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
-                          ip_type=ip_type)
+                          ip_type=ip_type, ctnr=self.ctnr)
         a.clean()
         a.save()
         return a

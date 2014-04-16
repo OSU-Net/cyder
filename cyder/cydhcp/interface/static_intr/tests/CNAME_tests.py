@@ -74,7 +74,8 @@ class CNAMEStaticRegTests(TestCase):
                   'ip_str': ip_str}
         i = self.do_add_intr(**kwargs)
         cn, _ = CNAME.objects.get_or_create(label='foo', domain=domain,
-                                            target=label + "." + domain.name)
+                                            target=label + "." + domain.name,
+                                            ctnr=self.ctnr)
         self.assertRaises(ValidationError, i.delete)
 
     def test1_delete_override(self):
@@ -86,5 +87,6 @@ class CNAMEStaticRegTests(TestCase):
                   'ip_str': ip_str}
         i = self.do_add_intr(**kwargs)
         cn, _ = CNAME.objects.get_or_create(label='food', domain=domain,
-                                            target=label + "." + domain.name)
+                                            target=label + "." + domain.name,
+                                            ctnr=self.ctnr)
         i.delete(check_cname=False, **{'delete_system': False})
