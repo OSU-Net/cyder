@@ -3,6 +3,7 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.models import BaseModel
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
@@ -12,7 +13,7 @@ from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
-class BasePTR(object):
+class BasePTR(BaseModel):
     urd = True
 
     def clean_reverse(self, update_reverse_domain=None):
