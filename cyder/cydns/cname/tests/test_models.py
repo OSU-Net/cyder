@@ -429,3 +429,31 @@ class CNAMETests(cyder.base.tests.TestCase):
             cn3 = CNAME(label='bar', domain=gz, target='foo3.gz', ctnr=c2)
             cn3.full_clean()
             cn3.save()
+
+    def test_target_validation(self):
+        """Test that target must be a valid non-IP hostname but need not exist
+        """
+        gz = Domain.objects.get(name='gz')
+
+        valid_targets = (
+            'example.com',
+            'www.example.com',
+            'foo.bar.example.com',
+        )
+
+        for target in valid_targets:
+            cn = CNAME(label='bar', domain=gz, target=target)
+            cn.full_clean()
+            cn.save()
+            cn.delete()
+
+        invalid_targets = (
+            '10.234.30.253',
+            '128.193.0.2',
+        )
+
+        for target in invalid_targets:
+            with self.assertRaises(ValidationError):
+                cn = CNAME(label='bar', domain=gz, target=target)
+                cn.full_clean()
+                cn.save()
