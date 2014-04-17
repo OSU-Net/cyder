@@ -434,7 +434,8 @@ class PTRTests(cyder.base.tests.TestCase):
         n.save()
 
         r = Range(network=n, range_type='dy', start_str='128.193.0.2',
-                  end_str='128.193.0.100')
+                  end_str='128.193.0.100',
+                  domain=Domain.objects.get(name='oregonstate.edu'))
         r.full_clean()
         r.save()
 
