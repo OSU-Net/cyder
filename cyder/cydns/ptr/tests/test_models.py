@@ -361,7 +361,7 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def test_target_resembles_ip(self):
         """Test that a PTR's target cannot resemble an IP address"""
-        for fqdn in ('10.274.30.253', '127.0.0.1', 'fe80::e1c9:1:228d:d8'):
+        for fqdn in ('10.234.30.253', '128.193.0.3', 'fe80::e1c9:1:228d:d8'):
             with self.assertRaises(ValidationError):
                 self.do_generic_add(ip_str='128.193.0.2', fqdn=fqdn,
                                     ip_type='4')
