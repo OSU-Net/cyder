@@ -202,7 +202,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def do_generic_remove(self, ip, fqdn, ip_type):
         ptr = PTR(ctnr=self.ctnr, ip_str=ip, fqdn=fqdn, ip_type=ip_type)
-        ptr.clean()
         ptr.full_clean()
         ptr.save()
 
