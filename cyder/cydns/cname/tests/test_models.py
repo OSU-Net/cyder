@@ -405,3 +405,27 @@ class CNAMETests(cyder.base.tests.TestCase):
             cn2 = CNAME(label='bar2', domain=gz, target='foo2.gz', ctnr=c2)
             cn2.full_clean()
             cn2.save()
+
+    def test_name_uniqueness(self):
+        """Test that CNAMEs must share a ctnr if they have the same name"""
+        c1 = Ctnr(name='test_ctnr1')
+        c1.full_clean()
+        c1.save()
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        gz = Domain.objects.get(name='gz')
+
+        cn1 = CNAME(label='bar', domain=gz, target='foo1.gz', ctnr=c1)
+        cn1.full_clean()
+        cn1.save()
+
+        cn2 = CNAME(label='bar', domain=gz, target='foo2.gz', ctnr=c1)
+        cn2.full_clean()
+        cn2.save()
+
+        with self.assertRaises(ValidationError):
+            cn3 = CNAME(label='bar', domain=gz, target='foo3.gz', ctnr=c2)
+            cn3.full_clean()
+            cn3.save()
