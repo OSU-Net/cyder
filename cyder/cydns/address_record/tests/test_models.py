@@ -693,7 +693,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         c1 = Ctnr(name='test_ctnr1')
         c1.full_clean()
         c1.save()
-
         c2 = Ctnr(name='test_ctnr2')
         c2.full_clean()
         c2.save()
@@ -702,23 +701,47 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         s.full_clean()
         s.save()
 
-        si = StaticInterface(
-            mac='be:ef:fa:ce:12:34', label='foo', domain=self.o_e,
+        # first StaticInterface then AddressRecord
+
+        si1 = StaticInterface(
+            mac='be:ef:fa:ce:11:11', label='foo1', domain=self.o_e,
             ip_str='128.193.0.2', ip_type='4', system=s,
             ctnr=c1)
-        si.full_clean()
-        si.save()
+        si1.full_clean()
+        si1.save()
 
-        a1 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.3',
+        a1 = AddressRecord(label='foo1', domain=self.o_e, ip_str='128.193.0.3',
                            ctnr=c1)
         a1.full_clean()
         a1.save()
 
         with self.assertRaises(ValidationError):
-            a2 = AddressRecord(label='foo', domain=self.o_e,
-                               ip_str='128.193.0.3', ctnr=c2)
+            a2 = AddressRecord(label='foo1', domain=self.o_e,
+                               ip_str='128.193.0.4', ctnr=c2)
             a2.full_clean()
             a2.save()
+
+        # first AddressRecord then StaticInterface
+
+        a3 = AddressRecord(label='foo2', domain=self.o_e, ip_str='128.193.0.5',
+                           ctnr=c1)
+        a3.full_clean()
+        a3.save()
+
+        si2 = StaticInterface(
+            mac='be:ef:fa:ce:22:22', label='foo2', domain=self.o_e,
+            ip_str='128.193.0.6', ip_type='4', system=s,
+            ctnr=c1)
+        si2.full_clean()
+        si2.save()
+
+        with self.assertRaises(ValidationError):
+            si2 = StaticInterface(
+                mac='be:ef:fa:ce:33:33', label='foo2', domain=self.o_e,
+                ip_str='128.193.0.7', ip_type='4', system=s,
+                ctnr=c2)
+            si2.full_clean()
+            si2.save()
 
     def test_target_validation(self):
         """Test that the target must be an IP address"""
