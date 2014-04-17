@@ -383,25 +383,39 @@ class PTRTests(cyder.base.tests.TestCase):
         s.full_clean()
         s.save()
 
-        i = StaticInterface(
+        # first StaticInterface then PTR
+
+        i1 = StaticInterface(
             mac='be:ef:fa:ce:12:34', label='foo1',
             domain=Domain.objects.get(name='oregonstate.edu'),
             ip_str='128.193.0.2', ip_type='4', system=s,
-            ctnr=self.c1, dns_enabled=True)
-        i.full_clean()
-        i.save()
+            ctnr=self.c1)
+        i1.full_clean()
+        i1.save()
 
-        with self.assertRaises(ValidationError):
-            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
-                                fqdn='foo2.oregonstate.edu')
+        for dns_enabled in (False, True):
+            i1.dns_enabled = dns_enabled
+            i1.full_clean()
+            i1.save()
+            with self.assertRaises(ValidationError):
+                self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                    fqdn='foo2.oregonstate.edu')
 
-        i.dns_enabled = False
-        i.full_clean()
-        i.save()
+        # first PTR then StaticInterface
 
-        with self.assertRaises(ValidationError):
-            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
-                                fqdn='foo2.oregonstate.edu')
+        self.do_generic_add(ip_str='128.193.0.3', ip_type='4',
+                            fqdn='foo3.oregonstate.edu')
+
+        for dns_enabled in (False, True):
+            with self.assertRaises(ValidationError):
+                i1 = StaticInterface(
+                    mac='be:ef:fa:ce:12:34', label='foo4',
+                    domain=Domain.objects.get(name='oregonstate.edu'),
+                    ip_str='128.193.0.3', ip_type='4', system=s,
+                    ctnr=self.c1, dns_enabled=dns_enabled)
+                i1.full_clean()
+                i1.save()
+
 
     def test_same_ip(self):
         """Test that two PTRs cannot have the same IP"""
