@@ -415,6 +415,7 @@ class PTRTests(cyder.base.tests.TestCase):
                                 fqdn='foo2.oregonstate.edu')
 
     def test_ptr_in_dynamic_range(self):
+        """Test that the IP cannot be in a dynamic range"""
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                     network_str='128.193.0.0/24')
         n.full_clean()
