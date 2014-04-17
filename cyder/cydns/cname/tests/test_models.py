@@ -383,3 +383,25 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         cn = CNAME(label=label, ctnr=self.ctnr, domain=dom, target=data)
         self.assertRaises(ValidationError, cn.full_clean)
+
+    def test_domain_ctnr(self):
+        """Test that a CNAME's domain must be in the CNAME's container"""
+        c1 = Ctnr(name='test_ctnr1')
+        c1.full_clean()
+        c1.save()
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        gz = Domain.objects.get(name='gz')
+
+        c1.domains.add(gz)
+
+        cn1 = CNAME(label='bar1', domain=gz, target='foo1.gz', ctnr=c1)
+        cn1.full_clean()
+        cn1.save()
+
+        with self.assertRaises(ValidationError):
+            cn2 = CNAME(label='bar2', domain=gz, target='foo2.gz', ctnr=c2)
+            cn2.full_clean()
+            cn2.save()
