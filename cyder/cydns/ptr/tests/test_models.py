@@ -53,7 +53,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
         ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type,
                   ctnr=ctnr)
-        ret.clean()
         ret.full_clean()
         ret.save()
 
