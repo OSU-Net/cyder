@@ -697,3 +697,35 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                                ip_str='128.193.0.3', ctnr=c2)
             a2.full_clean()
             a2.save()
+
+    def test_target_validation(self):
+        """Test that the target must be an IP address"""
+        valid_ips = (
+            ('10.234.30.253', '4'),
+            ('128.193.0.3', '4'),
+            ('fe80::e1c9:1:228d:d8', '6'),
+        )
+
+        for ip_str, ip_type in valid_ips:
+            a = AddressRecord(label='foo', domain=self.o_e,
+                              ip_str=ip_str, ip_type=ip_type)
+            a.full_clean()
+            a.save()
+
+        invalid_ips = (
+            ('fe80::e1c9:1:228d:d8', '4'),
+            ('10.234,30.253', '4'),
+            ('10.234.30', '4'),
+            ('128.193', '4'),
+            ('10.234.30.253', '6'),
+            ('fe80:e1c9:1:228d:d8', '6'),
+            ('fe80::e1c9:1:228d:d8::91c2', '6'),
+            ('fe801::e1c9:1:228d:d8', '6'),
+        )
+
+        for ip_str, ip_type in invalid_ips:
+            with self.assertRaises(ValidationError):
+                a = AddressRecord(label='foo', domain=self.o_e,
+                                  ip_str=ip_str)
+                a.full_clean()
+                a.save()
