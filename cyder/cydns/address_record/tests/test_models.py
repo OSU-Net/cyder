@@ -617,6 +617,28 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.assertRaises(ValidationError, a.delete)
         a.delete(check_cname=False)
 
+    def test_domain_ctnr(self):
+        """Test that an AR's domain must be in the AR's ctnr"""
+        c1 = Ctnr(name='test_ctnr1')
+        c1.full_clean()
+        c1.save()
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        c1.domains.add(self.o_e)
+
+        a1 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.2',
+                           ctnr=c1)
+        a1.full_clean()
+        a1.save()
+
+        with self.assertRaises(ValidationError):
+            a2 = AddressRecord(label='foo', domain=self.o_e,
+                               ip_str='128.193.0.3', ctnr=c2)
+            a2.full_clean()
+            a2.save()
+
     def test_duplicate_names(self):
         """Test that AddressRecords can have the same name iff in the same Ctnr
         """
