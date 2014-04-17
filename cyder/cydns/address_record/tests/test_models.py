@@ -756,6 +756,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
                               ip_str=ip_str, ip_type=ip_type)
             a.full_clean()
             a.save()
+            a.delete()
 
         invalid_ips = (
             ('fe80::e1c9:1:228d:d8', '4'),
@@ -771,6 +772,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         for ip_str, ip_type in invalid_ips:
             with self.assertRaises(ValidationError):
                 a = AddressRecord(label='foo', domain=self.o_e,
-                                  ip_str=ip_str)
+                                  ip_str=ip_str, ip_type=ip_type)
                 a.full_clean()
                 a.save()
