@@ -31,7 +31,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
         d = Domain(name=name, delegated=delegated)
-        d.clean()
+        d.full_clean()
         self.assertTrue(d.is_reverse)
         return d
 
@@ -295,7 +295,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         rec = Nameserver(domain=dom, server="asdf1")
         rec.save()
         cn = CNAME(label='', ctnr=self.ctnr, domain=dom, target=data)
-        self.assertRaises(ValidationError, cn.clean)
+        self.assertRaises(ValidationError, cn.full_clean)
 
     def test_ns_cname_exists(self):
         # Duplicate test?
@@ -320,7 +320,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         intr = StaticInterface(label=label, domain=dom, ip_str="10.0.0.1",
                                ip_type='4', system=self.s, ctnr=self.ctnr,
                                mac="11:22:33:44:55:66")
-        intr.clean()
+        intr.full_clean()
         intr.save()
 
         cn = CNAME(label=label, ctnr=self.ctnr, domain=dom, target=data)
@@ -343,10 +343,10 @@ class CNAMETests(cyder.base.tests.TestCase):
             system=self.s, mac="00:11:22:33:44:55", ctnr=self.ctnr,
         )
 
-        self.assertRaises(ValidationError, intr.clean)
+        self.assertRaises(ValidationError, intr.full_clean)
         cn.label = "differentlabel"
         cn.save()
-        intr.clean()
+        intr.full_clean()
         intr.save()
 
     def test_ptr_exists(self):
@@ -357,7 +357,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         rec = PTR(ctnr=self.ctnr, ip_str="10.193.1.1", ip_type='4',
                   fqdn='testyfoo.what.cd')
-        rec.clean()
         rec.full_clean()
         rec.save()
 
@@ -374,7 +373,7 @@ class CNAMETests(cyder.base.tests.TestCase):
                                     target=data)
         rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd')
 
-        self.assertRaises(ValidationError, rec.clean)
+        self.assertRaises(ValidationError, rec.full_clean)
 
     def test_cname_point_to_itself(self):
         label = "foopy"
@@ -383,4 +382,4 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
         cn = CNAME(label=label, ctnr=self.ctnr, domain=dom, target=data)
-        self.assertRaises(ValidationError, cn.clean)
+        self.assertRaises(ValidationError, cn.full_clean)
