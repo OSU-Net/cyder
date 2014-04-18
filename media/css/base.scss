@@ -331,8 +331,8 @@ a.btn {
     padding-top: 13px;
     position: relative;
     .content {
-        clear: left;
         display: inline-block;
+        float: right;
         margin-top: 13px;
         overflow: visible;
         // Container - sidebar width - sidebar gutter - gutter.
