@@ -131,16 +131,12 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         return super(PTR, self).bind_render_record(
             custom={'reverse_domain': reverse_domain})
 
-    def save(self, *args, **kwargs):
-        label = kwargs.pop('label', None)
-        domain = kwargs.pop('domain', None)
-        if label is not None and domain is not None:
-            fqdn = ".".join([label, domain.name]).strip('.')
-            if 'fqdn' in kwargs and kwargs['fqdn'] != fqdn:
-                raise ValidationError("FQDN & label/domain mismatch.")
-            elif 'fqdn' not in kwargs:
-                kwargs['fqdn'] = fqdn
+    def __init__(self, *args, **kwargs):
+        kwargs = self.fqdn_kwargs_check(kwargs)
+        return super(PTR, self).__init__(*args, **kwargs)
 
+    def save(self, *args, **kwargs):
+        kwargs = self.fqdn_kwargs_check(kwargs)
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -156,6 +152,18 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             rng.save()
             if old_range:
                 old_range.save()
+
+    def fqdn_kwargs_check(self, kwargs):
+        label = kwargs.pop('label', None)
+        domain = kwargs.pop('domain', None)
+        if label is not None and domain is not None:
+            fqdn = ".".join([label, domain.name]).strip('.')
+            if 'fqdn' in kwargs and kwargs['fqdn'] != fqdn:
+                raise ValidationError("FQDN & label/domain mismatch.")
+            elif 'fqdn' not in kwargs:
+                kwargs['fqdn'] = fqdn
+
+        return kwargs
 
     def delete(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
