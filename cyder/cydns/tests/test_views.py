@@ -21,8 +21,12 @@ from cyder.cydns.view.models import View
 from cyder.cydns.tests.utils import create_fake_zone
 
 
-def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
-    ctnr = Ctnr.objects.get(name='test_ctnr')
+def do_setUp(self, test_class, test_data, use_ctnr=True,
+             use_domain=True, use_rdomain=False):
+    self.ctnr = Ctnr.objects.get(name='test_ctnr')
+    if use_ctnr:
+        test_data['ctnr'] = self.ctnr
+
     self.client = Client()
     self.client.login(username='test_superuser', password='password')
     self.test_class = test_class
@@ -31,14 +35,14 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
 
     # Create forward zone.
     self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
-    ctnr.domains.add(self.domain)
+    self.ctnr.domains.add(self.domain)
     self.soa = self.domain.soa
     self.subdomain = Domain.objects.create(
         name=random_label() + '.' + self.domain.name, soa=self.soa)
-    ctnr.domains.add(self.subdomain)
+    self.ctnr.domains.add(self.subdomain)
 
     self.reverse_domain = create_fake_zone('196.in-addr.arpa', suffix='')
-    ctnr.domains.add(self.reverse_domain)
+    self.ctnr.domains.add(self.reverse_domain)
     self.soa2 = self.reverse_domain.soa
 
     # Create test object.
@@ -155,7 +159,8 @@ class NSViewTests(cyder.base.tests.TestCase):
         root_domain = create_fake_zone("asdfdjhjd")
         ns = root_domain.nameserver_set.all()[0]
 
-        cn = CNAME(label='asdf', domain=root_domain, target='test.com')
+        cn = CNAME(label='asdf', domain=root_domain,
+                   target='test.com', ctnr=self.ctnr)
         cn.full_clean()
         cn.save()
         cn.views.add(self.public_view)
