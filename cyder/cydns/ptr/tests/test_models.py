@@ -5,10 +5,13 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import Ip
+from cyder.core.ctnr.models import Ctnr
 
 
 class PTRTests(cyder.base.tests.TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
@@ -43,7 +46,7 @@ class PTRTests(cyder.base.tests.TestCase):
         return d
 
     def do_generic_add(self, ip_str, fqdn, ip_type, domain=None):
-        ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
+        ret = PTR(ctnr=self.ctnr, fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
         ret.clean()
         ret.full_clean()
         ret.save()
@@ -87,13 +90,13 @@ class PTRTests(cyder.base.tests.TestCase):
     def test_no_domain(self):
         test_ip = "244.123.123.123"
         name = "lol.foo"
-        self.do_generic_invalid_add(test_ip, name, '4', Domain.DoesNotExist)
+        self.do_generic_invalid_add(test_ip, name, '4', ValidationError)
         name = "oregonstate.com"
-        self.do_generic_invalid_add(test_ip, name, '4', Domain.DoesNotExist)
+        self.do_generic_invalid_add(test_ip, name, '4', ValidationError)
         name = "me.oregondfastate.edu"
-        self.do_generic_invalid_add(test_ip, name, '4', Domain.DoesNotExist)
+        self.do_generic_invalid_add(test_ip, name, '4', ValidationError)
 
-    def test_add_invalid_name_ipv6_ptr(self):
+    def test_add_invalid_name_ipv6_PTR(self):
         bad_name = "testyfoo.com"
         test_ip = self.osu_block + ":1"
         bad_name = "2134!@#$!@"
@@ -106,7 +109,7 @@ class PTRTests(cyder.base.tests.TestCase):
     """
     Is this test redundant?
     """
-    def test_add_invalid_name_ipv4_ptr(self):
+    def test_add_invalid_name_ipv4_PTR(self):
         bad_name = "testyfoo.com"
         test_ip = "128.123.123.123"
         bad_name = "2134!@#$!@"
@@ -116,7 +119,7 @@ class PTRTests(cyder.base.tests.TestCase):
         bad_name = "A" * 257
         self.do_generic_invalid_add(test_ip, bad_name, '4', ValidationError)
 
-    def test_add_invalid_ip_ipv6_ptr(self):
+    def test_add_invalid_ip_ipv6_PTR(self):
         test_name = "oregonstate.edu"
         bad_ip = "123.123.123.123."
         self.do_generic_invalid_add(bad_ip, test_name, '6', ValidationError)
@@ -157,7 +160,7 @@ class PTRTests(cyder.base.tests.TestCase):
                                     "foo.bar.oregonstate.edu", '6',
                                     ValidationError)
 
-    def test_add_invalid_ip_ipv4_ptr(self):
+    def test_add_invalid_ip_ipv4_PTR(self):
         test_name = "oregonstate.edu"
         bad_ip = "123.123"
         self.do_generic_invalid_add(bad_ip, test_name, '4', ValidationError)
@@ -193,7 +196,7 @@ class PTRTests(cyder.base.tests.TestCase):
             "128.128.1.1", "foo.bar.oregonstate.edu", '4', ValidationError)
 
     def do_generic_remove(self, ip, fqdn, ip_type):
-        ptr = PTR(ip_str=ip, fqdn=fqdn, ip_type=ip_type)
+        ptr = PTR(ctnr=self.ctnr, ip_str=ip, fqdn=fqdn, ip_type=ip_type)
         ptr.clean()
         ptr.full_clean()
         ptr.save()
