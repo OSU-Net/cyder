@@ -2,16 +2,20 @@ from django.test import TestCase
 
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.domain.models import Domain
+from cyder.core.ctnr.models import Ctnr
 
 
 class TXTTests(TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.o = Domain(name="org")
         self.o.save()
         self.o_e = Domain(name="oregonstate.org")
         self.o_e.save()
 
     def do_generic_add(self, data):
+        data['ctnr'] = self.ctnr
         txt = TXT(**data)
         txt.__repr__()
         txt.save()

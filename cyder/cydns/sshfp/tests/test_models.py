@@ -1,16 +1,20 @@
 from django.test import TestCase
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.domain.models import Domain
+from cyder.core.ctnr.models import Ctnr
 
 
 class SSHFPTests(TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.o = Domain(name="org")
         self.o.save()
         self.o_e = Domain(name="mozilla.org")
         self.o_e.save()
 
     def do_generic_add(self, data):
+        data['ctnr'] = self.ctnr
         sshfp = SSHFP(**data)
         sshfp.__repr__()
         sshfp.save()

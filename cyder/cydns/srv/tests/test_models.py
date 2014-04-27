@@ -4,9 +4,13 @@ from django.core.exceptions import ValidationError
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 
+from cyder.core.ctnr.models import Ctnr
+
 
 class SRVTests(TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.o = Domain(name="org")
         self.o.save()
         self.o_e = Domain(name="oregonstate.org")
@@ -15,6 +19,7 @@ class SRVTests(TestCase):
         self.b_o_e.save()
 
     def do_generic_add(self, data):
+        data['ctnr'] = self.ctnr
         srv = SRV(**data)
         srv.__repr__()
         srv.save()
