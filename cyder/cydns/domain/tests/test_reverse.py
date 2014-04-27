@@ -61,13 +61,13 @@ class ReverseDomainTests(TestCase):
         return intr
 
     def add_ptr_ipv4(self, ip):
-        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='4')
+        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='4', ctnr=self.ctnr)
         ptr.full_clean()
         ptr.save()
         return ptr
 
     def add_ptr_ipv6(self, ip):
-        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='6')
+        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='6', ctnr=self.ctnr)
         ptr.full_clean()
         ptr.save()
         return ptr

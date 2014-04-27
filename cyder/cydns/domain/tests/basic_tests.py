@@ -6,6 +6,7 @@ from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
+from cyder.core.ctnr.models import Ctnr
 
 
 class DomainTests(TestCase):
@@ -14,6 +15,7 @@ class DomainTests(TestCase):
         Domain.objects.get_or_create(name="arpa")
         Domain.objects.get_or_create(name="in-addr.arpa")
         Domain.objects.get_or_create(name="128.in-addr.arpa")
+        self.ctnr, _ = Ctnr.objects.get_or_create(name="abloobloobloo")
 
     def test_remove_domain(self):
         c = Domain(name='com')
@@ -89,7 +91,6 @@ class DomainTests(TestCase):
         s2 = SOA(primary="ns1.foo.com", contact="asdf",
                  description="test2", root_domain=m)
         self.assertRaises(ValidationError, s2.save)
-
 
     def test_2_soa_validators(self):
         d, _ = Domain.objects.get_or_create(name="gaz")
@@ -185,13 +186,13 @@ class DomainTests(TestCase):
 
         # Creating objects in the domain should be locked.
         arec = AddressRecord(
-            label="ns1", domain=dom, ip_str="128.193.99.9", ip_type='4')
+            label="ns1", ctnr=self.ctnr, domain=dom, ip_str="128.193.99.9", ip_type='4')
         self.assertRaises(ValidationError, arec.save)
 
-        ns = Nameserver(domain=dom, server="ns1." + dom.name)
+        ns = Nameserver(ctnr=self.ctnr, domain=dom, server="ns1." + dom.name)
         self.assertRaises(ValidationError, ns.save)
 
-        cn = CNAME(label="999asdf", domain=dom, target="asdf.asdf")
+        cn = CNAME(label="999asdf", ctnr=self.ctnr, domain=dom, target="asdf.asdf")
         self.assertRaises(ValidationError, cn.full_clean)
 
         # Undelegate (unlock) the domain.
@@ -208,10 +209,10 @@ class DomainTests(TestCase):
 
         # Creation should still be locked
         arec1 = AddressRecord(
-            label="ns2", domain=dom, ip_str="128.193.99.9", ip_type='4')
+            label="ns2", ctnr=self.ctnr, domain=dom, ip_str="128.193.99.9", ip_type='4')
         self.assertRaises(ValidationError, arec1.save)
 
-        cn1 = CNAME(label="1000asdf", domain=dom, target="asdf.asdf")
+        cn1 = CNAME(label="1000asdf", ctnr=self.ctnr, domain=dom, target="asdf.asdf")
         self.assertRaises(ValidationError, cn1.full_clean)
 
         # Editing should be allowed.
@@ -222,7 +223,7 @@ class DomainTests(TestCase):
         # Adding new A records that have the same name as an NS should
         # be allows.
         arec1 = AddressRecord(
-            label="ns1", domain=dom, ip_str="128.193.100.10", ip_type='4')
+            label="ns1", ctnr=self.ctnr, domain=dom, ip_str="128.193.100.10", ip_type='4')
         arec1.save()
 
     def test_existing_record_new_domain(self):
@@ -233,7 +234,7 @@ class DomainTests(TestCase):
         t_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
 
         arec1 = AddressRecord(
-            label="no", domain=t_dom, ip_str="128.193.99.9", ip_type='4')
+            label="no", ctnr=self.ctnr, domain=t_dom, ip_str="128.193.99.9", ip_type='4')
         arec1.save()
 
         name = "no.to.bo"
@@ -247,7 +248,7 @@ class DomainTests(TestCase):
         name = "to.bo"
         t_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
 
-        cn = CNAME(domain=t_dom, label="no", target="asdf")
+        cn = CNAME(ctnr=self.ctnr, domain=t_dom, label="no", target="asdf")
         cn.full_clean()
         cn.save()
 

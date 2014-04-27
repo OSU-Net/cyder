@@ -16,6 +16,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.network.models import Network
 
+
 class AutoDeleteTests(TestCase):
 
     def setUp(self):
@@ -44,7 +45,7 @@ class AutoDeleteTests(TestCase):
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
 
-        txt = TXT(label=label, domain=the_domain, txt_data="Nthing")
+        txt = TXT(label=label, ctnr=self.ctnr, domain=the_domain, txt_data="Nthing")
         txt.save()
         self.assertFalse(prune_tree(the_domain))
         txt.delete()
@@ -62,7 +63,7 @@ class AutoDeleteTests(TestCase):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
-        addr = AddressRecord(label=label, domain=the_domain,
+        addr = AddressRecord(label=label, ctnr=self.ctnr, domain=the_domain,
                              ip_type='4', ip_str="10.2.3.4")
         addr.save()
         self.assertFalse(prune_tree(the_domain))
@@ -81,7 +82,7 @@ class AutoDeleteTests(TestCase):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
-        mx = MX(label=label, domain=the_domain, server="foo", priority=4)
+        mx = MX(label=label, ctnr=self.ctnr, domain=the_domain, server="foo", priority=4)
         mx.save()
         self.assertFalse(prune_tree(the_domain))
         mx.delete()
@@ -99,7 +100,7 @@ class AutoDeleteTests(TestCase):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
-        ns = Nameserver(domain=the_domain, server="asdfasffoo")
+        ns = Nameserver(ctnr=self.ctnr, domain=the_domain, server="asdfasffoo")
         ns.save()
         self.assertFalse(prune_tree(the_domain))
         ns.delete()
@@ -118,7 +119,7 @@ class AutoDeleteTests(TestCase):
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
         srv = SRV(
-            label='_' + label, domain=the_domain, target="foo", priority=4,
+            label='_' + label, ctnr=self.ctnr, domain=the_domain, target="foo", priority=4,
             weight=4, port=34
         )
         srv.save()
@@ -147,7 +148,7 @@ class AutoDeleteTests(TestCase):
         fqdn = "cname.x.y.z.foo.foo1"
         label, the_domain = ensure_label_domain(fqdn)
 
-        cname = CNAME(label=label, domain=the_domain, target="foo")
+        cname = CNAME(label=label, ctnr=self.ctnr, domain=the_domain, target="foo")
         cname.save()
         self.assertFalse(prune_tree(the_domain))
         cname.delete()
