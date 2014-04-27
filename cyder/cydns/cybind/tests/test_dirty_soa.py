@@ -56,6 +56,7 @@ class DirtySOATests(TestCase):
 
     def generic_dirty(self, Klass, create_data, update_data, local_soa,
                       tdiff=1):
+        create_data['ctnr'] = self.ctnr
         Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
