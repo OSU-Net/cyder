@@ -4,11 +4,14 @@ import cyder.base.tests
 from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
+from cyder.core.ctnr.models import Ctnr
 
 
 class MXTests(cyder.base.tests.TestCase):
 
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.o = Domain(name="org")
         self.o.save()
         self.o_e = Domain(name="oregonstate.org")
@@ -17,6 +20,7 @@ class MXTests(cyder.base.tests.TestCase):
         self.b_o_e.save()
 
     def do_generic_add(self, data):
+        data['ctnr'] = self.ctnr
         mx = MX(**data)
         mx.__repr__()
         mx.save()
@@ -115,7 +119,7 @@ class MXTests(cyder.base.tests.TestCase):
         label = "cnamederp"
         domain = self.o_e
         data = "foo.com"
-        cn = CNAME(label=label, domain=domain, target=data)
+        cn = CNAME(label=label, ctnr=self.ctnr, domain=domain, target=data)
         cn.full_clean()
         cn.save()
 
