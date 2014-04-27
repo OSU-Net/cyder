@@ -80,7 +80,7 @@ class NSTestsModels(TestCase):
         ns.save()
         self.assertTrue(ns.__repr__())
         self.assertTrue(ns.details())
-        ret = Nameserver.objects.filter(ctnr=self.ctnr, domain=domain, server=server)
+        ret = Nameserver.objects.filter(domain=domain, server=server)
         self.assertEqual(len(ret), 1)
         return ns
 
@@ -282,7 +282,7 @@ class NSTestsModels(TestCase):
 
         ns.delete()
         nsret = Nameserver.objects.filter(
-            server='ns2.foo.ru', ctnr=self.ctnr, domain=self.f_r)
+            server='ns2.foo.ru', domain=self.f_r)
         self.assertFalse(nsret)
 
     def test_invalid_create(self):
