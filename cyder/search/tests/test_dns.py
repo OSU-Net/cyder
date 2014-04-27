@@ -5,10 +5,13 @@ from cyder.cydns.ptr.models import PTR
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.search.compiler.django_compile import compile_to_django
+from cyder.core.ctnr.models import Ctnr
 
 
 class SearchDNSTests(TestCase):
     def setUp(self):
+        self.ctnr = Ctnr(name='abloobloobloo')
+        self.ctnr.save()
         self.c = Client()
 
     def search(self, query):
@@ -66,10 +69,10 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        ptr = PTR(fqdn="host1.wee2.wee.mozilla.com", ip_str="1111::",
+        ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee2.wee.mozilla.com", ip_str="1111::",
                   ip_type="6")
         ptr.save()
-        addr = AddressRecord(label="host1", domain=root_domain, ip_str="11::",
+        addr = AddressRecord(label="host1", ctnr=self.ctnr, domain=root_domain, ip_str="11::",
                              ip_type="6")
         addr.save()
         res, error = self.search("host1.wee2.wee.mozilla.com")
@@ -99,7 +102,7 @@ class SearchDNSTests(TestCase):
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
         self.assertEqual(len(res['NS']), 1)
-        cn = CNAME(label="host1", domain=root_domain, target="whop.whop")
+        cn = CNAME(label="host1", ctnr=self.ctnr, domain=root_domain, target="whop.whop")
         cn.save()
         res, error = self.search("zone:wee3.wee.mozilla.com host1")
         self.assertFalse(error)
@@ -123,7 +126,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        ptr = PTR(fqdn="host1.wee.mozilla.com", ip_str="2111:0::",
+        ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="2111:0::",
                   ip_type="6")
         ptr.save()
 
@@ -146,10 +149,10 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['SOA']), 2)
         self.assertEqual(len(res['NS']), 2)
         self.assertEqual(len(res['DOMAIN']), 2)
-        ptr = PTR(fqdn="host1.wee.mozilla.com", ip_str="10.0.0.1",
+        ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="10.0.0.1",
                   ip_type="4")
         ptr.save()
-        addr = AddressRecord(label="host1", domain=root_domain,
+        addr = AddressRecord(label="host1", ctnr=self.ctnr, domain=root_domain,
                              ip_str="10.0.0.1", ip_type="4")
         addr.save()
 
