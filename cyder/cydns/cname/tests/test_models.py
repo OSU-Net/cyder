@@ -8,14 +8,16 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.mx.models import MX
 from cyder.cydns.ptr.models import PTR
+from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_basic_dns_data, create_fake_zone
 from cyder.cydns.txt.models import TXT
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.vrf.models import Vrf
 
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
@@ -36,8 +38,19 @@ class CNAMETests(cyder.base.tests.TestCase):
         return d
 
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
+        create_basic_dns_data(dhcp=True)
+
+        d = Domain(name='128.in-addr.arpa')
+        d.full_clean()
+        d.save()
+
+        self.ctnr1 = Ctnr(name='test_ctnr1')
+        self.ctnr1.full_clean()
+        self.ctnr1.save()
+        self.ctnr2 = Ctnr(name='test_ctnr2')
+        self.ctnr2.full_clean()
+        self.ctnr2.save()
+
         self.g = create_fake_zone("gz", suffix="")
         self.c_g = create_fake_zone("coo.gz", suffix="")
         self.d = create_fake_zone("dz", suffix="")
@@ -318,7 +331,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
         intr = StaticInterface(label=label, domain=dom, ip_str="10.0.0.1",
-                               ip_type='4', system=self.s, ctnr=self.ctnr,
+                               ip_type='4', system=self.s, ctnr=self.ctnr1,
                                mac="11:22:33:44:55:66")
         intr.full_clean()
         intr.save()
@@ -340,7 +353,7 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         intr = StaticInterface(
             label=label, domain=dom, ip_str="10.0.0.2", ip_type='4',
-            system=self.s, mac="00:11:22:33:44:55", ctnr=self.ctnr,
+            system=self.s, mac="00:11:22:33:44:55", ctnr=self.ctnr1,
         )
 
         self.assertRaises(ValidationError, intr.full_clean)
@@ -386,47 +399,35 @@ class CNAMETests(cyder.base.tests.TestCase):
 
     def test_domain_ctnr(self):
         """Test that a CNAME's domain must be in the CNAME's container"""
-        c1 = Ctnr(name='test_ctnr1')
-        c1.full_clean()
-        c1.save()
-        c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
-        c2.save()
-
         gz = Domain.objects.get(name='gz')
 
-        c1.domains.add(gz)
+        self.ctnr1.domains.add(gz)
 
-        cn1 = CNAME(label='bar1', domain=gz, target='foo1.gz', ctnr=c1)
+        cn1 = CNAME(label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
         cn1.full_clean()
         cn1.save()
 
         with self.assertRaises(ValidationError):
-            cn2 = CNAME(label='bar2', domain=gz, target='foo2.gz', ctnr=c2)
+            cn2 = CNAME(label='bar2', domain=gz, target='foo2.gz',
+                        ctnr=self.ctnr2)
             cn2.full_clean()
             cn2.save()
 
     def test_name_uniqueness(self):
         """Test that CNAMEs must share a ctnr if they have the same name"""
-        c1 = Ctnr(name='test_ctnr1')
-        c1.full_clean()
-        c1.save()
-        c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
-        c2.save()
-
         gz = Domain.objects.get(name='gz')
 
-        cn1 = CNAME(label='bar', domain=gz, target='foo1.gz', ctnr=c1)
+        cn1 = CNAME(label='bar', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
         cn1.full_clean()
         cn1.save()
 
-        cn2 = CNAME(label='bar', domain=gz, target='foo2.gz', ctnr=c1)
+        cn2 = CNAME(label='bar', domain=gz, target='foo2.gz', ctnr=self.ctnr1)
         cn2.full_clean()
         cn2.save()
 
         with self.assertRaises(ValidationError):
-            cn3 = CNAME(label='bar', domain=gz, target='foo3.gz', ctnr=c2)
+            cn3 = CNAME(label='bar', domain=gz, target='foo3.gz',
+                        ctnr=self.ctnr2)
             cn3.full_clean()
             cn3.save()
 
