@@ -12,7 +12,6 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               cy_delete, search_obj, table_update)
 from cyder.core.cyuser.utils import perm
 
-from cyder.cydns.constants import DNS_EAV_MODELS
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 import json
@@ -32,10 +31,13 @@ def cydns_view(request, pk=None):
     obj = get_object_or_404(Klass, pk=pk) if pk else None
 
     if request.method == 'POST':
-        object_table = None
         page_obj = None
 
-        qd, domain, errors = _fqdn_to_domain(request.POST.copy())
+        if obj_type == "ptr":
+            qd, domain, errors = request.POST.copy(), None, None
+        else:
+            qd, domain, errors = _fqdn_to_domain(request.POST.copy())
+
         # Validate form.
         if errors:
             form = FormKlass(request.POST)

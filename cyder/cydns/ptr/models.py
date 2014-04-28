@@ -114,6 +114,14 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     def __repr__(self):
         return "<{0}>".format(str(self))
 
+    @staticmethod
+    def filter_by_ctnr(ctnr, objects=None):
+        objects = objects if objects is not None else PTR.objects
+        if ctnr.name == "global":
+            return objects
+        objects = objects.filter(ctnr=ctnr)
+        return objects
+
     @property
     def rdtype(self):
         return 'PTR'

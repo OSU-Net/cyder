@@ -448,7 +448,7 @@ def table_update(request, pk, obj_type=None):
 
     # DNS specific.
     qd = request.POST.copy()
-    if 'fqdn' in qd:
+    if 'fqdn' in qd and obj_type != "ptr":
         fqdn = qd.pop('fqdn')[0]
         try:
             # Call prune tree later if error, else domain leak.
