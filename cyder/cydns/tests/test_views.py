@@ -13,7 +13,6 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.soa.models import SOA
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
@@ -116,6 +115,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
             'ip_str': '196.168.1.2',
             'ttl': '400',
             'description': 'yo',
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -134,7 +134,8 @@ class CNAMEViewTests(cyder.base.tests.TestCase, NoNSTests):
         return {
             'fqdn': self.subdomain.name,
             'label': random_label(),
-            'target': random_label()
+            'target': random_label(),
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -221,7 +222,8 @@ class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
             'label': random_label(),
             'server': random_label(),
             'priority': 123,
-            'ttl': 213
+            'ttl': 213,
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -259,6 +261,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
             'ip_type': '4',
             'ip_str': '196.168.1.3',
             'description': 'yo',
+            'ctnr': self.ctnr.pk,
         }
 
     def test_update_reverse_domain(self):
@@ -291,7 +294,8 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
             'target': 'foo.bar',
             'priority': 2,
             'weight': 2222,
-            'port': 222
+            'port': 222,
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -310,7 +314,8 @@ class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
         return {
             'fqdn': self.domain.name,
             'label': random_label(),
-            'txt_data': random_label()
+            'txt_data': random_label(),
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -333,7 +338,8 @@ class SSHFPViewTests(cyder.base.tests.TestCase, NoNSTests):
             'label': random_label(),
             'algorithm_number': 1,
             'fingerprint_type': 1,
-            'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50111'
+            'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50111',
+            'ctnr': self.ctnr.pk,
         }
 
 

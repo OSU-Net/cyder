@@ -10,7 +10,7 @@ class PTRForm(DNSForm, RangeWizard, UsabilityFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PTRForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['fqdn', 'vrf', 'site', 'range',
+        self.fields.keyOrder = ['ctnr', 'fqdn', 'vrf', 'site', 'range',
                                 'ip_type', 'next_ip', 'ip_str', 'views', 'ttl',
                                 'description']
 

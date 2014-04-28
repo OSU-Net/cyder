@@ -8,15 +8,15 @@ from cyder.cydhcp.forms import RangeWizard
 class AddressRecordForm(DNSForm, RangeWizard, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(AddressRecordForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['label', 'domain', 'vrf', 'site', 'range',
-                                'ip_type', 'next_ip', 'ip_str', 'views', 'ttl',
-                                'description']
+        self.fields.keyOrder = ['ctnr', 'label', 'domain', 'vrf', 'site',
+                                'range', 'ip_type', 'next_ip', 'ip_str',
+                                'views', 'ttl', 'description']
 
     class Meta:
         model = AddressRecord
         exclude = ('ip_upper', 'ip_lower', 'reverse_domain', 'fqdn')
         fields = ('label', 'domain', 'ip_type', 'ip_str', 'views', 'ttl',
-                  'description')
+                  'description', 'ctnr')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'ip_type': forms.RadioSelect}
 
@@ -24,6 +24,7 @@ class AddressRecordForm(DNSForm, RangeWizard, UsabilityFormMixin):
 class AddressRecordFQDNForm(AddressRecordForm):
     class Meta:
         model = AddressRecord
-        fields = ('fqdn', 'ip_type', 'ip_str', 'views', 'ttl', 'description')
+        fields = ('fqdn', 'ip_type', 'ip_str', 'views', 'ttl', 'description',
+                  'ctnr')
         widgets = {'views': forms.CheckboxSelectMultiple,
                    'ip_type': forms.RadioSelect}
