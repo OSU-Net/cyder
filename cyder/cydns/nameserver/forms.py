@@ -10,7 +10,7 @@ from cyder.base.mixins import UsabilityFormMixin
 class NameserverForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = Nameserver
-        fields = ('ctnr', 'domain', 'server', 'views', 'ttl', 'description')
+        fields = ('domain', 'server', 'views', 'ttl', 'description')
         exclude = ('addr_glue', 'intr_glue')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
