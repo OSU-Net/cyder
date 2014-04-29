@@ -96,7 +96,7 @@ class PTRTests(cyder.base.tests.TestCase):
         name = "me.oregondfastate.edu"
         self.do_generic_invalid_add(test_ip, name, '4', ValidationError)
 
-    def test_add_invalid_name_ipv6_PTR(self):
+    def test_add_invalid_name_ipv6_ptr(self):
         bad_name = "testyfoo.com"
         test_ip = self.osu_block + ":1"
         bad_name = "2134!@#$!@"
@@ -109,7 +109,7 @@ class PTRTests(cyder.base.tests.TestCase):
     """
     Is this test redundant?
     """
-    def test_add_invalid_name_ipv4_PTR(self):
+    def test_add_invalid_name_ipv4_ptr(self):
         bad_name = "testyfoo.com"
         test_ip = "128.123.123.123"
         bad_name = "2134!@#$!@"
@@ -119,7 +119,7 @@ class PTRTests(cyder.base.tests.TestCase):
         bad_name = "A" * 257
         self.do_generic_invalid_add(test_ip, bad_name, '4', ValidationError)
 
-    def test_add_invalid_ip_ipv6_PTR(self):
+    def test_add_invalid_ip_ipv6_ptr(self):
         test_name = "oregonstate.edu"
         bad_ip = "123.123.123.123."
         self.do_generic_invalid_add(bad_ip, test_name, '6', ValidationError)
@@ -160,7 +160,7 @@ class PTRTests(cyder.base.tests.TestCase):
                                     "foo.bar.oregonstate.edu", '6',
                                     ValidationError)
 
-    def test_add_invalid_ip_ipv4_PTR(self):
+    def test_add_invalid_ip_ipv4_ptr(self):
         test_name = "oregonstate.edu"
         bad_ip = "123.123"
         self.do_generic_invalid_add(bad_ip, test_name, '4', ValidationError)
