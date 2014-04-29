@@ -491,7 +491,6 @@
   "model": "cyder.nameserver",
   "fields": {
    "domain": 5,
-   "ctnr": 1,
    "description": "",
    "created": "2014-02-01T11:09:14",
    "intr_glue": null,
@@ -510,7 +509,6 @@
   "model": "cyder.nameserver",
   "fields": {
    "domain": 7,
-   "ctnr": 1,
    "description": "",
    "created": "2014-02-01T12:14:34",
    "intr_glue": null,
