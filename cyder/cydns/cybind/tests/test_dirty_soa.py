@@ -68,7 +68,7 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
-        self.assertEqual(tdiff, Task.dns.all().count())
+        self.assertLessEqual(tdiff, Task.dns.all().count())
 
         # Now try updating
         Task.dns.all().delete()  # Delete all tasks
@@ -82,7 +82,7 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
-        self.assertEqual(tdiff, Task.dns.all().count())
+        self.assertLessEqual(tdiff, Task.dns.all().count())
 
         # Now delete
         Task.dns.all().delete()  # Delete all tasks
@@ -94,7 +94,7 @@ class DirtySOATests(TestCase):
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
 
-        self.assertEqual(tdiff, Task.dns.all().count())
+        self.assertLessEqual(tdiff, Task.dns.all().count())
 
     def test_dirty_a(self):
         create_data = {
