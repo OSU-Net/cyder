@@ -431,6 +431,96 @@ class CNAMETests(cyder.base.tests.TestCase):
             cn3.full_clean()
             cn3.save()
 
+    def test_a_mx_soa_conflict(self):
+        """Test that a CNAME cannot have the same name as an AR, MX, or SOA"""
+        d = Domain(name='example.gz')
+        d.full_clean()
+        d.save()
+
+        soa = SOA(root_domain=d, primary='ns.example.gz',
+                  contact='root.mail.example.gz')
+        soa.full_clean()
+        soa.save()
+
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type=STATIC, start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        # Cyder has a catch-22 relating to nameservers: If a nameserver's name
+        # is in the same domain it serves as a nameserver for, a glue record
+        # must exist before that nameserver can be created, but the nameserver
+        # must exist before the glue record can be created. Thus, we have to
+        # set the nameserver's name to something outside the domain it's a
+        # nameserver for, add the glue record, then fix the nameserver's name.
+
+        ns = Nameserver(domain=d, server='cyderhack')
+        ns.full_clean()
+        ns.save()
+
+        glue = AddressRecord(label='ns', domain=d,
+                             ip_str='128.193.0.2')
+        glue.full_clean()
+        glue.save()
+
+        ns.server = 'ns.example.gz'
+        ns.full_clean()
+        ns.save()
+
+        def create_cname():
+            cn = CNAME(label='foo', domain=d, target='bar.example.gz')
+            cn.full_clean()
+            cn.save()
+            return cn
+        create_cname.name = 'CNAME'
+
+        def create_si():
+            s = System(name='test_system')
+            s.full_clean()
+            s.save()
+
+            si = StaticInterface(
+                mac='be:ef:fa:ce:11:11', label='foo', domain=d,
+                ip_str='128.193.0.3', ip_type='4', system=s,
+                ctnr=self.ctnr1)
+            si.full_clean()
+            si.save()
+            return si
+        create_si.name = 'StaticInterface'
+
+        def create_mx():
+            mx = MX(label='foo', domain=d, server='mail.example.gz',
+                    priority=1)
+            mx.full_clean()
+            mx.save()
+            return mx
+        create_mx.name = 'MX'
+
+        def create_soa():
+            d = Domain(name='foo.example.gz')
+            d.full_clean()
+            d.save()
+
+            soa = SOA(
+                root_domain=d, primary='ns1.example.gz',
+                contact='root.mail.example.gz',
+                description='SOA for foo.example.gz'
+            )
+            soa.full_clean()
+            soa.save()
+
+            return d
+        create_soa.name = 'SOA'
+
+        self.assertObjectsConflict((create_cname, create_si))
+        self.assertObjectsConflict((create_cname, create_mx))
+        self.assertObjectsConflict((create_cname, create_soa))
+
     def test_target_validation(self):
         """Test that target must be a valid non-IP hostname but need not exist
         """
