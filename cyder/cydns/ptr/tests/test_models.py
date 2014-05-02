@@ -403,7 +403,6 @@ class PTRTests(cyder.base.tests.TestCase):
         def create_ptr():
             return self.do_generic_add(
                 ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu')
-
         create_ptr.name = "PTR"
 
         self.assertObjectsConflict((create_si_enabled, create_ptr))

@@ -649,33 +649,53 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         c2.full_clean()
         c2.save()
 
-        a1 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.2',
-                           ctnr=c1)
-        a1.full_clean()
-        a1.save()
+        def create_ar1():
+            a = AddressRecord(label='foo', domain=self.o_e,
+                               ip_str='128.193.0.2', ctnr=c1)
+            a.full_clean()
+            a.save()
+            return a
+        create_ar1.name = "Create AddressRecord #1"
 
-        a2 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.3',
-                           ctnr=c1)
-        a2.full_clean()
-        a2.save()
+        def create_ar2():
+            a = AddressRecord(label='foo', domain=self.o_e,
+                               ip_str='128.193.0.3', ctnr=c1)
+            a.full_clean()
+            a.save()
+            return a
+        create_ar2.name = "Create AddressRecord #2"
 
-        with self.assertRaises(ValidationError):
-            a3 = AddressRecord(label='foo', domain=self.o_e,
+        def create_ar3():
+            a = AddressRecord(label='foo', domain=self.o_e,
                                ip_str='128.193.0.4', ctnr=c2)
-            a3.full_clean()
-            a3.save()
+            a.full_clean()
+            a.save()
+            return a
+        create_ar3.name = "Create AddressRecord #3"
+
+        self.assertObjectsDontConflict((create_ar1, create_ar2))
+        self.assertObjectsConflict((create_ar1, create_ar3))
+        self.assertObjectsConflict((create_ar2, create_ar3))
 
     def test_address_record_conflicts_with_cname(self):
         """Test that an AddressRecord and a CNAME can't have the same name"""
-        cn = CNAME(label='bar', domain=self.o_e, target='foo.oregonstate.edu')
-        cn.full_clean()
-        cn.save()
+        def create_cname():
+            cn = CNAME(label='bar', domain=self.o_e,
+                       target='foo.oregonstate.edu')
+            cn.full_clean()
+            cn.save()
+            return cn
+        create_cname.name = 'CNAME'
 
-        with self.assertRaises(ValidationError):
+        def create_ar():
             a = AddressRecord(label='bar', domain=self.o_e,
                               ip_str='128.193.0.2')
             a.full_clean()
             a.save()
+            return a
+        create_ar.name = 'AddressRecord'
+
+        self.assertObjectsConflict((create_cname, create_ar))
 
     def test_same_name_as_static_interface(self):
         """Test that ARs and SIs can share a name iff they have the same ctnr
@@ -697,51 +717,39 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         c2.full_clean()
         c2.save()
 
-        s = System(name='test_system')
-        s.full_clean()
-        s.save()
+        def create_si():
+            s = System(name='test_system')
+            s.full_clean()
+            s.save()
 
-        # first StaticInterface then AddressRecord
+            si = StaticInterface(
+                mac='be:ef:fa:ce:11:11', label='foo1', domain=self.o_e,
+                ip_str='128.193.0.2', ip_type='4', system=s,
+                ctnr=c1)
+            si.full_clean()
+            si.save()
 
-        si1 = StaticInterface(
-            mac='be:ef:fa:ce:11:11', label='foo1', domain=self.o_e,
-            ip_str='128.193.0.2', ip_type='4', system=s,
-            ctnr=c1)
-        si1.full_clean()
-        si1.save()
+            return si
+        create_si.name = 'StaticInterface'
 
-        a1 = AddressRecord(label='foo1', domain=self.o_e, ip_str='128.193.0.3',
-                           ctnr=c1)
-        a1.full_clean()
-        a1.save()
+        def create_ar_same_ctnr():
+            a = AddressRecord(label='foo1', domain=self.o_e,
+                               ip_str='128.193.0.3', ctnr=c1)
+            a.full_clean()
+            a.save()
+            return a
+        create_ar_same_ctnr.name = 'AddressRecord with same ctnr'
 
-        with self.assertRaises(ValidationError):
-            a2 = AddressRecord(label='foo1', domain=self.o_e,
-                               ip_str='128.193.0.4', ctnr=c2)
-            a2.full_clean()
-            a2.save()
+        def create_ar_different_ctnr():
+            a = AddressRecord(label='foo1', domain=self.o_e,
+                               ip_str='128.193.0.3', ctnr=c2)
+            a.full_clean()
+            a.save()
+            return a
+        create_ar_different_ctnr.name = 'AddressRecord with different ctnr'
 
-        # first AddressRecord then StaticInterface
-
-        a3 = AddressRecord(label='foo2', domain=self.o_e, ip_str='128.193.0.5',
-                           ctnr=c1)
-        a3.full_clean()
-        a3.save()
-
-        si2 = StaticInterface(
-            mac='be:ef:fa:ce:22:22', label='foo2', domain=self.o_e,
-            ip_str='128.193.0.6', ip_type='4', system=s,
-            ctnr=c1)
-        si2.full_clean()
-        si2.save()
-
-        with self.assertRaises(ValidationError):
-            si2 = StaticInterface(
-                mac='be:ef:fa:ce:33:33', label='foo2', domain=self.o_e,
-                ip_str='128.193.0.7', ip_type='4', system=s,
-                ctnr=c2)
-            si2.full_clean()
-            si2.save()
+        self.assertObjectsDontConflict((create_si, create_ar_same_ctnr))
+        self.assertObjectsConflict((create_si, create_ar_different_ctnr))
 
     def test_target_validation(self):
         """Test that the target must be an IP address"""
