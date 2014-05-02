@@ -21,10 +21,10 @@ class CyTestMixin(object):
         session.save()
 
     def assertObjectsConflict(self, obj_create_list):
-        pairs = [(x,y)
-                 for x in obj_create_list
-                 for y in obj_create_list
-                 if x != y]
+        pairs = [(a,b)
+                 for a in obj_create_list
+                 for b in obj_create_list
+                 if a != b]
 
         for first, second in pairs:
             x = first()
@@ -39,10 +39,10 @@ class CyTestMixin(object):
             x.delete()
 
     def assertObjectsDontConflict(self, obj_create_list):
-        pairs = [(x,y)
-                 for x in obj_create_list
-                 for y in obj_create_list
-                 if x != y]
+        pairs = [(a,b)
+                 for a in obj_create_list
+                 for b in obj_create_list
+                 if a != b]
 
         for first, second in pairs:
             x = first()
