@@ -1,3 +1,5 @@
+from functools import partial
+
 from django.core.exceptions import ValidationError
 
 import cyder.base.tests
@@ -379,43 +381,33 @@ class PTRTests(cyder.base.tests.TestCase):
         r.full_clean()
         r.save()
 
-        s = System(name='test_system')
-        s.full_clean()
-        s.save()
+        def create_si(dns_enabled):
+            s = System(name='test_system')
+            s.full_clean()
+            s.save()
 
-        # first StaticInterface then PTR
-
-        i1 = StaticInterface(
-            mac='be:ef:fa:ce:12:34', label='foo1',
-            domain=Domain.objects.get(name='oregonstate.edu'),
-            ip_str='128.193.0.2', ip_type='4', system=s,
-            ctnr=self.c1)
-        i1.full_clean()
-        i1.save()
-
-        for dns_enabled in (False, True):
-            i1.dns_enabled = dns_enabled
+            i1 = StaticInterface(
+                mac='be:ef:fa:ce:12:34', label='foo1',
+                domain=Domain.objects.get(name='oregonstate.edu'),
+                ip_str='128.193.0.2', ip_type='4', system=s,
+                ctnr=self.c1, dns_enabled=dns_enabled)
             i1.full_clean()
             i1.save()
-            with self.assertRaises(ValidationError):
-                self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
-                                    fqdn='foo2.oregonstate.edu')
+            return i1
 
-        # first PTR then StaticInterface
+        create_si_enabled = partial(create_si, True)
+        create_si_enabled.name = "StaticInterface with DNS enabled"
+        create_si_disabled = partial(create_si, False)
+        create_si_disabled.name = "StaticInterface with DNS disabled"
 
-        self.do_generic_add(ip_str='128.193.0.3', ip_type='4',
-                            fqdn='foo3.oregonstate.edu')
+        def create_ptr():
+            return self.do_generic_add(
+                ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu')
 
-        for dns_enabled in (False, True):
-            with self.assertRaises(ValidationError):
-                i1 = StaticInterface(
-                    mac='be:ef:fa:ce:12:34', label='foo4',
-                    domain=Domain.objects.get(name='oregonstate.edu'),
-                    ip_str='128.193.0.3', ip_type='4', system=s,
-                    ctnr=self.c1, dns_enabled=dns_enabled)
-                i1.full_clean()
-                i1.save()
+        create_ptr.name = "PTR"
 
+        self.assertObjectsConflict((create_si_enabled, create_ptr))
+        self.assertObjectsConflict((create_si_disabled, create_ptr))
 
     def test_same_ip(self):
         """Test that two PTRs cannot have the same IP"""
