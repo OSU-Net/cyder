@@ -163,7 +163,9 @@ def cy_view(request, template, pk=None, obj_type=None):
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
-                    return HttpResponse(json.dumps({'success': True}))
+                    object_table = tablefy([obj], request=request)
+                    return HttpResponse(
+                        json.dumps({'row': object_table}))
 
             except (ValidationError, ValueError) as e:
                 if form.errors is None:

@@ -101,7 +101,7 @@ class Tablefier:
         if self.add_info and value == obj:
             col = {'value': [unicode(value)], 'url': [None]}
         else:
-            col = {'value': [value], 'url': [self.grab_url(value)]}
+            col = {'value': [unicode(value)], 'url': [self.grab_url(value)]}
         return col
 
     @staticmethod

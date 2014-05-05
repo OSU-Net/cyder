@@ -34,8 +34,10 @@
   {% endif %}
 
   {% if attrs_table %}
-    <h3>Range Attributes</h3>
-    {{ render_table(request, attrs_table) }}
+    <h3 id="attr_title">Range Attributes</h3>
+    {{ render_table(request, attrs_table, 'attrs_table') }}
+  {% else %}
+    {% include "base/attrs_table.html" %}
   {% endif %}
   {% if range_used %}
     <h3>Range Usage: {{ range_used }}</h3>
