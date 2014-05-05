@@ -234,6 +234,7 @@ $(document).ready(function() {
                         $('#obj-form form').find('.cancel').click();
                     } else {
                         $('#obj-form form').trigger('reset');
+                        $('#id_attribute').focus();
                     };
                 } else {
                     location.reload();
