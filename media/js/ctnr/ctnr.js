@@ -37,8 +37,13 @@ $(document).ready(function() {
             } else {
                 name = $(this).parent().parent().find('.name_column').text().trim();
             };
-            acknowledge = confirm("Are you sure you want to remove " +
-                obj_type + ", " + name + ", from " + ctnr_name + "?");
+            if (name) {
+                acknowledge = confirm("Are you sure you want to remove " +
+                    obj_type + ", " + name + ", from " + ctnr_name + "?");
+            } else {
+                acknowledge = confirm("Are you sure you want to remove this " +
+                    obj_type + " from " + ctnr_name + "?");
+            };
         };
 
         if (acknowledge) {
