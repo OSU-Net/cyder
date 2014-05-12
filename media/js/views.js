@@ -43,12 +43,12 @@ $(document).ready(function() {
         };
     });
 
-    $('#system_create, #delete, .delete').click( function(e) {
+    $('#system_create, #delete, .delete').live( 'click', function(e) {
         e.preventDefault();
         if ($(this).attr('id') == 'delete'
                 || $(this).attr('class') == 'delete') {
             var msg = "Are you sure you want to delete this?";
-            if (objType == 'system') {
+            if ($(this).attr('data-kwargs').indexOf('"system"') >= 0) {
                 msg = "Deleting this system will also delete its"
                     + " interfaces. Are you sure you want to continue?";
             }
@@ -140,7 +140,7 @@ $(document).ready(function() {
                         $('#obj-form form')[0].action = $createBtn.attr('href');
                         $('.form-btns a.submit, .btn.ajax').text(
                             'Create ' + formPrettyObjType);
-                        $('.form-btns a.submit').attr('class', 'btn c ajax');
+                        $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
                         $('#obj-form').slideToggle();
                     }, 'json');
             } else {
@@ -156,16 +156,21 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit, .btn.ajax').text('Create ' + prettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c ajax');
+                $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
                 $('#obj-form').slideToggle();
-            }
+            };
+            $('#id_value').live("keypress", function(e) {
+                if (e.which == 13) {
+                    jQuery('.submit_create').focus().click();
+                };
+            });
             $('.form').append($('<input>',
                               {type: 'hidden', name: 'csrfmiddlewaretoken',
                                value: csrfToken}));
         };
     });
 
-    $('.update').click(function(e) {
+    $('.update').live( 'click', function(e) {
         // Show update form on clicking update icon.
         slideUp($('#obj-form'));
         e.preventDefault();
@@ -188,41 +193,90 @@ $(document).ready(function() {
                 }, 150);
                 $('.form-btns a.submit, .btn.ajax').text('Update ' + formPrettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c ajax');
+                $('.form-btns a.submit').attr('class', 'btn c submit_update ajax');
                 $('#obj-form').slideDown();
             }, 'json');
+            $('#id_value').live("keypress", function(e) {
+                if (e.which == 13) {
+                    jQuery('.submit_update').focus().click();
+                };
+            });
 
             $('.form').append($('<input>', {type: 'hidden',
                 name: 'csrfmiddlewaretoken', value: csrfToken}));
         };
     });
+    $('#Bug-Report').live('submit', function(event) {
+        event.preventDefault();
+        url = $(location).attr('href');
+        var data = ajax_form_submit(url, $('#Bug-Report'), csrfToken, function(data) {
+            if (!data.errors) {
+                alert('Your bug report was sent successfully. '
+                      + 'Thank you for your input!');
+                $('#Bug-Report')[0].reset();
+                window.location.href = '/';
+            };
+        });
+    });
 
     $('#obj-form form').live('submit', function(event) {
         var url = $('#obj-form form')[0].action;
         event.preventDefault();
-        var data = ajax_form_submit(url, $('#obj-form'), csrfToken);
-        if (!data.errors) {
-            location.reload();
-        };
+        ajax_form_submit(url, $('#obj-form'), csrfToken,
+                         function(data) {
+            if (!data.errors) {
+                if ($('#obj-form form').attr('action').indexOf('_av') >= 0) {
+                    var style = $('.attrs_table').attr('style');
+                    if (style != undefined && style != false &&
+                            !$('.attrs_table').attr('style').indexOf(
+                            'display:none') >= 0) {
+                        $('#attr_title').slideDown();
+                        $('.attrs_table').attr('style', '');
+                    };
+                    var is_update = false;
+                    jQuery.each($('.attrs_table > tbody > tr'), function(i, row) {
+                        if (row.cells[0].innerHTML.indexOf(
+                                data.row.data[0][0].value[0]) >= 0) {
+                            $(this.remove());
+                            is_update = true;
+
+                        };
+                    });
+                    insertTablefyRow(data.row, $('.attrs_table > tbody'));
+                    if (is_update) {
+                        $('#obj-form form').find('.cancel').click();
+                    } else {
+                        $('#obj-form form').trigger('reset');
+                        $('#id_attribute').focus();
+                    };
+                } else {
+                    location.reload();
+                };
+            };
+        });
     });
 });
 
 
-function ajax_form_submit(url, form, csrfToken) {
-    $.ajaxSetup({async:false});
+function ajax_form_submit(url, form, csrfToken, success) {
+    jQuery.ajaxSettings.traditional = true;
     var fields = form.find(':input').serializeArray();
     var postData = {}
     jQuery.each(fields, function (i, field) {
-        postData[field.name] = field.value;
+        if (i > 0 && fields[i-1].name == field.name) {
+            postData[field.name].push(field.value);
+        } else {
+            postData[field.name] = [field.value];
+        };
     });
     postData['csrfmiddlewaretoken'] = csrfToken;
     var ret_data = null;
     $.post(url, postData, function(data) {
         ret_data = data;
+        if ($('#hidden-inner-form').find('#error').length) {
+            $('#hidden-inner-form').find('#error').remove();
+        };
         if (data.errors) {
-            if ($('#hidden-inner-form').find('#error').length) {
-                $('#hidden-inner-form').find('#error').remove();
-            };
             jQuery.each(fields, function (i, field) {
                 if (data.errors[field.name]) {
                     $('#id_' + field.name).after(
@@ -235,7 +289,8 @@ function ajax_form_submit(url, form, csrfToken) {
                     '<p id="error"><font color="red">'
                     + data.errors['__all__'] + '</font></p>');
             };
+        } else {
+            success(ret_data);
         };
     }, 'json');
-    return ret_data;
 };

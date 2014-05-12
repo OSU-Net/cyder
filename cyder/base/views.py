@@ -113,13 +113,14 @@ def send_email(request):
             try:
                 send_mail(subject, message, from_email,
                           [BUG_REPORT_EMAIL])
-                return redirect(reverse('core-index'))
+                return HttpResponse(json.dumps({'success': True}))
 
             except BadHeaderError:
-                return HttpResponse('Invalid header found.')
+                return HttpResponse(json.dumps(
+                    {'errors': {'__all__': 'Invalid header found.'}}))
 
         else:
-            return render(request, 'base/email_form.html', {'form': form})
+            return HttpResponse(json.dumps({'errors': form.errors}))
 
     else:
         session_data = (
@@ -162,7 +163,9 @@ def cy_view(request, template, pk=None, obj_type=None):
                             not obj.ctnr_set.all().exists()):
                         obj.ctnr_set.add(request.session['ctnr'])
 
-                    return HttpResponse(json.dumps({'success': True}))
+                    object_table = tablefy([obj], request=request)
+                    return HttpResponse(
+                        json.dumps({'row': object_table}))
 
             except (ValidationError, ValueError) as e:
                 if form.errors is None:

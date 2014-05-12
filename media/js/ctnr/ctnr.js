@@ -1,7 +1,8 @@
 $(document).ready(function() {
     var form = document.getElementById('add-object-inner-form');
     var ctnr = $('#ctnr-data');
-    var ctnr_name = $('#title').text().split(' ')[1];
+    var title = $('#title').text().split(' ');
+    var ctnr_name = title[title.length - 1].trim();
     var searchUrl = null;
     var addObjectUrl = ctnr.attr('data-addObjectUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
@@ -29,14 +30,20 @@ $(document).ready(function() {
             lvl = -1;
         } else if ($(this).attr('class') == 'plus') {
             lvl = 1;
-        } else if ($(this).attr('class') == 'remove-user') {
-            action = 'user_remove';
-            acknowledge = confirm("Are you sure you want to remove this " +
-                "user from " + ctnr_name + "?");
         } else {
             action = 'obj_remove';
-            acknowledge = confirm("Are you sure you want to remove this " +
-                obj_type + " from " + ctnr_name + "?");
+            if (obj_type == 'user') {
+                name = $(this).parent().parent().find('.username_column').text().trim();
+            } else {
+                name = $(this).parent().parent().find('.name_column').text().trim();
+            };
+            if (name) {
+                acknowledge = confirm("Are you sure you want to remove " +
+                    obj_type + ", " + name + ", from " + ctnr_name + "?");
+            } else {
+                acknowledge = confirm("Are you sure you want to remove this " +
+                    obj_type + " from " + ctnr_name + "?");
+            };
         };
 
         if (acknowledge) {

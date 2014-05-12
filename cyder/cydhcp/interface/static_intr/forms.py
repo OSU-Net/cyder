@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 import ipaddr
 
 from cyder.base.eav.forms import get_eav_form
-from cyder.base.mixins import UsabilityFormMixin, ExpirableFormMixin
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.system.models import System
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.forms import RangeWizard
@@ -27,7 +27,7 @@ def validate_ip(ip):
 
 
 class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
-                          UsabilityFormMixin, ExpirableFormMixin):
+                          UsabilityFormMixin):
     views = forms.ModelMultipleChoiceField(
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
