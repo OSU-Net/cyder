@@ -9,6 +9,7 @@
     }
 }
 @media all and (max-width: 950px) {
+
     div.container {
         width: 630px;
     }
@@ -35,39 +36,14 @@
             }
         }
     }
-
-    div#sidebar{
-        visibility: hidden;
-        font-size: 13px;
-        opacity: 0;
-        transition: all .25s;
-        height: 10%;
-        margin-right: .5%;
-        width: 10px;
+    div#sidebar_div {
         position: fixed;
-        top: 15%;
-    }
-
-    div#chevronfooter {
-        display: inline;
-    }
-
-    #sidebar_toggle:checked ~ div#sidebar {
-            z-index: 1;
-            visibility: visible;
-            opacity: 1;
-            transition: all .5s;
-            height: 100%;
-            width: 15%;
-    }
-
-    #sidebar_toggle:checked ~ #chevronfooter {
-        #chevron {
-            #chevronimg {
-                transform: scaleX(-1);
-            }
+        display: block;
+        &.displayed {
+            display: none;
         }
     }
+
     /* Pagination */
     div.pagination {
         margin: 18px 0 0 .5%;

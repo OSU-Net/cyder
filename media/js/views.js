@@ -23,7 +23,12 @@ $(document).ready(function() {
         $('.settings-menu').slideToggle();
         $('#settings-btn').toggleClass('selected');
     });
+    $('#menu-btn').click( function(e) {
+        $('#menu-btn').toggleClass('selected');
+        $('#sidebar_div').toggleClass('displayed');
+    });
     $('.nav-item.parent').click( function(e) {
+        e.preventDefault();
         var parentsChild = ('#' + this.id + '-children');
         if ($(parentsChild).css('display') != 'none') {
             $(parentsChild).slideUp('slow');

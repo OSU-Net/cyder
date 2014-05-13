@@ -185,6 +185,15 @@ a.btn {
             background-image: url(../img/settings-hover.png);
         }
     }
+    &.menu {
+        background-image: url(../img/menu.png);
+        &:hover {
+            background-image: url(../img/menu-hover.png);
+        }
+        &.selected {
+            background-image: url(../img/menu-hover.png);
+        }
+    }
 }
 
 .header {
@@ -259,14 +268,25 @@ a.btn {
     display: none;
     z-index: 2;
 }
+#sidebar_div {
+    float: left;
+    position: relative;
+    width: 110px;
+    height: 1000px;
+    margin-right: 25px;
+    display: block;
+    &.displayed {
+        display: block;
+    }
+}
 
 #sidebar {
+    z-index: 2;
+    position: fixed;
     .expand {
         opacity: 0;
     }
-    float: left;
     height: 100%;
-    margin-right: 25px;
     width: 110px;
     display: block;
     word-spacing: 100px;
@@ -340,31 +360,6 @@ a.btn {
         width: 825px;
         width: 1145px;
     }
-}
-
-#chevronfooter {
-    display: none;
-    position: fixed;
-    left: 43%;
-    bottom: 0%;
-    width: 48px;
-    height: 48px;
-    text-align: center;
-    #chevron {
-        height: 100%;
-        width: 100%;
-        #chevronimg {
-            width: 48px;
-            height: 48px;
-            background-color: transparent;
-            position:fixed;
-            opacity: .7;
-        }
-    }
-}
-
-#sidebar_toggle{
-    display: none;
 }
 
 .page-header {
