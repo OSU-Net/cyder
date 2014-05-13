@@ -98,6 +98,9 @@ a.btn {
     text-decoration: none;
     right: 0;
     transition: .1s .1s;
+    &:hover {
+        background: lighten($blue, 10%);
+    }
     &.hover:active {
         @include box-shadow(none);
         background: lighten($blue, 5%);
