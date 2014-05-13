@@ -20,12 +20,12 @@
 
 {% block content %}
   {% if no_interfaces %}
-      There are no interfaces in this container.
+    <h3>There are no interfaces in this container.</h3>
   {% else %}
       {% if obj_table %}
           {{ render_table(request, obj_table) }}
       {% else %}
-        This feature is not available for the "global" container.
+        <h3>This feature is not available for the "global" container.</h3>
       {% endif %}
   {% endif %}
 {% endblock %}
