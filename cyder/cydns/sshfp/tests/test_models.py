@@ -23,7 +23,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
         sshfp.save()
         self.assertTrue(sshfp.details())
         rsshfp = SSHFP.objects.filter(**data)
-        self.assertEqual(len(rsshfp), 1)
+        self.assertEqual(rsshfp.count(), 1)
         return sshfp
 
     def do_remove(self, data):
