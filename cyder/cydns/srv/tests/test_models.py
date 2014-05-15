@@ -107,13 +107,13 @@ class SRVTests(TestCase):
         ctnr2.full_clean()
         ctnr2.save()
 
-        srv1 = SRV(label='foo', domain=self.o_e, target='bar.oregonstate.edu',
+        srv1 = SRV(label='_foo', domain=self.o_e, target='bar.oregonstate.edu',
                    priority=1, weight=100, port=9002, ctnr=ctnr1)
         srv1.full_clean()
         srv1.save()
 
         with self.assertRaises(ValidationError):
-            srv2 = SRV(label='bleh', domain=self.o_e,
+            srv2 = SRV(label='_bleh', domain=self.o_e,
                        target='xyz.oregonstate.edu', priority=1, weight=100,
                        port=9002, ctnr=ctnr2)
             srv2.full_clean()
