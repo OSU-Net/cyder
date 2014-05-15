@@ -551,3 +551,32 @@ class CNAMETests(cyder.base.tests.TestCase):
                 cn = CNAME(label='bar', domain=self.g, target=target)
                 cn.full_clean()
                 cn.save()
+
+    def test_staticinterface_conflict(self):
+        """Test that a CNAME can't have the same name as a StaticInterface"""
+        self.bootstrap_zone_and_range()
+
+        d = Domain.objects.get(name='example.gz')
+
+        def create_cname():
+            cn = CNAME(label='foo', domain=d, target='www.example.gz')
+            cn.full_clean()
+            cn.save()
+            return cn
+        create_cname.name = 'CNAME'
+
+        def create_si():
+            s = System(name='test_system')
+            s.full_clean()
+            s.save()
+
+            si = StaticInterface(
+                mac='be:ef:fa:ce:11:11', label='foo', domain=d,
+                ip_str='128.193.0.3', ip_type='4', system=s,
+                ctnr=self.ctnr1)
+            si.full_clean()
+            si.save()
+            return si
+        create_si.name = 'StaticInterface'
+
+        self.assertObjectsConflict((create_cname, create_si))
