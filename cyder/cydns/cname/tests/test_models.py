@@ -415,18 +415,18 @@ class CNAMETests(cyder.base.tests.TestCase):
 
     def test_name_uniqueness(self):
         """Test that CNAMEs must share a ctnr if they have the same name"""
-        gz = Domain.objects.get(name='gz')
-
-        cn1 = CNAME(label='bar', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
+        cn1 = CNAME(label='bar', domain=self.g, target='foo1.gz',
+                    ctnr=self.ctnr1)
         cn1.full_clean()
         cn1.save()
 
-        cn2 = CNAME(label='bar', domain=gz, target='foo2.gz', ctnr=self.ctnr1)
+        cn2 = CNAME(label='bar', domain=self.g, target='foo2.gz',
+                    ctnr=self.ctnr1)
         cn2.full_clean()
         cn2.save()
 
         with self.assertRaises(ValidationError):
-            cn3 = CNAME(label='bar', domain=gz, target='foo3.gz',
+            cn3 = CNAME(label='bar', domain=self.g, target='foo3.gz',
                         ctnr=self.ctnr2)
             cn3.full_clean()
             cn3.save()
@@ -524,8 +524,6 @@ class CNAMETests(cyder.base.tests.TestCase):
     def test_target_validation(self):
         """Test that target must be a valid non-IP hostname but need not exist
         """
-        gz = Domain.objects.get(name='gz')
-
         valid_targets = (
             'example.com',
             'www.example.com',
@@ -533,7 +531,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         )
 
         for target in valid_targets:
-            cn = CNAME(label='bar', domain=gz, target=target)
+            cn = CNAME(label='bar', domain=self.g, target=target)
             cn.full_clean()
             cn.save()
             cn.delete()
@@ -545,6 +543,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         for target in invalid_targets:
             with self.assertRaises(ValidationError):
-                cn = CNAME(label='bar', domain=gz, target=target)
+                cn = CNAME(label='bar', domain=self.g, target=target)
                 cn.full_clean()
                 cn.save()
