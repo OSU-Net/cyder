@@ -431,8 +431,7 @@ class CNAMETests(cyder.base.tests.TestCase):
             cn3.full_clean()
             cn3.save()
 
-    def test_a_mx_soa_conflict(self):
-        """Test that a CNAME cannot have the same name as an AR, MX, or SOA"""
+    def bootstrap_zone_and_range(self):
         d = Domain(name='example.gz')
         d.full_clean()
         d.save()
@@ -471,6 +470,12 @@ class CNAMETests(cyder.base.tests.TestCase):
         ns.server = 'ns.example.gz'
         ns.full_clean()
         ns.save()
+
+    def test_a_mx_soa_conflict(self):
+        """Test that a CNAME cannot have the same name as an AR, MX, or SOA"""
+        self.bootstrap_zone_and_range()
+
+        d = Domain.objects.get(name='example.gz')
 
         def create_cname():
             cn = CNAME(label='foo', domain=d, target='bar.example.gz')
