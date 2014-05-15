@@ -72,3 +72,10 @@ class TXTTests(cyder.base.tests.TestCase):
                      ctnr=ctnr2)
             t2.full_clean()
             t2.save()
+
+    def test_name_duplicates(self):
+        """Test that multiple TXTs may share a name"""
+        for txt_data in ('qwertyuiop', 'asdfghjkl', 'zxcvbnm'):
+            t = TXT(label='foo', domain=self.o_e, txt_data=txt_data)
+            t.full_clean()
+            t.save()
