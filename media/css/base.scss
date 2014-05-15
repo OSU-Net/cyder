@@ -447,6 +447,23 @@ a.btn {
     margin-bottom: 26px;
 }
 
+.load {
+    display: none;
+    position: absolute;
+    background: url('../img/loadingGif.gif')
+                50% 50%
+                no-repeat;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    width: 300px;
+    height: 300px;
+    opacity: 0.80;
+    margin: auto;
+}
+
 .footer {
     background-color: $dark-blue;
     color: $white;
