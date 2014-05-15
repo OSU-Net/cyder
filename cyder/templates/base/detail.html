@@ -9,7 +9,7 @@
 
 {% block action_bar %}
   {% if obj_type_perm %}
-    {% if obj.get_update_url %}
+    {% if obj.get_update_url and obj_type != "ctnr" %}
       <a class="btn btn-primary update" href="{{ obj.get_update_url() }}" data-pk="{{ obj.pk }}"
         data-objType= {{ obj_type }} data-prettyObjType="{{ obj.pretty_type }}">Edit</a>
     {% endif %}
