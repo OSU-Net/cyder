@@ -118,3 +118,17 @@ class SRVTests(TestCase):
                        port=9002, ctnr=ctnr2)
             srv2.full_clean()
             srv2.save()
+
+    def test_name_unique(self):
+        """Test that two SRVs cannot share a name"""
+        srv1 = SRV(label='_foo', domain=self.o_e, target='bar.oregonstate.edu',
+                priority=1, weight=100, port=9002)
+        srv1.full_clean()
+        srv1.save()
+
+        with self.assertRaises(ValidationError):
+            srv2 = SRV(label='_foo', domain=self.o_e,
+                       target='bleh.oregonstate.edu', priority=1, weight=100,
+                       port=9002)
+            srv2.full_clean()
+            srv2.save()

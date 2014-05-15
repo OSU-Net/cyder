@@ -87,3 +87,19 @@ class SSHFPTests(cyder.base.tests.TestCase):
                        algorithm_number=1, fingerprint_type=1, ctnr=ctnr2)
             s2.full_clean()
             s2.save()
+
+    def test_name_unique(self):
+        """Test that two SSHFPs cannot share a name"""
+        key1 = '7d97e98f8af710c7e7fe703abc8f639e0ee507c4'
+        key2 = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
+
+        s1 = SSHFP(label='foo', domain=self.o_e, key=key1, algorithm_number=1,
+                   fingerprint_type=1)
+        s1.full_clean()
+        s1.save()
+
+        with self.assertRaises(ValidationError):
+            s2 = SSHFP(label='foo', domain=self.o_e, key=key2,
+                       algorithm_number=1, fingerprint_type=1)
+            s2.full_clean()
+            s2.save()

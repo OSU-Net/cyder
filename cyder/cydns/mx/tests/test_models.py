@@ -150,3 +150,16 @@ class MXTests(cyder.base.tests.TestCase):
                      ctnr=ctnr2)
             mx1.full_clean()
             mx1.save()
+
+    def test_name_unique(self):
+        """Test that two MXs cannot share a name"""
+        mx1 = MX(label='foo', domain=self.o_e,
+                 server='bar.oregonstate.edu', priority=1, ttl=1000)
+        mx1.full_clean()
+        mx1.save()
+
+        with self.assertRaises(ValidationError):
+            mx2 = MX(label='foo', domain=self.o_e,
+                     server='bleh.oregonstate.edu', priority=1, ttl=1000)
+            mx2.full_clean()
+            mx2.save()
