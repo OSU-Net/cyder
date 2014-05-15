@@ -16,13 +16,13 @@ class CtnrForm(forms.ModelForm, UsabilityFormMixin):
 
 class CtnrUserForm(forms.Form):
     level = forms.ChoiceField(widget=forms.RadioSelect,
+                              label="Level*",
                               choices=[item for item in LEVELS.items()])
-
 
 class CtnrObjectForm(forms.Form):
     obj_type = forms.ChoiceField(
         widget=forms.RadioSelect,
-        label='Type',
+        label='Type*',
         choices=(
             ('user', 'User'),
             ('domain', 'Domain'),
@@ -37,4 +37,4 @@ class CtnrObjectForm(forms.Form):
 
     obj = forms.CharField(
         widget=forms.TextInput(attrs={'id': 'object-searchbox'}),
-        label='Search')
+        label='Search*')
