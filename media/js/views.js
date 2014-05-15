@@ -54,7 +54,7 @@ $(document).ready(function() {
         };
     });
 
-    $('#delete, .delete').live( 'click', function(e) {
+    $('#system_create, #delete, .delete').live( 'click', function(e) {
         e.preventDefault();
         if ($(this).attr('id') == 'delete'
                 || $(this).attr('class') == 'delete') {
@@ -106,13 +106,13 @@ $(document).ready(function() {
         $('#id_attribute').val('');
     });
 
-    $('#action-bar').find('a').each(function() {
-        $('#action-bar').find('a').addClass('hover');
+    $('.create-obj, .update, .cancel').each(function() {
+        $('.create-obj, .update, .cancel').addClass('hover');
         $(this).click(function(e) {
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
             } else {
-                $('#action-bar').find('a').removeClass('selected');
+                $('.create-obj, .update, .cancel').removeClass('selected');
                 $(this).removeClass('hover').addClass('selected');
             };
         });
@@ -121,6 +121,7 @@ $(document).ready(function() {
     $('.create-obj').click(function(e) {
         // Show create form on clicking create button.
         e.preventDefault();
+
         slideUp($('#obj-form'));
         if ($(this).hasClass('selected')) {
             form.action = this.href;
@@ -148,9 +149,9 @@ $(document).ready(function() {
                             initForms();
                         }, 150);
                         $('#obj-form form')[0].action = $createBtn.attr('href');
-                        $('.form-btns a.submit').text(
+                        $('.form-btns a.submit, .btn.ajax').text(
                             'Create ' + formPrettyObjType);
-                        $('.form-btns a.submit').attr('class', 'btn c submit_create');
+                        $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
                         $('#obj-form').slideToggle();
                     }, 'json');
             } else {
@@ -164,9 +165,9 @@ $(document).ready(function() {
                         clear_form_all(form);
                     };
                 }, 150);
-                $('.form-btns a.submit').text('Create ' + prettyObjType);
+                $('.form-btns a.submit, .btn.ajax').text('Create ' + prettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c submit_create');
+                $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
                 $('#obj-form').slideToggle();
             };
             $('#id_value').live("keypress", function(e) {
@@ -201,9 +202,9 @@ $(document).ready(function() {
                     $('#hidden-inner-form').empty().append(data.form);
                     initForms();
                 }, 150);
-                $('.form-btns a.submit').text('Update ' + formPrettyObjType);
+                $('.form-btns a.submit, .btn.ajax').text('Update ' + formPrettyObjType);
 
-                $('.form-btns a.submit').attr('class', 'btn c submit_update');
+                $('.form-btns a.submit').attr('class', 'btn c submit_update ajax');
                 $('#obj-form').slideDown();
             }, 'json');
             $('#id_value').live("keypress", function(e) {
