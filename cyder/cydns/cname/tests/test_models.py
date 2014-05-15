@@ -24,7 +24,6 @@ from cyder.core.ctnr.models import Ctnr
 
 
 class CNAMETests(cyder.base.tests.TestCase):
-
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
             ip_type = '4'

@@ -8,7 +8,6 @@ from cyder.core.ctnr.models import Ctnr
 
 
 class MXTests(cyder.base.tests.TestCase):
-
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
