@@ -32,6 +32,9 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
         queryset=View.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple, required=False)
     label = forms.CharField(max_length=128, required=True, label="Hostname")
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 4, 'cols': 50}),
+        required=False)
 
     def __init__(self, *args, **kwargs):
         super(StaticInterfaceForm, self).__init__(*args, **kwargs)
