@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 
@@ -94,3 +95,26 @@ class SRVTests(TestCase):
 
         srv0.target = "_df"
         self.assertRaises(ValidationError, srv0.save)
+
+    def test_domain_ctnr(self):
+        """Test that an SRV's domain must be in the SRV's container"""
+        ctnr1 = Ctnr(name='test_ctnr1')
+        ctnr1.full_clean()
+        ctnr1.save()
+        ctnr1.domains.add(self.o_e)
+
+        ctnr2 = Ctnr(name='test_ctnr2')
+        ctnr2.full_clean()
+        ctnr2.save()
+
+        srv1 = SRV(label='foo', domain=self.o_e, target='bar.oregonstate.edu',
+                   priority=1, weight=100, port=9002, ctnr=ctnr1)
+        srv1.full_clean()
+        srv1.save()
+
+        with self.assertRaises(ValidationError):
+            srv2 = SRV(label='bleh', domain=self.o_e,
+                       target='xyz.oregonstate.edu', priority=1, weight=100,
+                       port=9002, ctnr=ctnr2)
+            srv2.full_clean()
+            srv2.save()

@@ -1,10 +1,13 @@
-from django.test import TestCase
+from django.core.exceptions import ValidationError
+
+import cyder.base.tests
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.domain.models import Domain
 from cyder.core.ctnr.models import Ctnr
 
 
-class SSHFPTests(TestCase):
+class SSHFPTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
@@ -61,3 +64,26 @@ class SSHFPTests(TestCase):
         data = {'label': label, 'key': key, 'domain': self.o,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
         self.do_generic_add(data)
+
+    def test_domain_ctnr(self):
+        key = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
+
+        ctnr1 = Ctnr(name='test_ctnr1')
+        ctnr1.full_clean()
+        ctnr1.save()
+        ctnr1.domains.add(self.o_e)
+
+        ctnr2 = Ctnr(name='test_ctnr2')
+        ctnr2.full_clean()
+        ctnr2.save()
+
+        s1 = SSHFP(label='foo', domain=self.o_e, key=key, algorithm_number=1,
+                   fingerprint_type=1, ctnr=ctnr1)
+        s1.full_clean()
+        s1.save()
+
+        with self.assertRaises(ValidationError):
+            s2 = SSHFP(label='bleh', domain=self.o_e, key=key,
+                       algorithm_number=1, fingerprint_type=1, ctnr=ctnr2)
+            s2.full_clean()
+            s2.save()

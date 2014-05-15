@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 
 import cyder.base.tests
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -126,3 +127,26 @@ class MXTests(cyder.base.tests.TestCase):
                 'cnamederp.oregonstate.org', 'priority': 2, 'ttl': 2222}
         mx = MX(**data)
         self.assertRaises(ValidationError, mx.save)
+
+    def test_domain_ctnr(self):
+        """Test that an MX's domain must be in the MX's container"""
+        ctnr1 = Ctnr(name='test_ctnr1')
+        ctnr1.full_clean()
+        ctnr1.save()
+        ctnr1.domains.add(self.o_e)
+
+        ctnr2 = Ctnr(name='test_ctnr2')
+        ctnr2.full_clean()
+        ctnr2.save()
+
+        mx1 = MX(label='foo', domain=self.o_e, server='bar.oregonstate.edu',
+                 priority=1, ttl=1000, ctnr=ctnr1)
+        mx1.full_clean()
+        mx1.save()
+
+        with self.assertRaises(ValidationError):
+            mx1 = MX(label='bleh', domain=self.o_e,
+                     server='xyz.oregonstate.edu', priority=1, ttl=1000,
+                     ctnr=ctnr2)
+            mx1.full_clean()
+            mx1.save()

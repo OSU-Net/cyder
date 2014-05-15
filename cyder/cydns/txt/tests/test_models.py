@@ -1,11 +1,13 @@
-from django.test import TestCase
+from django.core.exceptions import ValidationError
 
+import cyder.base.tests
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.domain.models import Domain
 from cyder.core.ctnr.models import Ctnr
 
 
-class TXTTests(TestCase):
+class TXTTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
@@ -49,3 +51,24 @@ class TXTTests(TestCase):
         data = "dd"
         data = {'label': label, 'txt_data': data, 'domain': self.o}
         self.do_generic_add(data)
+
+    def test_domain_ctnr(self):
+        ctnr1 = Ctnr(name='test_ctnr1')
+        ctnr1.full_clean()
+        ctnr1.save()
+        ctnr1.domains.add(self.o_e)
+
+        ctnr2 = Ctnr(name='test_ctnr2')
+        ctnr2.full_clean()
+        ctnr2.save()
+
+        t1 = TXT(label='foo', domain=self.o_e, txt_data='Data data data',
+                 ctnr=ctnr1)
+        t1.full_clean()
+        t1.save()
+
+        with self.assertRaises(ValidationError):
+            t2 = TXT(label='bleh', domain=self.o_e, txt_data='Data data data',
+                     ctnr=ctnr2)
+            t2.full_clean()
+            t2.save()
