@@ -16,9 +16,10 @@ class SSHFPTests(cyder.base.tests.TestCase):
         self.o_e = Domain(name="mozilla.org")
         self.o_e.save()
 
-    def do_generic_add(self, data):
+    def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
         sshfp = SSHFP(**data)
+        sshfp.full_clean()
         sshfp.__repr__()
         sshfp.save()
         self.assertTrue(sshfp.details())
@@ -26,8 +27,8 @@ class SSHFPTests(cyder.base.tests.TestCase):
         self.assertEqual(rsshfp.count(), 1)
         return sshfp
 
-    def do_remove(self, data):
-        sshfp = self.do_generic_add(data)
+    def do_remove(self, **data):
+        sshfp = self.do_generic_add(**data)
         sshfp.delete()
         rmx = SSHFP.objects.filter(**data)
         self.assertTrue(len(rmx) == 0)
@@ -39,7 +40,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
         a_type = 1
         data = {'label': label, 'key': key, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(data)
+        self.do_generic_add(**data)
 
         label = "asdf"
         key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
@@ -47,7 +48,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
         a_type = 1
         data = {'label': label, 'key': key, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(data)
+        self.do_generic_add(**data)
 
         label = "df"
         key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
@@ -55,7 +56,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
         a_type = 1
         data = {'label': label, 'key': key, 'domain': self.o_e,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(data)
+        self.do_generic_add(**data)
 
         label = "12314"
         key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
@@ -63,7 +64,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
         a_type = 1
         data = {'label': label, 'key': key, 'domain': self.o,
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(data)
+        self.do_generic_add(**data)
 
     def test_domain_ctnr(self):
         key = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
@@ -94,12 +95,12 @@ class SSHFPTests(cyder.base.tests.TestCase):
         key2 = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
 
         s1 = SSHFP(label='foo', domain=self.o_e, key=key1, algorithm_number=1,
-                   fingerprint_type=1)
+                   fingerprint_type=1, ctnr=self.ctnr)
         s1.full_clean()
         s1.save()
 
         with self.assertRaises(ValidationError):
             s2 = SSHFP(label='foo', domain=self.o_e, key=key2,
-                       algorithm_number=1, fingerprint_type=1)
+                       algorithm_number=1, fingerprint_type=1, ctnr=self.ctnr)
             s2.full_clean()
             s2.save()

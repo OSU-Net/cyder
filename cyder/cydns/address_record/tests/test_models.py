@@ -655,7 +655,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             a.full_clean()
             a.save()
             return a
-        create_ar1.name = "Create AddressRecord #1"
+        create_ar1.name = "AddressRecord 1"
 
         def create_ar2():
             a = AddressRecord(label='foo', domain=self.o_e,
@@ -663,7 +663,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             a.full_clean()
             a.save()
             return a
-        create_ar2.name = "Create AddressRecord #2"
+        create_ar2.name = "AddressRecord 2"
 
         def create_ar3():
             a = AddressRecord(label='foo', domain=self.o_e,
@@ -671,7 +671,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             a.full_clean()
             a.save()
             return a
-        create_ar3.name = "Create AddressRecord #3"
+        create_ar3.name = "AddressRecord 3"
 
         self.assertObjectsDontConflict((create_ar1, create_ar2))
         self.assertObjectsConflict((create_ar1, create_ar3))
@@ -681,7 +681,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         """Test that an AddressRecord and a CNAME can't have the same name"""
         def create_cname():
             cn = CNAME(label='bar', domain=self.o_e,
-                       target='foo.oregonstate.edu')
+                       target='foo.oregonstate.edu', ctnr=self.ctnr)
             cn.full_clean()
             cn.save()
             return cn
@@ -689,7 +689,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         def create_ar():
             a = AddressRecord(label='bar', domain=self.o_e,
-                              ip_str='128.193.0.2')
+                              ip_str='128.193.0.2', ctnr=self.ctnr)
             a.full_clean()
             a.save()
             return a
@@ -761,7 +761,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         for ip_str, ip_type in valid_ips:
             a = AddressRecord(label='foo', domain=self.o_e,
-                              ip_str=ip_str, ip_type=ip_type)
+                              ip_str=ip_str, ip_type=ip_type, ctnr=self.ctnr)
             a.full_clean()
             a.save()
             a.delete()
