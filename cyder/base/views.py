@@ -467,47 +467,6 @@ def table_update(request, pk, obj_type=None):
     return HttpResponse(json.dumps({'error': form.errors}))
 
 
-class BaseListView(ListView):
-    """
-    Inherit ListView to specify our pagination.
-    """
-    template_name = 'list.html'
-    extra_context = None
-    paginate_by = 30
-
-    def get_context_data(self, **kwargs):
-        context = super(ListView, self).get_context_data(**kwargs)
-        context['Model'] = self.model
-        context['model_name'] = self.model._meta.db_table
-        context['object_table'] = tablefy(context['page_obj'])
-        context['form_title'] = "{0} Details".format(
-            self.form_class.Meta.model.__name__
-        )
-        # Extra_context takes precedence over original values in context.
-        try:
-            context = dict(context.items() + self.extra_context.items())
-        except AttributeError:
-            pass
-        return context
-
-
-class BaseDetailView(DetailView):
-    template_name = 'detail.html'
-    extra_context = None
-
-    def get_context_data(self, **kwargs):
-        context = super(DetailView, self).get_context_data(**kwargs)
-        context['form_title'] = "{0} Details".format(
-            self.form_class.Meta.model.__name__
-        )
-        # Extra_context takes precedence over original values in context.
-        try:
-            context = dict(context.items() + self.extra_context.items())
-        except AttributeError:
-            pass
-        return context
-
-
 class Base(DetailView):
     def get(self, request, *args, **kwargs):
         return render(request, "base.html")
