@@ -578,41 +578,6 @@ class BaseUpdateView(UpdateView):
         return context
 
 
-class BaseDeleteView(DeleteView):
-    template_name = 'confirm_delete.html'
-    extra_content = None
-    success_url = '/'
-
-    def get_object(self, queryset=None):
-        obj = super(BaseDeleteView, self).get_object()
-        return obj
-
-    def delete(self, request, *args, **kwargs):
-        # Get the object to delete.
-        obj = get_object_or_404(self.form_class.Meta.model,
-                                pk=kwargs.get('pk', 0))
-        try:
-            view = super(BaseDeleteView, self).delete(request, *args, **kwargs)
-        except ValidationError, e:
-            messages.error(request, "Error: {0}".format(' '.join(e.messages)))
-            return redirect(obj)
-
-        messages.success(request, "Deletion Successful")
-        return view
-
-    def get_context_data(self, **kwargs):
-        context = super(DeleteView, self).get_context_data(**kwargs)
-        context['form_title'] = "Update {0}".format(
-            self.form_class.Meta.model.__name__
-        )
-        # Extra_context takes precedence over original values in context.
-        try:
-            context = dict(context.items() + self.extra_context.items())
-        except AttributeError:
-            pass
-        return context
-
-
 class Base(DetailView):
     def get(self, request, *args, **kwargs):
         return render(request, "base.html")
