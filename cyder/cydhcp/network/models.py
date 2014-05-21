@@ -125,7 +125,7 @@ class Network(BaseModel, ObjectUrlMixin):
             #eav.save()
 
     def delete(self, *args, **kwargs):
-        if self.range_set.all().exists():
+        if self.range_set.exists():
             raise ValidationError("Cannot delete this network because it has "
                                   "child ranges")
         super(Network, self).delete(*args, **kwargs)
