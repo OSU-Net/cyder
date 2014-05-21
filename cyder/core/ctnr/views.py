@@ -265,8 +265,7 @@ def add_object(request, ctnr_pk):
                 try:
                     if Klass.__name__ == 'Range':
                         return HttpResponse(json.dumps({
-                            'error': 'Please select ranges from the '
-                            'dropdown'}))
+                            'error': 'Please select a valid range'}))
                     obj = Klass.objects.get(name=name)
                 except Klass.DoesNotExist:
                     return HttpResponse(
@@ -303,6 +302,10 @@ def add_user(request, ctnr, name):
         return HttpResponse(json.dumps({
             'error': 'Please enter a user name'}))
 
+    if not level:
+        return HttpResponse(json.dumps({
+            'error': 'Please select an administrative level'}))
+
     if (confirmation == 'false' and
             not User.objects.filter(username=name).exists()):
         return HttpResponse(json.dumps({
@@ -311,13 +314,11 @@ def add_user(request, ctnr, name):
 
     user, _ = User.objects.get_or_create(username=name)
     user.save()
-    ctnruser, newCtnrUser = CtnrUser.objects.get_or_create(
-        user_id=user.id, ctnr_id=ctnr.id, level=level)
-    if newCtnrUser is False:
+    if CtnrUser.objects.filter(user_id=user.id, ctnr_id=ctnr.id).exists():
         return HttpResponse(json.dumps({
             'error': 'This user already exists in this container'}))
 
-    ctnruser.save()
+    CtnrUser(user_id=user.id, ctnr_id=ctnr.id, level=level).save()
     return HttpResponse(json.dumps({'success': True}))
 
 
