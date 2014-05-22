@@ -274,11 +274,8 @@ def cy_delete(request):
         messages.error(request, ', '.join(e.messages))
 
     referer = request.META.get('HTTP_REFERER', obj.get_list_url())
-    # if there is path beyond obj.get_list_url() remove
-    try:
-        referer = referer.replace(referer.split(obj.get_list_url())[1], '')
-    except:
-        referer = request.META.get('HTTP_REFERER', '')
+    if referer.endswith('/'):
+        referer = obj.get_list_url()
 
     return redirect(referer)
 
