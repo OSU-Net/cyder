@@ -2,10 +2,11 @@ from django.core.exceptions import ValidationError
 
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
-from cyder.core.ctnr.models import Ctnr
+from cyder.cydns.mx.models import MX
+from cyder.cydns.sshfp.models import SSHFP
+from cyder.cydns.txt.models import TXT
 
 
 class MXTests(cyder.base.tests.TestCase):
@@ -164,3 +165,32 @@ class MXTests(cyder.base.tests.TestCase):
                      server='bleh.oregonstate.edu', priority=1, ttl=1000)
             mx2.full_clean()
             mx2.save()
+
+    def test_sshfp_txt_name(self):
+        """Test that an MX can share a name with an SSHFP or a TXT"""
+        def create_mx():
+            mx = MX(label='foo', domain=self.o_e, server='bar.oregonstate.edu',
+                    priority=1, ttl=1000, ctnr=self.ctnr)
+            mx.full_clean()
+            mx.save()
+            return mx
+        create_mx.name = 'MX'
+
+        def create_sshfp():
+            s = SSHFP(label='foo', domain=self.o_e,
+                      key='7d97e98f8af710c7e7fe703abc8f639e0ee507c4',
+                      algorithm_number=1, fingerprint_type=1, ctnr=self.ctnr)
+            s.full_clean()
+            s.save()
+            return s
+        create_sshfp.name = 'SSHFP'
+
+        def create_txt():
+            t = TXT(label='foo', domain=self.o_e, txt_data='Hi, Mom!',
+                    ctnr=self.ctnr)
+            t.full_clean()
+            t.save()
+            return t
+        create_txt.name = 'TXT'
+
+        self.assertObjectsDontConflict((create_mx, create_sshfp, create_txt))
