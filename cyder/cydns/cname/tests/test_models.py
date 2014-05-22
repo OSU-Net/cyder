@@ -166,12 +166,22 @@ class CNAMETests(cyder.base.tests.TestCase):
         fqdn = label + '.' + domain.name
         mx_data = {'label': '', 'domain': self.c_g, 'ctnr': self.ctnr1,
                    'server': fqdn, 'priority': 2, 'ttl': 2222}
-        mx = MX(**mx_data)
-        mx.save()
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain, target=data)
+        def create_mx():
+            mx = MX(**mx_data)
+            mx.save()
+            return mx
+        create_mx.name = 'MX'
 
-        self.assertRaises(ValidationError, cn.full_clean)
+        def create_cname():
+            cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain,
+                       target=data)
+            cn.full_clean()
+            cn.save()
+            return cn
+        create_cname.name = 'CNAME'
+
+        self.assertObjectsConflict((create_mx, create_cname))
 
     def test_address_record_exists(self):
         label = "testyfoo"
