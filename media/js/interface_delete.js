@@ -8,7 +8,7 @@ $(document).ready(function() {
                 obj_type = 'dynamic_interface';
             } else {
                 obj_type = 'static_interface';
-            };
+            }
             pk = String(this)[String(this).indexOf('delete') - 2];
             url = this.href;
             this.href = '#';
@@ -18,21 +18,21 @@ $(document).ready(function() {
             };
             this.onclick = function onclick(event) {
                 $.post('/dhcp/interface/interface_delete/', postData, function(data) {
-                    if(data.last == true) {
-                        if(confirm("Because this is the last interface on its "
-                                   + "system, deleting this interface will also "
-                                   + "delete its system. Are you sure you want "
-                                   + "to continue?")) {
+                    if(data.last === true) {
+                        if(confirm("Because this is the last interface on " +
+                                   "its system, deleting this interface " +
+                                   "will also delete its system. Are you " +
+                                   "sure you want to continue?")) {
                             window.location.replace(url);
-                        };
+                        }
                     } else {
                         if(confirm('Are you sure?')) {
                             window.location.replace(url);
-                        };
-                    };
+                        }
+                    }
                 }, 'json');
             };
-        };
+        }
     });
 });
 
