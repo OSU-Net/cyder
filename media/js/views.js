@@ -4,7 +4,7 @@ $(document).ready(function() {
     var hidden_inner_form = document.getElementById('hidden-inner-form');
     if(hidden_inner_form) {
         var defaults = hidden_inner_form.innerHTML;
-    };
+    }
     var objType = metadata.attr('data-objType');
     var objName = metadata.attr('data-objName');
     var prettyObjType = metadata.attr('data-prettyObjType');
@@ -47,21 +47,21 @@ $(document).ready(function() {
                 if (parentsChild != child) {
                     if ($(child).css('display') != 'none') {
                         $(child).slideToggle('slow');
-                    };
-                };
+                    }
+                }
             });
             $(parentsChild).slideToggle('slow');
-        };
+        }
     });
 
     $('#system_create, #delete, .delete').live( 'click', function(e) {
         e.preventDefault();
-        if ($(this).attr('id') == 'delete'
-                || $(this).attr('class') == 'delete') {
+        if ($(this).attr('id') == 'delete' ||
+            $(this).attr('class') == 'delete') {
             var msg = "Are you sure you want to delete this?";
             if ($(this).attr('data-kwargs').indexOf('"system"') >= 0) {
-                msg = "Deleting this system will also delete its"
-                    + " interfaces. Are you sure you want to continue?";
+                msg = "Deleting this system will also delete its" +
+                    " interfaces. Are you sure you want to continue?";
             }
             if (!confirm(msg)) {
                 return false;
@@ -69,8 +69,8 @@ $(document).ready(function() {
         }
         var url = $(this).attr('href');
         var postData = JSON.parse($(this).attr('data-kwargs'));
-        var postForm = $('<form style="display: none" action="' + url
-            + '" method="post"></form>');
+        var postForm = $('<form style="display: none" action="' +
+            url + '" method="post"></form>');
         $.each(postData, function(key, value) {
             postForm.append($('<input>').attr(
                 {type: 'text', name: key, value: value}));
@@ -93,11 +93,11 @@ $(document).ready(function() {
                         attribute_type: $('#id_attribute_type').val()
                     },
                     success: response
-                })
+                });
             },
             delay: 400,
             select: function(event, ui) {
-                attributeName = ui.item.label
+                attributeName = ui.item.label;
             }
         });
     });
@@ -114,7 +114,7 @@ $(document).ready(function() {
             } else {
                 $('.create-obj, .update, .cancel').removeClass('selected');
                 $(this).removeClass('hover').addClass('selected');
-            };
+            }
         });
     });
 
@@ -163,22 +163,22 @@ $(document).ready(function() {
                         $('#hidden-inner-form').empty().html(defaults);
                     } else {
                         clear_form_all(form);
-                    };
+                    }
                 }, 150);
                 $('.form-btns a.submit, .btn.ajax').text('Create ' + prettyObjType);
 
                 $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
                 $('#obj-form').slideToggle();
-            };
+            }
             $('#id_value').live("keypress", function(e) {
                 if (e.which == 13) {
                     jQuery('.submit_create').focus().click();
-                };
+                }
             });
             $('.form').append($('<input>',
                               {type: 'hidden', name: 'csrfmiddlewaretoken',
                                value: csrfToken}));
-        };
+        }
     });
 
     $('.update').live( 'click', function(e) {
@@ -210,23 +210,23 @@ $(document).ready(function() {
             $('#id_value').live("keypress", function(e) {
                 if (e.which == 13) {
                     jQuery('.submit_update').focus().click();
-                };
+                }
             });
 
             $('.form').append($('<input>', {type: 'hidden',
                 name: 'csrfmiddlewaretoken', value: csrfToken}));
-        };
+        }
     });
     $('#Bug-Report').live('submit', function(event) {
         event.preventDefault();
         url = $(location).attr('href');
         var data = ajax_form_submit(url, $('#Bug-Report'), csrfToken, function(data) {
             if (!data.errors) {
-                alert('Your bug report was sent successfully. '
-                      + 'Thank you for your input!');
+                alert('Your bug report was sent successfully. ' +
+                      'Thank you for your input!');
                 $('#Bug-Report')[0].reset();
                 window.location.href = '/';
-            };
+            }
         });
     });
 
@@ -238,12 +238,12 @@ $(document).ready(function() {
             if (!data.errors) {
                 if ($('#obj-form form').attr('action').indexOf('_av') >= 0) {
                     var style = $('.attrs_table').attr('style');
-                    if (style != undefined && style != false &&
-                            !$('.attrs_table').attr('style').indexOf(
-                            'display:none') >= 0) {
+                    if (style !== undefined && style !== false &&
+                            $('.attrs_table').attr('style').indexOf(
+                            'display:none') < 0) {
                         $('#attr_title').slideDown();
                         $('.attrs_table').attr('style', '');
-                    };
+                    }
                     var is_update = false;
                     jQuery.each($('.attrs_table > tbody > tr'), function(i, row) {
                         if (row.cells[0].innerHTML.indexOf(
@@ -251,7 +251,7 @@ $(document).ready(function() {
                             $(this.remove());
                             is_update = true;
 
-                        };
+                        }
                     });
                     insertTablefyRow(data.row, $('.attrs_table > tbody'));
                     if (is_update) {
@@ -259,11 +259,11 @@ $(document).ready(function() {
                     } else {
                         $('#obj-form form').trigger('reset');
                         $('#id_attribute').focus();
-                    };
+                    }
                 } else {
                     location.reload();
-                };
-            };
+                }
+            }
         });
     });
 });
@@ -272,36 +272,36 @@ $(document).ready(function() {
 function ajax_form_submit(url, form, csrfToken, success) {
     jQuery.ajaxSettings.traditional = true;
     var fields = form.find(':input').serializeArray();
-    var postData = {}
+    var postData = {};
     jQuery.each(fields, function (i, field) {
         if (i > 0 && fields[i-1].name == field.name) {
             postData[field.name].push(field.value);
         } else {
             postData[field.name] = [field.value];
-        };
+        }
     });
-    postData['csrfmiddlewaretoken'] = csrfToken;
+    postData.csrfmiddlewaretoken = csrfToken;
     var ret_data = null;
     $.post(url, postData, function(data) {
         ret_data = data;
         if ($('#hidden-inner-form').find('#error').length) {
             $('#hidden-inner-form').find('#error').remove();
-        };
+        }
         if (data.errors) {
             jQuery.each(fields, function (i, field) {
                 if (data.errors[field.name]) {
                     $('#id_' + field.name).after(
-                        '<p id="error"><font color="red">'
-                        + data.errors[field.name] + '</font></p>');
-                };
+                        '<p id="error"><font color="red">' +
+                        data.errors[field.name] + '</font></p>');
+                }
             });
-            if (data.errors['__all__']) {
+            if (data.errors.__all__) {
                 $('#hidden-inner-form').find('p:first').before(
-                    '<p id="error"><font color="red">'
-                    + data.errors['__all__'] + '</font></p>');
-            };
+                    '<p id="error"><font color="red">' +
+                    data.errors.__all__ + '</font></p>');
+            }
         } else {
             success(ret_data);
-        };
+        }
     }, 'json');
-};
+}
