@@ -159,8 +159,7 @@ def range_wizard(request):
     if data['range']:
         Range = get_model('cyder', 'range')
         rng = Range.objects.get(id=data['range'])
-
-        if data['free_ip'] and rng and rng.ip_type == '4':
+        if data['freeIp'] == 'true' and rng and rng.ip_type == '4':
             ip_str = rng.get_next_ip()
             if not ip_str:
                 ip_str = 'This range is full!'
@@ -181,8 +180,8 @@ def range_wizard(request):
         site = Site.objects.get(id=data['site'])
         site_networks = Network.objects.filter(site=site)
 
-    if data.get('range_type', None):
-        range_types = [data.get('range_type')[:2]]
+    if data.get('rangeType', None):
+        range_types = [data.get('rangeType')[:2]]
     else:
         range_types = ['st', 'dy']
 
