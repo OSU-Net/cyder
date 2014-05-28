@@ -59,10 +59,6 @@ class LabelDomainMixin(models.Model):
     class Meta:
         abstract = True
 
-    def full_clean(self, *args, **kwargs):
-        self.set_fqdn()
-
-        super(LabelDomainMixin, self).full_clean(*args, **kwargs)
 
 class ViewMixin(models.Model):
 
@@ -126,6 +122,11 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         fields.
         """
         return ['fqdn', 'ttl', 'description', 'views']
+
+    def full_clean(self, *args, **kwargs):
+        self.set_fqdn()
+
+        super(CydnsRecord, self).full_clean(*args, **kwargs)
 
     def clean(self):
         # The Nameserver and subclasses of BaseAddressRecord do not call this
