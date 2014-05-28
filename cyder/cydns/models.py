@@ -123,14 +123,10 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         """
         return ['fqdn', 'ttl', 'description', 'views']
 
-    def full_clean(self, *args, **kwargs):
-        self.set_fqdn()
-
-        super(CydnsRecord, self).full_clean(*args, **kwargs)
-
     def clean(self):
         # The Nameserver and subclasses of BaseAddressRecord do not call this
         # function
+        self.set_fqdn()
         self.check_TLD_condition()
         if hasattr(self, 'domain'):
             check_no_ns_soa_condition(self.domain)
