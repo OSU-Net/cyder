@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    var form = document.getElementById('add-object-inner-form');
     var ctnr = $('#ctnr-data');
     var title = $('#title').text().split(' ');
     var ctnr_name = title[title.length - 1].trim();
@@ -10,12 +9,7 @@ $(document).ready(function() {
     var objName = null;
     var objType = null;
     var confirmation = false;
-    var obj_select = document.getElementsByName('obj_type');
-    var add_user_form = document.getElementById('add-user-form');
-    var user_clone = add_user_form.cloneNode(true);
     var csrfToken = $('#view-metadata').attr('data-csrfToken');
-    user_clone.id="user_clone";
-    $(user_clone).removeAttr('style');
 
     $('.minus, .plus, .remove.user, .remove.object').click(function(e) {
         e.preventDefault();
@@ -36,15 +30,15 @@ $(document).ready(function() {
                 name = $(this).parent().parent().find('.username_column').text().trim();
             } else {
                 name = $(this).parent().parent().find('.name_column').text().trim();
-            };
+            }
             if (name) {
                 acknowledge = confirm("Are you sure you want to remove " +
                     obj_type + ", " + name + ", from " + ctnr_name + "?");
             } else {
                 acknowledge = confirm("Are you sure you want to remove this " +
                     obj_type + " from " + ctnr_name + "?");
-            };
-        };
+            }
+        }
 
         if (acknowledge) {
             postData = {
@@ -59,46 +53,41 @@ $(document).ready(function() {
                 if (data.error) {
                     if ($('.container.message').find('.messages').length) {
                         $('.container.message').find('.messages').remove();
-                    };
+                    }
                     $('.container.message').append(
-                        '<ul class="messages"><li class="error">' + data.error
-                        + '</li></ul>');
+                        '<ul class="messages"><li class="error">' +
+                        data.error + '</li></ul>');
                 } else {
                     location.reload();
-                };
-            }, 'json');
-        };
+                }
+            }, 'json' );
+        }
         return false;
     });
+    jQuery.each( $("input[name='obj_type']:checked"), function() {
+        if ( this.value == 'user' ) {
+            $('#add-user-form').slideDown();
+        } else {
+            $('#add-user-form').slideUp();
+        }
+        objType = this.value;
+        searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
+        $('label[for="object-searchbox"]').text(this.value + '*:');
+        search(searchUrl);
 
-    for(var i = 0; i < obj_select.length; i++) {
-        // Check for type selected on refresh/redirect
-        if (obj_select[i].checked || obj_select.length == 1) {
-            if (form.lastChild.tagName == 'DIV') {
-                form.removeChild(form.childNodes[form.childNodes.length -1]);
-            };
-            if (obj_select[i].value == 'user') {
-                 form.appendChild(user_clone);
-            };
-            objType = obj_select[i].value;
-            searchUrl = ctnr.attr(('data-search' + obj_select[i].value + 'Url'));
-            $('label[for="object-searchbox"]').text(obj_select[i].value + '*:');
-            search(searchUrl);
-        };
-        // Watch type selector and update related variables
-        obj_select[i].onclick = function() {
-            if (form.lastChild.tagName == 'DIV') {
-                form.removeChild(form.childNodes[form.childNodes.length -1]);
-            };
-            if (this.value == 'user') {
-                 form.appendChild(user_clone);
-            };
-            objType = this.value;
-            searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
-            $('label[for="object-searchbox"]').text(this.value + '*:');
-            search(searchUrl);
-        };
-    };
+    });
+
+    $("input[name='obj_type']").change( function() {
+        if ( this.value == 'user' ) {
+            $('#add-user-form').slideDown();
+        } else {
+            $('#add-user-form').slideUp();
+        }
+        objType = this.value;
+        searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
+        $('label[for="object-searchbox"]').text(this.value + '*:');
+        search(searchUrl);
+    });
 
     // Auto complete for object search dialog.
     function search(searchUrl) {
@@ -126,17 +115,17 @@ $(document).ready(function() {
             csrfmiddlewaretoken: csrfToken,
         };
         if (objType == 'user') {
-            level = $('#user_clone input[name="level"]:checked');
+            level = $('input[name="level"]:checked');
             if (level.length) {
                 postData.level = level[0].value;
             } else {
                 $('#add-user-errorlist').append(
-                    '<li class="error"><font color="red"> '
-                    + 'This field is required</font></li>');
+                    '<li class="error"><font color="red"> ' +
+                    'This field is required</font></li>');
                 return false;
-            };
+            }
             postData.confirmation = confirmation;
-        };
+        }
         confirmation = false;
         $.post(addObjectUrl, postData, function(data) {
             if (data.acknowledge) {
@@ -153,12 +142,12 @@ $(document).ready(function() {
                 console.log(data.error);
                 var forms = $('#add-object-errorlist');
                 forms.append('<li><font color="red">' + data.error +'</font></li>');
-            };
+            }
             // Not going to use ajax for other objects due to users tables being on top
             if (data.success) {
                 $('.error').empty();
                 document.location.reload();
-            };
+            }
         }, 'json');
     });
 
