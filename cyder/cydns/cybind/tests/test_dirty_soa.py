@@ -61,6 +61,7 @@ class DirtySOATests(TestCase):
         local_soa.dirty = False
         local_soa.save()
         rec = Klass(**create_data)
+        rec.clean()
         rec.full_clean()
         rec.save()
         self.assertTrue(rec.bind_render_record() not in ('', None))

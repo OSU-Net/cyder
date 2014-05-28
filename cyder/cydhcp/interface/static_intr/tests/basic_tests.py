@@ -25,7 +25,7 @@ class StaticInterTests(TestCase):
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
         d = Domain(name=name, delegated=delegated)
-        d.full_clean()
+        d.clean()
         self.assertTrue(d.is_reverse)
         return d
 
@@ -43,8 +43,8 @@ class StaticInterTests(TestCase):
         self.f_c.save()
         self.r1 = self.create_domain(name="10")
         self.r1.save()
-        self.n = System(name="test_system")
-        self.n.full_clean()
+        self.n = System()
+        self.n.clean()
         self.n.save()
         View.objects.get_or_create(name="private")
 
@@ -58,7 +58,7 @@ class StaticInterTests(TestCase):
     def do_add(self, mac, label, domain, ip_str, ip_type='4'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
                             ip_type=ip_type, system=self.n, ctnr=self.ctnr)
-        r.full_clean()
+        r.clean()
         r.save()
         r.details()
         r.get_update_url()
@@ -82,7 +82,7 @@ class StaticInterTests(TestCase):
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         i = self.do_add(**kwargs)
-        i.full_clean()
+        i.clean()
 
     def test2_create_basic(self):
         mac = "11:22:33:44:55:66"
@@ -94,13 +94,13 @@ class StaticInterTests(TestCase):
         i = self.do_add(**kwargs)
 
         i.dhcp_enabled = False
-        i.full_clean()
+        i.clean()
         i.save()
         i2 = StaticInterface.objects.get(pk=i.pk)
         self.assertFalse(i2.dhcp_enabled)
 
         i.dhcp_enabled = True
-        i.full_clean()
+        i.clean()
         i.save()
         i3 = StaticInterface.objects.get(pk=i.pk)
         self.assertTrue(i3.dhcp_enabled)
@@ -170,13 +170,13 @@ class StaticInterTests(TestCase):
                   'ip_str': ip_str}
         ip_type = '4'
         i = self.do_add(**kwargs)
-        i.full_clean()
+        i.clean()
         i.save()
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, a.full_clean)
+        self.assertRaises(ValidationError, a.clean)
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=i.fqdn, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, ptr.full_clean)
+        self.assertRaises(ValidationError, ptr.clean)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
@@ -189,10 +189,10 @@ class StaticInterTests(TestCase):
         ip_type = '4'
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        a.full_clean()
+        a.clean()
         a.save()
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=a.fqdn, ctnr=self.ctnr)
-        ptr.full_clean()
+        ptr.clean()
         ptr.save()
         self.assertRaises(ValidationError, self.do_add, **kwargs)
 

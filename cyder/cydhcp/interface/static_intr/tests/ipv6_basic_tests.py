@@ -24,7 +24,7 @@ class V6StaticInterTests(TestCase):
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
         d = Domain(name=name, delegated=delegated)
-        d.full_clean()
+        d.clean()
         self.assertTrue(d.is_reverse)
         return d
 
@@ -59,7 +59,7 @@ class V6StaticInterTests(TestCase):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
                             ip_type=ip_type, system=self.s, ctnr=self.ctnr,
                             range=self.range)
-        r.full_clean()
+        r.clean()
         r.save()
         repr(r)
         return r
@@ -137,13 +137,13 @@ class V6StaticInterTests(TestCase):
                   'ip_str': ip_str}
         ip_type = '6'
         i = self.do_add(**kwargs)
-        i.full_clean()
+        i.clean()
         i.save()
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, a.full_clean)
+        self.assertRaises(ValidationError, a.clean)
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=i.fqdn, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, ptr.full_clean)
+        self.assertRaises(ValidationError, ptr.clean)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
@@ -156,10 +156,10 @@ class V6StaticInterTests(TestCase):
         ip_type = '6'
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        a.full_clean()
+        a.clean()
         a.save()
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=a.fqdn, ctnr=self.ctnr)
-        ptr.full_clean()
+        ptr.clean()
         ptr.save()
         self.assertRaises(ValidationError, self.do_add, **kwargs)
 

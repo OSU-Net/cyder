@@ -71,7 +71,6 @@ class SearchDNSTests(TestCase):
 
         ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee2.wee.mozilla.com", ip_str="1111::",
                   ip_type="6")
-        ptr.full_clean()
         ptr.save()
         addr = AddressRecord(label="host1", ctnr=self.ctnr, domain=root_domain, ip_str="11::",
                              ip_type="6")
@@ -129,7 +128,6 @@ class SearchDNSTests(TestCase):
 
         ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="2111:0::",
                   ip_type="6")
-        ptr.full_clean()
         ptr.save()
 
         res, error = self.search(ptr.ip_str)
@@ -153,7 +151,6 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['DOMAIN']), 2)
         ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="10.0.0.1",
                   ip_type="4")
-        ptr.full_clean()
         ptr.save()
         addr = AddressRecord(label="host1", ctnr=self.ctnr, domain=root_domain,
                              ip_str="10.0.0.1", ip_type="4")

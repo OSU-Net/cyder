@@ -54,7 +54,7 @@ class ViewTests(TestCase):
     def test_private_view_case_1_addr(self):
         a = AddressRecord(label="asf", ctnr=self.ctnr, domain=self.f_o, ip_str="10.0.0.1",
                           ip_type="4")
-        a.full_clean()
+        a.clean()
         a.save()
         # Object has to exist before views can be assigned.
         a.views.add(self.private)
@@ -63,7 +63,7 @@ class ViewTests(TestCase):
     def test_private_view_case_1_ptr(self):
         ptr = PTR(fqdn="asf.org", ip_str="10.0.0.1", ctnr=self.ctnr,
                   ip_type="4")
-        ptr.full_clean()
+        ptr.clean()
         ptr.save()
         # Object has to exist before views can be assigned.
         ptr.views.add(self.private)
@@ -73,7 +73,7 @@ class ViewTests(TestCase):
         intr = StaticInterface(label="asf", domain=self.f_o, ip_str="10.0.0.1",
                                ip_type="4", mac="00:11:22:33:44:55",
                                system=self.s, ctnr=self.ctnr)
-        intr.full_clean()
+        intr.clean()
         intr.save()
         # Object has to exist before views can be assigned.
         intr.views.add(self.private)

@@ -45,7 +45,7 @@ class PTRTests(cyder.base.tests.TestCase):
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
         d = Domain(name=name, delegated=delegated)
-        d.full_clean()
+        d.clean()
         self.assertTrue(d.is_reverse)
         return d
 
