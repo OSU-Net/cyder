@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var data = $('#data');
+    var data = $('#view-metadata');
     var searchUserUrl = data.attr('data-searchUserUrl')
     $('#user-searchbox').autocomplete({
          minLength: 1,
