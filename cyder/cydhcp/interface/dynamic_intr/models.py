@@ -113,8 +113,8 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         super(DynamicInterface, self).clean(*args, **kwargs)
 
         siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
-        if self.id:
-            siblings = siblings.exclude(id=self.id)
+        if self.pk is not None:
+            siblings = siblings.exclude(pk=self.pk)
         if siblings.exists():
             raise ValidationError(
                 "MAC address must be unique in this interface's range")
