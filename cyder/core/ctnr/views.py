@@ -95,9 +95,9 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
     action_data = []
     users = []
     extra_cols = [
-        {'header': 'Level to %s' % ctnr.name, 'sort_field': 'user'}]
+        {'header': 'Level to %s' % ctnr.name, 'sort_field': None}]
     if actions:
-        extra_cols.append({'header': 'Remove', 'sort_field': 'user'})
+        extra_cols.append({'header': 'Remove', 'sort_field': None})
 
     for ctnruser in ctnrusers:
         user = ctnruser.user
@@ -158,12 +158,7 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
 def create_obj_extra_cols(ctnr, obj_set, obj_type):
     remove_data = []
     objs = []
-    if obj_type == 'range':
-        extra_cols = [
-            {'header': 'Remove', 'sort_field': 'range'}]
-    else:
-        extra_cols = [
-            {'header': 'Remove', 'sort_field': 'name'}]
+    extra_cols = [{'header': 'Remove', 'sort_field': None}]
 
     for obj in obj_set:
         remove_data.append({
