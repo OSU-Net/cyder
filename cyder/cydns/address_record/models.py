@@ -53,6 +53,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
 
         super(BaseAddressRecord, self).clean(*args, **kwargs)
 
+        self.check_name_ctnr_collision()
         if validate_glue:
             self.check_glue_status()
         if not ignore_intr:
@@ -74,6 +75,23 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                     "A CNAME points to this {0} record. Change the CNAME "
                     "before deleting this record.".format(self.record_type()))
         super(BaseAddressRecord, self).delete(*args, **kwargs)
+
+    def check_name_ctnr_collision(self):
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
+        assert self.fqdn
+
+        ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
+                                    .exclude(ctnr=self.ctnr))
+        sis = (StaticInterface.objects.filter(fqdn=self.fqdn)
+                                      .exclude(ctnr=self.ctnr))
+        if ars.exists():
+            raise ValidationError("Cannot create this object because an "
+                                  "Address Record with the name %s exists "
+                                  "in a different container." % self.fqdn)
+        elif sis.exists():
+            raise ValidationError("Cannot create this object because a "
+                                  "Static Interface with the name %s exists "
+                                  "in a different container." % self.fqdn)
 
     def check_intr_collision(self):
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
