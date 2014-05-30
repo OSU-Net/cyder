@@ -79,12 +79,13 @@ class CNAME(LabelDomainMixin, CydnsRecord):
         """
         Allow CNAMEs with the same name iff they share the same container.
         """
-        existing = CNAME.objects.filter(label=self.label, domain=self.domain)
-        for cname in existing:
-            if cname.ctnr != self.ctnr:
-                raise ValidationError("Cannot create CNAME because another "
-                                      "CNAME with the name %s already exists "
-                                      "in a different container." % cname.fqdn)
+        existing = (CNAME.objects.filter(label=self.label, domain=self.domain)
+                                 .exclude(ctnr=self.ctnr))
+        if existing.exists():
+            raise ValidationError("Cannot create CNAME because another CNAME "
+                                  "with the name %s.%s already exists in a "
+                                  "different container." % (self.label,
+                                                            self.domain.name))
 
     def check_SOA_condition(self):
         """
