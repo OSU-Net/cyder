@@ -53,6 +53,10 @@ class CNAMETests(cyder.base.tests.TestCase):
         self.g = create_fake_zone("gz", suffix="")
         self.c_g = create_fake_zone("coo.gz", suffix="")
         self.d = create_fake_zone("dz", suffix="")
+        self.whatcd = create_fake_zone("what.cd", suffix="")
+
+        for dom in [self.g, self.c_g, self.d, self.whatcd]:
+            self.ctnr1.domains.add(dom)
 
         self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
         self.r1.save()
@@ -107,7 +111,6 @@ class CNAMETests(cyder.base.tests.TestCase):
         domain = self.g
         data = "foo.com"
         self.do_add(label, domain, data)
-        self.assertRaises(ValidationError, self.do_add, *(label, domain, data))
 
         label = "hooo"
         domain = self.g
@@ -323,7 +326,9 @@ class CNAMETests(cyder.base.tests.TestCase):
         # Duplicate test?
         data = "wat"
         dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        dom, _ = Domain.objects.get_or_create(name="not.cd")
+
+        self.ctnr1.domains.add(dom)
 
         cn, _ = CNAME.objects.get_or_create(
             label='', ctnr=self.ctnr1, domain=dom, target=data)
@@ -445,6 +450,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         d = Domain(name='example.gz')
         d.full_clean()
         d.save()
+
+        self.ctnr1.domains.add(d)
 
         soa = SOA(root_domain=d, primary='ns.example.gz',
                   contact='root.mail.example.gz')
