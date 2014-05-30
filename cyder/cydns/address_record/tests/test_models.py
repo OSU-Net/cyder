@@ -628,13 +628,13 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         c1.domains.add(self.o_e)
 
-        a1 = AddressRecord(label='foo', domain=self.o_e, ip_str='128.193.0.2',
+        a1 = AddressRecord(label='foo2', domain=self.o_e, ip_str='128.193.0.2',
                            ctnr=c1)
         a1.full_clean()
         a1.save()
 
         with self.assertRaises(ValidationError):
-            a2 = AddressRecord(label='foo', domain=self.o_e,
+            a2 = AddressRecord(label='foo3', domain=self.o_e,
                                ip_str='128.193.0.3', ctnr=c2)
             a2.full_clean()
             a2.save()
