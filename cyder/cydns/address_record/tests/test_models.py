@@ -43,7 +43,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.o_e = Domain(name='oregonstate.edu')
         self.o_e.save()
 
-        self.f_o_e = Domain(name='foo.oregonstate.edu')
+        self.f_o_e = Domain(name='fooz.oregonstate.edu')
         self.f_o_e.save()
 
         self.m_o_e = Domain(name='max.oregonstate.edu')
@@ -59,6 +59,10 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         self._128_193 = self.create_domain(name='128.193')
         self._128_193.save()
+
+        for dom in [self.e, self.o_e, self.f_o_e, self.m_o_e, self.z_o_e,
+                    self.g_o_e, self._128, self._128_193]:
+            self.ctnr.domains.add(dom)
 
     def build_ar(self, *args, **kwargs):
         kwargs['ctnr'] = self.ctnr
@@ -403,6 +407,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     def test_add_address_underscore_in_name_domain(self):
         d = Domain(name="_mssucks.edu")
         d.save()
+        self.ctnr.domains.add(d)
         data = {'label': '*', 'domain': d, 'ip': "128.193.0.10"}
         self.do_add_record(data)
         data = {'label': 'foo', 'domain': d, 'ip': "128.193.0.10"}
@@ -642,16 +647,15 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     def test_duplicate_names(self):
         """Test that AddressRecords can have the same name iff in the same Ctnr
         """
-        c1 = Ctnr(name='test_ctnr1')
-        c1.full_clean()
-        c1.save()
+        c1 = self.ctnr
         c2 = Ctnr(name='test_ctnr2')
         c2.full_clean()
         c2.save()
+        c2.domains.add(self.o_e)
 
         def create_ar1():
             a = AddressRecord(label='foo', domain=self.o_e,
-                               ip_str='128.193.0.2', ctnr=c1)
+                              ip_str='128.193.0.2', ctnr=c1)
             a.full_clean()
             a.save()
             return a
@@ -659,7 +663,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         def create_ar2():
             a = AddressRecord(label='foo', domain=self.o_e,
-                               ip_str='128.193.0.3', ctnr=c1)
+                              ip_str='128.193.0.3', ctnr=c1)
             a.full_clean()
             a.save()
             return a
@@ -667,7 +671,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         def create_ar3():
             a = AddressRecord(label='foo', domain=self.o_e,
-                               ip_str='128.193.0.4', ctnr=c2)
+                              ip_str='128.193.0.4', ctnr=c2)
             a.full_clean()
             a.save()
             return a
@@ -710,12 +714,11 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         r.full_clean()
         r.save()
 
-        c1 = Ctnr(name='test_ctnr1')
-        c1.full_clean()
-        c1.save()
+        c1 = self.ctnr
         c2 = Ctnr(name='test_ctnr2')
         c2.full_clean()
         c2.save()
+        c2.domains.add(self.o_e)
 
         def create_si():
             s = System(name='test_system')
