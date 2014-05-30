@@ -1,37 +1,41 @@
+from functools import partial
+
 from django.core.exceptions import ValidationError
 
 import cyder.base.tests
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
+from cyder.cydns.tests.utils import create_basic_dns_data
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import Ip
-from cyder.core.ctnr.models import Ctnr
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.vrf.models import Vrf
 
 
 class PTRTests(cyder.base.tests.TestCase):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
-        self.arpa = self.create_domain(name='arpa')
-        self.arpa.save()
-        self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i_arpa.save()
-        self.i6_arpa = self.create_domain(name='ip6.arpa')
-        self.i6_arpa.save()
+
+        create_basic_dns_data(dhcp=True)
 
         self._128 = self.create_domain(name='128', ip_type='4')
         self._128.save()
         boot_strap_ipv6_reverse_domain("8.6.2.0")
         self.osu_block = "8620:105:F000:"
-        self.o = Domain(name="edu")
-        self.o.save()
-        self.o_e = Domain(name="oregonstate.edu")
-        self.o_e.save()
-        self.b_o_e = Domain(name="bar.oregonstate.edu")
-        self.b_o_e.save()
-        Domain(name="nothing").save()
-        Domain(name="nothing.nothing").save()
-        Domain(name="nothing.nothing.nothing").save()
+        for name in ('edu', 'oregonstate.edu', 'bar.oregonstate.edu',
+                     'nothing', 'nothing.nothing', 'nothing.nothing.nothing'):
+            d = Domain(name=name)
+            d.full_clean()
+            d.save()
+
+        self.c1 = Ctnr(name='test_ctnr1')
+        self.c1.full_clean()
+        self.c1.save()
 
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
@@ -45,9 +49,12 @@ class PTRTests(cyder.base.tests.TestCase):
         self.assertTrue(d.is_reverse)
         return d
 
-    def do_generic_add(self, ip_str, fqdn, ip_type, domain=None):
-        ret = PTR(ctnr=self.ctnr, fqdn=fqdn, ip_str=ip_str, ip_type=ip_type)
-        ret.clean()
+    def do_generic_add(self, ip_str, fqdn, ip_type, domain=None, ctnr=None):
+        if ctnr is None:
+            ctnr = self.c1
+
+        ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type,
+                  ctnr=ctnr)
         ret.full_clean()
         ret.save()
 
@@ -197,7 +204,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def do_generic_remove(self, ip, fqdn, ip_type):
         ptr = PTR(ctnr=self.ctnr, ip_str=ip, fqdn=fqdn, ip_type=ip_type)
-        ptr.clean()
         ptr.full_clean()
         ptr.save()
 
@@ -305,3 +311,125 @@ class PTRTests(cyder.base.tests.TestCase):
         self.do_generic_invalid_update(ptr, fqdn, '6', ValidationError)
         fqdn = "%.s#.com"
         self.do_generic_invalid_update(ptr, fqdn, '6', ValidationError)
+
+    def test_ctnr_range(self):
+        """Test that a PTR is allowed only in its IP's range's containers"""
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='st', start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        self.c1.ranges.add(r)
+
+        self.do_generic_add('128.193.0.2', 'www1.oregonstate.edu', '4',
+                            ctnr=self.c1)
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
+                                ctnr=c2)
+
+    def test_target_existence(self):
+        """Test that a PTR's target is not required to exist"""
+        self.do_generic_add(
+            ip_str='128.193.0.2', fqdn='nonexistent.oregonstate.edu',
+            ip_type='4')
+
+    def test_domain_ctnr(self):
+        """Test that a PTR's container is independent of its domain's container
+        """
+        self.c1.domains.add(Domain.objects.get(name='oregonstate.edu'))
+
+        c2 = Ctnr(name='test_ctnr2')
+        c2.full_clean()
+        c2.save()
+
+        self.do_generic_add(
+            ip_str='128.193.0.2', fqdn='foo1.oregonstate.edu',
+            ip_type='4', ctnr=self.c1)
+        self.do_generic_add(
+            ip_str='128.193.0.3', fqdn='foo2.oregonstate.edu',
+            ip_type='4', ctnr=c2)
+
+    def test_target_resembles_ip(self):
+        """Test that a PTR's target cannot resemble an IP address"""
+        for fqdn in ('10.234.30.253', '128.193.0.3', 'fe80::e1c9:1:228d:d8'):
+            with self.assertRaises(ValidationError):
+                self.do_generic_add(ip_str='128.193.0.2', fqdn=fqdn,
+                                    ip_type='4')
+
+    def test_same_ip_as_static_intr(self):
+        """Test that a PTR and a static inteface cannot share an IP
+
+        (It doesn't matter whether the static interface is enabled.)
+        """
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='st', start_str='128.193.0.2',
+                  end_str='128.193.0.100')
+        r.full_clean()
+        r.save()
+
+        def create_si(dns_enabled):
+            s = System(name='test_system')
+            s.full_clean()
+            s.save()
+
+            i1 = StaticInterface(
+                mac='be:ef:fa:ce:12:34', label='foo1',
+                domain=Domain.objects.get(name='oregonstate.edu'),
+                ip_str='128.193.0.2', ip_type='4', system=s,
+                ctnr=self.c1, dns_enabled=dns_enabled)
+            i1.full_clean()
+            i1.save()
+            return i1
+
+        create_si_enabled = partial(create_si, True)
+        create_si_enabled.name = "StaticInterface with DNS enabled"
+        create_si_disabled = partial(create_si, False)
+        create_si_disabled.name = "StaticInterface with DNS disabled"
+
+        def create_ptr():
+            return self.do_generic_add(
+                ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu')
+        create_ptr.name = "PTR"
+
+        self.assertObjectsConflict((create_si_enabled, create_ptr))
+        self.assertObjectsConflict((create_si_disabled, create_ptr))
+
+    def test_same_ip(self):
+        """Test that two PTRs cannot have the same IP"""
+        self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                            fqdn='foo1.oregonstate.edu')
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                fqdn='foo2.oregonstate.edu')
+
+    def test_ptr_in_dynamic_range(self):
+        """Test that the IP cannot be in a dynamic range"""
+        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+                    network_str='128.193.0.0/24')
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type='dy', start_str='128.193.0.2',
+                  end_str='128.193.0.100',
+                  domain=Domain.objects.get(name='oregonstate.edu'))
+        r.full_clean()
+        r.save()
+
+        with self.assertRaises(ValidationError):
+            self.do_generic_add(ip_str='128.193.0.2', ip_type='4',
+                                fqdn='foo.oregonstate.edu')
