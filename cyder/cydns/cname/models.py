@@ -36,7 +36,6 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     class Meta:
         app_label = 'cyder'
         db_table = 'cname'
-        unique_together = ('domain', 'label')
 
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)
@@ -72,8 +71,20 @@ class CNAME(LabelDomainMixin, CydnsRecord):
         super(CNAME, self).clean(*args, **kwargs)
         if self.fqdn == self.target:
             raise ValidationError("CNAME loop detected.")
+        self.check_roundrobin_condition()
         self.check_SOA_condition()
         self.existing_node_check()
+
+    def check_roundrobin_condition(self):
+        """
+        Allow CNAMEs with the same name iff they share the same container.
+        """
+        existing = CNAME.objects.filter(label=self.label, domain=self.domain)
+        for cname in existing:
+            if cname.ctnr != self.ctnr:
+                raise ValidationError("Cannot create CNAME because another "
+                                      "CNAME with the name %s already exists "
+                                      "in a different container." % cname.fqdn)
 
     def check_SOA_condition(self):
         """
