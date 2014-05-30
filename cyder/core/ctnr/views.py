@@ -243,7 +243,7 @@ def add_object(request, ctnr_pk):
     acting_user = request.user
     ctnr = Ctnr.objects.get(id=ctnr_pk)
     pk = request.POST.get('obj_pk', '')
-    name = request.POST.get('obj_name', '')
+    name = request.POST.get('obj', '')
     obj_type = request.POST.get('obj_type', '')
     if obj_type == 'user':
         if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=CtnrUser):

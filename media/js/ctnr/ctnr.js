@@ -104,28 +104,14 @@ $(document).ready(function() {
 
     // Add object to ctnr.
     $('#obj-form form').live('submit', function(event) {
-        if (objName != ($('#object-searchbox').val())) {
-            objPk = null;
-            objName = ($('#object-searchbox').val());
-        }
-        var postData = {
-            obj_pk: objPk,
-            obj_name: objName,
-            obj_type: objType,
-            csrfmiddlewaretoken: csrfToken,
-        };
-        if (objType == 'user') {
-            level = $('input[name="level"]:checked');
-            if (level.length) {
-                postData.level = level[0].value;
-            } else {
-                $('#add-user-errorlist').append(
-                    '<li class="error"><font color="red"> ' +
-                    'This field is required</font></li>');
-                return false;
-            }
-            postData.confirmation = confirmation;
-        }
+        var fields = $(this).find(':input').serializeArray();
+        var postData = {};
+        jQuery.each(fields, function (i, field) {
+            postData[field.name] = field.value;
+        });
+        postData.obj_pk = objPk;
+        postData.csrfmiddlewaretoken = csrfToken;
+        postData.confirmation = confirmation;
         confirmation = false;
         $.post(addObjectUrl, postData, function(data) {
             if (data.acknowledge) {
@@ -138,12 +124,9 @@ $(document).ready(function() {
             if (data.error) {
                 $('.error').empty();
                 $('#add-object-errorlist').empty();
-                // Put error message.
-                console.log(data.error);
                 var forms = $('#add-object-errorlist');
                 forms.append('<li><font color="red">' + data.error +'</font></li>');
             }
-            // Not going to use ajax for other objects due to users tables being on top
             if (data.success) {
                 $('.error').empty();
                 document.location.reload();
