@@ -77,6 +77,11 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         super(BaseAddressRecord, self).delete(*args, **kwargs)
 
     def check_name_ctnr_collision(self):
+        """
+        Allow ARs with the same name iff they have the same container.
+        Allow ARs to share a name with a static interface iff they have the
+            same container.
+        """
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         assert self.fqdn
 
