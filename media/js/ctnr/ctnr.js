@@ -2,12 +2,9 @@ $(document).ready(function() {
     var ctnr = $('#ctnr-data');
     var title = $('#title').text().split(' ');
     var ctnr_name = title[title.length - 1].trim();
-    var searchUrl = null;
     var addObjectUrl = ctnr.attr('data-addObjectUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
     var objPk = null;
-    var objName = null;
-    var objType = null;
     var confirmation = false;
     var csrfToken = $('#view-metadata').attr('data-csrfToken');
 
@@ -70,10 +67,8 @@ $(document).ready(function() {
         } else {
             $('#add-user-form').slideUp();
         }
-        objType = this.value;
-        searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
         $('label[for="object-searchbox"]').text(this.value + '*:');
-        search(searchUrl);
+        search(ctnr.attr('data-search' + this.value + 'Url'));
 
     });
 
@@ -83,10 +78,8 @@ $(document).ready(function() {
         } else {
             $('#add-user-form').slideUp();
         }
-        objType = this.value;
-        searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
         $('label[for="object-searchbox"]').text(this.value + '*:');
-        search(searchUrl);
+        search(ctnr.attr('data-search' + this.value + 'Url'));
     });
 
     // Auto complete for object search dialog.
@@ -97,7 +90,6 @@ $(document).ready(function() {
             delay: 400,
             select: function(event, ui) {
                 objPk = ui.item.pk;
-                objName = ui.item.label;
             }
         });
     }
