@@ -18,6 +18,8 @@ class SRVTests(TestCase):
         self.o_e.save()
         self.b_o_e = Domain(name="bar.oregonstate.org")
         self.b_o_e.save()
+        for dom in [self.o, self.o_e, self.b_o_e]:
+            self.ctnr.domains.add(dom)
 
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
