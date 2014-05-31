@@ -19,7 +19,8 @@ class TXTTests(cyder.base.tests.TestCase):
         self.ctnr.domains.add(self.o_e)
 
     def do_generic_add(self, **data):
-        data['ctnr'] = self.ctnr
+        if 'ctnr' not in data:
+            data['ctnr'] = self.ctnr
         txt = TXT(**data)
         txt.full_clean()
         txt.__repr__()
