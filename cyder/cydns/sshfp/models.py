@@ -53,7 +53,7 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
     class Meta:
         app_label = 'cyder'
         db_table = 'sshfp'
-        # unique_together = ('domain', 'label', 'txt_data')
+        unique_together = ('domain', 'label')
         # TODO
         # _mysql_exceptions.OperationalError: (1170, "BLOB/TEXT column
         # 'txt_data' used in key specification without a key length")

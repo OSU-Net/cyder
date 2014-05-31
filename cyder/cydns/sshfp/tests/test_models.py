@@ -44,7 +44,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
                 'algorithm_number': a_type, 'fingerprint_type': s_type}
         self.do_generic_add(**data)
 
-        label = "asdf"
+        label = "asdf2"
         key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
         s_type = 1
         a_type = 1
