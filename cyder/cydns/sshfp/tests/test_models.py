@@ -15,6 +15,8 @@ class SSHFPTests(cyder.base.tests.TestCase):
         self.o.save()
         self.o_e = Domain(name="mozilla.org")
         self.o_e.save()
+        self.ctnr.domains.add(self.o)
+        self.ctnr.domains.add(self.o_e)
 
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
