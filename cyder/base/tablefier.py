@@ -106,7 +106,7 @@ class Tablefier:
 
     @staticmethod
     def build_extra(d):
-        data_fields = ['value', 'url', 'img', 'class']
+        data_fields = ['value', 'url', 'img', 'class', 'data']
         if not isinstance(d['value'], list):
             for k, v in d.items():
                 d[k] = [v]
@@ -149,7 +149,6 @@ class Tablefier:
             extra_datas = zip(*[col['data'] for col in self.extra_cols])
         else:
             extra_datas = [[]] * len(self.objects)
-
         for obj, extra_data in zip(self.objects, extra_datas):
             row_data = []
             if self.add_info:
