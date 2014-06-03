@@ -245,10 +245,10 @@ def edit_user(request, username, action):
 
             else:
                 return HttpResponse(json.dumps(
-                    {'errors': {'__all__': 'Cannot complete action'}}))
+                    {'errors': {'__all__': 'Unknown action'}}))
         except:
             return HttpResponse(json.dumps(
-                {'errors': {'__all__': 'That user does not exist'}}))
+                {'errors': {'__all__': 'An error occurred'}}))
 
     return HttpResponse(json.dumps({'success': True}))
 
