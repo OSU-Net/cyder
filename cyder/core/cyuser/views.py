@@ -194,50 +194,54 @@ def edit_user(request, username, action):
     acting_user = User.objects.get(id=request.session['_auth_user_id'])
 
     if acting_user.is_superuser is False:
-        messages.error(request, 'You do not have superuser permissions')
-        return redirect(reverse('core-index'))
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': 'You do not have superuser permissions'}}))
 
     if acting_user.username == username:
-        messages.error(
-            request, 'You do not have permission to perform this action')
-        return redirect(request.META.get('HTTP_REFERER', ''))
+        return HttpResponse(json.dumps(
+            {'errors': {'__all__': 'You do not have permission to perform ' +
+                        'this action'}}))
 
     if action == 'Create':
         user, _ = User.objects.get_or_create(username=username)
         if _ is False:
-            messages.error(
-                request, 'A user with that username already exists')
+            return HttpResponse(json.dumps(
+                {'errors': {'__all__': 'A user with that username already ' +
+                            'exists'}}))
 
         user.save()
-        return redirect(request.META.get('HTTP_REFERER', ''))
 
-    try:
-        user = User.objects.get(username=username)
-        if action == 'Promote':
-            user.is_superuser = True
-            user.save()
+    else:
+        try:
+            user = User.objects.get(username=username)
+            if action == 'Promote':
+                user.is_superuser = True
+                user.save()
 
-            ctnruser, _ = CtnrUser.objects.get_or_create(
-                user_id=user.id, ctnr_id=Ctnr.objects.get(name='global').id,
-                level=0)
-            ctnruser.save()
+                ctnruser, _ = CtnrUser.objects.get_or_create(
+                    user_id=user.id,
+                    ctnr_id=Ctnr.objects.get(name='global').id,
+                    level=0)
+                ctnruser.save()
 
-        elif action == 'Demote':
-            user.is_superuser = False
-            user.save()
+            elif action == 'Demote':
+                user.is_superuser = False
+                user.save()
 
-        elif action == 'Delete':
-            ctnrs = CtnrUser.objects.filter(user_id=user.id)
-            for ctnr in ctnrs:
-                ctnr.delete()
-            user.delete()
+            elif action == 'Delete':
+                ctnrs = CtnrUser.objects.filter(user_id=user.id)
+                for ctnr in ctnrs:
+                    ctnr.delete()
+                user.delete()
 
-        else:
-            messages.error(request, 'Cannot complete action')
-    except:
-        messages.error(request, 'That user does not exist')
+            else:
+                return HttpResponse(json.dumps(
+                    {'errors': {'__all__': 'Cannot complete action'}}))
+        except:
+            return HttpResponse(json.dumps(
+                {'errors': {'__all__': 'That user does not exist'}}))
 
-    return redirect(request.META.get('HTTP_REFERER', ''))
+    return HttpResponse(json.dumps({'success': True}))
 
 
 def search(request):

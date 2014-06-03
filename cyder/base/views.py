@@ -8,7 +8,7 @@ from django.core.mail import send_mail, BadHeaderError
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.forms import ValidationError, ModelChoiceField, HiddenInput
-from django.forms.util import ErrorList, ErrorDict
+from django.forms.util import ErrorDict
 from django.db import IntegrityError
 from django.db.models import get_model
 from django.shortcuts import (get_object_or_404, redirect, render,
@@ -42,13 +42,12 @@ def home(request):
 def admin_page(request):
     if request.POST:
         if 'user' in request.POST:
-            if 'action' not in request.POST:
-                messages.error(request, 'Select an option')
+            if 'edit_action' not in request.POST:
+                return HttpResponse(json.dumps(
+                    {'errors': {'__all__': 'Select an option'}}))
             else:
-                edit_user(request, request.POST['user'],
-                          request.POST['action'])
-
-        return redirect(request.META.get('HTTP_REFERER', ''))
+                return edit_user(request, request.POST['user'],
+                                 request.POST['edit_action'])
 
     else:
         if User.objects.get(
