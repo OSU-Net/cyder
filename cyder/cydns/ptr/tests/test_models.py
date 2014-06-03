@@ -27,15 +27,17 @@ class PTRTests(cyder.base.tests.TestCase):
         self._128.save()
         boot_strap_ipv6_reverse_domain("8.6.2.0")
         self.osu_block = "8620:105:F000:"
+
+        self.c1 = Ctnr(name='test_ctnr1')
+        self.c1.full_clean()
+        self.c1.save()
+
         for name in ('edu', 'oregonstate.edu', 'bar.oregonstate.edu',
                      'nothing', 'nothing.nothing', 'nothing.nothing.nothing'):
             d = Domain(name=name)
             d.full_clean()
             d.save()
-
-        self.c1 = Ctnr(name='test_ctnr1')
-        self.c1.full_clean()
-        self.c1.save()
+            self.c1.domains.add(d)
 
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
