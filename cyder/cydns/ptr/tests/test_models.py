@@ -292,9 +292,10 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def test_invalid_update_ipv4(self):
         ptr = self.do_generic_add("128.3.1.1", "oregonstate.edu", '4')
-        ptr2 = self.do_generic_add("128.3.1.1", "foo.oregonstate.edu", '4')
-        fqdn = "oregonstate.edu"
-        self.do_generic_invalid_update(ptr2, fqdn, '4', ValidationError)
+        ptr2 = self.do_generic_add("128.3.1.2", "oregonstate.edu", '4')
+        with self.assertRaises(ValidationError):
+            ptr2.ip_str = ptr.ip_str
+            ptr2.save()
         fqdn = ".oregonstate.edu "
         self.do_generic_invalid_update(ptr, fqdn, '4', ValidationError)
         fqdn = "asfd..as"
@@ -306,7 +307,10 @@ class PTRTests(cyder.base.tests.TestCase):
         ptr = self.do_generic_add(
             self.osu_block + ":aa", "oregonstate.edu", '6')
         ptr2 = self.do_generic_add(
-            self.osu_block + ":aa", "foo.oregonstate.edu", '6')
+            self.osu_block + ":ab", "foo.oregonstate.edu", '6')
+        with self.assertRaises(ValidationError):
+            ptr2.ip_str = ptr.ip_str
+            ptr2.save()
         fqdn = "oregonstate.edu"
         self.do_generic_invalid_update(ptr2, fqdn, '6', ValidationError)
         fqdn = "asfd..as"

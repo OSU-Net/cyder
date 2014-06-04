@@ -1,6 +1,7 @@
 from gettext import gettext as _
 
 from django.db import models
+from django.db.models.loading import get_model
 from django.core.exceptions import ValidationError
 
 from cyder.base.models import BaseModel
@@ -25,6 +26,25 @@ class BasePTR(object):
             self.urd = False
         check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
+        self.check_ip_conflict()
+
+    def check_ip_conflict(self):
+        StaticInterface = get_model('cyder', 'staticinterface')
+        ptrs = PTR.objects.filter(ip_upper=self.ip_upper,
+                                  ip_lower=self.ip_lower)
+        sis = StaticInterface.objects.filter(ip_upper=self.ip_upper,
+                                             ip_lower=self.ip_lower)
+        if self.pk is not None:
+            if isinstance(self, PTR):
+                ptrs = ptrs.exclude(pk=self.pk)
+            if isinstance(self, StaticInterface):
+                sis = sis.exclude(pk=self.pk)
+
+        if ptrs.exists():
+            raise ValidationError("PTR already exists for %s" % self.ip_str)
+        elif sis.exists():
+            raise ValidationError("Static Interface already exists for %s" %
+                                  self.ip_str)
 
     def reverse_validate_no_cname(self):
         """
