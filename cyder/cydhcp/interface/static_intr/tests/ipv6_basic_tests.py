@@ -1,4 +1,3 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from functools import partial
 
@@ -12,22 +11,10 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
 
-from cyder.cydns.ip.utils import ip_to_domain_name
+from basestatic import BaseStaticTests
 
 
-class V6StaticInterTests(TestCase):
-    def create_domain(self, name, ip_type=None, delegated=False):
-        if ip_type is None:
-            ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            pass
-        else:
-            name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        d.clean()
-        self.assertTrue(d.is_reverse)
-        return d
-
+class V6StaticInterTests(BaseStaticTests):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
@@ -40,6 +27,8 @@ class V6StaticInterTests(TestCase):
         self.c.save()
         self.f_c = Domain(name="foo.ccc")
         self.f_c.save()
+        self.ctnr.domains.add(self.c)
+        self.ctnr.domains.add(self.f_c)
         self.r1 = self.create_domain(name="0", ip_type='6')
         self.r1.save()
         self.r2 = self.create_domain(name="1", ip_type='6')
