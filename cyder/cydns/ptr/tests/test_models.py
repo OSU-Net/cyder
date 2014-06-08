@@ -462,7 +462,7 @@ class PTRTests(cyder.base.tests.TestCase):
         """Test that the IP cannot be in a dynamic range"""
         self.create_network_range(network_str='128.193.1.0/24',
                                   start_str='128.193.1.2',
-                                  end_str='128.193.1.100')
+                                  end_str='128.193.1.100', range_type='dy')
 
         with self.assertRaises(ValidationError):
             self.do_generic_add(ip_str='128.193.1.2', ip_type='4',
