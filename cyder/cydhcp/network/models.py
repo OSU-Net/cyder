@@ -266,9 +266,9 @@ class Network(BaseModel, ObjectUrlMixin):
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
-        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError):
-            raise ValidationError('Invalid IPv{0} network'
-                                  .format(self.ip_type))
+        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
+            raise ValidationError('Invalid IPv{0} network: {1}'
+                                  .format(self.ip_type, e))
         # Update fields
         self.ip_upper = int(self.network) >> 64
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off

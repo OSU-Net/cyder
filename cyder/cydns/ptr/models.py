@@ -146,6 +146,13 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     def rdtype(self):
         return 'PTR'
 
+    @property
+    def range(self):
+        rng = find_range(self.ip_str)
+        if rng is None:
+            raise ValidationError("No range exists for %s" % self.ip_str)
+        return rng
+
     def bind_render_record(self):
         if self.ip_type == '6':
             ip = "%x" % ((self.ip_upper << 64) | self.ip_lower)
@@ -175,7 +182,7 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         self.clean()
         super(PTR, self).save(*args, **kwargs)
         self.rebuild_reverse()
-        rng = find_range(self.ip_str)
+        rng = self.range
         if rng and update_range_usage:
             rng.save()
             if old_range:
@@ -213,6 +220,9 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             raise ValidationError(
                 "A static interface has already used %s" % self.ip_str
             )
+        if self.ctnr not in self.range.ctnr_set.all():
+            raise ValidationError("Could not create PTR because %s "
+                                  "is not in this container." % self.ip_str)
         self.clean_reverse()
 
     def details(self):
