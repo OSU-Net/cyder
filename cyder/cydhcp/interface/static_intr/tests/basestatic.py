@@ -54,6 +54,7 @@ class BaseStaticTests(TestCase):
         self.sr = Range(network=self.net, range_type=STATIC,
                         start_str='10.0.0.1', end_str='10.0.0.3')
         self.sr.save()
+        self.ctnr.ranges.add(self.sr)
 
     def do_add_intr(self, mac, label, domain, ip_str, ip_type='4',
                     system=None):

@@ -43,6 +43,7 @@ class V6StaticInterTests(BaseStaticTests):
                            ip_type='6', start_str='1000::1',
                            end_str='1000:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
         self.range.save()
+        self.ctnr.ranges.add(self.range)
 
     def do_add(self, mac, label, domain, ip_str, ip_type='6'):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
