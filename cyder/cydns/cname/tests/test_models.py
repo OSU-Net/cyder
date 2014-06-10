@@ -84,6 +84,9 @@ class CNAMETests(cyder.base.tests.TestCase):
                          start_str='128.193.1.1', end_str='128.193.1.2')
         self.sr3.save()
 
+        for r in [self.sr1, self.sr2, self.sr3]:
+            self.ctnr1.ranges.add(r)
+
     def do_add(self, label, domain, data):
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain, target=data)
         cn.full_clean()
@@ -399,7 +402,8 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         CNAME.objects.get_or_create(label=label, ctnr=self.ctnr1, domain=dom,
                                     target=data)
-        rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd')
+        rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd',
+                  ctnr=self.ctnr1)
 
         self.assertRaises(ValidationError, rec.clean)
 
