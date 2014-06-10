@@ -6,12 +6,17 @@
     {% include "base/sidebar.html" %}
 {% endblock %}
 
+{% block view_metadata %}
+    <span id="view-metadata"
+        data-csrfToken="{{ csrf_token }}">
+    </span>
+{% endblock %}
+
 {% block action_bar %}
   {% if obj_type_perm %}
     {% if obj_type in ["static_interface", "dynamic_interface"] %}
-      {{ js('interface_delete') }}
-      <a class="btn submit c" href="{{ url('system-create') }}?interface_type={{ obj_type }}"
-          id="system_create">Create {{ pretty_obj_type }}</a>
+      <a class="btn submit a" href={{ url('system-create') }} id="system_create"
+          data-kwargs='{"initial": "True", "interface_type": "{{ obj_type }}"}'>Create {{ pretty_obj_type }}</a>
     {% else %}
       <a id="btn create-obj" class="btn create-obj">
         Create {{ pretty_obj_type }}

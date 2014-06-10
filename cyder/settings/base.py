@@ -312,9 +312,6 @@ MINIFY_BUNDLES = {
         'cyuser': (
             'js/cyuser/cyuser.js',
         ),
-        'interface_delete': (
-            'js/interface_delete.js',
-        ),
         'systemform': (
             'js/systemform.js',
         ),

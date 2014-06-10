@@ -53,32 +53,67 @@ $(document).ready(function() {
             $(parentsChild).slideToggle('slow');
         }
     });
-
-    $('#system_create, #delete, .delete').live( 'click', function(e) {
-        e.preventDefault();
-        if ($(this).attr('id') == 'delete' ||
-            $(this).attr('class') == 'delete') {
-            var msg = "Are you sure you want to delete this?";
-            if ($(this).attr('data-kwargs').indexOf('"system"') >= 0) {
-                msg = "Deleting this system will also delete its" +
-                    " interfaces. Are you sure you want to continue?";
-            }
-            if (!confirm(msg)) {
-                return false;
-            }
-        }
-        var url = $(this).attr('href');
-        var postData = JSON.parse($(this).attr('data-kwargs'));
+    function button_to_form( button, success) {
+        var url = $(button).attr( 'href' );
+        var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );
         var postForm = $('<form style="display: none" action="' +
             url + '" method="post"></form>');
-        $.each(postData, function(key, value) {
+        $.each(kwargs, function(key, value) {
             postForm.append($('<input>').attr(
                 {type: 'text', name: key, value: value}));
         });
         postForm.append($('<input>').attr(
-            {type: 'hidden', name: 'csrfmiddlewaretoken', value: csrfToken}));
+            { type: 'hidden', name: 'csrfmiddlewaretoken', value: csrfToken } ) );
         $('.content').append(postForm);
-        $(postForm).submit();
+        success( postForm );
+    };
+
+    $('#system_create').live( 'click', function( e ) {
+        e.preventDefault();
+        button_to_form( this, function ( postForm ) {
+            $(postForm).submit();
+        });
+    });
+
+    $('#delete, .delete').live( 'click', function(e) {
+        e.preventDefault();
+        var button = this;
+        var kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
+        var msg = "Are you sure you want to delete this?";
+        if ( kwargs.obj_type.indexOf( 'interface' ) != -1) {
+            var postData = {
+                pk: kwargs.pk,
+                obj_type: kwargs.obj_type,
+                csrfmiddlewaretoken: csrfToken,
+            };
+            $.post( '/dhcp/interface/last_interface/', postData, function( data ) {
+                if ( data == "true" ) {
+                    msg = "Because this is the last interface on " +
+                          "its system, deleting this interface " +
+                          "will also delete its system. Are you " +
+                          "sure you want to continue?"
+                };
+                if ( confirm( msg ) ) {
+                    button_to_form( button, function ( postForm ) {
+                        $(postForm).submit();
+                    });
+                } else {
+                    return false;
+                };
+            });
+        } else {
+            if ( kwargs.obj_type == "system" ) {
+                msg = "Deleting this system will also delete its" +
+                    " interfaces. Are you sure you want to continue?";
+            };
+            if ( confirm( msg ) ) {
+                button_to_form( this, function ( postForm ) {
+                    $(postForm).submit();
+                });
+            } else {
+                return false;
+            };
+        };
     });
 
     $('#id_attribute').live('focus', function() {
