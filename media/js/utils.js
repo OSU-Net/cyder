@@ -129,3 +129,57 @@ function clear_form_all(form) {
         }
     }
 }
+
+
+function button_to_form( button, csrfToken, success) {
+    var url = $(button).attr( 'href' );
+    var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );
+    var postForm = $('<form style="display: none" action="' +
+        url + '" method="post"></form>');
+    $.each(kwargs, function(key, value) {
+        postForm.append($('<input>').attr(
+            {type: 'text', name: key, value: value}));
+    });
+    postForm.append($('<input>').attr(
+        { type: 'hidden', name: 'csrfmiddlewaretoken', value: csrfToken } ) );
+    $('.content').append(postForm);
+    success( postForm );
+};
+
+
+function ajax_form_submit(url, form, csrfToken, success) {
+    jQuery.ajaxSettings.traditional = true;
+    var fields = form.find(':input').serializeArray();
+    var postData = {};
+    jQuery.each(fields, function (i, field) {
+        if (i > 0 && fields[i-1].name == field.name) {
+            postData[field.name].push(field.value);
+        } else {
+            postData[field.name] = [field.value];
+        }
+    });
+    postData.csrfmiddlewaretoken = csrfToken;
+    var ret_data = null;
+    $.post(url, postData, function(data) {
+        ret_data = data;
+        if ($('#hidden-inner-form').find('#error').length) {
+            $('#hidden-inner-form').find('#error').remove();
+        }
+        if (data.errors) {
+            jQuery.each(fields, function (i, field) {
+                if (data.errors[field.name]) {
+                    $('#id_' + field.name).after(
+                        '<p id="error"><font color="red">' +
+                        data.errors[field.name] + '</font></p>');
+                }
+            });
+            if (data.errors.__all__) {
+                $('#hidden-inner-form').find('p:first').before(
+                    '<p id="error"><font color="red">' +
+                    data.errors.__all__ + '</font></p>');
+            }
+        } else {
+            success(ret_data);
+        }
+    }, 'json');
+}
