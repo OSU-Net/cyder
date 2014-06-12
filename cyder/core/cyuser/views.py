@@ -218,11 +218,20 @@ def edit_user(request, username, action):
                 user.is_superuser = True
                 user.save()
 
-                ctnruser, _ = CtnrUser.objects.get_or_create(
-                    user_id=user.id,
-                    ctnr_id=Ctnr.objects.get(name='global').id,
-                    level=0)
-                ctnruser.save()
+                try:
+                    ctnruser = CtnrUser.objects.get(
+                        user_id=user.id,
+                        ctnr_id=Ctnr.objects.get(name='global').id)
+                    ctnruser.level = 0
+                    ctnruser.full_clean()
+                    ctnruser.save()
+                except CtnrUser.DoesNotExist:
+                    ctnruser = CtnrUser(
+                        user_id=user.id,
+                        ctnr_id=Ctnr.objects.get(name='global').id,
+                        level=0)
+                    ctnruser.full_clean()
+                    ctnruser.save()
 
             elif action == 'Demote':
                 user.is_superuser = False
@@ -236,10 +245,10 @@ def edit_user(request, username, action):
 
             else:
                 return HttpResponse(json.dumps(
-                    {'errors': {'__all__': 'Cannot complete action'}}))
+                    {'errors': {'__all__': 'Unknown action'}}))
         except:
             return HttpResponse(json.dumps(
-                {'errors': {'__all__': 'That user does not exist'}}))
+                {'errors': {'__all__': 'An error occurred'}}))
 
     return HttpResponse(json.dumps({'success': True}))
 
