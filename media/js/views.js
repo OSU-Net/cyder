@@ -19,20 +19,27 @@ $(document).ready(function() {
         make_smart_name_get_domains(
             $('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
     }
+
+    // displays the loading gif on ajax event
     $('.load').ajaxStart(function() {
         $(this).show();
     }).ajaxStop(function() {
         $(this).hide();
     });
 
+    // toggles the settings menu in mobile view
     $('#settings-btn').click( function(e) {
         $('.settings-menu').slideToggle();
         $('#settings-btn').toggleClass('selected');
     });
+
+    // toggles the sidebar in mobile view
     $('#menu-btn').click( function(e) {
         $('#menu-btn').toggleClass('selected');
         $('#sidebar_div').toggleClass('displayed');
     });
+
+    // sidebar animation logic
     $('.nav-item.parent').click( function(e) {
         e.preventDefault();
         var parentsChild = ('#' + this.id + '-children');
@@ -54,9 +61,11 @@ $(document).ready(function() {
         }
     });
 
+    // handles create buttons in dynamic/static interface view and range
+    // detail view
     $('#system_create').live( 'click', function( e ) {
         e.preventDefault();
-        button_to_form( this, function ( postForm ) {
+        button_to_form( this, csrfToken, function ( postForm ) {
             $(postForm).submit();
         });
     });
