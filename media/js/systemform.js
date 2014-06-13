@@ -14,29 +14,29 @@ $(document).ready(function() {
     if (initial_interface_type) {
         $('input[name=interface_type][value=' +
             initial_interface_type + ']').attr('checked', true);
-    };
+    }
     for(var i = 0; i < interface_type.length; i++) {
         if (interface_type[i].checked) {
-            if (form.lastChild.textContent != '') {
+            if (form.lastChild.textContent !== '') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
-            };
+            }
             if (interface_type[i].value =='static_interface') {
                 form.appendChild(static_clone);
             } else {
                 form.appendChild(dynamic_clone);
-            };
-        };
+            }
+        }
         interface_type[i].onclick = function() {
-            if (form.lastChild.textContent != '') {
+            if (form.lastChild.textContent !== '') {
                 form.removeChild(form.childNodes[form.childNodes.length -1]);
-            };
+            }
             if (this.value =='static_interface') {
                 form.appendChild(static_clone);
             } else {
                 form.appendChild(dynamic_clone);
-            };
-        };
-    };
+            }
+        }
+    }
 
     $('form#system-form').live('submit', function(event) {
         event.preventDefault();
@@ -48,12 +48,12 @@ $(document).ready(function() {
         });
         if (!data.errors) {
             location.href = '/core/system/' + data.system_id.toString();
-        };
+        }
 
         if ($("input[name=interface_type]:checked").val() === undefined) {
             $("label[for=id_interface_type_0]:first").after(
                 '<p id="error"><font color="red">This field is required.' +
-                '</font></p>')
-        };
+                '</font></p>');
+        }
     });
 });

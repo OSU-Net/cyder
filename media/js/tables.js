@@ -36,7 +36,7 @@ function enableEditableGrid() {
         */
         var postData = {};
         postData[editableGrid.getColumnName(columnIndex)] = newValue;
-        postData['csrfmiddlewaretoken'] = csrfToken;
+        postData.csrfmiddlewaretoken = csrfToken;
         $.post($(row).attr('data-url'), postData, function(resp) {
             if (resp && resp.error) {
                 $(row).after($('<tr></tr>').html(resp.error[0]));
