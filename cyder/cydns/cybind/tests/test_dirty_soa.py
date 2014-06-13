@@ -40,6 +40,8 @@ class DirtySOATests(TestCase):
         self.rsoa.dirty = False
         self.rsoa.save()
 
+        self.ctnr.domains.add(self.dom, self.rdom)
+
         self.s = System()
         self.s.save()
 
@@ -47,8 +49,9 @@ class DirtySOATests(TestCase):
         self.net.update_network()
         self.net.save()
         self.range = Range(network=self.net, range_type=STATIC,
-                        start_str='10.2.3.1', end_str='10.2.3.2')
+                           start_str='10.2.3.1', end_str='10.2.3.2')
         self.range.save()
+        self.ctnr.ranges.add(self.range)
 
     def test_print_soa(self):
         self.assertTrue(self.soa.bind_render_record() not in ('', None))
@@ -137,7 +140,7 @@ class DirtySOATests(TestCase):
 
     def test_dirty_ptr(self):
         create_data = {
-            'ip_str': '10.2.3.4',
+            'ip_str': '10.2.3.1',
             'ip_type': '4',
             'fqdn': 'foo.bar.com',
         }
