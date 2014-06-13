@@ -40,16 +40,17 @@ class LibTestsRange(TestCase):
             name="private.corp.phx1.oregonstate.com")
         d2.soa = soa
         d2.save()
+        self.ctnr.domains.add(d, d1, d2)
 
-        d, _ = Domain.objects.get_or_create(name="arpa")
-        d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
-        d, _ = Domain.objects.get_or_create(name="15.in-addr.arpa")
+        for name in ["arpa", "in-addr.arpa", "15.in-addr.arpa"]:
+            d, _ = Domain.objects.get_or_create(name=name)
+            self.ctnr.domains.add(d)
+
         n = Network(network_str="15.0.0.0/8", ip_type="4")
         n.clean()
         n.site = s1
         n.vlan = v
         n.save()
-
 
         r1 = Range(start_str="15.0.0.0", end_str="15.0.0.10",
                    network=n, ip_type='4', range_type=STATIC)
@@ -60,6 +61,8 @@ class LibTestsRange(TestCase):
                    network=n, ip_type='4', range_type=STATIC)
         r2.clean()
         r2.save()
+
+        self.ctnr.ranges.add(r1, r2)
 
     def test1_create_ipv4_interface_from_range(self):
         intr, errors = create_ipv4_intr_from_range(
