@@ -1,22 +1,15 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
-from cyder.core.ctnr.models import Ctnr
+
+from basedomain import BaseDomain
 
 
-class DomainTests(TestCase):
-
-    def setUp(self):
-        Domain.objects.get_or_create(name="arpa")
-        Domain.objects.get_or_create(name="in-addr.arpa")
-        Domain.objects.get_or_create(name="128.in-addr.arpa")
-        self.ctnr, _ = Ctnr.objects.get_or_create(name="abloobloobloo")
-
+class DomainTests(BaseDomain):
     def test_remove_domain(self):
         c = Domain(name='com')
         c.save()
@@ -181,8 +174,7 @@ class DomainTests(TestCase):
 
     def test_delegation(self):
         name = "boom"
-        dom = Domain(name=name, delegated=True)
-        dom.save()
+        dom = self.create_domain(name=name, delegated=True)
 
         # Creating objects in the domain should be locked.
         arec = AddressRecord(
@@ -228,10 +220,10 @@ class DomainTests(TestCase):
 
     def test_existing_record_new_domain(self):
         name = "bo"
-        b_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        b_dom = self.create_domain(name=name, delegated=False)
 
         name = "to.bo"
-        t_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        t_dom = self.create_domain(name=name, delegated=False)
 
         arec1 = AddressRecord(
             label="no", ctnr=self.ctnr, domain=t_dom, ip_str="128.193.99.9", ip_type='4')
@@ -243,10 +235,10 @@ class DomainTests(TestCase):
 
     def test_existing_cname_new_domain(self):
         name = "bo"
-        b_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        b_dom = self.create_domain(name=name, delegated=False)
 
         name = "to.bo"
-        t_dom, _ = Domain.objects.get_or_create(name=name, delegated=False)
+        t_dom = self.create_domain(name=name, delegated=False)
 
         cn = CNAME(ctnr=self.ctnr, domain=t_dom, label="no", target="asdf")
         cn.full_clean()

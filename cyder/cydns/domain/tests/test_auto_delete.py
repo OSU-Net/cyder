@@ -1,7 +1,4 @@
-from django.test import TestCase
-
 from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.cname.models import CNAME
@@ -12,29 +9,11 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.tests.utils import create_fake_zone
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.network.models import Network
+
+from basedomain import BaseDomain
 
 
-class AutoDeleteTests(TestCase):
-
-    def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        c = Domain(name='poo')
-        c.save()
-        self.assertFalse(c.purgeable)
-        self.f_c = create_fake_zone('foo.poo', suffix="")
-        self.assertEqual(self.f_c.name, 'foo.poo')
-
-        self.net = Network(network_str='10.2.3.0/29')
-        self.net.update_network()
-        self.net.save()
-        self.sr = Range(network=self.net, range_type=STATIC,
-                        start_str='10.2.3.1', end_str='10.2.3.4')
-        self.sr.save()
-
+class AutoDeleteTests(BaseDomain):
     def test_cleanup_txt(self):
         self.assertFalse(Domain.objects.filter(name="x.y.z.foo.poo"))
         self.assertFalse(Domain.objects.filter(name="y.z.foo.poo"))

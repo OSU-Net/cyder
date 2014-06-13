@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.txt.models import TXT
@@ -9,17 +7,13 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
-from cyder.core.ctnr.models import Ctnr
 
 from cyder.cydns.tests.utils import create_fake_zone
 
+from basedomain import BaseDomain
 
-class FullNameTests(TestCase):
 
-    def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-
+class FullNameTests(BaseDomain):
     def test_basic_add_remove1(self):
         c = Domain(name='com')
         c.save()

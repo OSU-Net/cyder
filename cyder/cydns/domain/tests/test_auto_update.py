@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.txt.models import TXT
@@ -7,18 +5,14 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.utils import ensure_label_domain
 
 from cyder.cydns.tests.utils import create_fake_zone
 
+from basedomain import BaseDomain
 
-class UpdateRecordDeleteDomainTests(TestCase):
 
-    def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-
+class UpdateRecordDeleteDomainTests(BaseDomain):
     def generic_check(self, obj, do_label=True, label_prefix=""):
         # Make sure all record types block
         f_c = create_fake_zone("foo.foo22", suffix="")
