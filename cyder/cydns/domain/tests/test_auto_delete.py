@@ -23,6 +23,7 @@ class AutoDeleteTests(BaseDomain):
         self.assertFalse(self.f_c.purgeable)
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
 
         txt = TXT(label=label, ctnr=self.ctnr, domain=the_domain, txt_data="Nthing")
         txt.save()
@@ -42,6 +43,7 @@ class AutoDeleteTests(BaseDomain):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         addr = AddressRecord(label=label, ctnr=self.ctnr, domain=the_domain,
                              ip_type='4', ip_str="10.2.3.4")
         addr.save()
@@ -61,6 +63,7 @@ class AutoDeleteTests(BaseDomain):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         mx = MX(label=label, ctnr=self.ctnr, domain=the_domain, server="foo", priority=4)
         mx.save()
         self.assertFalse(prune_tree(the_domain))
@@ -79,6 +82,7 @@ class AutoDeleteTests(BaseDomain):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         ns = Nameserver(ctnr=self.ctnr, domain=the_domain, server="asdfasffoo")
         ns.save()
         self.assertFalse(prune_tree(the_domain))
@@ -97,6 +101,7 @@ class AutoDeleteTests(BaseDomain):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         srv = SRV(
             label='_' + label, ctnr=self.ctnr, domain=the_domain, target="foo", priority=4,
             weight=4, port=34
@@ -112,10 +117,10 @@ class AutoDeleteTests(BaseDomain):
 
     def test_cleanup_cname(self):
         # Make sure CNAME record block
-        c = Domain(name='foo1')
-        c.save()
+        c = self.create_domain(name='foo1')
         self.assertFalse(c.purgeable)
         f_c = create_fake_zone('foo.foo1', suffix="")
+        self.ctnr.domains.add(f_c)
         self.assertEqual(f_c.name, 'foo.foo1')
 
         self.assertFalse(Domain.objects.filter(name="x.y.z.foo.foo1"))
@@ -126,6 +131,7 @@ class AutoDeleteTests(BaseDomain):
         self.assertFalse(f_c.purgeable)
         fqdn = "cname.x.y.z.foo.foo1"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
 
         cname = CNAME(label=label, ctnr=self.ctnr, domain=the_domain, target="foo")
         cname.save()
@@ -150,6 +156,7 @@ class AutoDeleteTests(BaseDomain):
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         system = System(name='foobar')
         system.save()
         addr = StaticInterface(

@@ -16,9 +16,11 @@ class UpdateRecordDeleteDomainTests(BaseDomain):
     def generic_check(self, obj, do_label=True, label_prefix=""):
         # Make sure all record types block
         f_c = create_fake_zone("foo.foo22", suffix="")
+        self.ctnr.domains.add(f_c)
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo22"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         if do_label:
             # NS records don't like labels
             label = label_prefix + label
@@ -28,6 +30,7 @@ class UpdateRecordDeleteDomainTests(BaseDomain):
 
         fqdn = "bar.x.y.xx.foo.foo22"
         label, new_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(new_domain)
         obj.domain = new_domain
         obj.save()
 
