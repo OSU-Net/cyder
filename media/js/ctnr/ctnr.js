@@ -50,25 +50,24 @@ $(document).ready(function() {
         }
         return false;
     });
-    jQuery.each( $("input[name='obj_type']:checked"), function() {
-        if ( this.value == 'user' ) {
+
+    function changeCtnrForm ( value ) {
+        if ( value == 'user' ) {
             $('#add-user-form').slideDown();
         } else {
             $('#add-user-form').slideUp();
         }
-        $('label[for="object-searchbox"]').text( this.value + '*:' );
-        search( $('#ctnr-data').attr( 'data-search' + this.value + 'Url' ) );
+        $('label[for="object-searchbox"]').text( value + '*:' );
+        search( $('#ctnr-data').attr( 'data-search' + value + 'Url' ) );
 
+    };
+
+    jQuery.each( $("input[name='obj_type']:checked"), function() {
+        changeCtnrForm( this.value );
     });
 
     $("input[name='obj_type']").change( function() {
-        if ( this.value == 'user' ) {
-            $('#add-user-form').slideDown();
-        } else {
-            $('#add-user-form').slideUp();
-        }
-        $('label[for="object-searchbox"]').text( this.value + '*:' );
-        search( $('#ctnr-data').attr( 'data-search' + this.value + 'Url' ) );
+        changeCtnrForm( this.value );
     });
 
     // Auto complete for object search dialog.
