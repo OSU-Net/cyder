@@ -121,6 +121,7 @@ class APITests(TestCase):
 
         self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.domain, self.view = build_sample_domain()
+        self.ctnr.domains.add(self.domain)
         self.token = Token.objects.create(
             user=User.objects.get(username="test_superuser")).key
         self.authheader = {'HTTP_AUTHORIZATION': 'Token ' + self.token}
