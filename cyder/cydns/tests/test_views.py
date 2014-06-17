@@ -89,6 +89,7 @@ class NoNSTests(object):
         post_data = self.post_data()
         # Get the '_' in SRV records
         post_data['fqdn'] = post_data['fqdn'][0] + "asdf.asdf." + domain_name
+        self.ctnr.domains.add(root_domain)
         return root_domain, post_data
 
     def test_no_ns_in_view(self):
@@ -264,6 +265,11 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         post_data = self.post_data()
         post_data['ip_str'] = '9000::df12'
         post_data['ip_type'] = '6'
+        create_network_range(network_str='9000::/32',
+                             start_str='9000::d000', end_str='9000::dfff',
+                             range_type='st', ip_type='6', domain=self.domain,
+                             ctnr=self.ctnr)
+
         return root_domain, post_data
 
     def setUp(self):
