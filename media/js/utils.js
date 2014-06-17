@@ -146,7 +146,7 @@ function button_to_form( button, csrfToken, success) {
     success( postForm );
 };
 
-
+// fields is a serialized array taken from inputs in a form
 function ajax_form_submit(url, fields, csrfToken, success) {
     jQuery.ajaxSettings.traditional = true;
     var postData = {};
