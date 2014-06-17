@@ -109,23 +109,24 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
             }
         else:
             if actions:
-                level = {
-                    'value': [LEVELS[ctnruser.level], '-', '+'],
-                    'url': [
-                        '',
-                        reverse('ctnr-update-user',
-                                kwargs={'ctnr_pk': ctnr.id}),
-                        reverse('ctnr-update-user',
-                                kwargs={'ctnr_pk': ctnr.id})],
-                    'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
-                    'class': ['', 'minus', 'plus'],
-                    'data': ['', [('kwargs', '{"obj_type": "user", "pk": "' +
-                                  str(user.id) + '", "name": "' +
-                                  str(user) + '", "lvl": "-1"}')],
-                             [('kwargs', '{"obj_type": "user", "pk": "' +
-                              str(user.id) + '", "name": "' +
-                              str(user) + '", "lvl": "1"}')]]
-                }
+                level = {}
+                level['value'] = [LEVELS[ctnruser.level], '-', '+']
+                level['url'] = [
+                    '',
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id}),
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id})]
+
+                level['img'] = [
+                    '', '/media/img/minus.png', '/media/img/plus.png']
+
+                level['class'] = ['', 'minus', 'plus']
+                level['data'] = [
+                    '',
+                    [('kwargs', json.dumps({'obj_type': 'user', 'pk': user.id,
+                                            'name': str(user), 'lvl': -1}))],
+                    [('kwargs', json.dumps({'obj_type': 'user', 'pk': user.id,
+                                            'name': str(user), 'lvl': 1}))]]
+
                 if level['value'][0] == 'Admin':
                     del level['value'][2]
                     del level['url'][2]
@@ -154,9 +155,8 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
                                kwargs={'ctnr_pk': ctnr.id}),
                 'img': '/media/img/remove.png',
                 'class': 'remove user',
-                'data': [('kwargs', '{"obj_type": "user", "pk": "' +
-                         str(user.id) + '", "name": "' +
-                         str(user) + '"}')]
+                'data': [('kwargs', json.dumps({
+                    'obj_type': 'user', 'pk': user.id, 'name': str(user)}))]
             })
 
     extra_cols[0]['data'] = level_data
@@ -178,8 +178,8 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
                 'ctnr_pk': ctnr.id}),
             'img': '/media/img/remove.png',
             'class': 'remove object',
-            'data': [('kwargs', '{"obj_type": "' + str(obj._meta.db_table) +
-                     '", "pk": "' + str(obj.id) + '"}')]
+            'data': [('kwargs', json.dumps({
+                'obj_type': str(obj._meta.db_table), 'pk': obj.id}))]
         })
         objs.append(obj)
     extra_cols[0]['data'] = remove_data
