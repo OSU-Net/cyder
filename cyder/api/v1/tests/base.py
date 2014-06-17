@@ -13,9 +13,25 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 
 
 API_VERSION = '1'
+
+
+def create_network_range(network_str, start_str, end_str, range_type,
+                         ip_type, domain, ctnr):
+    n = Network(ip_type=ip_type, network_str=network_str)
+    n.full_clean()
+    n.save()
+
+    r = Range(network=n, range_type=range_type, start_str=start_str,
+              end_str=end_str, domain=domain, ip_type=ip_type)
+    r.full_clean()
+    r.save()
+
+    ctnr.ranges.add(r)
 
 
 def build_sample_domain():
