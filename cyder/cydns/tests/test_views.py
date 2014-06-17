@@ -16,25 +16,38 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 
 from cyder.cydns.tests.utils import create_fake_zone
 
 
-def do_setUp(self, test_class, test_data, use_ctnr=True,
-             use_domain=True, use_rdomain=False):
-    self.ctnr = Ctnr.objects.get(name='test_ctnr')
-    if use_ctnr:
-        test_data['ctnr'] = self.ctnr
+def create_network_range(network_str, start_str, end_str, range_type,
+                         ip_type, domain, ctnr):
+    n = Network(ip_type=ip_type, network_str=network_str)
+    n.full_clean()
+    n.save()
 
+    r = Range(network=n, range_type=range_type, start_str=start_str,
+              end_str=end_str, domain=domain, ip_type=ip_type)
+    r.full_clean()
+    r.save()
+
+    ctnr.ranges.add(r)
+
+
+def do_preUp(self):
     self.client = Client()
     self.client.login(username='test_superuser', password='password')
-    self.test_class = test_class
+
     self.public_view = View.objects.get_or_create(name='public')[0]
     self.private_view = View.objects.get_or_create(name='private')[0]
 
-    # Create forward zone.
+    self.ctnr = Ctnr.objects.get(name='test_ctnr')
     self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
     self.ctnr.domains.add(self.domain)
+
+    # Create forward zone.
     self.soa = self.domain.soa
     self.subdomain = Domain.objects.create(
         name=random_label() + '.' + self.domain.name, soa=self.soa)
@@ -44,6 +57,13 @@ def do_setUp(self, test_class, test_data, use_ctnr=True,
     self.ctnr.domains.add(self.reverse_domain)
     self.soa2 = self.reverse_domain.soa
 
+
+def do_postUp(self, test_class, test_data, use_ctnr=True,
+              use_domain=True, use_rdomain=False):
+    if use_ctnr:
+        test_data['ctnr'] = self.ctnr
+
+    self.test_class = test_class
     # Create test object.
     test_data = dict(test_data.items())
     if use_domain:
@@ -51,6 +71,11 @@ def do_setUp(self, test_class, test_data, use_ctnr=True,
     if use_rdomain:
         test_data['reverse_domain'] = self.reverse_domain
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
+
+
+def do_setUp(self, *args, **kwargs):
+    do_preUp(self)
+    do_postUp(self, *args, **kwargs)
 
 
 class NoNSTests(object):
@@ -253,8 +278,14 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         Domain.objects.get_or_create(name='168.196.in-addr.arpa')
         Domain.objects.get_or_create(name='1.168.196.in-addr.arpa')
 
+        do_preUp(self)
+        create_network_range(network_str='196.168.0.0/16',
+                             start_str='196.168.1.0', end_str='196.168.1.253',
+                             range_type='st', ip_type='4', domain=self.domain,
+                             ctnr=self.ctnr)
+
         Domain.objects.create(name=ip_to_domain_name(test_data['ip_str']))
-        do_setUp(self, PTR, test_data, use_domain=False, use_rdomain=True)
+        do_postUp(self, PTR, test_data, use_domain=False, use_rdomain=True)
 
     def post_data(self):
         return {
