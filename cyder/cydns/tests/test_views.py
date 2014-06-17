@@ -158,6 +158,7 @@ class NSViewTests(cyder.base.tests.TestCase):
 
     def test_no_ns_in_view(self):
         root_domain = create_fake_zone("asdfdjhjd")
+        self.ctnr.domains.add(root_domain)
         ns = root_domain.nameserver_set.all()[0]
 
         cn = CNAME(label='asdf', domain=root_domain,
