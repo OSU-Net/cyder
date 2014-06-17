@@ -89,6 +89,12 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                                     .exclude(ctnr=self.ctnr))
         sis = (StaticInterface.objects.filter(fqdn=self.fqdn)
                                       .exclude(ctnr=self.ctnr))
+
+        if isinstance(self, AddressRecord):
+            ars = ars.exclude(pk=self.pk)
+        elif isinstance(self, StaticInterface):
+            sis = sis.exclude(pk=self.pk)
+
         if ars.exists():
             raise ValidationError("Cannot create this object because an "
                                   "Address Record with the name %s exists "
