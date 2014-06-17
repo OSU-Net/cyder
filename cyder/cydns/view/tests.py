@@ -32,6 +32,8 @@ class ViewTests(TestCase):
         self.o.save()
         self.f_o = Domain(name="foo.org")
         self.f_o.save()
+        self.ctnr.domains.add(self.o, self.f_o)
+
         self.s = System(name='foobar')
         self.s.save()
 
@@ -50,6 +52,7 @@ class ViewTests(TestCase):
         self.sr = Range(network=self.net, range_type=STATIC,
                         start_str='10.0.0.1', end_str='10.0.0.3')
         self.sr.save()
+        self.ctnr.ranges.add(self.sr)
 
     def test_private_view_case_1_addr(self):
         a = AddressRecord(label="asf", ctnr=self.ctnr, domain=self.f_o, ip_str="10.0.0.1",
