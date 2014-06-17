@@ -1,59 +1,53 @@
 $(document).ready(function() {
-    var form = document.getElementById('hidden-inner-form');
-    var interface_type = document.getElementsByName('interface_type');
-    var static_form = document.getElementById('static-form');
-    var static_clone = static_form.cloneNode(true);
-    static_clone.id ="static_clone";
-    $(static_clone).removeAttr('style');
-    var dynamic_form = document.getElementById('dynamic-form');
-    var dynamic_clone = dynamic_form.cloneNode(true);
-    dynamic_clone.id ="static_clone";
-    $(dynamic_clone).removeAttr('style');
-    initial_interface_type = $('#view-metadata').attr(
-        'data-initial_interface_type');
-    if (initial_interface_type) {
-        $('input[name=interface_type][value=' +
-            initial_interface_type + ']').attr('checked', true);
-    }
-    for(var i = 0; i < interface_type.length; i++) {
-        if (interface_type[i].checked) {
-            if (form.lastChild.textContent !== '') {
-                form.removeChild(form.childNodes[form.childNodes.length -1]);
-            }
-            if (interface_type[i].value =='static_interface') {
-                form.appendChild(static_clone);
-            } else {
-                form.appendChild(dynamic_clone);
-            }
+    function changeSystemForm( value, animate ) {
+        if ( animate ) {
+            delay = 500;
+            speed = 'slow';
+        } else {
+            delay = 0;
+            speed = 'fast';
         }
-        interface_type[i].onclick = function() {
-            if (form.lastChild.textContent !== '') {
-                form.removeChild(form.childNodes[form.childNodes.length -1]);
-            }
-            if (this.value =='static_interface') {
-                form.appendChild(static_clone);
-            } else {
-                form.appendChild(dynamic_clone);
-            }
+        if ( value == 'static_interface' ) {
+            setTimeout( function() {
+                $('#static-form').slideDown(speed);
+            }, delay);
+            $('#dynamic-form').slideUp();
+        } else {
+            setTimeout( function() {
+                $('#dynamic-form').slideDown(speed);
+            }, delay);
+            $('#static-form').slideUp();
         }
     }
 
-    $('form#system-form').live('submit', function(event) {
-        event.preventDefault();
+    jQuery.each( $("input[name='interface_type']:checked"), function() {
+        changeSystemForm( this.value, false );
+    });
+    $("input[name='interface_type']").change( function() {
+        changeSystemForm( this.value, true );
+    });
 
-        var url = $('form#system-form')[0].action;
-        var data = ajax_form_submit(url, $('form#system-form'),
-                $('#csrfToken').val(), function (ret_data) {
-            location.reload();
-        });
-        if (!data.errors) {
-            location.href = '/core/system/' + data.system_id.toString();
+    $('#system-form form').live('submit', function( e ) {
+        e.preventDefault();
+        var fields;
+        if ($(this).find('#error').length) {
+            $(this).find('#error').remove();
         }
 
         if ($("input[name=interface_type]:checked").val() === undefined) {
             $("label[for=id_interface_type_0]:first").after(
                 '<p id="error"><font color="red">This field is required.' +
                 '</font></p>');
+            return false;
+        } else {
+            fields = $(this).find(':input:visible').serializeArray();
         }
+
+        var url = '/core/system/create/';
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
+        var data = ajax_form_submit(url, fields,
+                csrfToken, function (ret_data) {
+            location.href = '/core/system/' + ret_data.system_id.toString();
+        });
     });
 });

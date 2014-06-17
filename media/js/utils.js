@@ -147,9 +147,8 @@ function button_to_form( button, csrfToken, success) {
 };
 
 
-function ajax_form_submit(url, form, csrfToken, success) {
+function ajax_form_submit(url, fields, csrfToken, success) {
     jQuery.ajaxSettings.traditional = true;
-    var fields = form.find(':input').serializeArray();
     var postData = {};
     jQuery.each(fields, function (i, field) {
         if (i > 0 && fields[i-1].name == field.name) {

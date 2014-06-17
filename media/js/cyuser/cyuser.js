@@ -26,6 +26,7 @@ $(document).ready(function() {
                 }
             }
             var url = $('#clone-perms-form').attr( 'action' );
+            var fields = $('#clone-perms-form').find( ':input' ).serializeArray();
             clone_perms_data = ajax_form_submit(
                 url, $('#clone-perms-form'), csrfToken );
             if ( clone_perms_data.success ) {

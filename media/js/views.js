@@ -263,7 +263,8 @@ $(document).ready( function() {
     $('#Bug-Report').live( 'submit', function( e ) {
         e.preventDefault();
         url = $(location).attr( 'href' );
-        var data = ajax_form_submit( url, $('#Bug-Report'), csrfToken, function( data ) {
+        var fields = $('#Bug-Report').find( ':input' ).serializeArray();
+        var data = ajax_form_submit( url, fields, csrfToken, function( data ) {
             if ( !data.errors ) {
                 alert('Your bug report was sent successfully. ' +
                       'Thank you for your input!');
@@ -276,9 +277,9 @@ $(document).ready( function() {
     // Form submit handler, special logic for attributes
     $('#obj-form form').live( 'submit', function( e ) {
         var url = $('#obj-form form')[0].action;
+        var fields = $('#obj-form form').find( ':input' ).serializeArray();
         e.preventDefault();
-        ajax_form_submit( url, $('#obj-form'), csrfToken,
-                         function( data ) {
+        ajax_form_submit( url, fields, csrfToken, function( data ) {
             if ( !data.errors ) {
                 if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
                     var style = $('.attrs_table').attr( 'style' );

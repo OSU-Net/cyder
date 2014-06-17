@@ -5,29 +5,32 @@
     {% include "base/sidebar.html" %}
 {% endblock %}
 
-{% block form %}
+{% block view_metadata %}
   <span id="view-metadata"
       data-csrfToken="{{ csrf_token }}"
       data-initial_interface_type="{{ initial_interface_type }}">
   </span>
-  <form class="form" id="system-form" method="POST" objType="system-extended">
-    <h3>Create a System</h3>
-    <div class="inner-form" id="hidden-inner-form">
-        {{ system_form.as_p() }}
-        <input id="csrfToken" type="hidden" name="csrfmiddlewaretoken"
-         value="{{ csrf_token }}"/>
-    </div>
-    <div class="form-btns">
-        <hr>
-        <a class="btn submit c" id="create-system">Create System</a>
-    </div>
-  </form>
-<div id="static-form" style="display: none">
-    {{ static_form.as_p() }}
-</div>
-<div id="dynamic-form" style="display: none">
-    {{ dynamic_form.as_p() }}
-</div>
+{% endblock %}
+
+{% block form %}
+  <div id="system-form">
+    <form class="form" method="POST" objType="system-extended">
+      <h3>Create a System</h3>
+      <div class="inner-form" id="hidden-inner-form">
+          {{ system_form.as_p() }}
+          <div id="static-form" style="display: none">
+            {{ static_form.as_p() }}
+          </div>
+          <div id="dynamic-form" style="display: none">
+            {{ dynamic_form.as_p() }}
+          </div>
+      </div>
+      <div class="form-btns">
+          <hr>
+          <a class="btn submit c" id="create-system">Create System</a>
+      </div>
+    </form>
+  </div>
 {{ js('systemform') }}
 {% endblock %}
 
