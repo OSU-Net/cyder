@@ -3,6 +3,8 @@ from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
                                   ACTION_UPDATE)
 from cyder.base.helpers import prettify_obj_type, cached_property
 
+import json
+
 
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
@@ -137,8 +139,8 @@ class Tablefier:
                          ('objType', obj._meta.db_table),
                          ('getUrl', reverse('get-update-form')),
                          ('prettyObjType', obj.pretty_type)],
-                         [('kwargs', '{"obj_type": "' + str(obj._meta.db_table)
-                              + '", "pk": "' + str(obj.id) + '"}')]],
+                         [('kwargs', json.dumps({
+                             'obj_type': obj._meta.db_table, 'pk': obj.id}))]],
                'class': ['update', 'delete'],
                'img': ['/media/img/update.png', '/media/img/delete.png']}
         return col
