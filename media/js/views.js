@@ -1,17 +1,10 @@
 $(document).ready( function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
-    var hidden_inner_form = $('#hidden-inner-form');
-    if ( hidden_inner_form ) {
-        var defaults = hidden_inner_form.innerHTML;
-    }
     var objType = metadata.attr( 'data-objType' );
-    var objName = metadata.attr( 'data-objName' );
-    var prettyObjType = metadata.attr( 'data-prettyObjType' );
-    var searchUrl = metadata.attr( 'data-searchUrl' );
-    var getUrl = metadata.attr( 'data-getUrl' );
-    var domainsUrl = metadata.attr( 'data-domainsUrl' );
     var objPk = metadata.attr( 'data-objPk' );
+    var searchUrl = metadata.attr( 'data-searchUrl' );
+    var domainsUrl = metadata.attr( 'data-domainsUrl' );
     var csrfToken = metadata.attr( 'data-csrfToken' );
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
@@ -138,114 +131,62 @@ $(document).ready( function() {
     });
 
     // button behavior logic, see css
-    $('.create-obj, .update, .cancel').each( function() {
-        $('.create-obj, .update, .cancel').addClass( 'hover' );
+    $('.getForm, .create-obj, .update, .cancel').each( function() {
+        $('.getForm, .create-obj, .update, .cancel').addClass( 'hover' );
         $(this).click( function( e ) {
             if ( $(this).hasClass( 'selected' ) ) {
                 $(this).removeClass( 'selected' );
             } else {
-                $('.create-obj, .update, .cancel').removeClass( 'selected' );
+                $('.getForm, .create-obj, .update, .cancel').removeClass( 'selected' );
                 $(this).removeClass( 'hover' ).addClass( 'selected' );
             }
         });
     });
 
-    $('.create-obj').click( function( e ) {
-        // Show create form on clicking create button.
-        e.preventDefault();
-
-        slideUp( $('#obj-form') );
-        if ( $(this).hasClass( 'selected' ) ) {
-            form.action = this.href;
-            if ( this.hasAttribute( 'data-objType' ) ) {
-                var $createBtn = $(this);
-                var formPrettyObjType = $createBtn.attr( 'data-prettyobjtype' );
-                var formObjType = $createBtn.attr( 'data-objType' );
-                $('#obj-form form').attr( 'objType', formObjType );
-                var formGetUrl = $createBtn.attr( 'data-getUrl' );
-                var data_to_post = $createBtn.attr( 'data-kwargs' );
-                var formTitle = 'Creating ' + formPrettyObjType;
-
-                $.get( formGetUrl,
-                    {
-                        'obj_type': formObjType,
-                        'related_type': objType,
-                        'related_pk': objPk,
-                        'data': data_to_post
-                    },
-                    function( data ) {
-                        setTimeout( function() {
-                            $('#form-title').html( formTitle );
-                            data.form.action = $createBtn.attr( 'href' );
-                            $('.inner-form').empty().append( data.form );
-                            initForms();
-                        }, 150 );
-                        $('#obj-form form')[0].action = $createBtn.attr( 'href' );
-                        $('.form-btns a.submit, .btn.ajax').text(
-                            'Create ' + formPrettyObjType );
-                        $('.form-btns a.submit').attr( 'class', 'btn c submit_create ajax' );
-                        $('#obj-form').slideToggle();
-                    }, 'json');
-            } else {
-                $('#obj-form form').attr( 'objType', objType );
-                setTimeout( function() {
-                    $('#form-title').html( 'Creating ' + prettyObjType );
-
-                    if ( defaults ) {
-                        $('#hidden-inner-form').empty().html( defaults );
-                    } else {
-                        clear_form_all( form );
-                    }
-                }, 150 );
-                $('.form-btns a.submit, .btn.ajax').text( 'Create ' + prettyObjType );
-
-                $('.form-btns a.submit').attr( 'class', 'btn c submit_create ajax' );
-                $('#obj-form').slideToggle();
-            }
-            $('#id_value').live( "keypress", function( e ) {
-                if ( e.which == 13 ) {
-                    jQuery( '.submit_create' ).focus().click();
-                }
-            });
-            $('.form').append(
-                $('<input>',
-                {
-                    type: 'hidden',
-                    name: 'csrfmiddlewaretoken',
-                    value: csrfToken
-                } ) );
-        }
-    });
-
-    $('.update').live( 'click', function( e ) {
+    $('.getForm').live( 'click', function( e ) {
         // Show update form on clicking update icon.
+        var kwargs;
+        var formTitle;
+        var buttonLabel;
+        var getData;
+        var buttonAttrs;
         slideUp($('#obj-form'));
         e.preventDefault();
+        form.action = this.href;
         if ( $(this).hasClass( 'selected' ) ||
                 $(this).parents().attr( 'class' ) == 'actions_column') {
-            form.action = this.href;
-            var formObjName = $(this).attr( 'data-objName' ) || objName;
-            var formObjType = $(this).attr( 'data-objType' );
-            $('#obj-form form').attr( 'objType', formObjType );
-            var formPrettyObjType = $(this).attr( 'data-prettyObjType' );
-            var formTitle = 'Updating ' + formPrettyObjType + ' ' + formObjName;
+            kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
+            if ( kwargs.pk ) {
+                formTitle = 'Updating ' + kwargs.pretty_obj_type + ' ' + kwargs.obj_name;
+                buttonLabel = 'Update ' + kwargs.pretty_obj_type;
+                buttonAttrs = 'btn c submit_update ajax';
+                getData = { 'obj_type': kwargs.obj_type, 'pk': kwargs.pk };
+            } else {
+                formTitle = 'Creating ' + kwargs.pretty_obj_type;
+                buttonLabel = 'Create ' + kwargs.pretty_obj_type;
+                buttonAttrs = 'btn c submit_create ajax';
+                getData = {
+                    'data': $(this).attr( 'data-kwargs' ),
+                    'obj_type': kwargs.obj_type,
+                    'related_pk': objPk,
+                    'related_type': objType,
+                };
+            }
 
-            $.get( $(this).attr( 'data-getUrl' ) || getUrl,
-                    {'obj_type': formObjType, 'pk': $(this).attr( 'data-pk' )},
-                    function( data ) {
+            $.get( kwargs.get_url , getData, function( data ) {
                 setTimeout( function() {
                     $('#form-title').html( formTitle );
                     $('#hidden-inner-form').empty().append( data.form );
                     initForms();
                 }, 150 );
-                $('.form-btns a.submit, .btn.ajax').text( 'Update ' + formPrettyObjType );
-
-                $('.form-btns a.submit').attr( 'class', 'btn c submit_update ajax' );
+                $('.form-btns a.submit, .btn.ajax').text( buttonLabel );
+                $('.form-btns a.submit').attr( 'class', buttonAttrs );
                 $('#obj-form').slideDown();
             }, 'json' );
+
             $('#id_value').live( "keypress", function( e ) {
                 if ( e.which == 13 ) {
-                    jQuery('.submit_update').focus().click();
+                    jQuery('.ajax').focus().click();
                 }
             });
 
@@ -293,7 +234,7 @@ $(document).ready( function() {
                     jQuery.each( $('.attrs_table > tbody > tr'), function( i, row ) {
                         if ( row.cells[0].innerHTML.indexOf(
                                 data.row.data[0][0].value[0] ) >= 0 ) {
-                            $(this.remove());
+                            $(this).remove();
                             is_update = true;
 
                         }

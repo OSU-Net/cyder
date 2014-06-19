@@ -131,17 +131,16 @@ class Tablefier:
 
     @staticmethod
     def build_update_field(obj):
-        obj_type = obj._meta.db_table
         col = {'value': ['Update', 'Delete'],
                'url': [obj.get_update_url(), obj.get_delete_url()],
-               'data': [[('pk', obj.id),
-                         ('objName', obj.pretty_name),
-                         ('objType', obj._meta.db_table),
-                         ('getUrl', reverse('get-update-form')),
-                         ('prettyObjType', obj.pretty_type)],
+               'data': [[('kwargs', json.dumps({
+                          'obj_type': obj._meta.db_table, 'pk': obj.id,
+                          'obj_name': obj.pretty_name,
+                          'get_url': reverse('get-update-form'),
+                          'pretty_obj_type': obj.pretty_type}))],
                          [('kwargs', json.dumps({
                              'obj_type': obj._meta.db_table, 'pk': obj.id}))]],
-               'class': ['update', 'delete'],
+               'class': ['getForm', 'delete'],
                'img': ['/media/img/update.png', '/media/img/delete.png']}
         return col
 

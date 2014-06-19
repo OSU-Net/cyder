@@ -10,8 +10,12 @@
 {% block action_bar %}
   {% if obj_type_perm %}
     {% if obj.get_update_url and obj_type != "ctnr" %}
-      <a class="btn btn-primary update" href="{{ obj.get_update_url() }}" data-pk="{{ obj.pk }}"
-        data-objType= {{ obj_type }} data-prettyObjType="{{ obj.pretty_type }}">Edit</a>
+      <a class="btn btn-primary getForm" href="{{ obj.get_update_url() }}"
+          data-kwargs='{"obj_type": "{{ obj_type }}", "pk": "{{ obj.pk }}",
+                        "pretty_obj_type": "{{ obj.pretty_type }}",
+                        "get_url": "{{ url('get-update-form') }}",
+                        "obj_name": "{{ obj.pretty_name }}"}'>
+      Edit</a>
     {% endif %}
     {% if obj.get_delete_url %}
       <a class="btn btn-danger" id="delete" href="{{ obj.get_delete_url() }}"
