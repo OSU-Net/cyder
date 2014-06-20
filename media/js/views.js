@@ -150,6 +150,7 @@ $(document).ready( function() {
         var buttonLabel;
         var getData;
         var buttonAttrs;
+        var initData;
         slideUp($('#obj-form'));
         e.preventDefault();
         form.action = this.href;
@@ -165,8 +166,12 @@ $(document).ready( function() {
                 formTitle = 'Creating ' + kwargs.pretty_obj_type;
                 buttonLabel = 'Create ' + kwargs.pretty_obj_type;
                 buttonAttrs = 'btn c submit_create ajax';
+                if ( $(this).attr( 'data-init' ) ) {
+                    initData = $(this).attr( 'data-init' );
+                }
+
                 getData = {
-                    'data': $(this).attr( 'data-kwargs' ),
+                    'data': initData,
                     'obj_type': kwargs.obj_type,
                     'related_pk': objPk,
                     'related_type': objType,
