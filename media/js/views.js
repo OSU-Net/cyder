@@ -200,21 +200,6 @@ $(document).ready( function() {
         }
     });
 
-    // Bug report page logic
-    $('#Bug-Report').live( 'submit', function( e ) {
-        e.preventDefault();
-        url = $(location).attr( 'href' );
-        var fields = $('#Bug-Report').find( ':input' ).serializeArray();
-        var data = ajax_form_submit( url, fields, csrfToken, function( data ) {
-            if ( !data.errors ) {
-                alert('Your bug report was sent successfully. ' +
-                      'Thank you for your input!');
-                $('#Bug-Report')[0].reset();
-                window.location.href = '/';
-            }
-        });
-    });
-
     // Form submit handler, special logic for attributes
     $('#obj-form form').live( 'submit', function( e ) {
         var url = $('#obj-form form')[0].action;

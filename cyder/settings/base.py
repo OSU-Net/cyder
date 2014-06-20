@@ -315,6 +315,9 @@ MINIFY_BUNDLES = {
         'systemform': (
             'js/systemform.js',
         ),
+        'bugreport': (
+            'js/bugreport.js',
+        ),
         'tags_js': (
             'js/lib/jquery.tagsinput.js',
         ),

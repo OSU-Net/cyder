@@ -132,7 +132,7 @@ def send_email(request):
 
         form = BugReportForm(initial={'session_data': session_data})
 
-        return render(request, 'base/email_form.html',
+        return render(request, 'base/bug_report.html',
                       {'form': form})
 
 
