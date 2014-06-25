@@ -39,14 +39,14 @@ class Command(BaseCommand):
                 'ctnr': si.ctnr.name,
                 'hostname': si.system.name,
             }
-            for si in static if self.use_mac(si.mac)
+            for si in static if self.use_mac(si.mac) and si.dhcp_enabled
         ] + [
             {
                 'mac': di.mac.replace(':', ''),
                 'ctnr': di.ctnr.name,
                 'hostname': di.system.name,
             }
-            for di in dynamic if self.use_mac(di.mac)
+            for di in dynamic if self.use_mac(di.mac) and di.dhcp_enabled
         ]
 
         # sort by mac
