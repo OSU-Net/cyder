@@ -26,6 +26,7 @@ class MacAddrField(CharField):
 
         kwargs['max_length'] = 17
         kwargs['blank'] = False  # always call MacAddrField.clean
+        kwargs['null'] = True
 
         super(MacAddrField, self).__init__(*args, **kwargs)
 
@@ -42,6 +43,8 @@ class MacAddrField(CharField):
             value = value.lower().replace(':', '').replace('-', '')
             value = reduce(lambda x,y: x + ':' + y,
                            (value[i:i+2] for i in xrange(0, 12, 2)))
+        elif value == '':
+            value = None
         return value
 
     def clean(self, value, model_instance):
