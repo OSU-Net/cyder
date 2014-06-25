@@ -37,6 +37,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     class Meta:
         app_label = 'cyder'
         db_table = 'dynamic_interface'
+        unique_together = (('range', 'mac'),)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -108,16 +109,6 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             return self.range.domain.name
         else:
             return "{0}.{1}".format(self.system.name, self.range.domain.name)
-
-    def clean(self, *args, **kwargs):
-        super(DynamicInterface, self).clean(*args, **kwargs)
-        if self.mac:
-            siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
-            if self.pk is not None:
-                siblings = siblings.exclude(pk=self.pk)
-            if siblings.exists():
-                raise ValidationError(
-                    "MAC address must be unique in this interface's range")
 
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
