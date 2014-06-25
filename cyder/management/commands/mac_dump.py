@@ -14,7 +14,7 @@ class Command(BaseCommand):
     )
     format_str = "{mac} {ctnr} {hostname} More_than_90_days\n"
     used_macs = set()
-    forbidden_macs = set(("00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff",))
+    forbidden_macs = set(("", "00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff",))
 
     def use_mac(self, mac):
         """
@@ -35,14 +35,14 @@ class Command(BaseCommand):
         dynamic = DynamicInterface.objects.order_by('mac')
         interfaces = [
             {
-                'mac': si.mac,
+                'mac': si.mac.replace(':', ''),
                 'ctnr': si.ctnr.name,
                 'hostname': si.system.name,
             }
             for si in static if self.use_mac(si.mac)
         ] + [
             {
-                'mac': di.mac,
+                'mac': di.mac.replace(':', ''),
                 'ctnr': di.ctnr.name,
                 'hostname': di.system.name,
             }
