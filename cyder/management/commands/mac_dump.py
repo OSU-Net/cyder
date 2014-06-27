@@ -21,7 +21,7 @@ class Command(BaseCommand):
                          "will be written to the given file."),
     )
     other_id_ctnrs = {"zone.public", "zone.resnet", "zone.flexnetoregonstate"}
-    output_format = "{mac} {ctnr} {hostname} {modified}\n"
+    output_format = "{mac} {zone_identifier} {hostname} {modified}\n"
     used_macs = set()
     forbidden_macs = {"", "00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff"}
 
@@ -47,30 +47,34 @@ class Command(BaseCommand):
 
         interfaces = []
         for interface in itertools.chain(static_interfaces, dynamic_interfaces):
-            if self.use_mac(interface.mac) and interface.dhcp_enabled:
-                ctnr = interface.ctnr.name
-                system = interface.system
+            if not (self.use_mac(interface.mac) and interface.dhcp_enabled):
+                continue
 
-                # handle when the zone name should be the Other ID
-                if ctnr in self.other_id_ctnrs:
-                    try:
-                        other_id = system.systemav_set.get(
-                            attribute__name__exact="Other ID").value
-                    except ObjectDoesNotExist:
-                        other_id = "No_other_id"
-                else:
-                    other_id = None
+            zone_identifier = interface.ctnr.name
+            system = interface.system
 
-                interface_data = {
-                    'mac': interface.mac.replace(':', ''),
-                    'ctnr': other_id or ctnr,
-                    'hostname': system.name,
-                    'modified': interface.modified.strftime(
-                        # Format to match: Tue Jun  3 10:33:57 2014
-                        "%a %b %d %X %Y") if interface.modified
-                                          else "More_than_90_days",
-                }
-                interfaces.append(interface_data)
+            # For certain special case ctnrs, the zone_identifier field should
+            # be the device's Other ID instead of a ctnr name.
+            if zone_identifier in self.other_id_ctnrs:
+                try:
+                    zone_identifier = system.systemav_set.get(
+                        attribute__name__exact="Other ID").value
+                except ObjectDoesNotExist:
+                    zone_identifier = "No_other_id"
+
+            if interface.modified:
+                # Format to match: Tue Jun  3 10:33:57 2014
+                modified = interface.modified.strftime("%a %b %d %X %Y")
+            else:
+                modified = "More_than_90_days"
+
+            interface_data = {
+                'mac': interface.mac.replace(':', ''),
+                'zone_identifier': zone_identifier,
+                'hostname': system.name,
+                'modified': modified,
+            }
+            interfaces.append(interface_data)
 
         # sort by mac
         interfaces = sorted(interfaces, key=itemgetter('mac'))
