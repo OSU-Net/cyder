@@ -149,8 +149,6 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     @property
     def range(self):
         rng = find_range(self.ip_str)
-        if rng is None:
-            raise ValidationError("No range exists for %s" % self.ip_str)
         return rng
 
     def bind_render_record(self):
@@ -220,11 +218,13 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             raise ValidationError(
                 "A static interface has already used %s" % self.ip_str
             )
-        if self.range.range_type == "dy":
-            raise ValidationError("Cannot create PTRs in dynamic ranges.")
-        if self.ctnr not in self.range.ctnr_set.all():
-            raise ValidationError("Could not create PTR because %s "
-                                  "is not in this container." % self.ip_str)
+        rng = self.range
+        if rng:
+            if self.range.range_type == "dy":
+                raise ValidationError("Cannot create PTRs in dynamic ranges.")
+            if self.ctnr not in self.range.ctnr_set.all():
+                raise ValidationError("Could not create PTR because %s is "
+                                      "not in this container." % self.ip_str)
         self.clean_reverse()
 
     def details(self):
