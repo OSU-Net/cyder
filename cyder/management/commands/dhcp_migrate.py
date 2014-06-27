@@ -357,8 +357,8 @@ def migrate_dynamic_hosts():
             try:
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
-                print ("Could not create dynamic interface %s: Range %s "
-                       "is in Maintain, but was not created in Cyder." %
+                print ('Could not create dynamic interface %s: Range %s '
+                       'is in Maintain, but was not created in Cyder.' %
                        (mac, items['dynamic_range']))
 
         if items['zone']:
@@ -368,7 +368,7 @@ def migrate_dynamic_hosts():
             w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c]):
-            stderr.write("Trouble migrating host with mac {0}\n"
+            stderr.write('Trouble migrating host with mac {0}\n'
                          .format(items['ha']))
             continue
 
