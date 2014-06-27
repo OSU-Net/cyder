@@ -1,6 +1,12 @@
+"""
+This management command recreates the functionality of internal script called
+radius-report, which produces a file containing all of the MAC addresses (and
+associated information) stored in Maintain.
+"""
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 
+import itertools
 from operator import itemgetter
 from optparse import make_option
 
@@ -40,32 +46,31 @@ class Command(BaseCommand):
             'mac', 'ctnr', 'system', 'modified', 'dhcp_enabled')
 
         interfaces = []
-        for interface_list in static_interfaces, dynamic_interfaces:
-            for interface in interface_list:
-                if self.use_mac(interface.mac) and interface.dhcp_enabled:
-                    ctnr = interface.ctnr.name
-                    system = interface.system
+        for interface in itertools.chain(static_interfaces, dynamic_interfaces):
+            if self.use_mac(interface.mac) and interface.dhcp_enabled:
+                ctnr = interface.ctnr.name
+                system = interface.system
 
-                    # handle when the zone name should be the Other ID
-                    if ctnr in self.other_id_ctnrs:
-                        try:
-                            other_id = system.systemav_set.get(
-                                attribute__name__exact="Other ID").value
-                        except ObjectDoesNotExist:
-                            other_id = "No_other_id"
-                    else:
-                        other_id = None
+                # handle when the zone name should be the Other ID
+                if ctnr in self.other_id_ctnrs:
+                    try:
+                        other_id = system.systemav_set.get(
+                            attribute__name__exact="Other ID").value
+                    except ObjectDoesNotExist:
+                        other_id = "No_other_id"
+                else:
+                    other_id = None
 
-                    intr = {
-                        'mac': interface.mac.replace(':', ''),
-                        'ctnr': other_id or ctnr,
-                        'hostname': system.name,
-                        'modified': interface.modified.strftime(
-                            # Format to match: Tue Jun  3 10:33:57 2014
-                            "%a %b %d %X %Y") if interface.modified
-                                              else "More_than_90_days",
-                    }
-                    interfaces.append(intr)
+                interface_data = {
+                    'mac': interface.mac.replace(':', ''),
+                    'ctnr': other_id or ctnr,
+                    'hostname': system.name,
+                    'modified': interface.modified.strftime(
+                        # Format to match: Tue Jun  3 10:33:57 2014
+                        "%a %b %d %X %Y") if interface.modified
+                                          else "More_than_90_days",
+                }
+                interfaces.append(interface_data)
 
         # sort by mac
         interfaces = sorted(interfaces, key=itemgetter('mac'))
