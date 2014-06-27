@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 
 from operator import itemgetter
@@ -8,13 +9,15 @@ from cyder.models import StaticInterface, DynamicInterface
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('-o', '--output',
+        make_option('-f', '--file',
                     default=False,
-                    help="Direct output to a file"),
+                    help="If this option is specified, the command's output "
+                         "will be written to the given file."),
     )
-    format_str = "{mac} {ctnr} {hostname} More_than_90_days\n"
+    other_id_ctnrs = {"zone.public", "zone.resnet", "zone.flexnetoregonstate"}
+    output_format = "{mac} {ctnr} {hostname} {modified}\n"
     used_macs = set()
-    forbidden_macs = set(("", "00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff",))
+    forbidden_macs = {"", "00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff"}
 
     def use_mac(self, mac):
         """
@@ -31,23 +34,38 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # get all unique mac addresses
-        static = StaticInterface.objects.order_by('mac')
-        dynamic = DynamicInterface.objects.order_by('mac')
-        interfaces = [
-            {
-                'mac': si.mac.replace(':', ''),
-                'ctnr': si.ctnr.name,
-                'hostname': si.system.name,
-            }
-            for si in static if self.use_mac(si.mac) and si.dhcp_enabled
-        ] + [
-            {
-                'mac': di.mac.replace(':', ''),
-                'ctnr': di.ctnr.name,
-                'hostname': di.system.name,
-            }
-            for di in dynamic if self.use_mac(di.mac) and di.dhcp_enabled
-        ]
+        static_interfaces = StaticInterface.objects.only(
+            'mac', 'ctnr', 'system', 'modified', 'dhcp_enabled')
+        dynamic_interfaces = DynamicInterface.objects.only(
+            'mac', 'ctnr', 'system', 'modified', 'dhcp_enabled')
+
+        interfaces = []
+        for interface_list in static_interfaces, dynamic_interfaces:
+            for interface in interface_list:
+                if self.use_mac(interface.mac) and interface.dhcp_enabled:
+                    ctnr = interface.ctnr.name
+                    system = interface.system
+
+                    # handle when the zone name should be the Other ID
+                    if ctnr in self.other_id_ctnrs:
+                        try:
+                            other_id = system.systemav_set.get(
+                                attribute__name__exact="Other ID").value
+                        except ObjectDoesNotExist:
+                            other_id = "No_other_id"
+                    else:
+                        other_id = None
+
+                    intr = {
+                        'mac': interface.mac.replace(':', ''),
+                        'ctnr': other_id or ctnr,
+                        'hostname': system.name,
+                        'modified': interface.modified.strftime(
+                            # Format to match: Tue Jun  3 10:33:57 2014
+                            "%a %b %d %X %Y") if interface.modified
+                                              else "More_than_90_days",
+                    }
+                    interfaces.append(intr)
 
         # sort by mac
         interfaces = sorted(interfaces, key=itemgetter('mac'))
@@ -55,11 +73,11 @@ class Command(BaseCommand):
         output = ""
 
         for i in interfaces:
-            output += self.format_str.format(**i)
+            output += self.output_format.format(**i)
 
-        if options['output']:
+        if options['file']:
             # output to a file
-            f = open(options['output'], 'w')
+            f = open(options['file'], 'w')
             f.write(output)
             f.close()
         else:
