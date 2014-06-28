@@ -311,9 +311,13 @@ class Zone(object):
                         fqdn=hostname, ip_str=long2ip(ip)).exists():
                     continue
 
-                arec, _ = range_usage_get_create(
-                    AddressRecord, label=label, domain=self.domain,
-                    ip_str=long2ip(ip), ip_type='4', ctnr=ctnr)
+                try:
+                    arec, _ = range_usage_get_create(
+                        AddressRecord, label=label, domain=self.domain,
+                        ip_str=long2ip(ip), ip_type='4', ctnr=ctnr)
+                except ValidationError, e:
+                    print "Could not migrate AR %s: %s" % (hostname, e)
+                    continue
 
                 if enabled:
                     arec.views.add(public)
@@ -326,7 +330,12 @@ class Zone(object):
 
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
-                    ptr.full_clean()
+                    try:
+                        ptr.full_clean()
+                    except ValidationError, e:
+                        print "Could not migrate PTR %s: %s" % (ptr.ip_str, e)
+                        continue
+
                     ptr.save(update_range_usage=False)
                     if enabled:
                         ptr.views.add(public)
