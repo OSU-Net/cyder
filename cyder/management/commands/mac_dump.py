@@ -22,8 +22,8 @@ class Command(BaseCommand):
     )
     other_id_ctnrs = {"zone.public", "zone.resnet", "zone.flexnetoregonstate"}
     output_format = "{mac} {zone_identifier} {hostname} {modified}\n"
-    used_macs = set()
-    forbidden_macs = {"", "00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff"}
+    # prefill bad MAC's so only good MAC's get added to the access point
+    used_macs = {"", "00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff"}
 
     def use_mac(self, mac):
         """
@@ -32,7 +32,7 @@ class Command(BaseCommand):
         :param mac: A given interface's MAC address.
         :return: True if the MAC is unique, False if it has already been used.
         """
-        if mac in self.used_macs or mac in self.forbidden_macs:
+        if mac in self.used_macs:
             return False
         else:
             self.used_macs.add(mac)
@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
         interfaces = []
         for interface in itertools.chain(static_interfaces, dynamic_interfaces):
-            if not (self.use_mac(interface.mac) and interface.dhcp_enabled):
+            if not (interface.dhcp_enabled and self.use_mac(interface.mac)):
                 continue
 
             zone_identifier = interface.ctnr.name
