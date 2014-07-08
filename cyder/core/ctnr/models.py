@@ -54,6 +54,9 @@ class Ctnr(BaseModel, ObjectUrlMixin):
             if isinstance(obj, m):
                 return f.filter(pk=obj.pk).exists()
 
+        if hasattr(obj, 'check_in_ctnr'):
+            return obj.check_in_ctnr(self)
+
         raise Exception("Permissions check on unknown object type: %s" % obj)
 
     def details(self):
