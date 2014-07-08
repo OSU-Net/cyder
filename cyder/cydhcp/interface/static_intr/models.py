@@ -160,9 +160,9 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             # The reverse_domain field is in the Ip class.
 
         if delete_system:
-            if(not self.system.staticinterface_set.all().exclude(
+            if(not self.system.staticinterface_set.exclude(
                     id=self.id).exists() and
-                    not self.system.dynamicinterface_set.all().exists()):
+                    not self.system.dynamicinterface_set.exists()):
                 self.system.delete()
 
         super(StaticInterface, self).delete(*args, **kwargs)

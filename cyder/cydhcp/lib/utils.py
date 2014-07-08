@@ -223,14 +223,14 @@ def create_ipv4_interface(label, vlan_str, site_str, system,
                                            "UI.".format(network_str)])
             return None, errors
 
-    if not network.range_set.all().exists():
+    if not network.range_set.exists():
         errors['range'] = ErrorList(["No range for network {0} in vlan {1} in "
                                      "site {0}. Create it via the web UI too "
                                      "many networks associated with vlan "
                                      "{0} in {1}".format(network, vlan, site)])
         return None, errors
 
-    if network.range_set.all().count() > 1:
+    if network.range_set.count() > 1:
         errors['ip'] = ErrorList(["Too many ranges. In the face of ambiguity, "
                                   "*this script* has refused the temptation "
                                   "to guess which range you want to put the "
