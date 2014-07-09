@@ -46,6 +46,9 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         return Ctnr.objects.filter(pk=ctnr.pk)
 
     def check_contains_obj(self, obj):
+        if self.name == "global":
+            return True
+
         if hasattr(obj, 'ctnr'):
             return obj.ctnr == self
 
