@@ -55,6 +55,12 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     from cyder.core.ctnr.models import CtnrUser
     user_level = None
 
+    try:
+        if obj and ctnr and not ctnr.check_contains_obj(obj):
+            return False
+    except Exception:
+        return False
+
     # Get user level.
     try:
         ctnr_level = CtnrUser.objects.get(ctnr=ctnr, user=user).level
@@ -389,6 +395,7 @@ def has_dynamic_registration_perm(user_level, obj, ctnr, action):
         'user': True,  # ?
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
+
 
 def has_token_perm(user, obj, ctnr, action):
     """

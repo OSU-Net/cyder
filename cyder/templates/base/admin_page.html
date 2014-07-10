@@ -9,22 +9,23 @@
 {% endblock %}
 
 {% block content %}
-<span id="data"
-    data-SearchUserUrl="{{ url('user-search') }}"
-</span>
-<form class="form" id="Bug-Report" method="POST" action="">
-  <h3>User Administration</h3>
-  <div class="inner-form">
-    {{ user_form.as_p() }}
-    <input type="hidden" name="csrfmiddlewaretoken"
-     value="{{ csrf_token }}"</input>
+  <span id="view-metadata"
+      data-searchUserUrl="{{ url('user-search') }}"
+      data-csrfToken="{{ csrf_token }}">
+  </span>
+  <div id="obj-form">
+    <form class="form" method="POST" action="{{ url('admin-page') }}">
+      <h3>User Administration</h3>
+      <div id="hidden-inner-form" class="inner-form">
+        {{ user_form.as_p() }}
+      </div>
+      <div class="form-btns">
+        <hr>
+        <a class="btn submit c">Submit</a>
+      </div>
+    </form>
   </div>
-  <div class="form-btns">
-    <hr>
-    <a class="btn submit c">Submit</a>
-  </div>
-</form>
-<div id=tables class=tableclass>
+  <div id=tables class=tableclass>
     {% if superuser_table %}
       <h3> Current Superusers </h3>
       {{ render_table(request, superuser_table, 'superuser_table') }}
@@ -33,7 +34,6 @@
       <h3> Users not in any Container </h3>
       {{ render_table(request, user_table, 'user_table') }}
     {% endif %}
-
-</div>
-{{ js('admin') }}
+  </div>
+  {{ js('admin') }}
 {% endblock %}
