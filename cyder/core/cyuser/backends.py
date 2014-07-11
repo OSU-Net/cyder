@@ -55,6 +55,9 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     from cyder.core.ctnr.models import CtnrUser
     user_level = None
 
+    if user.is_superuser:
+        return True
+
     try:
         if obj and ctnr and not ctnr.check_contains_obj(obj):
             return False
@@ -81,9 +84,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         is_cyder_user = False
         is_cyder_guest = False
 
-    if user.is_superuser:
-        return True
-    elif is_cyder_admin:
+    if is_cyder_admin:
         user_level = 'cyder_admin'
     elif is_ctnr_admin:
         user_level = 'ctnr_admin'
