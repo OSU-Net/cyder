@@ -66,6 +66,9 @@ class Nameserver(CydnsRecord):
         objects = objects.filter(domain__in=ctnr.domains.all())
         return objects
 
+    def check_in_ctnr(self, ctnr):
+        return self.domain in ctnr.domains.all()
+
     @property
     def rdtype(self):
         return 'NS'
