@@ -427,13 +427,13 @@ def gen_CNAME():
     :uniqueness: label, domain, target
     """
     print "Creating CNAMEs."
-    sql = ("SELECT zone_cname.server, zone_cname.name, zone_cname.enabled, "
-           "zone.name, domain.name FROM zone_cname "
+    sql = ("SELECT zone_cname.id, zone_cname.server, zone_cname.name, "
+           "zone_cname.enabled, zone.name, domain.name FROM zone_cname "
            "JOIN zone ON zone_cname.zone = zone.id "
            "JOIN domain ON zone_cname.domain = domain.id")
     cursor.execute(sql)
 
-    for server, name, enabled, zone, dname in cursor.fetchall():
+    for pk, server, name, enabled, zone, dname in cursor.fetchall():
         server, name = server.lower(), name.lower()
         dname = dname.lower()
 
@@ -462,6 +462,10 @@ def gen_CNAME():
 
         ctnr = Zone.ctnr_from_zone_name(zone, 'CNAME')
         if ctnr is None:
+            continue
+
+        if ctnr not in domain.ctnr_set.all():
+            print "CNAME %s has mismatching container for its domain." % pk
             continue
 
         cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
