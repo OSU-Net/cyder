@@ -19,6 +19,7 @@
           <a id="logout-btn" class="header-icon logout" href="{{ url('logout') }}"></a>
           <div class="settings-btn-container">
             <a id="settings-btn" class="header-icon settings" href="#"></a>
+            <a id="menu-btn" class="header-icon menu" href="#"></a>
           </div>
         </span>
         <div class="header settings" id="settings-header">
@@ -117,11 +118,10 @@
     </div>
 
     <div class="main wrap container">
-      <input type="checkbox" id="sidebar_toggle">
 
-      {% if self.sidebar() %}<div id="sidebar">{% endif %}
+      {% if self.sidebar() %}<div id="sidebar_div" class="displayed"><div id="sidebar">{% endif %}
       {% block sidebar %}{% endblock %}
-      {% if self.sidebar() %}</div>{% endif %}
+      {% if self.sidebar() %}</div></div>{% endif %}
 
       <div class="page-header">
         <h1 id="title">{{ self.title() }}</h1>
@@ -136,16 +136,12 @@
         {% block form %}{% endblock %}
         {% block content %}{% endblock %}
       </div>
-        <div id="chevronfooter">
-          <label id="chevron" for="sidebar_toggle">
-              <img id="chevronimg" src="/media/img/chevron.png"></img>
-          </label>
-        </div>
-      </div>
+    </div>
     <div id="footer" class="footer">
       <a class="footer source" href="https://github.com/OSU-Net/cyder">Source Code</a>
       <a id="bug-report" class="footer bug {{ 'selected' if url('bug-report') == request.path }}" href="{{ url('bug-report') }}">Report a Bug</a>
       <a id="linkware" class="footer linkware" href="http://www.visualpharm.com ">Icons provided by http://www.visualpharm.com</a>
     </div>
+    <div class="load"></div>
   </body>
 </html>

@@ -15,23 +15,26 @@
   </span>
 
   {% if request.user.get_profile().has_perm(request, 2, obj_class="CtnrUser", ctnr=obj) or request.user.is_superuser  %}
-    <form class="form" id="add-object">
-      {% if request.user.is_superuser %}
-        <h3>Add Object to Container</h3>
-      {% else %}
-        <h3>Add User to Container</h3>
-      {% endif %}
-      <div class="inner-form" id="add-object-inner-form">
-        <ul style="float:top; left:0;" id="add-object-errorlist"></ul>
-          {{ object_select_form.as_p() }}
+    <div id="obj-form">
+      <form class="form" id="add-object">
+        {% if request.user.is_superuser %}
+          <h3>Add Object to Container</h3>
+        {% else %}
+          <h3>Add User to Container</h3>
+        {% endif %}
+        <div class="inner-form" id="add-object-inner-form">
+          <ul style="float:top; left:0;" id="add-object-errorlist"></ul>
+            {{ object_select_form.as_p() }}
+        </div>
+        <div class="form-btns">
+          <hr>
+          <a id="add-object-ctnr" class="btn c submit">Add</a>
+        </div>
+      </form>
+      <div id ="add-user-form" style="display: none">
+          <ul style="float:top; left:0;" id="add-user-errorlist"></ul>
+        {{ add_user_form.as_p() }}
       </div>
-      <div class="form-btns">
-        <hr>
-        <a id="add-object-ctnr" class="btn" href="#">Add</a>
-      </div>
-    </form>
-    <div id ="add-user-form" style="display: none">
-      {{ add_user_form.as_p() }}
     </div>
   {% endif %}
 

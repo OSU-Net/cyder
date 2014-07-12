@@ -61,15 +61,15 @@ class Tablefier:
         for title, sort_field, value in data:
             headers.append([title, sort_field])
 
-        if self.extra_cols:
-            for col in self.extra_cols:
-                headers.append([col['header'], col['sort_field']])
-
         if self.views:
             headers.append(['Views', None])
             if hasattr(self.objects, 'object_list'):
                 self.objects.object_list = (
                     self.objects.object_list.prefetch_related('views'))
+
+        if self.extra_cols:
+            for col in self.extra_cols:
+                headers.append([col['header'], col['sort_field']])
 
         if self.can_update:
             headers.append(['Actions', None])
@@ -101,7 +101,7 @@ class Tablefier:
         if self.add_info and value == obj:
             col = {'value': [unicode(value)], 'url': [None]}
         else:
-            col = {'value': [value], 'url': [self.grab_url(value)]}
+            col = {'value': [unicode(value)], 'url': [self.grab_url(value)]}
         return col
 
     @staticmethod
@@ -161,11 +161,11 @@ class Tablefier:
             for title, field, value in details['data']:
                 row_data.append(self.build_data(obj, value))
 
-            for d in extra_data:
-                row_data.append(self.build_extra(d))
-
             if self.views:
                 row_data.append(self.build_view_field(obj))
+
+            for d in extra_data:
+                row_data.append(self.build_extra(d))
 
             if self.can_update:
                 row_data.append(self.build_update_field(obj))

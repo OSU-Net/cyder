@@ -32,7 +32,8 @@ class BugReportForm(forms.Form):
 class EditUserForm(forms.Form):
     user = forms.CharField(
         widget=forms.TextInput(attrs={'id': 'user-searchbox'}))
-    action = forms.ChoiceField(
+    edit_action = forms.ChoiceField(
+        label="Action",
         widget=forms.RadioSelect, choices=(
             ('Promote', 'Promote to Superuser'),
             ('Demote', 'Demote from Superuser'),

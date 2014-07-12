@@ -184,7 +184,7 @@ def prune_tree(domain):
 def prune_tree_helper(domain, deleted_domains):
     if not domain:
         return deleted_domains  # Didn't delete anything.
-    if domain.domain_set.all():
+    if domain.domain_set.exists():
         return deleted_domains  # Can't delete domain. Has children.
     if domain.has_record_set():
         return deleted_domains  # Records exist for domain.

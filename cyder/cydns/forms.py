@@ -16,6 +16,9 @@ class ViewChoiceForm(ModelForm):
 
 class DNSForm(ViewChoiceForm):
     comment = forms.CharField(widget=forms.HiddenInput, required=False)
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 4, 'cols': 50}),
+        required=False)
 
     def clean(self):
         super(DNSForm, self).clean()

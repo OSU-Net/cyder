@@ -98,6 +98,9 @@ a.btn {
     text-decoration: none;
     right: 0;
     transition: .1s .1s;
+    &:hover {
+        background: lighten($blue, 10%);
+    }
     &.hover:active {
         @include box-shadow(none);
         background: lighten($blue, 5%);
@@ -185,6 +188,15 @@ a.btn {
             background-image: url(../img/settings-hover.png);
         }
     }
+    &.menu {
+        background-image: url(../img/menu.png);
+        &:hover {
+            background-image: url(../img/menu-hover.png);
+        }
+        &.selected {
+            background-image: url(../img/menu-hover.png);
+        }
+    }
 }
 
 .header {
@@ -259,14 +271,25 @@ a.btn {
     display: none;
     z-index: 2;
 }
+#sidebar_div {
+    float: left;
+    position: relative;
+    width: 110px;
+    height: 1000px;
+    margin-right: 25px;
+    display: block;
+    &.displayed {
+        display: block;
+    }
+}
 
 #sidebar {
+    z-index: 2;
+    position: fixed;
     .expand {
         opacity: 0;
     }
-    float: left;
     height: 100%;
-    margin-right: 25px;
     width: 110px;
     display: block;
     word-spacing: 100px;
@@ -331,8 +354,8 @@ a.btn {
     padding-top: 13px;
     position: relative;
     .content {
-        clear: left;
         display: inline-block;
+        float: right;
         margin-top: 13px;
         overflow: visible;
         // Container - sidebar width - sidebar gutter - gutter.
@@ -340,31 +363,6 @@ a.btn {
         width: 825px;
         width: 1145px;
     }
-}
-
-#chevronfooter {
-    display: none;
-    position: fixed;
-    left: 43%;
-    bottom: 0%;
-    width: 48px;
-    height: 48px;
-    text-align: center;
-    #chevron {
-        height: 100%;
-        width: 100%;
-        #chevronimg {
-            width: 48px;
-            height: 48px;
-            background-color: transparent;
-            position:fixed;
-            opacity: .7;
-        }
-    }
-}
-
-#sidebar_toggle{
-    display: none;
 }
 
 .page-header {
@@ -450,6 +448,23 @@ a.btn {
 }
 #search-meta {
     margin-bottom: 26px;
+}
+
+.load {
+    display: none;
+    position: absolute;
+    background: url('../img/loadingGif.gif')
+                50% 50%
+                no-repeat;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1000;
+    width: 300px;
+    height: 300px;
+    opacity: 0.80;
+    margin: auto;
 }
 
 .footer {

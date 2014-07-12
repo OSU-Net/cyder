@@ -55,7 +55,7 @@ def cydns_view(request, pk=None):
                     return HttpResponse(json.dumps({'success': True}))
 
                 if (hasattr(obj, 'ctnr_set') and
-                        not obj.ctnr_set.all().exists()):
+                        not obj.ctnr_set.exists()):
                     obj.ctnr_set.add(request.session['ctnr'])
                     return redirect(obj.get_list_url())
 

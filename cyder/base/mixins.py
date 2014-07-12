@@ -89,10 +89,6 @@ class ObjectUrlMixin(object):
         return {'url': self.get_table_update_url()}
 
 
-class ExpirableFormMixin(object):
-    expire = forms.DateTimeField()
-
-
 class UsabilityFormMixin(object):
     def append_required_all(self):
         for fieldname, field in self.fields.items():

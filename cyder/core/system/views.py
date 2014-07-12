@@ -71,11 +71,10 @@ def system_create_view(request):
         system_form = ExtendedSystemForm(post_data)
         if system_form.is_valid():
             system = system_form.save(commit=False)
-        else:
+            system.save()
+            post_data['system'] = system.id
+        elif not request.POST.get('initial', None):
             return HttpResponse(json.dumps({'errors': system_form.errors}))
-
-        system.save()
-        post_data['system'] = system.id
 
         if post_data.get('interface_type', None) == 'static_interface':
             try:
@@ -92,7 +91,12 @@ def system_create_view(request):
         else:
             raise Exception("Invalid interface_type")
 
-        if form.is_valid():
+        if request.POST.get('initial', None):
+            system_form.errors.clear()
+            static_form.errors.clear()
+            dynamic_form.errors.clear()
+
+        elif form.is_valid():
             try:
                 form.save()
                 return HttpResponse(json.dumps(
@@ -108,10 +112,6 @@ def system_create_view(request):
 
             return HttpResponse(json.dumps({'errors': form.errors}))
 
-        if request.POST.get('initial', None):
-            system_form.errors.clear()
-            static_form.errors.clear()
-            dynamic_form.errors.clear()
 
     static_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['system'].widget = forms.HiddenInput()

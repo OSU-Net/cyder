@@ -100,14 +100,14 @@ class NoNSTests(object):
         # We now have a zone with nameservers that aren't in any views. No
         # record should be allowed to be in the view
 
-        start_obj_count = self.test_class.objects.all().count()
+        start_obj_count = self.test_class.objects.count()
         post_data['views'] = [self.public_view.pk]
 
         # Create the object then get the object
         resp = self.client.post(self.test_class.get_create_url(),
                                 post_data, follow=True)
         self.assertEqual(resp.status_code, 200)
-        new_obj_count = self.test_class.objects.all().count()
+        new_obj_count = self.test_class.objects.count()
 
         # Nothing should have been created
         self.assertEqual(start_obj_count, new_obj_count)
@@ -115,10 +115,10 @@ class NoNSTests(object):
         ns.views.add(self.public_view)
 
         # Okay, we should be able to add to the public view now
-        start_obj_count = self.test_class.objects.all().count()
+        start_obj_count = self.test_class.objects.count()
         resp = self.client.post(self.test_class.get_create_url(),
                                 post_data, follow=True)
-        new_obj_count = self.test_class.objects.all().count()
+        new_obj_count = self.test_class.objects.count()
         self.assertEqual(start_obj_count + 1, new_obj_count)
 
 

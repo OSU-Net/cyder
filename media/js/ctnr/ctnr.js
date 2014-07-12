@@ -1,7 +1,8 @@
 $(document).ready(function() {
     var form = document.getElementById('add-object-inner-form');
     var ctnr = $('#ctnr-data');
-    var ctnr_name = $('#title').text().split(' ')[1];
+    var title = $('#title').text().split(' ');
+    var ctnr_name = title[title.length - 1].trim();
     var searchUrl = null;
     var addObjectUrl = ctnr.attr('data-addObjectUrl');
     var ctnrPk = ctnr.attr('data-ctnr-pk');
@@ -29,14 +30,20 @@ $(document).ready(function() {
             lvl = -1;
         } else if ($(this).attr('class') == 'plus') {
             lvl = 1;
-        } else if ($(this).attr('class') == 'remove-user') {
-            action = 'user_remove';
-            acknowledge = confirm("Are you sure you want to remove this " +
-                "user from " + ctnr_name + "?");
         } else {
             action = 'obj_remove';
-            acknowledge = confirm("Are you sure you want to remove this " +
-                obj_type + " from " + ctnr_name + "?");
+            if (obj_type == 'user') {
+                name = $(this).parent().parent().find('.username_column').text().trim();
+            } else {
+                name = $(this).parent().parent().find('.name_column').text().trim();
+            };
+            if (name) {
+                acknowledge = confirm("Are you sure you want to remove " +
+                    obj_type + ", " + name + ", from " + ctnr_name + "?");
+            } else {
+                acknowledge = confirm("Are you sure you want to remove this " +
+                    obj_type + " from " + ctnr_name + "?");
+            };
         };
 
         if (acknowledge) {
@@ -75,7 +82,7 @@ $(document).ready(function() {
             };
             objType = obj_select[i].value;
             searchUrl = ctnr.attr(('data-search' + obj_select[i].value + 'Url'));
-            $('label[for="object-searchbox"]').text(obj_select[i].value + ':');
+            $('label[for="object-searchbox"]').text(obj_select[i].value + '*:');
             search(searchUrl);
         };
         // Watch type selector and update related variables
@@ -88,7 +95,7 @@ $(document).ready(function() {
             };
             objType = this.value;
             searchUrl = ctnr.attr(('data-search' + this.value + 'Url'));
-            $('label[for="object-searchbox"]').text(this.value + ':');
+            $('label[for="object-searchbox"]').text(this.value + '*:');
             search(searchUrl);
         };
     };
@@ -107,12 +114,11 @@ $(document).ready(function() {
     }
 
     // Add object to ctnr.
-    $('#add-object-ctnr').click(function(event) {
+    $('#obj-form form').live('submit', function(event) {
         if (objName != ($('#object-searchbox').val())) {
             objPk = null;
             objName = ($('#object-searchbox').val());
         }
-
         var postData = {
             obj_pk: objPk,
             obj_name: objName,
@@ -120,16 +126,23 @@ $(document).ready(function() {
             csrfmiddlewaretoken: csrfToken,
         };
         if (objType == 'user') {
-            postData.level = $('#user_clone input[name="level"]:checked')[0].value;
+            level = $('#user_clone input[name="level"]:checked');
+            if (level.length) {
+                postData.level = level[0].value;
+            } else {
+                $('#add-user-errorlist').append(
+                    '<li class="error"><font color="red"> '
+                    + 'This field is required</font></li>');
+                return false;
+            };
             postData.confirmation = confirmation;
         };
         confirmation = false;
-
         $.post(addObjectUrl, postData, function(data) {
             if (data.acknowledge) {
                 if (confirm(data.acknowledge)) {
                     confirmation = true;
-                    document.getElementById('add-object-ctnr').click();
+                    $('#add-object-ctnr').click();
                     data.removeClass("error");
                 }
             }
@@ -138,10 +151,8 @@ $(document).ready(function() {
                 $('#add-object-errorlist').empty();
                 // Put error message.
                 console.log(data.error);
-                var forms = document.getElementById('add-object-errorlist');
-                forms.innerHTML = "<li><font color='red'>" + data.error +"</font></li>" + forms.innerHTML;
-                $('#object-searchbox').val('');
-                userPk = null;
+                var forms = $('#add-object-errorlist');
+                forms.append('<li><font color="red">' + data.error +'</font></li>');
             };
             // Not going to use ajax for other objects due to users tables being on top
             if (data.success) {

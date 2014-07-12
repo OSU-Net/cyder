@@ -111,22 +111,22 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
-
-        siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
-        if self.id:
-            siblings.exclude(id=self.id)
-        if siblings.exists():
-            raise ValidationError(
-                "MAC address must be unique in this interface's range")
+        if self.mac:
+            siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
+            if self.pk is not None:
+                siblings = siblings.exclude(pk=self.pk)
+            if siblings.exists():
+                raise ValidationError(
+                    "MAC address must be unique in this interface's range")
 
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
         update_range_usage = kwargs.pop('update_range_usage', True)
         rng = self.range
         if delete_system:
-            if (not self.system.dynamicinterface_set.all().exclude(
+            if (not self.system.dynamicinterface_set.exclude(
                     id=self.id).exists() and
-                    not self.system.staticinterface_set.all().exists()):
+                    not self.system.staticinterface_set.exists()):
                 self.system.delete()
         super(DynamicInterface, self).delete()
         if rng and update_range_usage:
