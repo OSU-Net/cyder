@@ -148,13 +148,9 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         return reverse('build-debug', args=[self.pk])
 
     def delete(self, *args, **kwargs):
-        if self.domain_set.exclude(pk=self.root_domain.pk).exists():
-            raise ValidationError(
-                "Child domains exist in this SOA's zone. Delete "
-                "those domains or remove them from this zone before "
-                "deleting this SOA.")
-        self.root_domain.soa = None
-        self.root_domain.save(override_soa=True)
+        if self.root_domain.master_domain:
+            self.root_domain.set_soa_recursive(
+                self.root_domain.master_domain.soa)
         super(SOA, self).delete(*args, **kwargs)
 
     def has_record_set(self, view=None, exclude_ns=False):

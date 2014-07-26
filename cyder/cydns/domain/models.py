@@ -140,8 +140,6 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     def delete(self, *args, **kwargs):
         override_soa = kwargs.pop('override_soa', False)
-        if not override_soa:
-            self.validate_root_domain()
 
         self.check_for_children()
         if self.is_reverse:
@@ -152,10 +150,19 @@ class Domain(BaseModel, ObjectUrlMixin):
                                   "domain.")
         super(Domain, self).delete(*args, **kwargs)
 
+    def set_soa_recursive(self, soa):
+        """Do a pre-order traversal of this DNS subtree, stopping at zone
+        boundaries, and set each domain's 'soa' field to `soa`"""
+        children = self.domain_set.filter(soa=self.soa)
+        self.soa = soa
+        self.full_clean()
+        self.save()
+        for domain in children:
+            domain.set_soa_recursive(soa)
+
     def save(self, *args, **kwargs):
         override_soa = kwargs.pop('override_soa', False)
         if not override_soa:
-            self.validate_root_domain()
             self.full_clean()
 
         if not self.pk:
@@ -218,12 +225,6 @@ class Domain(BaseModel, ObjectUrlMixin):
             if db_self.name != self.name and self.domain_set.exists():
                 raise ValidationError("Child domains rely on this domain's "
                                       "name remaining the same.")
-
-    def validate_root_domain(self):
-        root_of_soa = self.root_of_soa.all()
-        if root_of_soa and root_of_soa[0] != self.soa:
-            raise ValidationError("Cannot delete domain or change its SOA "
-                                  "because it is a root domain.")
 
     def check_for_children(self):
         if self.domain_set.exists():
