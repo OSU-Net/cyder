@@ -180,10 +180,11 @@ class Domain(BaseModel, ObjectUrlMixin):
                                           "whose root domain has no NS "
                                           "record.")
 
+        # Give all SOA-less descendants the same SOA as this domain.
         if self.soa:
             for dom in self.domain_set.filter(soa=None, master_domain=self):
                 dom.soa = self.soa
-                dom.save()
+                dom.save()  # Recurse.
 
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:
