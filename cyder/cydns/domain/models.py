@@ -139,8 +139,6 @@ class Domain(BaseModel, ObjectUrlMixin):
         ]}
 
     def delete(self, *args, **kwargs):
-        override_soa = kwargs.pop('override_soa', False)
-
         self.check_for_children()
         if self.is_reverse:
             self.reassign_reverse_delete()
@@ -161,9 +159,7 @@ class Domain(BaseModel, ObjectUrlMixin):
             domain.set_soa_recursive(soa)
 
     def save(self, *args, **kwargs):
-        override_soa = kwargs.pop('override_soa', False)
-        if not override_soa:
-            self.full_clean()
+        self.full_clean()
 
         if not self.pk:
             new_domain = True
@@ -187,7 +183,7 @@ class Domain(BaseModel, ObjectUrlMixin):
         if self.soa:
             for dom in self.domain_set.filter(soa=None, master_domain=self):
                 dom.soa = self.soa
-                dom.save(override_soa=True)
+                dom.save()
 
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:

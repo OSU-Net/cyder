@@ -193,7 +193,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                              self.root_domain.get_children_recursive()]
             for domain in self.domain_set.exclude(pk__in=root_children):
                 domain.soa = None
-                domain.save(override_soa=True)
+                domain.save()
 
         super(SOA, self).save(*args, **kwargs)
         self.root_domain.soa = self
