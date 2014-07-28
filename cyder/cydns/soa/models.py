@@ -189,6 +189,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                     self.schedule_rebuild(commit=False)
 
         if self.pk:
+            # Null the SOA of the root domain; null the SOA of any domain above
+            # the root whose SOA is this one.
             root_children = [d.pk for d in
                              self.root_domain.get_children_recursive()]
             for domain in self.domain_set.exclude(pk__in=root_children):
@@ -196,6 +198,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 domain.save()
 
         super(SOA, self).save(*args, **kwargs)
+
         self.root_domain.soa = self
         try:
             self.root_domain.save()
