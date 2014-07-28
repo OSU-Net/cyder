@@ -153,7 +153,7 @@ class Nameserver(CydnsRecord):
             #  * Address records are searched.
             #  * Interface records are searched.
             # AddressRecords take higher priority over interface records.
-            glue_label = self.server.split('.')[0]  # foo.com -> foo
+            glue_label = self.server[:self.server.find('.')]  # foo.com -> foo
             if (self.glue and self.glue.label == glue_label and
                     self.glue.domain == self.domain):
                 # Our glue record is valid. Don't go looking for a new one.
