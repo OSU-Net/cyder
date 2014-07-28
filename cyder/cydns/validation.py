@@ -5,7 +5,7 @@ import ipaddr
 
 
 def do_zone_validation(domain):
-    """Preform validation on domain. This function calls the following
+    """Perform validation on domain. This function calls the following
     functions::
 
         check_for_soa_partition
