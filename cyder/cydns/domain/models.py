@@ -150,8 +150,9 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     def set_soa_recursive(self, soa):
         """Do a pre-order traversal of this DNS subtree, stopping at zone
-        boundaries, and set each domain's 'soa' field to `soa`"""
-        children = self.domain_set.filter(soa=self.soa)
+        and delegation boundaries, and set each domain's 'soa' field to `soa`.
+        """
+        children = self.domain_set.filter(soa=self.soa, delegated=False)
         self.soa = soa
         self.full_clean()
         self.save()
