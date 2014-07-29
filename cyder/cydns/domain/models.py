@@ -154,7 +154,6 @@ class Domain(BaseModel, ObjectUrlMixin):
         """
         children = self.domain_set.filter(soa=self.soa, delegated=False)
         self.soa = soa
-        self.full_clean()
         self.save()
         for domain in children:
             domain.set_soa_recursive(soa)
