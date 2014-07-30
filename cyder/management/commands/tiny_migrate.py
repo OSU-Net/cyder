@@ -137,14 +137,13 @@ def tiny2soa(fqdn, mname, rname, ser, ref=300, ret=900, exp=604800, _min=86400,
 
 
 def tiny2ptr(fqdn, p, ttl=3600):
-    label, domain = get_label_domain_workaround(p)
     for rdtype in ['A', 'AAAA']:
         ip_type = '6' if rdtype == 'AAAA' else '4'
         ip_str = diglet(rdtype, p)
         if ip_str:
             try:
                 ptr, _ = PTR.objects.get_or_create(
-                    label=label, domain=domain, ip_str=ip_str,
+                    fqdn=p, ip_str=ip_str,
                     ip_type=ip_type, ctnr=activectnr)
                 ptr.views.add(public)
                 ptr.views.add(private)
