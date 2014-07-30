@@ -183,9 +183,12 @@ class Command(LabelCommand):
             rdtype, line = line[0], line[1:]
             if rdtype in tinyprefixes:
                 tiny2cyder = tinyprefixes[rdtype]
-                obj = tiny2cyder(*line.split(':'))
-                if obj and hasattr(obj, 'views'):
-                    obj.views.add(public)
-                    obj.views.add(private)
+                try:
+                    obj = tiny2cyder(*line.split(':'))
+                    if obj and hasattr(obj, 'views'):
+                        obj.views.add(public)
+                        obj.views.add(private)
+                except ValidationError, e:
+                    print "ERROR: ", e
             else:
                 raise Exception("Unknown prefix: %s" % rdtype)
