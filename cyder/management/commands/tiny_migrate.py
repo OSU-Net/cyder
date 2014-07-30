@@ -175,8 +175,11 @@ class Command(LabelCommand):
                 if 'ctnr' in line:
                     ctnrname = line.split()[-1]
                     activectnr = Ctnr.objects.get(name=ctnrname)
+                    print
+                    print ctnrname
                 continue
 
+            print line
             rdtype, line = line[0], line[1:]
             if rdtype in tinyprefixes:
                 tiny2cyder = tinyprefixes[rdtype]
