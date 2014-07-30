@@ -132,7 +132,7 @@ def tiny2soa(fqdn, mname, rname, ser, ref=300, ret=900, exp=604800, _min=86400,
 
     soa, _ = SOA.objects.get_or_create(
         root_domain=domain, primary=mname, contact=rname, retry=ret,
-        refresh=ref, expire=exp, minimum=_min, ttl=ttl, ctnr=activectnr)
+        refresh=ref, expire=exp, minimum=_min, ttl=ttl)
     return soa
 
 
