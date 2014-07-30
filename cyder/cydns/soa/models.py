@@ -149,8 +149,11 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
 
     def delete(self, *args, **kwargs):
         if self.root_domain.master_domain:
-            self.root_domain.set_soa_recursive(
-                self.root_domain.master_domain.soa)
+            self.root_domain.soa = self.root_domain.master_domain.soa
+        else:
+            self.root_domain.soa = None
+        self.root_domain.save()
+
         super(SOA, self).delete(*args, **kwargs)
 
     def has_record_set(self, view=None, exclude_ns=False):
@@ -170,47 +173,38 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        if not self.pk:
-            new = True
-            self.dirty = True
-        elif self.dirty:
-            new = False
-        else:
-            new = False
-            db_self = SOA.objects.get(pk=self.pk)
-            fields = [
-                'primary', 'contact', 'expire', 'retry', 'refresh',
-                'root_domain',
-            ]
-            # Leave out serial and dirty so rebuilds don't cause a never ending
-            # build cycle
-            for field in fields:
-                if getattr(db_self, field) != getattr(self, field):
-                    self.schedule_rebuild(commit=False)
 
-        if self.pk:
-            # Null the SOA of the root domain; null the SOA of any domain above
-            # the root whose SOA is this one.
-            root_children = [d.pk for d in
-                             self.root_domain.get_children_recursive()]
-            for domain in self.domain_set.exclude(pk__in=root_children):
-                domain.soa = None
-                domain.save()
+        new = not self.pk
+        if new:
+            self.dirty = True
+        else:
+            db_self = SOA.objects.get(pk=self.pk)
+            if not self.dirty:
+                fields = [
+                    'primary', 'contact', 'expire', 'retry', 'refresh',
+                    'root_domain',
+                ]
+                # Leave out serial and dirty so rebuilds don't cause a
+                # never-ending build cycle
+                for field in fields:
+                    if getattr(db_self, field) != getattr(self, field):
+                        self.schedule_rebuild(commit=False)
+
 
         super(SOA, self).save(*args, **kwargs)
 
-        self.root_domain.soa = self
-        try:
-            self.root_domain.save()
-        except Exception, e:
-            if new:
-                self.delete()
-
-            raise e
-
         if new:
             # Need to call this after save because new objects won't have a pk
+            self.root_domain
             self.schedule_rebuild(commit=False)
+            self.root_domain.soa = self
+            self.root_domain.save()
+        else:
+            if db_self.root_domain != self.root_domain:
+                db_self.root_domain.soa = None
+                db_self.root_domain.save()
+                self.root_domain.soa = self
+                self.root_domain.save()
 
 
 class SOAAV(EAVBase):

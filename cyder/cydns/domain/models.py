@@ -148,17 +148,14 @@ class Domain(BaseModel, ObjectUrlMixin):
                                   "domain.")
         super(Domain, self).delete(*args, **kwargs)
 
-    def set_soa_recursive(self, soa):
-        """Do a pre-order traversal of this DNS subtree, stopping at zone
-        and delegation boundaries, and set each domain's 'soa' field to `soa`.
-        """
-        children = self.domain_set.filter(soa=self.soa, delegated=False)
-        self.soa = soa
-        self.save()
-        for domain in children:
-            domain.set_soa_recursive(soa)
-
     def save(self, *args, **kwargs):
+        # Ensure all descendants have the same SOA as this domain.
+        bad_children = list(self.domain_set.filter(
+            root_of_soa=None, delegated=False).exclude(soa=self.soa))
+        for child in bad_children:
+            child.soa = self.soa
+            child.save()  # Recurse.
+
         self.full_clean()
 
         if not self.pk:
@@ -179,12 +176,6 @@ class Domain(BaseModel, ObjectUrlMixin):
                                           "are attempting to create a zone "
                                           "whose root domain has no NS "
                                           "record.")
-
-        # Give all SOA-less descendants the same SOA as this domain.
-        if self.soa:
-            for dom in self.domain_set.filter(soa=None, master_domain=self):
-                dom.soa = self.soa
-                dom.save()  # Recurse.
 
         super(Domain, self).save(*args, **kwargs)
         if self.is_reverse and new_domain:
