@@ -150,8 +150,8 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     def save(self, *args, **kwargs):
         # Ensure all descendants have the same SOA as this domain.
-        bad_children = list(self.domain_set.filter(
-            root_of_soa=None, delegated=False).exclude(soa=self.soa))
+        bad_children = self.domain_set.filter(
+            root_of_soa=None, delegated=False).exclude(soa=self.soa)
         for child in bad_children:
             child.soa = self.soa
             child.save()  # Recurse.
