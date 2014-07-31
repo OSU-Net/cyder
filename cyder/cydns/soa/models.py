@@ -195,7 +195,6 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
 
         if new:
             # Need to call this after save because new objects won't have a pk
-            self.root_domain
             self.schedule_rebuild(commit=False)
             self.root_domain.soa = self
             self.root_domain.save()
