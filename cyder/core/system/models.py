@@ -37,9 +37,8 @@ class System(BaseModel, ObjectUrlMixin):
         return objects.filter(Q(id__in=static_query) | Q(id__in=dynamic_query))
 
     def check_in_ctnr(self, ctnr):
-        ctnrs = self.staticinterface_set.values_list('ctnr', flat=True)
-        ctnrs += self.dynamicinterface_set.values_list('ctnr', flat=True)
-        return ctnr.pk in ctnrs
+        return (self.staticinterface_set.filter(ctnr=ctnr).exists() or
+                self.dynamicinterface_set.filter(ctnr=ctnr).exists())
 
     def details(self):
         """For tables."""
