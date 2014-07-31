@@ -196,6 +196,10 @@ class Domain(BaseModel, ObjectUrlMixin):
         self.master_domain = name_to_master_domain(self.name)
 
         do_zone_validation(self)
+        if self.domain_set.filter(soa=self.soa).exclude(
+                root_of_soa=None).exists():
+            raise ValidationError("The root of this domain's zone is below "
+                                  "it.")
         # TODO, can we remove this?
         if self.pk is None:
             # The object doesn't exist in the db yet. Make sure we don't
