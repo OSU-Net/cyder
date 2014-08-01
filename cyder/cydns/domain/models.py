@@ -149,13 +149,6 @@ class Domain(BaseModel, ObjectUrlMixin):
         super(Domain, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        # Ensure all descendants have the same SOA as this domain.
-        bad_children = self.domain_set.filter(
-            root_of_soa=None).exclude(soa=self.soa)
-        for child in bad_children:
-            child.soa = self.soa
-            child.save()  # Recurse.
-
         self.full_clean()
 
         if not self.pk:
@@ -178,6 +171,14 @@ class Domain(BaseModel, ObjectUrlMixin):
                                           "record.")
 
         super(Domain, self).save(*args, **kwargs)
+
+        # Ensure all descendants have the same SOA as this domain.
+        bad_children = self.domain_set.filter(
+            root_of_soa=None).exclude(soa=self.soa)
+        for child in bad_children:
+            child.soa = self.soa
+            child.save()  # Recurse.
+
         if self.is_reverse and new_domain:
             # Collect any ptr's that belong to this new domain.
             reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
