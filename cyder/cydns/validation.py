@@ -23,7 +23,7 @@ def do_zone_validation(domain):
     """
 
     check_for_master_delegation(domain)
-    check_for_soa_partition(domain)
+    validate_zone_soa(domain)
 
 
 def check_for_master_delegation(domain):
@@ -31,8 +31,8 @@ def check_for_master_delegation(domain):
     """No subdomains can be created under a domain that is delegated.
     This function checks whether a domain is violating that condition.
 
-    :param domain: The domain/reverse_domain being validated.
-    :type domain: :class:`Domain` or :class:`ReverseDomain`
+    :param domain: The domain being validated.
+    :type domain: :class:`Domain`
 
     """
     master_domain = domain.master_domain
@@ -47,46 +47,44 @@ def check_for_master_delegation(domain):
                               .format(master_domain.name))
 
 
-def check_for_soa_partition(domain):
-    """This function determines if two sub domains have become zone
-    roots and share a common SOA (not allowed).
+def validate_zone_soa(domain):
+    """Make sure the SOA assigned to this domain is the correct SOA for
+    this domain. Also make sure that the SOA is not used in a different
+    zone.
 
-    :param domain: The domain/reverse_domain being validated.
-    :type domain: :class:`Domain` or :class:`ReverseDomain`
-
-    :param child_domains: A Queryset containing child objects of the
-        :class:`Domain`/:class:`ReverseDomain` object.
-    :type child_domains: :class:`Domain` or :class:`ReverseDomain`
-
-    :raises: ValidationError
-
-    The following code is an example of how to call this function during
-    *domain* introspection.
-
-        >>> check_for_soa_partition(self, self.domain_set.all())
-
-    The following code is an example of how to call this function during
-    *reverse_domain* introspection.
-
-        >>> check_for_soa_partition(self, self.reversedomain_set.all())
-
+    :param domain: The domain being validated.
+    :type domain: :class:`Domain`
     """
-    children = domain.domain_set.all()
-    for i_domain in children:
-        if i_domain.soa == domain.soa:
-            continue  # Valid child.
-        for j_domain in children:
-            # Make sure the child domain does not share an SOA with one
-            # of its siblings.
-            if i_domain == j_domain:
-                continue
-            if i_domain.soa == j_domain.soa and i_domain.soa is not None:
-                raise ValidationError(
-                    "Changing the SOA for the {0} domain would cause the "
-                    "child domains {1} and {2} to become two zones that "
-                    "share the same SOA. Change {3} or {4}'s SOA before "
-                    "changing this SOA.".format(domain.name, i_domain.name,
-                    j_domain.name, i_domain.name, j_domain.name))
+    if not domain:
+        raise Exception("You called this function wrong")
+
+    if not domain.soa or domain.soa.pk is None:
+        return
+
+    master_domain = domain.master_domain
+    zone_domains = domain.soa.domain_set.all()
+    root_domain = domain.soa.root_domain
+
+    if not root_domain:  # No one is using this domain.
+        return
+
+    if not zone_domains.exists():
+        return  # No zone uses this soa.
+
+    if master_domain and master_domain.soa != domain.soa:
+        # Someone uses this soa, make sure the domain is part of that
+        # zone (i.e. has a parent in the zone or is the root domain of
+        # the zone).
+        if root_domain == domain:
+            return
+        raise ValidationError("This SOA is used for a different zone.")
+
+    if domain.master_domain is None and domain != root_domain:
+        if root_domain.master_domain == domain:
+            return
+        # If we are at the root of the tree and we aren't the root domain,
+        # something is wrong.
+        raise ValidationError("This SOA is used for a different zone.")
 
 
 def find_root_domain(soa):
