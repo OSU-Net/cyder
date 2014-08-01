@@ -5,7 +5,6 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.cydns.validation import validate_domain_name
-from cyder.cydns.validation import do_zone_validation
 from cyder.cydns.search_utils import smart_fqdn_exists
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 from cyder.cydns.validation import validate_reverse_name
@@ -196,11 +195,29 @@ class Domain(BaseModel, ObjectUrlMixin):
             self.is_reverse = True
         self.master_domain = name_to_master_domain(self.name)
 
-        do_zone_validation(self)
+        if self.soa:  # domain is in a Cyder zone
+            if self.master_domain:  # domain is not a TLD
+                if (self.master_domain.soa != self.soa and
+                        not self.is_root):
+                    raise ValidationError(
+                        'This domain is the root of its zone but not the root '
+                        'of its SOA. Something is very wrong.')
+            else:  # domain is a TLD
+                if not self.is_root:
+                    raise ValidationError(
+                        'This domain is a top-level domain but is not the '
+                        'root of its SOA. Something is very wrong.')
+
+        if self.master_domain and self.master_domain.delegated:
+            raise ValidationError(
+                '{} is delegated, so it cannot have subdomains.'.format(
+                    self.master_domain.name))
+
         if self.domain_set.filter(soa=self.soa).exclude(
                 root_of_soa=None).exists():
             raise ValidationError("The root of this domain's zone is below "
                                   "it.")
+
         # TODO, can we remove this?
         if self.pk is None:
             # The object doesn't exist in the db yet. Make sure we don't
@@ -278,6 +295,10 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         reassign(self.reverse_ptr_set.iterator())
         reassign(self.reverse_staticintr_set.iterator())
+
+    @property
+    def is_root(self):
+        return self.root_of_soa.exists()
 
 
 def boot_strap_ipv6_reverse_domain(ip, soa=None):
