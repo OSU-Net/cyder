@@ -172,7 +172,7 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         super(Domain, self).save(*args, **kwargs)
 
-        # Ensure all descendants have the same SOA as this domain.
+        # Ensure all descendants in this zone have the same SOA as this domain.
         bad_children = self.domain_set.filter(
             root_of_soa=None).exclude(soa=self.soa)
         for child in bad_children:
