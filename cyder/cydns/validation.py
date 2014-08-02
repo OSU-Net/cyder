@@ -34,28 +34,10 @@ def find_root_domain(soa):
     else:
         return None
 
+
 ###################################################################
 #        Functions that validate labels and names                 #
 ###################################################################
-"""
-CyAddressValueError
-    This exception is thrown when an attempt is made to create/update a
-    record with an invalid IP.
-
-InvalidRecordNameError
-    This exception is thrown when an attempt is made to create/update a
-    record with an invalid name.
-
-RecordExistsError
-    This exception is thrown when an attempt is made to create a record
-    that already exists.  All records that can support the
-    unique_together constraint do so. These models will raise an
-    IntegretyError. Some models, ones that have to span foreign keys to
-    check for uniqueness, need to still raise ValidationError.
-    RecordExistsError will be raised in these cases.
-
-An AddressRecord is an example of a model that raises this Exception.
-"""
 
 
 def validate_first_label(label, valid_chars=None):
