@@ -171,6 +171,11 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         super(Domain, self).save(*args, **kwargs)
 
+        if self.domain_set.filter(soa=self.soa).exclude(
+                root_of_soa=None).exists():
+            raise ValidationError("The root of this domain's zone is below "
+                                  "it.")
+
         # Ensure all descendants in this zone have the same SOA as this domain.
         bad_children = self.domain_set.filter(
             root_of_soa=None).exclude(soa=self.soa)
@@ -181,6 +186,7 @@ class Domain(BaseModel, ObjectUrlMixin):
         if self.is_reverse and new_domain:
             # Collect any ptr's that belong to this new domain.
             reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
+
 
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
@@ -212,11 +218,6 @@ class Domain(BaseModel, ObjectUrlMixin):
             raise ValidationError(
                 '{} is delegated, so it cannot have subdomains.'.format(
                     self.master_domain.name))
-
-        if self.domain_set.filter(soa=self.soa).exclude(
-                root_of_soa=None).exists():
-            raise ValidationError("The root of this domain's zone is below "
-                                  "it.")
 
         # TODO, can we remove this?
         if self.pk is None:
