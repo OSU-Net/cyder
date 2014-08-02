@@ -62,17 +62,11 @@ class Command(BaseCommand):
                 except ObjectDoesNotExist:
                     zone_identifier = "No_other_id"
 
-            if interface.modified:
-                # Format to match: Tue Jun  3 10:33:57 2014
-                modified = interface.modified.strftime("%a %b %d %X %Y")
-            else:
-                modified = "More_than_90_days"
-
             interface_data = {
                 'mac': interface.mac.replace(':', ''),
                 'zone_identifier': zone_identifier,
                 'hostname': system.name,
-                'modified': modified,
+                'modified': interface.modified.strftime("%a %b %d %X %Y"),
             }
             interfaces.append(interface_data)
 
