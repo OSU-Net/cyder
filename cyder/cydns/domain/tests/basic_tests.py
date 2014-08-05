@@ -65,21 +65,17 @@ class DomainTests(BaseDomain):
                 description="test", root_domain=f_m)
         s.save()
 
-        b_m.soa = s
-        self.assertRaises(ValidationError, b_m.save)
-
         n_f_m = Domain.objects.get(pk=n_f_m.pk)  # Refresh object
-        n_f_m.soa = s
+        self.assertEqual(n_f_m.soa, s)
+        n_f_m.soa = None
         n_f_m.save()
+        self.assertEqual(n_f_m.soa, s)
 
-        m.soa = s
-        m.save()
+        s.root_domain = m
+        s.save()
 
-        b_m.soa = s
-        b_m.save()
-
-        m.soa = None
-        self.assertRaises(ValidationError, m.save)
+        b_m = Domain.objects.get(pk=b_m.pk)  # Refresh object
+        self.assertEqual(b_m.soa, s)
 
         s2 = SOA(primary="ns1.foo.com", contact="asdf",
                  description="test2", root_domain=m)
@@ -87,7 +83,6 @@ class DomainTests(BaseDomain):
 
     def test_2_soa_validators(self):
         d, _ = Domain.objects.get_or_create(name="gaz")
-        d.save()
         s1, _ = SOA.objects.get_or_create(
             primary="ns1.foo.gaz", contact="hostmaster.foo",
             description="foo.gaz2", root_domain=d)
@@ -103,8 +98,6 @@ class DomainTests(BaseDomain):
             description="foo.gaz2", root_domain=r)
 
         d, _ = Domain.objects.get_or_create(name="gaz")
-        d.soa = s1
-        self.assertRaises(ValidationError, d.save)
 
     def test__name_to_master_domain(self):
         try:
