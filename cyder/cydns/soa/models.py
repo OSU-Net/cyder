@@ -198,10 +198,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
             self.root_domain.save()
         else:
             if db_self.root_domain != self.root_domain:
-                db_self.root_domain.soa = None
-                db_self.root_domain.save()
-                self.root_domain.soa = self
                 self.root_domain.save()
+                db_self.root_domain.save()
 
 
 class SOAAV(EAVBase):
