@@ -40,8 +40,6 @@ def build_sample_domain():
     soa, _ = SOA.objects.get_or_create(
         primary="ns1.oregonstate.edu", contact="hostmaster.oregonstate.edu",
         root_domain=domain, description="Test SOA")
-    domain.soa = soa
-    domain.save()
     view, _ = View.objects.get_or_create(name='public')
     nameserver, _ = Nameserver.objects.get_or_create(
         domain=domain, server="ns1.oregonstate.edu", ttl=3600)
