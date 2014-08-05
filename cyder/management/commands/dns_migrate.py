@@ -246,8 +246,8 @@ class Zone(object):
                 static.save(update_range_usage=False)
             except ValidationError, e:
                 try:
-                    stderr.write("Warning: host with IP {0} has been "
-                                 "disabled: {1}".format(static.ip_str, e))
+                    stderr.write("WARNING: host with IP {0} has been "
+                                 "disabled: {1}\n".format(static.ip_str, e))
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
                     static.full_clean()
