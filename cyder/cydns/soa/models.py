@@ -174,8 +174,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def save(self, *args, **kwargs):
         self.full_clean()
 
-        new = not self.pk
-        if new:
+        is_new = self.pk is None
+        if is_new:
             self.dirty = True
         else:
             db_self = SOA.objects.get(pk=self.pk)
@@ -193,7 +193,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
 
         super(SOA, self).save(*args, **kwargs)
 
-        if new:
+        if is_new:
             # Need to call this after save because new objects won't have a pk
             self.schedule_rebuild(commit=False)
             self.root_domain.soa = self
