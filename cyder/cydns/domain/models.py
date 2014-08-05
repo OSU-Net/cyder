@@ -14,14 +14,11 @@ from cyder.cydns.domain.utils import name_to_domain
 class Domain(BaseModel, ObjectUrlMixin):
     """A Domain is used as a foreign key for most DNS records.
 
-    A domain's SOA should be shared by only domains within its zone.
+    All domains in a zone share the zone's SOA.
 
     If two domains are part of different zones, they (and their
     subdomains) will need different SOA objects even if the data contained
-    in the SOA is exactly the same. Use the description field to
-    distinguish between similar SOAs. This model enforces these
-    requirements and will raise a ``ValidationError`` during
-    :func:`clean` if it is violated.
+    in the SOA is exactly the same.
 
     For example: Say we are authoritative for the domains (and zones)
     ``foo.com`` and ``baz.com``.  These zones should have different
