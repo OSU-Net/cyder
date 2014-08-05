@@ -152,3 +152,19 @@ class StaticInterTests(BaseStaticTests):
                          ip_str=ip_str, ip_type=ip_type, system=None, mac=mac,
                          ctnr=self.ctnr)
         self.assertRaises(ValueError, create)
+
+    def test_has_range(self):
+        mac = "15:22:33:44:55:66"
+        label = "8888foo"
+        domain = self.f_c
+        ip_str = "10.0.0.4"
+        ip_type = '4'
+
+        create = partial(StaticInterface, label=label, domain=domain,
+                         ip_type=ip_type, system=self.n, mac=mac,
+                         ctnr=self.ctnr)
+        create_invalid = partial(create, ip_str=ip_str)
+        self.assertRaises(ValidationError, create_invalid)
+
+        ip_str = "10.0.0.1"
+        create(ip_str=ip_str)
