@@ -165,3 +165,5 @@ class StaticInterTests(BaseStaticTests):
         i.clean()
         i.ip_str = "10.0.0.4"
         self.assertRaises(ValidationError, i.clean)
+        i.dhcp_enabled = False
+        i.clean()

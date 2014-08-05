@@ -225,10 +225,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         if kwargs.pop('validate_glue', True):
             self.check_glue_status()
 
-        if not self.range:
-            raise ValidationError("No range exists to hold interface "
-                                  "with IP %s" % self.ip_str)
-
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
 
