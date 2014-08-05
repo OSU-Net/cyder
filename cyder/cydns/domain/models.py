@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
@@ -150,43 +150,21 @@ class Domain(BaseModel, ObjectUrlMixin):
     def save(self, *args, **kwargs):
         self.full_clean()
 
-        if not self.pk:
-            new_domain = True
-            if self.master_domain and self.master_domain.soa:
-                self.soa = self.master_domain.soa
-        else:
-            new_domain = False
-            db_self = Domain.objects.get(pk=self.pk)
-            # Raise an exception...
-            # If our soa is different AND it's non-null AND we have records in
-            # this domain AND the new soa has a record domain with no
-            # nameservers. NOTE: All SOAs now require a root domain.
-            # TODO: fix the view bug (???)
-            if db_self.soa != self.soa and self.soa and self.has_record_set():
-                if not self.soa.root_domain.nameserver_set.exists():
-                    raise ValidationError("By changing this domain's SOA you "
-                                          "are attempting to create a zone "
-                                          "whose root domain has no NS "
-                                          "record.")
+        with transaction.commit_on_success():
+            super(Domain, self).save(*args, **kwargs)
+            self.clean_after_save()
 
-        super(Domain, self).save(*args, **kwargs)
+        if self.is_reverse and self.pk is None:
+            # Collect any ptr's that belong to this new domain.
+            reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
 
-        if self.domain_set.filter(soa=self.soa).exclude(
-                root_of_soa=None).exists():
-            raise ValidationError("The root of this domain's zone is below "
-                                  "it.")
-
+    def clean_after_save(self):
         # Ensure all descendants in this zone have the same SOA as this domain.
         bad_children = self.domain_set.filter(
             root_of_soa=None).exclude(soa=self.soa)
         for child in bad_children:
             child.soa = self.soa
             child.save()  # Recurse.
-
-        if self.is_reverse and new_domain:
-            # Collect any ptr's that belong to this new domain.
-            reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
-
 
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
@@ -197,22 +175,25 @@ class Domain(BaseModel, ObjectUrlMixin):
             return None
 
     def clean(self):
+        is_new = self.pk is None
+
+        if not is_new and self.domain_set.filter(soa=self.soa).exclude(
+                root_of_soa=None).exists():
+            raise ValidationError("The root of this domain's zone is below "
+                                  "it.")
+
+        if not self.is_root and self.master_domain:
+            self.soa = self.master_domain.soa
+
         if self.name.endswith('arpa'):
             self.is_reverse = True
         self.master_domain = name_to_master_domain(self.name)
 
-        if self.soa:  # domain is in a Cyder zone
-            if self.master_domain:  # domain is not a TLD
-                if (self.master_domain.soa != self.soa and
-                        not self.is_root):
-                    raise ValidationError(
-                        'This domain is the root of its zone but not the root '
-                        'of its SOA. Something is very wrong.')
-            else:  # domain is a TLD
-                if not self.is_root:
-                    raise ValidationError(
-                        'This domain is a top-level domain but is not the '
-                        'root of its SOA. Something is very wrong.')
+        if self.soa and not self.master_domain and not self.is_root:
+            # domain is in a Cyder zone and is a TLD
+            raise ValidationError(
+                'This domain is a top-level domain but is not the root of its '
+                'SOA. Something is very wrong.')
 
         if self.master_domain and self.master_domain.delegated:
             raise ValidationError(
@@ -220,7 +201,7 @@ class Domain(BaseModel, ObjectUrlMixin):
                     self.master_domain.name))
 
         # TODO, can we remove this?
-        if self.pk is None:
+        if is_new:
             # The object doesn't exist in the db yet. Make sure we don't
             # conflict with existing objects. We may want to move to a more
             # automatic solution where the creation of a new domain will
@@ -233,9 +214,21 @@ class Domain(BaseModel, ObjectUrlMixin):
                                       "exist {0}".format(objects))
         else:
             db_self = Domain.objects.get(pk=self.pk)
+
             if db_self.name != self.name and self.domain_set.exists():
                 raise ValidationError("Child domains rely on this domain's "
                                       "name remaining the same.")
+
+            # Raise an exception...
+            # If our soa is different AND it's non-null AND we have records in
+            # this domain AND the new soa has a record domain with no
+            # nameservers.
+            if db_self.soa != self.soa and self.soa and self.has_record_set():
+                if not self.soa.root_domain.nameserver_set.exists():
+                    raise ValidationError("By changing this domain's SOA you "
+                                          "are attempting to create a zone "
+                                          "whose root domain has no NS "
+                                          "record.")
 
     def check_for_children(self):
         if self.domain_set.exists():
