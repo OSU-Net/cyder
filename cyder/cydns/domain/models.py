@@ -200,7 +200,6 @@ class Domain(BaseModel, ObjectUrlMixin):
                 '{} is delegated, so it cannot have subdomains.'.format(
                     self.master_domain.name))
 
-        # TODO, can we remove this?
         if is_new:
             # The object doesn't exist in the db yet. Make sure we don't
             # conflict with existing objects. We may want to move to a more
