@@ -84,7 +84,8 @@ class Domain(BaseModel, ObjectUrlMixin):
     master_domain = models.ForeignKey("self", null=True,
                                       default=None, blank=True)
     soa = models.ForeignKey("cyder.SOA", null=True, default=None,
-                            blank=True, verbose_name='SOA')
+                            blank=True, verbose_name='SOA',
+                            on_delete=models.SET_NULL)
     is_reverse = models.BooleanField(default=False)
     # This indicates if this domain (and zone) needs to be rebuilt
     dirty = models.BooleanField(default=False)
@@ -177,23 +178,22 @@ class Domain(BaseModel, ObjectUrlMixin):
     def clean(self):
         is_new = self.pk is None
 
-        if not is_new and self.domain_set.filter(soa=self.soa).exclude(
+        if self.is_root:
+            self.soa = self.root_of_soa.get()
+        else:
+            if self.master_domain:
+                self.soa = self.master_domain.soa
+            else:
+                self.soa = None
+
+        if self.domain_set.filter(soa=self.soa).exclude(
                 root_of_soa=None).exists():
             raise ValidationError("The root of this domain's zone is below "
                                   "it.")
 
-        if not self.is_root and self.master_domain:
-            self.soa = self.master_domain.soa
-
         if self.name.endswith('arpa'):
             self.is_reverse = True
         self.master_domain = name_to_master_domain(self.name)
-
-        if self.soa and not self.master_domain and not self.is_root:
-            # domain is in a Cyder zone and is a TLD
-            raise ValidationError(
-                'This domain is a top-level domain but is not the root of its '
-                'SOA. Something is very wrong.')
 
         if self.master_domain and self.master_domain.delegated:
             raise ValidationError(

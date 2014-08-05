@@ -4,7 +4,7 @@ from string import Template
 
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
@@ -148,13 +148,11 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         return reverse('build-debug', args=[self.pk])
 
     def delete(self, *args, **kwargs):
-        if self.root_domain.master_domain:
-            self.root_domain.soa = self.root_domain.master_domain.soa
-        else:
-            self.root_domain.soa = None
-        self.root_domain.save()
-
-        super(SOA, self).delete(*args, **kwargs)
+        root_domain = self.root_domain
+        with transaction.commit_on_success():
+            super(SOA, self).delete(*args, **kwargs)
+            root_domain.soa = None
+            root_domain.save()
 
     def has_record_set(self, view=None, exclude_ns=False):
         for domain in self.domain_set.all():
