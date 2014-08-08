@@ -45,9 +45,6 @@ class Domain(BaseModel, ObjectUrlMixin):
             ``ValidationError`` will be raised if you try to create an orphan
             domain that should have a master domain.
 
-        *   If you are not authoritative for a reverse domain, set the ``soa``
-            field to ``None``.
-
         *   The ``name`` field must be unique. Failing to make it unique will
             raise a ``ValidationError``.
 
