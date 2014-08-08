@@ -61,8 +61,8 @@ class DomainTests(BaseDomain):
         b_m = Domain(name='baz.moo')
         b_m.save()
 
-        s = SOA(primary="ns1.foo.com", contact="asdf",
-                description="test", root_domain=f_m)
+        s = SOA(primary="ns1.foo.com", contact="asdf", description="test",
+                root_domain=f_m)
         s.save()
 
         n_f_m = Domain.objects.get(pk=n_f_m.pk)  # Refresh object
@@ -77,7 +77,7 @@ class DomainTests(BaseDomain):
         b_m = Domain.objects.get(pk=b_m.pk)  # Refresh object
         self.assertEqual(b_m.soa, s)
 
-        s2 = SOA(primary="ns1.foo.com", contact="asdf",
+        s2 = SOA(primary="ns2.foo.com", contact="asdf",
                  description="test2", root_domain=m)
         self.assertRaises(ValidationError, s2.save)
 
