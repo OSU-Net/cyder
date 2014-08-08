@@ -173,12 +173,16 @@ class Domain(BaseModel, ObjectUrlMixin):
         else:
             return None
 
-    def clean(self):
+    def clean(self, *args, **kwargs):
+        from cyder.cydns.soa.models import SOA
+
+        super(Domain, self).clean(*args, **kwargs)
+
         is_new = self.pk is None
 
-        if self.is_root:
+        try:  # Assume domain is a root domain.
             self.soa = self.root_of_soa.get()
-        else:
+        except SOA.DoesNotExist:  # Domain is not a root domain.
             if self.master_domain:
                 self.soa = self.master_domain.soa
             else:
@@ -291,10 +295,6 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         reassign(self.reverse_ptr_set.iterator())
         reassign(self.reverse_staticintr_set.iterator())
-
-    @property
-    def is_root(self):
-        return self.root_of_soa.exists()
 
 
 def boot_strap_ipv6_reverse_domain(ip, soa=None):
