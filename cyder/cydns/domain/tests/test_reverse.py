@@ -124,55 +124,21 @@ class ReverseDomainTests(TestCase):
                 root_domain=f_m)
         s.save()
 
-        b_m.soa = s
-        self.assertRaises(ValidationError, b_m.save)
-
         n_f_m = Domain.objects.get(pk=n_f_m.pk)  # Refresh object
-        n_f_m.soa = s
+        self.assertEqual(n_f_m.soa, s)
+        n_f_m.soa = None
         n_f_m.save()
-
-        m.soa = s
-        self.assertRaises(ValidationError, m.save)
+        self.assertEqual(n_f_m.soa, s)
 
         s.root_domain = m
         s.save()
 
         b_m = Domain.objects.get(pk=b_m.pk)  # Refresh object
-        b_m.soa = s
-        b_m.save()
+        self.assertEqual(b_m.soa, s)
 
-        m.soa = None
-        self.assertRaises(ValidationError, m.save)
-
-        s2 = SOA(primary="ns1.foo.com", contact="asdf", description="test2",
-                 root_domain=Domain.objects.create(name="test2"))
-        s2.save()
-
-        m.soa = s2
-        self.assertRaises(ValidationError, m.save)
-
-    def test_2_soa_validators(self):
-        d, _ = Domain.objects.get_or_create(name="11.in-addr.arpa")
-        d.soa = None
-        d.save()
-        d1, _ = Domain.objects.get_or_create(name="12.in-addr.arpa")
-        d1.save()
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo.gaz",
-                                          contact="hostmaster.foo",
-                                          root_domain=d1,
-                                          description="foo.gaz2")
-
-    def test_3_soa_validators(self):
-        d, _ = Domain.objects.get_or_create(name="gaz")
-        d.save()
-        s1, _ = SOA.objects.get_or_create(primary="ns1.foo2.gaz",
-                                          contact="hostmaster.foo",
-                                          root_domain=d,
-                                          description="foo.gaz2")
-
-        r, _ = Domain.objects.get_or_create(name='9.in-addr.arpa')
-        r.soa = s1
-        self.assertRaises(ValidationError, r.save)
+        s2 = SOA(primary="ns2.foo.com", contact="asdf",
+                 description="test2", root_domain=m)
+        self.assertRaises(ValidationError, s2.save)
 
     def test_remove_reverse_domain(self):
         self.create_domain(name='127', ip_type='4').save()
