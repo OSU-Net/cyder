@@ -255,7 +255,7 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
 
     return {
         'cyder_admin': True,
-        'ctnr_admin': action == ACTION_VIEW,
+        'ctnr_admin': True,
         'user': True,
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
