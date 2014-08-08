@@ -146,13 +146,14 @@ class Domain(BaseModel, ObjectUrlMixin):
         super(Domain, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        is_new = self.pk is None
 
+        self.full_clean()
         with transaction.commit_on_success():
             super(Domain, self).save(*args, **kwargs)
             self.clean_after_save()
 
-        if self.is_reverse and self.pk is None:
+        if self.is_reverse and is_new:
             # Collect any ptr's that belong to this new domain.
             reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
 
