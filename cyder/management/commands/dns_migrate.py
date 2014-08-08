@@ -284,6 +284,7 @@ class Zone(object):
         """
 
         name = self.domain.name
+
         cursor.execute("SELECT ip, hostname, type, zone.name, enabled "
                        "FROM pointer JOIN zone ON pointer.zone = zone.id "
                        "WHERE hostname LIKE '%%.%s';" % name)
@@ -354,7 +355,7 @@ class Zone(object):
         cursor.execute("SELECT * "
                        "FROM nameserver "
                        "WHERE domain='%s';" % self.domain_id)
-        for _, name, _, _ in cursor.fetchall():
+        for pk, name, _, _ in cursor.fetchall():
             name = name.lower()
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
@@ -362,7 +363,7 @@ class Zone(object):
                 ns.views.add(public)
                 ns.views.add(private)
             except ValidationError, e:
-                stderr.write("Error generating NS. %s\n" % e)
+                stderr.write("Error generating NS %s. %s\n" % (pk, e))
 
     def walk_zone(self, gen_recs=True):
         """
@@ -561,16 +562,19 @@ def gen_domains_only():
 
 def add_pointers_manual():
     opts = settings.POINTERS
+    sql = 'SELECT id FROM zone WHERE name LIKE "zone.nws"'
+    cursor.execute(sql)
+    zone_id = cursor.fetchone()[0]
     for opt in opts:
         (ip, hn, ptype) = opt
         ip = ip2long(ip)
         sql = ('SELECT count(*) FROM pointer WHERE ip = %s AND hostname = "%s"'
-               'AND type = "%s"' % (ip, hn, ptype))
+               'AND type = "%s AND zone = %s"' % (ip, hn, ptype, zone_id))
         cursor.execute(sql)
         exists = cursor.fetchone()[0]
         if not exists:
-            sql = ('INSERT INTO pointer (ip, hostname, type) '
-                   'VALUES (%s, "%s", "%s")' % (ip, hn, ptype))
+            sql = ('INSERT INTO pointer (ip, hostname, type, zone) '
+                   'VALUES (%s, "%s", "%s", %s)' % (ip, hn, ptype, zone_id))
             cursor.execute(sql)
 
 
