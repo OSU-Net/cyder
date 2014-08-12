@@ -111,6 +111,10 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         objects = objects.filter(ctnr=ctnr)
         return objects
 
+    def check_in_ctnr(self, ctnr):
+        if hasattr(self, "domain"):
+            return self.domain in ctnr.domains.all()
+
     @classmethod
     def get_api_fields(cls):
         """

@@ -53,6 +53,9 @@ class UserProfile(BaseModel, ObjectUrlMixin):
             return UserProfile.objects.filter(
                 pk__in=ctnr.users.all().values_list('profile', flat=True))
 
+    def check_in_ctnr(self, ctnr):
+        return ctnr.check_contains_obj(self.user)
+
 
 def create_user_profile(sender, **kwargs):
     user = kwargs['instance']

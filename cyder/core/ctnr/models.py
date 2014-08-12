@@ -45,6 +45,26 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     def filter_by_ctnr(ctnr, objects=None):
         return Ctnr.objects.filter(pk=ctnr.pk)
 
+    def check_contains_obj(self, obj):
+        if self.name == "global":
+            return True
+
+        if hasattr(obj, 'check_in_ctnr'):
+            return obj.check_in_ctnr(self)
+
+        if isinstance(obj, Ctnr):
+            return obj == self
+
+        if hasattr(obj, 'ctnr'):
+            return obj.ctnr == self
+
+        for f in [self.users, self.domains, self.ranges, self.workgroups]:
+            m = f.model
+            if isinstance(obj, m):
+                return f.filter(pk=obj.pk).exists()
+
+        raise Exception("Permissions check on unknown object type: %s" % type(obj))
+
     def details(self):
         data = super(Ctnr, self).details()
         data['data'] = (
