@@ -71,6 +71,9 @@ class Network(BaseModel, ObjectUrlMixin):
         objects = objects or Network.objects
         return objects.filter(range__in=ctnr.ranges.all())
 
+    def check_in_ctnr(self, ctnr):
+        return self.range_set.filter(pk__in=ctnr.ranges.all()).exists()
+
     def details(self):
         """For tables."""
         data = super(Network, self).details()
