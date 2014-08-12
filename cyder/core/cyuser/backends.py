@@ -58,10 +58,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     if user.is_superuser:
         return True
 
-    try:
-        if obj and ctnr and not ctnr.check_contains_obj(obj):
-            return False
-    except Exception:
+    if obj and ctnr and not ctnr.check_contains_obj(obj):
         return False
 
     # Get user level.
