@@ -60,7 +60,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         if hasattr(obj, 'check_in_ctnr'):
             return obj.check_in_ctnr(self)
 
-        raise Exception("Permissions check on unknown object type: %s" % obj)
+        raise Exception("Permissions check on unknown object type: %s" % type(obj))
 
     def details(self):
         data = super(Ctnr, self).details()
