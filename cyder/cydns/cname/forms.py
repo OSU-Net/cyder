@@ -10,8 +10,8 @@ class CNAMEForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = CNAME
         exclude = ('target_domain', 'fqdn')
-        fields = ('ctnr', 'label', 'domain', 'target', 'views', 'ttl',
-                  'description')
+        fields = ('label', 'domain', 'target', 'views', 'ttl',
+                  'description', 'ctnr')
         widgets = {'views': forms.CheckboxSelectMultiple}
         # https://code.djangoproject.com/ticket/9321
 
@@ -20,6 +20,6 @@ class CNAMEFQDNForm(DNSForm):
 
     class Meta:
         model = CNAME
-        fields = ('ctnr', 'fqdn', 'target', 'views', 'ttl', 'description')
+        fields = ('fqdn', 'target', 'views', 'ttl', 'description', 'ctnr')
         widgets = {'views': forms.CheckboxSelectMultiple}
         # https://code.djangoproject.com/ticket/9321
