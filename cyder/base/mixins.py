@@ -147,6 +147,9 @@ class UsabilityFormMixin(object):
             del(self.fields['system'])
 
     def autoselect_ctnr(self, request):
+        if 'ctnr' not in self.fields:
+            return
+
         ctnr = request.session['ctnr']
         if ctnr.name != "global":
             if 'ctnr' not in self.initial:
