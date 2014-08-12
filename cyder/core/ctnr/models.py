@@ -49,6 +49,12 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         if self.name == "global":
             return True
 
+        if hasattr(obj, 'check_in_ctnr'):
+            return obj.check_in_ctnr(self)
+
+        if isinstance(obj, Ctnr):
+            return obj == self
+
         if hasattr(obj, 'ctnr'):
             return obj.ctnr == self
 
@@ -57,10 +63,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
             if isinstance(obj, m):
                 return f.filter(pk=obj.pk).exists()
 
-        if hasattr(obj, 'check_in_ctnr'):
-            return obj.check_in_ctnr(self)
-
-        raise Exception("Permissions check on unknown object type: %s" % obj)
+        raise Exception("Permissions check on unknown object type: %s" % type(obj))
 
     def details(self):
         data = super(Ctnr, self).details()
