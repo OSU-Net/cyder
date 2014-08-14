@@ -15,39 +15,6 @@ class Ip(models.Model):
     :class:`Ip` instances are used in the :ref:`address_record` (A and AAAA
     records), :ref:`ptr`, and the :ref:`staticinterface` classes.
 
-    :class:`Ip` instances in a :ref:`ptr` record must be mapped back to a
-    Reverse :ref:`domain` object. A :class:`ValidationError` is raised if an
-    eligible Reverse :ref:`domain` cannot be found when trying to create the
-    :ref:`ptr`'s :class:`Ip`.
-
-    The reason why an IP must be mapped back to a Reverse :ref:`domain` has to
-    do with how bind files are generated. In a reverse zone file, IP addresses
-    are mapped from IP to DATA. For instance an :ref:`ptr` record would
-    look like this::
-
-        IP                  DATA
-        197.1.1.1   PTR     foo.bob.com
-
-    If we were building the file ``197.in-addr.arpa``, all IP addresses
-    in the ``197`` domain would need to be in this file. To reduce the
-    complexity of finding records for a reverse domain, an :class:`Ip` is
-    linked to its appropriate reverse domain when it is created. Its
-    mapping is updated when its reverse domain is deleted or a more
-    appropriate reverse domain is added.  Keeping the :class:`Ip` field on
-    :ref:`ptr` will help performance when building reverse zone files.
-
-    The algorithm for determining which reverse domain an :class:`Ip`
-    belongs to is done by applying a 'longest prefix match' to all
-    reverse domains in the :ref:`domain` table.
-
-    :ref:`address_record` objects need the IP validation that happens in this
-    class but do not need their :class:`Ip`s to be tied back to a reverse
-    domain.
-
-    :ref:`staticinterface` objects need to have their IP tied back to reverse
-    domain because they represent a :ref:`PTR` record as well as an
-    :ref:`address_record`.
-
     .. note::
         Django's BigInteger wasn't "Big" enough, so there is code
         in `cydns/ip/sql/ip.sql` that Alters the IP table.

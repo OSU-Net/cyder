@@ -17,6 +17,34 @@ from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
 class BasePTR(object):
+    """
+    A :class:`BasePTR` instance must be mapped back to a Reverse :ref:`domain`
+    object. A :class:`ValidationError` is raised if an eligible reverse
+    :ref:`domain` cannot be found.
+
+    The reason why an IP must be mapped back to a Reverse :ref:`domain` has to
+    do with how bind files are generated. In a reverse zone file, IP addresses
+    are mapped from IP to DATA. For instance a :ref:`PTR` record would
+    look like this::
+
+        IP                  DATA
+        197.1.1.1   PTR     foo.bob.com
+
+    If we were building the file ``197.in-addr.arpa``, all IP addresses
+    in the ``197`` domain would need to be in this file. To reduce the
+    complexity of finding records for a reverse domain, a :class:`BasePTR` is
+    linked to its appropriate reverse domain when it is created. Its
+    mapping is updated when its reverse domain is deleted or a more
+    appropriate reverse domain is added.
+
+    The algorithm for determining which reverse domain a :class:`BasePTR`
+    belongs to is done by applying a 'longest prefix match' to all
+    reverse domains in the :ref:`domain` table.
+
+    :ref:`staticinterface` objects need to have their IP tied back to a reverse
+    domain because they represent a :ref:`PTR` record as well as an
+    :ref:`address_record`. Thus, they inherit from :class:`BasePtr`.
+    """
     urd = True
 
     def clean_reverse(self, update_reverse_domain=None):
