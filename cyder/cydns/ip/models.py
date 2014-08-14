@@ -58,22 +58,9 @@ class Ip(models.Model):
     """
     ip_str = models.CharField(
         max_length=39, editable=True, verbose_name='IP address')
-    # ip_upper/lower are calculated from ip_str on ip_clean.
-    # TODO: rename ip_* to ipaddr_*
+    # ip_upper/lower are calculated from ip_str on clean_ip.
     ip_upper = models.BigIntegerField(null=True, blank=True)
     ip_lower = models.BigIntegerField(null=True, blank=True)
-    # TODO: Should reverse_domain go into the PTR model?  I would think
-    # it shouldn't because it is used in this class during the ip_clean
-    # function.  Technically the ip_clean function would work if the
-    # field existed in the PTR model, but overall it would hurt
-    # readability.
-    #
-    # reactor.addCallback(think_about_it)
-    # This can't be factored out because the related name classes. i.e.:
-    # address_record.addressrecord: Accessor for field 'domain' clashes with
-    # related field 'Domain.addressrecord_set'. Add a related_name argument to
-    # the definition for 'domain'.
-    # reverse_domain = models.ForeignKey(Domain, null=True, blank=True)
     ip_type = models.CharField(
         verbose_name='IP address type', max_length=1,
         choices=IP_TYPES.items(), default=IP_TYPE_4,

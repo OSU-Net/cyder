@@ -19,9 +19,7 @@ from cyder.core.ctnr.models import Ctnr
 
 
 class NSTestsModels(TestCase):
-    def create_domain(self, name, ip_type=None, delegated=False):
-        if ip_type is None:
-            ip_type = '4'
+    def create_domain(self, name, ip_type='4', delegated=False):
         if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
