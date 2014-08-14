@@ -533,13 +533,8 @@ class NSTestsModels(TestCase):
 
         # Now try to add the domain to the zone that has no NS records at it's
         # root
-        SOA.objects.create(root_domain=bad_root_domain,
-                           contact="a", primary='b')
-        for ns in bad_root_domain.nameserver_set.all():
-            ns.delete()
-        cdomain.soa = bad_root_domain.soa
-
-        self.assertRaises(ValidationError, cdomain.save)
+        s = SOA(root_domain=bad_root_domain, contact="a", primary='b')
+        self.assertRaises(ValidationError, s.save)
 
     def test_bad_nameserver_soa_state_case_3_2(self):
         # This is Case 3 ... with ptrs
@@ -581,9 +576,5 @@ class NSTestsModels(TestCase):
 
         # Now try to add the domain to the zone that has no NS records at it's
         # root
-        SOA.objects.create(root_domain=bad_root_domain,
-                           contact="a", primary='b')
-        for ns in bad_root_domain.nameserver_set.all():
-            ns.delete()
-        cdomain.soa = bad_root_domain.soa
-        self.assertRaises(ValidationError, cdomain.save)
+        s = SOA(root_domain=bad_root_domain, contact="a", primary='b')
+        self.assertRaises(ValidationError, s.save)
