@@ -154,12 +154,10 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     def bind_render_record(self):
         if self.ip_type == '6':
             ip = "%x" % ((self.ip_upper << 64) | self.ip_lower)
-            reverse_domain = '.'.join(reversed(ip)) + ".ip6.arpa"
+            reverse_domain = '.'.join(reversed(ip)) + ".ip6.arpa."
         else:
-            reverse_domain = self.reverse_domain.name
-
-        if reverse_domain[-1] != '.':
-            reverse_domain = reverse_domain + '.'
+            reverse_domain = ('.'.join(reversed(self.ip_str.split('.'))) +
+                              '.in-addr.arpa.')
 
         return super(PTR, self).bind_render_record(
             custom={'reverse_domain': reverse_domain})
