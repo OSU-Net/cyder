@@ -49,13 +49,7 @@ class Ip(models.Model):
             ip_klass = ipaddr.IPv6Address
         return ip_klass(two_to_one(self.ip_upper, self.ip_lower))
 
-    def clean_ip(self, update_reverse_domain=True):
-        """
-        The clean method in Ip is different from the rest. It needs
-        to be called with the update_reverse_domain flag. Sometimes we
-        need to not update the reverse domain of an IP (i.e. when we are
-        deleting a reverse_domain).
-        """
+    def clean_ip(self):
         # TODO: It's a fucking hack. Car babies.
         if self.ip_type == IP_TYPE_4:
             Klass = ipaddr.IPv4Address
