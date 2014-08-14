@@ -8,11 +8,13 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.test import RequestFactory
 
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
 from cyder.cydns.utils import ensure_domain, prune_tree
+from cyder.cydhcp.vrf.models import Vrf
 
 
 def get_post_data(random_str, suffix):
@@ -177,3 +179,15 @@ def random_byte():
     Utility function to generate a random byte for random IPs
     """
     return random.randint(1, 255)
+
+
+def create_basic_dns_data(dhcp=False):
+    for name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
+        d = Domain(name=name)
+        d.full_clean()
+        d.save()
+
+    if dhcp:
+        v = Vrf(name='test_vrf')
+        v.full_clean()
+        v.save()

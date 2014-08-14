@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.txt.models import TXT
@@ -12,15 +10,14 @@ from cyder.cydns.soa.models import SOA
 
 from cyder.cydns.tests.utils import create_fake_zone
 
+from basedomain import BaseDomain
 
-class FullNameTests(TestCase):
 
+class FullNameTests(BaseDomain):
     def test_basic_add_remove1(self):
-        c = Domain(name='com')
-        c.save()
+        c = self.create_domain(name='com')
         self.assertFalse(c.purgeable)
-        f_c = Domain(name='foo.com')
-        f_c.save()
+        f_c = self.create_domain(name='foo.com')
         s, _ = SOA.objects.get_or_create(primary="foo", contact="foo",
                                          root_domain=f_c,
                                          description="foo.zfoo.comom")
@@ -29,6 +26,7 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.com"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         self.assertEqual(label, "bar")
         self.assertEqual(the_domain.name, "x.y.z.foo.com")
         self.assertTrue(the_domain.purgeable)
@@ -74,6 +72,7 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.edu"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         self.assertEqual(label, "bar")
         self.assertEqual(the_domain.name, "x.y.z.foo.edu")
         self.assertTrue(the_domain.purgeable)
@@ -126,7 +125,8 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo"
         label, the_domain = ensure_label_domain(fqdn)
-        txt = TXT(label=label, domain=the_domain, txt_data="Nthing")
+        self.ctnr.domains.add(the_domain)
+        txt = TXT(label=label, ctnr=self.ctnr, domain=the_domain, txt_data="Nthing")
         txt.save()
 
         self.assertTrue(the_domain.purgeable)
@@ -148,7 +148,8 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.goo"
         label, the_domain = ensure_label_domain(fqdn)
-        txt = TXT(label=label, domain=the_domain, txt_data="Nthing")
+        self.ctnr.domains.add(the_domain)
+        txt = TXT(label=label, ctnr=self.ctnr, domain=the_domain, txt_data="Nthing")
         txt.save()
 
         self.assertTrue(the_domain.purgeable)
@@ -157,6 +158,7 @@ class FullNameTests(TestCase):
         self.assertFalse(prune_tree(the_domain))
         txt.domain = the_domain.master_domain
         the_next_domain = the_domain.master_domain
+        self.ctnr.domains.add(the_next_domain)
         txt.save()
         self.assertFalse(Domain.objects.filter(pk=the_domain.pk))
         # We should be able to delete now.
@@ -167,6 +169,7 @@ class FullNameTests(TestCase):
         self.assertFalse(prune_tree(the_domain))
         txt.domain = the_domain.master_domain
         the_next_domain = the_domain.master_domain
+        self.ctnr.domains.add(the_next_domain)
         txt.save()
         self.assertFalse(Domain.objects.filter(pk=the_domain.pk))
         # We should be able to delete now.
@@ -176,6 +179,7 @@ class FullNameTests(TestCase):
         self.assertFalse(prune_tree(the_domain))
         txt.domain = the_domain.master_domain
         the_next_domain = the_domain.master_domain
+        self.ctnr.domains.add(the_next_domain)
         txt.save()
         self.assertFalse(Domain.objects.filter(pk=the_domain.pk))
         # We should be able to delete now.
@@ -190,34 +194,39 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo22"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
 
-        txt = TXT(label=label, domain=the_domain, txt_data="Nthing")
+        txt = TXT(label=label, ctnr=self.ctnr, domain=the_domain, txt_data="Nthing")
         txt.save()
         self.assertFalse(prune_tree(the_domain))
         txt.delete()
 
         label, the_domain = ensure_label_domain(fqdn)
-        addr = AddressRecord(label=label, domain=the_domain,
+        self.ctnr.domains.add(the_domain)
+        addr = AddressRecord(label=label, ctnr=self.ctnr, domain=the_domain,
                              ip_type='4', ip_str="10.2.3.4")
         addr.save()
         self.assertFalse(prune_tree(the_domain))
         addr.delete()
 
         label, the_domain = ensure_label_domain(fqdn)
-        mx = MX(label=label, domain=the_domain, server="foo", priority=4)
+        self.ctnr.domains.add(the_domain)
+        mx = MX(label=label, ctnr=self.ctnr, domain=the_domain, server="foo", priority=4)
         mx.save()
         self.assertFalse(prune_tree(the_domain))
         mx.delete()
 
         label, the_domain = ensure_label_domain(fqdn)
-        ns = Nameserver(domain=the_domain, server="asdfasffoo")
+        self.ctnr.domains.add(the_domain)
+        ns = Nameserver(ctnr=self.ctnr, domain=the_domain, server="asdfasffoo")
         ns.save()
         self.assertFalse(prune_tree(the_domain))
         ns.delete()
 
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         srv = SRV(
-            label='_' + label, domain=the_domain, target="foo", priority=4,
+            label='_' + label, ctnr=self.ctnr, domain=the_domain, target="foo", priority=4,
             weight=4, port=34)
         srv.save()
         self.assertFalse(prune_tree(the_domain))
@@ -230,8 +239,9 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "cname.x.y.z.foo.foo1"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
 
-        cname = CNAME(label=label, domain=the_domain, target="foo")
+        cname = CNAME(label=label, ctnr=self.ctnr, domain=the_domain, target="foo")
         cname.save()
         self.assertFalse(prune_tree(the_domain))
         cname.delete()
@@ -243,9 +253,10 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "*.x.y.z.foo.foo2"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         self.assertEqual('*', label)
 
-        cname = CNAME(label=label, domain=the_domain, target="foo")
+        cname = CNAME(label=label, ctnr=self.ctnr, domain=the_domain, target="foo")
         cname.save()
         self.assertFalse(prune_tree(the_domain))
         cname.delete()
@@ -258,15 +269,17 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "www.x.y.z.foo.foo3"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         self.assertEqual('www', label)
         self.assertEqual('x.y.z.foo.foo3', the_domain.name)
         self.assertTrue(the_domain.pk)
 
-        cname = CNAME(label=label, domain=the_domain, target="foo")
+        cname = CNAME(label=label, ctnr=self.ctnr, domain=the_domain, target="foo")
         cname.save()
         fqdn = "*.www.x.y.z.foo.foo3"
         the_domain.save()
         label2, the_domain2 = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain2)
         cname = CNAME.objects.get(fqdn=cname.fqdn)
         self.assertEqual('', cname.label)
         self.assertEqual('www.x.y.z.foo.foo3', cname.domain.name)
@@ -279,7 +292,8 @@ class FullNameTests(TestCase):
         self.assertFalse(f_c.purgeable)
         fqdn = "y.z.foo.foo22"
         label, the_domain = ensure_label_domain(fqdn)
-        addr = AddressRecord(label=label, domain=the_domain,
+        self.ctnr.domains.add(the_domain)
+        addr = AddressRecord(label=label, ctnr=self.ctnr, domain=the_domain,
                              ip_type='4', ip_str="10.2.3.4")
         addr.save()
         self.assertFalse(prune_tree(the_domain))

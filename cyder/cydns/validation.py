@@ -347,6 +347,14 @@ def validate_fqdn(fqdn):
     # TODO, make sure the grammar is followed.
     _name_type_check(fqdn)
 
+    if '.' in fqdn:
+        _, tld = fqdn.rsplit('.', 1)
+    else:
+        tld = fqdn
+
+    if tld.isdigit():
+        raise ValidationError("TLD cannot be a number.")
+
     # Star records are allowed. Remove them during validation.
     if fqdn[0] == '*':
         fqdn = fqdn[1:]

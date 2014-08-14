@@ -13,34 +13,57 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.soa.models import SOA
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 
 from cyder.cydns.tests.utils import create_fake_zone
 
 
-def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
-    ctnr = Ctnr.objects.get(name='test_ctnr')
+def create_network_range(network_str, start_str, end_str, range_type,
+                         ip_type, domain, ctnr):
+    n = Network(ip_type=ip_type, network_str=network_str)
+    n.full_clean()
+    n.save()
+
+    r = Range(network=n, range_type=range_type, start_str=start_str,
+              end_str=end_str, domain=domain, ip_type=ip_type)
+    r.full_clean()
+    r.save()
+
+    ctnr.ranges.add(r)
+
+
+def do_preUp(self):
     self.client = Client()
     self.client.login(username='test_superuser', password='password')
-    self.test_class = test_class
+
     self.public_view = View.objects.get_or_create(name='public')[0]
     self.private_view = View.objects.get_or_create(name='private')[0]
 
-    # Create forward zone.
+    self.ctnr = Ctnr.objects.get(name='test_ctnr')
     self.domain = create_fake_zone(random_label(), suffix='.oregonstate.edu')
-    ctnr.domains.add(self.domain)
+    self.ctnr.domains.add(self.domain)
+
+    # Create forward zone.
     self.soa = self.domain.soa
     self.subdomain = Domain.objects.create(
         name=random_label() + '.' + self.domain.name, soa=self.soa)
-    ctnr.domains.add(self.subdomain)
+    self.ctnr.domains.add(self.subdomain)
 
     self.reverse_domain = create_fake_zone('196.in-addr.arpa', suffix='')
-    ctnr.domains.add(self.reverse_domain)
+    self.ctnr.domains.add(self.reverse_domain)
     self.soa2 = self.reverse_domain.soa
 
+
+def do_postUp(self, test_class, test_data, use_ctnr=True,
+              use_domain=True, use_rdomain=False):
+    if use_ctnr:
+        test_data['ctnr'] = self.ctnr
+
+    self.test_class = test_class
     # Create test object.
     test_data = dict(test_data.items())
     if use_domain:
@@ -48,6 +71,11 @@ def do_setUp(self, test_class, test_data, use_domain=True, use_rdomain=False):
     if use_rdomain:
         test_data['reverse_domain'] = self.reverse_domain
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
+
+
+def do_setUp(self, *args, **kwargs):
+    do_preUp(self)
+    do_postUp(self, *args, **kwargs)
 
 
 class NoNSTests(object):
@@ -61,6 +89,7 @@ class NoNSTests(object):
         post_data = self.post_data()
         # Get the '_' in SRV records
         post_data['fqdn'] = post_data['fqdn'][0] + "asdf.asdf." + domain_name
+        self.ctnr.domains.add(root_domain)
         return root_domain, post_data
 
     def test_no_ns_in_view(self):
@@ -112,6 +141,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
             'ip_str': '196.168.1.2',
             'ttl': '400',
             'description': 'yo',
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -130,7 +160,8 @@ class CNAMEViewTests(cyder.base.tests.TestCase, NoNSTests):
         return {
             'fqdn': self.subdomain.name,
             'label': random_label(),
-            'target': random_label()
+            'target': random_label(),
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -153,9 +184,11 @@ class NSViewTests(cyder.base.tests.TestCase):
 
     def test_no_ns_in_view(self):
         root_domain = create_fake_zone("asdfdjhjd")
+        self.ctnr.domains.add(root_domain)
         ns = root_domain.nameserver_set.all()[0]
 
-        cn = CNAME(label='asdf', domain=root_domain, target='test.com')
+        cn = CNAME(label='asdf', domain=root_domain,
+                   target='test.com', ctnr=self.ctnr)
         cn.full_clean()
         cn.save()
         cn.views.add(self.public_view)
@@ -216,7 +249,8 @@ class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
             'label': random_label(),
             'server': random_label(),
             'priority': 123,
-            'ttl': 213
+            'ttl': 213,
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -231,11 +265,16 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         post_data = self.post_data()
         post_data['ip_str'] = '9000::df12'
         post_data['ip_type'] = '6'
+        create_network_range(network_str='9000::/32',
+                             start_str='9000::d000', end_str='9000::dfff',
+                             range_type='st', ip_type='6', domain=self.domain,
+                             ctnr=self.ctnr)
+
         return root_domain, post_data
 
     def setUp(self):
         test_data = {
-            'label': random_label(),
+            'fqdn': random_label() + '.' + random_label(),
             'ip_type': '4',
             'ip_str': '196.168.1.2',
         }
@@ -245,15 +284,22 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         Domain.objects.get_or_create(name='168.196.in-addr.arpa')
         Domain.objects.get_or_create(name='1.168.196.in-addr.arpa')
 
+        do_preUp(self)
+        create_network_range(network_str='196.168.0.0/16',
+                             start_str='196.168.1.0', end_str='196.168.1.253',
+                             range_type='st', ip_type='4', domain=self.domain,
+                             ctnr=self.ctnr)
+
         Domain.objects.create(name=ip_to_domain_name(test_data['ip_str']))
-        do_setUp(self, PTR, test_data, use_domain=True, use_rdomain=True)
+        do_postUp(self, PTR, test_data, use_domain=False, use_rdomain=True)
 
     def post_data(self):
         return {
-            'fqdn': random_label() + '.' + self.domain.name,
+            'fqdn': random_label() + '.' + random_label(),
             'ip_type': '4',
             'ip_str': '196.168.1.3',
             'description': 'yo',
+            'ctnr': self.ctnr.pk,
         }
 
     def test_update_reverse_domain(self):
@@ -286,7 +332,8 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
             'target': 'foo.bar',
             'priority': 2,
             'weight': 2222,
-            'port': 222
+            'port': 222,
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -305,7 +352,8 @@ class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
         return {
             'fqdn': self.domain.name,
             'label': random_label(),
-            'txt_data': random_label()
+            'txt_data': random_label(),
+            'ctnr': self.ctnr.pk,
         }
 
 
@@ -328,7 +376,8 @@ class SSHFPViewTests(cyder.base.tests.TestCase, NoNSTests):
             'label': random_label(),
             'algorithm_number': 1,
             'fingerprint_type': 1,
-            'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50111'
+            'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50111',
+            'ctnr': self.ctnr.pk,
         }
 
 

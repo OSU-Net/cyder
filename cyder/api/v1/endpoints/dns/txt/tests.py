@@ -8,6 +8,7 @@ class TXTAPI_Test(APITests):
 
     def create_data(self):
         data = {
+            'ctnr': self.ctnr,
             'label': 'txt',
             'domain': self.domain,
             'txt_data': 'Things',

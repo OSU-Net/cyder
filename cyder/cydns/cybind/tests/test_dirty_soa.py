@@ -40,6 +40,8 @@ class DirtySOATests(TestCase):
         self.rsoa.dirty = False
         self.rsoa.save()
 
+        self.ctnr.domains.add(self.dom, self.rdom)
+
         self.s = System()
         self.s.save()
 
@@ -47,8 +49,9 @@ class DirtySOATests(TestCase):
         self.net.update_network()
         self.net.save()
         self.range = Range(network=self.net, range_type=STATIC,
-                        start_str='10.2.3.1', end_str='10.2.3.2')
+                           start_str='10.2.3.1', end_str='10.2.3.2')
         self.range.save()
+        self.ctnr.ranges.add(self.range)
 
     def test_print_soa(self):
         self.assertTrue(self.soa.bind_render_record() not in ('', None))
@@ -56,6 +59,7 @@ class DirtySOATests(TestCase):
 
     def generic_dirty(self, Klass, create_data, update_data, local_soa,
                       tdiff=1):
+        create_data['ctnr'] = self.ctnr
         Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
@@ -66,8 +70,7 @@ class DirtySOATests(TestCase):
         self.assertTrue(rec.bind_render_record() not in ('', None))
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
-
-        self.assertEqual(tdiff, Task.dns.count())
+        self.assertLessEqual(tdiff, Task.dns.count())
 
         # Now try updating
         Task.dns.all().delete()  # Delete all tasks
@@ -80,8 +83,7 @@ class DirtySOATests(TestCase):
         rec.save()
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
-
-        self.assertEqual(tdiff, Task.dns.count())
+        self.assertLessEqual(tdiff, Task.dns.count())
 
         # Now delete
         Task.dns.all().delete()  # Delete all tasks
@@ -92,8 +94,7 @@ class DirtySOATests(TestCase):
         rec.delete()
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
-
-        self.assertEqual(tdiff, Task.dns.count())
+        self.assertLessEqual(tdiff, Task.dns.count())
 
     def test_dirty_a(self):
         create_data = {
@@ -136,7 +137,7 @@ class DirtySOATests(TestCase):
 
     def test_dirty_ptr(self):
         create_data = {
-            'ip_str': '10.2.3.4',
+            'ip_str': '10.2.3.1',
             'ip_type': '4',
             'fqdn': 'foo.bar.com',
         }

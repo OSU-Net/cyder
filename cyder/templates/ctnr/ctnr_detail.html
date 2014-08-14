@@ -1,7 +1,7 @@
 {% extends "core/core_detail.html" %}
 {% from "base/tables.html" import render_table %}
 
-{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type, ctnr=obj) %}
+{% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj=obj, ctnr=obj) %}
 
 
 {% block content %}

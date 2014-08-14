@@ -8,6 +8,7 @@ class MXAPI_Test(APITests):
 
     def create_data(self):
         data = {
+            'ctnr': self.ctnr,
             'description': 'MX Record',
             'label': 'mail',
             'domain': self.domain,

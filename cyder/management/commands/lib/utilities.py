@@ -90,6 +90,9 @@ def get_label_domain_workaround(fqdn):
         domain, _ = Domain.objects.get_or_create(name=domain_name)
         for obj in objs:
             obj.label = ""
+            ctnr_set = obj.domain.ctnr_set
+            for ctnr in ctnr_set.all():
+                ctnr.domains.add(domain)
             obj.domain = domain
             obj.save()
 

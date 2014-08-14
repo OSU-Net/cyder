@@ -5,7 +5,8 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.lib.utils import *
+from cyder.cydhcp.lib.utils import (create_ipv4_interface,
+                                    create_ipv4_intr_from_domain)
 
 from cyder.cydns.domain.models import Domain
 
@@ -20,8 +21,9 @@ class LibTestsDomain(TestCase):
         self.ctnr.save()
         self.system = System(name='foobar')
         self.system.save()
-        Domain.objects.get_or_create(name="com")
-        Domain.objects.get_or_create(name="mozilla.com")
+        d, _ = Domain.objects.get_or_create(name="com")
+        d2, _ = Domain.objects.get_or_create(name="mozilla.com")
+        self.ctnr.domains.add(d, d2)
 
     def test0_create_ipv4_interface(self):
         intr, errors = create_ipv4_interface(
@@ -100,11 +102,13 @@ class LibTestsDomain(TestCase):
     def test6_create_ipv4_interface(self):
         v, _ = Vlan.objects.get_or_create(name="6db", number=3)
         s, _ = Site.objects.get_or_create(name="6scl3")
-        d, _ = Domain.objects.get_or_create(name="6scl3.mozilla.com")
-        d, _ = Domain.objects.get_or_create(name="6db.6scl3.mozilla.com")
-        d, _ = Domain.objects.get_or_create(name="arpa")
-        d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
-        d, _ = Domain.objects.get_or_create(name="11.in-addr.arpa")
+
+        names = ["6scl3.mozilla.com", "6db.6scl3.mozilla.com", "arpa",
+                 "in-addr.arpa", "11.in-addr.arpa"]
+        for name in names:
+            d, _ = Domain.objects.get_or_create(name=name)
+            self.ctnr.domains.add(d)
+
         n = Network(network_str="11.0.0.0/8", ip_type="4")
         n.clean()
         n.site = s

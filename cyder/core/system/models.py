@@ -36,6 +36,10 @@ class System(BaseModel, ObjectUrlMixin):
             ctnr=ctnr).values_list('system')
         return objects.filter(Q(id__in=static_query) | Q(id__in=dynamic_query))
 
+    def check_in_ctnr(self, ctnr):
+        return (self.staticinterface_set.filter(ctnr=ctnr).exists() or
+                self.dynamicinterface_set.filter(ctnr=ctnr).exists())
+
     def details(self):
         """For tables."""
         data = super(System, self).details()

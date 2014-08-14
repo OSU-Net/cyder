@@ -1,14 +1,18 @@
 from gettext import gettext as _
 
 from django.db import models
+from django.db.models.loading import get_model
 from django.core.exceptions import ValidationError
 
+from cyder.base.models import BaseModel
+from cyder.base.mixins import DisplayMixin, ObjectUrlMixin
 from cyder.cydhcp.range.utils import find_range
+from cyder.cydns.models import ViewMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.models import CydnsRecord, LabelDomainMixin
+from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
@@ -22,6 +26,25 @@ class BasePTR(object):
             self.urd = False
         check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
+        self.check_ip_conflict()
+
+    def check_ip_conflict(self):
+        StaticInterface = get_model('cyder', 'staticinterface')
+        ptrs = PTR.objects.filter(ip_upper=self.ip_upper,
+                                  ip_lower=self.ip_lower)
+        sis = StaticInterface.objects.filter(ip_upper=self.ip_upper,
+                                             ip_lower=self.ip_lower)
+        if self.pk is not None:
+            if isinstance(self, PTR):
+                ptrs = ptrs.exclude(pk=self.pk)
+            if isinstance(self, StaticInterface):
+                sis = sis.exclude(pk=self.pk)
+
+        if ptrs.exists():
+            raise ValidationError("PTR already exists for %s" % self.ip_str)
+        elif sis.exists():
+            raise ValidationError("Static Interface already exists for %s" %
+                                  self.ip_str)
 
     def reverse_validate_no_cname(self):
         """
@@ -73,7 +96,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
+class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     """
     A PTR is used to map an IP to a domain name.
 
@@ -85,6 +108,15 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     id = models.AutoField(primary_key=True)
     reverse_domain = models.ForeignKey(Domain, null=False, blank=True,
                                        related_name='reverse_ptr_set')
+    fqdn = models.CharField(
+        max_length=255, blank=True, validators=[validate_fqdn], db_index=True
+    )
+    ttl = models.PositiveIntegerField(default=3600, blank=True, null=True,
+                                      validators=[validate_ttl],
+                                      verbose_name="Time to live")
+    description = models.CharField(max_length=1000, blank=True)
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     template = _("{reverse_domain:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
@@ -104,13 +136,20 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        objects = objects or PTR.objects
-        objects = objects.filter(reverse_domain__in=ctnr.domains.all())
+        objects = objects if objects is not None else PTR.objects
+        if ctnr.name == "global":
+            return objects
+        objects = objects.filter(ctnr=ctnr)
         return objects
 
     @property
     def rdtype(self):
         return 'PTR'
+
+    @property
+    def range(self):
+        rng = find_range(self.ip_str)
+        return rng
 
     def bind_render_record(self):
         if self.ip_type == '6':
@@ -125,7 +164,12 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
         return super(PTR, self).bind_render_record(
             custom={'reverse_domain': reverse_domain})
 
+    def __init__(self, *args, **kwargs):
+        kwargs = self.fqdn_kwargs_check(kwargs)
+        return super(PTR, self).__init__(*args, **kwargs)
+
     def save(self, *args, **kwargs):
+        kwargs = self.fqdn_kwargs_check(kwargs)
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -136,11 +180,23 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
         self.clean()
         super(PTR, self).save(*args, **kwargs)
         self.rebuild_reverse()
-        rng = find_range(self.ip_str)
+        rng = self.range
         if rng and update_range_usage:
             rng.save()
             if old_range:
                 old_range.save()
+
+    def fqdn_kwargs_check(self, kwargs):
+        label = kwargs.pop('label', None)
+        domain = kwargs.pop('domain', None)
+        if label is not None and domain is not None:
+            fqdn = ".".join([label, domain.name]).strip('.')
+            if 'fqdn' in kwargs and kwargs['fqdn'] != fqdn:
+                raise ValidationError("FQDN & label/domain mismatch.")
+            elif 'fqdn' not in kwargs:
+                kwargs['fqdn'] = fqdn
+
+        return kwargs
 
     def delete(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
@@ -162,14 +218,20 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
             raise ValidationError(
                 "A static interface has already used %s" % self.ip_str
             )
+        rng = self.range
+        if rng:
+            if self.range.range_type == "dy":
+                raise ValidationError("Cannot create PTRs in dynamic ranges.")
+            if self.ctnr not in self.range.ctnr_set.all():
+                raise ValidationError("Could not create PTR because %s is "
+                                      "not in this container." % self.ip_str)
         self.clean_reverse()
 
     def details(self):
         """For tables."""
         data = super(PTR, self).details()
         data['data'] = [
-            ('Label', 'label', self.label),
-            ('Domain', 'domain', self.domain),
+            ('Target', 'fqdn', self.fqdn),
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
@@ -178,7 +240,6 @@ class PTR(BasePTR, Ip, LabelDomainMixin, CydnsRecord):
     def eg_metadata():
         """EditableGrid metadata."""
         return {'metadata': [
-            {'name': 'label', 'datatype': 'string', 'editable': True},
-            {'name': 'domain', 'datatype': 'string', 'editable': True},
+            {'name': 'fqdn', 'datatype': 'string', 'editable': True},
             {'name': 'ip_str', 'datatype': 'string', 'editable': True},
         ]}
