@@ -332,7 +332,7 @@ class NSTestsModels(TestCase):
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
-        # At his point we should have a domain at the root of a zone with no
+        # At this point we should have a domain at the root of a zone with no
         # other records in it.
 
         # Adding a record shouldn't be allowed because there is no NS record on
@@ -349,7 +349,7 @@ class NSTestsModels(TestCase):
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
-        # At his point we should have a domain at the root of a zone with no
+        # At this point we should have a domain at the root of a zone with no
         # other records in it.
 
         # Let's create a child domain and try to add a record there.
@@ -370,7 +370,7 @@ class NSTestsModels(TestCase):
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
-        # At his point we should have a domain at the root of a zone with no
+        # At this point we should have a domain at the root of a zone with no
         # other records in it.
 
         # Adding a record shouldn't be allowed because there is no NS record on
@@ -384,7 +384,7 @@ class NSTestsModels(TestCase):
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
-        # At his point we should have a domain at the root of a zone with no
+        # At this point we should have a domain at the root of a zone with no
         # other records in it.
 
         # Let's create a child domain and try to add a record there.
@@ -404,7 +404,7 @@ class NSTestsModels(TestCase):
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
-        # At his point we should have a domain at the root of a zone with no
+        # At this point we should have a domain at the root of a zone with no
         # other records in it.
 
         # Let's create a child domain and try to add a record there.
@@ -426,7 +426,7 @@ class NSTestsModels(TestCase):
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
-        # At his point we should have a domain at the root of a zone with one
+        # At this point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
         a = AddressRecord(
@@ -441,7 +441,7 @@ class NSTestsModels(TestCase):
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
-        # At his point we should have a domain at the root of a zone with one
+        # At this point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
         # Let's create a child domain and add a record there, then try to
@@ -462,7 +462,7 @@ class NSTestsModels(TestCase):
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
-        # At his point we should have a domain at the root of a zone with one
+        # At this point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
         ptr = PTR(ctnr=self.ctnr, fqdn="bloo.asdf", ip_str="14.10.1.1", ip_type="4")
@@ -476,7 +476,7 @@ class NSTestsModels(TestCase):
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
-        # At his point we should have a domain at the root of a zone with one
+        # At this point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
         # Let's create a child domain and add a record there, then try to
@@ -503,8 +503,8 @@ class NSTestsModels(TestCase):
         root_domain.save()
         ns.domain.save()
 
-        # At his point we should have a domain pointed at no SOA record with no
-        # records attached to it. It also has no child domains.
+        # At this point we should have a domain pointed at no SOA record with
+        # no records attached to it. It also has no child domains.
 
         # Add a record to the domain.
         a = AddressRecord(
@@ -554,8 +554,8 @@ class NSTestsModels(TestCase):
         self.assertIsNone(root_domain.soa)
         ns.domain.save()
 
-        # At his point we should have a domain pointed at no SOA record with no
-        # records attached to it. It also has no child domains.
+        # At this point we should have a domain pointed at no SOA record with
+        # no records attached to it. It also has no child domains.
 
         # Add a record to the domain.
 
