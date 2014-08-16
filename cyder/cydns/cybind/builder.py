@@ -389,12 +389,17 @@ class DNSBuilder(MutexMixin):
                                    root_domain=root_domain)
 
                 for view, file_meta, view_data in views_to_build:
-                    view_zone_stmts = zone_stmts.setdefault(view.name, [])
-                    # If we see a view in this loop it's going to end up in
-                    # the config
-                    view_zone_stmts.append(
-                        self.render_zone_stmt(soa, root_domain, file_meta)
-                    )
+                    if (root_domain.name, view.name) in ZONES_WITH_NO_CONFIG:
+                        self.log_notice(
+                            '!!! Not going to emit zone statements for {0}\n'
+                            .format(root_domain.name), root_domain=root_domain)
+                    else:
+                        view_zone_stmts = zone_stmts.setdefault(view.name, [])
+                        # If we see a view in this loop it's going to end up in
+                        # the config
+                        view_zone_stmts.append(
+                            self.render_zone_stmt(soa, root_domain, file_meta)
+                        )
 
                     # If it's dirty or we are rebuilding another view, rebuild
                     # the zone
