@@ -133,6 +133,19 @@ class Domain(BaseModel, ObjectUrlMixin):
         ]}
 
     def delete(self, *args, **kwargs):
+        commit = kwargs.pop('commit', True)
+
+        if commit:
+            with transaction.commit_on_success():
+                self.before_delete()
+                super(Domain, self).delete(*args, **kwargs)
+                self.after_delete()
+        else:
+            self.before_delete()
+            super(Domain, self).delete(*args, **kwargs)
+            self.after_delete()
+
+    def before_delete():
         self.check_for_children()
         if self.is_reverse:
             self.reassign_reverse_delete()
@@ -140,27 +153,41 @@ class Domain(BaseModel, ObjectUrlMixin):
             raise ValidationError("There are records associated with this "
                                   "domain. Delete them before deleting this "
                                   "domain.")
-        super(Domain, self).delete(*args, **kwargs)
+
+    def after_delete():
+        pass
 
     def save(self, *args, **kwargs):
+        commit = kwargs.pop('commit', True)
+
         is_new = self.pk is None
 
         self.full_clean()
-        with transaction.commit_on_success():
+
+        if commit:
+            with transaction.commit_on_success():
+                self.before_save(is_new)
+                super(Domain, self).save(*args, **kwargs)
+                self.after_save(is_new)
+        else:
+            self.before_save(is_new)
             super(Domain, self).save(*args, **kwargs)
-            self.clean_after_save()
+            self.after_save(is_new)
 
-        if self.is_reverse and is_new:
-            # Collect any ptr's that belong to this new domain.
-            reassign_reverse_ptrs(self, self.master_domain, self.ip_type())
+    def before_save(self, is_new):
+        pass
 
-    def clean_after_save(self):
+    def after_save(self, is_new):
         # Ensure all descendants in this zone have the same SOA as this domain.
         bad_children = self.domain_set.filter(
             root_of_soa=None).exclude(soa=self.soa)
         for child in bad_children:
             child.soa = self.soa
-            child.save()  # Recurse.
+            child.save(commit=False)  # Recurse.
+
+        if self.is_reverse and is_new and self.master_domain is not None:
+            # Collect any ptr's that belong to this new domain.
+            self.reassign_reverse_ptrs()
 
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
@@ -270,7 +297,37 @@ class Domain(BaseModel, ObjectUrlMixin):
                     self.nameserver_set.filter(views=view).exists()):
                 return True
 
-    ### Reverse Domain Functions
+    ### Reverse domain functions
+
+    def reassign_reverse_ptrs(self):
+        """There are some formalities that need to happen when a reverse
+        domain is added and deleted. For example, when adding say we had the
+        IP address 128.193.4.0 and it had the reverse_domain 128.193. If we
+        add the reverse_domain 128.193.4, our 128.193.4.0 no longer belongs
+        to the 128.193 domain. We need to re-assign the IP to its correct
+        reverse domain.
+        """
+        def reassign(objs):
+            for obj in objs:
+                if self.ip_type == '6':
+                    nibz = nibbilize(obj.ip_str)
+                    revname = ip_to_domain_name(nibz, ip_type='6')
+                else:
+                    revname = ip_to_domain_name(obj.ip_str, ip_type='4')
+                correct_reverse_domain = name_to_domain(revname)
+                if correct_reverse_domain != obj.reverse_domain:
+                    # TODO: Is this needed? The save() function (actually the
+                    # clean_ip function) will assign the correct reverse
+                    # domain.
+                    obj.reverse_domain = correct_reverse_domain
+                    obj.save()
+
+        ptrs = self.master_domain.reverse_ptr_set.all()
+        intrs = self.master_domain.reverse_staticintr_set.all()
+
+        reassign(ptrs)
+        reassign(intrs)
+
     def reassign_reverse_delete(self):
         """
         This function serves as a pretty subtle workaround.
@@ -318,51 +375,8 @@ def boot_strap_ipv6_reverse_domain(ip, soa=None):
     return reverse_domain
 
 
-def reassign_reverse_ptrs(reverse_domain_1, reverse_domain_2, ip_type):
-    """There are some formalities that need to happen when a reverse
-    domain is added and deleted. For example, when adding say we had the
-    IP address 128.193.4.0 and it had the reverse_domain 128.193. If we
-    add the reverse_domain 128.193.4, our 128.193.4.0 no longer belongs
-    to the 128.193 domain. We need to re-assign the IP to its correct
-    reverse domain.
-
-    :param reverse_domain_1: The domain which could possibly have
-        addresses added to it.
-
-    :type reverse_domain_1: :class:`Domain`
-
-    :param reverse_domain_2: The domain that has IPs which might not
-        belong to it anymore.
-
-    :type reverse_domain_2: :class:`Domain`
-    """
-
-    if reverse_domain_2 is None or ip_type is None:
-        return
-
-    def reassign(objs):
-        for obj in objs:
-            if ip_type == '6':
-                nibz = nibbilize(obj.ip_str)
-                revname = ip_to_domain_name(nibz, ip_type='6')
-            else:
-                revname = ip_to_domain_name(obj.ip_str, ip_type='4')
-            correct_reverse_domain = name_to_domain(revname)
-            if correct_reverse_domain != obj.reverse_domain:
-                # TODO: Is this needed? The save() function (actually the
-                # clean_ip function) will assign the correct reverse domain.
-                obj.reverse_domain = correct_reverse_domain
-                obj.save()
-
-    ptrs = reverse_domain_2.reverse_ptr_set.iterator()
-    intrs = reverse_domain_2.reverse_staticintr_set.iterator()
-
-    reassign(ptrs)
-    reassign(intrs)
-
-
-# A bunch of handy functions that would cause circular dependencies if
-# they were in another file.
+# A handy function that would cause circular dependencies if it were in
+# another file.
 def name_to_master_domain(name):
     """Given an domain name, this function returns the appropriate
     master domain.
