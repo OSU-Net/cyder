@@ -370,7 +370,6 @@ def boot_strap_ipv6_reverse_domain(ip, soa=None):
         cur_reverse_domain = ip[:i]
         domain_name = ip_to_domain_name(cur_reverse_domain, ip_type='6')
         reverse_domain = Domain(name=domain_name)
-        reverse_domain.soa = soa
         reverse_domain.save()
     return reverse_domain
 
