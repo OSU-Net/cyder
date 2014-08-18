@@ -15,7 +15,7 @@ def check_for_reverse_domain(ip_str, ip_type):
         )
 
 
-def ip_to_dns_form(ip, uppercase=False):
+def ip_to_dns_form(ip):
     """
     Convert an ip to dns zone form. The ip is assumed to be in valid
     format.
@@ -28,9 +28,6 @@ def ip_to_dns_form(ip, uppercase=False):
     else:
         octets = ip.split('.')
         name = '.in-addr.arpa'
-
-    if uppercase:
-        name = name.uppercase
 
     name = '.'.join(list(reversed(octets))) + name + "."
     return name

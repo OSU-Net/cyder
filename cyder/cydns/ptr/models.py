@@ -109,7 +109,7 @@ class BasePTR(object):
         if (self.reverse_domain is None or self.reverse_domain.name in
                 ('arpa', 'in-addr.arpa', 'ip6.arpa')):
             raise ValidationError(
-                "No reverse Domain found for {0} ".format(self.ip_str)
+                "No reverse Domain found for {0}".format(self.ip_str)
             )
 
     def rebuild_reverse(self):
