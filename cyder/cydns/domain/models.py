@@ -145,7 +145,7 @@ class Domain(BaseModel, ObjectUrlMixin):
             super(Domain, self).delete(*args, **kwargs)
             self.after_delete()
 
-    def before_delete():
+    def before_delete(self):
         self.check_for_children()
         if self.is_reverse:
             self.reassign_reverse_delete()
@@ -154,7 +154,7 @@ class Domain(BaseModel, ObjectUrlMixin):
                                   "domain. Delete them before deleting this "
                                   "domain.")
 
-    def after_delete():
+    def after_delete(self):
         pass
 
     def save(self, *args, **kwargs):
