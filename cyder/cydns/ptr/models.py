@@ -190,10 +190,6 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         return super(PTR, self).bind_render_record(
             custom={'reverse_domain': reverse_domain})
 
-    def __init__(self, *args, **kwargs):
-        kwargs = self.fqdn_kwargs_check(kwargs)
-        return super(PTR, self).__init__(*args, **kwargs)
-
     def save(self, *args, **kwargs):
         kwargs = self.fqdn_kwargs_check(kwargs)
         update_range_usage = kwargs.pop('update_range_usage', True)

@@ -571,7 +571,8 @@ class NSTestsModels(TestCase):
         cdomain = Domain(name="1.10.14.in-addr.arpa")
         cdomain.save()
 
-        p = PTR(label='eh', ctnr=self.ctnr, domain=cdomain, ip_type="4", ip_str="14.10.1.1")
+        p = PTR(fqdn=('eh.' + cdomain.name), ctnr=self.ctnr, ip_type="4",
+                ip_str="14.10.1.1")
         p.save()
 
         # Now try to add the domain to the zone that has no NS records at it's

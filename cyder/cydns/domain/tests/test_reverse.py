@@ -1,10 +1,3 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
@@ -81,13 +74,15 @@ class ReverseDomainTests(TestCase):
         return intr
 
     def add_ptr_ipv4(self, ip):
-        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='4', ctnr=self.ctnr)
+        ptr = PTR(fqdn=("bluh." + self.domain.name), ip_str=ip, ip_type='4',
+                  ctnr=self.ctnr)
         ptr.full_clean()
         ptr.save()
         return ptr
 
     def add_ptr_ipv6(self, ip):
-        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='6', ctnr=self.ctnr)
+        ptr = PTR(fqdn=("bluh." + self.domain.name), ip_str=ip, ip_type='6',
+                  ctnr=self.ctnr)
         ptr.full_clean()
         ptr.save()
         return ptr

@@ -59,6 +59,24 @@ class LabelDomainMixin(models.Model):
     class Meta:
         abstract = True
 
+    def __init__(self, *args, **kwargs):
+        super(LabelDomainMixin, self).__init__(*args, **kwargs)
+        if self.fqdn:
+            self.label_domain_from_fqdn()
+
+    def label_domain_from_fqdn(self):
+        try:
+            self.domain = Domain.objects.get(name=self.fqdn)
+            self.label = ''
+        except Domain.DoesNotExist:
+            parts = self.fqdn.split('.', 1)
+            if len(parts) == 2:
+                self.label = parts[0]
+                self.domain = Domain.objects.get(name=parts[1])
+            else:
+                self.label = ''
+                self.domain = Domain.objects.get(name=parts[0])
+
 
 class ViewMixin(models.Model):
 
