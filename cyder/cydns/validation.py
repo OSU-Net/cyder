@@ -4,37 +4,6 @@ import string
 import ipaddr
 
 
-def find_root_domain(soa):
-    """
-    It is nessicary to know which domain is at the top of a zone. This
-    function returns that domain.
-
-    :param soa: A zone's :class:`SOA` object.
-    :type soa: :class:`SOA`
-
-    The following code is an example of how to call this function using
-    a Domain as ``domain``.
-
-        >>> find_root_domain('forward', domain.soa)
-
-    The following code is an example of how to call this function using
-    a ReverseDomain as ``domain``.
-
-        >>> find_root_domain('reverse', reverse_domain.soa)
-
-    """
-
-    if soa is None:
-        return None
-
-    domains = soa.domain_set.all()
-    if domains:
-        key = lambda domain: len(domain.name.split('.'))
-        return sorted(domains, key=key)[0]  # Sort by number of labels
-    else:
-        return None
-
-
 ###################################################################
 #        Functions that validate labels and names                 #
 ###################################################################
@@ -283,7 +252,7 @@ def validate_srv_weight(weight):
 
 
 def validate_srv_label(srv_label):
-    """This function is the same as :func:`validate_label` expect
+    """This function is the same as :func:`validate_label` except
     :class:`SRV` records can have a ``_`` preceding its label.
     """
     if not srv_label:
@@ -294,8 +263,8 @@ def validate_srv_label(srv_label):
 
 
 def validate_srv_name(srv_name):
-    """This function is the same as :func:`validate_fqdn` expect
-    :class:`SRV` records can have a ``_`` preceding is name.
+    """This function is the same as :func:`validate_fqdn` except
+    :class:`SRV` records can have a ``_`` preceding its name.
     """
     if srv_name and srv_name[0] != '_':
         raise ValidationError("Error: SRV label must start with '_'")

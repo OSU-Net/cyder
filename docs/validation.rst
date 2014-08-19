@@ -14,7 +14,6 @@ Use the function ``do_zone_validation`` in model code.
 .. autofunction:: mozdns.validation.check_for_master_delegation
 .. autofunction:: mozdns.validation.validate_zone_soa
 .. autofunction:: mozdns.validation.check_for_soa_partition
-.. autofunction:: mozdns.validation.find_root_domain
 
 Name and Label Validation
 -------------------------
