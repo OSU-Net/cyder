@@ -15,15 +15,15 @@ DOMAIN_FQDN_CONFLICT = ("Please specify either fqdn or "
                         "label and domain, not both.")
 
 
-class LabelDomainMixin(models.Model):
+class LabelDomainUtilsMixin(models.Model):
     """
     This class provides common functionality that many DNS record
     classes share.  This includes a foreign key to the ``domain`` table
     and a ``label`` CharField.
 
     If you plan on using the ``unique_together`` constraint on a Model
-    that inherits from ``LabelDomainMixin``, you must include ``domain`` and
-    ``label`` explicitly if you need them to.
+    that inherits from ``LabelDomainUtilsMixin`` or ``LabelDomainMixin``, you
+    must include ``domain`` and ``label`` explicitly if you need them to.
 
     All common records have a ``fqdn`` field. This field is updated
     every time the object is saved::
@@ -45,22 +45,11 @@ class LabelDomainMixin(models.Model):
     def pretty_name(self):
         return self.fqdn
 
-    domain = models.ForeignKey(Domain, null=False)
-    # "The length of any one label is limited to between 1 and 63 octets."
-    # -- RFC218
-    label = models.CharField(
-        max_length=63, blank=True, validators=[validate_first_label],
-        help_text="Short name of the FQDN",
-    )
-    fqdn = models.CharField(
-        max_length=255, blank=True, validators=[validate_fqdn], db_index=True
-    )
-
     class Meta:
         abstract = True
 
     def __init__(self, *args, **kwargs):
-        super(LabelDomainMixin, self).__init__(*args, **kwargs)
+        super(LabelDomainUtilsMixin, self).__init__(*args, **kwargs)
         if self.fqdn:
             self.label_domain_from_fqdn()
 
@@ -76,6 +65,23 @@ class LabelDomainMixin(models.Model):
             else:
                 self.label = ''
                 self.domain = Domain.objects.get(name=parts[0])
+
+
+class LabelDomainMixin(LabelDomainUtilsMixin):
+    class Meta:
+        abstract = True
+
+    domain = models.ForeignKey(Domain, null=False)
+    # "The length of any one label is limited to between 1 and 63 octets."
+    # -- RFC218
+    label = models.CharField(
+        max_length=63, blank=True, validators=[validate_first_label],
+        help_text="Short name of the FQDN",
+    )
+    fqdn = models.CharField(
+        max_length=255, blank=True, validators=[validate_fqdn], db_index=True
+    )
+
 
 
 class ViewMixin(models.Model):

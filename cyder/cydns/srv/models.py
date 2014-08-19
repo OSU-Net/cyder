@@ -7,10 +7,10 @@ from cyder.cydns.validation import (
     validate_srv_label, validate_srv_port, validate_srv_priority,
     validate_srv_weight, validate_srv_name, validate_srv_target
 )
-from cyder.cydns.models import CydnsRecord
+from cyder.cydns.models import CydnsRecord, LabelDomainUtilsMixin
 
 
-class SRV(CydnsRecord):
+class SRV(CydnsRecord, LabelDomainUtilsMixin):
     """
     >>> SRV(label=label, domain=domain, target=target, port=port,
     ... priority=priority, weight=weight, ttl=ttl)
