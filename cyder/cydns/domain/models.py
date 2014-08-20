@@ -1,9 +1,10 @@
-from django.db import models, transaction
+from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_delete, safe_save
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.search_utils import smart_fqdn_exists
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
@@ -132,20 +133,8 @@ class Domain(BaseModel, ObjectUrlMixin):
             {'name': 'delegated', 'datatype': 'boolean', 'editable': True},
         ]}
 
+    @safe_delete
     def delete(self, *args, **kwargs):
-        commit = kwargs.pop('commit', True)
-
-        if commit:
-            with transaction.commit_on_success():
-                self.before_delete()
-                super(Domain, self).delete(*args, **kwargs)
-                self.after_delete()
-        else:
-            self.before_delete()
-            super(Domain, self).delete(*args, **kwargs)
-            self.after_delete()
-
-    def before_delete(self):
         self.check_for_children()
         if self.is_reverse:
             self.reassign_reverse_delete()
@@ -154,30 +143,14 @@ class Domain(BaseModel, ObjectUrlMixin):
                                   "domain. Delete them before deleting this "
                                   "domain.")
 
-    def after_delete(self):
-        pass
+        super(Domain, self).delete(*args, **kwargs)
 
+    @safe_save
     def save(self, *args, **kwargs):
-        commit = kwargs.pop('commit', True)
-
         is_new = self.pk is None
 
-        self.full_clean()
+        super(Domain, self).save(*args, **kwargs)
 
-        if commit:
-            with transaction.commit_on_success():
-                self.before_save(is_new)
-                super(Domain, self).save(*args, **kwargs)
-                self.after_save(is_new)
-        else:
-            self.before_save(is_new)
-            super(Domain, self).save(*args, **kwargs)
-            self.after_save(is_new)
-
-    def before_save(self, is_new):
-        pass
-
-    def after_save(self, is_new):
         # Ensure all descendants in this zone have the same SOA as this domain.
         bad_children = self.domain_set.filter(
             root_of_soa=None).exclude(soa=self.soa)
@@ -186,7 +159,7 @@ class Domain(BaseModel, ObjectUrlMixin):
             child.save(commit=False)  # Recurse.
 
         if self.is_reverse and is_new and self.master_domain is not None:
-            # Collect any ptr's that belong to this new domain.
+            # Collect any PTRs that belong to this new domain.
             self.reassign_reverse_ptrs()
 
     def ip_type(self):

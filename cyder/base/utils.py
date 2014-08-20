@@ -8,6 +8,7 @@ import syslog
 from sys import stderr
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.loading import get_model
 
@@ -189,3 +190,51 @@ def django_pretty_type(obj_type):
         return 'user'
     else:
         return None
+
+
+def safe_save(func):
+    """Make a model's save method more safe.
+
+    This decorator should only be used on model save methods. It slightly
+    changes the effects of the method so that fewer things can go wrong. First
+    the model's full_clean method is called, so that an invalid instance can't
+    be saved. Then (if the save method is the outermost one being called) it
+    runs it inside a transaction that is committed if the function returns or
+    rolled back if it raises an exception. (The exception is re-raised.)
+    """
+
+    def outer(self, *args, **kwargs):
+        commit = kwargs.pop('commit', True)
+        self.full_clean()
+        if commit:
+            with transaction.commit_on_success():
+                return func(self, *args, **kwargs)
+        else:
+            return func(self, *args, **kwargs)
+    outer.__name__ = func.__name__
+    outer.__module__ = func.__module__
+    outer.__doc__ = func.__doc__
+    return outer
+
+
+def safe_delete(func):
+    """Make a model's delete method more safe.
+
+    This decorator should only be used on model delete methods. It slightly
+    changes the effects of the method so that fewer things can go wrong. If the
+    delete method is the outermost one being called it runs it inside a
+    transaction that is committed if the function returns or rolled back if it
+    raises an exception. (The exception is re-raised.)
+    """
+
+    def outer(self, *args, **kwargs):
+        commit = kwargs.pop('commit', True)
+        if commit:
+            with transaction.commit_on_success():
+                return func(self, *args, **kwargs)
+        else:
+            return func(self, *args, **kwargs)
+    outer.__name__ = func.__name__
+    outer.__module__ = func.__module__
+    outer.__doc__ = func.__doc__
+    return outer
