@@ -173,7 +173,7 @@ def ensure_label_domain(fqdn, force=False):
         domain = ensure_domain(domain_name, purgeable=True, inherit_soa=True)
         if not domain.soa and not force:
             raise ValidationError("You must create a record inside an "
-                                  "existing zones.")
+                                  "existing zone.")
         return label, domain
 
 

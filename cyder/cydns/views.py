@@ -12,7 +12,7 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               cy_delete, search_obj, table_update)
 from cyder.core.cyuser.utils import perm
 
-from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
+from cyder.cydns.utils import slim_form
 
 import json
 
@@ -33,20 +33,7 @@ def cydns_view(request, pk=None):
     if request.method == 'POST':
         page_obj = None
 
-        if obj_type == "ptr":
-            qd, domain, errors = request.POST.copy(), None, None
-        else:
-            qd, domain, errors = _fqdn_to_domain(request.POST.copy())
-
-        # Validate form.
-        if errors:
-            form = FormKlass(request.POST)
-            form._errors = ErrorDict()
-            form._errors['__all__'] = ErrorList(errors)
-            if is_ajax_form(request):
-                return HttpResponse(json.dumps({'errors': form.errors}))
-        else:
-            form = FormKlass(qd, instance=obj)
+        form = FormKlass(request.POST, instance=obj)
         try:
             if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
                 obj = form.save()
@@ -60,7 +47,6 @@ def cydns_view(request, pk=None):
                     return redirect(obj.get_list_url())
 
         except (ValidationError, ValueError), e:
-            form = _revert(domain, request.POST, form, FormKlass)
             if hasattr(e, 'messages'):
                 e = e.messages
 
@@ -88,29 +74,6 @@ def cydns_view(request, pk=None):
         'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
     })
-
-
-def _revert(domain, orig_qd, orig_form, FormKlass):
-    """Revert domain if not valid."""
-    prune_tree(domain)
-    form = FormKlass(orig_qd)
-    form._errors = orig_form._errors
-    return form
-
-
-def _fqdn_to_domain(qd):
-    """Resolve FQDN to domain and attach to record object. """
-    domain = None
-    if 'fqdn' in qd:
-        fqdn = qd.pop('fqdn')[0]
-        try:
-            # Call prune tree later if error, else domain leak.
-            label, domain = ensure_label_domain(fqdn)
-        except ValidationError, e:
-            return None, None, e.messages
-
-        qd['label'], qd['domain'] = label, str(domain.pk)
-    return qd, domain, None
 
 
 def cydns_table_update(request, pk, object_type=None):
