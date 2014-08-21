@@ -8,7 +8,6 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.test import RequestFactory
 
-from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA

@@ -3,7 +3,8 @@ from django.test.client import Client
 from nose.tools import eq_
 
 import cyder.base.tests
-from cyder.base.tests.test_views_template import build, format_response, random_label
+from cyder.base.tests.test_views_template import (
+    build, format_response, random_label)
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
