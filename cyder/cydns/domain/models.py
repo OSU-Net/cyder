@@ -177,6 +177,15 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         is_new = self.pk is None
 
+        if self.name.endswith('arpa'):
+            self.is_reverse = True
+        self.master_domain = name_to_master_domain(self.name)
+
+        if self.master_domain and self.master_domain.delegated:
+            raise ValidationError(
+                '{} is delegated, so it cannot have subdomains.'.format(
+                    self.master_domain.name))
+
         try:  # Assume domain is a root domain.
             self.soa = self.root_of_soa.get()
         except SOA.DoesNotExist:  # Domain is not a root domain.
@@ -194,15 +203,6 @@ class Domain(BaseModel, ObjectUrlMixin):
                 root_of_soa=None).exists():
             raise ValidationError("The root of this domain's zone is below "
                                   "it.")
-
-        if self.name.endswith('arpa'):
-            self.is_reverse = True
-        self.master_domain = name_to_master_domain(self.name)
-
-        if self.master_domain and self.master_domain.delegated:
-            raise ValidationError(
-                '{} is delegated, so it cannot have subdomains.'.format(
-                    self.master_domain.name))
 
         if is_new:
             # The object doesn't exist in the db yet. Make sure we don't
