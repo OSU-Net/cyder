@@ -88,6 +88,7 @@ class NoNSTests(object):
         root_domain = create_fake_zone(domain_name, suffix="")
         post_data = self.post_data()
         asdf = Domain.objects.create(name=('asdf.' + domain_name))
+        self.ctnr.domains.add(asdf)
         # Get the '_' in SRV records
         post_data['label'] = post_data['label'][0] + 'asdf'
         post_data['domain'] = asdf.pk
@@ -120,7 +121,7 @@ class NoNSTests(object):
         start_obj_count = self.test_class.objects.count()
         resp = self.client.post(self.test_class.get_create_url(),
                                 post_data, follow=True)
-        self.assertNotIn(
+        self.assertIn(
             resp.status_code, (200, 302),
             "Couldn't add to public view\n" + format_response(resp))
         new_obj_count = self.test_class.objects.count()
@@ -301,6 +302,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         new_domain = Domain.objects.create(name='foo')
+        self.ctnr.domains.add(new_domain)
         return {
             'label': random_label(),
             'domain': new_domain.pk,
@@ -336,6 +338,7 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         new_domain = Domain.objects.create(name='foo')
+        self.ctnr.domains.add(new_domain)
         return {
             'label': '_' + random_label(),
             'domain': new_domain.pk,

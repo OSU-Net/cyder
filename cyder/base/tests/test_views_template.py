@@ -103,7 +103,7 @@ class GenericViewTests(object):
             if has_perm:
                 # Check that the attributes we posted updated the object.
                 for k, v in post_data.items():
-                    if k not in ['fqdn', 'label']:
+                    if k not in ['domain', 'label']:
                         obj_val = getattr(test_obj, k)
                         if hasattr(obj_val, 'id'):
                             self.assertEqual(
@@ -116,7 +116,7 @@ class GenericViewTests(object):
             else:
                 # Check nothing has changed.
                 for k, v in post_data.items():
-                    if k not in ['fqdn', 'label']:
+                    if k not in ['domain', 'label']:
                         self.assertEqual(
                             getattr(self.test_obj, k), getattr(test_obj, k),
                             '%s changed but was not supposed to' % k)
