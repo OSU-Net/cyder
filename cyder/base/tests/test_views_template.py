@@ -301,8 +301,7 @@ def random_byte():
 
 
 def format_response(response):
-    response = unicode(response).splitlines()
-    response = list(dropwhile(lambda c: c != u'', response))[1:]
+    response = response.content.decode('utf_8').splitlines()
     if len(response) > 3:
         response = response[:3] + [u'...']
     response = u'Response:\n' + u'\n'.join(response)
