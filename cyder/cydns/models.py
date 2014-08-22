@@ -11,10 +11,6 @@ from cyder.cydns.validation import validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
 
 
-DOMAIN_FQDN_CONFLICT = ("Please specify either fqdn or "
-                        "label and domain, not both.")
-
-
 class LabelDomainUtilsMixin(models.Model):
     """
     This class provides common functionality that many DNS record
@@ -65,6 +61,17 @@ class LabelDomainUtilsMixin(models.Model):
             else:
                 self.label = ''
                 self.domain = Domain.objects.get(name=parts[0])
+
+    def clean(self, *args, **kwargs):
+        self.set_fqdn()
+
+        super(LabelDomainUtilsMixin, self).clean(*args, **kwargs)
+
+    def set_fqdn(self):
+        if self.label:
+            self.fqdn = self.label + '.' + self.domain.name
+        else:
+            self.fqdn = self.domain.name
 
 
 class LabelDomainMixin(LabelDomainUtilsMixin):
@@ -120,7 +127,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         abstract = True
 
     def __str__(self):
-        self.set_fqdn()
+        self.label_domain_from_fqdn()
         return self.bind_render_record()
 
     def __repr__(self):
@@ -151,10 +158,9 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         """
         return ['fqdn', 'ttl', 'description', 'views']
 
-    def clean(self):
-        # The Nameserver and subclasses of BaseAddressRecord do not call this
-        # function
-        self.set_fqdn()
+    def clean(self, *args, **kwargs):
+        super(CydnsRecord, self).clean(*args, **kwargs)
+
         self.check_TLD_condition()
         if hasattr(self, 'domain'):
             check_no_ns_soa_condition(self.domain)
@@ -179,7 +185,6 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             prune_tree(objs_domain)
 
     def save(self, *args, **kwargs):
-        self.fqdn_kwargs_check(kwargs)
         self.full_clean()
 
         if self.pk:
@@ -208,56 +213,6 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         if self.domain.soa and not isinstance(self, PTR):
             # Mark the soa
             self.domain.soa.schedule_rebuild()
-
-    def fqdn_kwargs_check(self, kwargs):
-        fqdn = kwargs.pop('fqdn', None)
-        if fqdn:
-            if 'label' in kwargs and 'domain' in kwargs:
-                label, domain = kwargs['label'], kwargs['domain']
-                if fqdn != self.generate_fqdn(label, domain):
-                    raise ValidationError(DOMAIN_FQDN_CONFLICT)
-
-            elif 'label' in kwargs or 'domain' in kwargs:
-                raise ValidationError(DOMAIN_FQDN_CONFLICT)
-            else:
-                self.label_domain_from_fqdn()
-
-    def label_domain_from_fqdn(self):
-        validate_fqdn(self.fqdn)
-        try:
-            label, domain = self.fqdn.split('.', 1)
-        except ValueError:
-            label, domain = "", self.fqdn
-        domain = Domain.objects.get(name=domain)
-        self.label, self.domain = label, domain
-
-    def set_fqdn(self):
-        try:
-            Klass = type(self)
-            old = Klass.objects.get(pk=self.pk)
-        except Klass.DoesNotExist:
-            old = None
-
-        if (old and old.fqdn != self.fqdn and
-                self.generate_fqdn() != self.fqdn):
-            if old.label != self.label or old.domain != self.domain:
-                raise ValidationError(DOMAIN_FQDN_CONFLICT)
-            else:
-                self.label_domain_from_fqdn()
-
-        try:
-            self.fqdn = self.generate_fqdn()
-        except Domain.DoesNotExist:
-            if self.fqdn:
-                self.label_domain_from_fqdn()
-
-    def generate_fqdn(self, label=None, domain=None):
-        label = label or self.label
-        domain = domain or self.domain
-        if label == '':
-            return domain.name
-        else:
-            return "{0}.{1}".format(label, domain.name)
 
     def check_domain_ctnr(self):
         """
