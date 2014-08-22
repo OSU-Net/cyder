@@ -33,7 +33,7 @@ def ip_to_dns_form(ip):
     return name
 
 
-def ip_to_domain_name(ip, ip_type='4', uppercase=False):
+def ip_to_domain_name(ip, ip_type='4'):
     """Convert an ip to dns zone form. The ip is assumed to be in valid
     format."""
     if not isinstance(ip, basestring):
@@ -44,8 +44,6 @@ def ip_to_domain_name(ip, ip_type='4', uppercase=False):
         name = '.in-addr.arpa'
     if ip_type == '6':
         name = '.ip6.arpa'
-    if uppercase:
-        name = name.uppercase
 
     name = '.'.join(list(reversed(octets))) + name
     return name
