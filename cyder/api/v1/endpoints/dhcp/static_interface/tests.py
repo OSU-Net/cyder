@@ -1,9 +1,11 @@
+from cyder.api.v1.tests.base import APITests
 from cyder.core.system.models import System
+from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.soa.models import SOA
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.models import Network
 from cyder.cydns.domain.models import Domain
-from cyder.api.v1.tests.base import APITests
 
 
 class StaticInterfaceBase(APITests):
@@ -34,7 +36,8 @@ class StaticInterfaceV4API_Test(StaticInterfaceBase):
     def setUp(self):
         super(StaticInterfaceV4API_Test, self).setUp()
         Domain.objects.get_or_create(name='in-addr.arpa')
-        Domain.objects.get_or_create(name='11.in-addr.arpa')
+        eleven, _ = Domain.objects.get_or_create(name='11.in-addr.arpa')
+        Nameserver.objects.get_or_create(domain=eleven, server="ns1.foo.com")
         self.net = Network(network_str='11.12.14.0/8', ip_type='4')
         self.net.update_network()
         self.net.save()
@@ -42,6 +45,9 @@ class StaticInterfaceV4API_Test(StaticInterfaceBase):
                            ip_type='4', start_str='11.12.14.253',
                            end_str='11.12.14.254')
         self.range.save()
+        self.soa = SOA(primary='ns1.foo.com', contact='webmaster.foo.com',
+                       root_domain=eleven)
+        self.soa.save()
 
     def create_data(self):
         data = super(StaticInterfaceV4API_Test, self).create_data()
