@@ -62,10 +62,9 @@ def check_for_master_delegation(domain, master_domain):
         return
     if not master_domain.delegated:
         return
-    if not domain.pk:  # We don't exist yet.
-        raise ValidationError("No subdomains can be created in the {0} "
-                              "domain. It is delegated."
-                              .format(master_domain.name))
+    raise ValidationError("No subdomains can be created in the {0} "
+                          "domain. It is delegated."
+                          .format(master_domain.name))
 
 
 def validate_zone_soa(domain, master_domain):
