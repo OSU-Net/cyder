@@ -1,5 +1,6 @@
 import time
 from gettext import gettext as _
+from itertools import chain
 from string import Template
 
 from django.core.exceptions import ValidationError
@@ -11,6 +12,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_delete, safe_save
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
@@ -147,12 +149,12 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def get_debug_build_url(self):
         return reverse('build-debug', args=[self.pk])
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         root_domain = self.root_domain
-        with transaction.commit_on_success():
-            super(SOA, self).delete(*args, **kwargs)
-            root_domain.soa = None
-            root_domain.save()
+        super(SOA, self).delete(*args, **kwargs)
+        root_domain.soa = None
+        root_domain.save()
 
     def has_record_set(self, view=None, exclude_ns=False):
         for domain in self.domain_set.all():
@@ -169,9 +171,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         if commit:
             self.save()
 
+    @safe_save
     def save(self, *args, **kwargs):
-        self.full_clean()
-
         is_new = self.pk is None
         if is_new:
             self.dirty = True
@@ -183,23 +184,23 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                     'root_domain',
                 ]
                 # Leave out serial and dirty so rebuilds don't cause a
-                # never-ending build cycle
+                # never-ending build cycle.
                 for field in fields:
                     if getattr(db_self, field) != getattr(self, field):
                         self.schedule_rebuild(commit=False)
 
-
         super(SOA, self).save(*args, **kwargs)
 
         if is_new:
-            # Need to call this after save because new objects won't have a pk
+            # Need to call this after save because new objects won't have a pk.
             self.schedule_rebuild(commit=False)
-            self.root_domain.soa = self
             self.root_domain.save()
+            reassign_reverse_records(None, self.root_domain)
         else:
             if db_self.root_domain != self.root_domain:
                 self.root_domain.save()
                 db_self.root_domain.save()
+                reassign_reverse_records(db_self.root_domain, self.root_domain)
 
 
 class SOAAV(EAVBase):
@@ -211,3 +212,15 @@ class SOAAV(EAVBase):
     entity = models.ForeignKey(SOA)
     attribute = EAVAttributeField(Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))
+
+
+def reassign_reverse_records(old_domain, new_domain):
+    def reassign_domain(domain):
+        for obj in chain(domain.reverse_ptr_set.all(),
+                         domain.reverse_staticintr_set.all()):
+            obj.update_reverse_domain(take_shortcut=True)
+
+    if old_domain is not None:
+        reassign_domain(old_domain)
+    if new_domain is not None:
+        reassign_domain(new_domain.zone_root_domain)

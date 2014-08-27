@@ -4,17 +4,6 @@ from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.domain.utils import name_to_domain
 
 
-def check_for_reverse_domain(ip_str, ip_type):
-    rvname = nibbilize(ip_str) if ip_type == '6' else ip_str
-    rvname = ip_to_domain_name(rvname, ip_type=ip_type)
-    reverse_domain = name_to_domain(rvname)
-    if (reverse_domain is None or reverse_domain.name in
-            ('arpa', 'in-addr.arpa', 'ip6.arpa')):
-        raise ValidationError(
-            "No reverse Domain found for {0} ".format(ip_str)
-        )
-
-
 def ip_to_dns_form(ip):
     """
     Convert an ip to dns zone form. The ip is assumed to be in valid

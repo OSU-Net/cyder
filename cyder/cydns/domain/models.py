@@ -136,8 +136,6 @@ class Domain(BaseModel, ObjectUrlMixin):
     @safe_delete
     def delete(self, *args, **kwargs):
         self.check_for_children()
-        if self.is_reverse:
-            self.reassign_reverse_delete()
         if self.has_record_set():
             raise ValidationError("There are records associated with this "
                                   "domain. Delete them before deleting this "
@@ -157,10 +155,6 @@ class Domain(BaseModel, ObjectUrlMixin):
         for child in bad_children:
             child.soa = self.soa
             child.save(commit=False)  # Recurse.
-
-        if self.is_reverse and is_new and self.master_domain is not None:
-            # Collect any PTRs that belong to this new domain.
-            self.reassign_reverse_ptrs()
 
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
@@ -270,58 +264,16 @@ class Domain(BaseModel, ObjectUrlMixin):
                     self.nameserver_set.filter(views=view).exists()):
                 return True
 
-    ### Reverse domain functions
+    @property
+    def is_root_domain(self):
+        return self.root_of_soa.exists()
 
-    def reassign_reverse_ptrs(self):
-        """There are some formalities that need to happen when a reverse
-        domain is added and deleted. For example, when adding say we had the
-        IP address 128.193.4.0 and it had the reverse_domain 128.193. If we
-        add the reverse_domain 128.193.4, our 128.193.4.0 no longer belongs
-        to the 128.193 domain. We need to re-assign the IP to its correct
-        reverse domain.
-        """
-        def reassign(objs):
-            for obj in objs:
-                if self.ip_type == '6':
-                    nibz = nibbilize(obj.ip_str)
-                    revname = ip_to_domain_name(nibz, ip_type='6')
-                else:
-                    revname = ip_to_domain_name(obj.ip_str, ip_type='4')
-                correct_reverse_domain = name_to_domain(revname)
-                if correct_reverse_domain != obj.reverse_domain:
-                    # TODO: Is this needed? The save() function (actually the
-                    # clean_ip function) will assign the correct reverse
-                    # domain.
-                    obj.reverse_domain = correct_reverse_domain
-                    obj.save()
-
-        ptrs = self.master_domain.reverse_ptr_set.all()
-        intrs = self.master_domain.reverse_staticintr_set.all()
-
-        reassign(ptrs)
-        reassign(intrs)
-
-    def reassign_reverse_delete(self):
-        """
-        This function serves as a pretty subtle workaround.
-
-            *   An Ip is not allowed to have a reverse_domain of None.
-
-            *   When you save an Ip it is automatically assigned the most
-                appropriate reverse_domain
-
-        Passing the update_reverse_domain as False will bypass the Ip
-        class's attempt to find an appropriate reverse_domain. This way
-        you can reassign the reverse_domain of an Ip, save it, and then
-        delete the old reverse_domain.
-        """
-        def reassign(objs):
-            for obj in objs:
-                obj.reverse_domain = self.master_domain
-                obj.save(update_reverse_domain=False)
-
-        reassign(self.reverse_ptr_set.iterator())
-        reassign(self.reverse_staticintr_set.iterator())
+    @property
+    def zone_root_domain(self):
+        if self.soa:
+            return self.soa.root_domain
+        else:
+            return None
 
 
 def boot_strap_ipv6_reverse_domain(ip, soa=None):

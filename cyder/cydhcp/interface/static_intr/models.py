@@ -24,7 +24,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
+from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.domain.models import Domain
 
 
@@ -137,13 +137,12 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         self.urd = kwargs.pop('update_reverse_domain', True)
-        self.clean_reverse()  # BasePTR
         old_range = None
         if self.id is not None:
             old_range = StaticInterface.objects.get(id=self.id).range
 
         super(StaticInterface, self).save(*args, **kwargs)
-        self.rebuild_reverse()
+        self.schedule_zone_rebuild()
         if update_range_usage:
             self.range.save()
             if old_range:
@@ -153,9 +152,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         rng = self.range
         update_range_usage = kwargs.pop('update_range_usage', True)
         delete_system = kwargs.pop('delete_system', True)
-        if self.reverse_domain and self.reverse_domain.soa:
-            self.reverse_domain.soa.schedule_rebuild()
-            # The reverse_domain field is in the Ip class.
 
         if delete_system:
             if(not self.system.staticinterface_set.exclude(
@@ -166,7 +162,12 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         super(StaticInterface, self).delete(*args, **kwargs)
         if rng and update_range_usage:
             rng.save()
-        # ^ goes to BaseAddressRecord
+
+    def schedule_zone_rebuild(self):
+        if self.domain.soa is not None:
+            self.domain.soa.schedule_rebuild()
+        if self.reverse_domain.soa is not None:
+            self.reverse_domain.soa.schedule_rebuild()
 
     def check_A_PTR_collision(self):
         if PTR.objects.filter(ip_str=self.ip_str).exists():
@@ -211,8 +212,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         return 'subclass "{0}" 1:{1};\n'.format(classname, self.mac)
 
     def clean(self, *args, **kwargs):
-        check_for_reverse_domain(self.ip_str, self.ip_type)
-
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
             raise ValidationError("A PTR already uses '%s' and '%s'" %

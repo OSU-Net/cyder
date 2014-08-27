@@ -3,6 +3,7 @@ from gettext import gettext as _
 from django.db import models
 from django.db.models.loading import get_model
 from django.core.exceptions import ValidationError
+from ipaddr import IPv4Address, IPv6Address
 
 from cyder.base.models import BaseModel
 from cyder.base.mixins import DisplayMixin, ObjectUrlMixin
@@ -45,16 +46,75 @@ class BasePTR(object):
     domain because they represent a :ref:`PTR` record as well as an
     :ref:`address_record`. Thus, they inherit from :class:`BasePtr`.
     """
-    urd = True
+    def clean(self, *args, **kwargs):
+        super(BasePTR, self).clean(*args, **kwargs)
 
-    def clean_reverse(self, update_reverse_domain=None):
-        # This indirection is so StaticInterface can call this function
-        if self.urd or update_reverse_domain:
+        is_new = self.pk is None
+
+        if is_new:
             self.update_reverse_domain()
-            self.urd = False
+        else:
+            db_self = self.__class__.objects.get(pk=self.pk)
+            if db_self.ip_str != self.ip_str:
+                self.update_reverse_domain()
+
         check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
         self.check_ip_conflict()
+
+    def update_reverse_domain(self, take_shortcut=False):
+        def search_downwards():
+            name = self.reverse_domain.name
+
+            # Start at current reverse domain.
+            for nibble in nibbles[(name.count('.') - 1):]:
+                print name
+                name = nibble + '.' + name
+                try:
+                    yield Domain.objects.only('soa').get(name=name)
+                except Domain.DoesNotExist:
+                    break
+            raise StopIteration
+
+        NOT_FOUND = 'No reverse domain found for {}'.format(self.ip_str)
+
+        if self.ip_type == '4':
+            nibbles = str(IPv4Address(self.ip_str)).split('.')
+        else:
+            nibbles = IPv6Address(self.ip_str).exploded.replace(':', '')
+
+        try:
+            old_reverse_domain = self.reverse_domain
+        except Domain.DoesNotExist:
+            old_reverse_domain = None
+
+        if take_shortcut and old_reverse_domain is not None:
+            # Search for a better reverse domain below the old one.
+            for reverse_domain in search_downwards():
+                if reverse_domain.is_root_domain:
+                    break
+            else:  # Couldn't find one.
+                # Try the old reverse domain's zone's root domain.
+                reverse_domain = old_reverse_domain.zone_root_domain
+                if not reverse_domain:
+                    raise ValidationError(NOT_FOUND)
+        else:
+            # Search starting from scratch.
+            name = '.'.join(reversed(nibbles)) + (
+                '.in-addr.arpa' if self.ip_type == '4' else '.ip6.arpa')
+
+            while True:  # Find closest domain. TODO: binary search for IPv6?
+                try:  # Assume domain exists.
+                    reverse_domain = Domain.objects.only('soa').get(name=name)
+                    break
+                except Domain.DoesNotExist:
+                    pass
+                name = name[name.find('.') + 1:]
+
+            if reverse_domain.soa is None:
+                raise ValidationError(NOT_FOUND)
+
+        self.reverse_domain = reverse_domain
 
     def check_ip_conflict(self):
         StaticInterface = get_model('cyder', 'staticinterface')
@@ -101,21 +161,6 @@ class BasePTR(object):
                 "alias defined by a CNAME. -- RFC 1034"
             )
 
-    def update_reverse_domain(self):
-        # We are assuming that self.clean_ip has been called already
-        rvname = nibbilize(self.ip_str) if self.ip_type == '6' else self.ip_str
-        rvname = ip_to_domain_name(rvname, ip_type=self.ip_type)
-        self.reverse_domain = name_to_domain(rvname)
-        if (self.reverse_domain is None or self.reverse_domain.name in
-                ('arpa', 'in-addr.arpa', 'ip6.arpa')):
-            raise ValidationError(
-                "No reverse Domain found for {0}".format(self.ip_str)
-            )
-
-    def rebuild_reverse(self):
-        if self.reverse_domain and self.reverse_domain.soa:
-            self.reverse_domain.soa.schedule_rebuild()
-
     def dns_name(self):
         """
         Return the cononical name of this ptr that can be placed in a
@@ -124,7 +169,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
+class PTR(BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     """
     A PTR is used to map an IP to a domain name.
 
@@ -197,10 +242,9 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             old_ip = PTR.objects.get(id=self.id).ip_str
             old_range = find_range(old_ip)
 
-        self.urd = kwargs.pop('update_reverse_domain', True)
         self.clean()
         super(PTR, self).save(*args, **kwargs)
-        self.rebuild_reverse()
+        self.schedule_zone_rebuild()
         rng = self.range
         if rng and update_range_usage:
             rng.save()
@@ -234,7 +278,10 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             if self.ctnr not in self.range.ctnr_set.all():
                 raise ValidationError("Could not create PTR because %s is "
                                       "not in this container." % self.ip_str)
-        self.clean_reverse()
+
+    def schedule_zone_rebuild(self):
+        if self.reverse_domain.soa:
+            self.reverse_domain.soa.schedule_rebuild()
 
     def details(self):
         """For tables."""
