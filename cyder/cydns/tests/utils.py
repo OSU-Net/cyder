@@ -190,3 +190,11 @@ def create_basic_dns_data(dhcp=False):
         v = Vrf(name='test_vrf')
         v.full_clean()
         v.save()
+
+
+def create_zone(name):
+    domain = Domain.objects.create(name=name)
+    soa = SOA.objects.create(
+        primary='ns1.unused', contact='webmaster.unused', root_domain=domain)
+    ns = Nameserver.objects.create(domain=domain, server='ns1.unused')
+    return domain

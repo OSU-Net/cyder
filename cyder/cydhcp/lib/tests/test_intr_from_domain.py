@@ -9,6 +9,7 @@ from cyder.cydhcp.lib.utils import (create_ipv4_interface,
                                     create_ipv4_intr_from_domain)
 
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.tests.utils import create_zone
 
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
@@ -103,11 +104,14 @@ class LibTestsDomain(TestCase):
         v, _ = Vlan.objects.get_or_create(name="6db", number=3)
         s, _ = Site.objects.get_or_create(name="6scl3")
 
-        names = ["6scl3.mozilla.com", "6db.6scl3.mozilla.com", "arpa",
-                 "in-addr.arpa", "11.in-addr.arpa"]
+        names = ("6scl3.mozilla.com", "6db.6scl3.mozilla.com", "arpa",
+                 "in-addr.arpa")
         for name in names:
             d, _ = Domain.objects.get_or_create(name=name)
             self.ctnr.domains.add(d)
+
+        d = create_zone('11.in-addr.arpa')
+        self.ctnr.domains.add(d)
 
         n = Network(network_str="11.0.0.0/8", ip_type="4")
         n.clean()

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.tests.utils import create_zone
 from cyder.cydns.view.models import View
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
@@ -34,6 +35,7 @@ class BaseStaticTests(TestCase):
         self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
         self.i_arpa.save()
+        self.r1 = create_zone('10.in-addr.arpa')
 
         self.c = Domain(name="ccc")
         self.c.save()
@@ -41,8 +43,6 @@ class BaseStaticTests(TestCase):
         self.f_c.save()
         self.ctnr.domains.add(self.c)
         self.ctnr.domains.add(self.f_c)
-        self.r1 = self.create_domain(name="10")
-        self.r1.save()
         self.n = System()
         self.n.clean()
         self.n.save()

@@ -10,7 +10,8 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.utils import create_basic_dns_data, create_fake_zone
+from cyder.cydns.tests.utils import (
+    create_basic_dns_data, create_fake_zone, create_zone)
 from cyder.cydns.txt.models import TXT
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -39,9 +40,7 @@ class CNAMETests(cyder.base.tests.TestCase):
     def setUp(self):
         create_basic_dns_data(dhcp=True)
 
-        d = Domain(name='128.in-addr.arpa')
-        d.full_clean()
-        d.save()
+        create_zone('128.in-addr.arpa')
 
         self.ctnr1 = Ctnr(name='test_ctnr1')
         self.ctnr1.full_clean()
