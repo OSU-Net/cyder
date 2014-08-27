@@ -201,6 +201,9 @@ def safe_save(func):
     be saved. Then (if the save method is the outermost one being called) it
     runs it inside a transaction that is committed if the function returns or
     rolled back if it raises an exception. (The exception is re-raised.)
+
+    IMPORTANT: Do not use this decorator in models that are inherited from. It
+    causes problems.
     """
 
     def outer(self, *args, **kwargs):
@@ -225,6 +228,9 @@ def safe_delete(func):
     delete method is the outermost one being called it runs it inside a
     transaction that is committed if the function returns or rolled back if it
     raises an exception. (The exception is re-raised.)
+
+    IMPORTANT: Do not use this decorator in models that are inherited from. It
+    causes problems.
     """
 
     def outer(self, *args, **kwargs):
