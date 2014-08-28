@@ -269,8 +269,8 @@ def become_user(request, username=None):
     referer = request.META.get('HTTP_REFERER', '/')
     current_user = request.user.username
 
-    # Don't do anything if becoming self.
-    if current_user == username:
+    # Don't do anything if not a superuser or becoming self.
+    if not request.user.is_superuser or current_user == username:
         return redirect(referer)
 
     # Save stack since session will be overwritten.
