@@ -1,7 +1,6 @@
 @import "globals.scss";
 @import "base_mobile.scss";
 
-
 .container {
     margin: 0 auto;
     width: 960px;
@@ -31,7 +30,7 @@ a {
     font-weight: bold;
     text-decoration: none;
     &:hover {
-        color: $teal;
+        text-decoration: underline;
     }
 }
 
@@ -86,8 +85,7 @@ input[type="text"], input[type="search"] {
 }
 
 a.btn {
-    @include box-shadow(2px 2px 2px $dark-gray);
-    background: $blue;
+    background: $orange;
     border-radius: 2px;
     bottom: 0;
     color: $white;
@@ -99,18 +97,18 @@ a.btn {
     right: 0;
     transition: .1s .1s;
     &:hover {
-        background: lighten($blue, 10%);
+        background: darken($orange, 10%);
     }
     &.hover:active {
         @include box-shadow(none);
-        background: lighten($blue, 5%);
+        background: darken($orange, 5%);
         color: $white;
         cursor: pointer;
         transition: .25s 0s;
     }
     &.selected {
         @include box-shadow(none);
-        background: darken($blue, 10%);
+        background: darken($orange, 10%);
         color: $white;
         cursor: default;
     }
@@ -143,7 +141,7 @@ a.btn {
 }
 
 #header {
-    background-color: $dark-blue;
+    background-color: $black;
     height: 30px;
     padding-top: 5px;
 }
@@ -229,12 +227,6 @@ a.btn {
     color: $white;
     float: left;
     margin-left: 5px;
-    &.name:hover {
-        color: $teal;
-    }
-    &.name.selected {
-        color: $teal;
-    }
     .level {
         color:$white;
         cursor: default;
@@ -251,7 +243,6 @@ a.btn {
     #defaultCtnrBtn {
         color: $white;
         &:hover {
-            color: $teal;
             cursor: pointer;
         }
     }
@@ -322,7 +313,7 @@ a.btn {
             }
             &.selected {
                 background: $white;
-                border-left:5px solid $teal;
+                border-left:5px solid $orange;
                 border-right: none;
                 color: $black;
                 margin-left: 10px;
@@ -332,16 +323,15 @@ a.btn {
             }
         }
         &:hover {
-            color: $teal;
-            background: $dark-gray;
+            background: $orange;
             text-decoration: none;
         }
         &.selected {
             background: $white;
-            border-left:5px solid $teal;
+            border-left:5px solid $orange;
             color: $dark-gray;
             &:hover {
-                color: $teal;
+                
             }
         }
     }
@@ -405,7 +395,7 @@ a.btn {
     }
     .active a {
       background-color: $black;
-      color: $teal;
+      color: $orange;
       cursor: default;
     }
     .disabled {
@@ -468,7 +458,7 @@ a.btn {
 }
 
 .footer {
-    background-color: $dark-blue;
+    background-color: $black;
     color: $white;
     font-size: 13px;
     padding: 3px;
@@ -478,7 +468,7 @@ a.btn {
         display: block;
         position: relative;
         &:hover {
-            color: $teal;
+            text-decoration: underline;
         }
     }
 }
