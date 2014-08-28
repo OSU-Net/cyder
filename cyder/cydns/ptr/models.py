@@ -71,7 +71,7 @@ class BasePTR(object):
                 print name
                 name = nibble + '.' + name
                 try:
-                    yield Domain.objects.only('soa').get(name=name)
+                    yield Domain.objects.get(name=name)
                 except Domain.DoesNotExist:
                     break
             raise StopIteration
@@ -92,7 +92,7 @@ class BasePTR(object):
             # Search for a better reverse domain below the old one.
             for reverse_domain in search_downwards():
                 if reverse_domain.is_root_domain:
-                    break
+                    break  # Found it.
             else:  # Couldn't find one.
                 # Try the old reverse domain's zone's root domain.
                 reverse_domain = old_reverse_domain.zone_root_domain
@@ -105,8 +105,8 @@ class BasePTR(object):
 
             while True:  # Find closest domain. TODO: binary search for IPv6?
                 try:  # Assume domain exists.
-                    reverse_domain = Domain.objects.only('soa').get(name=name)
-                    break
+                    reverse_domain = Domain.objects.get(name=name)
+                    break  # Found it.
                 except Domain.DoesNotExist:
                     pass
                 name = name[name.find('.') + 1:]
