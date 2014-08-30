@@ -9,7 +9,7 @@ from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.search_utils import smart_fqdn_exists
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 from cyder.cydns.validation import validate_reverse_name
-from cyder.cydns.domain.utils import name_to_domain
+from cyder.cydns.domain.utils import name_to_domain, is_name_descendant_of
 
 
 class Domain(BaseModel, ObjectUrlMixin):
@@ -274,6 +274,9 @@ class Domain(BaseModel, ObjectUrlMixin):
             return self.soa.root_domain
         else:
             return None
+
+    def is_descendant_of(self, other):
+        return is_name_descendant_of(self.name, other.name)
 
 
 def boot_strap_ipv6_reverse_domain(ip, soa=None):

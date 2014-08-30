@@ -38,6 +38,29 @@ def ip_to_domain_name(ip, ip_type='4'):
     return name
 
 
+def reverse_domain_name_to_ip(name):
+    if name.endswith('in-addr.arpa'):  # IPv4
+        octets = reversed(name.split('.')[:-2])
+        return '.'.join(octets)
+    elif name.endswith('ip6.arpa'):  # IPv6
+        nibbles = reversed(name.split('.')[:-2])
+        b = bytearray()
+        count = 0
+        for nibble in nibbles:
+            if count != 0 and count % 4 == 0:
+                b.append(':')
+            b.append(nibble)
+            count += 1
+        while count % 4 != 0:
+            b.append('0')
+            count += 1
+        if count < 64:
+            b.extend('::')
+        return str(b)
+    else:
+        raise ValueError('Invalid reverse domain')
+
+
 """
 >>> nibbilize('2620:0105:F000::1')
 '2.6.2.0.0.1.0.5.F.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1'

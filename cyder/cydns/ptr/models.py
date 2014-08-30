@@ -46,67 +46,48 @@ class BasePTR(object):
     domain because they represent a :ref:`PTR` record as well as an
     :ref:`address_record`. Thus, they inherit from :class:`BasePtr`.
     """
+
     def clean(self, *args, **kwargs):
         super(BasePTR, self).clean(*args, **kwargs)
 
         is_new = self.pk is None
 
         if is_new:
-            self.update_reverse_domain()
+            self.set_reverse_domain()
         else:
             db_self = self.__class__.objects.get(pk=self.pk)
             if db_self.ip_str != self.ip_str:
-                self.update_reverse_domain()
+                self.set_reverse_domain()
 
         check_no_ns_soa_condition(self.reverse_domain)
         self.reverse_validate_no_cname()
         self.check_ip_conflict()
 
-    def update_reverse_domain(self, search_upwards):
-        def search_downwards():
-            name = self.reverse_domain.name
-
-            # Start at current reverse domain.
-            for nibble in nibbles[(name.count('.') - 1):]:
-                print name
-                name = nibble + '.' + name
-                try:
-                    yield Domain.objects.get(name=name)
-                except Domain.DoesNotExist:
-                    break
-            raise StopIteration
-
-        NOT_FOUND = 'No reverse domain found for {}'.format(self.ip_str)
+    def set_reverse_domain(self):
+        """
+        TODO: For IPv6, it might be more efficient to use a binary search to
+        find the bottommost domain. zone_root_domain would still be used to
+        find the root domain of that domain's zone.
+        """
 
         if self.ip_type == '4':
             nibbles = str(IPv4Address(self.ip_str)).split('.')
         else:
             nibbles = IPv6Address(self.ip_str).exploded.replace(':', '')
+        name = '.'.join(reversed(nibbles)) + (
+            '.in-addr.arpa' if self.ip_type == '4' else '.ip6.arpa')
+        while True:  # Find closest domain.
+            try:  # Assume domain exists.
+                reverse_domain = Domain.objects.get(name=name)
+                break  # Found it.
+            except Domain.DoesNotExist:
+                pass
+            name = name[name.find('.') + 1:]
 
-        try:
-            old_reverse_domain = self.reverse_domain
-        except Domain.DoesNotExist:
-            old_reverse_domain = None
-
-        reverse_domain = None
-        if search_upwards:
-            reverse_domain = old_reverse_domain.zone_root_domain
+        reverse_domain = reverse_domain.zone_root_domain
         if not reverse_domain:
-            # Start from scratch.
-            name = '.'.join(reversed(nibbles)) + (
-                '.in-addr.arpa' if self.ip_type == '4' else '.ip6.arpa')
-
-            while True:  # Find closest domain. TODO: binary search for IPv6?
-                try:  # Assume domain exists.
-                    reverse_domain = Domain.objects.get(name=name)
-                    break  # Found it.
-                except Domain.DoesNotExist:
-                    pass
-                name = name[name.find('.') + 1:]
-
-        if reverse_domain.soa is None:
-            raise ValidationError(NOT_FOUND)
-
+            raise ValidationError(
+                'No reverse domain found for {}'.format(self.ip_str))
         self.reverse_domain = reverse_domain
 
     def check_ip_conflict(self):

@@ -14,14 +14,13 @@ from cyder.cydns.view.validation import check_no_ns_soa_condition
 class LabelDomainUtilsMixin(models.Model):
     """
     This class provides common functionality that many DNS record
-    classes share.  This includes a foreign key to the ``domain`` table
-    and a ``label`` CharField.
+    classes share.
 
     If you plan on using the ``unique_together`` constraint on a Model
     that inherits from ``LabelDomainUtilsMixin`` or ``LabelDomainMixin``, you
     must include ``domain`` and ``label`` explicitly if you need them to.
 
-    All common records have a ``fqdn`` field. This field is updated
+    All common records have an ``fqdn`` field. This field is updated
     every time the object is saved::
 
         fqdn = name + domain.name
