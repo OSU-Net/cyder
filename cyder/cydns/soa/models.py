@@ -227,39 +227,40 @@ def ip_str_to_name(ip_str, ip_type):
 
 
 def reassign_reverse_records(old_domain, new_domain):
+    up = (None, None)  # from, to
+    down = (None, None)  # from, to
+    if new_domain:
+        if (old_domain and new_domain.is_descendant_of(old_domain) and
+                old_domain.soa == new_domain.master_domain.soa):
+            # new_domain is below old_domain and there is no root domain
+            # between them, so we can take a shortcut.
+            down = (old_domain, new_domain)
+        else:
+            down = (new_domain.master_domain.zone_root_domain, new_domain)
     if old_domain:
-        new_below_old = new_domain.is_descendant_of(old_domain)
-    else:
-        new_below_old = False
+        up = (old_domain, old_domain.zone_root_domain)
 
-    if old_domain:
-        for obj in chain(old_domain.reverse_ptr_set.all(),
-                         old_domain.reverse_staticintr_set.all()):
-            # M -----> N or A
-            reverse_domain = None
-            if (new_domain and new_below_old and
-                    old_domain.soa == new_domain.master_domain.soa):
-                # new_domain is below old_domain and there is no root domain
-                # between them.
-                reverse_domain = new_domain
-            if not reverse_domain:
-                reverse_domain = old_domain.zone_root_domain
-
-            if not reverse_domain or not reverse_domain.soa:
-                raise ValidationError(
-                    'No reverse domain found for {}'.format(obj))
-            obj.reverse_domain = reverse_domain
-            obj.save()
-    if new_domain and new_domain.master_domain.soa and not new_below_old:
-        # new_domain has a parent zone.
+    if all(down):
         from cyder.cydns.domain.utils import is_name_descendant_of
 
-        parent_root = new_domain.master_domain.zone_root_domain
-        for obj in chain(parent_root.reverse_ptr_set.all(),
-                         parent_root.reverse_staticintr_set.all()):
-            # B - - -> A
-            reverse_name = ip_str_to_name(obj.ip_str, ip_type=obj.ip_type)
-            if (is_name_descendant_of(reverse_name, new_domain.name) or
-                    reverse_name == new_domain.name):
-                obj.reverse_domain = new_domain
+        for obj in chain(down[0].reverse_ptr_set.all(),
+                         down[0].reverse_staticintr_set.all()):
+            if is_name_descendant_of(
+                    ip_str_to_name(obj.ip_str, ip_type=obj.ip_type),
+                    down[1].name):
+                obj.reverse_domain = down[1]
                 obj.save()
+    if all(up):
+        for obj in chain(up[0].reverse_ptr_set.all(),
+                         up[0].reverse_staticintr_set.all()):
+            obj.reverse_domain = up[1]
+            obj.save()
+
+    if old_domain:
+        still_there = [unicode(x) for x in
+                       chain(old_domain.reverse_ptr_set.all(),
+                             old_domain.reverse_staticintr_set.all())]
+        if still_there:
+            raise ValidationError(
+                u'No reverse domain found for the following objects: ' +
+                u', '.join(still_there))
