@@ -153,8 +153,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def delete(self, *args, **kwargs):
         root_domain = self.root_domain
         super(SOA, self).delete(*args, **kwargs)
-        root_domain.soa = None
         root_domain.save()
+        reassign_reverse_records(root_domain, None)
 
     def has_record_set(self, view=None, exclude_ns=False):
         for domain in self.domain_set.all():
@@ -174,6 +174,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     @safe_save
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+
         if is_new:
             self.dirty = True
         else:
@@ -218,7 +219,7 @@ def reassign_reverse_records(old_domain, new_domain):
     def reassign_domain(domain):
         for obj in chain(domain.reverse_ptr_set.all(),
                          domain.reverse_staticintr_set.all()):
-            obj.update_reverse_domain(take_shortcut=True)
+            obj.update_reverse_domain()
 
     if old_domain is not None:
         reassign_domain(old_domain)

@@ -10,8 +10,9 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
+from cyder.cydns.tests.utils import create_zone
 
-from basestatic import BaseStaticTests
+from .basestatic import BaseStaticTests
 
 
 class V6StaticInterTests(BaseStaticTests):
@@ -31,8 +32,7 @@ class V6StaticInterTests(BaseStaticTests):
         self.ctnr.domains.add(self.f_c)
         self.r1 = self.create_domain(name="0", ip_type='6')
         self.r1.save()
-        self.r2 = self.create_domain(name="1", ip_type='6')
-        self.r2.save()
+        self.r2 = create_zone('1.ip6.arpa')
         self.s = System(name='foobar')
         self.s.save()
 

@@ -5,17 +5,17 @@ from django.core.exceptions import ValidationError
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydns.tests.utils import create_basic_dns_data
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
 
 
 class AddressRecordTests(cyder.base.tests.TestCase):
@@ -54,8 +54,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.g_o_e = Domain(name='george.oregonstate.edu')
         self.g_o_e.save()
 
-        self._128 = self.create_domain(name='128')
-        self._128.save()
+        self._128 = create_zone('128.in-addr.arpa')
 
         self._128_193 = self.create_domain(name='128.193')
         self._128_193.save()

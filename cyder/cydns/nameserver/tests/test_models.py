@@ -8,7 +8,7 @@ from cyder.cydns.soa.models import SOA
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ip.utils import ip_to_domain_name
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_fake_zone, create_zone
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
@@ -550,7 +550,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_2(self):
         # This is Case 3 ... with PTRs
-        root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
+        root_domain = create_zone('14.in-addr.arpa')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -577,7 +577,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_3(self):
         # This is Case 3 ... with PTRs
-        root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
+        root_domain = create_zone('14.in-addr.arpa')
 
         bad_root_domain = Domain(name="10." + root_domain.name)
         bad_root_domain.save()

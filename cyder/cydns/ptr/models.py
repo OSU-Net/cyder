@@ -62,7 +62,7 @@ class BasePTR(object):
         self.reverse_validate_no_cname()
         self.check_ip_conflict()
 
-    def update_reverse_domain(self, take_shortcut=False):
+    def update_reverse_domain(self, search_upwards):
         def search_downwards():
             name = self.reverse_domain.name
 
@@ -88,18 +88,11 @@ class BasePTR(object):
         except Domain.DoesNotExist:
             old_reverse_domain = None
 
-        if take_shortcut and old_reverse_domain is not None:
-            # Search for a better reverse domain below the old one.
-            for reverse_domain in search_downwards():
-                if reverse_domain.is_root_domain:
-                    break  # Found it.
-            else:  # Couldn't find one.
-                # Try the old reverse domain's zone's root domain.
-                reverse_domain = old_reverse_domain.zone_root_domain
-                if not reverse_domain:
-                    raise ValidationError(NOT_FOUND)
-        else:
-            # Search starting from scratch.
+        reverse_domain = None
+        if search_upwards:
+            reverse_domain = old_reverse_domain.zone_root_domain
+        if not reverse_domain:
+            # Start from scratch.
             name = '.'.join(reversed(nibbles)) + (
                 '.in-addr.arpa' if self.ip_type == '4' else '.ip6.arpa')
 
@@ -111,8 +104,8 @@ class BasePTR(object):
                     pass
                 name = name[name.find('.') + 1:]
 
-            if reverse_domain.soa is None:
-                raise ValidationError(NOT_FOUND)
+        if reverse_domain.soa is None:
+            raise ValidationError(NOT_FOUND)
 
         self.reverse_domain = reverse_domain
 

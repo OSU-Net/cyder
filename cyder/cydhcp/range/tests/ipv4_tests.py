@@ -5,6 +5,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydns.tests.utils import create_zone
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
 
@@ -19,7 +20,7 @@ class V4RangeTests(TestCase):
         self.ctnr.domains.add(self.d)
         Domain(name="arpa").save()
         Domain(name="in-addr.arpa").save()
-        Domain(name="10.in-addr.arpa").save()
+        create_zone('10.in-addr.arpa')
         self.s = Network(network_str="10.0.0.0/16", ip_type='4')
         self.s.update_network()
         self.s.save()

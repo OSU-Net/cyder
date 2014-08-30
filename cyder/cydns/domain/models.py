@@ -280,11 +280,6 @@ def boot_strap_ipv6_reverse_domain(ip, soa=None):
     """
     This function is here to help create IPv6 reverse domains.
 
-    .. note::
-        Every nibble in the reverse domain should not exists for this
-        function to exit successfully.
-
-
     :param ip: The IP address in nibble format
     :type ip: str
     :raises: ReverseDomainNotFoundError
@@ -294,8 +289,7 @@ def boot_strap_ipv6_reverse_domain(ip, soa=None):
     for i in xrange(1, len(ip) + 1, 2):
         cur_reverse_domain = ip[:i]
         domain_name = ip_to_domain_name(cur_reverse_domain, ip_type='6')
-        reverse_domain = Domain(name=domain_name)
-        reverse_domain.save()
+        reverse_domain, _ = Domain.objects.get_or_create(name=domain_name)
     return reverse_domain
 
 

@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.tests.test_views import random_label
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_fake_zone, create_zone
 
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
@@ -136,7 +136,7 @@ class ReverseDomainTests(TestCase):
         self.assertRaises(ValidationError, s2.save)
 
     def test_remove_reverse_domain(self):
-        self.create_domain(name='127', ip_type='4').save()
+        create_zone('127.in-addr.arpa')
         rd1 = self.create_domain(name='127.193', ip_type='4')
         rd1.save()
         repr(rd1)
@@ -168,7 +168,7 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ptr4.reverse_domain, rd1)
 
     def test_remove_reverse_domain_intr(self):
-        self.create_domain(name='127', ip_type='4').save()
+        create_zone('127.in-addr.arpa')
         rd1 = self.create_domain(name='127.193', ip_type='4')
         rd1.save()
         repr(rd1)
@@ -265,7 +265,7 @@ class ReverseDomainTests(TestCase):
         self.assertRaises(ValidationError, self.create_domain,
                           name='192.168', ip_type='4')
 
-        self.create_domain(name='127', ip_type='4').save()
+        create_zone('127.in-addr.arpa')
         rd0 = self.create_domain(name='127.193', ip_type='4')
         rd0.save()
         ip1 = self.add_ptr_ipv4('127.193.8.1')
@@ -336,6 +336,7 @@ class ReverseDomainTests(TestCase):
         self.assertRaises(ValidationError, self.add_ptr_ipv6,
                           ip='2001:0db8:85a3:0000:0000:8a2e:0370:733')
 
+        create_zone('2.ip6.arpa')
         boot_strap_ipv6_reverse_domain("2.0.0.1")
         self.assertRaises(ValidationError, self.create_domain,
                           name='2.0.0.1', ip_type='6')
@@ -364,9 +365,11 @@ class ReverseDomainTests(TestCase):
         self.assertRaises(ValidationError, self.create_domain,
                           name=name, ip_type=ip_type)
 
-    def test_add_remove_reverse_ipv6_domains(self):
+    def test_add_remove_reverse_ipv6_zones(self):
         osu_block = "2620:105:F000"
-        rd0 = boot_strap_ipv6_reverse_domain("2.6.2.0.0.1.0.5.f.0.0.0")
+        boot_strap_ipv6_reverse_domain('2.6.2.0.0.1.0.5.f.0.0')
+        rd0 = create_zone(ip_to_domain_name('2.6.2.0.0.1.0.5.f.0.0.0',
+                                             ip_type='6'))
 
         ip1 = self.add_ptr_ipv6(osu_block + ":8000::1")
         self.assertEqual(ip1.reverse_domain, rd0)
@@ -376,8 +379,9 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ip3.reverse_domain, rd0)
         self.add_ptr_ipv6(osu_block + ":8000::4")
 
-        rd1 = self.create_domain(name="2.6.2.0.0.1.0.5.f.0.0.0.8", ip_type='6')
-        rd1.save()
+        rd1 = create_zone(ip_to_domain_name('2.6.2.0.0.1.0.5.f.0.0.0.8',
+                                            ip_type='6'))
+
         ip_upper, ip_lower = ipv6_to_longs(osu_block + ":8000::1")
         ptr1 = PTR.objects.filter(
             ip_upper=ip_upper, ip_lower=ip_lower, ip_type='6')[0]
