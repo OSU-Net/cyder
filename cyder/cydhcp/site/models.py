@@ -7,6 +7,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_save
 from cyder.cydhcp.utils import networks_to_Q
 
 
@@ -52,6 +53,10 @@ class Site(BaseModel, ObjectUrlMixin):
             ('Parent', 'parent', self.parent),
         )
         return data
+
+    @safe_save
+    def save(self, *args, **kwargs):
+        super(Site, self).save(*args, **kwargs)
 
     @staticmethod
     def eg_metadata():

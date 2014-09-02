@@ -1,3 +1,5 @@
+import datetime
+import re
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -5,18 +7,16 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.mixins import ObjectUrlMixin
+from cyder.base.models import BaseModel, ExpirableMixin
+from cyder.base.utils import safe_delete, safe_save
+from cyder.core.fields import MacAddrField
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
-from cyder.core.fields import MacAddrField
-from cyder.core.ctnr.models import Ctnr
-from cyder.core.system.models import System
-from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.models import BaseModel, ExpirableMixin
-
-import datetime
-import re
 
 
 class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
@@ -119,6 +119,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
                 raise ValidationError(
                     "MAC address must be unique in this interface's range")
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
         update_range_usage = kwargs.pop('update_range_usage', True)
@@ -132,6 +133,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         if rng and update_range_usage:
             rng.save()
 
+    @safe_save
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None

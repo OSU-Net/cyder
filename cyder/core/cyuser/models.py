@@ -4,6 +4,7 @@ from django.db.models import signals
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_save
 from cyder.core.cyuser import backends
 from cyder.core.ctnr.models import Ctnr
 
@@ -34,6 +35,7 @@ class UserProfile(BaseModel, ObjectUrlMixin):
         ]
         return data
 
+    @safe_save
     def save(self, *args, **kwargs):
         if not self.pk:
             try:

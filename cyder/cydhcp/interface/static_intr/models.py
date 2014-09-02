@@ -16,6 +16,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.models import ExpirableMixin
+from cyder.base.utils import safe_delete, safe_save
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -134,6 +135,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             related_systems.update([interface.system])
         return related_systems
 
+    @safe_save
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         self.urd = kwargs.pop('update_reverse_domain', True)
@@ -148,6 +150,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             if old_range:
                 old_range.save()
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         rng = self.range
         update_range_usage = kwargs.pop('update_range_usage', True)

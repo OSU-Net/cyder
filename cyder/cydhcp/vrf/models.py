@@ -8,6 +8,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_save
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
@@ -64,6 +65,10 @@ class Vrf(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
             {'name': 'network', 'datatype': 'string', 'editable': False},
         ]}
+
+    @safe_save
+    def save(self, *args, **kwargs):
+        super(Vrf, self).save(*args, **kwargs)
 
     def build_vrf(self):
         build_str = ('class "{0}" {{\n'

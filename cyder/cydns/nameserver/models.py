@@ -4,6 +4,7 @@ from gettext import gettext as _
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 
+from cyder.base.utils import safe_delete, safe_save
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.domain.models import Domain
@@ -137,12 +138,16 @@ class Nameserver(CydnsRecord):
             kwargs['ctnr'] = Ctnr.objects.get(pk=1)
         super(Nameserver, self).__init__(*args, **kwargs)
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         self.check_no_ns_soa_condition(self.domain)
         super(Nameserver, self).delete(*args, **kwargs)
 
+    @safe_save
+    def save(self, *args, **kwargs):
+        super(Nameserver, self).save(*args, **kwargs)
+
     def clean(self):
-        # We are a CydnsRecord, our clean method is called during save()!
         self.check_for_cname()
 
         if not self.needs_glue():

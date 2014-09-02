@@ -5,9 +5,10 @@ from django.db.models.loading import get_model
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.helpers import get_display
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.helpers import get_display
+from cyder.base.utils import safe_delete, safe_save
 from cyder.core.system.validators import validate_no_spaces
 
 
@@ -48,14 +49,15 @@ class System(BaseModel, ObjectUrlMixin):
         ]
         return data
 
-    def delete(self):
+    @safe_delete
+    def delete(self, *args, **kwargs):
         DynamicInterface = get_model('cyder', 'dynamicinterface')
         for interface in DynamicInterface.objects.filter(system=self):
             interface.delete(**{'delete_system': False})
         StaticInterface = get_model('cyder', 'staticinterface')
         for interface in StaticInterface.objects.filter(system=self):
             interface.delete(**{'delete_system': False})
-        super(System, self).delete()
+        super(System, self).delete(*args, **kwargs)
 
     @staticmethod
     def eg_metadata():
@@ -64,12 +66,14 @@ class System(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
+    def save(self, *args, **kwargs):
+        super(System, self).save(*args, **kwargs)
+
 
 class SystemAV(EAVBase):
     class Meta(EAVBase.Meta):
         app_label = 'cyder'
         db_table = 'system_av'
-
 
     entity = models.ForeignKey(System)
     attribute = EAVAttributeField(Attribute,
