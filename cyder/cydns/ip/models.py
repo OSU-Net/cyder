@@ -50,7 +50,6 @@ class Ip(models.Model):
         return ip_klass(two_to_one(self.ip_upper, self.ip_lower))
 
     def clean_ip(self):
-        # TODO: It's a fucking hack. Car babies.
         if self.ip_type == IP_TYPE_4:
             Klass = ipaddr.IPv4Address
         elif self.ip_type == IP_TYPE_6:
