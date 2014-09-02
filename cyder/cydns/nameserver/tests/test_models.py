@@ -53,8 +53,7 @@ class NSTestsModels(TestCase):
         for d in [self.r, self.f_r, self.b_f_r, self.f]:
             self.ctnr.domains.add(d)
 
-        self._128 = self.create_domain(name='128', ip_type='4')
-        self._128.save()
+        self._128 = create_zone('128.in-addr.arpa')
 
         self.s = System()
         self.s.save()
@@ -554,12 +553,9 @@ class NSTestsModels(TestCase):
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
-        soa = ns.domain.soa
-        soa.delete()
-        ns.domain.soa = None
+        root_domain.soa.delete()
         root_domain = Domain.objects.get(pk=root_domain.pk)
         self.assertIsNone(root_domain.soa)
-        ns.domain.save()
 
         # At this point we should have a domain pointed at no SOA record with
         # no records attached to it. It also has no child domains.
@@ -568,12 +564,7 @@ class NSTestsModels(TestCase):
 
         ptr = PTR(ctnr=self.ctnr, fqdn="bloo.asdf", ip_str="14.10.1.1",
                   ip_type="4")
-        ptr.save()
-
-        s = SOA(primary="asdf.asdf", contact="asdf.asdf",
-                description="asdf", root_domain=root_domain)
-
-        self.assertRaises(ValidationError, s.save)
+        self.assertRaises(ValidationError, ptr.save)
 
     def test_bad_nameserver_soa_state_case_3_3(self):
         # This is Case 3 ... with PTRs

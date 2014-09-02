@@ -153,6 +153,9 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def delete(self, *args, **kwargs):
         root_domain = self.root_domain
         super(SOA, self).delete(*args, **kwargs)
+        root_domain.soa = None
+        # If we don't set the SOA to None, Django complains that the SOA
+        # doesn't exist (which is true).
         root_domain.save()
         reassign_reverse_records(root_domain, None)
 
@@ -236,7 +239,11 @@ def reassign_reverse_records(old_domain, new_domain):
             # between them, so we can take a shortcut.
             down = (old_domain, new_domain)
         else:
-            down = (new_domain.master_domain.zone_root_domain, new_domain)
+            if new_domain.master_domain:
+                parent_root = new_domain.master_domain.zone_root_domain
+            else:
+                parent_root = None
+            down = (parent_root, new_domain)
     if old_domain:
         up = (old_domain, old_domain.zone_root_domain)
 

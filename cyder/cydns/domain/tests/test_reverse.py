@@ -137,14 +137,8 @@ class ReverseDomainTests(TestCase):
 
     def test_remove_reverse_domain(self):
         create_zone('127.in-addr.arpa')
-        rd1 = self.create_domain(name='127.193', ip_type='4')
-        rd1.save()
-        repr(rd1)
-        str(rd1)
-        rd2 = self.create_domain(name='127.193.8', ip_type='4')
-        rd2.save()
-        repr(rd2)
-        str(rd2)
+        rd1 = create_zone('193.127.in-addr.arpa')
+        rd2 = create_zone('8.193.127.in-addr.arpa')
         ip1 = self.add_ptr_ipv4('127.193.8.1')
         self.assertEqual(ip1.reverse_domain, rd2)
         ip2 = self.add_ptr_ipv4('127.193.8.2')
@@ -153,6 +147,8 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ip3.reverse_domain, rd2)
         ip4 = self.add_ptr_ipv4('127.193.8.4')
         self.assertEqual(ip4.reverse_domain, rd2)
+        rd2.soa.delete()
+        rd2.nameserver_set.get().delete()
         rd2.delete()
         ptr1 = PTR.objects.filter(
             ip_lower=int(ipaddr.IPv4Address('127.193.8.1')), ip_type='4')[0]
@@ -169,14 +165,8 @@ class ReverseDomainTests(TestCase):
 
     def test_remove_reverse_domain_intr(self):
         create_zone('127.in-addr.arpa')
-        rd1 = self.create_domain(name='127.193', ip_type='4')
-        rd1.save()
-        repr(rd1)
-        str(rd1)
-        rd2 = self.create_domain(name='127.193.8', ip_type='4')
-        rd2.save()
-        repr(rd2)
-        str(rd2)
+        rd1 = create_zone('193.127.in-addr.arpa')
+        rd2 = create_zone('8.193.127.in-addr.arpa')
         ip1 = self.add_intr_ipv4('127.193.8.1')
         self.assertEqual(ip1.reverse_domain, rd2)
         ip2 = self.add_intr_ipv4('127.193.8.2')
@@ -185,6 +175,8 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ip3.reverse_domain, rd2)
         ip4 = self.add_intr_ipv4('127.193.8.4')
         self.assertEqual(ip4.reverse_domain, rd2)
+        rd2.soa.delete()
+        rd2.nameserver_set.get().delete()
         rd2.delete()
         ptr1 = StaticInterface.objects.filter(
             ip_lower=int(ipaddr.IPv4Address('127.193.8.1')),
@@ -266,8 +258,7 @@ class ReverseDomainTests(TestCase):
                           name='192.168', ip_type='4')
 
         create_zone('127.in-addr.arpa')
-        rd0 = self.create_domain(name='127.193', ip_type='4')
-        rd0.save()
+        rd0 = create_zone('193.127.in-addr.arpa')
         ip1 = self.add_ptr_ipv4('127.193.8.1')
         self.assertEqual(ip1.reverse_domain, rd0)
         ip2 = self.add_ptr_ipv4('127.193.8.2')
@@ -276,8 +267,7 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ip3.reverse_domain, rd0)
         ip4 = self.add_ptr_ipv4('127.193.8.4')
         self.assertEqual(ip4.reverse_domain, rd0)
-        rd1 = self.create_domain(name='127.193.8', ip_type='4')
-        rd1.save()
+        rd1 = create_zone('8.193.127.in-addr.arpa')
         ptr1 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
             '127.193.8.1').__int__(), ip_type='4')[0]
         self.assertEqual(ptr1.reverse_domain, rd1)
@@ -290,6 +280,8 @@ class ReverseDomainTests(TestCase):
         ptr4 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
             '127.193.8.4').__int__(), ip_type='4')[0]
         self.assertEqual(ptr4.reverse_domain, rd1)
+        rd1.soa.delete()
+        rd1.nameserver_set.get().delete()
         rd1.delete()
         ptr1 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
             '127.193.8.1').__int__(), ip_type='4')[0]
@@ -399,6 +391,8 @@ class ReverseDomainTests(TestCase):
             ip_upper=ip_upper, ip_lower=ip_lower, ip_type='6')[0]
         self.assertEqual(ptr4.reverse_domain, rd1)
 
+        rd1.soa.delete()
+        rd1.nameserver_set.get().delete()
         rd1.delete()
 
         ip_upper, ip_lower = ipv6_to_longs(osu_block + ":8000::1")

@@ -3,7 +3,7 @@ from gettext import gettext as _
 from django.db import models
 from django.db.models.loading import get_model
 from django.core.exceptions import ValidationError
-from ipaddr import IPv4Address, IPv6Address
+from ipaddr import AddressValueError, IPv4Address, IPv6Address
 
 from cyder.base.models import BaseModel
 from cyder.base.mixins import DisplayMixin, ObjectUrlMixin
@@ -70,6 +70,7 @@ class BasePTR(object):
         find the root domain of that domain's zone.
         """
 
+        self.clean_ip()  # Validate ip_str.
         if self.ip_type == '4':
             nibbles = str(IPv4Address(self.ip_str)).split('.')
         else:
@@ -143,7 +144,7 @@ class BasePTR(object):
         return ip_to_dns_form(self.ip_str)
 
 
-class PTR(BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
+class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     """
     A PTR is used to map an IP to a domain name.
 

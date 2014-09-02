@@ -195,6 +195,7 @@ def create_basic_dns_data(dhcp=False):
 def create_zone(name):
     domain = Domain.objects.create(name=name)
     make_root(domain)
+    return domain
 
 def make_root(domain):
     Nameserver.objects.create(domain=domain, server='ns1.unused')

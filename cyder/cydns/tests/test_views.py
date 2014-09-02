@@ -14,6 +14,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
+from cyder.cydns.tests.utils import create_zone
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
@@ -288,7 +289,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')
-        Domain.objects.get_or_create(name='196.in-addr.arpa')
+        create_zone('196.in-addr.arpa')
         Domain.objects.get_or_create(name='168.196.in-addr.arpa')
         Domain.objects.get_or_create(name='1.168.196.in-addr.arpa')
 
@@ -314,7 +315,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
     def test_update_reverse_domain(self):
-        eq_(self.test_obj.reverse_domain.name, '2.1.168.196.in-addr.arpa')
+        eq_(self.test_obj.reverse_domain.name, '196.in-addr.arpa')
         post_data = self.post_data()
 
         self.client.post(self.test_obj.get_update_url(), post_data,
