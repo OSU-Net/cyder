@@ -12,7 +12,7 @@ from cyder.core.ctnr.models import Ctnr
 class UserProfile(BaseModel, ObjectUrlMixin):
     user = models.OneToOneField(User, related_name='profile')
     default_ctnr = models.ForeignKey(Ctnr, default=2)
-    phone_number = models.IntegerField(null=True)
+    phone_number = models.IntegerField(null=True, blank=True)
 
     has_perm = backends.has_perm
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
