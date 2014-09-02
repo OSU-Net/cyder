@@ -153,7 +153,7 @@ class Nameserver(CydnsRecord):
         if not self.needs_glue():
             self.glue = None
         else:
-            # Try to find any glue record. It will be the first elligible
+            # Try to find any glue record. It will be the first eligible
             # The resolution is:
             #  * Address records are searched.
             #  * Interface records are searched.
