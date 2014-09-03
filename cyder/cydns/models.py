@@ -184,8 +184,6 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             prune_tree(objs_domain)
 
     def save(self, *args, **kwargs):
-        self.full_clean()
-
         if self.pk:
             # We need to get the domain from the db. If it's not our current
             # domain, call prune_tree on the domain in the db later.
