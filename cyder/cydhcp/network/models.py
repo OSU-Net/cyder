@@ -126,7 +126,6 @@ class Network(BaseModel, ObjectUrlMixin):
 
             #eav = NetworkAV(attribute=Attribute.objects.get(name="routers"),
                             #value=router, network=self)
-            #eav.clean()
             #eav.save(commit=False)
 
     @safe_delete

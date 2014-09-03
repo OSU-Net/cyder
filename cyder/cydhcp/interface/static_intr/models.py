@@ -36,7 +36,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
         >>> s = StaticInterface(label=label, domain=domain, ip_str=ip_str,
         ... ip_type=ip_type, dhcp_enabled=True, dns_enabled=True)
-        >>> s.full_clean()
         >>> s.save()
 
     This class is the main interface to DNS and DHCP. A static
@@ -51,9 +50,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
     In terms of DNS, a static interface represents a PTR and A record and must
     adhere to the requirements of those classes. The interface inherits from
-    BaseAddressRecord and will call its clean method with
-    'update_reverse_domain' set to True. This will ensure that its A record is
-    valid *and* that its PTR record is valid.
+    BaseAddressRecord.
     """
 
     pretty_type = 'static interface'
@@ -138,7 +135,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     @safe_save
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
-        self.urd = kwargs.pop('update_reverse_domain', True)
         old_range = None
         if self.id is not None:
             old_range = StaticInterface.objects.get(id=self.id).range
