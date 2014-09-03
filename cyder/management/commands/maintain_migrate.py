@@ -76,7 +76,7 @@ class Command(BaseCommand):
             print "Scheduling SOA rebuilds."
             SOA = get_model('cyder', 'soa')
             for s in SOA.objects.all():
-                s.schedule_rebuild(commit=True, force=True)
+                s.schedule_rebuild(save=True, force=True)
 
         if options['dns']:
             print "Migrating DNS objects."

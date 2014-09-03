@@ -165,13 +165,13 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 return True
         return False
 
-    def schedule_rebuild(self, commit=True, force=False):
+    def schedule_rebuild(self, save=True, force=False):
         if MIGRATING and not force:
             return
 
         Task.schedule_zone_rebuild(self)
         self.dirty = True
-        if commit:
+        if save:
             self.save()
 
     @safe_save
@@ -191,13 +191,13 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 # never-ending build cycle.
                 for field in fields:
                     if getattr(db_self, field) != getattr(self, field):
-                        self.schedule_rebuild(commit=False)
+                        self.schedule_rebuild(save=False)
 
         super(SOA, self).save(*args, **kwargs)
 
         if is_new:
             # Need to call this after save because new objects won't have a pk.
-            self.schedule_rebuild(commit=False)
+            self.schedule_rebuild(save=False)
             self.root_domain.save(commit=False)
             reassign_reverse_records(None, self.root_domain)
         else:
