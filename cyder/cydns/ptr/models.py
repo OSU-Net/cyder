@@ -219,14 +219,13 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             old_ip = PTR.objects.get(id=self.id).ip_str
             old_range = find_range(old_ip)
 
-        self.clean()
         super(PTR, self).save(*args, **kwargs)
         self.schedule_zone_rebuild()
         rng = self.range
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
             if old_range:
-                old_range.save()
+                old_range.save(commit=False)
 
     @safe_delete
     def delete(self, *args, **kwargs):
@@ -236,7 +235,7 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         rng = find_range(self.ip_str)
         super(PTR, self).delete(*args, **kwargs)
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
 
     def clean(self):
         super(PTR, self).clean()

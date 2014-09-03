@@ -53,10 +53,10 @@ class System(BaseModel, ObjectUrlMixin):
     def delete(self, *args, **kwargs):
         DynamicInterface = get_model('cyder', 'dynamicinterface')
         for interface in DynamicInterface.objects.filter(system=self):
-            interface.delete(**{'delete_system': False})
+            interface.delete(delete_system=False, commit=False)
         StaticInterface = get_model('cyder', 'staticinterface')
         for interface in StaticInterface.objects.filter(system=self):
-            interface.delete(**{'delete_system': False})
+            interface.delete(delete_system=False, commit=False)
         super(System, self).delete(*args, **kwargs)
 
     @staticmethod

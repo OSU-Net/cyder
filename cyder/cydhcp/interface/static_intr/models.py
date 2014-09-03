@@ -146,9 +146,9 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         super(StaticInterface, self).save(*args, **kwargs)
         self.schedule_zone_rebuild()
         if update_range_usage:
-            self.range.save()
+            self.range.save(commit=False)
             if old_range:
-                old_range.save()
+                old_range.save(commit=False)
 
     @safe_delete
     def delete(self, *args, **kwargs):
@@ -160,11 +160,11 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             if(not self.system.staticinterface_set.exclude(
                     id=self.id).exists() and
                     not self.system.dynamicinterface_set.exists()):
-                self.system.delete()
+                self.system.delete(commit=False)
 
         super(StaticInterface, self).delete(*args, **kwargs)
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
 
     def schedule_zone_rebuild(self):
         if self.domain.soa is not None:

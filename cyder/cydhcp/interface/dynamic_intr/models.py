@@ -128,10 +128,10 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             if (not self.system.dynamicinterface_set.exclude(
                     id=self.id).exists() and
                     not self.system.staticinterface_set.exists()):
-                self.system.delete()
+                self.system.delete(commit=False)
         super(DynamicInterface, self).delete()
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
 
     @safe_save
     def save(self, *args, **kwargs):
@@ -142,9 +142,9 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
 
         super(DynamicInterface, self).save()
         if self.range and update_range_usage:
-            self.range.save()
+            self.range.save(commit=False)
             if old_range:
-                old_range.save()
+                old_range.save(commit=False)
 
 
 class DynamicInterfaceAV(EAVBase):

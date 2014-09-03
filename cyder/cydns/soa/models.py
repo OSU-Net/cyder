@@ -156,7 +156,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         root_domain.soa = None
         # If we don't set the SOA to None, Django complains that the SOA
         # doesn't exist (which is true).
-        root_domain.save()
+        root_domain.save(commit=False)
         reassign_reverse_records(root_domain, None)
 
     def has_record_set(self, view=None, exclude_ns=False):
@@ -198,14 +198,14 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         if is_new:
             # Need to call this after save because new objects won't have a pk.
             self.schedule_rebuild(commit=False)
-            self.root_domain.save()
+            self.root_domain.save(commit=False)
             reassign_reverse_records(None, self.root_domain)
         else:
             if db_self.root_domain != self.root_domain:
                 from cyder.cydns.domain.models import Domain
 
-                self.root_domain.save()
-                db_self.root_domain.save()
+                self.root_domain.save(commit=False)
+                db_self.root_domain.save(commit=False)
                 self.root_domain = Domain.objects.get(pk=self.root_domain.pk)
                 reassign_reverse_records(db_self.root_domain, self.root_domain)
 
@@ -256,12 +256,12 @@ def reassign_reverse_records(old_domain, new_domain):
                     ip_str_to_name(obj.ip_str, ip_type=obj.ip_type),
                     down[1].name):
                 obj.reverse_domain = down[1]
-                obj.save()
+                obj.save(commit=False)
     if all(up):
         for obj in chain(up[0].reverse_ptr_set.all(),
                          up[0].reverse_staticintr_set.all()):
             obj.reverse_domain = up[1]
-            obj.save()
+            obj.save(commit=False)
 
     if old_domain:
         still_there = [unicode(x) for x in

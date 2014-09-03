@@ -123,11 +123,12 @@ class Nameserver(CydnsRecord):
                              "either type AddressRecord or type "
                              "StaticInterface.".format(glue))
 
+    @safe_delete
     def del_glue(self):
         if self.addr_glue:
-            self.addr_glue.delete()
+            self.addr_glue.delete(commit=False)
         elif self.intr_glue:
-            self.intr_glue.delete()
+            self.intr_glue.delete(commit=False)
         else:
             raise AttributeError("'Nameserver' object has no attribute 'glue'")
 

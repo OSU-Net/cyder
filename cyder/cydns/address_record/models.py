@@ -203,9 +203,9 @@ class AddressRecord(BaseAddressRecord):
         super(AddressRecord, self).save(*args, **kwargs)
         rng = find_range(self.ip_str)
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
             if old_range:
-                old_range.save()
+                old_range.save(commit=False)
 
     @safe_delete
     def delete(self, *args, **kwargs):
@@ -213,4 +213,4 @@ class AddressRecord(BaseAddressRecord):
         rng = find_range(self.ip_str)
         super(AddressRecord, self).delete(*args, **kwargs)
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
