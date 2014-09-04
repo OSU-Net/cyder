@@ -265,9 +265,9 @@ class Network(BaseModel, ObjectUrlMixin):
             raise ValidationError("ERROR: No network str.")
         try:
             if self.ip_type == IP_TYPE_4:
-                self.network = ipaddr.IPv4Network(self.network_str)
+                self.network = ipaddr.IPv4Network(self.network_str).masked()
             elif self.ip_type == IP_TYPE_6:
-                self.network = ipaddr.IPv6Network(self.network_str)
+                self.network = ipaddr.IPv6Network(self.network_str).masked()
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
@@ -279,6 +279,31 @@ class Network(BaseModel, ObjectUrlMixin):
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
                                                     # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
+
+    @property
+    def children(self):
+        self.update_network()
+        if ip_type == '4':
+            return Network.objecst.filter(
+                ip_lower__gte=int(self.network.ip),
+                ip_lower__lte=int(self.network.broadcast)
+            ).exclude(prefixlen=self.prefixlen)
+        elif ip_type == '6':
+            raise Exception('Network.children does not currently support IPv6')
+
+    @property
+    def parent(self):
+        self.update_network()
+        net = self.network
+        while net.prefixlen > 0:
+            net = net.supernet().masked()
+            try:
+                return Network.objects.get(
+                    ip_upper=(int(net) / (1<<64)),
+                    ip_lower=(int(net) % (1<<64)),
+                    prefixlen=net.prefixlen)
+            except Network.DoesNotExist:
+                pass
 
 
 class NetworkAV(EAVBase):
