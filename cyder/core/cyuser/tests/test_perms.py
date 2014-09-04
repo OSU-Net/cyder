@@ -34,7 +34,8 @@ class AuthenticationTest(TestCase):
 
         self.dev_middleware.process_request(self.request)
 
-        self.assertTrue(str(self.request.user) is not 'AnonymousUser')
+        self.assertNotEqual(str(self.request.user), 'AnonymousUser',
+                            "")
 
     def test_user_profile_create(self):
         """
@@ -58,7 +59,7 @@ class AuthenticationTest(TestCase):
         dev_middleware = DevAuthenticationMiddleware()
         dev_middleware.process_request(self.request)
 
-        self.assertTrue('ctnr' in self.request.session)
+        self.assertIn('ctnr', self.request.session)
 
     def test_become_user(self):
         """
@@ -68,20 +69,24 @@ class AuthenticationTest(TestCase):
         self.setup_request()
         self.request = login_session(self.request, 'test_superuser')
 
-        user = User.objects.create(username='test_new_user')
-        user.save()
+        test_new_superuser = User.objects.create(username="test_new_superuser")
+        test_new_superuser.is_superuser = True
+        test_new_superuser.save()
 
+        test_new_user = User.objects.create(username='test_new_user')
+        test_new_user.save()
+
+        become_user(self.request, 'test_new_superuser')
+        self.assertEqual(self.request.user.username, 'test_new_superuser')
         become_user(self.request, 'test_new_user')
-        self.assertTrue(self.request.user.username == 'test_new_user')
-        become_user(self.request, 'test_superuser')
-        self.assertTrue(self.request.user.username == 'test_superuser')
+        self.assertEqual(self.request.user.username, 'test_new_user')
 
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'test_new_user')
+        self.assertEqual(self.request.user.username, 'test_new_superuser')
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'test_superuser')
+        self.assertEqual(self.request.user.username, 'test_superuser')
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'test_superuser')
+        self.assertEqual(self.request.user.username, 'test_superuser')
 
     def setup_request(self):
         """
