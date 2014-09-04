@@ -29,7 +29,7 @@ class Network(BaseModel, ObjectUrlMixin):
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
     vrf = models.ForeignKey('cyder.Vrf',
-                            default=lambda: Vrf.objects.get(name='Legacy'))
+                            default=1)  # "Legacy"
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
