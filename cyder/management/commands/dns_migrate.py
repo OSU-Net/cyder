@@ -242,20 +242,19 @@ class Zone(object):
 
             # create static interface
             try:
-                static.full_clean()
                 static.save(update_range_usage=False)
-            except ValidationError, e:
+            except ValidationError as e:
                 try:
-                    stderr.write("WARNING: host with IP {0} has been "
-                                 "disabled: {1}\n".format(static.ip_str, e))
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
-                    static.full_clean()
                     static.save(update_range_usage=False)
-                except ValidationError, e:
-                    stderr.write("Error creating static interface for host"
-                                 "with IP {0}\n".format(static.ip_str))
-                    stderr.write("Original exception: {0}\n".format(e))
+                    stderr.write('WARNING: Static interface with IP {} has '
+                                 'been disabled\n'.format(static.ip_str)
+                    stderr.write('    {}\n'.format(e))
+                except ValidationError as e:
+                    stderr.write('WARNING: Could not create static interface '
+                                 'with IP {}\n'.format(static.ip_str))
+                    stderr.write('    {}\n'.format(e))
                     static = None
                     system.delete()
 

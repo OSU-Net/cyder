@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -389,15 +389,32 @@ def migrate_dynamic_hosts():
         if last_seen:
             last_seen = datetime.fromtimestamp(last_seen)
 
-        intr, _ = range_usage_get_create(
-            DynamicInterface, range=r, workgroup=w, ctnr=c, mac=mac,
-            system=s, dhcp_enabled=enabled, last_seen=last_seen)
+        intr = DynamicInterface(
+            range=r, workgroup=w, ctnr=c, mac=mac, system=s,
+            dhcp_enabled=enabled, last_seen=last_seen)
+        try:
+            intr.save(update_range_usage=False, commit=False)
+        except ValidationError as e:
+            try:
+                intr.dhcp_enabled = False
+                intr.save(update_range_usage=False)
+                stderr.write(
+                    'WARNING: Dynamic interface with MAC address {} has been '
+                    'disabled\n'.format(intr.mac))
+                stderr.write('    {}\n'.format(e))
+            except ValidationError as e:
+                stderr.write(
+                    'WARNING: Could not create dynamic interface with MAC '
+                    'address {}\n'.format(intr.mac))
+                stderr.write('    {}\n'.format(e))
+                intr = None
 
-        count += 1
-        if not count % 1000:
-            print "%s valid hosts found so far." % count
+        if intr:
+            count += 1
+            if not count % 1000:
+                print "%s valid hosts found so far." % count
 
-    print "%s valid hosts found. Committing transaction." % count
+    print "%s valid hosts found." % count
 
 
 def migrate_user():
