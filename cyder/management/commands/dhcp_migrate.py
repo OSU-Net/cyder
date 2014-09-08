@@ -161,7 +161,6 @@ def create_range(range_id, start, end, range_type, subnet_id,
 
         valid = all((valid_start, valid_order, valid_end))
 
-        # If the range is disabled, we don't need to print warnings.
         if not valid:
             print 'Range {0}, {1} in network {2} is invalid:'.format(
                 range_id, range_str, n)
