@@ -249,7 +249,7 @@ class Zone(object):
                     static.dns_enabled = dns_enabled
                     static.save(update_range_usage=False)
                     stderr.write('WARNING: Static interface with IP {} has '
-                                 'been disabled\n'.format(static.ip_str)
+                                 'been disabled\n'.format(static.ip_str))
                     stderr.write('    {}\n'.format(e))
                 except ValidationError as e:
                     stderr.write('WARNING: Could not create static interface '
