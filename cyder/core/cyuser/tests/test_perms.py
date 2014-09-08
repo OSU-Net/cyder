@@ -227,7 +227,7 @@ class PermissionsTest(TestCase):
         self.check_perms_each_user(Nameserver(domain=domain), ns_perm_table)
 
         for obj in domain_records:
-            self.check_perms_each_user(obj, perm_table)
+            self.check_perms_each_user(obj, perm_table, set_same_ctnr=True)
 
     def setup_request(self):
         """
@@ -246,31 +246,41 @@ class PermissionsTest(TestCase):
         self.ctnr_user.save()
         self.ctnr_guest.save()
 
-    def check_perms_each_user(self, obj, perm_table):
+    def check_perms_each_user(self, obj, perm_table, set_same_ctnr=False):
         """
         Utility function for checking permissions
         """
         # Superuser.
         self.request.user = self.superuser
         self.request.session['ctnr'] = self.ctnr_guest
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_guest
         self.assert_perms(obj, perm_table, 'superuser')
 
         # Cyder admin.
         self.request.user = self.cyder_admin
         self.request.session['ctnr'] = self.ctnr_admin
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_admin
         self.assert_perms(obj, perm_table, 'cyder_admin')
 
         # Admin.
         self.request.user = self.test_user
         self.request.session['ctnr'] = self.ctnr_admin
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_admin
         self.assert_perms(obj, perm_table, 'admin')
 
         # User.
         self.request.session['ctnr'] = self.ctnr_user
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_user
         self.assert_perms(obj, perm_table, 'user')
 
         # Guest.
         self.request.session['ctnr'] = self.ctnr_guest
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_guest
         self.assert_perms(obj, perm_table, 'guest')
 
         # Pleb.

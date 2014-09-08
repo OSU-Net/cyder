@@ -3,8 +3,8 @@ from cyder.base.constants import (LEVEL_GUEST, LEVEL_USER, LEVEL_ADMIN,
 
 
 def has_perm(self, request, action, obj=None, obj_class=None, ctnr=None):
-        return _has_perm(request.user, ctnr or request.session['ctnr'], action,
-            obj, obj_class)
+    return _has_perm(request.user, ctnr or request.session['ctnr'], action,
+        obj, obj_class)
 
 
 def _has_perm(user, ctnr, action, obj=None, obj_class=None):
@@ -226,7 +226,7 @@ def has_domain_record_perm(user_level, obj, ctnr, action):
     Permissions for domain records (or objects linked to a domain).
     Domain records are assigned a domain.
     """
-    if obj and obj.domain not in ctnr.domains.all():
+    if obj and obj.ctnr != ctnr:
         return False
 
     return {
@@ -254,7 +254,7 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
     Permissions for reverse domain records (or objects linked to a reverse
     domain). Reverse domain records are assigned a reverse domain.
     """
-    if obj and obj.reverse_domain not in ctnr.domains.all():
+    if obj and obj.ctnr != ctnr:
         return False
 
     return {
