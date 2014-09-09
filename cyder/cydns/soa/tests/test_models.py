@@ -136,3 +136,42 @@ class SOATests(TestCase):
         self.assertTrue(soa == d1.soa)
         self.assertTrue(soa == d2.soa)
         self.assertTrue(soa == d3.soa)
+
+    def test_nested_zones(self):
+        self.domain_names = (
+            'y', 'x.y', 'p.x.y', 'q.x.y',
+            'a.q.x.y', 'b.q.x.y', 'c.q.x.y')
+        for name in self.domain_names:
+            d = Domain(name=name)
+            d.save()
+
+        soa_q_x_y = SOA(
+            root_domain=Domain.objects.get(name='q.x.y'),
+            primary='bleh1', contact='bleh1')
+        soa_q_x_y.save()
+
+        for name in ('y', 'x.y', 'p.x.y'):
+            self.assertEqual(Domain.objects.get(name=name).soa, None)
+        for name in ('q.x.y', 'a.q.x.y', 'b.q.x.y', 'c.q.x.y'):
+            self.assertEqual(Domain.objects.get(name=name).soa, soa_q_x_y)
+
+        soa_x_y = SOA(
+            root_domain=Domain.objects.get(name='x.y'),
+            primary='bleh2', contact='bleh2')
+        soa_x_y.save()
+
+        soa_q_x_y = SOA.objects.get(root_domain__name='q.x.y')
+
+        self.assertEqual(Domain.objects.get(name='y').soa, None)
+        for name in ('x.y', 'p.x.y'):
+            self.assertEqual(Domain.objects.get(name=name).soa, soa_x_y)
+        for name in ('q.x.y', 'a.q.x.y', 'b.q.x.y', 'c.q.x.y'):
+            self.assertEqual(Domain.objects.get(name=name).soa, soa_q_x_y)
+
+        soa_q_x_y.delete()
+
+        soa_x_y = SOA.objects.get(root_domain__name='x.y')
+
+        self.assertEqual(Domain.objects.get(name='y').soa, None)
+        for name in ('x.y', 'p.x.y', 'q.x.y', 'a.q.x.y', 'b.q.x.y', 'c.q.x.y'):
+            self.assertEqual(Domain.objects.get(name=name).soa, soa_x_y)
