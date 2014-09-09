@@ -192,11 +192,12 @@ class Domain(BaseModel, ObjectUrlMixin):
         if is_new:
             self.set_soa()
 
-        # If this domain is new, it doesn't have children yet. Also, because a
-        # new, unsaved domain has a pk of None, self.domain_set will contain
-        # the top-level domains rather than this domain's children, making the
-        # query useless anyway. Thus, we don't check for an out-of-place root
-        # domain if this domain is new.
+        if self.delegated and not self.soa:
+            raise ValidationError(
+                '{} is delegated, so it must be in a zone.'.format(self.name))
+
+        # If the domain is new, its pk is None, so self.domain_set will contain
+        # the top-level domains rather than an empty queryset.
         if not is_new and self.domain_set.filter(soa=self.soa).exclude(
                 root_of_soa=None).exists():
             raise ValidationError("The root of this domain's zone is below "
