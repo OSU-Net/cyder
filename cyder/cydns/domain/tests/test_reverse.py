@@ -11,6 +11,8 @@ from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.soa.models import SOA
 
+from cyder.cydns.tests.utils import make_root
+
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.constants import STATIC
@@ -573,8 +575,9 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(ValidationError, type(e))
 
     def test_delegation_add_domain(self):
-        dom = self.create_domain(name='3', delegated=True)
-        dom.save()
+        three = self.create_domain(name='3')
+        three = make_root(three)
+        four = self.create_domain(name='3.4', delegated=True)
 
         self.assertRaises(ValidationError, self.create_domain,
-                          name='3.4', delegated=False)
+                          name='3.4.5', delegated=False)
