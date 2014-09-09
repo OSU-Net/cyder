@@ -80,10 +80,17 @@ class Zone(object):
             try:
                 soa = SOA.objects.get(root_domain=self.domain)
             except SOA.DoesNotExist:
-                soa, _ = SOA.objects.get_or_create(
-                    primary=primary, contact=contact, refresh=refresh,
-                    retry=retry, expire=expire, minimum=minimum,
-                    root_domain=self.domain, description='')
+                soa = SOA()
+
+            soa.primary = primary
+            soa.contact = contact
+            soa.refresh = refresh
+            soa.retry = retry
+            soa.expire = expire
+            soa.minimum = minimum
+            soa.root_domain = self.domain
+            soa.description = ''
+            soa.save()
 
             return soa
         else:
@@ -493,18 +500,6 @@ def gen_reverses():
     add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
-
-    reverses = settings.REVERSE_DOMAINS
-
-    for i in reverses:
-        if '.' in i:
-            reverses.append(i.split('.', 1)[1])
-
-    reverses.reverse()
-
-    for i in reverses:
-        Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
-                                     is_reverse=True)
 
     gen_reverse_soa()
 
