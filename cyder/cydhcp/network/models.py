@@ -149,28 +149,22 @@ class Network(BaseModel, ObjectUrlMixin):
 
         super(Network, self).clean(*args, **kwargs)
 
+    # TODO: I was writing checks to make sure that subnets wouldn't
+    # orphan ranges. IPv6 needs support.
     def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
         # in the subnet?
         self.update_network()
         fail = False
         for range_ in self.range_set.all():
-            # TODO
-            """
-                I was writing checks to make sure that subnets wouldn't orphan
-                ranges. IPv6 needs support.
-            """
             # Check the start addresses.
             if range_.start_upper < self.ip_upper:
-                fail = True
                 break
             elif (range_.start_upper > self.ip_upper and range_.start_lower <
                   self.ip_lower):
-                fail = True
                 break
             elif (range_.start_upper == self.ip_upper and range_.start_lower <
                     self.ip_lower):
-                fail = True
                 break
 
             if self.ip_type == IP_TYPE_4:
@@ -181,20 +175,19 @@ class Network(BaseModel, ObjectUrlMixin):
 
             # Check the end addresses.
             if range_.end_upper > brdcst_upper:
-                fail = True
                 break
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
                     brdcst_lower):
-                fail = True
                 break
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
-                fail = True
+                break
+        else:  # break not called.
+            return
 
-            if fail:
-                raise ValidationError("Resizing this subnet to the requested "
-                                      "network prefix would orphan existing "
-                                      "ranges.")
+        raise ValidationError(
+            "Resizing this subnet to the requested network prefix would "
+            "orphan existing ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
