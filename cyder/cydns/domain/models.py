@@ -164,9 +164,18 @@ class Domain(BaseModel, ObjectUrlMixin):
         else:
             return None
 
-    def clean(self, *args, **kwargs):
+    def set_soa(self):
         from cyder.cydns.soa.models import SOA
 
+        try:  # Assume domain is a root domain.
+            self.soa = self.root_of_soa.get()
+        except SOA.DoesNotExist:  # Domain is not a root domain.
+            if self.master_domain:
+                self.soa = self.master_domain.soa
+            else:
+                self.soa = None
+
+    def clean(self, *args, **kwargs):
         super(Domain, self).clean(*args, **kwargs)
 
         is_new = self.pk is None
@@ -180,13 +189,8 @@ class Domain(BaseModel, ObjectUrlMixin):
                 '{} is delegated, so it cannot have subdomains.'.format(
                     self.master_domain.name))
 
-        try:  # Assume domain is a root domain.
-            self.soa = self.root_of_soa.get()
-        except SOA.DoesNotExist:  # Domain is not a root domain.
-            if self.master_domain:
-                self.soa = self.master_domain.soa
-            else:
-                self.soa = None
+        if is_new:
+            self.set_soa()
 
         # If this domain is new, it doesn't have children yet. Also, because a
         # new, unsaved domain has a pk of None, self.domain_set will contain

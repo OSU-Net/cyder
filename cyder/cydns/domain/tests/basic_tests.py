@@ -67,9 +67,6 @@ class DomainTests(BaseDomain):
 
         n_f_m = Domain.objects.get(pk=n_f_m.pk)  # Refresh object
         self.assertEqual(n_f_m.soa, s)
-        n_f_m.soa = None
-        n_f_m.save()
-        self.assertEqual(n_f_m.soa, s)
 
         s.root_domain = m
         s.save()

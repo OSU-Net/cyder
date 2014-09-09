@@ -47,7 +47,9 @@ class NetworkTests(TestCase):
         str(s)
         s.__repr__()
         self.assertTrue(s)
-        ip_upper, ip_lower = ipv6_to_longs(network)
+        ip_upper, ip_lower = ipv6_to_longs(
+            'ffff:ff00:0000:0000:0000:0000:0000:0000')
+        # Network address was canonicalized.
         self.assertEqual(s.ip_upper, ip_upper)
         self.assertEqual(s.ip_lower, ip_lower)
 
