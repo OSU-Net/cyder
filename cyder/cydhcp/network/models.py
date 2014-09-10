@@ -41,8 +41,8 @@ class Network(BaseModel, ObjectUrlMixin):
     # This field is here so ES can search this model easier.
     network_str = models.CharField(
         max_length=49, editable=True,
-        help_text="The network address of this network.",
-        verbose_name="Network address")
+        help_text='Network address and prefix length, in CIDR notation',
+        verbose_name='Network string')
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
     enabled = models.BooleanField(default=True)
@@ -183,7 +183,7 @@ class Network(BaseModel, ObjectUrlMixin):
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
                 break
-        else:  # break not called.
+        else:  # All ranges are valid.
             return
 
         raise ValidationError(
