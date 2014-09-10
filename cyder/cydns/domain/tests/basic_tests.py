@@ -238,7 +238,6 @@ class DomainTests(BaseDomain):
         t_dom = self.create_domain(name=name, delegated=False)
 
         cn = CNAME(ctnr=self.ctnr, domain=t_dom, label="no", target="asdf")
-        cn.full_clean()
         cn.save()
 
         name = "no.to.bo"

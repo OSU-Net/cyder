@@ -50,7 +50,6 @@ class LibTestsFreeIP(TestCase):
             self.ctnr.domains.add(d)
 
         n = Network(network_str="15.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s1
         n.vlan = v
         n.save()
@@ -61,7 +60,6 @@ class LibTestsFreeIP(TestCase):
 
         r = Range(start_str="15.0.0.200", end_str="15.0.0.204",
                   network=n, ip_type='4', range_type=STATIC)
-        r.clean()
         r.save()
         self.ctnr.ranges.add(r)
 

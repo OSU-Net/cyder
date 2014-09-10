@@ -117,7 +117,6 @@ class DNSBuildTest(TestCase):
             mac='01:23:45:01:23:45',
             ctnr=Ctnr.objects.get(name='Global')
         )
-        s.full_clean()
         s.save()
         s.views.add(
             View.objects.get(name='public'),

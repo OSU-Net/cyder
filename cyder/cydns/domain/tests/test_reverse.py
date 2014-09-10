@@ -56,12 +56,10 @@ class ReverseDomainTests(TestCase):
             domain = self.domain
 
         n = Network(ip_type=ip_type, network_str=network_str)
-        n.full_clean()
         n.save()
 
         r = Range(network=n, range_type=range_type, start_str=start_str,
                   end_str=end_str, domain=domain, ip_type=ip_type)
-        r.full_clean()
         r.save()
 
         self.ctnr.ranges.add(r)
@@ -71,34 +69,27 @@ class ReverseDomainTests(TestCase):
             label=random_label(), domain=self.domain, ip_str=ip, ip_type='4',
             system=self.s, mac='11:22:33:44:55:66', ctnr=self.ctnr,
         )
-        intr.clean()
         intr.save()
         return intr
 
     def add_ptr_ipv4(self, ip):
         ptr = PTR(fqdn=("bluh." + self.domain.name), ip_str=ip, ip_type='4',
                   ctnr=self.ctnr)
-        ptr.full_clean()
         ptr.save()
         return ptr
 
     def add_ptr_ipv6(self, ip):
         ptr = PTR(fqdn=("bluh." + self.domain.name), ip_str=ip, ip_type='6',
                   ctnr=self.ctnr)
-        ptr.full_clean()
         ptr.save()
         return ptr
 
-    def create_domain(self, name, ip_type=None, delegated=False):
-        if ip_type is None:
-            ip_type = '4'
+    def create_domain(self, name, ip_type='4', delegated=False):
         if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        d.clean()
-        d.save()
+        d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         self.ctnr.domains.add(d)
         return d

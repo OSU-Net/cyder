@@ -17,13 +17,13 @@ class ViewTests(TestCase):
     """
     Cases we need to cover:
     1) Give an A/PTR/StaticInterface private IP and the private view.
-        * clean, save, *no* ValidationError raised
+        * save, *no* ValidationError raised
 
     The following cases were determined to be an unnecessary feature:
     2) Give an A/PTR/StaticInterface private IP and the public view.
-        * clean, save, ValidationError raised
+        * save, ValidationError raised
     3) Give an A/PTR/StaticInterface private IP and public and private view.
-        * clean, save, ValidationError raised
+        * save, ValidationError raised
     """
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
@@ -57,7 +57,6 @@ class ViewTests(TestCase):
     def test_private_view_case_1_addr(self):
         a = AddressRecord(label="asf", ctnr=self.ctnr, domain=self.f_o, ip_str="10.0.0.1",
                           ip_type="4")
-        a.clean()
         a.save()
         # Object has to exist before views can be assigned.
         a.views.add(self.private)
@@ -66,7 +65,6 @@ class ViewTests(TestCase):
     def test_private_view_case_1_ptr(self):
         ptr = PTR(fqdn="asf.org", ip_str="10.0.0.1", ctnr=self.ctnr,
                   ip_type="4")
-        ptr.clean()
         ptr.save()
         # Object has to exist before views can be assigned.
         ptr.views.add(self.private)
@@ -76,7 +74,6 @@ class ViewTests(TestCase):
         intr = StaticInterface(label="asf", domain=self.f_o, ip_str="10.0.0.1",
                                ip_type="4", mac="00:11:22:33:44:55",
                                system=self.s, ctnr=self.ctnr)
-        intr.clean()
         intr.save()
         # Object has to exist before views can be assigned.
         intr.views.add(self.private)

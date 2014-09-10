@@ -21,10 +21,8 @@ class BaseStaticTests(TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        d.clean()
+        d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
-        d.save()
         self.ctnr.domains.add(d)
         return d
 
@@ -32,9 +30,7 @@ class BaseStaticTests(TestCase):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
         self.arpa = self.create_domain(name='arpa')
-        self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i_arpa.save()
         self.r1 = create_zone('10.in-addr.arpa')
 
         self.c = Domain(name="ccc")
@@ -44,7 +40,6 @@ class BaseStaticTests(TestCase):
         self.ctnr.domains.add(self.c)
         self.ctnr.domains.add(self.f_c)
         self.n = System()
-        self.n.clean()
         self.n.save()
         View.objects.get_or_create(name="private")
 
@@ -63,7 +58,6 @@ class BaseStaticTests(TestCase):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
                             ip_type=ip_type, system=system, ctnr=self.ctnr,
                             range=self.sr)
-        r.clean()
         r.save()
         r.details()
         r.get_update_url()
@@ -75,7 +69,6 @@ class BaseStaticTests(TestCase):
     def do_add_a(self, label, domain, ip_str, ip_type='4'):
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        a.clean()
         a.save()
         return a
 
@@ -89,6 +82,5 @@ class BaseStaticTests(TestCase):
     def do_add_ptr(self, label, domain, ip_str, ip_type='4'):
         ptr = PTR(fqdn=label + '.' + domain.name, ip_str=ip_str,
                   ip_type=ip_type, ctnr=self.ctnr)
-        ptr.clean()
         ptr.save()
         return ptr

@@ -49,19 +49,16 @@ class LibTestsRange(TestCase):
         self.ctnr.domains.add(d)
 
         n = Network(network_str="15.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s1
         n.vlan = v
         n.save()
 
         r1 = Range(start_str="15.0.0.0", end_str="15.0.0.10",
                    network=n, ip_type='4', range_type=STATIC)
-        r1.clean()
         r1.save()
 
         r2 = Range(start_str="15.0.0.20", end_str="15.0.0.22",
                    network=n, ip_type='4', range_type=STATIC)
-        r2.clean()
         r2.save()
 
         self.ctnr.ranges.add(r1, r2)

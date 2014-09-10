@@ -49,7 +49,6 @@ class V6StaticInterTests(BaseStaticTests):
         r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
                             ip_type=ip_type, system=self.s, ctnr=self.ctnr,
                             range=self.range)
-        r.clean()
         r.save()
         repr(r)
         return r
@@ -127,13 +126,12 @@ class V6StaticInterTests(BaseStaticTests):
                   'ip_str': ip_str}
         ip_type = '6'
         i = self.do_add(**kwargs)
-        i.clean()
         i.save()
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, a.clean)
+        self.assertRaises(ValidationError, a.save)
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=i.fqdn, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, ptr.clean)
+        self.assertRaises(ValidationError, ptr.save)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
@@ -146,10 +144,8 @@ class V6StaticInterTests(BaseStaticTests):
         ip_type = '6'
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        a.clean()
         a.save()
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=a.fqdn, ctnr=self.ctnr)
-        ptr.clean()
         ptr.save()
         self.assertRaises(ValidationError, self.do_add, **kwargs)
 

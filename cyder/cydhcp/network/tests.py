@@ -14,14 +14,12 @@ class NetworkTests(TestCase):
                      ame=None, number=None, site=None):
         s = Network(network_str=network + "/" + prefixlen,
                     ip_type=ip_type, site=site)
-        s.clean()
         s.save()
         self.assertTrue(s)
         return s
 
     def do_basic_add_site(self, name, parent=None):
         s = Site(name=name, parent=parent)
-        s.clean()
         s.save()
         self.assertTrue(s)
         return s
@@ -77,7 +75,7 @@ class NetworkTests(TestCase):
         self.assertTrue(len(s.range_set.all()) == 1)
 
         s.network_str = "129.0.0.0/25"
-        self.assertRaises(ValidationError, s.clean)
+        self.assertRaises(ValidationError, s.save)
 
     def test_bad_delete(self):
         network = "129.0.0.0"
@@ -98,7 +96,6 @@ class NetworkTests(TestCase):
 
         r = Range(start_str=start_str, end_str=end_str, network=network,
                   ip_type='4')
-        r.clean()
         r.save()
 
         self.assertEqual(r.network, s)

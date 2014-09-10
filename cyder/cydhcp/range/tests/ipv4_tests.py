@@ -368,7 +368,7 @@ class V4RangeTests(TestCase):
         r = self.do_add(**kwargs)
         r.end_str = "160.0.4.60"
 
-        self.assertRaises(ValidationError, r.clean)
+        self.assertRaises(ValidationError, r.save)
 
     def test13_bad_create(self):
         start_str = "10.0.4.5"
@@ -403,18 +403,15 @@ class V4RangeTests(TestCase):
         s = StaticInterface(label="foo1", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.clean()
         s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.2")
         s = StaticInterface(label="foo2", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.clean()
         s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.3")
         s = StaticInterface(label="foo3", domain=self.d, ip_type='4',
                             ip_str=str(r.get_next_ip()), system=system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.clean()
         s.save()
         self.assertEqual(r.get_next_ip(), None)

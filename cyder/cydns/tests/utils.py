@@ -183,12 +183,10 @@ def random_byte():
 def create_basic_dns_data(dhcp=False):
     for name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
         d = Domain(name=name)
-        d.full_clean()
         d.save()
 
     if dhcp:
         v = Vrf(name='test_vrf')
-        v.full_clean()
         v.save()
 
 

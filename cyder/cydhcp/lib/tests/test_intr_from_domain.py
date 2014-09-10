@@ -85,7 +85,6 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="5scl3.mozilla.com")
         d, _ = Domain.objects.get_or_create(name="5db.5scl3.mozilla.com")
         n = Network(network_str="10.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s
         n.vlan = v
         n.save()
@@ -114,32 +113,27 @@ class LibTestsDomain(TestCase):
         self.ctnr.domains.add(d)
 
         n = Network(network_str="11.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s
         n.vlan = v
         n.save()
 
         r = Range(start_str="11.0.0.0", end_str="11.0.0.2",
                   network=n, ip_type='4')
-        r.clean()
         r.save()
 
         s = StaticInterface(label="fab1", domain=d, ip_type="4",
                             ip_str="11.0.0.0", system=self.system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.clean()
         s.save()
 
         s = StaticInterface(label="fab2", domain=d, ip_type="4",
                             ip_str="11.0.0.1", system=self.system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.clean()
         s.save()
 
         s = StaticInterface(label="fab3", domain=d, ip_type="4",
                             ip_str="11.0.0.2", system=self.system,
                             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.clean()
         s.save()
 
         intr, errors = create_ipv4_interface(
@@ -163,14 +157,12 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
         d, _ = Domain.objects.get_or_create(name="12.in-addr.arpa")
         n = Network(network_str="12.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s
         n.vlan = v
         n.save()
 
         r = Range(start_str="12.0.0.0", end_str="12.0.0.2",
                   network=n, ip_type='4')
-        r.clean()
         r.save()
 
         intr, errors = create_ipv4_interface(
@@ -192,14 +184,12 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
         d, _ = Domain.objects.get_or_create(name="15.in-addr.arpa")
         n = Network(network_str="15.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s1
         n.vlan = v
         n.save()
 
         r = Range(start_str="15.0.0.0", end_str="15.0.0.2",
                   network=n, ip_type='4')
-        r.clean()
         r.save()
 
         intr, errors = create_ipv4_interface(
@@ -220,14 +210,12 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
         d, _ = Domain.objects.get_or_create(name="13.in-addr.arpa")
         n = Network(network_str="13.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s
         n.vlan = v
         n.save()
 
         r = Range(start_str="13.0.0.0", end_str="13.0.0.2",
                   network=n, ip_type='4')
-        r.clean()
         r.save()
 
         intr, errors = create_ipv4_intr_from_domain(
@@ -250,14 +238,12 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
         d, _ = Domain.objects.get_or_create(name="14.in-addr.arpa")
         n = Network(network_str="14.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s1
         n.vlan = v
         n.save()
 
         r = Range(start_str="14.0.0.0", end_str="14.0.0.2",
                   network=n, ip_type='4')
-        r.clean()
         r.save()
 
         intr, errors = create_ipv4_intr_from_domain(
@@ -276,25 +262,21 @@ class LibTestsDomain(TestCase):
         d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
         d, _ = Domain.objects.get_or_create(name="12.in-addr.arpa")
         n = Network(network_str="12.0.0.0/24", ip_type="4")
-        n.clean()
         n.site = s
         n.vlan = v
         n.save()
 
         n1 = Network(network_str="12.0.1.0/24", ip_type="4")
-        n1.clean()
         n1.site = s
         n1.vlan = v
         n1.save()
 
         r = Range(start_str="12.0.0.0", end_str="12.0.0.2",
                   network=n, ip_type='4')
-        r.clean()
         r.save()
 
         r1 = Range(start_str="12.0.1.0", end_str="12.0.1.2",
                    network=n1, ip_type='4')
-        r1.clean()
         r1.save()
 
         intr, errors = create_ipv4_interface(
