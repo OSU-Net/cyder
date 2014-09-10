@@ -109,6 +109,14 @@ class Network(BaseModel, ObjectUrlMixin):
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
 
+    def cyder_unique_error_message(self, model_class, unique_check):
+        if unique_check == ('ip_upper', 'ip_lower', 'prefixlen'):
+            return (
+                'Network with this address and prefix length already exists.')
+        else:
+            super(Network, self).unique_error_message(
+                model_class, unique_check)
+
     def save(self, *args, **kwargs):
         self.update_network()
         super(Network, self).save(*args, **kwargs)

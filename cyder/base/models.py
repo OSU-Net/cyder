@@ -26,13 +26,26 @@ class BaseModel(models.Model):
     def pretty_name(self):
         return unicode(self)
 
-    def unique_error_message(self, model_class, unique_check):
-        error = super(BaseModel, self).unique_error_message(
+    def cyder_unique_error_message(self, model_class, unique_check):
+        """
+        Override this method to provide a custom error message for
+        unique or unique_together fields. It should return a descriptive error
+        message that ends in a period.
+        """
+
+        return super(BaseModel, self).unique_error_message(
             model_class, unique_check)
+
+    def unique_error_message(self, model_class, unique_check):
+        """
+        Don't override this method. Override cyder_unique_error_message
+        instead.
+        """
+
+        error = self.cyder_unique_error_message(model_class, unique_check)
         kwargs = {}
         for field in unique_check:
             kwargs[field] = getattr(self, field)
-
         obj = model_class.objects.filter(**kwargs)
         if obj and hasattr(obj.get(), 'get_detail_url'):
             error = error[:-1] + ' at <a href={0}>{1}.</a>'.format(
