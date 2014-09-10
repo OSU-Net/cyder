@@ -22,8 +22,8 @@ class TXTTests(cyder.base.tests.TestCase):
         if 'ctnr' not in data:
             data['ctnr'] = self.ctnr
         txt = TXT(**data)
-        txt.__repr__()
         txt.save()
+        txt.__repr__()
         rtxt = TXT.objects.filter(**data)
         self.assertTrue(len(rtxt) == 1)
         return txt

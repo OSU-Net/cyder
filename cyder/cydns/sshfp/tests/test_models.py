@@ -21,8 +21,8 @@ class SSHFPTests(cyder.base.tests.TestCase):
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
         sshfp = SSHFP(**data)
-        sshfp.__repr__()
         sshfp.save()
+        sshfp.__repr__()
         self.assertTrue(sshfp.details())
         rsshfp = SSHFP.objects.filter(**data)
         self.assertEqual(rsshfp.count(), 1)

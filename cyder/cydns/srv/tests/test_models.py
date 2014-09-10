@@ -24,8 +24,8 @@ class SRVTests(TestCase):
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
         srv = SRV(**data)
-        srv.__repr__()
         srv.save()
+        srv.__repr__()
         self.assertTrue(srv.details())
         rsrv = SRV.objects.filter(**data)
         self.assertTrue(len(rsrv) == 1)

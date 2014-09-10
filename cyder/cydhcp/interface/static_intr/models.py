@@ -142,7 +142,9 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         super(StaticInterface, self).save(*args, **kwargs)
         self.schedule_zone_rebuild()
         if update_range_usage:
-            self.range.save(commit=False)
+            new_range = self.range
+            if new_range:
+                new_range.save(commit=False)
             if old_range:
                 old_range.save(commit=False)
 
@@ -211,6 +213,11 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         return 'subclass "{0}" 1:{1};\n'.format(classname, self.mac)
 
     def clean(self, *args, **kwargs):
+        validate_glue = kwargs.pop('validate_glue', True)
+
+        super(StaticInterface, self).clean(validate_glue=False,
+                                           ignore_intr=True)
+
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
             raise ValidationError("A PTR already uses '%s' and '%s'" %
@@ -220,11 +227,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             raise ValidationError("An A record already uses '%s' and '%s'" %
                                   (self.fqdn, self.ip_str))
 
-        if kwargs.pop('validate_glue', True):
+        if validate_glue:
             self.check_glue_status()
-
-        super(StaticInterface, self).clean(validate_glue=False,
-                                           ignore_intr=True)
 
         if self.dhcp_enabled:
             if not (self.range and self.range.range_type == STATIC):
