@@ -114,7 +114,7 @@ class Network(BaseModel, ObjectUrlMixin):
             return (
                 'Network with this address and prefix length already exists.')
         else:
-            super(Network, self).unique_error_message(
+            return super(Network, self).unique_error_message(
                 model_class, unique_check)
 
     def save(self, *args, **kwargs):
