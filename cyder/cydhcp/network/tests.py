@@ -9,7 +9,6 @@ from cyder.cydns.ip.models import ipv6_to_longs
 
 
 class NetworkTests(TestCase):
-
     def do_basic_add(self, network, prefixlen, ip_type,
                      ame=None, number=None, site=None):
         s = Network(network_str=network + "/" + prefixlen,
@@ -188,3 +187,92 @@ class NetworkTests(TestCase):
 
         if we choose
         """
+
+    def test_check_valid_ranges_v4_valid(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.4.0.2', end_str='10.4.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        n.full_clean()
+        n.save()
+
+    def test_check_valid_ranges_v4_start_low(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.4.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_start_end_low(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.3.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_end_high(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.4.0.2', end_str='10.5.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_start_end_high(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.5.0.2', end_str='10.5.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_start_low_end_high(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.5.255.254',
+                network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
