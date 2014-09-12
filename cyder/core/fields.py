@@ -13,10 +13,10 @@ class MacAddrField(CharField):
 
     Arguments:
 
-    dhcp_enabled (string): The name of another attribute (possibly a field) in
-                           the model that holds a boolean specifying whether to
-                           validate this MacAddrField; if not specified, always
-                           validate.
+    dhcp_enabled (string):
+        The name of another attribute (possibly a field) in the model that
+        holds a boolean specifying whether to validate this MacAddrField; if
+        not specified, always validate.
     """
 
     __metaclass__ = SubfieldBase

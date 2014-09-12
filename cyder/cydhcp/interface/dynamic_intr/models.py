@@ -78,7 +78,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         s = s.replace('%6m', self.mac.replace(':', '')[0:6])
         return s
 
-    def build_host(self, options=None):
+    def build_host(self, options=()):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
         build_str += "\t\thardware ethernet {0};\n".format(self.mac)
         build_str += join_dhcp_args(map(self.format_host_option, options),
