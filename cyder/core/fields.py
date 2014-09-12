@@ -31,10 +31,21 @@ class MacAddrField(CharField):
         super(MacAddrField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
-        value = super(MacAddrField, self).get_prep_value(value)
         if value:
-            value = value.lower().replace(':', '').replace('-', '')
-        return value
+            return value.lower().replace(':', '').replace('-', '')
+        else:
+            return None
+
+    def get_prep_lookup(self, lookup_type, value):
+        if lookup_type == 'exact' and value == '':
+            raise Exception(
+                "When using the __exact lookup type, use a query value of "
+                "None instead of ''. Even though get_prep_value transforms "
+                "'' into None, Django only converts __exact queries into "
+                "__isnull queries if the *user*-provided query value is None.")
+        else:
+            return super(MacAddrField, self).get_prep_lookup(
+                lookup_type, value)
 
     def to_python(self, value):
         value = super(MacAddrField, self).to_python(value)

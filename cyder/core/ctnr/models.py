@@ -68,7 +68,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
                                          Q(start_str='10.255.255.255')):
             clients = (range_.dynamicinterface_set.filter(ctnr=self,
                                                           dhcp_enabled=True)
-                                                  .exclude(mac=''))
+                                                  .exclude(mac=None))
 
             classname = '{0}:{1}:{2}'.format(
                 self.name, range_.start_str, range_.end_str)
