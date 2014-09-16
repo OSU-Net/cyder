@@ -145,8 +145,6 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     @safe_save
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
-
         super(Domain, self).save(*args, **kwargs)
 
         # Ensure all descendants in this zone have the same SOA as this domain.
@@ -189,8 +187,7 @@ class Domain(BaseModel, ObjectUrlMixin):
                 '{} is delegated, so it cannot have subdomains.'.format(
                     self.master_domain.name))
 
-        if is_new:
-            self.set_soa()
+        self.set_soa()
 
         if self.delegated and not self.soa:
             raise ValidationError(

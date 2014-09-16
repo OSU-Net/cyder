@@ -153,7 +153,9 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def delete(self, *args, **kwargs):
         root_domain = self.root_domain
         super(SOA, self).delete(*args, **kwargs)
-        root_domain.set_soa()
+        root_domain.soa = None
+        # If we don't set the SOA to None, Django complains that the SOA
+        # doesn't exist (which is true).
         root_domain.save(commit=False)
         reassign_reverse_records(root_domain, None)
 
@@ -196,16 +198,13 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         if is_new:
             # Need to call this after save because new objects won't have a pk.
             self.schedule_rebuild(save=False)
-            self.root_domain.soa = self
             self.root_domain.save(commit=False)
             reassign_reverse_records(None, self.root_domain)
         else:
             if db_self.root_domain != self.root_domain:
                 from cyder.cydns.domain.models import Domain
 
-                self.root_domain.soa = self
                 self.root_domain.save(commit=False)
-                db_self.root_domain.set_soa()
                 db_self.root_domain.save(commit=False)
                 self.root_domain = Domain.objects.get(pk=self.root_domain.pk)
                 reassign_reverse_records(db_self.root_domain, self.root_domain)
