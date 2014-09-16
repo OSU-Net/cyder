@@ -171,7 +171,11 @@ def cy_view(request, template, pk=None, obj_type=None):
                     form.errors = ErrorDict()
                 form.errors.update(e.message_dict)
                 return HttpResponse(json.dumps({'errors': form.errors}))
-
+            except DatabaseError as e:  # DatabaseError(number, description)
+                if form.errors is None:
+                    form.errors = ErrorDict()
+                form.errors.setdefault('__all__', []).append(e.args[1])
+                return HttpResponse(json.dumps({'errors': form.errors}))
         else:
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
