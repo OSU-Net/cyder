@@ -1,4 +1,4 @@
-from django.test import TestCase
+from cyder.base.tests import TestCase
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.tests.utils import create_zone
