@@ -4,6 +4,7 @@ from django.db.models import signals
 
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
+from cyder.base.validators import validate_integer_field
 from cyder.core.cyuser import backends
 from cyder.core.ctnr.models import Ctnr
 
@@ -11,7 +12,8 @@ from cyder.core.ctnr.models import Ctnr
 class UserProfile(BaseModel, ObjectUrlMixin):
     user = models.OneToOneField(User, related_name='profile')
     default_ctnr = models.ForeignKey(Ctnr, default=2)
-    phone_number = models.IntegerField(null=True)
+    phone_number = models.IntegerField(null=True,
+        validators=[validate_integer_field])
 
     has_perm = backends.has_perm
     search_fields = ('user__username', 'user__first_name', 'user__last_name')

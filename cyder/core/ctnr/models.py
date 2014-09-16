@@ -6,6 +6,7 @@ from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
+from cyder.base.validators import validate_integer_field
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
@@ -106,7 +107,8 @@ class Ctnr(BaseModel, ObjectUrlMixin):
 class CtnrUser(BaseModel, ObjectUrlMixin):
     user = models.ForeignKey(User)
     ctnr = models.ForeignKey(Ctnr)
-    level = models.IntegerField()
+    level = models.IntegerField(
+        validators=[validate_integer_field])
 
     class Meta:
         app_label = 'cyder'
