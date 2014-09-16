@@ -143,7 +143,8 @@ class CNAME(LabelDomainMixin, CydnsRecord):
         if qset:
             objects = qset.all()
             raise ValidationError(
-                "Objects with this name already exist: {0}".format(objects)
+                "Objects with this name already exist: {0}".format(
+                    ', '.join(unicode(object) for object in objects))
             )
 
         MX = get_model('cyder', 'MX')
