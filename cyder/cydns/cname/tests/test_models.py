@@ -605,3 +605,10 @@ class CNAMETests(cyder.base.tests.TestCase):
         create_si.name = 'StaticInterface'
 
         self.assertObjectsConflict((create_cname, create_si))
+
+    def test_duplicate_cname(self):
+        label = "foo"
+        domain = self.g
+        data = "foo.com"
+        self.do_add(label, domain, data)
+        self.assertRaises(ValidationError, self.do_add, label, domain, data)
