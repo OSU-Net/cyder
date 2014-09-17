@@ -15,6 +15,7 @@ class DeleteStaticInterTests(BaseStaticTests):
             'label': "foo",
             'domain': self.f_c,
             'ip_str': "10.0.0.2",
+            'system': system,
         }
         self.do_add_intr(**kwargs)
         self.assertTrue(StaticInterface.objects.filter(**kwargs))
