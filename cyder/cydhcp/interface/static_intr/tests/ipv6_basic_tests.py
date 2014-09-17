@@ -62,59 +62,68 @@ class V6StaticInterTests(BaseStaticTests):
 
     def test1_create_basic(self):
         mac = "11:22:33:44:55:66"
-        label = "foo"
-        domain = self.f_c
-        ip_str = "1000:12:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add(**kwargs)
+
+        self.do_add(
+            mac=mac,
+            label="foo",
+            domain=self.f_c,
+            ip_str=("1000:12:" + mac),
+        )
 
     def test2_create_basic(self):
-        mac = "20:22:33:44:55:66"
-        label = "foo1"
-        domain = self.f_c
-        ip_str = "1000:123:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add(**kwargs)
+        mac = "11:22:33:44:55:66"
+
+        self.do_add(
+            mac=mac,
+            label="foo1",
+            domain=self.f_c,
+            ip_str=("1000:123:" + mac),
+        )
 
     def test3_create_basic(self):
         mac = "11:22:33:44:55:66"
-        label = "foo1"
-        domain = self.f_c
-        ip_str = "1000:1234:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add(**kwargs)
+
+        self.do_add(
+            mac=mac,
+            label="foo1",
+            domain=self.f_c,
+            ip_str=("1000:1234:" + mac),
+        )
 
     def test4_create_basic(self):
-        mac = "12:22:33:44:55:66"
-        label = "foo1"
-        domain = self.f_c
-        ip_str = "1000:11:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add(**kwargs)
+        mac = "11:22:33:44:55:66"
+
+        self.do_add(
+            mac=mac,
+            label="foo1",
+            domain=self.f_c,
+            ip_str=("1000:11:" + mac),
+        )
 
     def test1_delete(self):
-        mac = "12:22:33:44:55:66"
-        label = "foo1"
-        domain = self.f_c
-        ip_str = "1000:112:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        r = self.do_add(**kwargs)
+        mac = "11:22:33:44:55:66"
+
+        r = self.do_add(
+            mac=mac,
+            label="foo1",
+            domain=self.f_c,
+            ip_str=("1000:112:" + mac),
+        )
         self.do_delete(r)
 
     def test1_dup_create_basic(self):
         mac = "11:22:33:44:55:66"
-        label = "foo3"
-        domain = self.f_c
-        ip_str = "1000:1123:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add(**kwargs)
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
+        def x():
+            self.do_add(
+                mac=mac,
+                label="foo3",
+                domain=self.f_c,
+                ip_str=("1000:1123:" + mac),
+            )
+
+        x()
+
+        self.assertRaises(ValidationError, x)
 
     def test1_bad_add_for_a_ptr(self):
         # Intr exists, then try ptr and A
@@ -122,52 +131,57 @@ class V6StaticInterTests(BaseStaticTests):
         label = "9988fooddfdf"
         domain = self.c
         ip_str = "1000:111:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        ip_type = '6'
-        i = self.do_add(**kwargs)
-        i.save()
-        a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
-                          ip_type=ip_type, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, a.save)
-        ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=i.fqdn, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, ptr.save)
+
+        self.do_add(mac=mac, label=label, domain=domain, ip_str=ip_str)
+
+        self.assertRaises(ValidationError, AddressRecord.objects.create,
+            label=label, domain=domain, ip_str=ip_str, ip_type='6',
+            ctnr=self.ctnr)
+
+        self.assertRaises(ValidationError, PTR.objects.create,
+                ip_str=ip_str, ip_type='6',
+                fqdn=(label + '.' + domain.name), ctnr=self.ctnr)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
-        mac = "11:22:33:44:55:66"
-        label = "9988fdfood"
+        mac = "11:22:33:44:55:6e"
+        label = "9988fooddfdf"
         domain = self.c
-        ip_str = "1000:1112:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        ip_type = '6'
-        a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
-                          ip_type=ip_type, ctnr=self.ctnr)
-        a.save()
-        ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=a.fqdn, ctnr=self.ctnr)
-        ptr.save()
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
+        ip_str = "1000:111:" + mac
+
+        AddressRecord.objects.create(
+            label=label, domain=domain, ip_str=ip_str, ip_type='6',
+            ctnr=self.ctnr)
+
+        PTR.objects.create(
+                ip_str=ip_str, ip_type='6',
+                fqdn=(label + '.' + domain.name), ctnr=self.ctnr)
+
+        self.assertRaises(ValidationError, self.do_add,
+            mac=mac, label=label, domain=domain, ip_str=ip_str)
 
     def test1_bad_reverse_domain(self):
         mac = "11:22:33:44:55:66"
-        label = "8888foo"
-        domain = self.f_c
-        ip_str = "1000:115:" + mac
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        i = self.do_add(**kwargs)
+
+        i = self.do_add(
+            mac=mac,
+            label="8888foo",
+            domain=self.f_c,
+            ip_str=("1000:115:" + mac),
+        )
+
         i.ip_str = "9111::"
         self.assertRaises(ValidationError, i.save)
 
     def test1_no_system(self):
         mac = "15:22:33:44:55:66"
-        label = "8888foo"
-        domain = self.f_c
-        ip_str = "1000:188:" + mac
-        ip_type = '6'
 
-        create = partial(StaticInterface, label=label, domain=domain,
-                         ip_str=ip_str, ip_type=ip_type, system=None,
-                         ctnr=self.ctnr)
-        self.assertRaises(ValueError, create)
+        self.assertRaises(ValueError, StaticInterface.objects.create,
+            mac=mac,
+            label="8888foo",
+            domain=self.f_c,
+            ip_str=("1000:188:" + mac),
+            ip_type='6',
+            system=None,
+            ctnr=self.ctnr,
+        )
