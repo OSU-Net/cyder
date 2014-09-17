@@ -35,37 +35,37 @@ class SSHFPTests(cyder.base.tests.TestCase):
         self.assertTrue(len(rmx) == 0)
 
     def test_add_remove_sshfp(self):
-        label = "asdf"
-        key = "7d97e98f8af710c7e7fe703abc8f639e0ee507c4"
-        s_type = 1
-        a_type = 1
-        data = {'label': label, 'key': key, 'domain': self.o_e,
-                'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(**data)
+        self.do_generic_add(
+            label="asdf",
+            domain=self.o_e,
+            key="7d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+            fingerprint_type=1,
+            algorithm_number=1,
+        )
 
-        label = "asdf2"
-        key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
-        s_type = 1
-        a_type = 1
-        data = {'label': label, 'key': key, 'domain': self.o_e,
-                'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(**data)
+        self.do_generic_add(
+            label="asdf2",
+            domain=self.o_e,
+            key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+            fingerprint_type=1,
+            algorithm_number=1,
+        )
 
-        label = "df"
-        key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
-        s_type = 1
-        a_type = 1
-        data = {'label': label, 'key': key, 'domain': self.o_e,
-                'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(**data)
+        self.do_generic_add(
+            label="df",
+            domain=self.o_e,
+            key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+            fingerprint_type=1,
+            algorithm_number=1,
+        )
 
-        label = "12314"
-        key = "8d97e98f8af710c7e7fe703abc8f639e0ee507c4"
-        s_type = 1
-        a_type = 1
-        data = {'label': label, 'key': key, 'domain': self.o,
-                'algorithm_number': a_type, 'fingerprint_type': s_type}
-        self.do_generic_add(**data)
+        self.do_generic_add(
+            label="12314",
+            domain=self.o_e,
+            key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+            fingerprint_type=1,
+            algorithm_number=1,
+        )
 
     def test_domain_ctnr(self):
         key = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
@@ -74,28 +74,42 @@ class SSHFPTests(cyder.base.tests.TestCase):
         ctnr1.save()
         ctnr1.domains.add(self.o_e)
 
+        SSHFP.objects.create(
+            label='foo',
+            domain=self.o_e,
+            key=key,
+            algorithm_number=1,
+            fingerprint_type=1,
+            ctnr=ctnr1,
+        )
+
         ctnr2 = Ctnr(name='test_ctnr2')
         ctnr2.save()
 
-        s1 = SSHFP(label='foo', domain=self.o_e, key=key, algorithm_number=1,
-                   fingerprint_type=1, ctnr=ctnr1)
-        s1.save()
-
-        with self.assertRaises(ValidationError):
-            s2 = SSHFP(label='bleh', domain=self.o_e, key=key,
-                       algorithm_number=1, fingerprint_type=1, ctnr=ctnr2)
-            s2.save()
+        self.assertRaises(ValidationError, SSHFP.objects.create,
+            label='bleh',
+            domain=self.o_e,
+            key=key,
+            algorithm_number=1,
+            fingerprint_type=1,
+            ctnr=ctnr2,
+        )
 
     def test_name_unique(self):
         """Test that two SSHFPs cannot share a name"""
-        key1 = '7d97e98f8af710c7e7fe703abc8f639e0ee507c4'
-        key2 = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
 
-        s1 = SSHFP(label='foo', domain=self.o_e, key=key1, algorithm_number=1,
-                   fingerprint_type=1, ctnr=self.ctnr)
-        s1.save()
+        SSHFP.objects.create(
+            label='foo',
+            domain=self.o_e,
+            key='7d97e98f8af710c7e7fe703abc8f639e0ee507c4',
+            algorithm_number=1,
+            fingerprint_type=1,
+            ctnr=self.ctnr)
 
-        with self.assertRaises(ValidationError):
-            s2 = SSHFP(label='foo', domain=self.o_e, key=key2,
-                       algorithm_number=1, fingerprint_type=1, ctnr=self.ctnr)
-            s2.save()
+        self.assertRaises(ValidationError, SSHFP.objects.create,
+            label='foo',
+            domain=self.o_e,
+            key='8d97e98f8af710c7e7fe703abc8f639e0ee507c4',
+            algorithm_number=1,
+            fingerprint_type=1,
+            ctnr=self.ctnr)

@@ -24,8 +24,7 @@ class TXTTests(cyder.base.tests.TestCase):
         txt = TXT(**data)
         txt.save()
         txt.__repr__()
-        rtxt = TXT.objects.filter(**data)
-        self.assertTrue(len(rtxt) == 1)
+        self.assertEqual(TXT.objects.filter(**data).count(), 1)
         return txt
 
     def do_remove(self, **data):
@@ -35,46 +34,31 @@ class TXTTests(cyder.base.tests.TestCase):
         self.assertTrue(len(rmx) == 0)
 
     def test_add_remove_txt(self):
-        label = "asdf"
-        data = "asdf"
-        data = {'label': label, 'txt_data': data, 'domain': self.o_e}
-        self.do_generic_add(**data)
-
-        label = "asdf"
-        data = "asdfasfd"
-        data = {'label': label, 'txt_data': data, 'domain': self.o_e}
-        self.do_generic_add(**data)
-
-        label = "df"
-        data = "aasdf"
-        data = {'label': label, 'txt_data': data, 'domain': self.o_e}
-        self.do_generic_add(**data)
-
-        label = "12314"
-        data = "dd"
-        data = {'label': label, 'txt_data': data, 'domain': self.o}
-        self.do_generic_add(**data)
+        self.do_generic_add(label="asdf", txt_data="asdf", domain=self.o_e)
+        self.do_generic_add(label="asdf", txt_data="asdfasfd", domain=self.o_e)
+        self.do_generic_add(label="df", txt_data="aasdf", domain=self.o_e)
+        self.do_generic_add(label="12314", txt_data="dd", domain=self.o)
 
     def test_domain_ctnr(self):
         ctnr1 = Ctnr(name='test_ctnr1')
         ctnr1.save()
         ctnr1.domains.add(self.o_e)
 
-        ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.save()
-
         self.do_generic_add(
             label='foo', domain=self.o_e, txt_data='Data data data',
             ctnr=ctnr1)
 
-        with self.assertRaises(ValidationError):
-            self.do_generic_add(
-                label='bleh', domain=self.o_e, txt_data='Data data data',
-                ctnr=ctnr2)
+        ctnr2 = Ctnr(name='test_ctnr2')
+        ctnr2.save()
+
+        self.assertRaises(ValidationError, self.do_generic_add,
+            label='bleh', domain=self.o_e, txt_data='Data data data',
+            ctnr=ctnr2)
 
     def test_name_duplicates(self):
         """Test that multiple TXTs may share a name"""
+
         for txt_data in ('qwertyuiop', 'asdfghjkl', 'zxcvbnm'):
-            t = TXT(label='foo', domain=self.o_e, txt_data=txt_data,
-                    ctnr=self.ctnr)
-            t.save()
+            TXT.objects.create(
+                label='foo', domain=self.o_e, txt_data=txt_data,
+                ctnr=self.ctnr)
