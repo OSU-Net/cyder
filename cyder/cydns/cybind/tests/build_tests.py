@@ -68,14 +68,14 @@ class DNSBuildTest(TestCase):
         self.builder.push(sanity_check=False)
         rev1 = self.builder.repo.get_revision()
 
-        sleep(1)  # ensure different serial if rebuilt
+        sleep(1)  # Ensure different serial if rebuilt.
         self.builder.build()
         self.builder.push(sanity_check=False)
         rev2 = self.builder.repo.get_revision()
 
         self.assertEqual(rev1, rev2)
 
-        sleep(1)  # ensure different serial if rebuilt
+        sleep(1)  # Ensure different serial if rebuilt.
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
         rev3 = self.builder.repo.get_revision()
@@ -93,7 +93,7 @@ class DNSBuildTest(TestCase):
         s = StaticInterface.objects.get(fqdn='www.example.com')
         s.domain.soa.schedule_rebuild()
 
-        sleep(1)  # ensure different serial if rebuilt
+        sleep(1)  # Ensure different serial if rebuilt.
         self.builder.build()
         self.builder.push(sanity_check=False)
         rev2 = self.builder.repo.get_revision()
@@ -123,9 +123,8 @@ class DNSBuildTest(TestCase):
             View.objects.get(name='private'))
 
         self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
 
     def test_sanity_check2(self):
         """Test that the sanity check fails when too many lines are removed"""
@@ -141,9 +140,8 @@ class DNSBuildTest(TestCase):
             fqdn__in=('www.example.com', 'www2.example.com')).delete()
 
         self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
 
     def test_sanity_check3(self):
         """Test that the sanity check succeeds when changes are sane"""

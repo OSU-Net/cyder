@@ -22,8 +22,7 @@ from cyder.core.task.models import Task
 
 class DirtySOATests(TestCase):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
         self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
         self.sr = self.r1.soa
         self.sr.dirty = False
@@ -42,8 +41,7 @@ class DirtySOATests(TestCase):
 
         self.ctnr.domains.add(self.dom, self.rdom)
 
-        self.s = System(name='test_system')
-        self.s.save()
+        self.s = System.objects.create(name='test_system')
 
         self.net = Network(network_str='10.2.3.0/30')
         self.net.update_network()
