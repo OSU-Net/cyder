@@ -21,7 +21,7 @@ class LibTestsRange(TestCase):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
-        self.system = System()
+        self.system = System(name='test_system')
         self.system.save()
         d1 = create_fake_zone("oregonstate.com", suffix="")
         soa = d1.soa

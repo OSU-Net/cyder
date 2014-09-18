@@ -51,7 +51,7 @@ class NSTestsModels(TestCase):
 
         self._128 = create_zone('128.in-addr.arpa')
 
-        self.s = System()
+        self.s = System(name='test_system')
         self.s.save()
 
         self.net1 = Network(network_str='128.193.0.0/17')

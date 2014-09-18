@@ -39,7 +39,7 @@ class BaseStaticTests(TestCase):
         self.f_c.save()
         self.ctnr.domains.add(self.c)
         self.ctnr.domains.add(self.f_c)
-        self.n = System()
+        self.n = System(name='test_system')
         self.n.save()
         View.objects.get_or_create(name="private")
 

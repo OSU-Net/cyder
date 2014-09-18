@@ -13,8 +13,9 @@ from cyder.core.system.validators import validate_no_spaces
 
 
 class System(BaseModel, ObjectUrlMixin):
-    name = models.CharField(max_length=255, unique=False,
-                            validators=[validate_no_spaces])
+    name = models.CharField(
+        max_length=255, unique=False, null=False, blank=False,
+        validators=[validate_no_spaces])
 
     search_fields = ('name',)
     display_fields = ('name',)
@@ -66,6 +67,7 @@ class System(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
+    @safe_save
     def save(self, *args, **kwargs):
         super(System, self).save(*args, **kwargs)
 

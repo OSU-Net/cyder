@@ -42,7 +42,7 @@ class DirtySOATests(TestCase):
 
         self.ctnr.domains.add(self.dom, self.rdom)
 
-        self.s = System()
+        self.s = System(name='test_system')
         self.s.save()
 
         self.net = Network(network_str='10.2.3.0/30')
