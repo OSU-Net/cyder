@@ -43,17 +43,15 @@ class DirtySOATests(TestCase):
 
         self.s = System.objects.create(name='test_system')
 
-        self.net = Network(network_str='10.2.3.0/30')
-        self.net.update_network()
-        self.net.save()
-        self.range = Range(network=self.net, range_type=STATIC,
-                           start_str='10.2.3.1', end_str='10.2.3.2')
-        self.range.save()
+        self.net = Network.objects.create(network_str='10.2.3.0/30')
+        self.range = Range.objects.create(
+            network=self.net, range_type=STATIC, start_str='10.2.3.1',
+            end_str='10.2.3.2')
         self.ctnr.ranges.add(self.range)
 
     def test_print_soa(self):
-        self.assertTrue(self.soa.bind_render_record() not in ('', None))
-        self.assertTrue(self.rsoa.bind_render_record() not in ('', None))
+        self.assertNotIn(self.soa.bind_render_record(), ('', None))
+        self.assertNotIn(self.rsoa.bind_render_record(), ('', None))
 
     def generic_dirty(self, Klass, create_data, update_data, local_soa,
                       tdiff=1):
@@ -61,9 +59,8 @@ class DirtySOATests(TestCase):
         Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
-        rec = Klass(**create_data)
-        rec.save()
-        self.assertTrue(rec.bind_render_record() not in ('', None))
+        rec = Klass.objects.create(**create_data)
+        self.assertNotIn(rec.bind_render_record(), ('', None))
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
         self.assertLessEqual(tdiff, Task.dns.count())
@@ -188,7 +185,7 @@ class DirtySOATests(TestCase):
         create_data = {
             'label': 'asdf8',
             'domain': self.dom,
-            'txt_data': 'some shit',
+            'txt_data': 'some stuff',
         }
         update_data = {
             'label': 'asdfx5',
