@@ -279,6 +279,7 @@ class Network(BaseModel, ObjectUrlMixin):
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
                                                     # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
+        self.network_str = str(self.network)
 
     @property
     def children(self):
