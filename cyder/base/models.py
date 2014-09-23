@@ -40,6 +40,9 @@ class BaseModel(models.Model):
             error = mark_safe(error)
         return error
 
+    def reload(self):
+        return self.__class__.objects.get(pk=self.pk)
+
 
 class ExpirableMixin(models.Model):
     expire = models.DateTimeField(null=True, blank=True,
