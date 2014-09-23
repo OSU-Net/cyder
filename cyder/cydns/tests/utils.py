@@ -194,6 +194,7 @@ def create_zone(name):
     domain = Domain.objects.create(name=name)
     return make_root(domain)
 
+
 def make_root(domain):
     Nameserver.objects.create(domain=domain, server='ns1.unused')
     SOA.objects.create(
