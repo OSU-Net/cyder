@@ -56,7 +56,7 @@ $(document).ready( function() {
 
     // handles create buttons in dynamic/static interface view and range
     // detail view
-    $('#system_create').on( 'click', function( e ) {
+    $( document ).on( 'click', '#system_create', function( e ) {
         e.preventDefault();
         button_to_form( this, csrfToken, function ( postForm ) {
             $(postForm).submit();
@@ -64,7 +64,7 @@ $(document).ready( function() {
     });
 
     // handles all delete buttons
-    $('#delete, .delete').on( 'click', function( e ) {
+    $( document ).on( 'click', '#delete, .delete', function( e ) {
         e.preventDefault();
         var button = this;
         var kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
@@ -105,7 +105,7 @@ $(document).ready( function() {
         }
     });
 
-    $('#id_attribute').on( 'focus', function() {
+    $( document ).on( 'focus', '#id_attribute', function() {
         $('#id_attribute').autocomplete({
             minLength: 1,
             source: function( request, response ) {
@@ -126,7 +126,7 @@ $(document).ready( function() {
         });
     });
 
-    $('#id_attribute_type').on( 'change', function() {
+    $( document ).on( 'change', '#id_attribute_type', function() {
         $('#id_attribute').val( '' );
     });
 
@@ -143,7 +143,7 @@ $(document).ready( function() {
         });
     });
 
-    $('.getForm').on( 'click', function( e ) {
+    $( document ).on( 'click', '.getForm', function( e ) {
         // Show update form on clicking update icon.
         var kwargs;
         var formTitle;
@@ -212,7 +212,7 @@ $(document).ready( function() {
     });
 
     // Form submit handler, special logic for attributes
-    $('#obj-form form').on( 'submit', function( e ) {
+    $( document ).on( 'submit', '#obj-form form', function( e ) {
         var url = $('#obj-form form')[0].action;
         var fields = $('#obj-form form').find( ':input' ).serializeArray();
         e.preventDefault();

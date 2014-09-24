@@ -1,6 +1,6 @@
 $(document).ready(function() {
     var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
-    $('.wizard').on( 'change', function() {
+    $( document ).on( 'change', '.wizard', function() {
         var rangeType = $(
             "input[type='radio'][name='interface_type']:checked" ).val();
         if ( this.id == 'id_range' && $('#id_range').val() == '') {

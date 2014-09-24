@@ -1,5 +1,5 @@
 $(document).ready( function() {
-    $('#Bug-Report').on( 'submit', function( e ) {
+    $( document ).on( 'submit', '#Bug-Report', function( e ) {
         e.preventDefault();
         url = $(location).attr( 'href' );
         var csrfToken = $('#view-metadata').attr('data-csrfToken');

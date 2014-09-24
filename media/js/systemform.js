@@ -27,7 +27,7 @@ $(document).ready(function() {
         changeSystemForm( this.value, true );
     });
 
-    $('#system-form form').on('submit', function( e ) {
+    $( document ).on('submit', '#system-form form', function( e ) {
         e.preventDefault();
         var fields;
         if ($(this).find('#error').length) {
