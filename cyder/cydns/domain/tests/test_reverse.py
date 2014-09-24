@@ -42,14 +42,34 @@ class ReverseDomainTests(TestCase):
         self.i6_arpa.save()
 
         self.domain = create_fake_zone('foo.mozilla.com', suffix='')
+        self.ctnr.domains.add(self.domain)
         self.s = System.objects.create(name='mozilla.com')
 
-        self.net = Network(network_str='127.193.8.0/29')
-        self.net.update_network()
-        self.net.save()
-        self.sr = Range(network=self.net, range_type=STATIC,
-                        start_str='127.193.8.1', end_str='127.193.8.4')
-        self.sr.save()
+        self.create_network_range(
+            network_str="127.193.8.0/29", start_str="127.193.8.1",
+            end_str="127.193.8.4", ip_type='4')
+        self.create_network_range(
+            network_str="2620:105::/32", start_str="2620:105:f000:8000::1",
+            end_str="2620:105:f000:8000::1000", ip_type='6')
+        self.create_network_range(
+            network_str="2001:db8::/32", start_str="2001:db8:85a3::8000:0:0",
+            end_str="2001:db8:85a3::9000:0:0", ip_type='6')
+
+    def create_network_range(self, network_str, start_str, end_str,
+                             range_type="st", ip_type='4', domain=None):
+        if domain is None:
+            domain = self.domain
+
+        n = Network(ip_type=ip_type, network_str=network_str)
+        n.full_clean()
+        n.save()
+
+        r = Range(network=n, range_type=range_type, start_str=start_str,
+                  end_str=end_str, domain=domain, ip_type=ip_type)
+        r.full_clean()
+        r.save()
+
+        self.ctnr.ranges.add(r)
 
     def add_intr_ipv4(self, ip):
         intr = StaticInterface(
@@ -61,13 +81,13 @@ class ReverseDomainTests(TestCase):
         return intr
 
     def add_ptr_ipv4(self, ip):
-        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='4')
+        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='4', ctnr=self.ctnr)
         ptr.full_clean()
         ptr.save()
         return ptr
 
     def add_ptr_ipv6(self, ip):
-        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='6')
+        ptr = PTR(label="bluh", domain=self.domain, ip_str=ip, ip_type='6', ctnr=self.ctnr)
         ptr.full_clean()
         ptr.save()
         return ptr
@@ -83,6 +103,7 @@ class ReverseDomainTests(TestCase):
         d.clean()
         d.save()
         self.assertTrue(d.is_reverse)
+        self.ctnr.domains.add(d)
         return d
 
     # Reverse Domain test functions
@@ -283,43 +304,43 @@ class ReverseDomainTests(TestCase):
         self.assertRaises(ValidationError, self.create_domain,
                           name='192.168', ip_type='4')
 
-        self.create_domain(name='128', ip_type='4').save()
-        rd0 = self.create_domain(name='128.193', ip_type='4')
+        self.create_domain(name='127', ip_type='4').save()
+        rd0 = self.create_domain(name='127.193', ip_type='4')
         rd0.save()
-        ip1 = self.add_ptr_ipv4('128.193.8.1')
+        ip1 = self.add_ptr_ipv4('127.193.8.1')
         self.assertEqual(ip1.reverse_domain, rd0)
-        ip2 = self.add_ptr_ipv4('128.193.8.2')
+        ip2 = self.add_ptr_ipv4('127.193.8.2')
         self.assertEqual(ip2.reverse_domain, rd0)
-        ip3 = self.add_ptr_ipv4('128.193.8.3')
+        ip3 = self.add_ptr_ipv4('127.193.8.3')
         self.assertEqual(ip3.reverse_domain, rd0)
-        ip4 = self.add_ptr_ipv4('128.193.8.4')
+        ip4 = self.add_ptr_ipv4('127.193.8.4')
         self.assertEqual(ip4.reverse_domain, rd0)
-        rd1 = self.create_domain(name='128.193.8', ip_type='4')
+        rd1 = self.create_domain(name='127.193.8', ip_type='4')
         rd1.save()
         ptr1 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.1').__int__(), ip_type='4')[0]
+            '127.193.8.1').__int__(), ip_type='4')[0]
         self.assertEqual(ptr1.reverse_domain, rd1)
         ptr2 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.2').__int__(), ip_type='4')[0]
+            '127.193.8.2').__int__(), ip_type='4')[0]
         self.assertEqual(ptr2.reverse_domain, rd1)
         ptr3 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.3').__int__(), ip_type='4')[0]
+            '127.193.8.3').__int__(), ip_type='4')[0]
         self.assertEqual(ptr3.reverse_domain, rd1)
         ptr4 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.4').__int__(), ip_type='4')[0]
+            '127.193.8.4').__int__(), ip_type='4')[0]
         self.assertEqual(ptr4.reverse_domain, rd1)
         rd1.delete()
         ptr1 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.1').__int__(), ip_type='4')[0]
+            '127.193.8.1').__int__(), ip_type='4')[0]
         self.assertEqual(ptr1.reverse_domain, rd0)
         ptr2 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.2').__int__(), ip_type='4')[0]
+            '127.193.8.2').__int__(), ip_type='4')[0]
         self.assertEqual(ptr2.reverse_domain, rd0)
         ptr3 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.2').__int__(), ip_type='4')[0]
+            '127.193.8.2').__int__(), ip_type='4')[0]
         self.assertEqual(ptr3.reverse_domain, rd0)
         ptr4 = PTR.objects.filter(ip_lower=ipaddr.IPv4Address(
-            '128.193.8.3').__int__(), ip_type='4')[0]
+            '127.193.8.3').__int__(), ip_type='4')[0]
         self.assertEqual(ptr4.reverse_domain, rd0)
 
     def test_boot_strap_add_ipv6_domain(self):

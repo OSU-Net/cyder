@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
+from settings import NONDELEGATED_NS
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
@@ -40,6 +41,21 @@ connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
 cursor = connection.cursor()
 
 
+def get_delegated():
+    sql = ("SELECT domain.name FROM maintain_sb.domain "
+           "INNER JOIN maintain_sb.nameserver "
+           "ON domain.id=nameserver.domain "
+           "WHERE %s")
+    where = ' and '.join(["nameserver.name != '%s'" % ns
+                          for ns in NONDELEGATED_NS])
+    cursor.execute(sql % where)
+    results = [i for (i,) in cursor.fetchall()]
+    return results
+
+
+delegated_dnames = set(get_delegated())
+
+
 class Zone(object):
 
     def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
@@ -47,7 +63,25 @@ class Zone(object):
         self.dname = self.get_dname() if dname is None else dname
         self.dname = self.dname.lower()
 
-        self.domain = self.gen_domain()
+        if gen_recs:
+            try:
+                self.domain = Domain.objects.get(name=self.dname)
+            except Domain.DoesNotExist:
+                return
+        else:
+            self.domain = self.gen_domain()
+            if not self.domain:
+                return
+
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.delegated:
+                raise Exception("Whoa dude %s has a delegated master" % self.domain.name)
+
+            if self.dname in delegated_dnames:
+                self.domain.delegated = True
+                print "%s has been marked as delegated." % self.domain.name
+                self.domain.save()
+
         if self.domain:
             if gen_recs:
                 if self.domain_id is not None:
@@ -58,7 +92,7 @@ class Zone(object):
                     self.domain.soa = self.gen_SOA() or soa
                 else:
                     self.gen_AR()
-            self.domain.save()
+
             if self.domain_id is not None:
                 self.walk_zone(gen_recs=gen_recs)
 
@@ -67,6 +101,9 @@ class Zone(object):
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
         """
+        if self.domain_id is None:
+            return None
+
         cursor.execute("SELECT primary_master, hostmaster, refresh, "
                        "retry, expire, ttl "
                        "FROM soa "
@@ -84,10 +121,15 @@ class Zone(object):
                     primary=primary, contact=contact, refresh=refresh,
                     retry=retry, expire=expire, minimum=minimum,
                     root_domain=self.domain, description='')
-
-            return soa
         else:
-            return None
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.soa:
+                soa = master_domain.soa
+            else:
+                print "WARNING: No SOA exists for %s." % self.domain.name
+                return None
+
+        return soa
 
     def gen_domain(self):
         """Generates a Domain object for this Zone from a hostname.
@@ -95,8 +137,15 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES):
-            return ensure_domain(name=self.dname, force=True,
-                                 update_range_usage=False)
+            try:
+                domain = ensure_domain(name=self.dname, force=True,
+                                       update_range_usage=False)
+                domain.clean()
+                domain.save()
+                return domain
+            except ValidationError, e:
+                print "Could not migrate domain %s: %s" % (self.dname, e)
+                return None
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -107,11 +156,13 @@ class Zone(object):
 
         :uniqueness: label, domain, server, priority
         """
-        cursor.execute("SELECT name, server, priority, ttl, enabled "
-                       "FROM zone_mx "
+        cursor.execute("SELECT zone_mx.name, server, priority, ttl, "
+                       "enabled, zone.name FROM zone_mx "
+                       "JOIN zone ON zone_mx.zone = zone.id "
                        "WHERE domain = '%s';" % self.domain_id)
 
-        for name, server, priority, ttl, enabled in cursor.fetchall():
+        for (name, server, priority, ttl,
+                enabled, zone) in cursor.fetchall():
             name, server = name.lower(), server.lower()
             if MX.objects.filter(label=name,
                                  domain=self.domain,
@@ -120,12 +171,16 @@ class Zone(object):
                 print "Ignoring MX %s; MX already exists." % server
                 continue
 
+            ctnr = self.ctnr_from_zone_name(zone, 'MX')
+            if ctnr is None:
+                continue
+
             try:
                 mx, _ = MX.objects.get_or_create(label=name,
                                                  domain=self.domain,
                                                  server=server,
                                                  priority=priority,
-                                                 ttl=ttl)
+                                                 ttl=ttl, ctnr=ctnr)
                 if enabled:
                     mx.views.add(public)
                     mx.views.add(private)
@@ -143,7 +198,7 @@ class Zone(object):
 
         :StaticInterface uniqueness: hostname, mac, ip_str
         """
-        from dhcp_migrate import maintain_find_zone, migrate_zones
+        from dhcp_migrate import migrate_zones
 
         if Ctnr.objects.count() <= 2:
             print "WARNING: Zones not migrated. Attempting to migrate now."
@@ -161,20 +216,24 @@ class Zone(object):
                           "owning_unit": "Owning Unit",
                           "user_id": "User ID"}
 
-        keys = ("id", "ip", "name", "workgroup", "enabled", "ha", "zone",
-                "type", "os", "location", "department", "serial", "other_id",
-                "purchase_date", "po_number", "warranty_date", "owning_unit",
-                "user_id", "last_seen", "expire", "ttl", "last_update")
+        keys = ("host.id", "ip", "host.name", "zone.name", "workgroup",
+                "enabled", "ha", "zone", "type", "os", "location",
+                "department", "serial", "other_id", "purchase_date",
+                "po_number", "warranty_date", "owning_unit", "user_id",
+                "last_seen", "expire", "ttl", "last_update")
 
-        sql = ("SELECT %s FROM host WHERE ip != 0 AND domain = '%s';" %
+        sql = ("SELECT %s FROM host JOIN zone ON host.zone = zone.id "
+               "WHERE ip != 0 AND domain = '%s';" %
                (", ".join(keys), self.domain_id))
 
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
-            ctnr = maintain_find_zone(items['zone'])
+            ctnr = self.ctnr_from_zone_name(items['zone.name'])
+            if ctnr is None:
+                continue
 
-            name = items['name']
+            name = items['host.name']
             enabled = bool(items['enabled'])
             dns_enabled, dhcp_enabled = enabled, enabled
             ip = items['ip']
@@ -193,7 +252,7 @@ class Zone(object):
                 label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
             if static:
                 stderr.write("Ignoring host %s: already exists.\n"
-                             % items['id'])
+                             % items['host.id'])
                 continue
 
             # create system
@@ -234,8 +293,10 @@ class Zone(object):
             try:
                 static.full_clean()
                 static.save(update_range_usage=False)
-            except ValidationError:
+            except ValidationError, e:
                 try:
+                    stderr.write("WARNING: host with IP {0} has been "
+                                 "disabled: {1}\n".format(static.ip_str, e))
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
                     static.full_clean()
@@ -270,11 +331,13 @@ class Zone(object):
 
         :PTR uniqueness: name, ip_str, ip_type
         """
+
         name = self.domain.name
-        cursor.execute("SELECT ip, hostname, type, enabled "
-                       "FROM pointer "
+
+        cursor.execute("SELECT ip, hostname, type, zone.name, enabled "
+                       "FROM pointer JOIN zone ON pointer.zone = zone.id "
                        "WHERE hostname LIKE '%%.%s';" % name)
-        for ip, hostname, ptr_type, enabled, in cursor.fetchall():
+        for ip, hostname, ptr_type, zone, enabled, in cursor.fetchall():
             hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
             if dname != name:
@@ -291,14 +354,22 @@ class Zone(object):
                 else:
                     pass
 
+            ctnr = self.ctnr_from_zone_name(zone, 'AR/PTR')
+            if ctnr is None:
+                continue
+
             if ptr_type == 'forward':
                 if AddressRecord.objects.filter(
                         fqdn=hostname, ip_str=long2ip(ip)).exists():
                     continue
 
-                arec, _ = range_usage_get_create(
-                    AddressRecord, label=label, domain=self.domain,
-                    ip_str=long2ip(ip), ip_type='4')
+                try:
+                    arec, _ = range_usage_get_create(
+                        AddressRecord, label=label, domain=self.domain,
+                        ip_str=long2ip(ip), ip_type='4', ctnr=ctnr)
+                except ValidationError, e:
+                    print "Could not migrate AR %s: %s" % (hostname, e)
+                    continue
 
                 if enabled:
                     arec.views.add(public)
@@ -306,12 +377,17 @@ class Zone(object):
 
             elif ptr_type == 'reverse':
                 if not PTR.objects.filter(ip_str=long2ip(ip)).exists():
-                    ptr = PTR(label=label, domain=self.domain,
-                              ip_str=long2ip(ip), ip_type='4')
+                    ptr = PTR(fqdn=hostname, ip_str=long2ip(ip),
+                              ip_type='4', ctnr=ctnr)
 
                     # PTRs need to be cleaned independently of saving
                     # (no get_or_create)
-                    ptr.full_clean()
+                    try:
+                        ptr.full_clean()
+                    except ValidationError, e:
+                        print "Could not migrate PTR %s: %s" % (ptr.ip_str, e)
+                        continue
+
                     ptr.save(update_range_usage=False)
                     if enabled:
                         ptr.views.add(public)
@@ -328,7 +404,7 @@ class Zone(object):
         cursor.execute("SELECT * "
                        "FROM nameserver "
                        "WHERE domain='%s';" % self.domain_id)
-        for _, name, _, _ in cursor.fetchall():
+        for pk, name, _, _ in cursor.fetchall():
             name = name.lower()
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
@@ -336,7 +412,7 @@ class Zone(object):
                 ns.views.add(public)
                 ns.views.add(private)
             except ValidationError, e:
-                stderr.write("Error generating NS. %s\n" % e)
+                stderr.write("Error generating NS %s. %s\n" % (pk, e))
 
     def walk_zone(self, gen_recs=True):
         """
@@ -364,8 +440,23 @@ class Zone(object):
         dname = dname.lower()
         return dname
 
-    #TODO: Cleanup functions for leftover objects to migrate
-    # (static interfaces and PTRs)
+    @staticmethod
+    def ctnr_from_zone_name(zone, obj_type="Object"):
+        from dhcp_migrate import clean_zone_name
+        zone = clean_zone_name(zone)
+        try:
+            ctnr = Ctnr.objects.get(name=zone)
+        except Ctnr.DoesNotExist:
+            print ("%s migration error; ctnr %s does not exist." %
+                   (obj_type, zone))
+            ctnr = None
+
+        return ctnr
+
+    @staticmethod
+    def ctnr_from_zone_id(zone_id):
+        from dhcp_migrate import maintain_find_zone
+        return maintain_find_zone(zone_id)
 
 
 def gen_CNAME():
@@ -388,18 +479,14 @@ def gen_CNAME():
     :uniqueness: label, domain, target
     """
     print "Creating CNAMEs."
-    cursor.execute("SELECT * FROM zone_cname")
+    sql = ("SELECT zone_cname.id, zone_cname.server, zone_cname.name, "
+           "zone_cname.enabled, zone.name, domain.name FROM zone_cname "
+           "JOIN zone ON zone_cname.zone = zone.id "
+           "JOIN domain ON zone_cname.domain = domain.id")
+    cursor.execute(sql)
 
-    for _, server, name, domain_id, ttl, zone, enabled in cursor.fetchall():
+    for pk, server, name, enabled, zone, dname in cursor.fetchall():
         server, name = server.lower(), name.lower()
-        if not cursor.execute("SELECT name FROM domain WHERE id = '%s'"
-                              % domain_id):
-            stderr.write('Ignoring CNAME {0}; domain unknown.\n'
-                         .format(name))
-            continue
-        dname, = cursor.fetchone()
-        if not dname:
-            continue
         dname = dname.lower()
 
         fqdn = ".".join([name, dname])
@@ -425,7 +512,15 @@ def gen_CNAME():
                        % fqdn)
             continue
 
-        cn = CNAME(label=name, domain=domain, target=server)
+        ctnr = Zone.ctnr_from_zone_name(zone, 'CNAME')
+        if ctnr is None:
+            continue
+
+        if ctnr not in domain.ctnr_set.all():
+            print "CNAME %s has mismatching container for its domain." % pk
+            continue
+
+        cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
         cn.set_fqdn()
         dup_ptrs = PTR.objects.filter(fqdn=cn.fqdn)
         if dup_ptrs:
@@ -516,16 +611,19 @@ def gen_domains_only():
 
 def add_pointers_manual():
     opts = settings.POINTERS
+    sql = 'SELECT id FROM zone WHERE name LIKE "zone.nws"'
+    cursor.execute(sql)
+    zone_id = cursor.fetchone()[0]
     for opt in opts:
         (ip, hn, ptype) = opt
         ip = ip2long(ip)
         sql = ('SELECT count(*) FROM pointer WHERE ip = %s AND hostname = "%s"'
-               'AND type = "%s"' % (ip, hn, ptype))
+               'AND type = "%s AND zone = %s"' % (ip, hn, ptype, zone_id))
         cursor.execute(sql)
         exists = cursor.fetchone()[0]
         if not exists:
-            sql = ('INSERT INTO pointer (ip, hostname, type) '
-                   'VALUES (%s, "%s", "%s")' % (ip, hn, ptype))
+            sql = ('INSERT INTO pointer (ip, hostname, type, zone) '
+                   'VALUES (%s, "%s", "%s", %s)' % (ip, hn, ptype, zone_id))
             cursor.execute(sql)
 
 

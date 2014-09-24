@@ -41,6 +41,9 @@ class Site(BaseModel, ObjectUrlMixin):
         objects = objects or Site.objects
         return objects.filter(network__in=networks)
 
+    def check_in_ctnr(self, ctnr):
+        return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
+
     def details(self):
         """For tables."""
         data = super(Site, self).details()

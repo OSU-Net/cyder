@@ -62,10 +62,9 @@ def check_for_master_delegation(domain, master_domain):
         return
     if not master_domain.delegated:
         return
-    if not domain.pk:  # We don't exist yet.
-        raise ValidationError("No subdomains can be created in the {0} "
-                              "domain. It is delegated."
-                              .format(master_domain.name))
+    raise ValidationError("No subdomains can be created in the {0} "
+                          "domain. It is delegated."
+                          .format(master_domain.name))
 
 
 def validate_zone_soa(domain, master_domain):
@@ -346,6 +345,14 @@ def validate_fqdn(fqdn):
     """
     # TODO, make sure the grammar is followed.
     _name_type_check(fqdn)
+
+    if '.' in fqdn:
+        _, tld = fqdn.rsplit('.', 1)
+    else:
+        tld = fqdn
+
+    if tld.isdigit():
+        raise ValidationError("TLD cannot be a number.")
 
     # Star records are allowed. Remove them during validation.
     if fqdn[0] == '*':

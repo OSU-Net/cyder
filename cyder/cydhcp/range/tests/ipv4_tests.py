@@ -16,6 +16,7 @@ class V4RangeTests(TestCase):
         self.ctnr.save()
         self.d = Domain(name="com")
         self.d.save()
+        self.ctnr.domains.add(self.d)
         Domain(name="arpa").save()
         Domain(name="in-addr.arpa").save()
         Domain(name="10.in-addr.arpa").save()

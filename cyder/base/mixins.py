@@ -139,8 +139,6 @@ class UsabilityFormMixin(object):
     def autoselect_system(self):
         System = get_model('cyder', 'system')
         if 'system' in self.initial:
-            system_name = System.objects.get(
-                pk=int(self.initial['system'])).name
             self.fields['system'] = ModelChoiceField(
                 widget=HiddenInput(),
                 empty_label='',
@@ -148,8 +146,19 @@ class UsabilityFormMixin(object):
         elif 'system' in self.fields:
             del(self.fields['system'])
 
+    def autoselect_ctnr(self, request):
+        if 'ctnr' not in self.fields:
+            return
+
+        ctnr = request.session['ctnr']
+        if ctnr.name != "global":
+            if 'ctnr' not in self.initial:
+                self.fields['ctnr'].initial = request.session['ctnr']
+            self.fields['ctnr'].widget = HiddenInput()
+
     def make_usable(self, request):
         self.autoselect_system()
+        self.autoselect_ctnr(request)
         if 'ctnr' in request.session:
             self.filter_by_ctnr_all(request)
         self.alphabetize_all()

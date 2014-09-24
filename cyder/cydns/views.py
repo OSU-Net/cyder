@@ -12,7 +12,6 @@ from cyder.base.views import (BaseCreateView, BaseDeleteView,
                               cy_delete, search_obj, table_update)
 from cyder.core.cyuser.utils import perm
 
-from cyder.cydns.constants import DNS_EAV_MODELS
 from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 import json
@@ -32,10 +31,13 @@ def cydns_view(request, pk=None):
     obj = get_object_or_404(Klass, pk=pk) if pk else None
 
     if request.method == 'POST':
-        object_table = None
         page_obj = None
 
-        qd, domain, errors = _fqdn_to_domain(request.POST.copy())
+        if obj_type == "ptr":
+            qd, domain, errors = request.POST.copy(), None, None
+        else:
+            qd, domain, errors = _fqdn_to_domain(request.POST.copy())
+
         # Validate form.
         if errors:
             form = FormKlass(request.POST)
@@ -53,7 +55,7 @@ def cydns_view(request, pk=None):
                     return HttpResponse(json.dumps({'success': True}))
 
                 if (hasattr(obj, 'ctnr_set') and
-                        not obj.ctnr_set.all().exists()):
+                        not obj.ctnr_set.exists()):
                     obj.ctnr_set.add(request.session['ctnr'])
                     return redirect(obj.get_list_url())
 
@@ -120,27 +122,21 @@ def cydns_search_obj(request):
 
 
 def cydns_index(request):
-    domains = request.session['ctnr'].domains.all()
-
-    addressrecord_count = 0
-    cname_count = 0
-    mx_count = 0
-    ns_count = 0
-    ptr_count = 0
-    srv_count = 0
-    sshfp_count = 0
-    txt_count = 0
+    from cyder.models import AddressRecord, PTR, MX, SRV, SSHFP, TXT, CNAME
+    ctnr = request.session['ctnr']
+    domains = ctnr.domains.all()
 
     soa_list = []
+    addressrecord_count = AddressRecord.objects.filter(ctnr=ctnr).count()
+    ptr_count = PTR.objects.filter(ctnr=ctnr).count()
+    mx_count = MX.objects.filter(ctnr=ctnr).count()
+    srv_count = SRV.objects.filter(ctnr=ctnr).count()
+    sshfp_count = SSHFP.objects.filter(ctnr=ctnr).count()
+    txt_count = TXT.objects.filter(ctnr=ctnr).count()
+    cname_count = CNAME.objects.filter(ctnr=ctnr).count()
+    ns_count = 0
     for domain in domains:
-        addressrecord_count += domain.addressrecord_set.count()
-        cname_count += domain.cname_set.count()
-        mx_count += domain.mx_set.count()
         ns_count += domain.nameserver_set.count()
-        ptr_count += domain.ptr_set.count()
-        srv_count += domain.srv_set.count()
-        sshfp_count += domain.sshfp_set.count()
-        txt_count += domain.txt_set.count()
 
         if domain.soa not in soa_list:
             soa_list.append(domain.soa)

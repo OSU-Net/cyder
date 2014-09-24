@@ -8,13 +8,30 @@ from cyder.api.authtoken.models import Token
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.validators import VALUE_TYPES
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 
 
 API_VERSION = '1'
+
+
+def create_network_range(network_str, start_str, end_str, range_type,
+                         ip_type, domain, ctnr):
+    n = Network(ip_type=ip_type, network_str=network_str)
+    n.full_clean()
+    n.save()
+
+    r = Range(network=n, range_type=range_type, start_str=start_str,
+              end_str=end_str, domain=domain, ip_type=ip_type)
+    r.full_clean()
+    r.save()
+
+    ctnr.ranges.add(r)
 
 
 def build_sample_domain():
@@ -118,7 +135,9 @@ class APITests(TestCase):
             url = self.model.get_list_url()
         root, urlname = tuple(url.strip("/").split("/"))
 
+        self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.domain, self.view = build_sample_domain()
+        self.ctnr.domains.add(self.domain)
         self.token = Token.objects.create(
             user=User.objects.get(username="test_superuser")).key
         self.authheader = {'HTTP_AUTHORIZATION': 'Token ' + self.token}

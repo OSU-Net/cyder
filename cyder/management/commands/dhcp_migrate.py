@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -486,8 +486,12 @@ def migrate_zone_reverse():
         for octet in octets:
             doctets = [octet] + doctets
             dname = ".".join(doctets) + ".in-addr.arpa"
-            domain, _ = Domain.objects.get_or_create(name=dname,
-                                                     is_reverse=True)
+            try:
+                domain, _ = Domain.objects.get_or_create(name=dname,
+                                                         is_reverse=True)
+            except ValidationError, e:
+                print "Could not migrate domain %s: %s" % (dname, e)
+                break
 
         ctnr.domains.add(domain)
         ctnr.save()

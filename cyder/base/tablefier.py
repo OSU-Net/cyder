@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse
-from cyder.base.constants import (DHCP_OBJECTS, DNS_OBJECTS, CORE_OBJECTS,
-                                  ACTION_UPDATE)
-from cyder.base.helpers import prettify_obj_type, cached_property
+from cyder.base.constants import ACTION_UPDATE
+from cyder.base.helpers import cached_property
 
 import json
 
@@ -24,6 +23,13 @@ class Tablefier:
             self.update = update
 
     @cached_property
+    def profile(self):
+        if self.request:
+            return self.request.user.get_profile()
+        else:
+            return None
+
+    @cached_property
     def first_obj(self):
         return self.objects[0]
 
@@ -37,10 +43,9 @@ class Tablefier:
 
     @cached_property
     def can_update(self):
-        request = self.request
-        if (request and request.user.get_profile().has_perm(
-                request, ACTION_UPDATE, obj_class=self.klass) and
-                hasattr(self.klass, 'get_update_url')) and self.update is True:
+        if (self.profile and self.profile.has_perm(
+                self.request, ACTION_UPDATE, obj_class=self.klass) and
+                hasattr(self.klass, 'get_update_url') and self.update):
             return True
         return False
 
@@ -129,19 +134,24 @@ class Tablefier:
             col = {'value': ['None'], 'url': [None]}
         return col
 
-    @staticmethod
-    def build_update_field(obj):
-        col = {'value': ['Update', 'Delete'],
-               'url': [obj.get_update_url(), obj.get_delete_url()],
-               'data': [[('kwargs', json.dumps({
-                          'obj_type': obj._meta.db_table, 'pk': obj.id,
-                          'obj_name': obj.pretty_name,
-                          'get_url': reverse('get-update-form'),
-                          'pretty_obj_type': obj.pretty_type}))],
-                         [('kwargs', json.dumps({
-                             'obj_type': obj._meta.db_table, 'pk': obj.id}))]],
-               'class': ['getForm', 'delete'],
-               'img': ['/media/img/update.png', '/media/img/delete.png']}
+    def build_update_field(self, obj):
+        if self.profile and self.profile.has_perm(self.request, ACTION_UPDATE,
+                                                  obj=obj):
+            # Clean this up
+            col = {'value': ['Update', 'Delete'],
+                   'url': [obj.get_update_url(), obj.get_delete_url()],
+                   'data': [[('kwargs', json.dumps({
+                              'obj_type': obj._meta.db_table, 'pk': obj.id,
+                              'obj_name': obj.pretty_name,
+                              'get_url': reverse('get-update-form'),
+                              'pretty_obj_type': obj.pretty_type}))],
+                             [('kwargs', json.dumps({
+                                 'obj_type': obj._meta.db_table, 'pk': obj.id}))]],
+                   'class': ['getForm', 'delete'],
+                   'img': ['/media/img/update.png', '/media/img/delete.png']}
+        else:
+            col = {'value': []}
+
         return col
 
     def get_data(self):

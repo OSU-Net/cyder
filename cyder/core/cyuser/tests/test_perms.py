@@ -34,7 +34,8 @@ class AuthenticationTest(TestCase):
 
         self.dev_middleware.process_request(self.request)
 
-        self.assertTrue(str(self.request.user) is not 'AnonymousUser')
+        self.assertNotEqual(str(self.request.user), 'AnonymousUser',
+                            "")
 
     def test_user_profile_create(self):
         """
@@ -58,7 +59,7 @@ class AuthenticationTest(TestCase):
         dev_middleware = DevAuthenticationMiddleware()
         dev_middleware.process_request(self.request)
 
-        self.assertTrue('ctnr' in self.request.session)
+        self.assertIn('ctnr', self.request.session)
 
     def test_become_user(self):
         """
@@ -68,20 +69,24 @@ class AuthenticationTest(TestCase):
         self.setup_request()
         self.request = login_session(self.request, 'test_superuser')
 
-        user = User.objects.create(username='test_new_user')
-        user.save()
+        test_new_superuser = User.objects.create(username="test_new_superuser")
+        test_new_superuser.is_superuser = True
+        test_new_superuser.save()
 
+        test_new_user = User.objects.create(username='test_new_user')
+        test_new_user.save()
+
+        become_user(self.request, 'test_new_superuser')
+        self.assertEqual(self.request.user.username, 'test_new_superuser')
         become_user(self.request, 'test_new_user')
-        self.assertTrue(self.request.user.username == 'test_new_user')
-        become_user(self.request, 'test_superuser')
-        self.assertTrue(self.request.user.username == 'test_superuser')
+        self.assertEqual(self.request.user.username, 'test_new_user')
 
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'test_new_user')
+        self.assertEqual(self.request.user.username, 'test_new_superuser')
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'test_superuser')
+        self.assertEqual(self.request.user.username, 'test_superuser')
         unbecome_user(self.request)
-        self.assertTrue(self.request.user.username == 'test_superuser')
+        self.assertEqual(self.request.user.username, 'test_superuser')
 
     def setup_request(self):
         """
@@ -153,8 +158,8 @@ class PermissionsTest(TestCase):
         domain = Domain(id=None, name='foo')
         domain.save()
         obj = SOA(root_domain=domain)
-        obj.primary = '192.168.1.1'
-        obj.contact = '192.168.1.1'
+        obj.primary = 'foo.bar'
+        obj.contact = 'foo.gaz'
         obj.save()
         self.ctnr_admin.domains.add(domain)
         self.ctnr_user.domains.add(domain)
@@ -222,7 +227,7 @@ class PermissionsTest(TestCase):
         self.check_perms_each_user(Nameserver(domain=domain), ns_perm_table)
 
         for obj in domain_records:
-            self.check_perms_each_user(obj, perm_table)
+            self.check_perms_each_user(obj, perm_table, set_same_ctnr=True)
 
     def setup_request(self):
         """
@@ -241,31 +246,41 @@ class PermissionsTest(TestCase):
         self.ctnr_user.save()
         self.ctnr_guest.save()
 
-    def check_perms_each_user(self, obj, perm_table):
+    def check_perms_each_user(self, obj, perm_table, set_same_ctnr=False):
         """
         Utility function for checking permissions
         """
         # Superuser.
         self.request.user = self.superuser
         self.request.session['ctnr'] = self.ctnr_guest
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_guest
         self.assert_perms(obj, perm_table, 'superuser')
 
         # Cyder admin.
         self.request.user = self.cyder_admin
         self.request.session['ctnr'] = self.ctnr_admin
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_admin
         self.assert_perms(obj, perm_table, 'cyder_admin')
 
         # Admin.
         self.request.user = self.test_user
         self.request.session['ctnr'] = self.ctnr_admin
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_admin
         self.assert_perms(obj, perm_table, 'admin')
 
         # User.
         self.request.session['ctnr'] = self.ctnr_user
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_user
         self.assert_perms(obj, perm_table, 'user')
 
         # Guest.
         self.request.session['ctnr'] = self.ctnr_guest
+        if set_same_ctnr:
+            obj.ctnr = self.ctnr_guest
         self.assert_perms(obj, perm_table, 'guest')
 
         # Pleb.

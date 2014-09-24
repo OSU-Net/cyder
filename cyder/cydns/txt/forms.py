@@ -9,7 +9,8 @@ class TXTForm(DNSForm, UsabilityFormMixin):
     class Meta:
         model = TXT
         exclude = ('fqdn',)
-        fields = ('label', 'domain', 'txt_data', 'views', 'ttl', 'description')
+        fields = ('label', 'domain', 'txt_data', 'views', 'ttl',
+                  'description', 'ctnr')
         widgets = {'views': forms.CheckboxSelectMultiple}
 
 

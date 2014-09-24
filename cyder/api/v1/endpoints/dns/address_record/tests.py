@@ -8,6 +8,7 @@ class AddressRecordBase(APITests):
 
     def create_data(self, label):
         return {
+            'ctnr': self.ctnr,
             'description': 'Address Record',
             'ttl': 420,
             'label': label,

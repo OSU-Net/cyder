@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.txt.models import TXT
@@ -11,15 +9,18 @@ from cyder.cydns.utils import ensure_label_domain
 
 from cyder.cydns.tests.utils import create_fake_zone
 
+from basedomain import BaseDomain
 
-class UpdateRecordDeleteDomainTests(TestCase):
 
+class UpdateRecordDeleteDomainTests(BaseDomain):
     def generic_check(self, obj, do_label=True, label_prefix=""):
         # Make sure all record types block
         f_c = create_fake_zone("foo.foo22", suffix="")
+        self.ctnr.domains.add(f_c)
         self.assertFalse(f_c.purgeable)
         fqdn = "bar.x.y.z.foo.foo22"
         label, the_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(the_domain)
         if do_label:
             # NS records don't like labels
             label = label_prefix + label
@@ -29,6 +30,7 @@ class UpdateRecordDeleteDomainTests(TestCase):
 
         fqdn = "bar.x.y.xx.foo.foo22"
         label, new_domain = ensure_label_domain(fqdn)
+        self.ctnr.domains.add(new_domain)
         obj.domain = new_domain
         obj.save()
 
@@ -41,26 +43,26 @@ class UpdateRecordDeleteDomainTests(TestCase):
         self.assertFalse(Domain.objects.filter(name="x.y.xx.foo.foo22"))
 
     def test_txt_update(self):
-        txt = TXT(txt_data="Nthing")
+        txt = TXT(txt_data="Nthing", ctnr=self.ctnr)
         self.generic_check(txt)
 
     def test_addrees_record_update(self):
-        addr = AddressRecord(ip_type='4', ip_str="10.2.3.4")
+        addr = AddressRecord(ip_type='4', ip_str="10.2.3.4", ctnr=self.ctnr)
         self.generic_check(addr)
 
     def test_mx_update(self):
-        mx = MX(server="foo", priority=4)
+        mx = MX(server="foo", priority=4, ctnr=self.ctnr)
         self.generic_check(mx)
 
     def test_ns_update(self):
-        ns = Nameserver(server="asdfasffoo")
+        ns = Nameserver(server="asdfasffoo", ctnr=self.ctnr)
         self.generic_check(ns, do_label=False)
 
     def test_srv_update(self):
         srv = SRV(target="foo", priority=4,
-                  weight=4, port=34)
+                  weight=4, port=34, ctnr=self.ctnr)
         self.generic_check(srv, label_prefix="_")
 
     def test_cname_update(self):
-        cname = CNAME(target="foo")
+        cname = CNAME(target="foo", ctnr=self.ctnr)
         self.generic_check(cname)

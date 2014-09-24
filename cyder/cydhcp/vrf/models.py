@@ -33,6 +33,9 @@ class Vrf(BaseModel, ObjectUrlMixin):
         objects = objects or Vrf.objects
         return objects.filter(network__in=networks)
 
+    def check_in_ctnr(self, ctnr):
+        return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
+
     def details(self):
         data = super(Vrf, self).details()
         data['data'] = (
