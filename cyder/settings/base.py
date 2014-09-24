@@ -276,6 +276,7 @@ MINIFY_BUNDLES = {
     'js': {
         'cyder_js': (
             'js/lib/jquery-1.11.1.min.js',
+            'js/lib/jquery-migrate-1.2.1.min.js',
             'js/lib/attribute_adder.js',
             'js/lib/jQuery.rightclick.js',
             'js/lib/jquery.validate.min.js',
