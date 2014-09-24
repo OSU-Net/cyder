@@ -178,16 +178,22 @@ $(document).ready( function() {
                 };
             }
 
-            $.get( kwargs.get_url , getData, function( data ) {
-                setTimeout( function() {
-                    $('#form-title').html( formTitle );
-                    $('#hidden-inner-form').empty().append( data.form );
-                    initForms();
-                }, 150 );
-                $('.form-btns a.submit, .btn.ajax').text( buttonLabel );
-                $('.form-btns a.submit').attr( 'class', buttonAttrs );
-                $('#obj-form').slideDown();
-            }, 'json' );
+            $.ajax({
+                url: kwargs.get_url,
+                data: getData,
+                global: false,
+                dataType: 'json',
+                success: function( data ) {
+                    setTimeout( function() {
+                        $('#form-title').html( formTitle );
+                        $('#hidden-inner-form').empty().append( data.form );
+                        initForms();
+                    }, 150 );
+                    $('.form-btns a.submit, .btn.ajax').text( buttonLabel );
+                    $('.form-btns a.submit').attr( 'class', buttonAttrs );
+                    $('#obj-form').slideDown();
+                }
+            });
 
             $('#id_value').live( "keypress", function( e ) {
                 if ( e.which == 13 ) {
