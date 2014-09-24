@@ -83,7 +83,8 @@ def system_create_view(request):
 
             system_form = ExtendedSystemForm(post_data)
             if system_form.is_valid():
-                system = system_form.save()
+                system = system_form.save(commit=False)
+                system.save()
                 post_data['system'] = system.id
             else:
                 return HttpResponse(json.dumps({'errors': system_form.errors}))
