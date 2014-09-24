@@ -83,7 +83,7 @@ $(document).ready(function() {
     }
 
     // Add object to ctnr.
-    $('#obj-form form').live( 'submit', function( event ) {
+    $('#obj-form form').on( 'submit', function( event ) {
         var fields = $(this).find( ':input' ).serializeArray();
         var postData = {};
         var addObjectUrl = $('#ctnr-data').attr( 'data-addObjectUrl' );
