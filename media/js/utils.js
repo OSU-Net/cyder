@@ -154,8 +154,11 @@ function button_to_form( button, csrfToken, success) {
 }
 
 // fields is a serialized array taken from inputs in a form
-function ajax_form_submit( url, fields, csrfToken, success ) {
+function ajax_form_submit( url, fields, csrfToken ) {
+    var deferred = $.Deferred();
     jQuery.ajaxSettings.traditional = true;
+
+    // Load data from form
     var postData = {};
     jQuery.each( fields, function ( i, field ) {
         if ( i > 0 && fields[i-1].name == field.name ) {
@@ -165,27 +168,36 @@ function ajax_form_submit( url, fields, csrfToken, success ) {
         }
     });
     postData.csrfmiddlewaretoken = csrfToken;
+
     var ret_data = null;
-    $.post( url, postData, function( data ) {
-        ret_data = data;
-        if ( $('#hidden-inner-form').find( '#error' ).length ) {
-            $('#hidden-inner-form').find( '#error' ).remove();
-        }
-        if ( data.errors ) {
-            jQuery.each( fields, function ( i, field ) {
-                if ( data.errors[field.name] ) {
-                    $('#id_' + field.name).after(
-                        '<p id="error"><font color="red">' +
-                        data.errors[field.name] + '</font></p>' );
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: postData,
+        dataType: 'json',
+        beforeSend: function() {
+            $('#hidden-inner-form').find( '.error' ).remove();
+        },
+        success: function( data ) {
+            ret_data = data;
+            if ( data.errors ) {
+                jQuery.each( fields, function ( i, field ) {
+                    if ( data.errors[field.name] ) {
+                        $('#id_' + field.name + ':visible').after(
+                            '<p class="error">' +
+                            data.errors[field.name] + '</p>' );
+                    }
+                });
+                if ( data.errors.__all__ ) {
+                    $('#hidden-inner-form').find( 'p:first' ).before(
+                    '<p class="error">' +
+                    data.errors.__all__ + '</p>' );
                 }
-            });
-            if ( data.errors.__all__ ) {
-                $('#hidden-inner-form').find( 'p:first' ).before(
-                    '<p id="error"><font color="red">' +
-                    data.errors.__all__ + '</font></p>' );
+                deferred.reject();
+            } else {
+                deferred.resolve( ret_data );
             }
-        } else {
-            success( ret_data );
         }
-    }, 'json');
+    });
+    return deferred;
 }

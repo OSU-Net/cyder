@@ -179,6 +179,7 @@ $(document).ready( function() {
             }
 
             $.ajax({
+                type: 'GET',
                 url: kwargs.get_url,
                 data: getData,
                 global: false,
@@ -216,35 +217,33 @@ $(document).ready( function() {
         var url = $('#obj-form form')[0].action;
         var fields = $('#obj-form form').find( ':input' ).serializeArray();
         e.preventDefault();
-        ajax_form_submit( url, fields, csrfToken, function( data ) {
-            if ( !data.errors ) {
-                if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
-                    var style = $('.attrs_table').attr( 'style' );
-                    if ( style !== undefined && style !== false &&
-                            $('.attrs_table').attr( 'style' ).indexOf(
-                            'display:none' ) < 0 ) {
-                        $('#attr_title').slideDown();
-                        $('.attrs_table').attr( 'style', '' );
-                    }
-                    var is_update = false;
-                    jQuery.each( $('.attrs_table > tbody > tr'), function( i, row ) {
-                        if ( row.cells[0].innerHTML.indexOf(
-                                data.row.data[0][0].value[0] ) >= 0 ) {
-                            $(this).remove();
-                            is_update = true;
-
-                        }
-                    });
-                    insertTablefyRow( data.row, $('.attrs_table > tbody') );
-                    if ( is_update ) {
-                        $('#obj-form form').find( '.cancel' ).click();
-                    } else {
-                        $('#obj-form form').trigger( 'reset' );
-                        $('#id_attribute').focus();
-                    }
-                } else {
-                    location.reload();
+        $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( data ) {
+            if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
+                var style = $('.attrs_table').attr( 'style' );
+                if ( style !== undefined && style !== false &&
+                        $('.attrs_table').attr( 'style' ).indexOf(
+                        'display:none' ) < 0 ) {
+                    $('#attr_title').slideDown();
+                    $('.attrs_table').attr( 'style', '' );
                 }
+                var is_update = false;
+                jQuery.each( $('.attrs_table > tbody > tr'), function( i, row ) {
+                    if ( row.cells[0].innerHTML.indexOf(
+                            data.row.data[0][0].value[0] ) >= 0 ) {
+                        $(this).remove();
+                        is_update = true;
+
+                    }
+                });
+                insertTablefyRow( data.row, $('.attrs_table > tbody') );
+                if ( is_update ) {
+                    $('#obj-form form').find( '.cancel' ).click();
+                } else {
+                    $('#obj-form form').trigger( 'reset' );
+                    $('#id_attribute').focus();
+                }
+            } else {
+                location.reload();
             }
         });
     });

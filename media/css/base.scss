@@ -62,6 +62,10 @@ input[type="text"], input[type="search"] {
     }
 }
 
+.error {
+    color: $red;
+}
+
 .messages {
     @include default-box-shadow();
     background: $light-gray;

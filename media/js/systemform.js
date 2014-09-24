@@ -30,14 +30,11 @@ $(document).ready(function() {
     $( document ).on('submit', '#system-form form', function( e ) {
         e.preventDefault();
         var fields;
-        if ($(this).find('#error').length) {
-            $(this).find('#error').remove();
-        }
+        $(this).find('.error').remove();
 
         if ($("input[name=interface_type]:checked").val() === undefined) {
             $("label[for=id_interface_type_0]:first").after(
-                '<p id="error"><font color="red">This field is required.' +
-                '</font></p>');
+                '<p class="error">This field is required.</p>');
             return false;
         } else {
             fields = $(this).find(':input:visible').serializeArray();
@@ -45,9 +42,8 @@ $(document).ready(function() {
 
         var url = '/core/system/create/';
         var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
-        var data = ajax_form_submit(url, fields,
-                csrfToken, function (ret_data) {
+        $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( ret_data ) {
             location.href = '/core/system/' + ret_data.system_id.toString();
-        });
+        })
     });
 });
