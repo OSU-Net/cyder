@@ -36,29 +36,16 @@ $(document).ready( function() {
     $('.nav-item.parent').click( function( e ) {
         e.preventDefault();
         var parentsChild = ( '#' + this.id + '-children' );
-        if ( $(parentsChild).css( 'display' ) != 'none' ) {
-            $(parentsChild).slideUp( 'slow' );
-        } else {
-            var children = [
-                '#dns-sidebar-children',
-                '#dhcp-sidebar-children',
-                '#core-sidebar-children'];
-            $.each( children, function( i, child ) {
-                if ( parentsChild != child ) {
-                    if ( $(child).css( 'display' ) != 'none' ) {
-                        $(child).slideToggle( 'slow' );
-                    }
-                }
-            });
-            $(parentsChild).slideToggle( 'slow' );
-        }
+        $('#dns-sidebar-children, #dhcp-sidebar-children, #core-sidebar-children')
+            .not(parentsChild).slideUp( 'slow' );
+        $(parentsChild).slideToggle( 'slow' );
     });
 
     // handles create buttons in dynamic/static interface view and range
     // detail view
     $( document ).on( 'click', '#system_create', function( e ) {
         e.preventDefault();
-        button_to_form( this, csrfToken, function ( postForm ) {
+        button_to_form( this, csrfToken, function( postForm ){
             $(postForm).submit();
         });
     });
