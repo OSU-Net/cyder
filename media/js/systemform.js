@@ -1,37 +1,60 @@
 $(document).ready(function() {
-    function changeSystemForm( value, animate ) {
-        if ( animate ) {
-            delay = 500;
-            speed = 'slow';
-        } else {
-            delay = 0;
-            speed = 'fast';
-        }
+    var systemForm = (function(){
+        // avoid duplicate fields id's
+        var staticForm = $('#static-form')
+            .clone().wrap( '<div>' ).parent().html();
+        var dynamicForm = $('#dynamic-form')
+            .clone().wrap( '<div>' ).parent().html();
+        $('#static-form').remove();
+        $('#dynamic-form').remove();
+        return {
+            showStaticForm: function( delay, speed ) {
+                setTimeout( function() {
+                    $('#hidden-inner-form').append( staticForm );
+                    $('#static-form').slideDown( speed );
+                }, delay);
+                $('#dynamic-form').slideUp( function() {
+                    $('#dynamic-form').remove();
+                });
+            },
+            showDynamicForm: function( delay, speed ) {
+                setTimeout( function() {
+                    $('#hidden-inner-form').append( dynamicForm );
+                    $('#dynamic-form').slideDown( speed );
+                }, delay);
+                $('#static-form').slideUp( function() {
+                    $('#static-form').remove();
+                });
+            }
+        };
+    }());
+
+    function changeSystemForm( value, delay, speed ) {
         if ( value == 'static_interface' ) {
-            setTimeout( function() {
-                $('#static-form').slideDown(speed);
-            }, delay);
-            $('#dynamic-form').slideUp();
+            systemForm.showStaticForm( delay, speed );
         } else {
-            setTimeout( function() {
-                $('#dynamic-form').slideDown(speed);
-            }, delay);
-            $('#static-form').slideUp();
+            systemForm.showDynamicForm( delay, speed );
         }
     }
 
+    // if initial page load
     jQuery.each( $("input[name='interface_type']:checked"), function() {
-        changeSystemForm( this.value, false );
+        changeSystemForm( this.value, 0, 'fast' );
     });
+
     $("input[name='interface_type']").change( function() {
-        changeSystemForm( this.value, true );
+        // dont delay on initial page load
+        if( $('#dynamic-form').length || $('#static-form').length ) {
+            changeSystemForm( this.value, 500, 'slow' );
+        } else {
+            changeSystemForm( this.value, 0, 'fast' );
+        }
     });
 
     $( document ).on('submit', '#system-form form', function( e ) {
         e.preventDefault();
         var fields;
         $(this).find('.error').remove();
-
         if ($("input[name=interface_type]:checked").val() === undefined) {
             $("label[for=id_interface_type_0]:first").after(
                 '<p class="error">This field is required.</p>');
