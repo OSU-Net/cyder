@@ -7,6 +7,7 @@ import subprocess
 import syslog
 from sys import stderr
 
+from cyder import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
 from django.db.models import Q
@@ -207,8 +208,18 @@ def safe_save(func):
         commit = kwargs.pop('commit', True)
         self.full_clean()
         if commit:
-            with transaction.commit_on_success():
-                return func(self, *args, **kwargs)
+            if settings.TESTING:
+                sid = transaction.savepoint()
+                try:
+                    ret = func(self, *args, **kwargs)
+                except:
+                    transaction.savepoint_rollback(sid)
+                    raise
+                transaction.savepoint_commit(sid)
+                return ret
+            else:
+                with transaction.commit_on_success():
+                    return func(self, *args, **kwargs)
         else:
             return func(self, *args, **kwargs)
     outer.__name__ = func.__name__
@@ -230,8 +241,18 @@ def safe_delete(func):
     def outer(self, *args, **kwargs):
         commit = kwargs.pop('commit', True)
         if commit:
-            with transaction.commit_on_success():
-                return func(self, *args, **kwargs)
+            if settings.TESTING:
+                sid = transaction.savepoint()
+                try:
+                    ret = func(self, *args, **kwargs)
+                except:
+                    transaction.savepoint_rollback(sid)
+                    raise
+                transaction.savepoint_commit(sid)
+                return ret
+            else:
+                with transaction.commit_on_success():
+                    return func(self, *args, **kwargs)
         else:
             return func(self, *args, **kwargs)
     outer.__name__ = func.__name__

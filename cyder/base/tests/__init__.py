@@ -34,8 +34,8 @@ class CyTestMixin(object):
                 pass
             else:
                 raise AssertionError(
-                    "'{}' and '{}' do not conflict".format(first.name,
-                                                           second.name))
+                    "'{}' and '{}' do not conflict".format(
+                        first.name, second.name))
             x.delete()
 
     def assertObjectsDontConflict(self, obj_create_list):
