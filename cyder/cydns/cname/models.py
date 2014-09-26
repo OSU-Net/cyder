@@ -107,7 +107,7 @@ class CNAME(LabelDomainMixin, CydnsRecord):
             return
         if self.fqdn == root_domain.name:
             raise ValidationError(
-                "You cannot create a CNAME who's left hand side is at the "
+                "You cannot create a CNAME whose left hand side is at the "
                 "same level as an SOA"
             )
 
