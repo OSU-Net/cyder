@@ -17,10 +17,6 @@ class NSView(object):
     extra_context = {'obj_type': 'nameserver'}
 
 
-class NSCreateView(NSView, CydnsCreateView):
-    """"""
-
-
 def update_ns(request, nameserver_pk):
     nameserver = get_object_or_404(Nameserver, pk=nameserver_pk)
     if request.method == "POST":
