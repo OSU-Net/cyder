@@ -2,19 +2,16 @@ from __future__ import unicode_literals
 
 import inspect
 import os
-import re
-import shutil
 import sys
 import syslog
 import time
-from itertools import ifilter
 from traceback import format_exception
 
-from cyder.settings import BINDBUILD
+from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (copy_tree, dict_merge, log, remove_dir_contents,
-                              run_command, set_attrs, shell_out)
+                              run_command, set_attrs)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
@@ -55,7 +52,8 @@ class DNSBuilder(MutexMixin):
         if self.log_syslog:
             syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
 
-        self.repo = GitRepo(self.prod_dir, self.line_change_limit,
+        self.repo = GitRepo(
+            self.prod_dir, self.line_change_limit,
             self.line_removal_limit, debug=self.debug,
             log_syslog=self.log_syslog, logger=syslog)
 
@@ -63,24 +61,24 @@ class DNSBuilder(MutexMixin):
         if to_stderr is None:
             to_stderr = self.debug
         log(format_log_message(msg, root_domain=root_domain),
-                log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
-                logger=syslog)
+            log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
+            logger=syslog)
 
     def log_info(self, msg, root_domain=None, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.verbose
         log(format_log_message(msg, root_domain=root_domain),
-                log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
+            log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
 
     def log_notice(self, msg, root_domain=None, to_stderr=None):
         if to_stderr is None:
             to_stderr = self.verbose
         log(format_log_message(msg, root_domain=root_domain),
-                log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
+            log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
 
     def log_err(self, msg, root_domain=None, to_stderr=True):
         log(format_log_message(msg, root_domain=root_domain),
-                log_level='LOG_ERR', to_stderr=to_stderr, logger=syslog)
+            log_level='LOG_ERR', to_stderr=to_stderr, logger=syslog)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
@@ -164,7 +162,7 @@ class DNSBuilder(MutexMixin):
         if not os.path.exists(os.path.dirname(stage_fname)):
             os.makedirs(os.path.dirname(stage_fname))
         self.log_debug("Stage zone file is {0}".format(stage_fname),
-                 root_domain=root_domain)
+                       root_domain=root_domain)
         with open(stage_fname, 'w+') as fd:
             fd.write(data)
         return stage_fname
@@ -335,25 +333,26 @@ class DNSBuilder(MutexMixin):
                 # This for loop decides which views will be canidates for
                 # rebuilding.
                 for view in View.objects.all():
-                    self.log_debug("++++++ Looking at < {0} > view ++++++".
-                             format(view.name), root_domain=root_domain)
+                    self.log_debug("++++++ Looking at < {0} > view ++++++"
+                                   .format(view.name), root_domain=root_domain)
                     t_start = time.time()  # tic
                     view_data = build_zone_data(view, root_domain, soa,
                                                 logf=self.log_notice)
                     build_time = time.time() - t_start  # toc
                     self.log_debug('< {0} > Built {1} data in {2} seconds'
-                             .format(view.name, soa, build_time),
-                             root_domain=root_domain)
+                                   .format(view.name, soa, build_time),
+                                   root_domain=root_domain)
                     if not view_data:
-                        self.log_debug('< {0} > No data found in this view. '
-                                 'No zone file will be made or included in any'
-                                 ' config for this view.'.format(view.name),
-                                 root_domain=root_domain)
+                        self.log_debug(
+                            '< {0} > No data found in this view. '
+                            'No zone file will be made or included in any'
+                            ' config for this view.'.format(view.name),
+                            root_domain=root_domain)
                         continue
-                    self.log_debug('< {0} > Non-empty data set for this '
-                             'view. Its zone file will be included in the '
-                             'config.'.format(view.name),
-                             root_domain=root_domain)
+                    self.log_debug(
+                        '< {0} > Non-empty data set for this '
+                        'view. Its zone file will be included in the '
+                        'config.'.format(view.name), root_domain=root_domain)
                     file_meta = self.get_file_meta(view, root_domain, soa)
 
                     if force:
@@ -361,7 +360,7 @@ class DNSBuilder(MutexMixin):
                         new_serial = int(time.time())
                     else:
                         was_bad_prev, new_serial = self.verify_previous_build(
-                                file_meta, view, root_domain, soa)
+                            file_meta, view, root_domain, soa)
 
                     if was_bad_prev:
                         soa.serial = new_serial
@@ -382,18 +381,26 @@ class DNSBuilder(MutexMixin):
                     # 'dirty' value to the db.
                     SOA.objects.filter(pk=soa.pk).update(serial=soa.serial + 1)
                     self.log_debug('Zone will be rebuilt at serial {0}'
-                             .format(soa.serial + 1), root_domain=root_domain)
+                                   .format(soa.serial + 1),
+                                   root_domain=root_domain)
                 else:
                     self.log_debug('Zone is stable at serial {0}'
-                             .format(soa.serial), root_domain=root_domain)
+                                   .format(soa.serial),
+                                   root_domain=root_domain)
 
                 for view, file_meta, view_data in views_to_build:
-                    view_zone_stmts = zone_stmts.setdefault(view.name, [])
-                    # If we see a view in this loop it's going to end up in the
-                    # config
-                    view_zone_stmts.append(
-                        self.render_zone_stmt(soa, root_domain, file_meta)
-                    )
+                    if (root_domain.name, view.name) in ZONES_WITH_NO_CONFIG:
+                        self.log_notice(
+                            '!!! Not going to emit zone statements for {0}\n'
+                            .format(root_domain.name), root_domain=root_domain)
+                    else:
+                        view_zone_stmts = zone_stmts.setdefault(view.name, [])
+                        # If we see a view in this loop it's going to end up in
+                        # the config
+                        view_zone_stmts.append(
+                            self.render_zone_stmt(soa, root_domain, file_meta)
+                        )
+
                     # If it's dirty or we are rebuilding another view, rebuild
                     # the zone
                     if force_rebuild:
@@ -407,8 +414,10 @@ class DNSBuilder(MutexMixin):
                             view_data.format(serial=soa.serial + 1),
                             root_domain
                         )
-                        self.run_checkzone(os.path.join(self.stage_dir,
-                            file_meta['rel_fname']), root_domain)
+                        self.run_checkzone(
+                            os.path.join(self.stage_dir,
+                                         file_meta['rel_fname']),
+                            root_domain)
                     else:
                         self.log_debug(
                             'NO REBUILD needed for < {0} > view file {1}'
@@ -436,8 +445,8 @@ class DNSBuilder(MutexMixin):
             )
         )
         for view_name, view_stmts in zone_stmts.iteritems():
-            self.log_debug("Building config for view < {0} >".
-                     format(view_name))
+            self.log_debug("Building config for view < {0} >"
+                           .format(view_name))
             self.build_view_config(view_name, 'master', view_stmts)
 
     def build(self, force=False):
@@ -476,7 +485,7 @@ class DNSBuilder(MutexMixin):
             # zone files
             soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
             self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
-                    force=force))
+                                    force=force))
 
             self.log_info('DNS build successful')
         except:

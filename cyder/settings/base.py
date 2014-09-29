@@ -471,6 +471,19 @@ ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
 ZONE_PATH = "cyder/management/commands/lib/zones"
 ZONE_BLACKLIST = []
 
+# This list contains tuples that have a zone's name as their 0th element and a
+# view's name as the 1st element. For example:
+#
+# ('mozilla.net', 'public'),
+# ('mozilla.net', 'private')
+#
+# This will cause the public and private view of the mozilla.net zone to not
+# have a config statement in the produced config/master.private and
+# config/master.public files. The files net/mozilla/mozilla.net.public and
+# net/mozilla.net.private *will* be generated and written to disk.
+ZONES_WITH_NO_CONFIG = [
+]
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         # 'cyder.api.v1.permissions.ReadOnlyIfAuthenticated',
