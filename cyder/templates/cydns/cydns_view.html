@@ -8,7 +8,7 @@
 
 {% block action_bar %}
   {% if obj_type_perm %}
-    <a id="btn create-obj" class="btn getForm"
+    <a id="btn js-create-object" class="btn js-get-form"
         data-kwargs='{"obj_type": "{{ obj_type }}",
                       "get_url": "{{ url('get-update-form') }}",
                       "pretty_obj_type": "{{ pretty_obj_type }}"}'>

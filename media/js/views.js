@@ -118,19 +118,19 @@ $(document).ready( function() {
     });
 
     // button behavior logic, see css
-    $('.getForm, .create-obj, .update, .cancel').each( function() {
-        $('.getForm, .create-obj, .update, .cancel').addClass( 'hover' );
+    $('.js-get-form, .js-create-object, .update, .cancel').each( function() {
+        $('.js-get-form, .js-create-object, .update, .cancel').addClass( 'hover' );
         $(this).click( function( e ) {
             if ( $(this).hasClass( 'selected' ) ) {
                 $(this).removeClass( 'selected' );
             } else {
-                $('.getForm, .create-obj, .update, .cancel').removeClass( 'selected' );
+                $('.js-get-form, .js-create-object, .update, .cancel').removeClass( 'selected' );
                 $(this).removeClass( 'hover' ).addClass( 'selected' );
             }
         });
     });
 
-    $( document ).on( 'click', '.getForm', function( e ) {
+    $( document ).on( 'click', '.js-get-form', function( e ) {
         // Show update form on clicking update icon.
         var kwargs;
         var formTitle;

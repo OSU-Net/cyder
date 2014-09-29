@@ -1,6 +1,6 @@
 {% macro create_button(obj_type, pretty_obj_type, get_url, post_url, obj_name=None, data=None,
                        button_prefix="Create ", button_name=None) %}
-  <a class="btn getForm"
+  <a class="btn js-get-form"
     data-kwargs='{"obj_type": "{{ obj_type }}",
                   "get_url": "{{ get_url }}",
                   "pretty_obj_type": "{{ pretty_obj_type }}"}'
@@ -15,7 +15,7 @@
     {% endif %}
   </a>
 {% endmacro %}
-      <a id="btn create-obj" class="btn getForm"
+      <a id="btn js-create-object" class="btn js-get-form"
           data-kwargs='{"obj_type": "{{ obj_type }}", "get_url": "{{ url('get-update-form') }}", "pretty_obj_type": "{{ pretty_obj_type }}"}'>
         Create {{ pretty_obj_type }}
       </a>
