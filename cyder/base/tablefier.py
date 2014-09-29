@@ -137,17 +137,20 @@ class Tablefier:
     def build_update_field(self, obj):
         if self.profile and self.profile.has_perm(self.request, ACTION_UPDATE,
                                                   obj=obj):
-            # Clean this up
+            data = [
+                [('kwargs', json.dumps({
+                    'obj_type': obj._meta.db_table, 'pk': obj.id,
+                    'obj_name': obj.pretty_name,
+                    'get_url': reverse('get-update-form'),
+                    'pretty_obj_type': obj.pretty_type}))],
+                [('kwargs', json.dumps({
+                    'obj_type': obj._meta.db_table,
+                    'pk': obj.id}))]]
+
             col = {'value': ['Update', 'Delete'],
                    'url': [obj.get_update_url(), obj.get_delete_url()],
-                   'data': [[('kwargs', json.dumps({
-                              'obj_type': obj._meta.db_table, 'pk': obj.id,
-                              'obj_name': obj.pretty_name,
-                              'get_url': reverse('get-update-form'),
-                              'pretty_obj_type': obj.pretty_type}))],
-                             [('kwargs', json.dumps({
-                                 'obj_type': obj._meta.db_table, 'pk': obj.id}))]],
-                   'class': ['getForm', 'delete'],
+                   'data': data,
+                   'class': ['js-get-form', 'delete'],
                    'img': ['/media/img/update.png', '/media/img/delete.png']}
         else:
             col = {'value': []}
