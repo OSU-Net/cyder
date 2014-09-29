@@ -1,11 +1,7 @@
 $(document).ready( function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
-    var objType = metadata.attr( 'data-objType' );
-    var objPk = metadata.attr( 'data-objPk' );
-    var searchUrl = metadata.attr( 'data-searchUrl' );
     var domainsUrl = metadata.attr( 'data-domainsUrl' );
-    var csrfToken = metadata.attr( 'data-csrfToken' );
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
     if ( domainsUrl ) {
@@ -45,6 +41,7 @@ $(document).ready( function() {
     // detail view
     $( document ).on( 'click', '#system_create', function( e ) {
         e.preventDefault();
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
         button_to_form( this, csrfToken, function( postForm ){
             $(postForm).submit();
         });
@@ -56,6 +53,7 @@ $(document).ready( function() {
         var button = this;
         var kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
         var msg = "Are you sure you want to delete this?";
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
         if ( kwargs.obj_type.indexOf( 'interface' ) != -1) {
             var postData = {
                 pk: kwargs.pk,
@@ -138,21 +136,24 @@ $(document).ready( function() {
         var getData;
         var buttonAttrs;
         var initData;
+        var objPk = metadata.attr( 'data-objPk' );
+        var objType = metadata.attr( 'data-objType' );
         slideUp( $('#obj-form') );
         e.preventDefault();
         form.action = this.href;
         if ( $(this).hasClass( 'selected' ) ||
                 $(this).parents().attr( 'class' ) == 'actions_column') {
             kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
+            // #TODO move all this logic to get_update_form
             if ( kwargs.pk ) {
                 formTitle = 'Updating ' + kwargs.pretty_obj_type + ' ' + kwargs.obj_name;
                 buttonLabel = 'Update ' + kwargs.pretty_obj_type;
-                buttonAttrs = 'btn c submit_update ajax';
+                buttonAttrs = 'btn c submit_update js-submit';
                 getData = { 'obj_type': kwargs.obj_type, 'pk': kwargs.pk };
             } else {
                 formTitle = 'Creating ' + kwargs.pretty_obj_type;
                 buttonLabel = 'Create ' + kwargs.pretty_obj_type;
-                buttonAttrs = 'btn c submit_create ajax';
+                buttonAttrs = 'btn c submit_create js-submit';
                 if ( $(this).attr( 'data-init' ) ) {
                     initData = $(this).attr( 'data-init' );
                 }
@@ -177,26 +178,29 @@ $(document).ready( function() {
                         $('#hidden-inner-form').empty().append( data.form );
                         initForms();
                     }, 150 );
-                    $('.form-btns a.submit, .btn.ajax').text( buttonLabel );
+                    $('.form-btns a.submit, .btn.js-submit').text( buttonLabel );
                     $('.form-btns a.submit').attr( 'class', buttonAttrs );
                     $('#obj-form').slideDown();
                 }
-            });
-
-            $('#id_value').on( "keypress", function( e ) {
-                if ( e.which == 13 ) {
-                    jQuery('.ajax').focus().click();
-                }
+            }).done( function() {
+                $('#obj-form form :input:visible:last').on( 'keypress', function( e ) {
+                    if ( e.which == 13 ) {
+                        $('.js-submit').focus().click();
+                    }
+                });
             });
         }
     });
 
+
     // Form submit handler, special logic for attributes
     $( document ).on( 'submit', '#obj-form form', function( e ) {
+        e.preventDefault();
         var url = $('#obj-form form')[0].action;
         var fields = $('#obj-form form').find( ':input' ).serializeArray();
-        e.preventDefault();
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
         $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( data ) {
+            // for av forms
             if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
                 var style = $('.attrs_table').attr( 'style' );
                 if ( style !== undefined && style !== false &&
