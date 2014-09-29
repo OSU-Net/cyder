@@ -6,28 +6,30 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, BadHeaderError
 from django.core.urlresolvers import reverse
+from django.db.models import get_model
+from django.db.utils import DatabaseError
 from django.http import Http404, HttpResponse
 from django.forms import ValidationError, ModelChoiceField, HiddenInput
 from django.forms.util import ErrorDict
-from django.db.models import get_model
 from django.shortcuts import (get_object_or_404, redirect, render,
                               render_to_response)
+from django.views.generic import (CreateView, DeleteView, DetailView,
+                                  ListView, UpdateView)
 
 from cyder.base.constants import (ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE,
                                   get_klasses)
+from cyder.base.forms import BugReportForm, EditUserForm
 from cyder.base.helpers import do_sort
+from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.utils import (_filter, make_megafilter,
                               make_paginator, tablefy)
-from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.utils import django_pretty_type
-from cyder.core.cyuser.utils import perm, perm_soft
-from cyder.core.cyuser.models import User
-from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_update_session
-from cyder.cydns.utils import ensure_label_domain
-from cyder.base.forms import BugReportForm, EditUserForm
-from cyder.core.cyuser.views import edit_user
 from cyder.core.ctnr.models import CtnrUser
-
+from cyder.core.ctnr.utils import ctnr_delete_session, ctnr_update_session
+from cyder.core.cyuser.models import User
+from cyder.core.cyuser.utils import perm, perm_soft
+from cyder.core.cyuser.views import edit_user
+from cyder.cydns.utils import ensure_label_domain
 from cyder.settings import BUG_REPORT_EMAIL
 
 
@@ -169,7 +171,11 @@ def cy_view(request, template, pk=None, obj_type=None):
                     form.errors = ErrorDict()
                 form.errors.update(e.message_dict)
                 return HttpResponse(json.dumps({'errors': form.errors}))
-
+            except DatabaseError as e:  # DatabaseError(number, description)
+                if form.errors is None:
+                    form.errors = ErrorDict()
+                form.errors.setdefault('__all__', []).append(e.args[1])
+                return HttpResponse(json.dumps({'errors': form.errors}))
         else:
             return HttpResponse(json.dumps({'errors': form.errors}))
     elif request.method == 'GET':
