@@ -1,9 +1,10 @@
 from exceptions import AssertionError
 
+import django.test
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 from django.test.client import Client
 
+from cyder.base.utils import savepoint_atomic
 from cyder.core.ctnr.models import Ctnr
 
 
@@ -29,7 +30,8 @@ class CyTestMixin(object):
         for first, second in pairs:
             x = first()
             try:
-                second()
+                with savepoint_atomic():
+                    second()
             except ValidationError:
                 pass
             else:
@@ -51,9 +53,13 @@ class CyTestMixin(object):
             x.delete()
 
 
-class TestCase(TestCase, CyTestMixin):
+class TestCase(django.test.TestCase, CyTestMixin):
     """
     Base class for all tests.
     """
     client_class = Client
     fixtures = ['core/users']
+
+    def assertRaises(self, *args, **kwargs):
+        with savepoint_atomic():
+            return super(TestCase, self).assertRaises(*args, **kwargs)

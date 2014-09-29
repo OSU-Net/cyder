@@ -208,18 +208,8 @@ def safe_save(func):
         commit = kwargs.pop('commit', True)
         self.full_clean()
         if commit:
-            if settings.TESTING:
-                sid = transaction.savepoint()
-                try:
-                    ret = func(self, *args, **kwargs)
-                except:
-                    transaction.savepoint_rollback(sid)
-                    raise
-                transaction.savepoint_commit(sid)
-                return ret
-            else:
-                with transaction.commit_on_success():
-                    return func(self, *args, **kwargs)
+            with transaction.commit_on_success():
+                return func(self, *args, **kwargs)
         else:
             return func(self, *args, **kwargs)
     outer.__name__ = func.__name__
@@ -241,21 +231,23 @@ def safe_delete(func):
     def outer(self, *args, **kwargs):
         commit = kwargs.pop('commit', True)
         if commit:
-            if settings.TESTING:
-                sid = transaction.savepoint()
-                try:
-                    ret = func(self, *args, **kwargs)
-                except:
-                    transaction.savepoint_rollback(sid)
-                    raise
-                transaction.savepoint_commit(sid)
-                return ret
-            else:
-                with transaction.commit_on_success():
-                    return func(self, *args, **kwargs)
+            with transaction.commit_on_success():
+                return func(self, *args, **kwargs)
         else:
             return func(self, *args, **kwargs)
     outer.__name__ = func.__name__
     outer.__module__ = func.__module__
     outer.__doc__ = func.__doc__
     return outer
+
+
+class savepoint_atomic(object):
+    def __enter__(self):
+        self.sid = transaction.savepoint()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            transaction.savepoint_rollback(self.sid)
+        else:
+            transaction.savepoint_commit(self.sid)
