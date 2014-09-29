@@ -118,17 +118,17 @@ $(document).ready( function() {
     });
 
     // button behavior logic, see css
-    $('.js-get-form, .js-create-object, .update, .cancel').each( function() {
-        $('.js-get-form, .js-create-object, .update, .cancel').addClass( 'hover' );
-        $(this).click( function( e ) {
-            if ( $(this).hasClass( 'selected' ) ) {
-                $(this).removeClass( 'selected' );
-            } else {
-                $('.js-get-form, .js-create-object, .update, .cancel').removeClass( 'selected' );
-                $(this).removeClass( 'hover' ).addClass( 'selected' );
-            }
-        });
-    });
+    function buttonLogic() {
+        $('.js-get-form, .js-create-object, .update, .cancel').addClass( 'hover' )
+        if ( $(this).hasClass( 'selected' ) ) {
+            $(this).removeClass( 'selected' );
+        } else {
+            $('.js-get-form, .js-create-object, .update, .cancel').removeClass( 'selected' );
+            $(this).removeClass( 'hover' ).addClass( 'selected' );
+        }
+    }
+    $( document ).on('click', '.js-get-form, js-create-object, .update, .cancel', buttonLogic );
+
 
     $( document ).on( 'click', '.js-get-form', function( e ) {
         // Show update form on clicking update icon.
@@ -138,7 +138,7 @@ $(document).ready( function() {
         var getData;
         var buttonAttrs;
         var initData;
-        slideUp($('#obj-form'));
+        slideUp( $('#obj-form') );
         e.preventDefault();
         form.action = this.href;
         if ( $(this).hasClass( 'selected' ) ||
@@ -188,14 +188,6 @@ $(document).ready( function() {
                     jQuery('.ajax').focus().click();
                 }
             });
-
-            $('.form').append(
-                $('<input>',
-                {
-                    type: 'hidden',
-                    name: 'csrfmiddlewaretoken',
-                    value: csrfToken
-                } ) );
         }
     });
 
