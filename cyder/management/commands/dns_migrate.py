@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
+from settings import NONDELEGATED_NS
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
@@ -40,6 +41,21 @@ connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
 cursor = connection.cursor()
 
 
+def get_delegated():
+    sql = ("SELECT domain.name FROM maintain_sb.domain "
+           "INNER JOIN maintain_sb.nameserver "
+           "ON domain.id=nameserver.domain "
+           "WHERE %s")
+    where = ' and '.join(["nameserver.name != '%s'" % ns
+                          for ns in NONDELEGATED_NS])
+    cursor.execute(sql % where)
+    results = [i for (i,) in cursor.fetchall()]
+    return results
+
+
+delegated_dnames = set(get_delegated())
+
+
 class Zone(object):
 
     def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
@@ -47,7 +63,25 @@ class Zone(object):
         self.dname = self.get_dname() if dname is None else dname
         self.dname = self.dname.lower()
 
-        self.domain = self.gen_domain()
+        if gen_recs:
+            try:
+                self.domain = Domain.objects.get(name=self.dname)
+            except Domain.DoesNotExist:
+                return
+        else:
+            self.domain = self.gen_domain()
+            if not self.domain:
+                return
+
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.delegated:
+                raise Exception("Whoa dude %s has a delegated master" % self.domain.name)
+
+            if self.dname in delegated_dnames:
+                self.domain.delegated = True
+                print "%s has been marked as delegated." % self.domain.name
+                self.domain.save()
+
         if self.domain:
             if gen_recs:
                 if self.domain_id is not None:
@@ -58,7 +92,7 @@ class Zone(object):
                     self.domain.soa = self.gen_SOA() or soa
                 else:
                     self.gen_AR()
-            self.domain.save()
+
             if self.domain_id is not None:
                 self.walk_zone(gen_recs=gen_recs)
 
@@ -67,6 +101,9 @@ class Zone(object):
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
         """
+        if self.domain_id is None:
+            return None
+
         cursor.execute("SELECT primary_master, hostmaster, refresh, "
                        "retry, expire, ttl "
                        "FROM soa "
@@ -84,10 +121,15 @@ class Zone(object):
                     primary=primary, contact=contact, refresh=refresh,
                     retry=retry, expire=expire, minimum=minimum,
                     root_domain=self.domain, description='')
-
-            return soa
         else:
-            return None
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.soa:
+                soa = master_domain.soa
+            else:
+                print "WARNING: No SOA exists for %s." % self.domain.name
+                return None
+
+        return soa
 
     def gen_domain(self):
         """Generates a Domain object for this Zone from a hostname.
@@ -95,8 +137,15 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES):
-            return ensure_domain(name=self.dname, force=True,
-                                 update_range_usage=False)
+            try:
+                domain = ensure_domain(name=self.dname, force=True,
+                                       update_range_usage=False)
+                domain.clean()
+                domain.save()
+                return domain
+            except ValidationError, e:
+                print "Could not migrate domain %s: %s" % (self.dname, e)
+                return None
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
