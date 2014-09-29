@@ -6,8 +6,8 @@ $(document).ready( function() {
          source: searchUserUrl,
          delay: 400,
          select: function( event, ui ) {
-         userPk = ui.item.pk;
-         username = ui.item.label;
+            userPk = ui.item.pk;
+            username = ui.item.label;
          }
     });
 });
