@@ -280,7 +280,7 @@ MINIFY_BUNDLES = {
             'js/lib/attribute_adder.js',
             'js/lib/jQuery.rightclick.js',
             'js/lib/jquery.validate.min.js',
-            'js/lib/jquery.autocomplete.min.js',
+            'js/lib/jquery-ui.min.js',
             'js/lib/tablesorter.js',
             'js/lib/editablegrid/editablegrid.js',
             'js/lib/editablegrid/editablegrid_renderers.js',
