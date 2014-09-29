@@ -1,17 +1,18 @@
 $(document).ready(function() {
-    var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
 
     $('#id_users').tagsInput( {
         'defaultText': 'add a user',
-        'autocomplete_url': '/core/user/search'} );
+        'autocomplete_url': '/core/user/search'
+    } );
 
     $('#clone-perms-btn, #clone-perms-cancel').click( function ( e ) {
         $('#permissions-form-hidden').slideToggle( "slow", function() {
-        });
+        } );
     } );
 
     $('#clone-perms-submit').click( function( e ) {
         e.preventDefault();
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
         postData = {
             users: $('#clone-perms-form').find( ':input' )[0].value,
             csrfmiddlewaretoken: csrfToken,
@@ -26,8 +27,11 @@ $(document).ready(function() {
                 }
             }
             var url = $('#clone-perms-form').attr( 'action' );
-            var fields = $('#clone-perms-form').find( ':input' ).serializeArray();
-            $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function() {
+            var fields = $('#clone-perms-form')
+                .find( ':input' ).serializeArray();
+
+            $.when( ajax_form_submit( url, fields, csrfToken ) )
+                    .done( function() {
                 location.reload();
             });
         }, 'json' );
