@@ -148,7 +148,12 @@ class Nameserver(CydnsRecord):
     def save(self, *args, **kwargs):
         super(Nameserver, self).save(*args, **kwargs)
 
-    def clean(self):
+    def clean(self, *args, **kwargs):
+        try:
+            self.domain
+        except Domain.DoesNotExist:
+            return  # clean_fields already seen `domain`'s own ValidationError.
+
         self.check_for_cname()
 
         if not self.needs_glue():

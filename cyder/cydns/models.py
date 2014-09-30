@@ -62,8 +62,12 @@ class LabelDomainUtilsMixin(models.Model):
                 self.domain = Domain.objects.get(name=parts[0])
 
     def clean(self, *args, **kwargs):
+        try:
+            self.domain
+        except Domain.DoesNotExist:
+            # clean_fields has already seen `domain`'s own ValidationError.
+            raise ValidationError('')
         self.set_fqdn()
-
         super(LabelDomainUtilsMixin, self).clean(*args, **kwargs)
 
     def set_fqdn(self):
@@ -87,7 +91,6 @@ class LabelDomainMixin(LabelDomainUtilsMixin):
     fqdn = models.CharField(
         max_length=255, blank=True, validators=[validate_fqdn], db_index=True
     )
-
 
 
 class ViewMixin(models.Model):
@@ -161,11 +164,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         super(CydnsRecord, self).clean(*args, **kwargs)
 
         self.check_TLD_condition()
-        if hasattr(self, 'domain'):
-            check_no_ns_soa_condition(self.domain)
-        else:
-            raise ValidationError("DNS records require a domain")
-
+        check_no_ns_soa_condition(self.domain)
         self.check_domain_ctnr()
         self.check_for_delegation()
         if self.rdtype != 'CNAME':
