@@ -17,7 +17,7 @@ class Ip(models.Model):
 
     .. note::
         Django's BigInteger wasn't "Big" enough, so there is code
-        in `cydns/ip/sql/ip.sql` that Alters the IP table.
+        in `cyder/sql/cyder.sql` that alters the IP table.
 
     .. note::
         This class is abstract.

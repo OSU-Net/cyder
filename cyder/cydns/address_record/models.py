@@ -48,12 +48,12 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         ]}
 
     def clean(self, *args, **kwargs):
-        self.clean_ip()
         ignore_intr = kwargs.pop("ignore_intr", False)
         validate_glue = kwargs.pop("validate_glue", True)
 
         super(BaseAddressRecord, self).clean(*args, **kwargs)
 
+        self.clean_ip()
         self.check_name_ctnr_collision()
         if validate_glue:
             self.check_glue_status()
