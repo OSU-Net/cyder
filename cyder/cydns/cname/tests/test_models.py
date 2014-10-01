@@ -356,9 +356,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         )
 
         for target in valid_targets:
-            cn = CNAME(label='bar', domain=self.g, target=target,
-                       ctnr=self.ctnr1)
-            cn.save()
+            cn = CNAME.objects.create(
+                label='bar', domain=self.g, target=target, ctnr=self.ctnr1)
             cn.delete()
 
         invalid_targets = (
@@ -367,10 +366,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         )
 
         for target in invalid_targets:
-            with self.assertRaises(ValidationError):
-                cn = CNAME(label='bar', domain=self.g, target=target,
-                           ctnr=self.ctnr1)
-                cn.save()
+            self.assertRaises(ValidationError, CNAME.objects.create,
+                label='bar', domain=self.g, target=target, ctnr=self.ctnr1)
 
     def test_staticinterface_conflict(self):
         """Test that a CNAME can't have the same name as a StaticInterface"""
@@ -379,22 +376,17 @@ class CNAMETests(cyder.base.tests.TestCase):
         d = Domain.objects.get(name='example.gz')
 
         def create_cname():
-            cn = CNAME(label='foo', domain=d, target='www.example.gz',
-                       ctnr=self.ctnr1)
-            cn.save()
-            return cn
+            return CNAME.objects.create(
+                label='foo', domain=d, target='www.example.gz',
+                ctnr=self.ctnr1)
         create_cname.name = 'CNAME'
 
         def create_si():
-            s = System(name='test_system')
-            s.save()
-
-            si = StaticInterface(
+            s = System.objects.create(name='test_system')
+            return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,
                 ctnr=self.ctnr1)
-            si.save()
-            return si
         create_si.name = 'StaticInterface'
 
         self.assertObjectsConflict((create_cname, create_si))
