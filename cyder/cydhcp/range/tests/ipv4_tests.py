@@ -13,27 +13,23 @@ from cyder.core.ctnr.models import Ctnr
 class V4RangeTests(TestCase):
 
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        self.d = Domain(name="com")
-        self.d.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        self.d = Domain.objects.create(name="com")
         self.ctnr.domains.add(self.d)
-        Domain(name="arpa").save()
-        Domain(name="in-addr.arpa").save()
-        create_zone('10.in-addr.arpa')
-        self.s = Network(network_str="10.0.0.0/16", ip_type='4')
-        self.s.update_network()
-        self.s.save()
 
-        self.s1 = Network(network_str="10.2.1.0/24", ip_type='4')
-        self.s1.update_network()
-        self.s1.save()
+        Domain.objects.create(name="arpa")
+        Domain.objects.create(name="in-addr.arpa")
+        create_zone('10.in-addr.arpa')
+
+        self.s = Network.objects.create(network_str="10.0.0.0/16", ip_type='4')
+        self.s1 = Network.objects.create(
+            network_str="10.2.1.0/24", ip_type='4')
 
     def do_add(self, start_str, end_str, network, ip_type):
-        r = Range(start_str=start_str, end_str=end_str, network=network,
+        r = Range.objects.create(
+            start_str=start_str, end_str=end_str, network=network,
                   ip_type=ip_type)
         r.__repr__()
-        r.save()
         return r
 
     def test1_create(self):
@@ -262,21 +258,18 @@ class V4RangeTests(TestCase):
 
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
-        s = StaticInterface(
+        s = StaticInterface.objects.create(
             label="foo1", domain=self.d, ip_type='4',
             ip_str=str(r.get_next_ip()), system=system,
             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.2")
-        s = StaticInterface(
+        s = StaticInterface.objects.create(
             label="foo2", domain=self.d, ip_type='4',
             ip_str=str(r.get_next_ip()), system=system,
             mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.save()
         self.assertEqual(str(r.get_next_ip()), "10.0.33.3")
-        s = StaticInterface(
+        s = StaticInterface.objects.create(
                 label="foo3", domain=self.d, ip_type='4',
                 ip_str=str(r.get_next_ip()), system=system,
                 mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.save()
         self.assertEqual(r.get_next_ip(), None)

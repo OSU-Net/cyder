@@ -7,17 +7,11 @@ from cyder.cydhcp.network.models import Network
 class SiteTests(TestCase):
     def do_basic_add_network(self, network, prefixlen, ip_type,
                              name=None, number=None, site=None):
-        s = Network(network_str=network + "/" + prefixlen,
-                    ip_type=ip_type, site=site)
-        s.save()
-        self.assertTrue(s)
-        return s
+        return Network.objects.create(
+            network_str=network + "/" + prefixlen, ip_type=ip_type, site=site)
 
     def do_basic_add_site(self, name, parent=None):
-        s = Site(name=name, parent=parent)
-        s.save()
-        self.assertTrue(s)
-        return s
+        return Site.objects.create(name=name, parent=parent)
 
     def test_related_sites(self):
         s1 = self.do_basic_add_site(name="Site 1")
@@ -50,81 +44,69 @@ class SiteTests(TestCase):
         s7 = self.do_basic_add_site(name="Site 7", parent=s3)
         s10 = self.do_basic_add_site(name="Site 10", parent=s7)
 
-        n1 = self.do_basic_add_network(
-            network="123.0.0.0",
-            prefixlen="10",
+        n1 = Network.objects.create(
+            network_str="123.0.0.0/10",
             ip_type='4',
             site=s1,
         )
 
-        n2 = self.do_basic_add_network(
-            network="123.0.10.0",
-            prefixlen="20",
+        n2 = Network.objects.create(
+            network_str="123.0.10.0/20",
             ip_type='4',
             site=s3,
         )
 
-        n3 = self.do_basic_add_network(
-            network="123.0.10.0",
-            prefixlen="24",
+        n3 = Network.objects.create(
+            network_str="123.0.10.0/24",
             ip_type='4',
             site=s7,
         )
 
-        n4 = self.do_basic_add_network(
-            network="123.0.16.0",
-            prefixlen="20",
+        n4 = Network.objects.create(
+            network_str="123.0.16.0/20",
             ip_type='4',
         )
 
-        n5 = self.do_basic_add_network(
-            network="123.0.16.0",
-            prefixlen="21",
+        n5 = Network.objects.create(
+            network_str="123.0.16.0/21",
             ip_type='4',
             site=s10,
         )
 
-        n6 = self.do_basic_add_network(
-            network="123.0.17.0",
-            prefixlen="26",
+        n6 = Network.objects.create(
+            network_str="123.0.17.0/26",
             ip_type='4',
         )
 
-        n7 = self.do_basic_add_network(
-            network="123.0.18.0",
-            prefixlen="26",
+        n7 = Network.objects.create(
+            network_str="123.0.18.0/26",
             ip_type='4',
         )
 
-        n8 = self.do_basic_add_network(
-            network="223.0.0.0",
-            prefixlen="10",
+        n8 = Network.objects.create(
+            network_str="223.0.0.0/10",
             ip_type='4',
             site=s1,
         )
 
-        n9 = self.do_basic_add_network(
-            network="223.0.10.0",
-            prefixlen="24",
+        n9 = Network.objects.create(
+            network_str="223.0.10.0/24",
             ip_type='4',
         )
 
-        n10 = self.do_basic_add_network(
-            network="223.0.32.0",
-            prefixlen="20",
+        n10 = Network.objects.create(
+            network_str="223.0.32.0/20",
             ip_type='4',
             site=s2,
         )
 
-        n11 = self.do_basic_add_network(
-            network="223.0.32.0",
-            prefixlen="24",
+        n11 = Network.objects.create(
+            network_str="223.0.32.0/24",
             ip_type='4',
         )
 
-        n12 = self.do_basic_add_network(
-            network="223.0.33.0",
-            prefixlen="24",
+        n12 = Network.objects.create(
+            network_str="223.0.33.0/24",
             ip_type='4',
             site=s4,
         )

@@ -10,28 +10,18 @@ import ipaddr
 
 class V6RangeTests(TestCase):
     def setUp(self):
-        self.d = Domain(name="com")
-        self.s = Network(network_str="1234:1234:1234::/16", ip_type='6')
-        self.s.update_network()
-        self.s.save()
-
-        self.s1 = Network(network_str="1234:1134:1234::/32", ip_type='6')
-        self.s1.update_network()
-        self.s1.save()
-
-        self.s2 = Network(network_str="fff::/4", ip_type='6')
-        self.s2.update_network()
-        self.s2.save()
-
-        self.s3 = Network(network_str="ffff::/4", ip_type='6')
-        self.s3.update_network()
-        self.s3.save()
+        self.s = Network.objects.create(
+            network_str="1234:1234:1234::/16", ip_type='6')
+        self.s1 = Network.objects.create(
+            network_str="1234:1134:1234::/32", ip_type='6')
+        self.s2 = Network.objects.create(network_str="fff::/4", ip_type='6')
+        self.s3 = Network.objects.create(network_str="ffff::/4", ip_type='6')
 
     def do_add(self, start_str, end_str, network, ip_type):
-        r = Range(start_str=start_str, end_str=end_str, network=network,
-                  ip_type=ip_type)
+        r = Range.objects.create(
+            start_str=start_str, end_str=end_str, network=network,
+            ip_type=ip_type)
         r.__repr__()
-        r.save()
         return r
 
     def test1_create(self):
@@ -62,16 +52,18 @@ class V6RangeTests(TestCase):
         self.assertEqual(r.end_upper, 0xffffffffffffffff)
         self.assertEqual(r.end_lower, 0xfffffffffffffffe)
 
-    """
     def test1_bad_create(self):
-        # start == end
-        self.assertRaises(ValidationError, self.do_add,
-            start_str="1234:1235:1234:1234::",
-            end_str="1234:1235:1234:1234::",
-            network=self.s,
-            ip_type='6',
-        )
-    """
+        def x():
+            self.do_add(
+                start_str="fe8:4:5::",
+                end_str="fe8:4:55::",
+                network=self.s2,
+                ip_type='6',
+            )
+
+        x()
+
+        self.assertRaises(ValidationError, x)
 
     def test2_bad_create(self):
         # start > end
@@ -249,15 +241,3 @@ class V6RangeTests(TestCase):
         # Update range to something outside of the subnet.
         r.end_str = "ffff:ffff:ffff::"
         self.assertRaises(ValidationError, r.save)
-
-    def test13_bad_create(self):
-        def x():
-            self.do_add(
-                start_str="fe8:4:5::",
-                end_str="fe8:4:55::",
-                network=self.s2,
-                ip_type='6',
-            )
-
-        x()
-        self.assertRaises(ValidationError, x)
