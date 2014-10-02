@@ -18,35 +18,6 @@ class GenericViewTests(object):
             server = random_label()
             return {'server': server, 'domain':self.domain.pk}
     """
-    def get_tests(self):
-        return (
-            self.test_filter(),
-            self.test_list_get(),
-            self.test_create_post_guest(),
-            self.test_create_post_user(),
-            self.test_create_post_admin(),
-            self.test_create_post_superuser(),
-            self.test_update_post_guest(),
-            self.test_update_post_user(),
-            self.test_update_post_admin(),
-            self.test_update_post_superuser(),
-            self.test_delete_post_guest(),
-            self.test_delete_post_user(),
-            self.test_delete_post_admin(),
-            self.test_delete_post_superuser(),
-            self.test_detail_get(),
-            self.test_table_update_post(),
-            lambda junk: True
-        )
-
-    def get_helpers(self):
-        return (
-            self.has_perm(),
-            self.do_create(),
-            self.do_update(),
-            self.do_delete(),
-        )
-
     def has_perm(self):
         def has_perm(self, user, action):
             if action == ACTION_CREATE:
