@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 
+from cyder.cydns.address_record.models import AddressRecord
 from .basestatic import BaseStaticTests
 
 
@@ -15,14 +16,17 @@ class AStaticRegTests(BaseStaticTests):
                 mac="11:22:33:44:55:66",
                 label=label,
                 domain=domain,
-                ip_str=ip_str)
+                ip_str=ip_str,
+            )
         i.name = 'StaticInterface'
 
         def a():
-            return self.do_add_a(
+            return AddressRecord.objects.create(
                 label=label,
                 domain=domain,
-                ip_str=ip_str)
+                ip_str=ip_str,
+                ctnr=self.ctnr,
+            )
         a.name = 'AddressRecord'
 
         self.assertObjectsConflict((i, a))
@@ -39,10 +43,11 @@ class AStaticRegTests(BaseStaticTests):
             ip_str='10.0.0.2',
         )
 
-        a = self.do_add_a(
+        a = AddressRecord.objects.create(
             label=label,
             domain=domain,
             ip_str='10.0.0.3',
+            ctnr=self.ctnr,
         )
 
         a.ip_str = "10.0.0.2"
@@ -54,10 +59,11 @@ class AStaticRegTests(BaseStaticTests):
         label = "foo98"
         domain = self.f_c
 
-        self.do_add_a(
+        AddressRecord.objects.create(
             label=label,
             domain=domain,
             ip_str='10.0.0.2',
+            ctnr=self.ctnr,
         )
 
         intr = self.do_add_intr(

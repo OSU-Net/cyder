@@ -17,108 +17,85 @@ from .basestatic import BaseStaticTests
 
 class V6StaticInterTests(BaseStaticTests):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
         self.arpa = self.create_domain(name='arpa')
-        self.arpa.save()
         self.i_arpa = self.create_domain(name='ip6.arpa', ip_type='6')
-        self.i_arpa.save()
 
-        self.c = Domain(name="ccc")
-        self.c.save()
-        self.f_c = Domain(name="foo.ccc")
-        self.f_c.save()
+        self.c = Domain.objects.create(name="ccc")
+        self.f_c = Domain.objects.create(name="foo.ccc")
         self.ctnr.domains.add(self.c)
         self.ctnr.domains.add(self.f_c)
         self.r1 = self.create_domain(name="0", ip_type='6')
-        self.r1.save()
         self.r2 = create_zone('1.ip6.arpa')
-        self.s = System(name='foobar')
-        self.s.save()
+        self.s = System.objects.create(name='foobar')
 
-        self.net = Network(network_str='1000::/16', ip_type='6')
-        self.net.update_network()
-        self.net.save()
-        self.range = Range(network=self.net, range_type=STATIC,
-                           ip_type='6', start_str='1000::1',
-                           end_str='1000:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
+        self.net = Network.objects.create(network_str='1000::/16', ip_type='6')
+        self.range = Range.objects.create(
+            network=self.net, range_type=STATIC, ip_type='6',
+            start_str='1000::1',
+            end_str='1000:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
         self.range.save()
         self.ctnr.ranges.add(self.range)
 
     def do_add(self, mac, label, domain, ip_str, ip_type='6'):
-        r = StaticInterface(mac=mac, label=label, domain=domain, ip_str=ip_str,
-                            ip_type=ip_type, system=self.s, ctnr=self.ctnr,
-                            range=self.range)
-        r.save()
+        r = StaticInterface.objects.create(
+            mac=mac, label=label, domain=domain, ip_str=ip_str,
+            ip_type=ip_type, system=self.s, ctnr=self.ctnr, range=self.range)
         repr(r)
         return r
 
     def do_delete(self, r):
-        ip_str = r.ip_str
-        fqdn = r.fqdn
         r.delete()
-        self.assertFalse(
-            AddressRecord.objects.filter(ip_str=ip_str, fqdn=fqdn))
+        self.assertFalse(AddressRecord.objects.filter(pk=r.pk).exists())
 
     def test1_create_basic(self):
-        mac = "11:22:33:44:55:66"
-
         self.do_add(
-            mac=mac,
+            mac="11:22:33:44:55:66",
             label="foo",
             domain=self.f_c,
-            ip_str=("1000:12:" + mac),
+            ip_str='1000:12:11:22:33:44:55:66',
         )
 
     def test2_create_basic(self):
-        mac = "11:22:33:44:55:66"
-
         self.do_add(
-            mac=mac,
+            mac="11:22:33:44:55:66",
             label="foo1",
             domain=self.f_c,
-            ip_str=("1000:123:" + mac),
+            ip_str='1000:123:11:22:33:44:55:66',
         )
 
     def test3_create_basic(self):
-        mac = "11:22:33:44:55:66"
-
         self.do_add(
-            mac=mac,
+            mac="11:22:33:44:55:66",
             label="foo1",
             domain=self.f_c,
-            ip_str=("1000:1234:" + mac),
+            ip_str='1000:1234:11:22:33:44:55:66',
         )
 
     def test4_create_basic(self):
-        mac = "11:22:33:44:55:66"
-
         self.do_add(
-            mac=mac,
+            mac="11:22:33:44:55:66",
             label="foo1",
             domain=self.f_c,
-            ip_str=("1000:11:" + mac),
+            ip_str='1000:11:11:22:33:44:55:66',
         )
 
     def test1_delete(self):
-        mac = "11:22:33:44:55:66"
-
         r = self.do_add(
-            mac=mac,
+            mac="11:22:33:44:55:66",
             label="foo1",
             domain=self.f_c,
-            ip_str=("1000:112:" + mac),
+            ip_str='1000:112:11:22:33:44:55:66',
         )
         self.do_delete(r)
 
     def test1_dup_create_basic(self):
-        mac = "11:22:33:44:55:66"
         def x():
             self.do_add(
-                mac=mac,
+                mac="11:22:33:44:55:66",
                 label="foo3",
                 domain=self.f_c,
-                ip_str=("1000:1123:" + mac),
+                ip_str="1000:1123:11:22:33:44:55:66",
             )
 
         x()
@@ -127,20 +104,22 @@ class V6StaticInterTests(BaseStaticTests):
 
     def test1_bad_add_for_a_ptr(self):
         # Intr exists, then try ptr and A
-        mac = "11:22:33:44:55:6e"
-        label = "9988fooddfdf"
-        domain = self.c
-        ip_str = "1000:111:" + mac
 
-        self.do_add(mac=mac, label=label, domain=domain, ip_str=ip_str)
+        ip_str = '1000:111:11:22:33:44:55:6e'
+        self.do_add(
+            mac="11:22:33:44:55:6e",
+            label="9988fooddfdf",
+            domain=self.c,
+            ip_str=ip_str,
+        )
 
         self.assertRaises(ValidationError, AddressRecord.objects.create,
-            label=label, domain=domain, ip_str=ip_str, ip_type='6',
+            label='9988fooddfdf', domain=self.c, ip_str=ip_str, ip_type='6',
             ctnr=self.ctnr)
 
         self.assertRaises(ValidationError, PTR.objects.create,
                 ip_str=ip_str, ip_type='6',
-                fqdn=(label + '.' + domain.name), ctnr=self.ctnr)
+                fqdn='9988fooddfdf.ccc', ctnr=self.ctnr)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
