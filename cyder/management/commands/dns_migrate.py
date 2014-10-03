@@ -255,7 +255,7 @@ class Zone(object):
 
             # check for duplicate
             static = StaticInterface.objects.filter(
-                label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+                label=name, mac=(clean_mac(ha) or None), ip_str=long2ip(ip))
             if static:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['host.id'])
@@ -289,7 +289,7 @@ class Zone(object):
                 last_seen = datetime.fromtimestamp(last_seen)
 
             static = StaticInterface(
-                label=name, domain=self.domain, mac=clean_mac(ha),
+                label=name, domain=self.domain, mac=(clean_mac(ha) or None),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
                 dns_enabled=dns_enabled, dhcp_enabled=dhcp_enabled,

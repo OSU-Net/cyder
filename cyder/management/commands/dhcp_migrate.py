@@ -343,13 +343,20 @@ def migrate_dynamic_hosts():
     for values in cursor.fetchall():
         items = dict(zip(keys, values))
         enabled = items['enabled']
-        mac = items['ha']
 
-        if len(mac) != 12 or mac == '0' * 12:
-            mac = ""
-
-        if mac == "":
-            enabled = False
+        if len(items['ha']) == 0:
+            mac = None
+        elif len(items['ha']) == 12:
+            if items['ha'] == '0' * 12:
+                mac = None
+                enabled = False
+            else:
+                mac = items['ha']
+        else:
+            stderr.write(
+                'Host with id {} has invalid hardware address "{}"'.format(
+                    items['id'], items['ha']))
+            continue
 
         # TODO: Verify that there is no valid range/zone/workgroup with id 0
         r, c, w = None, None, default
@@ -357,9 +364,10 @@ def migrate_dynamic_hosts():
             try:
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
-                print ('Could not create dynamic interface %s: Range %s '
-                       'is in Maintain, but was not created in Cyder.' %
-                       (mac, items['dynamic_range']))
+                stderr.write(
+                    'Could not create dynamic interface %s: Range %s '
+                    'is in Maintain, but was not created in Cyder.' %
+                    (items['ha'], items['dynamic_range']))
 
         if items['zone']:
             c = maintain_find_zone(items['zone'])
