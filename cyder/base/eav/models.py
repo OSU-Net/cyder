@@ -46,6 +46,9 @@ class EAVBase(BaseModel, ObjectUrlMixin):
         abstract = True
         unique_together = ('entity', 'attribute')
 
+    def check_in_ctnr(self, ctnr):
+        return ctnr.check_contains_obj(self.entity)
+
     @property
     def pretty_name(self):
         return self.attribute.name

@@ -450,6 +450,9 @@ POINTERS = [('128.193.76.253', 'cob-dc81.bus.oregonstate.edu', 'forward'),
             ('128.193.76.252', 'cob-dc83.bus.oregonstate.edu', 'forward'),
             ('128.193.76.255', 'cob-dc84.bus.oregonstate.edu', 'forward')]
 
+NONDELEGATED_NS = ['dns.merit.net', 'ns1.nero.net', 'ns1.oregonstate.edu',
+                   'ns1.ucsb.edu', 'ns2.oregonstate.edu']
+
 REVERSE_DOMAINS = [
     '50.209.59.69', '193.128', '10', '211.140', '201.199', '32.198', '232.111',
     '127', '131.80.252.131', '5.68.98.207'
@@ -467,6 +470,19 @@ VERIFICATION_SERVER = "ns1.oregonstate.edu"
 ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
 ZONE_PATH = "cyder/management/commands/lib/zones"
 ZONE_BLACKLIST = []
+
+# This list contains tuples that have a zone's name as their 0th element and a
+# view's name as the 1st element. For example:
+#
+# ('mozilla.net', 'public'),
+# ('mozilla.net', 'private')
+#
+# This will cause the public and private view of the mozilla.net zone to not
+# have a config statement in the produced config/master.private and
+# config/master.public files. The files net/mozilla/mozilla.net.public and
+# net/mozilla.net.private *will* be generated and written to disk.
+ZONES_WITH_NO_CONFIG = [
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

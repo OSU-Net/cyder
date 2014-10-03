@@ -1,12 +1,13 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.utils import ensure_label_domain
 from cyder.cydns.soa.models import SOA
 
+from basedomain import BaseDomain
 
-class AutoCreateTests(TestCase):
+
+class AutoCreateTests(BaseDomain):
     """These tests should cover zone insurance and delegation blocking.
     Purgeable Domains
     """

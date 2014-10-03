@@ -40,12 +40,13 @@ class LibTestsFreeIP(TestCase):
             name="private.corp.phx1.oregonstate.com")
         d2.soa = soa
         d2.save()
+        self.ctnr.domains.add(d, d1, d2)
 
-        d, _ = Domain.objects.get_or_create(name="arpa")
-        d, _ = Domain.objects.get_or_create(name="in-addr.arpa")
-        d, _ = Domain.objects.get_or_create(name="ip6.arpa")
-        d, _ = Domain.objects.get_or_create(name="15.in-addr.arpa")
-        d, _ = Domain.objects.get_or_create(name="2.in-addr.arpa")
+        for name in ["arpa", "in-addr.arpa", "ip6.arpa", "15.in-addr.arpa",
+                     "2.in-addr.arpa"]:
+            d, _ = Domain.objects.get_or_create(name=name)
+            self.ctnr.domains.add(d)
+
         n = Network(network_str="15.0.0.0/8", ip_type="4")
         n.clean()
         n.site = s1
@@ -60,6 +61,7 @@ class LibTestsFreeIP(TestCase):
                   network=n, ip_type='4', range_type=STATIC)
         r.clean()
         r.save()
+        self.ctnr.ranges.add(r)
 
     def test1_free_ip_count(self):
         # Add a bunch of interfaces and make sure the calc_free_ips function is

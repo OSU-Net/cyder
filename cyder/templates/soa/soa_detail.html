@@ -4,7 +4,7 @@
 
 
 {% block extra_action_bar %}
-  {% if request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
+  {% if request.user.get_profile().has_perm(request, 2, obj=obj) %}
     {{ create_button('soa_av', 'soa_av'|prettify_obj_type,
                      url('get-update-form'), url('soa_av'), obj_name=obj.description,
                      button_name="SOA Attribute") }}

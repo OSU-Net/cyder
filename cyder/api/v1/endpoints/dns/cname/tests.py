@@ -8,6 +8,7 @@ class CNAMEAPI_Test(APITests):
 
     def create_data(self):
         data = {
+            'ctnr': self.ctnr,
             'description': 'CNAME record',
             'ttl': 420,
             'label': 'baz',

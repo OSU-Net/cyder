@@ -67,7 +67,7 @@ def get_clobbered(domain_name, **kwargs):
 
 
 def ensure_domain(name, purgeable=False, inherit_soa=False, force=False,
-                  **kwargs):
+                  inherit_ctnr=True, **kwargs):
     """
     This function will take ``domain_name`` and make sure that that domain
     with that name exists in the db. If this function creates a domain it will
@@ -129,6 +129,11 @@ def ensure_domain(name, purgeable=False, inherit_soa=False, force=False,
             domain.soa = domain.master_domain.soa
             domain.save()
 
+        if (inherit_ctnr and created and domain.master_domain and
+                domain.master_domain.ctnr_set.count() > 0):
+            for ctnr in domain.master_domain.ctnr_set.all():
+                ctnr.domains.add(domain)
+
         for object_, views in clobber_objects:
             object_.domain = domain
             object_.clean()
@@ -179,7 +184,7 @@ def prune_tree(domain):
 def prune_tree_helper(domain, deleted_domains):
     if not domain:
         return deleted_domains  # Didn't delete anything.
-    if domain.domain_set.all():
+    if domain.domain_set.exists():
         return deleted_domains  # Can't delete domain. Has children.
     if domain.has_record_set():
         return deleted_domains  # Records exist for domain.

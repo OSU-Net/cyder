@@ -71,6 +71,9 @@ class Network(BaseModel, ObjectUrlMixin):
         objects = objects or Network.objects
         return objects.filter(range__in=ctnr.ranges.all())
 
+    def check_in_ctnr(self, ctnr):
+        return self.range_set.filter(pk__in=ctnr.ranges.all()).exists()
+
     def details(self):
         """For tables."""
         data = super(Network, self).details()
@@ -125,7 +128,7 @@ class Network(BaseModel, ObjectUrlMixin):
             #eav.save()
 
     def delete(self, *args, **kwargs):
-        if self.range_set.all().exists():
+        if self.range_set.exists():
             raise ValidationError("Cannot delete this network because it has "
                                   "child ranges")
         super(Network, self).delete(*args, **kwargs)
@@ -266,9 +269,9 @@ class Network(BaseModel, ObjectUrlMixin):
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
-        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError):
-            raise ValidationError('Invalid IPv{0} network'
-                                  .format(self.ip_type))
+        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
+            raise ValidationError('Invalid IPv{0} network: {1}'
+                                  .format(self.ip_type, e))
         # Update fields
         self.ip_upper = int(self.network) >> 64
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off

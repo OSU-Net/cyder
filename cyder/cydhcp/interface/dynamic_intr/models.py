@@ -118,9 +118,9 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         update_range_usage = kwargs.pop('update_range_usage', True)
         rng = self.range
         if delete_system:
-            if (not self.system.dynamicinterface_set.all().exclude(
+            if (not self.system.dynamicinterface_set.exclude(
                     id=self.id).exists() and
-                    not self.system.staticinterface_set.all().exists()):
+                    not self.system.staticinterface_set.exists()):
                 self.system.delete()
         super(DynamicInterface, self).delete()
         if rng and update_range_usage:

@@ -10,9 +10,9 @@ class PTRForm(DNSForm, RangeWizard, UsabilityFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PTRForm, self).__init__(*args, **kwargs)
-        self.fields.keyOrder = ['label', 'domain', 'vrf', 'site', 'range',
+        self.fields.keyOrder = ['fqdn', 'vrf', 'site', 'range',
                                 'ip_type', 'next_ip', 'ip_str', 'views', 'ttl',
-                                'description']
+                                'description', 'ctnr']
 
     def delete_instance(self, instance):
         instance.delete()

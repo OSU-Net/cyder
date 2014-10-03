@@ -52,6 +52,9 @@ class NSTestsModels(TestCase):
         self.f = Domain(name="fam")
         self.f.save()
 
+        for d in [self.r, self.f_r, self.b_f_r, self.f]:
+            self.ctnr.domains.add(d)
+
         self._128 = self.create_domain(name='128', ip_type='4')
         self._128.save()
 
@@ -65,18 +68,26 @@ class NSTestsModels(TestCase):
                          start_str='128.193.99.2', end_str='128.193.99.14')
         self.sr1.save()
         self.sr2 = Range(network=self.net1, range_type=STATIC,
-                         start_str='128.193.1.2', end_str='128.193.1.14')
+                         start_str='128.193.1.1', end_str='128.193.1.14')
         self.sr2.save()
 
         self.net2 = Network(network_str='14.10.1.0/30')
         self.net2.update_network()
         self.net2.save()
         self.sr3 = Range(network=self.net2, range_type=STATIC,
-                        start_str='14.10.1.1', end_str='14.10.1.2')
+                         start_str='14.10.1.1', end_str='14.10.1.2')
         self.sr3.save()
 
+        for r in [self.sr1, self.sr2, self.sr3]:
+            self.ctnr.ranges.add(r)
+
+    def create_fake_zone(self, *args, **kwargs):
+        domain = create_fake_zone(*args, **kwargs)
+        self.ctnr.domains.add(domain)
+        return domain
+
     def do_add(self, domain, server):
-        ns = Nameserver(domain=domain, server=server)
+        ns = Nameserver(ctnr=self.ctnr, domain=domain, server=server)
         ns.save()
         self.assertTrue(ns.__repr__())
         self.assertTrue(ns.details())
@@ -109,7 +120,7 @@ class NSTestsModels(TestCase):
 
     def testtest_add_ns_in_domain(self):
         # Use an A record as a glue record.
-        glue = AddressRecord(label='ns2', domain=self.r,
+        glue = AddressRecord(label='ns2', ctnr=self.ctnr, domain=self.r,
                              ip_str='128.193.1.10', ip_type='4')
         glue.clean()
         glue.save()
@@ -119,7 +130,7 @@ class NSTestsModels(TestCase):
         self.assertEqual(ns.server, ns.glue.fqdn)
         self.assertRaises(ValidationError, glue.delete)
 
-        glue = AddressRecord(label='ns3', domain=self.f_r,
+        glue = AddressRecord(label='ns3', ctnr=self.ctnr, domain=self.f_r,
                              ip_str='128.193.1.10', ip_type='4')
         glue.save()
         data = {'domain': self.f_r, 'server': 'ns3.foo.ru'}
@@ -129,7 +140,7 @@ class NSTestsModels(TestCase):
 
     def test_disallow_name_update_of_glue_A(self):
         # Glue records should not be allowed to change their name.
-        glue = AddressRecord(label='ns39', domain=self.f_r,
+        glue = AddressRecord(label='ns39', ctnr=self.ctnr, domain=self.f_r,
                              ip_str='128.193.1.77', ip_type='4')
         glue.clean()
         glue.save()
@@ -183,7 +194,7 @@ class NSTestsModels(TestCase):
         self.assertTrue(ns.glue)
         self.assertEqual(ns.glue, glue)
 
-        glue2 = AddressRecord(label='ns25', domain=self.f_r,
+        glue2 = AddressRecord(label='ns25', ctnr=self.ctnr, domain=self.f_r,
                               ip_str='128.193.1.78', ip_type='4')
         glue2.clean()
         glue2.save()
@@ -260,7 +271,7 @@ class NSTestsModels(TestCase):
         self.assertRaises(ValidationError, glue.clean)
 
     def test_update_glue_to_no_glue(self):
-        glue = AddressRecord(label='ns3', domain=self.r,
+        glue = AddressRecord(label='ns3', ctnr=self.ctnr, domain=self.r,
                              ip_str='128.193.1.10', ip_type='4')
         glue.save()
         data = {'domain': self.r, 'server': 'ns3.ru'}
@@ -272,7 +283,7 @@ class NSTestsModels(TestCase):
         self.assertTrue(ns.glue is None)
 
     def test_delete_ns(self):
-        glue = AddressRecord(label='ns4', domain=self.f_r,
+        glue = AddressRecord(label='ns4', ctnr=self.ctnr, domain=self.f_r,
                              ip_str='128.196.1.10', ip_type='4')
         glue.save()
         data = {'domain': self.f_r, 'server': 'ns4.foo.ru'}
@@ -286,7 +297,7 @@ class NSTestsModels(TestCase):
         self.assertFalse(nsret)
 
     def test_invalid_create(self):
-        glue = AddressRecord(label='ns2', domain=self.r,
+        glue = AddressRecord(label='ns2', ctnr=self.ctnr, domain=self.r,
                              ip_str='128.193.1.10', ip_type='4')
         glue.save()
 
@@ -319,7 +330,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_1_0(self):
         # This is Case 1
-        root_domain = create_fake_zone("asdf10")
+        root_domain = self.create_fake_zone("asdf10")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -329,14 +340,14 @@ class NSTestsModels(TestCase):
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
         a = AddressRecord(
-            label='', domain=root_domain, ip_type="6", ip_str="1::")
+            label='', ctnr=self.ctnr, domain=root_domain, ip_type="6", ip_str="1::")
         self.assertRaises(ValidationError, a.save)
-        cn = CNAME(label='', domain=root_domain, target="asdf")
+        cn = CNAME(label='', ctnr=self.ctnr, domain=root_domain, target="asdf")
         self.assertRaises(ValidationError, cn.save)
 
     def test_bad_nameserver_soa_state_case_1_1(self):
         # This is Case 1
-        root_domain = create_fake_zone("asdf111")
+        root_domain = self.create_fake_zone("asdf111")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -350,14 +361,14 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        a = AddressRecord(label='', domain=cdomain, ip_type="6", ip_str="1::")
+        a = AddressRecord(label='', ctnr=self.ctnr, domain=cdomain, ip_type="6", ip_str="1::")
         self.assertRaises(ValidationError, a.save)
-        cn = CNAME(label='', domain=cdomain, target="asdf")
+        cn = CNAME(label='', ctnr=self.ctnr, domain=cdomain, target="asdf")
         self.assertRaises(ValidationError, cn.save)
 
     def test_bad_nameserver_soa_state_case_1_2(self):
         # This is Case 1 ... with ptr's
-        root_domain = create_fake_zone("12.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("12.in-addr.arpa", suffix="")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -366,12 +377,12 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        ptr = PTR(fqdn="asdf", ip_str="12.10.1.1", ip_type="4")
+        ptr = PTR(ctnr=self.ctnr, fqdn="asdf", ip_str="12.10.1.1", ip_type="4")
         self.assertRaises(ValidationError, ptr.save)
 
     def test_bad_nameserver_soa_state_case_1_3(self):
         # This is Case 1 ... with ptr's
-        root_domain = create_fake_zone("13.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("13.in-addr.arpa", suffix="")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -385,13 +396,13 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        ptr = PTR(fqdn="asdf", ip_str="13.10.1.1", ip_type="4")
+        ptr = PTR(ctnr=self.ctnr, fqdn="asdf", ip_str="13.10.1.1", ip_type="4")
         self.assertRaises(ValidationError, ptr.save)
 
     def test_bad_nameserver_soa_state_case_1_4(self):
         # This is Case 1 ... with StaticInterfaces's
-        reverse_root_domain = create_fake_zone("14.in-addr.arpa", suffix="")
-        root_domain = create_fake_zone("asdf14")
+        reverse_root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("asdf14")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -413,7 +424,7 @@ class NSTestsModels(TestCase):
     # See record.tests for the case a required view is deleted.
     def test_bad_nameserver_soa_state_case_2_0(self):
         # This is Case 2
-        root_domain = create_fake_zone("asdf20")
+        root_domain = self.create_fake_zone("asdf20")
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -421,14 +432,14 @@ class NSTestsModels(TestCase):
         # ns record associated to the domain.
 
         a = AddressRecord(
-            label='', domain=root_domain, ip_type="6", ip_str="1::")
+            label='', ctnr=self.ctnr, domain=root_domain, ip_type="6", ip_str="1::")
         a.save()
 
         self.assertRaises(ValidationError, ns.delete)
 
     def test_bad_nameserver_soa_state_case_2_1(self):
         # This is Case 2
-        root_domain = create_fake_zone("asdf21")
+        root_domain = self.create_fake_zone("asdf21")
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -440,29 +451,30 @@ class NSTestsModels(TestCase):
         cdomain = Domain(name="test." + root_domain.name)
         cdomain.soa = root_domain.soa
         cdomain.save()
+        self.ctnr.domains.add(cdomain)
 
-        a = AddressRecord(label='', domain=cdomain, ip_type="6", ip_str="1::")
+        a = AddressRecord(label='', ctnr=self.ctnr, domain=cdomain, ip_type="6", ip_str="1::")
         a.save()
 
         self.assertRaises(ValidationError, ns.delete)
 
     def test_bad_nameserver_soa_state_case_2_2(self):
         # This is Case 2 ... with ptrs
-        root_domain = create_fake_zone("22.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
         # At his point we should have a domain at the root of a zone with one
         # ns record associated to the domain.
 
-        ptr = PTR(fqdn="bloo.asdf", ip_str="22.1.1.1", ip_type="4")
+        ptr = PTR(ctnr=self.ctnr, fqdn="bloo.asdf", ip_str="14.10.1.1", ip_type="4")
         ptr.save()
 
         self.assertRaises(ValidationError, ns.delete)
 
     def test_bad_nameserver_soa_state_case_2_3(self):
         # This is Case 2 ... with ptrs
-        root_domain = create_fake_zone("10.23.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("10.14.in-addr.arpa", suffix="")
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -475,14 +487,14 @@ class NSTestsModels(TestCase):
         cdomain.soa = root_domain.soa
         cdomain.save()
 
-        ptr = PTR(fqdn="bloo.asdf", ip_str="23.10.1.1", ip_type="4")
+        ptr = PTR(ctnr=self.ctnr, fqdn="bloo.asdf", ip_str="14.10.1.1", ip_type="4")
         ptr.save()
 
         self.assertRaises(ValidationError, ns.delete)
 
     def test_bad_nameserver_soa_state_case_3_0(self):
         # This is Case 3
-        root_domain = create_fake_zone("asdf30")
+        root_domain = self.create_fake_zone("asdf30")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -498,7 +510,7 @@ class NSTestsModels(TestCase):
 
         # Add a record to the domain.
         a = AddressRecord(
-            label='', domain=root_domain, ip_type="6", ip_str="1::")
+            label='', ctnr=self.ctnr, domain=root_domain, ip_type="6", ip_str="1::")
         a.save()
 
         s = SOA(primary="asdf.asdf", contact="asdf.asdf",
@@ -508,16 +520,17 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_1(self):
         # This is Case 3
-        root_domain = create_fake_zone("asdf31")
+        root_domain = self.create_fake_zone("asdf31")
 
         # Try case 3 but add a record to a child domain of root_domain
         bad_root_domain = Domain(name="below." + root_domain.name)
         bad_root_domain.save()
         cdomain = Domain(name="test." + bad_root_domain.name)
         cdomain.save()
+        self.ctnr.domains.add(cdomain)
 
         # Add a record to the domain.
-        a = AddressRecord(label='', domain=cdomain, ip_type="6", ip_str="1::")
+        a = AddressRecord(label='', ctnr=self.ctnr, domain=cdomain, ip_type="6", ip_str="1::")
         a.save()
 
         # Now try to add the domain to the zone that has no NS records at it's
@@ -532,7 +545,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_2(self):
         # This is Case 3 ... with ptrs
-        root_domain = create_fake_zone("32.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -548,7 +561,7 @@ class NSTestsModels(TestCase):
 
         # Add a record to the domain.
 
-        ptr = PTR(fqdn="bloo.asdf", ip_str="32.1.1.1", ip_type="4")
+        ptr = PTR(ctnr=self.ctnr, fqdn="bloo.asdf", ip_str="14.10.1.1", ip_type="4")
         ptr.save()
 
         s = SOA(primary="asdf.asdf", contact="asdf.asdf",
@@ -558,14 +571,14 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_3(self):
         # This is Case 3 ... with ptrs
-        root_domain = create_fake_zone("33.in-addr.arpa", suffix="")
+        root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
 
         bad_root_domain = Domain(name="10." + root_domain.name)
         bad_root_domain.save()
-        cdomain = Domain(name="6.10.33.in-addr.arpa")
+        cdomain = Domain(name="1.10.14.in-addr.arpa")
         cdomain.save()
 
-        p = PTR(label='eh', domain=cdomain, ip_type="4", ip_str="33.10.6.2")
+        p = PTR(label='eh', ctnr=self.ctnr, domain=cdomain, ip_type="4", ip_str="14.10.1.1")
         p.save()
 
         # Now try to add the domain to the zone that has no NS records at it's

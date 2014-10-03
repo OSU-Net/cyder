@@ -1,6 +1,7 @@
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.network.models import Network
 from cyder.cydns.domain.models import Domain
 from cyder.api.v1.tests.base import APITests
 
@@ -10,7 +11,6 @@ class StaticInterfaceBase(APITests):
 
     def setUp(self):
         Domain.objects.get_or_create(name='arpa')
-        self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.system, _ = System.objects.get_or_create(name="TestSystem")
         super(StaticInterfaceBase, self).setUp()
 
@@ -35,11 +35,18 @@ class StaticInterfaceV4API_Test(StaticInterfaceBase):
         super(StaticInterfaceV4API_Test, self).setUp()
         Domain.objects.get_or_create(name='in-addr.arpa')
         Domain.objects.get_or_create(name='11.in-addr.arpa')
+        self.net = Network(network_str='11.12.14.0/8', ip_type='4')
+        self.net.update_network()
+        self.net.save()
+        self.range = Range(network=self.net, range_type='st',
+                           ip_type='4', start_str='11.12.14.253',
+                           end_str='11.12.14.254')
+        self.range.save()
 
     def create_data(self):
         data = super(StaticInterfaceV4API_Test, self).create_data()
         data.update({
-            'ip_str': '11.12.14.255',
+            'ip_str': '11.12.14.253',
             'ip_type': '4',
         })
         fack = self.model.objects.filter(**data)
@@ -57,6 +64,13 @@ class StaticInterfaceV6API_Test(StaticInterfaceBase):
         super(StaticInterfaceV6API_Test, self).setUp()
         Domain.objects.get_or_create(name='ip6.arpa')
         Domain.objects.get_or_create(name='2.ip6.arpa')
+        self.net = Network(network_str='2001::/16', ip_type='6')
+        self.net.update_network()
+        self.net.save()
+        self.range = Range(network=self.net, range_type='st',
+                           ip_type='6', start_str='2001::1',
+                           end_str='2001:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
+        self.range.save()
 
     def create_data(self):
         data = super(StaticInterfaceV6API_Test, self).create_data()

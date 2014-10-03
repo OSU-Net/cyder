@@ -8,6 +8,7 @@ class NameserverAPI_Test(APITests):
 
     def create_data(self):
         data = {
+            'ctnr': self.ctnr,
             'server': 'relay.oregonstate.edu',
             'description': 'Nameserver Record',
             'ttl': 420,

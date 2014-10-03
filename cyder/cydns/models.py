@@ -59,12 +59,6 @@ class LabelDomainMixin(models.Model):
     class Meta:
         abstract = True
 
-    @classmethod
-    def filter_by_ctnr(cls, ctnr, objects=None):
-        objects = objects or cls.objects
-        objects = objects.filter(domain__in=ctnr.domains.all())
-        return objects
-
 
 class ViewMixin(models.Model):
 
@@ -95,6 +89,8 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
                                       validators=[validate_ttl],
                                       verbose_name="Time to live")
     description = models.CharField(max_length=1000, blank=True)
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     class Meta:
         abstract = True
@@ -108,7 +104,16 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
 
     @classmethod
     def filter_by_ctnr(cls, ctnr, objects=None):
-        return objects or cls.objects.all()
+        objects = objects or cls.objects
+        if ctnr.name == "global":
+            return objects
+
+        objects = objects.filter(ctnr=ctnr)
+        return objects
+
+    def check_in_ctnr(self, ctnr):
+        if hasattr(self, "domain"):
+            return self.domain in ctnr.domains.all()
 
     @classmethod
     def get_api_fields(cls):
@@ -132,6 +137,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         else:
             raise ValidationError("DNS records require a domain")
 
+        self.check_domain_ctnr()
         self.check_for_delegation()
         if self.rdtype != 'CNAME':
             self.check_for_cname()
@@ -228,6 +234,15 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
             return domain.name
         else:
             return "{0}.{1}".format(label, domain.name)
+
+    def check_domain_ctnr(self):
+        """
+        Validate name uses domain allowed in record's container.
+        """
+        if hasattr(self, 'ctnr') and hasattr(self, 'domain'):
+            if not self.domain.ctnr_set.filter(pk=self.ctnr.pk).exists():
+                raise ValidationError("Cannot create this record because its "
+                                      "ctnr does not match its domain.")
 
     def check_for_cname(self):
         """

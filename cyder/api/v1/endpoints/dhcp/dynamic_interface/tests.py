@@ -1,4 +1,3 @@
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.network.models import Network
@@ -11,7 +10,6 @@ class DynamicInterfaceBase(APITests):
     model = DynamicInterface
 
     def setUp(self):
-        self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
         self.system, _ = System.objects.get_or_create(name="TestSystem")
         super(DynamicInterfaceBase, self).setUp()
 

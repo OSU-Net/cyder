@@ -141,6 +141,7 @@
   "model": "cyder.cname",
   "fields": {
    "domain": 5,
+   "ctnr": 3,
    "fqdn": "foo.example.com",
    "description": "",
    "created": "2014-02-01T11:15:47",
@@ -159,6 +160,7 @@
   "model": "cyder.addressrecord",
   "fields": {
    "domain": 5,
+   "ctnr": 3,
    "fqdn": "ns1.example.com",
    "ip_lower": 3232235522,
    "created": "2014-02-01T11:12:01",
@@ -469,6 +471,7 @@
   "model": "cyder.mx",
   "fields": {
    "domain": 5,
+   "ctnr": 3,
    "fqdn": "mail.example.com",
    "description": "",
    "created": "2014-02-01T11:41:49",

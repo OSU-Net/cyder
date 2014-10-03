@@ -1,3 +1,5 @@
+# encoding: utf_8
+
 from django.core.exceptions import ValidationError
 
 import string
@@ -62,10 +64,9 @@ def check_for_master_delegation(domain, master_domain):
         return
     if not master_domain.delegated:
         return
-    if not domain.pk:  # We don't exist yet.
-        raise ValidationError("No subdomains can be created in the {0} "
-                              "domain. It is delegated."
-                              .format(master_domain.name))
+    raise ValidationError("No subdomains can be created in the {0} "
+                          "domain. It is delegated."
+                          .format(master_domain.name))
 
 
 def validate_zone_soa(domain, master_domain):
@@ -347,6 +348,14 @@ def validate_fqdn(fqdn):
     # TODO, make sure the grammar is followed.
     _name_type_check(fqdn)
 
+    if '.' in fqdn:
+        _, tld = fqdn.rsplit('.', 1)
+    else:
+        tld = fqdn
+
+    if tld.isdigit():
+        raise ValidationError("TLD cannot be a number.")
+
     # Star records are allowed. Remove them during validation.
     if fqdn[0] == '*':
         fqdn = fqdn[1:]
@@ -397,12 +406,6 @@ def validate_reverse_name(reverse_name, ip_type):
                                       .format(reverse_name, nibble))
 
 
-def validate_minimum(minimum):
-    if minimum >= 4294967296:
-        raise ValidationError(
-            "Minimum must be within the 0 to 4294967295 range.")
-
-
 def validate_ttl(ttl):
     """
         "It is hereby specified that a TTL value is an unsigned number,
@@ -414,8 +417,8 @@ def validate_ttl(ttl):
         :raises: ValidationError
     """
     if ttl < 0 or ttl > 2147483647:  # See RFC 2181
-        raise ValidationError("TTLs must be within the 0 to "
-                              "2147483647 range.")
+        raise ValidationError(
+            'TTL must be within the range 0 – 2147483647. See RFC 2181.')
 
 # Works for labels too.
 
@@ -432,8 +435,8 @@ def _name_type_check(name):
 def validate_srv_port(port):
     """Port must be within the 0 to 65535 range."""
     if port > 65535 or port < 0:
-        raise ValidationError("SRV port must be within 0 and 65535. "
-                              "See RFC 1035")
+        raise ValidationError(
+            'Port must be within the range 0 – 65535. See RFC 1035.')
 
 #TODO, is this a duplicate of MX ttl?
 
@@ -441,15 +444,15 @@ def validate_srv_port(port):
 def validate_srv_priority(priority):
     """Priority must be within the 0 to 65535 range."""
     if priority > 65535 or priority < 0:
-        raise ValidationError("SRV priority must be within 0 and 65535. "
-                              "See RFC 1035")
+        raise ValidationError(
+            'Priority must be within the range 0 – 65535. See RFC 1035.')
 
 
 def validate_srv_weight(weight):
     """Weight must be within the 0 to 65535 range."""
     if weight > 65535 or weight < 0:
-        raise ValidationError("SRV weight must be within 0 and 65535. "
-                              "See RFC 1035")
+        raise ValidationError(
+            'Weight must be within the range 0 – 65535. See RFC 1035.')
 
 
 def validate_srv_label(srv_label):
@@ -493,8 +496,8 @@ def validate_mx_priority(priority):
     # This is pretty much the same as validate_srv_priority. It just has
     # a different error messege.
     if priority > 65535 or priority < 0:
-        raise ValidationError("MX priority must be within the 0 to 65535 "
-                              "range. See RFC 1035")
+        raise ValidationError(
+            'Priority must be within the range 0 – 65535. See RFC 1035.')
 
 ###################################################################
 #             Functions that validate ip_type fields              #
@@ -506,7 +509,7 @@ def validate_ip_type(ip_type):
     An ``ip_type`` field must be either '4' or '6'.
     """
     if ip_type not in ('4', '6'):
-        raise ValidationError("Error: Plase provide a valid ip type.")
+        raise ValidationError("Error: Please provide a valid ip type.")
 
 ###################################################################
 #          Functions that validate RFC1918 requirements           #

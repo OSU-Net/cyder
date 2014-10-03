@@ -8,6 +8,7 @@ class SSHFPAPI_Test(APITests):
 
     def create_data(self):
         data = {
+            'ctnr': self.ctnr,
             'description': 'SSHFP Record',
             'ttl': 420,
             'label': 'sshfp',
