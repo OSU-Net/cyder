@@ -42,18 +42,24 @@ cursor = connection.cursor()
 
 
 def get_delegated():
-    sql = ("SELECT domain.name FROM maintain_sb.domain "
-           "INNER JOIN maintain_sb.nameserver "
-           "ON domain.id=nameserver.domain "
-           "WHERE %s")
-    where = ' and '.join(["nameserver.name != '%s'" % ns
-                          for ns in NONDELEGATED_NS])
-    cursor.execute(sql % where)
-    results = [i for (i,) in cursor.fetchall()]
-    return results
+    global delegated_dnames
+    if delegated_dnames is None:
+        print 'Fetching delegated domain names...'
+
+        sql = ("SELECT domain.name FROM maintain_sb.domain "
+               "INNER JOIN maintain_sb.nameserver "
+               "ON domain.id=nameserver.domain "
+               "WHERE %s")
+        where = ' and '.join(["nameserver.name != '%s'" % ns
+                              for ns in NONDELEGATED_NS])
+        cursor.execute(sql % where)
+        results = [i for (i,) in cursor.fetchall()]
+
+        delegated_dnames = set(results)
+    return delegated_dnames
 
 
-delegated_dnames = set(get_delegated())
+delegated_dnames = None
 
 
 class Zone(object):
@@ -77,7 +83,7 @@ class Zone(object):
             if master_domain and master_domain.delegated:
                 raise Exception("Whoa dude %s has a delegated master" % self.domain.name)
 
-            if self.dname in delegated_dnames:
+            if self.dname in get_delegated():
                 self.domain.delegated = True
                 print "%s has been marked as delegated." % self.domain.name
                 self.domain.save()
