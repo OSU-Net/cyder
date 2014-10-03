@@ -1,7 +1,7 @@
 from django.test.client import Client
 
-import cyder.base.tests
-from cyder.base.tests.test_views_template import build
+from cyder.base.tests import TestCase
+from cyder.base.tests.test_views_base import GenericViewTests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 
@@ -16,7 +16,7 @@ def do_setUp(self, test_class, test_data):
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
 
 
-class CtnrViewTests(cyder.base.tests.TestCase):
+class CtnrViewTests(TestCase, GenericViewTests):
     fixtures = ['test_users/test_users.json']
     name = 'ctnr'
 
@@ -32,7 +32,7 @@ class CtnrViewTests(cyder.base.tests.TestCase):
         }
 
 
-class SystemViewTests(cyder.base.tests.TestCase):
+class SystemViewTests(TestCase, GenericViewTests):
     fixtures = ['test_users/test_users.json']
     name = 'system'
 
@@ -46,7 +46,3 @@ class SystemViewTests(cyder.base.tests.TestCase):
         return {
             'name': 'post_system',
         }
-
-
-# Build the tests.
-build([SystemViewTests, CtnrViewTests])

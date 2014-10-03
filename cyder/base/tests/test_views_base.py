@@ -240,20 +240,6 @@ class GenericViewTests(object):
         return test_table_update_post
 
 
-def build(tests):
-    """
-    Attaches test methods and helper functions to test classes.
-    """
-    builder = GenericViewTests()
-    for test in tests:
-        for generic_test in builder.get_tests():
-            # Set name of test.
-            setattr(test, generic_test.__name__ + '_' + test.name,
-                    generic_test)
-        for helper in builder.get_helpers():
-            setattr(test, helper.__name__, helper)
-
-
 def random_label():
     """
     Utility function to generate a random *valid* label.

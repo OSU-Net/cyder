@@ -1,8 +1,8 @@
 from django.test.client import Client
 
-import cyder.base.tests
 from cyder.base.constants import IP_TYPE_4
-from cyder.base.tests.test_views_template import build
+from cyder.base.tests import TestCase
+from cyder.base.tests.test_views_base import GenericViewTests
 from cyder.cydhcp.constants import (ALLOW_VRF, STATIC)
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
@@ -23,7 +23,7 @@ def do_setUp(self, test_class, test_data):
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
 
 
-class NetworkViewTests(GenericViewTests, cyder.base.tests.TestCase):
+class NetworkViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'network'
 
@@ -42,7 +42,7 @@ class NetworkViewTests(GenericViewTests, cyder.base.tests.TestCase):
         }
 
 
-class RangeViewTests(GenericViewTests, cyder.base.tests.TestCase):
+class RangeViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'range'
     domain, _ = Domain.objects.get_or_create(name="dummy")
@@ -74,7 +74,7 @@ class RangeViewTests(GenericViewTests, cyder.base.tests.TestCase):
         }
 
 
-class SiteViewTests(GenericViewTests, cyder.base.tests.TestCase):
+class SiteViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'site'
 
@@ -90,7 +90,7 @@ class SiteViewTests(GenericViewTests, cyder.base.tests.TestCase):
         }
 
 
-class WorkgroupViewTests(GenericViewTests, cyder.base.tests.TestCase):
+class WorkgroupViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'workgroup'
 
@@ -106,7 +106,7 @@ class WorkgroupViewTests(GenericViewTests, cyder.base.tests.TestCase):
         }
 
 
-class VlanViewTests(GenericViewTests, cyder.base.tests.TestCase):
+class VlanViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'vlan'
 
@@ -124,7 +124,7 @@ class VlanViewTests(GenericViewTests, cyder.base.tests.TestCase):
         }
 
 
-class VrfViewTests(GenericViewTests, cyder.base.tests.TestCase):
+class VrfViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'vrf'
 
@@ -138,8 +138,3 @@ class VrfViewTests(GenericViewTests, cyder.base.tests.TestCase):
         return {
             'name': 'post_vrf',
         }
-
-
-# Build the tests.
-build([RangeViewTests, NetworkViewTests, SiteViewTests, WorkgroupViewTests,
-       VlanViewTests, VrfViewTests])

@@ -2,9 +2,9 @@ from django.test.client import Client
 
 from nose.tools import eq_
 
-import cyder.base.tests
-from cyder.base.tests.test_views_template import (
-    build, format_response, random_label)
+from cyder.base.tests import TestCase
+from cyder.base.tests.test_views_base import (
+    GenericViewTests, format_response, random_label)
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -78,8 +78,7 @@ def do_setUp(self, *args, **kwargs):
     do_postUp(self, *args, **kwargs)
 
 
-class NoNSTests(object):
-
+class NoNSTests(GenericViewTests):
     def get_domain_and_post_data(self):
         # This is different for classes that have ips instead of fqdns
         domain_name = "{0}.{1}.{2}.{3}.com".format(
@@ -128,7 +127,7 @@ class NoNSTests(object):
         self.assertEqual(start_obj_count + 1, new_obj_count)
 
 
-class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
+class AddressRecordViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'address_record'
 
@@ -152,7 +151,7 @@ class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
 
-class CNAMEViewTests(cyder.base.tests.TestCase, NoNSTests):
+class CNAMEViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'cname'
 
@@ -172,7 +171,7 @@ class CNAMEViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
 
-class NSViewTests(cyder.base.tests.TestCase):
+class NSViewTests(TestCase, GenericViewTests):
     fixtures = ['test_users/test_users.json']
     name = 'nameserver'
 
@@ -236,7 +235,7 @@ class NSViewTests(cyder.base.tests.TestCase):
         self.assertTrue(self.private_view not in ns.views.all())
 
 
-class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
+class MXViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'mx'
 
@@ -260,7 +259,7 @@ class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
 
-class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
+class PTRViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'ptr'
 
@@ -321,7 +320,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         eq_(updated_obj.ip_str, '196.168.1.3')
 
 
-class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
+class SRVViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'srv'
 
@@ -349,7 +348,7 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
 
-class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
+class TXTViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'txt'
 
@@ -369,7 +368,7 @@ class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
 
-class SSHFPViewTests(cyder.base.tests.TestCase, NoNSTests):
+class SSHFPViewTests(TestCase, NoNSTests):
     fixtures = ['test_users/test_users.json']
     name = 'sshfp'
 
@@ -391,8 +390,3 @@ class SSHFPViewTests(cyder.base.tests.TestCase, NoNSTests):
             'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50111',
             'ctnr': self.ctnr.pk,
         }
-
-
-# Build the tests.
-build([AddressRecordViewTests, CNAMEViewTests, MXViewTests, NSViewTests,
-       PTRViewTests, SRVViewTests, TXTViewTests, SSHFPViewTests])
