@@ -193,6 +193,29 @@ $(document).ready( function() {
     });
 
 
+    function av_form_submit_handler( data ) {
+        if ( $('.attrs_table:hidden') ) {
+            $('.attrs_table').slideDown();
+            $('.attrs_title').slideDown();
+        }
+        var is_update = false;
+        jQuery.each( $('.attrs_table > tbody > tr'), function( i, row ) {
+            if ( row.cells[0].innerHTML.indexOf(
+                    data.row.data[0][0].value[0] ) >= 0 ) {
+                $(this).remove();
+                is_update = true;
+
+            }
+        });
+        insertTablefyRow( data.row, $('.attrs_table > tbody') );
+        if ( is_update ) {
+            $('#obj-form form').find( '.cancel' ).click();
+        } else {
+            $('#obj-form form').trigger( 'reset' );
+            $('#id_attribute').focus();
+        }
+    }
+
     // Form submit handler, special logic for attributes
     $( document ).on( 'submit', '#obj-form form', function( e ) {
         e.preventDefault();
@@ -202,29 +225,7 @@ $(document).ready( function() {
         $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( data ) {
             // for av forms
             if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
-                var style = $('.attrs_table').attr( 'style' );
-                if ( style !== undefined && style !== false &&
-                        $('.attrs_table').attr( 'style' ).indexOf(
-                        'display:none' ) < 0 ) {
-                    $('#attr_title').slideDown();
-                    $('.attrs_table').attr( 'style', '' );
-                }
-                var is_update = false;
-                jQuery.each( $('.attrs_table > tbody > tr'), function( i, row ) {
-                    if ( row.cells[0].innerHTML.indexOf(
-                            data.row.data[0][0].value[0] ) >= 0 ) {
-                        $(this).remove();
-                        is_update = true;
-
-                    }
-                });
-                insertTablefyRow( data.row, $('.attrs_table > tbody') );
-                if ( is_update ) {
-                    $('#obj-form form').find( '.cancel' ).click();
-                } else {
-                    $('#obj-form form').trigger( 'reset' );
-                    $('#id_attribute').focus();
-                }
+                av_form_submit_handler( data );
             } else {
                 location.reload();
             }
