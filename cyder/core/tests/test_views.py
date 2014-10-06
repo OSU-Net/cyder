@@ -12,7 +12,6 @@ def do_setUp(self, test_class, test_data):
     self.test_class = test_class
 
     # Create test object.
-    test_data = dict(test_data.items())
     self.test_obj, create = test_class.objects.get_or_create(**test_data)
 
 
