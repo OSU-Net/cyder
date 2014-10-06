@@ -284,12 +284,12 @@ class Network(BaseModel, ObjectUrlMixin):
     @property
     def children(self):
         self.update_network()
-        if ip_type == '4':
-            return Network.objecst.filter(
+        if self.ip_type == '4':
+            return Network.objects.filter(
                 ip_lower__gte=int(self.network.ip),
                 ip_lower__lte=int(self.network.broadcast)
-            ).exclude(prefixlen=self.prefixlen)
-        elif ip_type == '6':
+            ).exclude(prefixlen__lte=self.prefixlen)
+        elif self.ip_type == '6':
             raise Exception('Network.children does not currently support IPv6')
 
     @property
