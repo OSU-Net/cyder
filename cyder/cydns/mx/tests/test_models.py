@@ -264,27 +264,6 @@ class MXTests(cyder.base.tests.TestCase):
             ctnr=ctnr2,
         )
 
-    def test_name_unique(self):
-        """Test that two MXs cannot share a name"""
-
-        MX.objects.create(
-            label='foo',
-            domain=self.o_e,
-            server='bar.oregonstate.edu',
-            priority=1,
-            ttl=1000,
-            ctnr=self.ctnr,
-        )
-
-        self.assertRaises(ValidationError, MX.objects.create,
-            label='foo',
-            domain=self.o_e,
-            server='bleh.oregonstate.edu',
-            priority=1,
-            ttl=1000,
-            ctnr=self.ctnr,
-        )
-
     def test_sshfp_txt_name(self):
         """Test that an MX can share a name with an SSHFP or a TXT"""
 
