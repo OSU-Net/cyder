@@ -51,7 +51,8 @@ class Vrf(BaseModel, ObjectUrlMixin):
     # vrfs will have one masked network,
     # but that may change when they are expanding
     # eg: network_id's in vrf
-    def get_related_networks(self, vrfs):
+    @staticmethod
+    def get_related_networks(vrfs):
         networks = set()
         for vrf in vrfs:
             for network in vrf.network_set.all():
