@@ -329,6 +329,8 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
 def get_update_form(request):
     """
     Update view called asynchronously from the list_create view
+    Returns an http response including the form, form_title,
+    submit_btn_label, and pk.
     """
     obj_type = request.GET.get('obj_type', '')
     record_pk = request.GET.get('pk', '')
@@ -342,10 +344,15 @@ def get_update_form(request):
         raise Http404
 
     Klass, FormKlass = get_klasses(obj_type)
+    form_title = 'Creating {0}'.format(Klass.pretty_type)
+    submit_btn_label = 'Create {0}'.format(Klass.pretty_type)
+
     try:
         # Get the object if updating.
         if record_pk:
             record = Klass.objects.get(pk=record_pk)
+            form_title = form_title.replace('Creating', 'Updating')
+            submit_btn_label = submit_btn_label.replace('Create', 'Update')
             if perm(request, ACTION_UPDATE, obj=record):
                 form = FormKlass(instance=record)
         else:
@@ -407,9 +414,13 @@ def get_update_form(request):
 
     if isinstance(form, UsabilityFormMixin):
         form.make_usable(request)
-
     return HttpResponse(
-        json.dumps({'form': form.as_p(), 'pk': record_pk or ''}))
+        json.dumps({
+            'form': form.as_p(),
+            'form_title': form_title,
+            'submit_btn_label': submit_btn_label,
+            'pk': record_pk
+        }))
 
 
 def search_obj(request):

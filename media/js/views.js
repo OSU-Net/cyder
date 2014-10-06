@@ -136,8 +136,6 @@ $(document).ready( function() {
         var getData;
         var buttonAttrs;
         var initData;
-        var objPk = metadata.attr( 'data-objPk' );
-        var objType = metadata.attr( 'data-objType' );
         slideUp( $('#obj-form') );
         e.preventDefault();
         form.action = this.href;
@@ -146,13 +144,12 @@ $(document).ready( function() {
             kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
             // #TODO move all this logic to get_update_form
             if ( kwargs.pk ) {
-                formTitle = 'Updating ' + kwargs.pretty_obj_type + ' ' + kwargs.obj_name;
-                buttonLabel = 'Update ' + kwargs.pretty_obj_type;
                 buttonAttrs = 'btn c submit_update js-submit';
-                getData = { 'obj_type': kwargs.obj_type, 'pk': kwargs.pk };
+                getData = {
+                    'obj_type': kwargs.obj_type,
+                    'pk': kwargs.pk
+                };
             } else {
-                formTitle = 'Creating ' + kwargs.pretty_obj_type;
-                buttonLabel = 'Create ' + kwargs.pretty_obj_type;
                 buttonAttrs = 'btn c submit_create js-submit';
                 if ( $(this).attr( 'data-init' ) ) {
                     initData = $(this).attr( 'data-init' );
@@ -161,8 +158,8 @@ $(document).ready( function() {
                 getData = {
                     'data': initData,
                     'obj_type': kwargs.obj_type,
-                    'related_pk': objPk,
-                    'related_type': objType,
+                    'related_pk': metadata.attr( 'data-objPk' ),
+                    'related_type': metadata.attr( 'data-objType' ),
                 };
             }
 
@@ -174,11 +171,11 @@ $(document).ready( function() {
                 dataType: 'json',
                 success: function( data ) {
                     setTimeout( function() {
-                        $('#form-title').html( formTitle );
                         $('#hidden-inner-form').empty().append( data.form );
                         initForms();
                     }, 150 );
-                    $('.form-btns a.submit, .btn.js-submit').text( buttonLabel );
+                    $('#form-title').html( data.form_title );
+                    $('.form-btns a.submit, .btn.js-submit').text( data.submit_btn_label );
                     $('.form-btns a.submit').attr( 'class', buttonAttrs );
                     $('#obj-form').slideDown();
                 }
