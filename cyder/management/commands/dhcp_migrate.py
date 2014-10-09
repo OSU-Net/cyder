@@ -20,7 +20,6 @@ from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 from sys import stderr
-from random import choice
 from datetime import datetime
 import ipaddr
 import MySQLdb
@@ -541,7 +540,12 @@ def maintain_find_range_domain(range_id):
     cursor.execute(sql)
     results = [r[0] for r in cursor.fetchall() if r[0] is not None]
     if results:
-        return maintain_find_domain(choice(results))
+        try:
+            return maintain_find_domain(results[0])
+        except Domain.DoesNotExist:
+            stderr.write("WARNING: Could not migrate range %s because "
+                         "domain does not exist.\n" % range_id)
+            return None
     else:
         return None
 
@@ -555,7 +559,12 @@ def maintain_find_range(range_id):
 def maintain_find_domain(domain_id):
     (name,) = maintain_get_cached('domain', ['name'], domain_id)
     if name:
-        return Domain.objects.get(name=name)
+        try:
+            return Domain.objects.get(name=name)
+        except Domain.DoesNotExist, e:
+            stderr.write("ERROR: Domain with name %s was "
+                         "never created.\n" % name)
+            raise e
 
 
 def maintain_find_workgroup(workgroup_id):
