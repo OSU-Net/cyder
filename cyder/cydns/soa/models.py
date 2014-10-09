@@ -14,8 +14,7 @@ from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_positive_integer_field
 from cyder.base.utils import safe_delete, safe_save
-from cyder.cydns.validation import (validate_fqdn, validate_ttl,
-                                    validate_minimum)
+from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.core.task.models import Task
 from cyder.settings import MIGRATING
 
