@@ -189,18 +189,21 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
     def test_add_and_update_dup(self):
-        def x():
-            return self.do_generic_add(
-                label='',
-                domain=self.o_e,
-                server='relaydf.oregonstate.edu',
-                priority=2,
-                ttl=2222,
-            )
+        mx0 = self.do_generic_add(
+            label='',
+            domain=self.o_e,
+            server='relaydf.oregonstate.edu',
+            priority=2,
+            ttl=2222,
+        )
 
-        mx0 = x()
-
-        self.assertRaises(ValidationError, x)
+        self.assertRaises(ValidationError, self.do_generic_add,
+            label='',
+            domain=self.o_e,
+            server='relaydf.oregonstate.edu',
+            priority=2,
+            ttl=9800,
+        )
 
         def y():
             self.do_generic_add(
@@ -217,7 +220,7 @@ class MXTests(cyder.base.tests.TestCase):
 
         mx0.server = "mail.sddf.fo"
         mx0.priority = 9
-        mx0.ttl = 34234
+        mx0.ttl = 10000
         self.assertRaises(ValidationError, mx0.save)
 
     def test_add_with_cname(self):

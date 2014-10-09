@@ -9,30 +9,24 @@ from cyder.core.ctnr.models import Ctnr
 
 class SSHFPTests(cyder.base.tests.TestCase):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        self.o = Domain(name="org")
-        self.o.save()
-        self.o_e = Domain(name="mozilla.org")
-        self.o_e.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        self.o = Domain.objects.create(name="org")
+        self.o_e = Domain.objects.create(name="mozilla.org")
         self.ctnr.domains.add(self.o)
         self.ctnr.domains.add(self.o_e)
 
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
-        sshfp = SSHFP(**data)
-        sshfp.save()
+        sshfp = SSHFP.objects.create(**data)
         sshfp.__repr__()
         self.assertTrue(sshfp.details())
-        rsshfp = SSHFP.objects.filter(**data)
-        self.assertEqual(rsshfp.count(), 1)
+        self.assertEqual(SSHFP.objects.filter(**data).count(), 1)
         return sshfp
 
     def do_remove(self, **data):
         sshfp = self.do_generic_add(**data)
         sshfp.delete()
-        rmx = SSHFP.objects.filter(**data)
-        self.assertTrue(len(rmx) == 0)
+        self.assertEqual(SSHFP.objects.filter(**data).count(), 0)
 
     def test_add_remove_sshfp(self):
         self.do_generic_add(
@@ -70,8 +64,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
     def test_domain_ctnr(self):
         key = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
 
-        ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.save()
+        ctnr1 = Ctnr.objects.create(name='test_ctnr1')
         ctnr1.domains.add(self.o_e)
 
         SSHFP.objects.create(
@@ -83,8 +76,7 @@ class SSHFPTests(cyder.base.tests.TestCase):
             ctnr=ctnr1,
         )
 
-        ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.save()
+        ctnr2 = Ctnr.objects.create(name='test_ctnr2')
 
         self.assertRaises(ValidationError, SSHFP.objects.create,
             label='bleh',

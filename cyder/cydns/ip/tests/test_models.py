@@ -15,12 +15,8 @@ class SimpleTest(TestCase):
 
         rd = self.create_domain(name='66', ip_type='4')
 
-    def create_domain(self, name, ip_type=None, delegated=False):
-        if ip_type is None:
-            ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            pass
-        else:
+    def create_domain(self, name, ip_type='4', delegated=False):
+        if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
             name = ip_to_domain_name(name, ip_type=ip_type)
         d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
@@ -28,13 +24,11 @@ class SimpleTest(TestCase):
 
     def test_ipv4_str(self):
         rd = self.create_domain(name='192', ip_type='4')
-        rd.save()
         ip_str = '192.168.1.1'
         ipaddr.IPv4Address(ip_str)
         Ip(ip_str=ip_str, ip_type='4').clean_ip()
 
         rd = self.create_domain(name='128', ip_type='4')
-        rd.save()
         ip_str = '128.168.1.1'
         ipaddr.IPv4Address(ip_str)
         Ip(ip_str=ip_str, ip_type='4').clean_ip()
@@ -75,11 +69,7 @@ class SimpleTest(TestCase):
         self.assertEqual(new_ip.ip_lower, ip_lower)
 
     def test_large_ipv6(self):
-        try:
-            rd = boot_strap_ipv6_reverse_domain('f')
-            rd.save()
-        except ValidationError:
-            pass
+        rd = boot_strap_ipv6_reverse_domain('f')
         ip_str = 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
         ip = ipaddr.IPv6Address(ip_str)
         ip_upper, ip_lower = ipv6_to_longs(ip_str)
@@ -95,7 +85,6 @@ class SimpleTest(TestCase):
 
     def test_int_ip(self):
         rd = self.create_domain(name='129', ip_type='4')
-        rd.save()
         ip = Ip(ip_str="129.193.1.1", ip_type='4')
         ip.clean_ip()
         ip.__int__()
@@ -109,7 +98,6 @@ class SimpleTest(TestCase):
 
     def test_creation(self):
         rd = self.create_domain(name='130', ip_type='4')
-        rd.save()
 
         ip = Ip(ip_str="111:22:3::", ip_type='6')
         ip.clean_ip()
