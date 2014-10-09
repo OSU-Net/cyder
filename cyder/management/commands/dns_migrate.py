@@ -83,7 +83,7 @@ class Zone(object):
                        "will not be migrated." % self.dname)
                 secondary = True
             else:
-                if self.dname in delegated_dnames:
+                if self.dname in get_delegated():
                     self.domain.soa = self.gen_SOA() or soa
                     if not self.domain.soa:
                         print ("WARNING: Could not migrate domain %s; no SOA"
@@ -458,7 +458,7 @@ class Zone(object):
             Child domains will inherit this domain's SOA if they do not have
             their own.
         """
-        if self.dname in delegated_dnames:
+        if self.dname in get_delegated():
             print "%s is delegated, so no children to create." % self.dname
             return
 
