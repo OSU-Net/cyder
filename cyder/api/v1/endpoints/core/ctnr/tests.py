@@ -25,11 +25,6 @@ class CtnrAPI_Test(APITests):
 
         domain_data = {
             'name': 'www.' + self.domain.name,
-            'master_domain': self.domain,
-            'soa': self.domain.soa,
-            'is_reverse': False,
-            'dirty': False,
-            'purgeable': False,
             'delegated': True,
         }
         self.ctnr_domain = Domain.objects.get_or_create(**domain_data)[0]

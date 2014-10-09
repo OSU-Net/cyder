@@ -3,6 +3,7 @@ from string import Template
 
 from django.db import models
 
+from cyder.base.utils import safe_save
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_txt_data
 
@@ -91,3 +92,7 @@ class TXT(LabelDomainMixin, CydnsRecord):
             bind_name=bind_name, ttl=self.ttl, rdtype=self.rdtype,
             rdclass='IN', txt_data=txt_data
         )
+
+    @safe_save
+    def save(self, *args, **kwargs):
+        super(TXT, self).save(*args, **kwargs)

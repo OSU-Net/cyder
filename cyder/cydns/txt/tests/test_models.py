@@ -22,9 +22,8 @@ class TXTTests(cyder.base.tests.TestCase):
         if 'ctnr' not in data:
             data['ctnr'] = self.ctnr
         txt = TXT(**data)
-        txt.full_clean()
-        txt.__repr__()
         txt.save()
+        txt.__repr__()
         rtxt = TXT.objects.filter(**data)
         self.assertTrue(len(rtxt) == 1)
         return txt
@@ -58,12 +57,10 @@ class TXTTests(cyder.base.tests.TestCase):
 
     def test_domain_ctnr(self):
         ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.full_clean()
         ctnr1.save()
         ctnr1.domains.add(self.o_e)
 
         ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.full_clean()
         ctnr2.save()
 
         self.do_generic_add(
@@ -80,5 +77,4 @@ class TXTTests(cyder.base.tests.TestCase):
         for txt_data in ('qwertyuiop', 'asdfghjkl', 'zxcvbnm'):
             t = TXT(label='foo', domain=self.o_e, txt_data=txt_data,
                     ctnr=self.ctnr)
-            t.full_clean()
             t.save()

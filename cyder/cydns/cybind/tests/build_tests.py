@@ -91,7 +91,7 @@ class DNSBuildTest(TestCase):
 
         CNAME.objects.get(fqdn='foo.example.com').delete()
         s = StaticInterface.objects.get(fqdn='www.example.com')
-        s.schedule_rebuild_check()
+        s.domain.soa.schedule_rebuild()
 
         sleep(1)  # ensure different serial if rebuilt
         self.builder.build()
@@ -117,7 +117,6 @@ class DNSBuildTest(TestCase):
             mac='01:23:45:01:23:45',
             ctnr=Ctnr.objects.get(name='Global')
         )
-        s.full_clean()
         s.save()
         s.views.add(
             View.objects.get(name='public'),

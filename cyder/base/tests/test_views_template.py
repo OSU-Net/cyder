@@ -1,7 +1,6 @@
 import random
 import string
-
-from nose.tools import eq_
+from itertools import dropwhile
 
 from cyder.base.constants import ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from cyder.core.ctnr.models import Ctnr
@@ -67,18 +66,23 @@ class GenericViewTests(object):
                                    self.post_data(), follow=True)
 
             self.assertTrue(res.status_code in (302, 200),
-                            'Response code %s' % res.status_code)
+                            u'Response code %s\n' % res.status_code +
+                            format_response(res))
 
             if not self.has_perm(User.objects.get(username=username),
                                  ACTION_CREATE):
                 # Nothing should be created if no permissions.
-                eq_(self.test_class.objects.count(), count)
+                self.assertEqual(
+                    self.test_class.objects.count(), count,
+                    u'Should not have been able to create as %s' % username)
             else:
                 # Check object was created.
                 self.assertTrue(res.status_code in (302, 200),
-                                'Response code %s' % res.status_code)
+                                u'Response code %s\n' % res.status_code +
+                                format_response(res))
                 self.assertTrue(self.test_class.objects.count() > count,
-                                'Could not create as %s' % username)
+                                u'Could not create as %s\n' % username +
+                                format_response(res))
         return do_create
 
     def do_update(self):
@@ -92,23 +96,30 @@ class GenericViewTests(object):
                                    post_data, follow=True)
 
             self.assertTrue(res.status_code in (302, 200),
-                            'Response code %s' % res.status_code)
+                            u'Response code %s' % res.status_code +
+                            format_response(res))
 
             test_obj = self.test_obj.__class__.objects.get(id=self.test_obj.id)
             if has_perm:
                 # Check that the attributes we posted updated the object.
                 for k, v in post_data.items():
-                    if k not in ['fqdn', 'label']:
+                    if k not in ['domain', 'label']:
                         obj_val = getattr(test_obj, k)
                         if hasattr(obj_val, 'id'):
-                            eq_(obj_val.id, v)
+                            self.assertEqual(
+                                obj_val.id, v,
+                                'The "%s" field was not updated' % k)
                         else:
-                            eq_(str(obj_val), str(v))
+                            self.assertEqual(
+                                str(obj_val), str(v),
+                                'The "%s" field was not updated' % k)
             else:
                 # Check nothing has changed.
                 for k, v in post_data.items():
-                    if k not in ['fqdn', 'label']:
-                        eq_(getattr(self.test_obj, k), getattr(test_obj, k))
+                    if k not in ['domain', 'label']:
+                        self.assertEqual(
+                            getattr(self.test_obj, k), getattr(test_obj, k),
+                            '%s changed but was not supposed to' % k)
         return do_update
 
     def do_delete(self):
@@ -124,12 +135,17 @@ class GenericViewTests(object):
                  'obj_type': self.test_obj._meta.db_table})
 
             self.assertTrue(res.status_code in (302, 200),
-                            'Response code %s' % res.status_code)
+                            'Response code %s' % res.status_code +
+                            format_response(res))
 
             if has_perm:
-                self.assertTrue(self.test_class.objects.count() < count)
+                self.assertTrue(
+                    self.test_class.objects.count() < count,
+                    'Object was not deleted')
             else:
-                eq_(self.test_class.objects.count(), count)
+                self.assertEqual(
+                    self.test_class.objects.count(), count,
+                    'Object was not supposed to be deleted')
         return do_delete
 
     def test_filter(self):
@@ -235,7 +251,7 @@ class GenericViewTests(object):
             post_data = self.post_data()
             resp = self.client.post(self.test_obj.get_table_update_url(),
                                     post_data, follow=True)
-            eq_(resp.status_code, 200)
+            self.assertEqual(resp.status_code, 200)
 
             # Check that the attributes we posted updated the object, if they
             # were set to be editable.
@@ -247,9 +263,9 @@ class GenericViewTests(object):
                 if k in editable_attrs and k not in ['fqdn', 'label']:
                     obj_val = getattr(test_obj, k)
                     if hasattr(obj_val, 'id'):
-                        eq_(obj_val.id, v)
+                        self.assertEqual(obj_val.id, v)
                     else:
-                        eq_(str(obj_val), str(v))
+                        self.assertEqual(str(obj_val), str(v))
         return test_table_update_post
 
 
@@ -282,3 +298,11 @@ def random_byte():
     Utility function to generate a random byte for random IPs
     """
     return random.randint(0, 255)
+
+
+def format_response(response):
+    response = response.content.decode('utf_8').splitlines()
+    if len(response) > 3:
+        response = response[:3] + [u'...']
+    response = u'Response:\n' + u'\n'.join(response)
+    return response

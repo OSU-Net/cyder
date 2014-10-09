@@ -10,6 +10,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_delete, safe_save
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -28,7 +29,7 @@ class Network(BaseModel, ObjectUrlMixin):
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
     vrf = models.ForeignKey('cyder.Vrf',
-                            default=lambda: Vrf.objects.get(name='Legacy'))
+                            default=1)  # "Legacy"
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
@@ -109,6 +110,7 @@ class Network(BaseModel, ObjectUrlMixin):
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
 
+    @safe_save
     def save(self, *args, **kwargs):
         self.update_network()
         super(Network, self).save(*args, **kwargs)
@@ -124,9 +126,9 @@ class Network(BaseModel, ObjectUrlMixin):
 
             #eav = NetworkAV(attribute=Attribute.objects.get(name="routers"),
                             #value=router, network=self)
-            #eav.clean()
-            #eav.save()
+            #eav.save(commit=False)
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         if self.range_set.exists():
             raise ValidationError("Cannot delete this network because it has "
@@ -263,9 +265,9 @@ class Network(BaseModel, ObjectUrlMixin):
             raise ValidationError("ERROR: No network str.")
         try:
             if self.ip_type == IP_TYPE_4:
-                self.network = ipaddr.IPv4Network(self.network_str)
+                self.network = ipaddr.IPv4Network(self.network_str).masked()
             elif self.ip_type == IP_TYPE_6:
-                self.network = ipaddr.IPv6Network(self.network_str)
+                self.network = ipaddr.IPv6Network(self.network_str).masked()
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
@@ -277,6 +279,33 @@ class Network(BaseModel, ObjectUrlMixin):
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
                                                     # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
+        self.network_str = str(self.network)
+
+    @property
+    def descendants(self):
+        self.update_network()
+        if self.ip_type == '4':
+            return Network.objects.filter(
+                ip_lower__gte=int(self.network.ip),
+                ip_lower__lte=int(self.network.broadcast)
+            ).exclude(prefixlen__lte=self.prefixlen)
+        elif self.ip_type == '6':
+            raise Exception(
+                'Network.descendants does not currently support IPv6')
+
+    @property
+    def parent(self):
+        self.update_network()
+        net = self.network
+        while net.prefixlen > 0:
+            net = net.supernet().masked()
+            try:
+                return Network.objects.get(
+                    ip_upper=(int(net) / (1<<64)),
+                    ip_lower=(int(net) % (1<<64)),
+                    prefixlen=net.prefixlen)
+            except Network.DoesNotExist:
+                pass
 
 
 class NetworkAV(EAVBase):

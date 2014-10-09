@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydns.tests.utils import create_basic_dns_data
+from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
@@ -23,21 +23,18 @@ class PTRTests(cyder.base.tests.TestCase):
 
         create_basic_dns_data(dhcp=True)
 
-        self._128 = self.create_domain(name='128', ip_type='4')
-        self._128.save()
+        self._128 = create_zone('128.in-addr.arpa')
+        create_zone('8.ip6.arpa')
 
         self.c1 = Ctnr(name='test_ctnr1')
-        self.c1.full_clean()
         self.c1.save()
 
         self.n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                          network_str='128.193.0.0/24')
-        self.n.full_clean()
         self.n.save()
 
         self.r = Range(network=self.n, range_type='st',
                        start_str='128.193.0.2', end_str='128.193.0.100')
-        self.r.full_clean()
         self.r.save()
 
         self.c1.ranges.add(self.r)
@@ -45,7 +42,6 @@ class PTRTests(cyder.base.tests.TestCase):
         for name in ('edu', 'oregonstate.edu', 'bar.oregonstate.edu',
                      'nothing', 'nothing.nothing', 'nothing.nothing.nothing'):
             d = Domain(name=name)
-            d.full_clean()
             d.save()
             self.c1.domains.add(d)
 
@@ -63,8 +59,7 @@ class PTRTests(cyder.base.tests.TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        d.clean()
+        d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         return d
 
@@ -75,12 +70,10 @@ class PTRTests(cyder.base.tests.TestCase):
 
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type=ip_type,
                     network_str=network_str)
-        n.full_clean()
         n.save()
 
         r = Range(network=n, range_type=range_type, start_str=start_str,
                   end_str=end_str, domain=domain, ip_type=ip_type)
-        r.full_clean()
         r.save()
 
         self.c1.ranges.add(r)
@@ -91,7 +84,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
         ret = PTR(fqdn=fqdn, ip_str=ip_str, ip_type=ip_type,
                   ctnr=ctnr)
-        ret.full_clean()
         ret.save()
 
         self.assertTrue(ret.details())
@@ -249,7 +241,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def do_generic_remove(self, ip, fqdn, ip_type):
         ptr = PTR(ctnr=self.c1, ip_str=ip, fqdn=fqdn, ip_type=ip_type)
-        ptr.full_clean()
         ptr.save()
 
         ptr.delete()
@@ -305,7 +296,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def do_generic_update(self, ptr, new_fqdn, ip_type):
         ptr.fqdn = new_fqdn
-        ptr.full_clean()
         ptr.save()
 
         ptr = PTR.objects.filter(fqdn=new_fqdn, ip_upper=ptr.ip_upper,
@@ -372,8 +362,8 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def test_ctnr_range(self):
         """Test that a PTR is allowed only in its IP's range's containers"""
+
         c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
         c2.save()
 
         r = self.r
@@ -398,7 +388,6 @@ class PTRTests(cyder.base.tests.TestCase):
         self.c1.domains.add(Domain.objects.get(name='oregonstate.edu'))
 
         c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
         c2.save()
         c2.ranges.add(self.r)
 
@@ -424,7 +413,6 @@ class PTRTests(cyder.base.tests.TestCase):
 
         def create_si(dns_enabled):
             s = System(name='test_system')
-            s.full_clean()
             s.save()
 
             i1 = StaticInterface(
@@ -432,7 +420,6 @@ class PTRTests(cyder.base.tests.TestCase):
                 domain=Domain.objects.get(name='oregonstate.edu'),
                 ip_str='128.193.0.2', ip_type='4', system=s,
                 ctnr=self.c1, dns_enabled=dns_enabled)
-            i1.full_clean()
             i1.save()
             return i1
 

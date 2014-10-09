@@ -123,10 +123,19 @@ class Zone(object):
             try:
                 soa = SOA.objects.get(root_domain=self.domain)
             except SOA.DoesNotExist:
-                soa, _ = SOA.objects.get_or_create(
-                    primary=primary, contact=contact, refresh=refresh,
-                    retry=retry, expire=expire, minimum=minimum,
-                    root_domain=self.domain, description='')
+                soa = SOA()
+
+            soa.primary = primary
+            soa.contact = contact
+            soa.refresh = refresh
+            soa.retry = retry
+            soa.expire = expire
+            soa.minimum = minimum
+            soa.root_domain = self.domain
+            soa.description = ''
+            soa.save()
+
+            return soa
         else:
             master_domain = self.domain.master_domain
             if master_domain and master_domain.soa:
@@ -297,20 +306,19 @@ class Zone(object):
 
             # create static interface
             try:
-                static.full_clean()
                 static.save(update_range_usage=False)
-            except ValidationError, e:
+            except ValidationError as e:
                 try:
-                    stderr.write("WARNING: host with IP {0} has been "
-                                 "disabled: {1}\n".format(static.ip_str, e))
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
-                    static.full_clean()
                     static.save(update_range_usage=False)
-                except ValidationError, e:
-                    stderr.write("Error creating static interface for host"
-                                 "with IP {0}\n".format(static.ip_str))
-                    stderr.write("Original exception: {0}\n".format(e))
+                    stderr.write('WARNING: Static interface with IP {} has '
+                                 'been disabled\n'.format(static.ip_str))
+                    stderr.write('    {}\n'.format(e))
+                except ValidationError as e:
+                    stderr.write('WARNING: Could not create static interface '
+                                 'with IP {}\n'.format(static.ip_str))
+                    stderr.write('    {}\n'.format(e))
                     static = None
                     system.delete()
 
@@ -549,18 +557,6 @@ def gen_reverses():
     add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
-
-    reverses = settings.REVERSE_DOMAINS
-
-    for i in reverses:
-        if '.' in i:
-            reverses.append(i.split('.', 1)[1])
-
-    reverses.reverse()
-
-    for i in reverses:
-        Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
-                                     is_reverse=True)
 
     gen_reverse_soa()
 

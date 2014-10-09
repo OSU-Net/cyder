@@ -3,11 +3,12 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
+from cyder.base.constants import IP_TYPE_6, IP_TYPE_4
+from cyder.base.utils import safe_delete, safe_save
+from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.ip.models import Ip
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
-from cyder.base.constants import IP_TYPE_6, IP_TYPE_4
-from cyder.cydhcp.range.utils import find_range
 
 
 class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
@@ -47,12 +48,12 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         ]}
 
     def clean(self, *args, **kwargs):
-        self.clean_ip()
         ignore_intr = kwargs.pop("ignore_intr", False)
         validate_glue = kwargs.pop("validate_glue", True)
 
         super(BaseAddressRecord, self).clean(*args, **kwargs)
 
+        self.clean_ip()
         self.check_name_ctnr_collision()
         if validate_glue:
             self.check_glue_status()
@@ -191,6 +192,7 @@ class AddressRecord(BaseAddressRecord):
         ]
         return data
 
+    @safe_save
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
@@ -200,13 +202,14 @@ class AddressRecord(BaseAddressRecord):
         super(AddressRecord, self).save(*args, **kwargs)
         rng = find_range(self.ip_str)
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)
             if old_range:
-                old_range.save()
+                old_range.save(commit=False)
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         rng = find_range(self.ip_str)
         super(AddressRecord, self).delete(*args, **kwargs)
         if rng and update_range_usage:
-            rng.save()
+            rng.save(commit=False)

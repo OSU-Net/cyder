@@ -10,14 +10,12 @@ class SiteTests(TestCase):
                              name=None, number=None, site=None):
         s = Network(network_str=network + "/" + prefixlen,
                     ip_type=ip_type, site=site)
-        s.clean()
         s.save()
         self.assertTrue(s)
         return s
 
     def do_basic_add_site(self, name, parent=None):
         s = Site(name=name, parent=parent)
-        s.clean()
         s.save()
         self.assertTrue(s)
         return s

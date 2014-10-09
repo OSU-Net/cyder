@@ -10,18 +10,15 @@ class VlanTests(TestCase):
                              vlan=None, site=None):
         n = Network(network_str=network + "/" + prefixlen, ip_type=ip_type,
                     site=site, vlan=vlan)
-        n.clean()
         n.save()
         return n
 
     def do_basic_add_site(self, name, parent=None):
         s = Site(name=name, parent=parent)
-        s.clean()
         s.save()
         return s
 
     def do_basic_add_vlan(self, name, number):
         vlan = Vlan(name=name, number=number)
-        vlan.clean()
         vlan.save()
         return vlan

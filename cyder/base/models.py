@@ -35,7 +35,7 @@ class BaseModel(models.Model):
 
         obj = model_class.objects.filter(**kwargs)
         if obj and hasattr(obj.get(), 'get_detail_url'):
-            error = error[:-1] + ' at <a href={0}>{1}.</a>'.format(
+            error = error[:-1] + u' at <a href={0}>{1}.</a>'.format(
                 obj.get().get_detail_url(), obj.get())
             error = mark_safe(error)
         return error

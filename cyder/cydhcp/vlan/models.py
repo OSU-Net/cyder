@@ -9,6 +9,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_positive_integer_field
+from cyder.base.utils import safe_save
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 
@@ -86,6 +87,10 @@ class Vlan(BaseModel, ObjectUrlMixin):
                 return domain.name
 
         return None
+
+    @safe_save
+    def save(self, *args, **kwargs):
+        super(Vlan, self).save(*args, **kwargs)
 
 
 class VlanAV(EAVBase):

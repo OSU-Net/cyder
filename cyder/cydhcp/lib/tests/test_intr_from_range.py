@@ -13,7 +13,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
 
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_fake_zone, create_zone
 
 
 class LibTestsRange(TestCase):
@@ -21,7 +21,7 @@ class LibTestsRange(TestCase):
     def setUp(self):
         self.ctnr = Ctnr(name='abloobloobloo')
         self.ctnr.save()
-        self.system = System()
+        self.system = System(name='test_system')
         self.system.save()
         d1 = create_fake_zone("oregonstate.com", suffix="")
         soa = d1.soa
@@ -42,24 +42,23 @@ class LibTestsRange(TestCase):
         d2.save()
         self.ctnr.domains.add(d, d1, d2)
 
-        for name in ["arpa", "in-addr.arpa", "15.in-addr.arpa"]:
+        for name in ("arpa", "in-addr.arpa"):
             d, _ = Domain.objects.get_or_create(name=name)
             self.ctnr.domains.add(d)
+        d = create_zone("15.in-addr.arpa")
+        self.ctnr.domains.add(d)
 
         n = Network(network_str="15.0.0.0/8", ip_type="4")
-        n.clean()
         n.site = s1
         n.vlan = v
         n.save()
 
         r1 = Range(start_str="15.0.0.0", end_str="15.0.0.10",
                    network=n, ip_type='4', range_type=STATIC)
-        r1.clean()
         r1.save()
 
         r2 = Range(start_str="15.0.0.20", end_str="15.0.0.22",
                    network=n, ip_type='4', range_type=STATIC)
-        r2.clean()
         r2.save()
 
         self.ctnr.ranges.add(r1, r2)

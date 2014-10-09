@@ -1,6 +1,7 @@
+from cyder.api.v1.tests.base import APITests, create_network_range
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
-from cyder.api.v1.tests.base import APITests, create_network_range
+from cyder.cydns.tests.utils import create_zone
 
 
 class PTRBase(APITests):
@@ -23,7 +24,7 @@ class PTRv4API_Test(PTRBase):
     def create_data(self):
         data = super(PTRv4API_Test, self).create_data()
         Domain.objects.get_or_create(name='in-addr.arpa')
-        Domain.objects.get_or_create(name='11.in-addr.arpa')
+        create_zone('11.in-addr.arpa')
         create_network_range(network_str='11.1.2.0/24', start_str='11.1.2.1',
                              end_str='11.1.2.127', range_type='st',
                              ip_type='4', domain=self.domain, ctnr=self.ctnr)
@@ -43,7 +44,7 @@ class PTRv6API_Test(PTRBase):
     def create_data(self):
         data = super(PTRv6API_Test, self).create_data()
         Domain.objects.get_or_create(name='ip6.arpa')
-        Domain.objects.get_or_create(name='1.ip6.arpa')
+        create_zone('1.ip6.arpa')
         create_network_range(network_str='1000:2000::/32',
                              start_str='1000:2000:3000::4000:5000:5000',
                              end_str='1000:2000:3000::4000:5000:6000',

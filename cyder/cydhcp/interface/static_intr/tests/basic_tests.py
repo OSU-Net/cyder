@@ -16,7 +16,6 @@ class StaticInterTests(BaseStaticTests):
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         i = self.do_add_intr(**kwargs)
-        i.clean()
 
     def test2_create_basic(self):
         mac = "11:22:33:44:55:66"
@@ -28,13 +27,11 @@ class StaticInterTests(BaseStaticTests):
         i = self.do_add_intr(**kwargs)
 
         i.dhcp_enabled = False
-        i.clean()
         i.save()
         i2 = StaticInterface.objects.get(pk=i.pk)
         self.assertFalse(i2.dhcp_enabled)
 
         i.dhcp_enabled = True
-        i.clean()
         i.save()
         i3 = StaticInterface.objects.get(pk=i.pk)
         self.assertTrue(i3.dhcp_enabled)
@@ -104,13 +101,11 @@ class StaticInterTests(BaseStaticTests):
                   'ip_str': ip_str}
         ip_type = '4'
         i = self.do_add_intr(**kwargs)
-        i.clean()
-        i.save()
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, a.clean)
+        self.assertRaises(ValidationError, a.save)
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=i.fqdn, ctnr=self.ctnr)
-        self.assertRaises(ValidationError, ptr.clean)
+        self.assertRaises(ValidationError, ptr.save)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
@@ -123,10 +118,8 @@ class StaticInterTests(BaseStaticTests):
         ip_type = '4'
         a = AddressRecord(label=label, domain=domain, ip_str=ip_str,
                           ip_type=ip_type, ctnr=self.ctnr)
-        a.clean()
         a.save()
         ptr = PTR(ip_str=ip_str, ip_type=ip_type, fqdn=a.fqdn, ctnr=self.ctnr)
-        ptr.clean()
         ptr.save()
         self.assertRaises(ValidationError, self.do_add_intr, **kwargs)
 
@@ -161,9 +154,7 @@ class StaticInterTests(BaseStaticTests):
         kwargs = {'mac': mac, 'label': label, 'domain': domain,
                   'ip_str': ip_str}
         i = self.do_add_intr(**kwargs)
-
-        i.clean()
         i.ip_str = "10.0.0.4"
-        self.assertRaises(ValidationError, i.clean)
+        self.assertRaises(ValidationError, i.save)
         i.dhcp_enabled = False
-        i.clean()
+        i.save()

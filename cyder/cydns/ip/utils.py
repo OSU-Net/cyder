@@ -4,18 +4,7 @@ from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.domain.utils import name_to_domain
 
 
-def check_for_reverse_domain(ip_str, ip_type):
-    rvname = nibbilize(ip_str) if ip_type == '6' else ip_str
-    rvname = ip_to_domain_name(rvname, ip_type=ip_type)
-    reverse_domain = name_to_domain(rvname)
-    if (reverse_domain is None or reverse_domain.name in
-            ('arpa', 'in-addr.arpa', 'ip6.arpa')):
-        raise ValidationError(
-            "No reverse Domain found for {0} ".format(ip_str)
-        )
-
-
-def ip_to_dns_form(ip, uppercase=False):
+def ip_to_dns_form(ip):
     """
     Convert an ip to dns zone form. The ip is assumed to be in valid
     format.
@@ -29,14 +18,11 @@ def ip_to_dns_form(ip, uppercase=False):
         octets = ip.split('.')
         name = '.in-addr.arpa'
 
-    if uppercase:
-        name = name.uppercase
-
     name = '.'.join(list(reversed(octets))) + name + "."
     return name
 
 
-def ip_to_domain_name(ip, ip_type='4', uppercase=False):
+def ip_to_domain_name(ip, ip_type='4'):
     """Convert an ip to dns zone form. The ip is assumed to be in valid
     format."""
     if not isinstance(ip, basestring):
@@ -47,11 +33,32 @@ def ip_to_domain_name(ip, ip_type='4', uppercase=False):
         name = '.in-addr.arpa'
     if ip_type == '6':
         name = '.ip6.arpa'
-    if uppercase:
-        name = name.uppercase
 
     name = '.'.join(list(reversed(octets))) + name
     return name
+
+
+def reverse_domain_name_to_ip(name):
+    if name.endswith('in-addr.arpa'):  # IPv4
+        octets = reversed(name.split('.')[:-2])
+        return '.'.join(octets)
+    elif name.endswith('ip6.arpa'):  # IPv6
+        nibbles = reversed(name.split('.')[:-2])
+        b = bytearray()
+        count = 0
+        for nibble in nibbles:
+            if count != 0 and count % 4 == 0:
+                b.append(':')
+            b.append(nibble)
+            count += 1
+        while count % 4 != 0:
+            b.append('0')
+            count += 1
+        if count < 64:
+            b.extend('::')
+        return str(b)
+    else:
+        raise ValueError('Invalid reverse domain')
 
 
 """

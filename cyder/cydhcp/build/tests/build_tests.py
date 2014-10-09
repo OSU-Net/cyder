@@ -104,7 +104,6 @@ class DHCPBuildTest(TestCase):
             range=Range.objects.get(name='Test range 1'),
             ctnr=Ctnr.objects.get(name='Global'),
         )
-        d.full_clean()
         d.save()
 
         self.builder.build()
@@ -146,7 +145,6 @@ class DHCPBuildTest(TestCase):
             range=Range.objects.get(name='Test range 1'),
             ctnr=Ctnr.objects.get(name='Global'),
         )
-        d.full_clean()
         d.save()
 
         self.builder.build()

@@ -24,9 +24,8 @@ class SRVTests(TestCase):
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
         srv = SRV(**data)
-        srv.full_clean()
-        srv.__repr__()
         srv.save()
+        srv.__repr__()
         self.assertTrue(srv.details())
         rsrv = SRV.objects.filter(**data)
         self.assertTrue(len(rsrv) == 1)
@@ -102,36 +101,30 @@ class SRVTests(TestCase):
     def test_domain_ctnr(self):
         """Test that an SRV's domain must be in the SRV's container"""
         ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.full_clean()
         ctnr1.save()
         ctnr1.domains.add(self.o_e)
 
         ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.full_clean()
         ctnr2.save()
 
         srv1 = SRV(label='_foo', domain=self.o_e, target='bar.oregonstate.edu',
                    priority=1, weight=100, port=9002, ctnr=ctnr1)
-        srv1.full_clean()
         srv1.save()
 
         with self.assertRaises(ValidationError):
             srv2 = SRV(label='_bleh', domain=self.o_e,
                        target='xyz.oregonstate.edu', priority=1, weight=100,
                        port=9002, ctnr=ctnr2)
-            srv2.full_clean()
             srv2.save()
 
     def test_name_unique(self):
         """Test that two SRVs cannot share a name"""
         srv1 = SRV(label='_foo', domain=self.o_e, target='bar.oregonstate.edu',
                 priority=1, weight=100, port=9002, ctnr=self.ctnr)
-        srv1.full_clean()
         srv1.save()
 
         with self.assertRaises(ValidationError):
             srv2 = SRV(label='_foo', domain=self.o_e,
                        target='bleh.oregonstate.edu', priority=1, weight=100,
                        port=9002)
-            srv2.full_clean()
             srv2.save()

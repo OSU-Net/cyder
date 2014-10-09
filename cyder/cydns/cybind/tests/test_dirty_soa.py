@@ -42,7 +42,7 @@ class DirtySOATests(TestCase):
 
         self.ctnr.domains.add(self.dom, self.rdom)
 
-        self.s = System()
+        self.s = System(name='test_system')
         self.s.save()
 
         self.net = Network(network_str='10.2.3.0/30')
@@ -64,8 +64,6 @@ class DirtySOATests(TestCase):
         local_soa.dirty = False
         local_soa.save()
         rec = Klass(**create_data)
-        rec.clean()
-        rec.full_clean()
         rec.save()
         self.assertTrue(rec.bind_render_record() not in ('', None))
         local_soa = SOA.objects.get(pk=local_soa.pk)

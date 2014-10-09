@@ -7,6 +7,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
 from cyder.base.validators import validate_integer_field
+from cyder.base.utils import safe_save
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
@@ -35,8 +36,8 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         app_label = 'cyder'
         db_table = 'ctnr'
 
+    @safe_save
     def save(self, *args, **kwargs):
-        self.full_clean()
         super(Ctnr, self).save(*args, **kwargs)
 
     def __str__(self):
