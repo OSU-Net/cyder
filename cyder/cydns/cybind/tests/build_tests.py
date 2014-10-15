@@ -56,8 +56,7 @@ class DNSBuildTest(TestCase):
         mgr.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
 
         self.builder = DNSBuilder(verbose=False, debug=False, **BINDBUILD)
-        self.builder.repo.commit_and_push(empty=True,
-                                          message='Initial commit')
+        self.builder.repo.commit_and_push(empty=True, message='Initial commit')
 
         super(DNSBuildTest, self).setUp()
 
@@ -109,7 +108,7 @@ class DNSBuildTest(TestCase):
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
 
-        s = StaticInterface(
+        s = StaticInterface.objects.create(
             system=System.objects.get(name='Test system'),
             label='www3',
             domain=Domain.objects.get(name='example.com'),
@@ -117,7 +116,6 @@ class DNSBuildTest(TestCase):
             mac='01:23:45:01:23:45',
             ctnr=Ctnr.objects.get(name='Global')
         )
-        s.save()
         s.views.add(
             View.objects.get(name='public'),
             View.objects.get(name='private'))

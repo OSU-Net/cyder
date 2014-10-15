@@ -21,7 +21,7 @@ class GenericViewTests(object):
     def has_perm(self, user, action):
         if action == ACTION_CREATE:
             return _has_perm(user, Ctnr.objects.get(name='test_ctnr'),
-                             action=action, obj_class=self.test_class)
+                             action=action, obj_class=self.model)
         elif action in (ACTION_UPDATE, ACTION_DELETE):
             return _has_perm(user, Ctnr.objects.get(name='test_ctnr'),
                              action=action, obj=self.test_obj)
@@ -29,8 +29,8 @@ class GenericViewTests(object):
     def do_create(self, username='test_superuser'):
         self.client.login(username=username, password='password')
 
-        count = self.test_class.objects.count()
-        res = self.client.post(self.test_class.get_create_url(),
+        count = self.model.objects.count()
+        res = self.client.post(self.model.get_create_url(),
                                self.post_data(), follow=True)
 
         self.assertTrue(res.status_code in (302, 200),
@@ -41,14 +41,14 @@ class GenericViewTests(object):
                              ACTION_CREATE):
             # Nothing should be created if no permissions.
             self.assertEqual(
-                self.test_class.objects.count(), count,
+                self.model.objects.count(), count,
                 u'Should not have been able to create as %s' % username)
         else:
             # Check object was created.
             self.assertTrue(res.status_code in (302, 200),
                             u'Response code %s\n' % res.status_code +
                             format_response(res))
-            self.assertTrue(self.test_class.objects.count() > count,
+            self.assertTrue(self.model.objects.count() > count,
                             u'Could not create as %s\n' % username +
                             format_response(res))
 
@@ -92,7 +92,7 @@ class GenericViewTests(object):
         has_perm = self.has_perm(User.objects.get(username=username),
                                  ACTION_DELETE)
 
-        count = self.test_class.objects.count()
+        count = self.model.objects.count()
         res = self.client.post(
             self.test_obj.get_delete_url(),
             {'follow': True, 'pk': self.test_obj.id,
@@ -104,15 +104,15 @@ class GenericViewTests(object):
 
         if has_perm:
             self.assertTrue(
-                self.test_class.objects.count() < count,
+                self.model.objects.count() < count,
                 'Object was not deleted')
         else:
             self.assertEqual(
-                self.test_class.objects.count(), count,
+                self.model.objects.count(), count,
                 'Object was not supposed to be deleted')
 
     def test_filter(self):
-        url = self.test_class.get_list_url()
+        url = self.model.get_list_url()
         query = random_label()
         url = "{0}?filter={1}".format(url, query)
         resp = self.client.get(url, follow=True)
@@ -120,7 +120,7 @@ class GenericViewTests(object):
 
     def test_list_get(self):
         """List view."""
-        resp = self.client.get(self.test_class.get_list_url(),
+        resp = self.client.get(self.model.get_list_url(),
                                follow=True)
         self.assertEqual(resp.status_code, 200)
 

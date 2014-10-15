@@ -9,56 +9,45 @@ from cyder.core.ctnr.models import Ctnr
 
 class TXTTests(cyder.base.tests.TestCase):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        self.o = Domain(name="org")
-        self.o.save()
-        self.o_e = Domain(name="oregonstate.org")
-        self.o_e.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        self.o = Domain.objects.create(name="org")
+        self.o_e = Domain.objects.create(name="oregonstate.org")
         self.ctnr.domains.add(self.o)
         self.ctnr.domains.add(self.o_e)
 
-    def do_generic_add(self, **data):
+    def create_TXT(self, **data):
         if 'ctnr' not in data:
             data['ctnr'] = self.ctnr
-        txt = TXT(**data)
-        txt.save()
-        txt.__repr__()
-        self.assertEqual(TXT.objects.filter(**data).count(), 1)
-        return txt
+        return TXT.objects.create(**data)
 
-    def do_remove(self, **data):
-        txt = self.do_generic_add(data)
+    def create_remove_TXT(self, **data):
+        txt = self.create_TXT(**data)
         txt.delete()
         rmx = TXT.objects.filter(**data)
         self.assertTrue(len(rmx) == 0)
 
-    def test_add_remove_txt(self):
-        self.do_generic_add(label="asdf", txt_data="asdf", domain=self.o_e)
-        self.do_generic_add(label="asdf", txt_data="asdfasfd", domain=self.o_e)
-        self.do_generic_add(label="df", txt_data="aasdf", domain=self.o_e)
-        self.do_generic_add(label="12314", txt_data="dd", domain=self.o)
+    def test_create_remove(self):
+        self.create_remove_TXT(label="asdf", txt_data="asdf", domain=self.o_e)
+        self.create_remove_TXT(
+            label="asdf", txt_data="asdfasfd", domain=self.o_e)
+        self.create_remove_TXT(label="df", txt_data="aasdf", domain=self.o_e)
+        self.create_remove_TXT(label="12314", txt_data="dd", domain=self.o)
 
     def test_domain_ctnr(self):
-        ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.save()
+        ctnr1 = Ctnr.objects.create(name='test_ctnr1')
         ctnr1.domains.add(self.o_e)
 
-        self.do_generic_add(
+        self.create_TXT(
             label='foo', domain=self.o_e, txt_data='Data data data',
             ctnr=ctnr1)
 
-        ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.save()
+        ctnr2 = Ctnr.objects.create(name='test_ctnr2')
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(ValidationError, self.create_TXT,
             label='bleh', domain=self.o_e, txt_data='Data data data',
             ctnr=ctnr2)
 
     def test_name_duplicates(self):
         """Test that multiple TXTs may share a name"""
-
         for txt_data in ('qwertyuiop', 'asdfghjkl', 'zxcvbnm'):
-            TXT.objects.create(
-                label='foo', domain=self.o_e, txt_data=txt_data,
-                ctnr=self.ctnr)
+            self.create_TXT(label='foo', domain=self.o_e, txt_data=txt_data)
