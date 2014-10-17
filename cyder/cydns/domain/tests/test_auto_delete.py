@@ -8,7 +8,7 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.tests.utils import create_fake_zone, create_zone
+from cyder.cydns.tests.utils import create_zone
 
 from basedomain import BaseDomain
 
@@ -118,7 +118,7 @@ class AutoDeleteTests(BaseDomain):
         # Make sure CNAME record block
         c = self.create_domain(name='foo1')
         self.assertFalse(c.purgeable)
-        f_c = create_fake_zone('foo.foo1', suffix="")
+        f_c = create_zone('foo.foo1')
         self.ctnr.domains.add(f_c)
         self.assertEqual(f_c.name, 'foo.foo1')
 

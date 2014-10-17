@@ -1,9 +1,9 @@
+import ipaddr
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from cyder.cydns.ptr.models import PTR
-from cyder.cydns.tests.test_views import random_label
-from cyder.cydns.tests.utils import create_fake_zone, create_zone, make_root
+from cyder.cydns.tests.utils import create_zone, make_root
 
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
@@ -20,8 +20,6 @@ from cyder.cydhcp.network.models import Network
 
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
-
-import ipaddr
 
 
 class ReverseDomainTests(TestCase):
@@ -60,9 +58,9 @@ class ReverseDomainTests(TestCase):
             end_str=end_str, domain=domain, ip_type=ip_type)
         self.ctnr.ranges.add(r)
 
-    def add_intr_ipv4(self, ip):
+    def add_intr_ipv4(self, ip, label):
         return StaticInterface.objects.create(
-            label=random_label(), domain=self.domain, ip_str=ip, ip_type='4',
+            label=label, domain=self.domain, ip_str=ip, ip_type='4',
             system=self.s, mac='11:22:33:44:55:66', ctnr=self.ctnr,
         )
 
@@ -139,13 +137,13 @@ class ReverseDomainTests(TestCase):
         create_zone('127.in-addr.arpa')
         rd1 = create_zone('193.127.in-addr.arpa')
         rd2 = create_zone('8.193.127.in-addr.arpa')
-        ip1 = self.add_intr_ipv4('127.193.8.1')
+        ip1 = self.add_intr_ipv4('127.193.8.1', 'foo')
         self.assertEqual(ip1.reverse_domain, rd2)
-        ip2 = self.add_intr_ipv4('127.193.8.2')
+        ip2 = self.add_intr_ipv4('127.193.8.2', 'bar')
         self.assertEqual(ip2.reverse_domain, rd2)
-        ip3 = self.add_intr_ipv4('127.193.8.3')
+        ip3 = self.add_intr_ipv4('127.193.8.3', 'qux')
         self.assertEqual(ip3.reverse_domain, rd2)
-        ip4 = self.add_intr_ipv4('127.193.8.4')
+        ip4 = self.add_intr_ipv4('127.193.8.4', 'zih')
         self.assertEqual(ip4.reverse_domain, rd2)
         rd2.soa.delete()
         rd2.nameserver_set.get().delete()

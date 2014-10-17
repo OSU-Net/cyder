@@ -1,6 +1,9 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+import ipaddr
+import re
+
+from django.core.exceptions import (
+    ObjectDoesNotExist, MultipleObjectsReturned, ValidationError)
 from django.db.models import Q
-from django.core.exceptions import MultipleObjectsReturned
 from django.forms.util import ErrorDict, ErrorList
 
 from cyder.cydhcp.vlan.models import Vlan
@@ -9,16 +12,14 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.range.models import find_free_ip
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 
-from cyder.cydns.utils import ensure_domain
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import i128_to_i64
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
+from cyder.cydns.utils import ensure_domain
 
 
-import re
-import ipaddr
 
 is_mozilla_tld = re.compile(".*mozilla\.(org|net|ru|co|it|me|de|hu|pt|"
                             "at|uk|rs|la|tv)$")

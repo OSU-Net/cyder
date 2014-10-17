@@ -13,18 +13,18 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.domain.models import Domain
 
 
-def do_setUp(self, test_class, test_data):
+def do_setUp(self, test_data):
     self.client = Client()
     self.client.login(username='test_superuser', password='password')
-    self.test_class = test_class
 
     # Create test object.
     test_data = dict(test_data.items())
-    self.test_obj, create = test_class.objects.get_or_create(**test_data)
+    self.test_obj = self.model.objects.create(**test_data)
 
 
 class NetworkViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
+    model = Network
     name = 'network'
 
     def setUp(self):
@@ -32,7 +32,7 @@ class NetworkViewTests(GenericViewTests, TestCase):
             'ip_type': IP_TYPE_4,
             'network_str': '192.168.1.0/24',
         }
-        do_setUp(self, Network, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {
@@ -45,6 +45,7 @@ class NetworkViewTests(GenericViewTests, TestCase):
 class RangeViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'range'
+    model = Range
     domain, _ = Domain.objects.get_or_create(name="dummy")
     network, _ = Network.objects.get_or_create(network_str="196.168.1.0/24")
 
@@ -59,7 +60,7 @@ class RangeViewTests(GenericViewTests, TestCase):
             'domain': self.domain,
             'network': self.network,
         }
-        do_setUp(self, Range, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {
@@ -76,13 +77,14 @@ class RangeViewTests(GenericViewTests, TestCase):
 
 class SiteViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
+    model = Site
     name = 'site'
 
     def setUp(self):
         test_data = {
             'name': 'test_site',
         }
-        do_setUp(self, Site, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {
@@ -92,13 +94,14 @@ class SiteViewTests(GenericViewTests, TestCase):
 
 class WorkgroupViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
+    model = Workgroup
     name = 'workgroup'
 
     def setUp(self):
         test_data = {
             'name': 'test_workgroup',
         }
-        do_setUp(self, Workgroup, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {
@@ -108,6 +111,7 @@ class WorkgroupViewTests(GenericViewTests, TestCase):
 
 class VlanViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
+    model = Vlan
     name = 'vlan'
 
     def setUp(self):
@@ -115,7 +119,7 @@ class VlanViewTests(GenericViewTests, TestCase):
             'name': 'test_vlan',
             'number': 1,
         }
-        do_setUp(self, Vlan, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {
@@ -126,13 +130,14 @@ class VlanViewTests(GenericViewTests, TestCase):
 
 class VrfViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
+    model = Vrf
     name = 'vrf'
 
     def setUp(self):
         test_data = {
             'name': 'test_vrf',
         }
-        do_setUp(self, Vrf, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {

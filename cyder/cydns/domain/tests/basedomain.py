@@ -2,7 +2,7 @@ from django.test import TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.network.models import Network
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.tests.utils import make_root
+from cyder.cydns.tests.utils import create_basic_dns_data, make_root
 
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.constants import STATIC
@@ -10,8 +10,8 @@ from cyder.cydhcp.constants import STATIC
 
 class BaseDomain(TestCase):
     def setUp(self):
-        Domain.objects.create(name='arpa')
-        Domain.objects.create(name='in-addr.arpa')
+        create_basic_dns_data()
+
         Domain.objects.create(name="128.in-addr.arpa")
         self.ctnr = Ctnr.objects.create(name="abloobloobloo")
 

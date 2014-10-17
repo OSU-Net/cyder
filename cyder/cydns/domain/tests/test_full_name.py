@@ -5,10 +5,9 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.utils import ensure_label_domain, prune_tree
 from cyder.cydns.soa.models import SOA
-
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_zone
+from cyder.cydns.utils import ensure_domain, ensure_label_domain, prune_tree
 
 from basedomain import BaseDomain
 
@@ -120,7 +119,8 @@ class FullNameTests(BaseDomain):
     def test_basic_add_remove3(self):
         # Make sure that if a domain is set to not purgeable the prune stops at
         # that domain when a record exists in a domain.
-        f_c = create_fake_zone("foo.foo", suffix="")
+        Domain.objects.create(name='foo')
+        f_c = create_zone('foo.foo')
         self.assertFalse(f_c.purgeable)
 
         fqdn = "bar.x.y.z.foo.foo"
@@ -145,7 +145,8 @@ class FullNameTests(BaseDomain):
     def test_basic_add_remove4(self):
         # Move a record down the tree testing prune's ability to not delete
         # stuff.
-        f_c = create_fake_zone("foo.goo", suffix="")
+        Domain.objects.create(name='goo')
+        f_c = create_zone('foo.goo')
         self.assertFalse(f_c.purgeable)
 
         fqdn = "bar.x.y.z.foo.goo"
@@ -192,7 +193,8 @@ class FullNameTests(BaseDomain):
 
     def test_basic_add_remove5(self):
         # Make sure all record types block
-        f_c = create_fake_zone("foo.foo22", suffix="")
+        Domain.objects.create(name='foo22')
+        f_c = create_zone('foo.foo22')
         self.assertFalse(f_c.purgeable)
 
         fqdn = "bar.x.y.z.foo.foo22"
@@ -237,7 +239,8 @@ class FullNameTests(BaseDomain):
 
     def test_basic_add_remove6(self):
         # Make sure CNAME record block
-        f_c = create_fake_zone("foo.foo1", suffix="")
+        Domain.objects.create(name='foo1')
+        f_c = create_zone('foo.foo1')
         f_c.save()
         self.assertFalse(f_c.purgeable)
 
@@ -252,7 +255,8 @@ class FullNameTests(BaseDomain):
 
     def test_basic_add_remove7(self):
         # try a star record
-        f_c = create_fake_zone("foo.foo2", suffix="")
+        Domain.objects.create(name='foo2')
+        f_c = create_zone('foo.foo2')
         f_c.save()
         self.assertFalse(f_c.purgeable)
         fqdn = "*.x.y.z.foo.foo2"
@@ -268,7 +272,8 @@ class FullNameTests(BaseDomain):
     def test_basic_add_remove8(self):
         # Make sure a record's label is changed to '' when a domain with the
         # same name as it's fqdn is created.
-        f_c = create_fake_zone("foo.foo3", suffix="")
+        Domain.objects.create(name='foo3')
+        f_c = create_zone('foo.foo3')
         self.assertFalse(f_c.purgeable)
 
         fqdn = "www.x.y.z.foo.foo3"
@@ -292,7 +297,8 @@ class FullNameTests(BaseDomain):
 
     def test_basic_add_remove9(self):
         # Make sure all record types block.
-        f_c = create_fake_zone("foo.foo22", suffix="")
+        Domain.objects.create(name='foo22')
+        f_c = create_zone('foo.foo22')
         self.assertFalse(f_c.purgeable)
 
         fqdn = "y.z.foo.foo22"
@@ -303,5 +309,5 @@ class FullNameTests(BaseDomain):
             ip_str="10.2.3.4")
         self.assertFalse(prune_tree(the_domain))
 
-        f_c = create_fake_zone("y.z.foo.foo22", suffix="")
-        self.assertFalse(f_c.purgeable)
+        new_domain = ensure_domain('y.z.foo.foo22')
+        self.assertFalse(new_domain.purgeable)

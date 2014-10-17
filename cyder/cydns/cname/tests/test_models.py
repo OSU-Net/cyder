@@ -10,8 +10,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.utils import (
-    create_basic_dns_data, create_fake_zone, create_zone)
+from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
 from cyder.cydns.txt.models import TXT
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface

@@ -6,24 +6,24 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 
 
-def do_setUp(self, test_class, test_data):
+def do_setUp(self, test_data):
     self.client = Client()
     self.client.login(username='test_superuser', password='password')
-    self.test_class = test_class
 
     # Create test object.
-    self.test_obj, create = test_class.objects.get_or_create(**test_data)
+    self.test_obj = self.model.objects.create(**test_data)
 
 
 class CtnrViewTests(TestCase, GenericViewTests):
     fixtures = ['test_users/test_users.json']
+    model = Ctnr
     name = 'ctnr'
 
     def setUp(self):
         test_data = {
             'name': 'test_test_ctnr',
         }
-        do_setUp(self, Ctnr, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {
@@ -33,13 +33,14 @@ class CtnrViewTests(TestCase, GenericViewTests):
 
 class SystemViewTests(TestCase, GenericViewTests):
     fixtures = ['test_users/test_users.json']
+    model = System
     name = 'system'
 
     def setUp(self):
         test_data = {
             'name': 'test_system',
         }
-        do_setUp(self, System, test_data)
+        do_setUp(self, test_data)
 
     def post_data(self):
         return {

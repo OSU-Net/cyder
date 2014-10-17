@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.models import TXT
@@ -8,7 +9,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -22,19 +23,24 @@ from cyder.core.task.models import Task
 
 class DirtySOATests(TestCase):
     def setUp(self):
+        create_basic_dns_data()
+
         self.ctnr = Ctnr.objects.create(name='abloobloobloo')
-        self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
+        self.r1 = create_zone(name='10.in-addr.arpa')
         self.sr = self.r1.soa
         self.sr.dirty = False
         self.sr.save()
 
-        self.dom = create_fake_zone("azg.bgaz", suffix="")
-        create_fake_zone("foo.bar.com", suffix="")
+        Domain.objects.create(name='bgaz')
+        self.dom = create_zone('azg.bgaz')
+        Domain.objects.create(name='com')
+        Domain.objects.create(name='bar.com')
+        create_zone('foo.bar.com')
         self.soa = self.dom.soa
         self.soa.dirty = False
         self.soa.save()
 
-        self.rdom = create_fake_zone("123.in-addr.arpa", suffix="")
+        self.rdom = create_zone('123.in-addr.arpa')
         self.rsoa = self.r1.soa
         self.rsoa.dirty = False
         self.rsoa.save()

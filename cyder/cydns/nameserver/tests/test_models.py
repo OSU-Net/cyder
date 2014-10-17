@@ -8,7 +8,7 @@ from cyder.cydns.soa.models import SOA
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ip.utils import ip_to_domain_name
-from cyder.cydns.tests.utils import create_fake_zone, create_zone
+from cyder.cydns.tests.utils import create_zone
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
@@ -39,7 +39,7 @@ class NSTestsModels(TestCase):
 
         self.f = Domain.objects.create(name="fam")
 
-        for d in [self.r, self.f_r, self.b_f_r, self.f]:
+        for d in (self.r, self.f_r, self.b_f_r, self.f):
             self.ctnr.domains.add(d)
 
         self._128 = create_zone('128.in-addr.arpa')
@@ -62,8 +62,8 @@ class NSTestsModels(TestCase):
         for r in (self.sr1, self.sr2, self.sr3):
             self.ctnr.ranges.add(r)
 
-    def create_fake_zone(self, *args, **kwargs):
-        domain = create_fake_zone(*args, **kwargs)
+    def create_zone(self, name):
+        domain = create_zone(name)
         self.ctnr.domains.add(domain)
         return domain
 
@@ -286,7 +286,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_1_0(self):
         # This is Case 1
-        root_domain = self.create_fake_zone("asdf10")
+        root_domain = self.create_zone('asdf10.asdf')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -304,7 +304,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_1_1(self):
         # This is Case 1
-        root_domain = self.create_fake_zone("asdf111")
+        root_domain = self.create_zone('asdf111.asdf')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -324,7 +324,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_1_2(self):
         # This is Case 1 ... with ptr's
-        root_domain = self.create_fake_zone("12.in-addr.arpa", suffix="")
+        root_domain = self.create_zone('12.in-addr.arpa')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -338,7 +338,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_1_3(self):
         # This is Case 1 ... with ptr's
-        root_domain = self.create_fake_zone("13.in-addr.arpa", suffix="")
+        root_domain = self.create_zone('13.in-addr.arpa')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -355,9 +355,8 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_1_4(self):
         # This is Case 1 ... with StaticInterfaces's
-        reverse_root_domain = self.create_fake_zone(
-            "14.in-addr.arpa", suffix="")
-        root_domain = self.create_fake_zone("asdf14")
+        reverse_root_domain = self.create_zone('14.in-addr.arpa')
+        root_domain = self.create_zone('asdf14.asdf')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
 
@@ -376,7 +375,7 @@ class NSTestsModels(TestCase):
     # See record.tests for the case a required view is deleted.
     def test_bad_nameserver_soa_state_case_2_0(self):
         # This is Case 2
-        root_domain = self.create_fake_zone("asdf20")
+        root_domain = self.create_zone('asdf20.asdf')
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -391,7 +390,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_2_1(self):
         # This is Case 2
-        root_domain = self.create_fake_zone("asdf21")
+        root_domain = self.create_zone('asdf21.asdf')
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -411,7 +410,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_2_2(self):
         # This is Case 2 ... with PTRs
-        root_domain = self.create_fake_zone("14.in-addr.arpa", suffix="")
+        root_domain = self.create_zone('14.in-addr.arpa')
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -425,7 +424,8 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_2_3(self):
         # This is Case 2 ... with PTRs
-        root_domain = self.create_fake_zone("10.14.in-addr.arpa", suffix="")
+        Domain.objects.create(name='14.in-addr.arpa')
+        root_domain = self.create_zone('10.14.in-addr.arpa')
         self.assertEqual(root_domain.nameserver_set.count(), 1)
         ns = root_domain.nameserver_set.all()[0]
 
@@ -443,7 +443,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_0(self):
         # This is Case 3
-        root_domain = self.create_fake_zone("asdf30")
+        root_domain = self.create_zone('asdf30.asdf')
         for ns in root_domain.nameserver_set.all():
             ns.delete()
         ns.domain.soa.delete()
@@ -463,7 +463,7 @@ class NSTestsModels(TestCase):
 
     def test_bad_nameserver_soa_state_case_3_1(self):
         # This is Case 3
-        root_domain = self.create_fake_zone("asdf31")
+        root_domain = self.create_zone('asdf31.asdf')
 
         # Try case 3 but add a record to a child domain of root_domain.
         bad_root_domain = Domain.objects.create(
