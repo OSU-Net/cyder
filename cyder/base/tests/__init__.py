@@ -2,24 +2,23 @@ from exceptions import AssertionError
 
 import django.test
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.test.client import Client
 
 from cyder.base.utils import savepoint_atomic
 from cyder.core.ctnr.models import Ctnr
 
 
-class CyTestMixin(object):
+class TestCase(django.test.TestCase):
     """
-    Mixin for all tests.
+    Base class for all tests.
     """
-    def _pre_setup(self):
-        super(TestCase, self)._pre_setup()
+    client_class = Client
+    fixtures = ['core/users']
 
-        # Add ctnrs to session.
-        session = self.client.session
-        session['ctnr'] = Ctnr.objects.get(id=2)
-        session['ctnrs'] = list(Ctnr.objects.all())
-        session.save()
+    def assertRaises(self, *args, **kwargs):
+        with savepoint_atomic():
+            return super(TestCase, self).assertRaises(*args, **kwargs)
 
     def assertObjectsConflict(self, obj_create_list):
         pairs = [(a,b)
@@ -28,6 +27,8 @@ class CyTestMixin(object):
                  if a != b]
 
         for first, second in pairs:
+            sid = transaction.savepoint()
+
             x = first()
             try:
                 with savepoint_atomic():
@@ -38,7 +39,9 @@ class CyTestMixin(object):
                 raise AssertionError(
                     "'{}' and '{}' do not conflict".format(
                         first.name, second.name))
-            x.delete()
+
+            transaction.savepoint_rollback(sid)
+
 
     def assertObjectsDontConflict(self, obj_create_list):
         pairs = [(a,b)
@@ -47,19 +50,9 @@ class CyTestMixin(object):
                  if a != b]
 
         for first, second in pairs:
+            sid = transaction.savepoint()
+
             x = first()
             y = second()
-            y.delete()
-            x.delete()
 
-
-class TestCase(django.test.TestCase, CyTestMixin):
-    """
-    Base class for all tests.
-    """
-    client_class = Client
-    fixtures = ['core/users']
-
-    def assertRaises(self, *args, **kwargs):
-        with savepoint_atomic():
-            return super(TestCase, self).assertRaises(*args, **kwargs)
+            transaction.savepoint_rollback(sid)
