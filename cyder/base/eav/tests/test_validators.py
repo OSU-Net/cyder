@@ -9,16 +9,13 @@ class TestValidators(TestCase):
         for value in value_list:
             validator(value)
 
-
     def _invalid(self, validator, value_list):
         for value in value_list:
             self.assertRaises(ValidationError, lambda: validator(value))
 
-
     def test_flag(self):
         self._valid(v.flag, ('on', 'off', 'true', 'false', 'oN', 'True'))
         self._invalid(v.flag, ('truth', 'yes', 'no', '0', '1'))
-
 
     def test_uint8(self):
         self._valid(v.uint8, ('0', '10', '255',
@@ -26,12 +23,10 @@ class TestValidators(TestCase):
         self._invalid(v.uint8, ('-1', 'a', '256',
                                '-0x1', '0x-1', '0x100'))
 
-
     def test_int8(self):
         self._valid(v.int8, ('-128', '-10', '0', '10', '127',
                             '0x0', '0xa', '0x7F'))
         self._invalid(v.int8, ('-129', '1a', '128'))
-
 
     def test_domain(self):
         self._valid(v.domain, ('com', 'example.com', 'example.com.'))
@@ -40,7 +35,6 @@ class TestValidators(TestCase):
             'example.com..', # too many dots
             'example..com', # too many dots
         ))
-
 
     def test_host(self):
         self._valid(v.host, (
@@ -52,7 +46,6 @@ class TestValidators(TestCase):
             'example..com', # too many dots
         ))
 
-
     def test_domain_list(self):
         self._valid(v.domain_list, (
             '"example.com"',
@@ -62,7 +55,6 @@ class TestValidators(TestCase):
             'example.com', # no quotes
             '"example.com" "example.org."  "example.edu"', # no commas
         ))
-
 
     def test_host_pair(self):
         self._valid(v.host_pair, (
@@ -78,7 +70,6 @@ class TestValidators(TestCase):
             '1.2.3.4 127.0.0.1 192.168.0.1', # too many hosts
         ))
 
-
     def test_host_pair_list(self):
         self._valid(v.host_pair_list, (
             'example.com example.org',
@@ -92,7 +83,6 @@ class TestValidators(TestCase):
             '1.2.3.4 127.0.0.1 192.168.0.1', # too many hosts in one pair
         ))
 
-
     def test_flag_host_list(self):
         self._valid(v.flag_host_list, (
             'true example.com, example.org',
@@ -105,7 +95,6 @@ class TestValidators(TestCase):
             'yes, 127.0.0.1', # comma after flag
         ))
 
-
     def test_text(self):
         self._valid(v.text, (
             'foo', 'foo bar', "'foo bar'", '!@#$%^&*()_',
@@ -117,7 +106,6 @@ class TestValidators(TestCase):
             'foo"bar', # double quote
         ))
 
-
     def test_string(self):
         self._valid(v.string, (
             'foo', 'foo bar', 'foo bar baz', "'foo bar baz'",
@@ -128,7 +116,6 @@ class TestValidators(TestCase):
             '"foo"', # double quotes
             'foo"bar', # double quote
         ))
-
 
     def test_identifier(self):
         self._valid(v.identifier, (
@@ -142,7 +129,6 @@ class TestValidators(TestCase):
             '"foobar"', # double quote
             "'foobar", # single quote
         ))
-
 
     def test_flag_optional_text(self):
         self._valid(v.flag_optional_text, (

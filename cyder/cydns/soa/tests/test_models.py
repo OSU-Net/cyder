@@ -32,8 +32,10 @@ class SOATests(TestCase):
         soa = SOA.objects.create(
             primary='ns1.derp.com', contact='admf.asdf', root_domain=d)
         repr(soa)
-        self.assertTrue(
-            soa.serial and soa.expire and soa.retry and soa.refresh)
+        self.assertTrue(soa.serial)
+        self.assertTrue(soa.expire)
+        self.assertTrue(soa.retry)
+        self.assertTrue(soa.refresh)
         self.assertTrue(soa.details())
 
     def test_create_delete(self):

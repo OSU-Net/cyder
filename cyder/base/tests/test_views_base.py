@@ -15,8 +15,7 @@ class GenericViewTests(object):
     Also requires post_data to generate test view POST data:
 
         def post_data(self):
-            server = random_label()
-            return {'server': server, 'domain':self.domain.pk}
+            return {'server': 'foobie.bletch', 'domain':self.domain.pk}
     """
     def has_perm(self, user, action):
         if action == ACTION_CREATE:
@@ -113,7 +112,7 @@ class GenericViewTests(object):
 
     def test_filter(self):
         url = self.model.get_list_url()
-        query = random_label()
+        query = 'fakeyfake'
         url = "{0}?filter={1}".format(url, query)
         resp = self.client.get(url, follow=True)
         self.assertEqual(resp.status_code, 200)
@@ -198,23 +197,6 @@ class GenericViewTests(object):
                     self.assertEqual(obj_val.id, v)
                 else:
                     self.assertEqual(str(obj_val), str(v))
-
-
-def random_label():
-    """
-    Utility function to generate a random *valid* label.
-    """
-    label = ''
-    for i in range(random.randint(5, 30)):
-        label += string.letters[random.randint(0, len(string.letters) - 1)]
-    return label
-
-
-def random_byte():
-    """
-    Utility function to generate a random byte for random IPs
-    """
-    return random.randint(0, 255)
 
 
 def format_response(response):

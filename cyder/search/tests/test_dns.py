@@ -1,32 +1,35 @@
 from django.test import TestCase, Client
 
-from cyder.cydns.tests.utils import create_fake_zone
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.search.compiler.django_compile import compile_to_django
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
+from cyder.cydns.ptr.models import PTR
+from cyder.search.compiler.django_compile import compile_to_django
 
 
 class SearchDNSTests(TestCase):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
+        create_basic_dns_data()
+
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
         self.c = Client()
+        for name in ('com', 'mozilla.com', 'wee.mozilla.com'):
+            Domain.objects.create(name=name)
 
     def create_network_range(self, network_str, start_str, end_str,
                              range_type="st", ip_type='4', domain=None):
         if domain is None:
             domain = self.domain
 
-        n = Network(ip_type=ip_type, network_str=network_str)
-        n.save()
+        n = Network.objects.create(ip_type=ip_type, network_str=network_str)
 
-        r = Range(network=n, range_type=range_type, start_str=start_str,
-                  end_str=end_str, domain=domain, ip_type=ip_type)
-        r.save()
+        r = Range.objects.create(
+            network=n, range_type=range_type, start_str=start_str,
+            end_str=end_str, domain=domain, ip_type=ip_type)
 
         self.ctnr.ranges.add(r)
 
@@ -35,14 +38,14 @@ class SearchDNSTests(TestCase):
         return res, errors
 
     def test_integration1(self):
-        create_fake_zone("wee.wee.mozilla.com", "")
+        create_zone('wee.wee.mozilla.com')
         res, error = self.search("wee.wee.mozilla.com")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        create_fake_zone("wee1.wee.mozilla.com", "")
+        create_zone('wee1.wee.mozilla.com')
         res, error = self.search("wee1.wee.mozilla.com")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
@@ -71,7 +74,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['DOMAIN']), 1)
 
     def test_integration2(self):
-        root_domain = create_fake_zone("wee2.wee.mozilla.com", "")
+        root_domain = create_zone('wee2.wee.mozilla.com')
         self.ctnr.domains.add(root_domain)
         res, error = self.search("wee2.wee.mozilla.com")
         self.assertFalse(error)
@@ -79,7 +82,8 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 1)
         self.assertEqual(len(res['DOMAIN']), 1)
 
-        create_fake_zone("1.1.ip6.arpa", "")
+        Domain.objects.create(name='1.ip6.arpa')
+        create_zone('1.1.ip6.arpa')
         res, error = self.search("1.1.ip6.arpa")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
@@ -118,7 +122,7 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['PTR']), 0)
 
     def test_integration3_zone(self):
-        root_domain = create_fake_zone("wee3.wee.mozilla.com", "")
+        root_domain = create_zone('wee3.wee.mozilla.com')
         self.ctnr.domains.add(root_domain)
         res, error = self.search("zone:wee3.wee.mozilla.com")
         self.assertFalse(error)
@@ -140,8 +144,9 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['CNAME']), 1)
 
     def test_integration4_ip_range(self):
-        d = create_fake_zone("wee3.wee.mozilla.com", "")
-        d2 = create_fake_zone("1.2.ip6.arpa", "")
+        d = create_zone('wee3.wee.mozilla.com')
+        Domain.objects.create(name='2.ip6.arpa')
+        d2 = create_zone('1.2.ip6.arpa')
         self.ctnr.domains.add(d, d2)
         res, error = self.search("1.2.ip6.arpa")
         self.assertFalse(error)
@@ -167,9 +172,9 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['A']), 0)
 
     def test_integration5_ip(self):
-        root_domain = create_fake_zone("wee5.wee.mozilla.com", "")
+        root_domain = create_zone('wee5.wee.mozilla.com')
         self.ctnr.domains.add(root_domain)
-        create_fake_zone("10.in-addr.arpa", "")
+        create_zone('10.in-addr.arpa')
         res, error = self.search("10.in-addr.arpa OR "
                                  "wee5.wee.mozilla.com")
         self.assertFalse(error)
