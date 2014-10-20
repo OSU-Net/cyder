@@ -41,8 +41,8 @@ class Network(BaseModel, ObjectUrlMixin):
     # This field is here so ES can search this model easier.
     network_str = models.CharField(
         max_length=49, editable=True,
-        help_text="The network address of this network.",
-        verbose_name="Network address")
+        help_text='Network address and prefix length, in CIDR notation',
+        verbose_name='Network string')
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
     enabled = models.BooleanField(default=True)
@@ -109,6 +109,14 @@ class Network(BaseModel, ObjectUrlMixin):
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
 
+    def cyder_unique_error_message(self, model_class, unique_check):
+        if unique_check == ('ip_upper', 'ip_lower', 'prefixlen'):
+            return (
+                'Network with this address and prefix length already exists.')
+        else:
+            return super(Network, self).unique_error_message(
+                model_class, unique_check)
+
     def save(self, *args, **kwargs):
         self.update_network()
         super(Network, self).save(*args, **kwargs)
@@ -139,38 +147,25 @@ class Network(BaseModel, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         self.check_valid_range()
-        allocated = Network.objects.filter(prefixlen=self.prefixlen,
-                                           ip_upper=self.ip_upper,
-                                           ip_lower=self.ip_lower)
-        if allocated:
-            if not self.id or self not in allocated:
-                raise ValidationError(
-                    "This network has already been allocated.")
 
         super(Network, self).clean(*args, **kwargs)
 
+    # TODO: I was writing checks to make sure that subnets wouldn't
+    # orphan ranges. IPv6 needs support.
     def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
         # in the subnet?
         self.update_network()
         fail = False
         for range_ in self.range_set.all():
-            # TODO
-            """
-                I was writing checks to make sure that subnets wouldn't orphan
-                ranges. IPv6 needs support.
-            """
             # Check the start addresses.
             if range_.start_upper < self.ip_upper:
-                fail = True
                 break
             elif (range_.start_upper > self.ip_upper and range_.start_lower <
                   self.ip_lower):
-                fail = True
                 break
             elif (range_.start_upper == self.ip_upper and range_.start_lower <
                     self.ip_lower):
-                fail = True
                 break
 
             if self.ip_type == IP_TYPE_4:
@@ -181,20 +176,19 @@ class Network(BaseModel, ObjectUrlMixin):
 
             # Check the end addresses.
             if range_.end_upper > brdcst_upper:
-                fail = True
                 break
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
                     brdcst_lower):
-                fail = True
                 break
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
-                fail = True
+                break
+        else:  # All ranges are valid.
+            return
 
-            if fail:
-                raise ValidationError("Resizing this subnet to the requested "
-                                      "network prefix would orphan existing "
-                                      "ranges.")
+        raise ValidationError(
+            "Resizing this subnet to the requested network prefix would "
+            "orphan existing ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall

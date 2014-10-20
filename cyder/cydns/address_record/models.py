@@ -82,8 +82,17 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         Allow ARs to share a name with a static interface iff they have the
             same container.
         """
+
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
+        from cyder.core.ctnr.models import Ctnr
         assert self.fqdn
+        try:
+            self.ctnr
+        except Ctnr.DoesNotExist:
+            # By this point, Django will already have encountered a
+            # Validation error about the ctnr field, so there's no need to
+            # raise another one.
+            return
 
         ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
                                     .exclude(ctnr=self.ctnr))
@@ -190,6 +199,16 @@ class AddressRecord(BaseAddressRecord):
             ('IP', 'ip_str', str(self.ip_str)),
         ]
         return data
+
+    def cyder_unique_error_message(self, model_class, unique_check):
+        if unique_check == ('label', 'domain', 'fqdn', 'ip_upper', 'ip_lower',
+                            'ip_type'):
+            return (
+                'Address record with this label, domain, and IP address '
+                'already exists.')
+        else:
+            return super(AddressRecord, self).unique_error_message(
+                model_class, unique_check)
 
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
