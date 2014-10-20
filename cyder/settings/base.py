@@ -229,8 +229,6 @@ MOBILE_COOKIE = 'mobile'
 #########
 
 
-from cyder.settings.dns import *
-
 TESTING = True if sys.argv[1:] and sys.argv[1] == 'test' else False
 MIGRATING = (True if sys.argv[1:] and sys.argv[1] == 'maintain_migrate'
              else False)
@@ -465,11 +463,6 @@ REVERSE_SOAS = [
 NONAUTHORITATIVE_DOMAINS = [
     'nero.net', 'peak.org', 'orvsd.org', 'pdx.orvsd.org',
 ]
-
-VERIFICATION_SERVER = "ns1.oregonstate.edu"
-ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
-ZONE_PATH = "cyder/management/commands/lib/zones"
-ZONE_BLACKLIST = []
 
 # This list contains tuples that have a zone's name as their 0th element and a
 # view's name as the 1st element. For example:

@@ -7,8 +7,6 @@ from optparse import make_option
 import dns_migrate
 import dhcp_migrate
 from lib import fix_maintain
-from lib.diffdns import diff_zones
-from lib.checkexcept import checkexcept
 
 
 class Command(BaseCommand):
@@ -29,11 +27,6 @@ class Command(BaseCommand):
                     dest='dns',
                     default=False,
                     help='Migrate DNS objects'),
-        make_option('-f', '--diff',
-                    action='store_true',
-                    dest='diff',
-                    default=False,
-                    help='Compare results to nameserver'),
         make_option('-p', '--dhcp',
                     action='store_true',
                     dest='dhcp',
@@ -81,22 +74,6 @@ class Command(BaseCommand):
         if options['dns']:
             print "Migrating DNS objects."
             dns_migrate.do_everything(skip_edu=False)
-
-        if options['diff']:
-            print "Comparing localhost to %s." % settings.VERIFICATION_SERVER
-            diffs = diff_zones("localhost", settings.VERIFICATION_SERVER,
-                               settings.ZONES_FILE, skip_edu=False)
-
-            print "Removing excusable differences."
-            total, unexcused = checkexcept(diffs)
-
-            print "%s differences. %s not excused." % (total, len(unexcused))
-            print
-            for rdtype, name, A, B in unexcused:
-                print rdtype, name
-                print "localhost", A
-                print settings.VERIFICATION_SERVER, B
-                print
 
         if options['dhcp']:
             dhcp_migrate.do_everything(skip=False)
