@@ -7,14 +7,8 @@ class CNAMEAPI_Test(APITests):
     model = CNAME
 
     def create_data(self):
-        data = {
-            'ctnr': self.ctnr,
-            'description': 'CNAME record',
-            'ttl': 420,
-            'label': 'baz',
-            'domain': self.domain,
-            'target': 'bar.' + self.domain.name,
-        }
-        obj, _ = self.model.objects.get_or_create(**data)
+        obj = CNAME.objects.create(
+            ctnr=self.ctnr, description='CNAME record', ttl=420, label='baz',
+            domain=self.domain, target=('bar.' + self.domain.name))
         obj.views.add(self.view.id)
         return obj

@@ -7,11 +7,5 @@ class TXTAPI_Test(APITests):
     model = TXT
 
     def create_data(self):
-        data = {
-            'ctnr': self.ctnr,
-            'label': 'txt',
-            'domain': self.domain,
-            'txt_data': 'Things',
-        }
-        obj, _ = self.model.objects.get_or_create(**data)
-        return obj
+        return TXT.objects.create(
+            ctnr=self.ctnr, label='txt', domain=self.domain, txt_data='Things')

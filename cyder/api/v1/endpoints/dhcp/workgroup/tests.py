@@ -7,4 +7,4 @@ class WorkgroupAPI_Test(APITests, APIEAVTestMixin):
     model = Workgroup
 
     def create_data(self):
-        return self.model.objects.get_or_create(name='workgroup')[0]
+        return Workgroup.objects.create(name='workgroup')
