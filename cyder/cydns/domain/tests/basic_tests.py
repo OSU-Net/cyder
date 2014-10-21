@@ -57,7 +57,8 @@ class DomainTests(BaseDomain):
         b_m = Domain.objects.get(pk=b_m.pk)  # Refresh object
         self.assertEqual(b_m.soa, s)
 
-        self.assertRaises(ValidationError, SOA.objects.create,
+        self.assertRaises(
+            ValidationError, SOA.objects.create,
             primary="ns2.foo.com", contact="asdf", description="test2",
             root_domain=m)
 
@@ -88,7 +89,8 @@ class DomainTests(BaseDomain):
             ValidationError, Domain.objects.create, name='foo.cn')
 
     def test_create_domain(self):
-        self.assertRaises(ValidationError, Domain.objects.create,
+        self.assertRaises(
+            ValidationError, Domain.objects.create,
             name='foo.bar.oregonstate.edu')
 
     def test_remove_has_child_domain(self):
@@ -114,9 +116,9 @@ class DomainTests(BaseDomain):
         boom = make_root(boom)
         bleh = self.create_domain(name='bleh.boom', delegated=True)
 
-        self.assertRaises(ValidationError, Domain.objects.create,
+        self.assertRaises(
+            ValidationError, Domain.objects.create,
             name='baa.bleh.boom', delegated=False)
-
 
     def test_delegation(self):
         boom = self.create_domain(name='boom')
@@ -150,11 +152,13 @@ class DomainTests(BaseDomain):
         bleh.save()
 
         # Creation should still be disallowed.
-        self.assertRaises(ValidationError, AddressRecord.objects.create,
+        self.assertRaises(
+            ValidationError, AddressRecord.objects.create,
             label="ns2", ctnr=self.ctnr, domain=bleh, ip_str="128.193.99.9",
             ip_type='4')
 
-        self.assertRaises(ValidationError, CNAME.objects.create,
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
             label="1000asdf", ctnr=self.ctnr, domain=bleh,
             target="asdf.asdf")
 
@@ -178,7 +182,8 @@ class DomainTests(BaseDomain):
             label="no", ctnr=self.ctnr, domain=t_dom, ip_str="128.193.99.9",
             ip_type='4')
 
-        self.assertRaises(ValidationError, Domain.objects.create,
+        self.assertRaises(
+            ValidationError, Domain.objects.create,
             name='no.to.bo', delegated=False)
 
     def test_existing_cname_new_domain(self):
@@ -189,7 +194,8 @@ class DomainTests(BaseDomain):
         CNAME.objects.create(
             ctnr=self.ctnr, domain=t_dom, label="no", target="asdf")
 
-        self.assertRaises(ValidationError, Domain.objects.create,
+        self.assertRaises(
+            ValidationError, Domain.objects.create,
             name='no.to.bo', delegated=False)
 
     def test_rename_has_child_domain(self):

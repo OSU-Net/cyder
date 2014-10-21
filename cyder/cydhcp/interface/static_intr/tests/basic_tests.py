@@ -83,11 +83,13 @@ class StaticInterTests(BaseStaticTests):
             mac="11:22:33:44:55:66", label='9988food', domain=self.c,
             ip_str='10.0.0.1')
 
-        self.assertRaises(ValidationError, AddressRecord.objects.create,
+        self.assertRaises(
+            ValidationError, AddressRecord.objects.create,
             label='9988food', domain=self.c, ip_str='10.0.0.1', ip_type='4',
             ctnr=self.ctnr)
 
-        self.assertRaises(ValidationError, PTR.objects.create,
+        self.assertRaises(
+            ValidationError, PTR.objects.create,
             fqdn='9988food.ccc', ip_str='10.0.0.1', ip_type='4',
             ctnr=self.ctnr)
 
@@ -101,7 +103,8 @@ class StaticInterTests(BaseStaticTests):
             fqdn='9988food.ccc', ip_str='10.0.0.1', ip_type='4',
             ctnr=self.ctnr)
 
-        self.assertRaises(ValidationError, self.do_add_intr,
+        self.assertRaises(
+            ValidationError, self.do_add_intr,
             mac="11:22:33:44:55:66", label='9988food', domain=self.c,
             ip_str='10.0.0.1')
 
@@ -117,7 +120,8 @@ class StaticInterTests(BaseStaticTests):
         self.assertRaises(ValidationError, i.save)
 
     def test1_no_system(self):
-        self.assertRaises(ValueError, StaticInterface.objects.create,
+        self.assertRaises(
+            ValueError, StaticInterface.objects.create,
             mac="15:22:33:44:55:66",
             label="8888foo",
             domain=self.f_c,

@@ -113,13 +113,15 @@ class V6StaticInterTests(BaseStaticTests):
             ip_str=ip_str,
         )
 
-        self.assertRaises(ValidationError, AddressRecord.objects.create,
+        self.assertRaises(
+            ValidationError, AddressRecord.objects.create,
             label='9988fooddfdf', domain=self.c, ip_str=ip_str, ip_type='6',
             ctnr=self.ctnr)
 
-        self.assertRaises(ValidationError, PTR.objects.create,
-                ip_str=ip_str, ip_type='6',
-                fqdn='9988fooddfdf.ccc', ctnr=self.ctnr)
+        self.assertRaises(
+            ValidationError, PTR.objects.create,
+            ip_str=ip_str, ip_type='6', fqdn='9988fooddfdf.ccc',
+            ctnr=self.ctnr)
 
     def test2_bad_add_for_a_ptr(self):
         # PTR and A exist, then try add intr
@@ -133,10 +135,11 @@ class V6StaticInterTests(BaseStaticTests):
             ctnr=self.ctnr)
 
         PTR.objects.create(
-                ip_str=ip_str, ip_type='6',
-                fqdn=(label + '.' + domain.name), ctnr=self.ctnr)
+            ip_str=ip_str, ip_type='6', fqdn=(label + '.' + domain.name),
+            ctnr=self.ctnr)
 
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             mac=mac, label=label, domain=domain, ip_str=ip_str)
 
     def test1_bad_reverse_domain(self):
@@ -155,7 +158,8 @@ class V6StaticInterTests(BaseStaticTests):
     def test1_no_system(self):
         mac = "15:22:33:44:55:66"
 
-        self.assertRaises(ValueError, StaticInterface.objects.create,
+        self.assertRaises(
+            ValueError, StaticInterface.objects.create,
             mac=mac,
             label="8888foo",
             domain=self.f_c,

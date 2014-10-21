@@ -13,10 +13,10 @@ class TestUtils(TestCase):
             self.assertTrue(utils.is_hex_byte(value))
 
         bad_values = (
-            '012', # too many digits
-            'no', # invalid byte
-            '0x01', # '0x' not allowed (we already know it's hex)
-            '-1a', # negative bytes not allowed
+            '012',  # too many digits
+            'no',  # invalid byte
+            '0x01',  # '0x' not allowed (we already know it's hex)
+            '-1a',  # negative bytes not allowed
         )
         for value in bad_values:
             self.assertFalse(utils.is_hex_byte(value))
@@ -27,11 +27,11 @@ class TestUtils(TestCase):
             self.assertTrue(utils.is_hex_byte_sequence(value))
 
         bad_values = (
-            '012:34', # invalid byte
-            '01::23', # too many consecutive colons
-            '01:', # trailing colon
-            ':01', # leading colon
-            'yes:no', # invalid bytes
+            '012:34',  # invalid byte
+            '01::23',  # too many consecutive colons
+            '01:',  # trailing colon
+            ':01',  # leading colon
+            'yes:no',  # invalid bytes
         )
         for value in bad_values:
             self.assertFalse(utils.is_hex_byte_sequence(value))

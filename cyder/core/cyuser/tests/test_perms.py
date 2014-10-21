@@ -3,8 +3,8 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.test import TestCase
 
-from cyder.base.constants import (ACTION_CREATE, ACTION_VIEW, ACTION_UPDATE,
-                             ACTION_DELETE)
+from cyder.base.constants import (
+    ACTION_CREATE, ACTION_VIEW, ACTION_UPDATE, ACTION_DELETE)
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.views import login_session, become_user, unbecome_user
 from cyder.cydns.address_record.models import AddressRecord

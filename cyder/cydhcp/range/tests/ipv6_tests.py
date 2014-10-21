@@ -67,7 +67,8 @@ class V6RangeTests(TestCase):
 
     def test2_bad_create(self):
         # start > end
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="1234:1235:1234:1235::",
             end_str="1234:1235:1234:1234::",
             network=self.s,
@@ -76,7 +77,8 @@ class V6RangeTests(TestCase):
 
     def test3_bad_create(self):
         # outside of network
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="2235:1235:1234:1233::",
             end_str="2235:1235:1234:1234::",
             network=self.s,
@@ -85,7 +87,8 @@ class V6RangeTests(TestCase):
 
     def test4_bad_create(self):
         # outside of network
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="1234:1234:1234:1::",
             end_str="1234:1234:1234:1234:1234:1234::",
             network=self.s1,
@@ -101,7 +104,8 @@ class V6RangeTests(TestCase):
         )
 
         # duplicate
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="1234:123e:1234:1234::",
             end_str="1234:123e:1235:1234:1234:1234::",
             network=self.s,
@@ -117,7 +121,8 @@ class V6RangeTests(TestCase):
         )
 
         # Partial overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="fe:1::",
             end_str="fe:1:3::",
             network=self.s2,
@@ -133,7 +138,8 @@ class V6RangeTests(TestCase):
         )
 
         # Partial overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="fe1:1::",
             end_str="fe1:1:4::",
             network=self.s2,
@@ -149,7 +155,8 @@ class V6RangeTests(TestCase):
         )
 
         # Full overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="fe2:1:2::",
             end_str="fe2:1:4::",
             network=self.s2,
@@ -165,7 +172,8 @@ class V6RangeTests(TestCase):
         )
 
         # Full overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="fe3:1:2::",
             end_str="fe3:1:3::",
             network=self.s2,
@@ -209,7 +217,8 @@ class V6RangeTests(TestCase):
             ip_type='6',
         )
 
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="fe6:4:2::",
             end_str="fe6:4:54::",
             network=self.s2,

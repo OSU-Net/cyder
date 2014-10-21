@@ -43,7 +43,8 @@ class TXTTests(cyder.base.tests.TestCase):
 
         ctnr2 = Ctnr.objects.create(name='test_ctnr2')
 
-        self.assertRaises(ValidationError, self.create_TXT,
+        self.assertRaises(
+            ValidationError, self.create_TXT,
             label='bleh', domain=self.o_e, txt_data='Data data data',
             ctnr=ctnr2)
 

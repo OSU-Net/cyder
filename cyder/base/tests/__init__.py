@@ -21,7 +21,7 @@ class TestCase(django.test.TestCase):
             return super(TestCase, self).assertRaises(*args, **kwargs)
 
     def assertObjectsConflict(self, obj_create_list):
-        pairs = [(a,b)
+        pairs = [(a, b)
                  for a in obj_create_list
                  for b in obj_create_list
                  if a != b]
@@ -42,9 +42,8 @@ class TestCase(django.test.TestCase):
 
             transaction.savepoint_rollback(sid)
 
-
     def assertObjectsDontConflict(self, obj_create_list):
-        pairs = [(a,b)
+        pairs = [(a, b)
                  for a in obj_create_list
                  for b in obj_create_list
                  if a != b]

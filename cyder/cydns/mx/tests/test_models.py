@@ -70,7 +70,8 @@ class MXTests(cyder.base.tests.TestCase):
 
     def test_add_invalid(self):
         # TLD condition
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='',
             domain=self.o,
             server='mail.oregonstate.edu',
@@ -78,7 +79,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='adsf.com',
             domain=self.o_e,
             server='mail.oregonstate.edu',
@@ -86,7 +88,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='foo',
             domain=self.o_e,
             server='mail..com',
@@ -94,7 +97,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=1234,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='foo.bar',
             domain=self.o_e,
             server='mail.com',
@@ -102,7 +106,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23424,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='asdf#$@',
             domain=self.o_e,
             server='coo.com',
@@ -110,7 +115,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='asdf',
             domain=self.o_e,
             server='coo.com',
@@ -118,7 +124,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='asdf',
             domain=self.o_e,
             server='coo.com',
@@ -126,7 +133,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='asdf',
             domain=self.o_e,
             server=234,
@@ -134,7 +142,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=23,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='a',
             domain=self.o_e,
             server='foo',
@@ -197,7 +206,8 @@ class MXTests(cyder.base.tests.TestCase):
             ttl=2222,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='',
             domain=self.o_e,
             server='relaydf.oregonstate.edu',
@@ -231,7 +241,8 @@ class MXTests(cyder.base.tests.TestCase):
             ctnr=self.ctnr,
         )
 
-        self.assertRaises(ValidationError, self.do_generic_add,
+        self.assertRaises(
+            ValidationError, self.do_generic_add,
             label='',
             domain=self.o_e,
             server='cnamederp.oregonstate.org',
@@ -258,7 +269,8 @@ class MXTests(cyder.base.tests.TestCase):
         ctnr2 = Ctnr(name='test_ctnr2')
         ctnr2.save()
 
-        self.assertRaises(ValidationError, MX.objects.create,
+        self.assertRaises(
+            ValidationError, MX.objects.create,
             label='bleh',
             domain=self.o_e,
             server='xyz.oregonstate.edu',

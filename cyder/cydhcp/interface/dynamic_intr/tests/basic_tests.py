@@ -52,6 +52,7 @@ class BasicDynamicInterfaceTests(TestCase):
             ctnr=self.c, system=self.s1, range=self.r1,
             mac='12:34:56:78:9a:bc')
 
-        self.assertRaises(ValidationError, DynamicInterface.objects.create,
+        self.assertRaises(
+            ValidationError, DynamicInterface.objects.create,
             ctnr=self.c, system=self.s2, range=self.r1,
             mac='12:34:56:78:9a:bc')

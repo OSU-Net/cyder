@@ -28,7 +28,7 @@ class V4RangeTests(TestCase):
     def do_add(self, start_str, end_str, network, ip_type):
         r = Range.objects.create(
             start_str=start_str, end_str=end_str, network=network,
-                  ip_type=ip_type)
+            ip_type=ip_type)
         r.__repr__()
         return r
 
@@ -50,7 +50,8 @@ class V4RangeTests(TestCase):
 
     def test1_bad_create(self):
         # start == end
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.0.0",
             end_str="10.1.0.0",
             network=self.s,
@@ -59,7 +60,8 @@ class V4RangeTests(TestCase):
 
     def test2_bad_create(self):
         # start > end
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.0.2",
             end_str="10.0.0.1",
             network=self.s,
@@ -68,7 +70,8 @@ class V4RangeTests(TestCase):
 
     def test3_bad_create(self):
         # outside of network
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="11.0.0.2",
             end_str="10.0.0.88",
             network=self.s,
@@ -77,7 +80,8 @@ class V4RangeTests(TestCase):
 
     def test4_bad_create(self):
         # outside of network
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.2.0.0",
             end_str="10.2.1.88",
             network=self.s1,
@@ -107,7 +111,8 @@ class V4RangeTests(TestCase):
         )
 
         # Partial overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.4.1",
             end_str="10.0.4.30",
             network=self.s,
@@ -123,7 +128,8 @@ class V4RangeTests(TestCase):
         )
 
         # Partial overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.4.1",
             end_str="10.0.4.56",
             network=self.s,
@@ -139,7 +145,8 @@ class V4RangeTests(TestCase):
         )
 
         # Full overlap
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.4.2",
             end_str="10.0.4.55",
             network=self.s,
@@ -155,7 +162,8 @@ class V4RangeTests(TestCase):
             ip_type='4',
         )
 
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.4.2",
             end_str="10.0.4.54",
             network=self.s,
@@ -199,7 +207,8 @@ class V4RangeTests(TestCase):
             ip_type='4',
         )
 
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             start_str="10.0.4.2",
             end_str="10.0.4.54",
             network=self.s,
@@ -269,7 +278,7 @@ class V4RangeTests(TestCase):
             mac="00:00:00:00:00:01", ctnr=self.ctnr)
         self.assertEqual(str(r.get_next_ip()), "10.0.33.3")
         s = StaticInterface.objects.create(
-                label="foo3", domain=self.d, ip_type='4',
-                ip_str=str(r.get_next_ip()), system=system,
-                mac="00:00:00:00:00:01", ctnr=self.ctnr)
+            label="foo3", domain=self.d, ip_type='4',
+            ip_str=str(r.get_next_ip()), system=system,
+            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         self.assertEqual(r.get_next_ip(), None)

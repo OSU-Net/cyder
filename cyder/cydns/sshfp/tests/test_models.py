@@ -78,7 +78,8 @@ class SSHFPTests(cyder.base.tests.TestCase):
 
         ctnr2 = Ctnr.objects.create(name='test_ctnr2')
 
-        self.assertRaises(ValidationError, SSHFP.objects.create,
+        self.assertRaises(
+            ValidationError, SSHFP.objects.create,
             label='bleh',
             domain=self.o_e,
             key=key,
@@ -98,7 +99,8 @@ class SSHFPTests(cyder.base.tests.TestCase):
             fingerprint_type=1,
             ctnr=self.ctnr)
 
-        self.assertRaises(ValidationError, SSHFP.objects.create,
+        self.assertRaises(
+            ValidationError, SSHFP.objects.create,
             label='foo',
             domain=self.o_e,
             key='8d97e98f8af710c7e7fe703abc8f639e0ee507c4',

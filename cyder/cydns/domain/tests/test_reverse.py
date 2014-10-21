@@ -101,7 +101,8 @@ class ReverseDomainTests(TestCase):
         b_m = b_m.reload()
         self.assertEqual(b_m.soa, s)
 
-        self.assertRaises(ValidationError, SOA.objects.create,
+        self.assertRaises(
+            ValidationError, SOA.objects.create,
             primary="ns2.foo.com", contact="asdf", description="test2",
             root_domain=m)
 
@@ -188,7 +189,8 @@ class ReverseDomainTests(TestCase):
         self.assertEqual(rd1.master_domain, self.i_arpa)
 
     def test_add_reverse_domains(self):
-        self.assertRaises(ValidationError, self.create_reverse_domain,
+        self.assertRaises(
+            ValidationError, self.create_reverse_domain,
             name='192.168', ip_type='4')
         rdx = self.create_reverse_domain(name='192', ip_type='4')
         rdy = self.create_reverse_domain(name='192.168', ip_type='4')

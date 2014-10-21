@@ -110,7 +110,7 @@ class SRVTests(TestCase):
     def test_name_unique(self):
         """Test that two SRVs cannot share a name"""
         srv1 = SRV(label='_foo', domain=self.o_e, target='bar.oregonstate.edu',
-                priority=1, weight=100, port=9002, ctnr=self.ctnr)
+                   priority=1, weight=100, port=9002, ctnr=self.ctnr)
         srv1.save()
 
         self.assertRaises(

@@ -197,11 +197,13 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             ip_type='6')
 
         for label in ('.', ' sdfsa ', 'asdf.', '%asdfsaf'):
-            self.assertRaises(ValidationError, self.create_A,
+            self.assertRaises(
+                ValidationError, self.create_A,
                 label=label, domain=self.f_o_e, ip_str='128.193.23.2',
                 ip_type='4')
 
-            self.assertRaises(ValidationError, self.create_A,
+            self.assertRaises(
+                ValidationError, self.create_A,
                 label=label, domain=self.f_o_e, ip_str=(osu_block + ':2'),
                 ip_type='6')
 
@@ -218,7 +220,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         bad_ips = (
             71134, '19.193.23.1.2', 12314123, 1214123, '1928.193.23.1')
         for ip_str in bad_ips:
-            self.assertRaises(ValidationError, self.create_A,
+            self.assertRaises(
+                ValidationError, self.create_A,
                 label='baz', domain=self.m_o_e, ip_str=ip_str, ip_type='4')
 
             a_v4.ip_str = ip_str
@@ -235,7 +238,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             71134, osu_block + ':::', osu_block, 123981247293462847,
             '128.193.1.1')
         for ip_str in bad_ips:
-            self.assertRaises(ValidationError, self.create_A,
+            self.assertRaises(
+                ValidationError, self.create_A,
                 label='baz', domain=self.m_o_e, ip_str=ip_str, ip_type='6')
 
             a_v6.ip_str = ip_str
@@ -374,11 +378,13 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_ip_type(self):
         # invalid ip_type
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='uuu', domain=self.f_o_e, ip_str='128.193.4.1', ip_type='x')
 
         # ip_type defaults to '4', but ip_str is IPv6
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='uuu', domain=self.f_o_e, ip_str='111:22:3::')
 
     def test_bad_A_ip(self):
@@ -386,29 +392,36 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         ### IPv4 ###
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf0', domain=self.o_e, ip_str=(osu_block + ':1'))
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf1', domain=self.o_e, ip_str=123142314)
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf1', domain=self.o_e, ip_str='128.193.0.1.22',
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf2', domain=self.o_e, ip_str='128.193.8')
 
         ### IPv6 ###
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf5', domain=self.o_e, ip_str='128.193.8.1', ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf4', domain=self.o_e, ip_str=(osu_block + ':::'),
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='asdf4', domain=self.o_e, ip_str=123213487823762347612346,
             ip_type='6')
 
@@ -457,47 +470,58 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.assertRaises(ValidationError, a5)
 
     def test_add_A_invalid_address_records(self):
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='', domain=self.e, ip_str='128.193.0.2')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='foo.baz.bar.nas', domain=self.o_e, ip_str='128.193.0.2')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='n%as', domain=self.o_e, ip_str='128.193.0.2')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='n+as', domain=self.o_e, ip_str='128.193.0.2')
 
     def test_add_AAAA_invalid_address_records(self):
         osu_block = "3620:105:F000:"
         boot_strap_ipv6_reverse_domain("3.6.2.0")
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='foo.nas', domain=self.o_e, ip_str=(osu_block + ':1'),
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='foo.bar.nas', domain=self.o_e, ip_str=(osu_block + ':2'),
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='foo.baz.bar.nas', domain=self.o_e,
             ip_str=(osu_block + ':3'), ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='n as', domain=self.o_e, ip_str=(osu_block + ':4'),
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='n!+/*&#@as', domain=self.o_e, ip_str=(osu_block + ':5'),
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='n%as', domain=self.o_e, ip_str=(osu_block + ':6'),
             ip_type='6')
 
-        self.assertRaises(ValidationError, self.create_A,
+        self.assertRaises(
+            ValidationError, self.create_A,
             label='n+as', domain=self.o_e, ip_str=(osu_block + ':7'),
             ip_type='6')
 
@@ -550,7 +574,8 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         AddressRecord.objects.create(
             label='foo2', domain=self.o_e, ip_str='128.193.0.2', ctnr=c1)
 
-        self.assertRaises(ValidationError, AddressRecord.objects.create,
+        self.assertRaises(
+            ValidationError, AddressRecord.objects.create,
             label='foo3', domain=self.o_e, ip_str='128.193.0.3', ctnr=c2)
 
     def test_duplicate_names(self):
@@ -655,5 +680,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         )
 
         for ip_str, ip_type in invalid_ips:
-            self.assertRaises(ValidationError, self.create_A,
+            self.assertRaises(
+                ValidationError, self.create_A,
                 label='foo', domain=self.o_e, ip_str=ip_str, ip_type=ip_type)

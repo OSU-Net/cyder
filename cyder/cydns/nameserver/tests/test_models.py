@@ -251,27 +251,26 @@ class NSTestsModels(TestCase):
             ip_type='4')
         glue.save()
 
-        self.assertRaises(ValidationError, self.do_add,
-            domain=self.r, server='ns2 .ru')
+        self.assertRaises(
+            ValidationError, self.do_add, domain=self.r, server='ns2 .ru')
 
-        self.assertRaises(ValidationError, self.do_add,
-            domain=self.r, server='ns2$.ru')
+        self.assertRaises(
+            ValidationError, self.do_add, domain=self.r, server='ns2$.ru')
 
-        self.assertRaises(ValidationError, self.do_add,
-            domain=self.r, server='ns2..ru')
+        self.assertRaises(
+            ValidationError, self.do_add, domain=self.r, server='ns2..ru')
 
-        self.assertRaises(ValidationError, self.do_add,
-            domain=self.r, server='ns2.ru ')
+        self.assertRaises(
+            ValidationError, self.do_add, domain=self.r, server='ns2.ru ')
 
-        self.assertRaises(ValidationError, self.do_add,
-            domain=self.r, server='')
+        self.assertRaises(
+            ValidationError, self.do_add, domain=self.r, server='')
 
     def test_add_dup(self):
         def x():
             self.do_add(domain=self.r, server='ns2.moot.ru')
 
         x()
-
         self.assertRaises(ValidationError, x)
 
     def _get_post_data(self, random_str):
@@ -295,11 +294,13 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        self.assertRaises(ValidationError, AddressRecord.objects.create,
+        self.assertRaises(
+            ValidationError, AddressRecord.objects.create,
             label='', ctnr=self.ctnr, domain=root_domain, ip_type="6",
             ip_str="1::")
 
-        self.assertRaises(ValidationError, CNAME.objects.create,
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
             label='', ctnr=self.ctnr, domain=root_domain, target="asdf")
 
     def test_bad_nameserver_soa_state_case_1_1(self):
@@ -316,10 +317,12 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        self.assertRaises(ValidationError, AddressRecord.objects.create,
+        self.assertRaises(
+            ValidationError, AddressRecord.objects.create,
             label='', ctnr=self.ctnr, domain=cdomain, ip_type="6",
             ip_str="1::")
-        self.assertRaises(ValidationError, CNAME.objects.create,
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
             label='', ctnr=self.ctnr, domain=cdomain, target="asdf")
 
     def test_bad_nameserver_soa_state_case_1_2(self):
@@ -333,7 +336,8 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        self.assertRaises(ValidationError, PTR.objects.create,
+        self.assertRaises(
+            ValidationError, PTR.objects.create,
             ctnr=self.ctnr, fqdn="asdf", ip_str="12.10.1.1", ip_type="4")
 
     def test_bad_nameserver_soa_state_case_1_3(self):
@@ -350,7 +354,8 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        self.assertRaises(ValidationError, PTR.objects.create,
+        self.assertRaises(
+            ValidationError, PTR.objects.create,
             ctnr=self.ctnr, fqdn="asdf", ip_str="13.10.1.1", ip_type="4")
 
     def test_bad_nameserver_soa_state_case_1_4(self):
@@ -368,7 +373,8 @@ class NSTestsModels(TestCase):
 
         # Adding a record shouldn't be allowed because there is no NS record on
         # the zone's root domain.
-        self.assertRaises(ValidationError, StaticInterface.objects.create,
+        self.assertRaises(
+            ValidationError, StaticInterface.objects.create,
             label="asdf", domain=root_domain, ip_str="14.10.1.1", ip_type="4",
             mac="11:22:33:44:55:66", system=self.s, ctnr=self.ctnr)
 
@@ -457,7 +463,8 @@ class NSTestsModels(TestCase):
             label='', ctnr=self.ctnr, domain=root_domain, ip_type="6",
             ip_str="1::")
 
-        self.assertRaises(ValidationError, SOA.objects.create,
+        self.assertRaises(
+            ValidationError, SOA.objects.create,
             primary="asdf.asdf", contact="asdf.asdf", description="asdf",
             root_domain=root_domain)
 
@@ -478,7 +485,8 @@ class NSTestsModels(TestCase):
 
         # Now try to add the domain to the zone that has no NS records at its
         # root.
-        self.assertRaises(ValidationError, SOA.objects.create,
+        self.assertRaises(
+            ValidationError, SOA.objects.create,
             root_domain=bad_root_domain, contact="a", primary='b')
 
     def test_bad_nameserver_soa_state_case_3_2(self):
@@ -496,7 +504,8 @@ class NSTestsModels(TestCase):
 
         # Add a record to the domain.
 
-        self.assertRaises(ValidationError, PTR.objects.create,
+        self.assertRaises(
+            ValidationError, PTR.objects.create,
             ctnr=self.ctnr, fqdn="bloo.asdf", ip_str="14.10.1.1", ip_type="4")
 
     def test_bad_nameserver_soa_state_case_3_3(self):
@@ -512,5 +521,6 @@ class NSTestsModels(TestCase):
 
         # Now try to add the domain to the zone that has no NS records at its
         # root.
-        self.assertRaises(ValidationError, SOA.objects.create,
+        self.assertRaises(
+            ValidationError, SOA.objects.create,
             root_domain=bad_root_domain, contact="a", primary='b')

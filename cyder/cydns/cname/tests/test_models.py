@@ -84,7 +84,8 @@ class CNAMETests(cyder.base.tests.TestCase):
     def test1_add_glob(self):
         self.do_add(label='*foo', domain=self.g, target='foo.com')
         self.do_add(label='*', domain=self.c_g, target='foo.foo.com')
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             label='*.fo1', domain=self.g, target='foo.com')
         self.do_add(label='*sadfasfd-asdf', domain=self.g, target='foo.com')
 
@@ -93,11 +94,13 @@ class CNAMETests(cyder.base.tests.TestCase):
         self.do_add(label='*', domain=self.c_g, target='foo.com')
 
     def test_soa_condition(self):
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             label='', domain=self.c_g, target='foo.com')
 
     def test_add_bad(self):
-        self.assertRaises(ValidationError, self.do_add,
+        self.assertRaises(
+            ValidationError, self.do_add,
             label='', domain=self.g, target='..foo.com')
 
     def test_add_mx_with_cname(self):
@@ -237,7 +240,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         self.assertObjectsConflict((create_ptr, create_cname))
 
     def test_cname_point_to_itself(self):
-        self.assertRaises(ValidationError, CNAME.objects.create,
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
             label='foopy', domain=self.whatcd, ctnr=self.ctnr1,
             target='foopy.what.cd')
 
@@ -249,7 +253,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         CNAME.objects.create(
             label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
 
-        self.assertRaises(ValidationError, CNAME.objects.create,
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
             label='bar2', domain=gz, target='foo2.gz', ctnr=self.ctnr2)
 
     def test_name_uniqueness(self):
@@ -260,7 +265,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         cn2 = CNAME.objects.create(
             label='bar', domain=self.g, target='foo2.gz', ctnr=self.ctnr1)
 
-        self.assertRaises(ValidationError, CNAME.objects.create,
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
             label='bar', domain=self.g, target='foo3.gz', ctnr=self.ctnr2)
 
     def bootstrap_zone_and_range(self):
@@ -365,7 +371,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         )
 
         for target in invalid_targets:
-            self.assertRaises(ValidationError, CNAME.objects.create,
+            self.assertRaises(
+                ValidationError, CNAME.objects.create,
                 label='bar', domain=self.g, target=target, ctnr=self.ctnr1)
 
     def test_staticinterface_conflict(self):
