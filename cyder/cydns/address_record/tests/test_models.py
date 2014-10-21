@@ -5,17 +5,17 @@ from django.core.exceptions import ValidationError
 import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydns.tests.utils import create_basic_dns_data
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ip.models import ipv6_to_longs
 from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
 
 
 class AddressRecordTests(cyder.base.tests.TestCase):
@@ -26,8 +26,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        d.clean()
+        d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         return d
 
@@ -54,11 +53,9 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         self.g_o_e = Domain(name='george.oregonstate.edu')
         self.g_o_e.save()
 
-        self._128 = self.create_domain(name='128')
-        self._128.save()
+        self._128 = create_zone('128.in-addr.arpa')
 
         self._128_193 = self.create_domain(name='128.193')
-        self._128_193.save()
 
         for dom in [self.e, self.o_e, self.f_o_e, self.m_o_e, self.z_o_e,
                     self.g_o_e, self._128, self._128_193]:
@@ -382,7 +379,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         # Test the glob form: *.foo.com A 10.0.0.1
         rec = self.build_ar(label='', domain=self.o_e,
                             ip_str="128.193.0.1", ip_type='4')
-        rec.clean()
         rec.save()
         self.assertEqual(rec.__str__(), "oregonstate.edu A 128.193.0.1")
 
@@ -420,7 +416,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     def test_add_A_address_records(self):
         rec = self.build_ar(label='', domain=self.o_e,
                             ip_str="128.193.0.1", ip_type='4')
-        rec.clean()
         rec.save()
         self.assertEqual(rec.__str__(), "oregonstate.edu A 128.193.0.1")
 
@@ -613,11 +608,9 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         label = 'foo100'
         a = self.build_ar(label=label, domain=self.o_e,
                           ip_str='128.193.1.10', ip_type='4')
-        a.clean()
         a.save()
         cn = CNAME(label="foomom", domain=self.o_e, target=label + "." +
                    self.o_e.name, ctnr=self.ctnr)
-        cn.clean()
         cn.save()
         self.assertRaises(ValidationError, a.delete)
         a.delete(check_cname=False)
@@ -625,23 +618,19 @@ class AddressRecordTests(cyder.base.tests.TestCase):
     def test_domain_ctnr(self):
         """Test that an AR's domain must be in the AR's ctnr"""
         c1 = Ctnr(name='test_ctnr1')
-        c1.full_clean()
         c1.save()
         c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
         c2.save()
 
         c1.domains.add(self.o_e)
 
         a1 = AddressRecord(label='foo2', domain=self.o_e, ip_str='128.193.0.2',
                            ctnr=c1)
-        a1.full_clean()
         a1.save()
 
         with self.assertRaises(ValidationError):
             a2 = AddressRecord(label='foo3', domain=self.o_e,
                                ip_str='128.193.0.3', ctnr=c2)
-            a2.full_clean()
             a2.save()
 
     def test_duplicate_names(self):
@@ -649,14 +638,12 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         """
         c1 = self.ctnr
         c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
         c2.save()
         c2.domains.add(self.o_e)
 
         def create_ar1():
             a = AddressRecord(label='foo', domain=self.o_e,
                               ip_str='128.193.0.2', ctnr=c1)
-            a.full_clean()
             a.save()
             return a
         create_ar1.name = "AddressRecord 1"
@@ -664,7 +651,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         def create_ar2():
             a = AddressRecord(label='foo', domain=self.o_e,
                               ip_str='128.193.0.3', ctnr=c1)
-            a.full_clean()
             a.save()
             return a
         create_ar2.name = "AddressRecord 2"
@@ -672,7 +658,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         def create_ar3():
             a = AddressRecord(label='foo', domain=self.o_e,
                               ip_str='128.193.0.4', ctnr=c2)
-            a.full_clean()
             a.save()
             return a
         create_ar3.name = "AddressRecord 3"
@@ -686,7 +671,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         def create_cname():
             cn = CNAME(label='bar', domain=self.o_e,
                        target='foo.oregonstate.edu', ctnr=self.ctnr)
-            cn.full_clean()
             cn.save()
             return cn
         create_cname.name = 'CNAME'
@@ -694,7 +678,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         def create_ar():
             a = AddressRecord(label='bar', domain=self.o_e,
                               ip_str='128.193.0.2', ctnr=self.ctnr)
-            a.full_clean()
             a.save()
             return a
         create_ar.name = 'AddressRecord'
@@ -706,30 +689,25 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         """
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                     network_str='128.193.0.0/24')
-        n.full_clean()
         n.save()
 
         r = Range(network=n, range_type='st', start_str='128.193.0.2',
                   end_str='128.193.0.100')
-        r.full_clean()
         r.save()
 
         c1 = self.ctnr
         c2 = Ctnr(name='test_ctnr2')
-        c2.full_clean()
         c2.save()
         c2.domains.add(self.o_e)
 
         def create_si():
             s = System(name='test_system')
-            s.full_clean()
             s.save()
 
             si = StaticInterface(
                 mac='be:ef:fa:ce:11:11', label='foo1', domain=self.o_e,
                 ip_str='128.193.0.2', ip_type='4', system=s,
                 ctnr=c1)
-            si.full_clean()
             si.save()
 
             return si
@@ -738,7 +716,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         def create_ar_same_ctnr():
             a = AddressRecord(label='foo1', domain=self.o_e,
                                ip_str='128.193.0.3', ctnr=c1)
-            a.full_clean()
             a.save()
             return a
         create_ar_same_ctnr.name = 'AddressRecord with same ctnr'
@@ -746,7 +723,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         def create_ar_different_ctnr():
             a = AddressRecord(label='foo1', domain=self.o_e,
                                ip_str='128.193.0.3', ctnr=c2)
-            a.full_clean()
             a.save()
             return a
         create_ar_different_ctnr.name = 'AddressRecord with different ctnr'
@@ -765,7 +741,6 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         for ip_str, ip_type in valid_ips:
             a = AddressRecord(label='foo', domain=self.o_e,
                               ip_str=ip_str, ip_type=ip_type, ctnr=self.ctnr)
-            a.full_clean()
             a.save()
             a.delete()
 
@@ -784,5 +759,4 @@ class AddressRecordTests(cyder.base.tests.TestCase):
             with self.assertRaises(ValidationError):
                 a = AddressRecord(label='foo', domain=self.o_e,
                                   ip_str=ip_str, ip_type=ip_type)
-                a.full_clean()
                 a.save()

@@ -10,14 +10,10 @@ from cyder.cydns.ip.utils import ip_to_domain_name
 class SimpleTest(TestCase):
     def setUp(self):
         self.arpa = self.create_domain(name='arpa')
-        self.arpa.save()
         self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i_arpa.save()
         self.i6_arpa = self.create_domain(name='ip6.arpa')
-        self.i6_arpa.save()
 
         rd = self.create_domain(name='66', ip_type='4')
-        rd.save()
 
     def create_domain(self, name, ip_type=None, delegated=False):
         if ip_type is None:
@@ -26,8 +22,7 @@ class SimpleTest(TestCase):
             pass
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        d.clean()
+        d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         return d
 

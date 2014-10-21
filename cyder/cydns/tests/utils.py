@@ -8,7 +8,6 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.test import RequestFactory
 
-from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
@@ -184,10 +183,19 @@ def random_byte():
 def create_basic_dns_data(dhcp=False):
     for name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
         d = Domain(name=name)
-        d.full_clean()
         d.save()
 
     if dhcp:
         v = Vrf(name='test_vrf')
-        v.full_clean()
         v.save()
+
+
+def create_zone(name):
+    domain = Domain.objects.create(name=name)
+    return make_root(domain)
+
+def make_root(domain):
+    Nameserver.objects.create(domain=domain, server='ns1.unused')
+    SOA.objects.create(
+        primary='ns1.unused', contact='webmaster.unused', root_domain=domain)
+    return Domain.objects.get(pk=domain.pk)  # Reload it.

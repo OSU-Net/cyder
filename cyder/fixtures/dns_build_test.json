@@ -33,7 +33,7 @@
   "pk": 3,
   "model": "cyder.domain",
   "fields": {
-   "soa": null,
+   "soa": 1,
    "purgeable": false,
    "name": "192.in-addr.arpa",
    "created": "2014-02-01T10:53:05",
@@ -63,7 +63,7 @@
   "pk": 5,
   "model": "cyder.domain",
   "fields": {
-   "soa": 1,
+   "soa": 2,
    "purgeable": false,
    "name": "example.com",
    "created": "2014-02-01T10:54:11",
@@ -93,7 +93,7 @@
   "pk": 7,
   "model": "cyder.domain",
   "fields": {
-   "soa": 2,
+   "soa": 3,
    "purgeable": false,
    "name": "example.org",
    "created": "2014-02-01T11:18:15",
@@ -487,6 +487,24 @@
   }
  },
  {
+  "pk": 1,
+  "model": "cyder.nameserver",
+  "fields": {
+   "domain": 3,
+   "description": "",
+   "created": "2014-08-26T19:14:00",
+   "intr_glue": null,
+   "views": [
+    2,
+    1
+   ],
+   "modified": "2014-08-26T19:14:00",
+   "server": "ns1.fake",
+   "addr_glue": null,
+   "ttl": 3600
+  }
+ },
+ {
   "pk": 2,
   "model": "cyder.nameserver",
   "fields": {
@@ -530,6 +548,27 @@
    "retry": 86400,
    "is_signed": false,
    "description": "",
+   "created": "2014-08-26T19:13:35",
+   "minimum": 180,
+   "primary": "ns1.fake",
+   "refresh": 180,
+   "modified": "2014-08-26T19:14:00",
+   "root_domain": 3,
+   "contact": "webmaster.fake",
+   "dirty": true,
+   "expire": 1209600,
+   "ttl": 3600,
+   "serial": 1409105525
+  }
+ },
+ {
+  "pk": 2,
+  "model": "cyder.soa",
+  "fields": {
+   "dns_enabled": true,
+   "retry": 86400,
+   "is_signed": false,
+   "description": "",
    "created": "2014-02-01T10:54:52",
    "minimum": 180,
    "primary": "ns1.example.com",
@@ -544,7 +583,7 @@
   }
  },
  {
-  "pk": 2,
+  "pk": 3,
   "model": "cyder.soa",
   "fields": {
    "dns_enabled": true,

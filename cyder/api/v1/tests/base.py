@@ -23,12 +23,10 @@ API_VERSION = '1'
 def create_network_range(network_str, start_str, end_str, range_type,
                          ip_type, domain, ctnr):
     n = Network(ip_type=ip_type, network_str=network_str)
-    n.full_clean()
     n.save()
 
     r = Range(network=n, range_type=range_type, start_str=start_str,
               end_str=end_str, domain=domain, ip_type=ip_type)
-    r.full_clean()
     r.save()
 
     ctnr.ranges.add(r)
@@ -40,8 +38,6 @@ def build_sample_domain():
     soa, _ = SOA.objects.get_or_create(
         primary="ns1.oregonstate.edu", contact="hostmaster.oregonstate.edu",
         root_domain=domain, description="Test SOA")
-    domain.soa = soa
-    domain.save()
     view, _ = View.objects.get_or_create(name='public')
     nameserver, _ = Nameserver.objects.get_or_create(
         domain=domain, server="ns1.oregonstate.edu", ttl=3600)

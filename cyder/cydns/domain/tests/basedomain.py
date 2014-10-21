@@ -32,7 +32,6 @@ class BaseDomain(TestCase):
         self.sr.save()
 
     def create_domain(self, *args, **kwargs):
-        d = Domain(*args, **kwargs)
-        d.save()
+        d = Domain.objects.create(*args, **kwargs)
         self.ctnr.domains.add(d)
         return d

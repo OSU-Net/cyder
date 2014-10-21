@@ -20,7 +20,6 @@ from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 from sys import stderr
-from random import choice
 from datetime import datetime
 import ipaddr
 import MySQLdb
@@ -161,7 +160,6 @@ def create_range(range_id, start, end, range_type, subnet_id,
 
         valid = all((valid_start, valid_order, valid_end))
 
-        # If the range is disabled, we don't need to print warnings.
         if not valid:
             print 'Range {0}, {1} in network {2} is invalid:'.format(
                 range_id, range_str, n)
@@ -397,19 +395,32 @@ def migrate_dynamic_hosts():
         if last_seen:
             last_seen = datetime.fromtimestamp(last_seen)
 
+        intr = DynamicInterface(
+            range=r, workgroup=w, ctnr=c, mac=mac, system=s,
+            dhcp_enabled=enabled, last_seen=last_seen)
         try:
-            intr, _ = range_usage_get_create(
-                DynamicInterface, range=r, workgroup=w, ctnr=c, mac=mac,
-                system=s, dhcp_enabled=enabled, last_seen=last_seen)
-        except ValidationError:
-            stderr.write('Skipped invalid dynamic interface with MAC {0}\n'
-                         .format(items['ha']))
+            intr.save(update_range_usage=False, commit=False)
+        except ValidationError as e:
+            try:
+                intr.dhcp_enabled = False
+                intr.save(update_range_usage=False)
+                stderr.write(
+                    'WARNING: Dynamic interface with MAC address {} has been '
+                    'disabled\n'.format(intr.mac))
+                stderr.write('    {}\n'.format(e))
+            except ValidationError as e:
+                stderr.write(
+                    'WARNING: Could not create dynamic interface with MAC '
+                    'address {}\n'.format(intr.mac))
+                stderr.write('    {}\n'.format(e))
+                intr = None
 
-        count += 1
-        if not count % 1000:
-            print "%s valid hosts found so far." % count
+        if intr:
+            count += 1
+            if not count % 1000:
+                print "%s valid hosts found so far." % count
 
-    print "%s valid hosts found. Committing transaction." % count
+    print "%s valid hosts found." % count
 
 
 def migrate_user():
@@ -529,7 +540,12 @@ def maintain_find_range_domain(range_id):
     cursor.execute(sql)
     results = [r[0] for r in cursor.fetchall() if r[0] is not None]
     if results:
-        return maintain_find_domain(choice(results))
+        try:
+            return maintain_find_domain(results[0])
+        except Domain.DoesNotExist:
+            stderr.write("WARNING: Could not migrate range %s because "
+                         "domain does not exist.\n" % range_id)
+            return None
     else:
         return None
 
@@ -543,7 +559,12 @@ def maintain_find_range(range_id):
 def maintain_find_domain(domain_id):
     (name,) = maintain_get_cached('domain', ['name'], domain_id)
     if name:
-        return Domain.objects.get(name=name)
+        try:
+            return Domain.objects.get(name=name)
+        except Domain.DoesNotExist, e:
+            stderr.write("ERROR: Domain with name %s was "
+                         "never created.\n" % name)
+            raise e
 
 
 def maintain_find_workgroup(workgroup_id):

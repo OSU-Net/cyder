@@ -3,7 +3,8 @@ from django.test.client import Client
 from nose.tools import eq_
 
 import cyder.base.tests
-from cyder.base.tests.test_views_template import build, random_label
+from cyder.base.tests.test_views_template import (
+    build, format_response, random_label)
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
@@ -13,6 +14,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.srv.models import SRV
+from cyder.cydns.tests.utils import create_zone
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.view.models import View
@@ -25,12 +27,10 @@ from cyder.cydns.tests.utils import create_fake_zone
 def create_network_range(network_str, start_str, end_str, range_type,
                          ip_type, domain, ctnr):
     n = Network(ip_type=ip_type, network_str=network_str)
-    n.full_clean()
     n.save()
 
     r = Range(network=n, range_type=range_type, start_str=start_str,
               end_str=end_str, domain=domain, ip_type=ip_type)
-    r.full_clean()
     r.save()
 
     ctnr.ranges.add(r)
@@ -87,8 +87,11 @@ class NoNSTests(object):
         )
         root_domain = create_fake_zone(domain_name, suffix="")
         post_data = self.post_data()
+        asdf = Domain.objects.create(name=('asdf.' + domain_name))
+        self.ctnr.domains.add(asdf)
         # Get the '_' in SRV records
-        post_data['fqdn'] = post_data['fqdn'][0] + "asdf.asdf." + domain_name
+        post_data['label'] = post_data['label'][0] + 'asdf'
+        post_data['domain'] = asdf.pk
         self.ctnr.domains.add(root_domain)
         return root_domain, post_data
 
@@ -118,6 +121,9 @@ class NoNSTests(object):
         start_obj_count = self.test_class.objects.count()
         resp = self.client.post(self.test_class.get_create_url(),
                                 post_data, follow=True)
+        self.assertIn(
+            resp.status_code, (200, 302),
+            "Couldn't add to public view\n" + format_response(resp))
         new_obj_count = self.test_class.objects.count()
         self.assertEqual(start_obj_count + 1, new_obj_count)
 
@@ -136,7 +142,8 @@ class AddressRecordViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
+            'label': random_label(),
+            'domain': self.domain.pk,
             'ip_type': '4',
             'ip_str': '196.168.1.2',
             'ttl': '400',
@@ -158,8 +165,8 @@ class CNAMEViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         return {
-            'fqdn': self.subdomain.name,
             'label': random_label(),
+            'domain': self.domain.pk,
             'target': random_label(),
             'ctnr': self.ctnr.pk,
         }
@@ -178,7 +185,7 @@ class NSViewTests(cyder.base.tests.TestCase):
 
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
+            'domain': self.domain.pk,
             'server': self.domain.name
         }
 
@@ -189,7 +196,6 @@ class NSViewTests(cyder.base.tests.TestCase):
 
         cn = CNAME(label='asdf', domain=root_domain,
                    target='test.com', ctnr=self.ctnr)
-        cn.full_clean()
         cn.save()
         cn.views.add(self.public_view)
 
@@ -202,7 +208,7 @@ class NSViewTests(cyder.base.tests.TestCase):
         self.assertTrue(self.public_view in ns.views.all())
         self.assertTrue(self.private_view in ns.views.all())
         post_data = self.post_data()
-        post_data['fqdn'] = ns.domain.name
+        post_data['domain'] = ns.domain.pk
         post_data['views'] = [self.private_view.pk]
         resp = self.client.post(
             ns.get_update_url(), post_data, follow=True
@@ -245,7 +251,7 @@ class MXViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
+            'domain': self.domain.pk,
             'label': random_label(),
             'server': random_label(),
             'priority': 123,
@@ -280,7 +286,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
         Domain.objects.get_or_create(name='arpa')
         Domain.objects.get_or_create(name='in-addr.arpa')
-        Domain.objects.get_or_create(name='196.in-addr.arpa')
+        create_zone('196.in-addr.arpa')
         Domain.objects.get_or_create(name='168.196.in-addr.arpa')
         Domain.objects.get_or_create(name='1.168.196.in-addr.arpa')
 
@@ -294,8 +300,11 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         do_postUp(self, PTR, test_data, use_domain=False, use_rdomain=True)
 
     def post_data(self):
+        new_domain = Domain.objects.create(name='foo')
+        self.ctnr.domains.add(new_domain)
         return {
-            'fqdn': random_label() + '.' + random_label(),
+            'label': random_label(),
+            'domain': new_domain.pk,
             'ip_type': '4',
             'ip_str': '196.168.1.3',
             'description': 'yo',
@@ -303,7 +312,7 @@ class PTRViewTests(cyder.base.tests.TestCase, NoNSTests):
         }
 
     def test_update_reverse_domain(self):
-        eq_(self.test_obj.reverse_domain.name, '2.1.168.196.in-addr.arpa')
+        eq_(self.test_obj.reverse_domain.name, '196.in-addr.arpa')
         post_data = self.post_data()
 
         self.client.post(self.test_obj.get_update_url(), post_data,
@@ -327,8 +336,11 @@ class SRVViewTests(cyder.base.tests.TestCase, NoNSTests):
         do_setUp(self, SRV, test_data)
 
     def post_data(self):
+        new_domain = Domain.objects.create(name='foo')
+        self.ctnr.domains.add(new_domain)
         return {
-            'fqdn': '_' + random_label() + '.' + self.domain.name,
+            'label': '_' + random_label(),
+            'domain': new_domain.pk,
             'target': 'foo.bar',
             'priority': 2,
             'weight': 2222,
@@ -350,8 +362,8 @@ class TXTViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
             'label': random_label(),
+            'domain': self.domain.pk,
             'txt_data': random_label(),
             'ctnr': self.ctnr.pk,
         }
@@ -372,8 +384,8 @@ class SSHFPViewTests(cyder.base.tests.TestCase, NoNSTests):
 
     def post_data(self):
         return {
-            'fqdn': self.domain.name,
             'label': random_label(),
+            'domain': self.domain.pk,
             'algorithm_number': 1,
             'fingerprint_type': 1,
             'key': '9d97e98f8af710c7e7fe703abc8f639e0ee50111',

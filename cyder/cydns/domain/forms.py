@@ -7,10 +7,10 @@ from cyder.base.mixins import UsabilityFormMixin
 class DomainForm(ModelForm, UsabilityFormMixin):
     class Meta:
         model = Domain
-        exclude = ('master_domain', 'is_reverse', 'dirty', 'purgeable')
+        exclude = ('soa', 'master_domain', 'is_reverse', 'dirty', 'purgeable')
 
 
 class DomainUpdateForm(ModelForm):
     class Meta:
         model = Domain
-        exclude = ('name', 'master_domain', 'purgeable')
+        exclude = ('soa', 'name', 'master_domain', 'purgeable')

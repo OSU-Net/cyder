@@ -2,15 +2,16 @@ from gettext import gettext as _
 
 from django.db import models
 
+from cyder.base.utils import safe_save
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.models import CydnsRecord, LabelDomainUtilsMixin
 from cyder.cydns.validation import (
     validate_srv_label, validate_srv_port, validate_srv_priority,
     validate_srv_weight, validate_srv_name, validate_srv_target
 )
-from cyder.cydns.models import CydnsRecord
 
 
-class SRV(CydnsRecord):
+class SRV(CydnsRecord, LabelDomainUtilsMixin):
     """
     >>> SRV(label=label, domain=domain, target=target, port=port,
     ... priority=priority, weight=weight, ttl=ttl)
@@ -25,7 +26,6 @@ class SRV(CydnsRecord):
     domain = models.ForeignKey(Domain, null=False)
     fqdn = models.CharField(max_length=255, blank=True,
                             validators=[validate_srv_name])
-    # fqdn = label + domain.name <--- see set_fqdn
 
     target = models.CharField(max_length=100,
                               validators=[validate_srv_target], blank=True)
@@ -80,3 +80,7 @@ class SRV(CydnsRecord):
     @property
     def rdtype(self):
         return 'SRV'
+
+    @safe_save
+    def save(self, *args, **kwargs):
+        super(SRV, self).save(*args, **kwargs)

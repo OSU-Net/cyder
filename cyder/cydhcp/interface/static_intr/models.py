@@ -16,6 +16,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.models import ExpirableMixin
+from cyder.base.utils import safe_delete, safe_save
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -24,7 +25,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_dns_form, check_for_reverse_domain
+from cyder.cydns.ip.utils import ip_to_dns_form
 from cyder.cydns.domain.models import Domain
 
 
@@ -35,7 +36,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
         >>> s = StaticInterface(label=label, domain=domain, ip_str=ip_str,
         ... ip_type=ip_type, dhcp_enabled=True, dns_enabled=True)
-        >>> s.full_clean()
         >>> s.save()
 
     This class is the main interface to DNS and DHCP. A static
@@ -50,9 +50,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
     In terms of DNS, a static interface represents a PTR and A record and must
     adhere to the requirements of those classes. The interface inherits from
-    BaseAddressRecord and will call its clean method with
-    'update_reverse_domain' set to True. This will ensure that its A record is
-    valid *and* that its PTR record is valid.
+    BaseAddressRecord.
     """
 
     pretty_type = 'static interface'
@@ -134,39 +132,43 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             related_systems.update([interface.system])
         return related_systems
 
+    @safe_save
     def save(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
-        self.urd = kwargs.pop('update_reverse_domain', True)
-        self.clean_reverse()  # BasePTR
         old_range = None
         if self.id is not None:
             old_range = StaticInterface.objects.get(id=self.id).range
 
         super(StaticInterface, self).save(*args, **kwargs)
-        self.rebuild_reverse()
+        self.schedule_zone_rebuild()
         if update_range_usage:
-            self.range.save()
+            new_range = self.range
+            if new_range:
+                new_range.save(commit=False)
             if old_range:
-                old_range.save()
+                old_range.save(commit=False)
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         rng = self.range
         update_range_usage = kwargs.pop('update_range_usage', True)
         delete_system = kwargs.pop('delete_system', True)
-        if self.reverse_domain and self.reverse_domain.soa:
-            self.reverse_domain.soa.schedule_rebuild()
-            # The reverse_domain field is in the Ip class.
 
         if delete_system:
             if(not self.system.staticinterface_set.exclude(
                     id=self.id).exists() and
                     not self.system.dynamicinterface_set.exists()):
-                self.system.delete()
+                self.system.delete(commit=False)
 
         super(StaticInterface, self).delete(*args, **kwargs)
         if rng and update_range_usage:
-            rng.save()
-        # ^ goes to BaseAddressRecord
+            rng.save(commit=False)
+
+    def schedule_zone_rebuild(self):
+        if self.domain.soa is not None:
+            self.domain.soa.schedule_rebuild()
+        if self.reverse_domain.soa is not None:
+            self.reverse_domain.soa.schedule_rebuild()
 
     def check_A_PTR_collision(self):
         if PTR.objects.filter(ip_str=self.ip_str).exists():
@@ -211,7 +213,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         return 'subclass "{0}" 1:{1};\n'.format(classname, self.mac)
 
     def clean(self, *args, **kwargs):
-        check_for_reverse_domain(self.ip_str, self.ip_type)
+        validate_glue = kwargs.pop('validate_glue', True)
+
+        super(StaticInterface, self).clean(validate_glue=False,
+                                           ignore_intr=True)
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
@@ -222,11 +227,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             raise ValidationError("An A record already uses '%s' and '%s'" %
                                   (self.fqdn, self.ip_str))
 
-        if kwargs.pop('validate_glue', True):
+        if validate_glue:
             self.check_glue_status()
-
-        super(StaticInterface, self).clean(validate_glue=False,
-                                           ignore_intr=True)
 
         if self.dhcp_enabled:
             if not (self.range and self.range.range_type == STATIC):

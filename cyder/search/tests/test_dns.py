@@ -22,12 +22,10 @@ class SearchDNSTests(TestCase):
             domain = self.domain
 
         n = Network(ip_type=ip_type, network_str=network_str)
-        n.full_clean()
         n.save()
 
         r = Range(network=n, range_type=range_type, start_str=start_str,
                   end_str=end_str, domain=domain, ip_type=ip_type)
-        r.full_clean()
         r.save()
 
         self.ctnr.ranges.add(r)

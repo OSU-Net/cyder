@@ -1,10 +1,11 @@
 import time
 from gettext import gettext as _
+from itertools import chain
 from string import Template
 
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
@@ -12,6 +13,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_positive_integer_field
+from cyder.base.utils import safe_delete, safe_save
 from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.core.task.models import Task
 from cyder.settings import MIGRATING
@@ -156,15 +158,15 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def get_debug_build_url(self):
         return reverse('build-debug', args=[self.pk])
 
+    @safe_delete
     def delete(self, *args, **kwargs):
-        if self.domain_set.exclude(pk=self.root_domain.pk).exists():
-            raise ValidationError(
-                "Child domains exist in this SOA's zone. Delete "
-                "those domains or remove them from this zone before "
-                "deleting this SOA.")
-        self.root_domain.soa = None
-        self.root_domain.save(override_soa=True)
+        root_domain = self.root_domain
         super(SOA, self).delete(*args, **kwargs)
+        root_domain.soa = None
+        # If we don't set the SOA to None, Django complains that the SOA
+        # doesn't exist (which is true).
+        root_domain.save(commit=False)
+        reassign_reverse_records(root_domain, None)
 
     def has_record_set(self, view=None, exclude_ns=False):
         for domain in self.domain_set.all():
@@ -172,55 +174,49 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                 return True
         return False
 
-    def schedule_rebuild(self, commit=True, force=False):
+    def schedule_rebuild(self, save=True, force=False):
         if MIGRATING and not force:
             return
 
         Task.schedule_zone_rebuild(self)
         self.dirty = True
-        if commit:
+        if save:
             self.save()
 
+    @safe_save
     def save(self, *args, **kwargs):
-        self.full_clean()
-        if not self.pk:
-            new = True
-            self.dirty = True
-        elif self.dirty:
-            new = False
-        else:
-            new = False
-            db_self = SOA.objects.get(pk=self.pk)
-            fields = [
-                'primary', 'contact', 'expire', 'retry', 'refresh',
-                'root_domain',
-            ]
-            # Leave out serial and dirty so rebuilds don't cause a never ending
-            # build cycle
-            for field in fields:
-                if getattr(db_self, field) != getattr(self, field):
-                    self.schedule_rebuild(commit=False)
+        is_new = self.pk is None
 
-        if self.pk:
-            root_children = [d.pk for d in
-                             self.root_domain.get_children_recursive()]
-            for domain in self.domain_set.exclude(pk__in=root_children):
-                domain.soa = None
-                domain.save(override_soa=True)
+        if is_new:
+            self.dirty = True
+        else:
+            db_self = SOA.objects.get(pk=self.pk)
+            if not self.dirty:
+                fields = [
+                    'primary', 'contact', 'expire', 'retry', 'refresh',
+                    'root_domain',
+                ]
+                # Leave out serial and dirty so rebuilds don't cause a
+                # never-ending build cycle.
+                for field in fields:
+                    if getattr(db_self, field) != getattr(self, field):
+                        self.schedule_rebuild(save=False)
 
         super(SOA, self).save(*args, **kwargs)
-        self.root_domain.soa = self
-        try:
-            self.root_domain.save()
-        except Exception, e:
-            if new:
-                self.delete()
 
-            raise e
+        if is_new:
+            # Need to call this after save because new objects won't have a pk.
+            self.schedule_rebuild(save=False)
+            self.root_domain.save(commit=False)
+            reassign_reverse_records(None, self.root_domain)
+        else:
+            if db_self.root_domain != self.root_domain:
+                from cyder.cydns.domain.models import Domain
 
-        if new:
-            # Need to call this after save because new objects won't have a pk
-            self.schedule_rebuild(commit=False)
+                self.root_domain.save(commit=False)
+                db_self.root_domain.save(commit=False)
+                self.root_domain = Domain.objects.get(pk=self.root_domain.pk)
+                reassign_reverse_records(db_self.root_domain, self.root_domain)
 
 
 class SOAAV(EAVBase):
@@ -232,3 +228,55 @@ class SOAAV(EAVBase):
     entity = models.ForeignKey(SOA)
     attribute = EAVAttributeField(Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))
+
+
+def ip_str_to_name(ip_str, ip_type):
+    from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
+
+    if ip_type == '6':
+        ip_str = nibbilize(ip_str)
+    return ip_to_domain_name(ip_str, ip_type=ip_type)
+
+
+def reassign_reverse_records(old_domain, new_domain):
+    up = (None, None)  # from, to
+    down = (None, None)  # from, to
+    if new_domain:
+        if (old_domain and new_domain.is_descendant_of(old_domain) and
+                old_domain.soa == new_domain.master_domain.soa):
+            # new_domain is below old_domain and there is no root domain
+            # between them, so we can take a shortcut.
+            down = (old_domain, new_domain)
+        else:
+            if new_domain.master_domain:
+                parent_root = new_domain.master_domain.zone_root_domain
+            else:
+                parent_root = None
+            down = (parent_root, new_domain)
+    if old_domain:
+        up = (old_domain, old_domain.zone_root_domain)
+
+    if all(down):
+        from cyder.cydns.domain.utils import is_name_descendant_of
+
+        for obj in chain(down[0].reverse_ptr_set.all(),
+                         down[0].reverse_staticintr_set.all()):
+            if is_name_descendant_of(
+                    ip_str_to_name(obj.ip_str, ip_type=obj.ip_type),
+                    down[1].name):
+                obj.reverse_domain = down[1]
+                obj.save(commit=False)
+    if all(up):
+        for obj in chain(up[0].reverse_ptr_set.all(),
+                         up[0].reverse_staticintr_set.all()):
+            obj.reverse_domain = up[1]
+            obj.save(commit=False)
+
+    if old_domain:
+        still_there = [unicode(x) for x in
+                       chain(old_domain.reverse_ptr_set.all(),
+                             old_domain.reverse_staticintr_set.all())]
+        if still_there:
+            raise ValidationError(
+                u'No reverse domain found for the following objects: ' +
+                u', '.join(still_there))

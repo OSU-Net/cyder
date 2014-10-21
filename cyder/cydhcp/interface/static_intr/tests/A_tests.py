@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from basestatic import BaseStaticTests
+from .basestatic import BaseStaticTests
 
 
 class AStaticRegTests(BaseStaticTests):
