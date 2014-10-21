@@ -91,15 +91,16 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['DOMAIN']), 1)
 
         self.create_network_range(
-            network_str="1111:0::/32", start_str="1111:0::0", end_str="1111:0::1000",
-            range_type="st", ip_type='6', domain=root_domain)
+            network_str="1111:0::/32", start_str="1111:0::0",
+            end_str="1111:0::1000", range_type="st", ip_type='6',
+            domain=root_domain)
 
-        ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee2.wee.mozilla.com", ip_str="1111::",
-                  ip_type="6")
-        ptr.save()
-        addr = AddressRecord(label="host1", ctnr=self.ctnr, domain=root_domain, ip_str="11::",
-                             ip_type="6")
-        addr.save()
+        ptr = PTR.objects.create(
+            ctnr=self.ctnr, fqdn="host1.wee2.wee.mozilla.com", ip_str="1111::",
+            ip_type="6")
+        addr = AddressRecord.objects.create(
+            label="host1", ctnr=self.ctnr, domain=root_domain, ip_str="11::",
+            ip_type="6")
         res, error = self.search("host1.wee2.wee.mozilla.com")
         self.assertFalse(error)
         self.assertEqual(len(res['A']), 1)
@@ -128,8 +129,9 @@ class SearchDNSTests(TestCase):
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 1)
         self.assertEqual(len(res['NS']), 1)
-        cn = CNAME(label="host1", ctnr=self.ctnr, domain=root_domain, target="whop.whop")
-        cn.save()
+        cn = CNAME.objects.create(
+            label="host1", ctnr=self.ctnr, domain=root_domain,
+            target="whop.whop")
         res, error = self.search("zone:wee3.wee.mozilla.com host1")
         self.assertFalse(error)
         self.assertEqual(len(res['SOA']), 0)
@@ -155,11 +157,11 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['DOMAIN']), 1)
 
         self.create_network_range(
-            network_str="2111:0::/32", start_str="2111:0::0", end_str="2111:0::1000",
-            range_type="st", ip_type='6', domain=d)
-        ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="2111:0::",
-                  ip_type="6")
-        ptr.save()
+            network_str="2111:0::/32", start_str="2111:0::0",
+            end_str="2111:0::1000", range_type="st", ip_type='6', domain=d)
+        ptr = PTR.objects.create(
+            ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="2111:0::",
+            ip_type="6")
 
         res, error = self.search(ptr.ip_str)
         self.assertFalse(error)
@@ -182,14 +184,15 @@ class SearchDNSTests(TestCase):
         self.assertEqual(len(res['NS']), 2)
         self.assertEqual(len(res['DOMAIN']), 2)
         self.create_network_range(
-            network_str="10.0.0.0/24", start_str="10.0.0.1", end_str="10.0.0.2",
-            range_type="st", ip_type='4', domain=root_domain)
-        ptr = PTR(ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="10.0.0.1",
-                  ip_type="4")
-        ptr.save()
-        addr = AddressRecord(label="host1", ctnr=self.ctnr, domain=root_domain,
-                             ip_str="10.0.0.1", ip_type="4")
-        addr.save()
+            network_str="10.0.0.0/24", start_str="10.0.0.1",
+            end_str="10.0.0.2", range_type="st", ip_type='4',
+            domain=root_domain)
+        ptr = PTR.objects.create(
+            ctnr=self.ctnr, fqdn="host1.wee.mozilla.com", ip_str="10.0.0.1",
+            ip_type="4")
+        addr = AddressRecord.objects.create(
+            label="host1", ctnr=self.ctnr, domain=root_domain,
+            ip_str="10.0.0.1", ip_type="4")
 
         res, error = self.search(ptr.ip_str)
         self.assertFalse(error)
