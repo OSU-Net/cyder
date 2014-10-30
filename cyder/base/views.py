@@ -267,7 +267,7 @@ def cy_delete(request):
         obj = obj.get()
     else:
         messages.error(request, "Object does not exist")
-        return redirect(request.META.get('HTTP_REFERER', ''))
+        return HttpResponse(json.dumps({'msg': 'Object does not exist'}))
     try:
         if perm(request, ACTION_DELETE, obj=obj):
             if Klass.__name__ == 'Ctnr':
@@ -280,7 +280,8 @@ def cy_delete(request):
     if referer.endswith('/'):
         referer = obj.get_list_url()
 
-    return redirect(referer)
+    return HttpResponse(json.dumps({'msg': 'Object was successfully deleted',
+                                    'url': referer}))
 
 
 def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):

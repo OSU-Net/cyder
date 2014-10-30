@@ -13,8 +13,9 @@ def is_last_interface(request):
     pk = request.POST['pk']
     Klass = get_model('cyder', obj_type.replace('_', ''))
     obj = get_object_or_404(Klass, pk=pk)
+    last_interface = False
     if (len(DynamicInterface.objects.filter(system=obj.system))
             + len(StaticInterface.objects.filter(system=obj.system)) == 1):
-            return HttpResponse(json.dumps(True))
-    else:
-        return HttpResponse(json.dumps(False))
+        last_interface = True
+
+    return HttpResponse(json.dumps({'last_interface': last_interface}))

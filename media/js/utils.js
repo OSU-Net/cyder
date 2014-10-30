@@ -135,9 +135,25 @@ function clear_form_all( form ) {
     }
 }
 
-// takes a button and submits its action as a form
-// allows us to use csrfToken in a post request rather
-// than dirtying the urls
+function button_to_post( button, csrfToken ) {
+    var url = $(button).attr( 'href' );
+    var deferred = $.Deferred();
+    var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );
+    postData = {};
+    $.each( kwargs, function( key, value ) {
+        postData[ key ] = value;
+    });
+
+    postData.csrfmiddlewaretoken = csrfToken;
+    return $.ajax({
+        type: 'POST',
+        url: url,
+        data: postData,
+        dataType: 'json',
+    });
+}
+
+
 function button_to_form( button, csrfToken, success) {
     var url = $(button).attr( 'href' );
     var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );

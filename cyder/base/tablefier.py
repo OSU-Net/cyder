@@ -154,7 +154,7 @@ class Tablefier:
             col = {'value': ['Update', 'Delete'],
                    'url': [obj.get_update_url(), obj.get_delete_url()],
                    'data': data,
-                   'class': ['js-get-form', 'delete'],
+                   'class': ['js-get-form', 'delete table_delete'],
                    'img': ['/media/img/update.png', '/media/img/delete.png']}
         else:
             col = {'value': []}
