@@ -10,7 +10,8 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.utils import create_basic_dns_data, create_fake_zone
+from cyder.cydns.tests.utils import (
+    create_basic_dns_data, create_fake_zone, create_zone)
 from cyder.cydns.txt.models import TXT
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -32,22 +33,17 @@ class CNAMETests(cyder.base.tests.TestCase):
         else:
             name = ip_to_domain_name(name, ip_type=ip_type)
         d = Domain(name=name, delegated=delegated)
-        d.clean()
         self.assertTrue(d.is_reverse)
         return d
 
     def setUp(self):
         create_basic_dns_data(dhcp=True)
 
-        d = Domain(name='128.in-addr.arpa')
-        d.full_clean()
-        d.save()
+        create_zone('128.in-addr.arpa')
 
         self.ctnr1 = Ctnr(name='test_ctnr1')
-        self.ctnr1.full_clean()
         self.ctnr1.save()
         self.ctnr2 = Ctnr(name='test_ctnr2')
-        self.ctnr2.full_clean()
         self.ctnr2.save()
 
         self.g = create_fake_zone("gz", suffix="")
@@ -61,7 +57,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
         self.r1.save()
 
-        self.s = System()
+        self.s = System(name='test_system')
         self.s.save()
 
         self.net1 = Network(network_str='10.0.0.0/8')
@@ -89,8 +85,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
     def do_add(self, label, domain, target):
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain, target=target)
-        cn.full_clean()
-        cn.save()
         cn.save()
         self.assertTrue(cn.details())
 
@@ -182,7 +176,6 @@ class CNAMETests(cyder.base.tests.TestCase):
         def create_cname():
             cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain,
                        target=target)
-            cn.full_clean()
             cn.save()
             return cn
         create_cname.name = 'CNAME'
@@ -200,7 +193,7 @@ class CNAMETests(cyder.base.tests.TestCase):
             ip_str="128.193.1.1")
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_address_record_exists_upper_case(self):
         label = "testyfoo"
@@ -214,7 +207,7 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         cn = CNAME(label=label.title(), ctnr=self.ctnr1, domain=dom,
                    target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_address_record_cname_exists(self):
         label = "testyfoo"
@@ -241,7 +234,7 @@ class CNAMETests(cyder.base.tests.TestCase):
             port=2, priority=2, weight=4)
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_srv_cname_exists(self):
         label = "testyfoo"
@@ -267,7 +260,7 @@ class CNAMETests(cyder.base.tests.TestCase):
             label=label, ctnr=self.ctnr1, domain=dom, txt_data="asdf")
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_txt_cname_exists(self):
         label = "testyfoo"
@@ -277,7 +270,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         cn, _ = CNAME.objects.get_or_create(
             label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        cn.full_clean()
         cn.save()
 
         rec = TXT(label=label, ctnr=self.ctnr1, domain=dom, txt_data="asdf1")
@@ -295,7 +287,7 @@ class CNAMETests(cyder.base.tests.TestCase):
             priority=123, ttl=123)
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_mx_cname_exists(self):
         # Duplicate test?
@@ -306,7 +298,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         cn, _ = CNAME.objects.get_or_create(
             label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        cn.full_clean()
         cn.save()
 
         rec = MX(label=label, ctnr=self.ctnr1, domain=dom, server="asdf1",
@@ -323,7 +314,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         rec = Nameserver(domain=dom, server="asdf1")
         rec.save()
         cn = CNAME(label='', ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_ns_cname_exists(self):
         # Duplicate test?
@@ -335,7 +326,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         cn, _ = CNAME.objects.get_or_create(
             label='', ctnr=self.ctnr1, domain=dom, target=target)
-        cn.full_clean()
         cn.save()
 
         rec = Nameserver(domain=dom, server="asdf1")
@@ -350,11 +340,10 @@ class CNAMETests(cyder.base.tests.TestCase):
         intr = StaticInterface(label=label, domain=dom, ip_str="10.0.0.1",
                                ip_type='4', system=self.s, ctnr=self.ctnr1,
                                mac="11:22:33:44:55:66")
-        intr.clean()
         intr.save()
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_intr_cname_exists(self):
         # Duplicate test?
@@ -365,7 +354,6 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         cn, _ = CNAME.objects.get_or_create(
             label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        cn.full_clean()
         cn.save()
 
         intr = StaticInterface(
@@ -373,10 +361,9 @@ class CNAMETests(cyder.base.tests.TestCase):
             system=self.s, mac="00:11:22:33:44:55", ctnr=self.ctnr1,
         )
 
-        self.assertRaises(ValidationError, intr.clean)
+        self.assertRaises(ValidationError, intr.save)
         cn.label = "differentlabel"
         cn.save()
-        intr.clean()
         intr.save()
 
     def test_ptr_exists(self):
@@ -387,12 +374,10 @@ class CNAMETests(cyder.base.tests.TestCase):
 
         rec = PTR(ctnr=self.ctnr1, ip_str="10.193.1.1", ip_type='4',
                   fqdn='testyfoo.what.cd')
-        rec.clean()
-        rec.full_clean()
         rec.save()
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.full_clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_ptr_cname_exists(self):
         label = "testyfoo"
@@ -405,7 +390,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd',
                   ctnr=self.ctnr1)
 
-        self.assertRaises(ValidationError, rec.clean)
+        self.assertRaises(ValidationError, rec.save)
 
     def test_cname_point_to_itself(self):
         label = "foopy"
@@ -414,7 +399,7 @@ class CNAMETests(cyder.base.tests.TestCase):
         dom, _ = Domain.objects.get_or_create(name="what.cd")
 
         cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.clean)
+        self.assertRaises(ValidationError, cn.save)
 
     def test_domain_ctnr(self):
         """Test that a CNAME's domain must be in the CNAME's container"""
@@ -423,53 +408,44 @@ class CNAMETests(cyder.base.tests.TestCase):
         self.ctnr1.domains.add(gz)
 
         cn1 = CNAME(label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
-        cn1.full_clean()
         cn1.save()
 
         with self.assertRaises(ValidationError):
             cn2 = CNAME(label='bar2', domain=gz, target='foo2.gz',
                         ctnr=self.ctnr2)
-            cn2.full_clean()
             cn2.save()
 
     def test_name_uniqueness(self):
         """Test that CNAMEs must share a ctnr if they have the same name"""
         cn1 = CNAME(label='bar', domain=self.g, target='foo1.gz',
                     ctnr=self.ctnr1)
-        cn1.full_clean()
         cn1.save()
 
         cn2 = CNAME(label='bar', domain=self.g, target='foo2.gz',
                     ctnr=self.ctnr1)
-        cn2.full_clean()
         cn2.save()
 
         with self.assertRaises(ValidationError):
             cn3 = CNAME(label='bar', domain=self.g, target='foo3.gz',
                         ctnr=self.ctnr2)
-            cn3.full_clean()
             cn3.save()
 
     def bootstrap_zone_and_range(self):
         d = Domain(name='example.gz')
-        d.full_clean()
         d.save()
 
         self.ctnr1.domains.add(d)
 
         soa = SOA(root_domain=d, primary='ns.example.gz',
                   contact='root.mail.example.gz')
-        soa.full_clean()
         soa.save()
 
         n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
                     network_str='128.193.0.0/24')
-        n.full_clean()
         n.save()
 
         r = Range(network=n, range_type=STATIC, start_str='128.193.0.2',
                   end_str='128.193.0.100')
-        r.full_clean()
         r.save()
 
         # Cyder has a catch-22 relating to nameservers: If a nameserver's name
@@ -480,16 +456,13 @@ class CNAMETests(cyder.base.tests.TestCase):
         # nameserver for, add the glue record, then fix the nameserver's name.
 
         ns = Nameserver(domain=d, server='cyderhack')
-        ns.full_clean()
         ns.save()
 
         glue = AddressRecord(label='ns', domain=d,
                              ip_str='128.193.0.2', ctnr=self.ctnr1)
-        glue.full_clean()
         glue.save()
 
         ns.server = 'ns.example.gz'
-        ns.full_clean()
         ns.save()
 
     def test_a_mx_soa_conflict(self):
@@ -501,21 +474,18 @@ class CNAMETests(cyder.base.tests.TestCase):
         def create_cname():
             cn = CNAME(label='foo', domain=d, target='bar.example.gz',
                        ctnr=self.ctnr1)
-            cn.full_clean()
             cn.save()
             return cn
         create_cname.name = 'CNAME'
 
         def create_si():
             s = System(name='test_system')
-            s.full_clean()
             s.save()
 
             si = StaticInterface(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,
                 ctnr=self.ctnr1)
-            si.full_clean()
             si.save()
             return si
         create_si.name = 'StaticInterface'
@@ -523,14 +493,12 @@ class CNAMETests(cyder.base.tests.TestCase):
         def create_mx():
             mx = MX(label='foo', domain=d, server='mail.example.gz',
                     priority=1, ctnr=self.ctnr1)
-            mx.full_clean()
             mx.save()
             return mx
         create_mx.name = 'MX'
 
         def create_soa():
             d = Domain(name='foo.example.gz')
-            d.full_clean()
             d.save()
 
             soa = SOA(
@@ -538,7 +506,6 @@ class CNAMETests(cyder.base.tests.TestCase):
                 contact='root.mail.example.gz',
                 description='SOA for foo.example.gz'
             )
-            soa.full_clean()
             soa.save()
 
             return d
@@ -560,7 +527,6 @@ class CNAMETests(cyder.base.tests.TestCase):
         for target in valid_targets:
             cn = CNAME(label='bar', domain=self.g, target=target,
                        ctnr=self.ctnr1)
-            cn.full_clean()
             cn.save()
             cn.delete()
 
@@ -573,7 +539,6 @@ class CNAMETests(cyder.base.tests.TestCase):
             with self.assertRaises(ValidationError):
                 cn = CNAME(label='bar', domain=self.g, target=target,
                            ctnr=self.ctnr1)
-                cn.full_clean()
                 cn.save()
 
     def test_staticinterface_conflict(self):
@@ -585,21 +550,18 @@ class CNAMETests(cyder.base.tests.TestCase):
         def create_cname():
             cn = CNAME(label='foo', domain=d, target='www.example.gz',
                        ctnr=self.ctnr1)
-            cn.full_clean()
             cn.save()
             return cn
         create_cname.name = 'CNAME'
 
         def create_si():
             s = System(name='test_system')
-            s.full_clean()
             s.save()
 
             si = StaticInterface(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,
                 ctnr=self.ctnr1)
-            si.full_clean()
             si.save()
             return si
         create_si.name = 'StaticInterface'

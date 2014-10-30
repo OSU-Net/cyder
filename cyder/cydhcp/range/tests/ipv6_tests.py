@@ -419,7 +419,7 @@ class V6RangeTests(TestCase):
         r = self.do_add(**kwargs)
         r.end_str = "ffff:ffff:ffff::"
 
-        self.assertRaises(ValidationError, r.clean)
+        self.assertRaises(ValidationError, r.save)
 
     def test13_bad_create(self):
         #start_str = "10.0.4.5"

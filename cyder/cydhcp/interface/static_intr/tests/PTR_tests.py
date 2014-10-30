@@ -42,7 +42,7 @@ class PTRStaticRegTests(BaseStaticTests):
         kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
         ptr = self.do_add_ptr(**kwargs)
         ptr.ip_str = "10.0.0.2"
-        self.assertRaises(ValidationError, ptr.clean)
+        self.assertRaises(ValidationError, ptr.save)
 
     def test2_conflict_add_A_first(self):
         # Add an PTR and update and existing intr to conflict.

@@ -13,10 +13,10 @@ class MacAddrField(CharField):
 
     Arguments:
 
-    dhcp_enabled (string): The name of another attribute (possibly a field) in
-                           the model that holds a boolean specifying whether to
-                           validate this MacAddrField; if not specified, always
-                           validate.
+    dhcp_enabled (string):
+        The name of another attribute (possibly a field) in the model that
+        holds a boolean specifying whether to validate this MacAddrField; if
+        not specified, always validate.
     """
 
     __metaclass__ = SubfieldBase
@@ -26,14 +26,26 @@ class MacAddrField(CharField):
 
         kwargs['max_length'] = 17
         kwargs['blank'] = False  # always call MacAddrField.clean
+        kwargs['null'] = True
 
         super(MacAddrField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
-        value = super(MacAddrField, self).get_prep_value(value)
         if value:
-            value = value.lower().replace(':', '').replace('-', '')
-        return value
+            return value.lower().replace(':', '').replace('-', '')
+        else:
+            return None
+
+    def get_prep_lookup(self, lookup_type, value):
+        if lookup_type == 'exact' and value == '':
+            raise Exception(
+                "When using the __exact lookup type, use a query value of "
+                "None instead of ''. Even though get_prep_value transforms "
+                "'' into None, Django only converts __exact queries into "
+                "__isnull queries if the *user*-provided query value is None.")
+        else:
+            return super(MacAddrField, self).get_prep_lookup(
+                lookup_type, value)
 
     def to_python(self, value):
         value = super(MacAddrField, self).to_python(value)
@@ -42,6 +54,8 @@ class MacAddrField(CharField):
             value = value.lower().replace(':', '').replace('-', '')
             value = reduce(lambda x,y: x + ':' + y,
                            (value[i:i+2] for i in xrange(0, 12, 2)))
+        elif value == '':
+            value = None
         return value
 
     def clean(self, value, model_instance):

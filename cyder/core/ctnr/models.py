@@ -6,6 +6,8 @@ from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.helpers import get_display
+from cyder.base.validators import validate_integer_field
+from cyder.base.utils import safe_save
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
@@ -34,8 +36,8 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         app_label = 'cyder'
         db_table = 'ctnr'
 
+    @safe_save
     def save(self, *args, **kwargs):
-        self.full_clean()
         super(Ctnr, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -88,7 +90,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
                                          Q(start_str='10.255.255.255')):
             clients = (range_.dynamicinterface_set.filter(ctnr=self,
                                                           dhcp_enabled=True)
-                                                  .exclude(mac=''))
+                                                  .exclude(mac=None))
 
             classname = '{0}:{1}:{2}'.format(
                 self.name, range_.start_str, range_.end_str)
@@ -106,7 +108,8 @@ class Ctnr(BaseModel, ObjectUrlMixin):
 class CtnrUser(BaseModel, ObjectUrlMixin):
     user = models.ForeignKey(User)
     ctnr = models.ForeignKey(Ctnr)
-    level = models.IntegerField()
+    level = models.IntegerField(
+        validators=[validate_integer_field])
 
     class Meta:
         app_label = 'cyder'

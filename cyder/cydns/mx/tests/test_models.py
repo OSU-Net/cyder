@@ -25,7 +25,6 @@ class MXTests(cyder.base.tests.TestCase):
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
         mx = MX(**data)
-        mx.full_clean()
         mx.__repr__()
         mx.save()
         self.assertTrue(mx.details())
@@ -124,7 +123,6 @@ class MXTests(cyder.base.tests.TestCase):
         domain = self.o_e
         data = "foo.com"
         cn = CNAME(label=label, ctnr=self.ctnr, domain=domain, target=data)
-        cn.full_clean()
         cn.save()
 
         data = {'label': '', 'domain': self.o_e, 'server':
@@ -135,37 +133,31 @@ class MXTests(cyder.base.tests.TestCase):
     def test_domain_ctnr(self):
         """Test that an MX's domain must be in the MX's container"""
         ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.full_clean()
         ctnr1.save()
         ctnr1.domains.add(self.o_e)
 
         ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.full_clean()
         ctnr2.save()
 
         mx1 = MX(label='foo', domain=self.o_e, server='bar.oregonstate.edu',
                  priority=1, ttl=1000, ctnr=ctnr1)
-        mx1.full_clean()
         mx1.save()
 
         with self.assertRaises(ValidationError):
             mx1 = MX(label='bleh', domain=self.o_e,
                      server='xyz.oregonstate.edu', priority=1, ttl=1000,
                      ctnr=ctnr2)
-            mx1.full_clean()
             mx1.save()
 
     def test_name_unique(self):
         """Test that two MXs cannot share a name"""
         mx1 = MX(label='foo', domain=self.o_e, server='bar.oregonstate.edu',
                  priority=1, ttl=1000, ctnr=self.ctnr)
-        mx1.full_clean()
         mx1.save()
 
         with self.assertRaises(ValidationError):
             mx2 = MX(label='foo', domain=self.o_e,
                      server='bleh.oregonstate.edu', priority=1, ttl=1000)
-            mx2.full_clean()
             mx2.save()
 
     def test_sshfp_txt_name(self):
@@ -173,7 +165,6 @@ class MXTests(cyder.base.tests.TestCase):
         def create_mx():
             mx = MX(label='foo', domain=self.o_e, server='bar.oregonstate.edu',
                     priority=1, ttl=1000, ctnr=self.ctnr)
-            mx.full_clean()
             mx.save()
             return mx
         create_mx.name = 'MX'
@@ -182,7 +173,6 @@ class MXTests(cyder.base.tests.TestCase):
             s = SSHFP(label='foo', domain=self.o_e,
                       key='7d97e98f8af710c7e7fe703abc8f639e0ee507c4',
                       algorithm_number=1, fingerprint_type=1, ctnr=self.ctnr)
-            s.full_clean()
             s.save()
             return s
         create_sshfp.name = 'SSHFP'
@@ -190,7 +180,6 @@ class MXTests(cyder.base.tests.TestCase):
         def create_txt():
             t = TXT(label='foo', domain=self.o_e, txt_data='Hi, Mom!',
                     ctnr=self.ctnr)
-            t.full_clean()
             t.save()
             return t
         create_txt.name = 'TXT'

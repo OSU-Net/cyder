@@ -21,9 +21,8 @@ class SSHFPTests(cyder.base.tests.TestCase):
     def do_generic_add(self, **data):
         data['ctnr'] = self.ctnr
         sshfp = SSHFP(**data)
-        sshfp.full_clean()
-        sshfp.__repr__()
         sshfp.save()
+        sshfp.__repr__()
         self.assertTrue(sshfp.details())
         rsshfp = SSHFP.objects.filter(**data)
         self.assertEqual(rsshfp.count(), 1)
@@ -72,23 +71,19 @@ class SSHFPTests(cyder.base.tests.TestCase):
         key = '8d97e98f8af710c7e7fe703abc8f639e0ee507c4'
 
         ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.full_clean()
         ctnr1.save()
         ctnr1.domains.add(self.o_e)
 
         ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.full_clean()
         ctnr2.save()
 
         s1 = SSHFP(label='foo', domain=self.o_e, key=key, algorithm_number=1,
                    fingerprint_type=1, ctnr=ctnr1)
-        s1.full_clean()
         s1.save()
 
         with self.assertRaises(ValidationError):
             s2 = SSHFP(label='bleh', domain=self.o_e, key=key,
                        algorithm_number=1, fingerprint_type=1, ctnr=ctnr2)
-            s2.full_clean()
             s2.save()
 
     def test_name_unique(self):
@@ -98,11 +93,9 @@ class SSHFPTests(cyder.base.tests.TestCase):
 
         s1 = SSHFP(label='foo', domain=self.o_e, key=key1, algorithm_number=1,
                    fingerprint_type=1, ctnr=self.ctnr)
-        s1.full_clean()
         s1.save()
 
         with self.assertRaises(ValidationError):
             s2 = SSHFP(label='foo', domain=self.o_e, key=key2,
                        algorithm_number=1, fingerprint_type=1, ctnr=self.ctnr)
-            s2.full_clean()
             s2.save()

@@ -16,6 +16,7 @@ class DynamicInterfaceBase(APITests):
     def create_data(self):
         data = {
             'ctnr': self.ctnr,
+            'mac': 'be:ef:fa:ce:f0:0d',
             'range': self.range,
             'system': self.system,
         }

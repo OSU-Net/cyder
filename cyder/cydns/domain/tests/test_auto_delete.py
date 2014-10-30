@@ -8,7 +8,7 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.utils import ensure_label_domain, prune_tree
-from cyder.cydns.tests.utils import create_fake_zone
+from cyder.cydns.tests.utils import create_fake_zone, create_zone
 
 from basedomain import BaseDomain
 
@@ -152,7 +152,7 @@ class AutoDeleteTests(BaseDomain):
 
         Domain.objects.get_or_create(name="arpa")
         Domain.objects.get_or_create(name="in-addr.arpa")
-        Domain.objects.get_or_create(name="10.in-addr.arpa")
+        create_zone('10.in-addr.arpa')
 
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)

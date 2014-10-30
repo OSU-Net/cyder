@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
-from settings import NONDELEGATED_NS
+from settings import NONDELEGATED_NS, SECONDARY_ZONES
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
@@ -42,59 +42,83 @@ cursor = connection.cursor()
 
 
 def get_delegated():
-    sql = ("SELECT domain.name FROM maintain_sb.domain "
-           "INNER JOIN maintain_sb.nameserver "
-           "ON domain.id=nameserver.domain "
-           "WHERE %s")
-    where = ' and '.join(["nameserver.name != '%s'" % ns
-                          for ns in NONDELEGATED_NS])
-    cursor.execute(sql % where)
-    results = [i for (i,) in cursor.fetchall()]
-    return results
+    global delegated_dnames
+    if delegated_dnames is None:
+        print 'Fetching delegated domain names...'
+
+        sql = ("SELECT domain.name FROM maintain_sb.domain "
+               "INNER JOIN maintain_sb.nameserver "
+               "ON domain.id=nameserver.domain "
+               "WHERE %s")
+        where = ' and '.join(["nameserver.name != '%s'" % ns
+                              for ns in NONDELEGATED_NS])
+        cursor.execute(sql % where)
+        results = [i for (i,) in cursor.fetchall()]
+
+        delegated_dnames = set(results)
+    return delegated_dnames
 
 
-delegated_dnames = set(get_delegated())
+delegated_dnames = None
 
 
 class Zone(object):
 
-    def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
+    def __init__(self, domain_id=None, dname=None, soa=None,
+                 gen_recs=True, secondary=False):
         self.domain_id = domain_id
         self.dname = self.get_dname() if dname is None else dname
         self.dname = self.dname.lower()
+        self.domain = None
 
         if gen_recs:
             try:
                 self.domain = Domain.objects.get(name=self.dname)
             except Domain.DoesNotExist:
-                return
-        else:
-            self.domain = self.gen_domain()
-            if not self.domain:
+                print "WARNING: Domain %s does not exist." % self.dname
                 return
 
-            master_domain = self.domain.master_domain
-            if master_domain and master_domain.delegated:
-                raise Exception("Whoa dude %s has a delegated master" % self.domain.name)
+            if self.dname in SECONDARY_ZONES or secondary:
+                print ("WARNING: Domain %s is a secondary, so its records "
+                       "will not be migrated." % self.dname)
+                secondary = True
+            else:
+                if self.dname in get_delegated():
+                    self.domain.soa = self.gen_SOA() or soa
+                    if not self.domain.soa:
+                        print ("WARNING: Could not migrate domain %s; no SOA"
+                               % self.domain.name)
+                        self.domain.delete()
+                        return
+                    else:
+                        self.domain.delegated = True
+                        print "%s has been marked as delegated." % self.dname
+                        self.domain.save()
 
-            if self.dname in delegated_dnames:
-                self.domain.delegated = True
-                print "%s has been marked as delegated." % self.domain.name
-                self.domain.save()
-
-        if self.domain:
-            if gen_recs:
-                if self.domain_id is not None:
+                elif self.domain_id is not None:
+                    # XXX: if SOA is created before AR and NS, then
+                    # creating glue will raise an error. However,
+                    # when creating delegated domains, an SOA is needed
                     self.gen_MX()
                     self.gen_static()
                     self.gen_AR()
                     self.gen_NS()
                     self.domain.soa = self.gen_SOA() or soa
-                else:
-                    self.gen_AR()
 
-            if self.domain_id is not None:
-                self.walk_zone(gen_recs=gen_recs)
+        else:
+            self.domain = self.gen_domain()
+            if not self.domain:
+                return
+            self.domain.save()
+
+        if self.domain:
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.delegated:
+                raise Exception("Whoa dude %s has a delegated master"
+                                % self.domain.name)
+
+        if self.domain and self.domain_id is not None:
+            self.walk_zone(gen_recs=gen_recs, secondary=secondary)
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
@@ -117,10 +141,19 @@ class Zone(object):
             try:
                 soa = SOA.objects.get(root_domain=self.domain)
             except SOA.DoesNotExist:
-                soa, _ = SOA.objects.get_or_create(
-                    primary=primary, contact=contact, refresh=refresh,
-                    retry=retry, expire=expire, minimum=minimum,
-                    root_domain=self.domain, description='')
+                soa = SOA()
+
+            soa.primary = primary
+            soa.contact = contact
+            soa.refresh = refresh
+            soa.retry = retry
+            soa.expire = expire
+            soa.minimum = minimum
+            soa.root_domain = self.domain
+            soa.description = ''
+            soa.save()
+
+            return soa
         else:
             master_domain = self.domain.master_domain
             if master_domain and master_domain.soa:
@@ -146,6 +179,8 @@ class Zone(object):
             except ValidationError, e:
                 print "Could not migrate domain %s: %s" % (self.dname, e)
                 return None
+        else:
+            print "Did not migrate %s because it is blacklisted." % self.dname
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -249,7 +284,7 @@ class Zone(object):
 
             # check for duplicate
             static = StaticInterface.objects.filter(
-                label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+                label=name, mac=(clean_mac(ha) or None), ip_str=long2ip(ip))
             if static:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['host.id'])
@@ -283,7 +318,7 @@ class Zone(object):
                 last_seen = datetime.fromtimestamp(last_seen)
 
             static = StaticInterface(
-                label=name, domain=self.domain, mac=clean_mac(ha),
+                label=name, domain=self.domain, mac=(clean_mac(ha) or None),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
                 dns_enabled=dns_enabled, dhcp_enabled=dhcp_enabled,
@@ -291,20 +326,19 @@ class Zone(object):
 
             # create static interface
             try:
-                static.full_clean()
                 static.save(update_range_usage=False)
-            except ValidationError, e:
+            except ValidationError as e:
                 try:
-                    stderr.write("WARNING: host with IP {0} has been "
-                                 "disabled: {1}\n".format(static.ip_str, e))
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
-                    static.full_clean()
                     static.save(update_range_usage=False)
-                except ValidationError, e:
-                    stderr.write("Error creating static interface for host"
-                                 "with IP {0}\n".format(static.ip_str))
-                    stderr.write("Original exception: {0}\n".format(e))
+                    stderr.write('WARNING: Static interface with IP {} has '
+                                 'been disabled\n'.format(static.ip_str))
+                    stderr.write('    {}\n'.format(e))
+                except ValidationError as e:
+                    stderr.write('WARNING: Could not create static interface '
+                                 'with IP {}\n'.format(static.ip_str))
+                    stderr.write('    {}\n'.format(e))
                     static = None
                     system.delete()
 
@@ -413,8 +447,9 @@ class Zone(object):
                 ns.views.add(private)
             except ValidationError, e:
                 stderr.write("Error generating NS %s. %s\n" % (pk, e))
+                import pdb; pdb.set_trace()
 
-    def walk_zone(self, gen_recs=True):
+    def walk_zone(self, gen_recs=True, secondary=False):
         """
         Recursively traverses the domain tree, creating Zone objects and
         migrating related DNS objects along the way.
@@ -423,13 +458,18 @@ class Zone(object):
             Child domains will inherit this domain's SOA if they do not have
             their own.
         """
+        if self.dname in get_delegated():
+            print "%s is delegated, so no children to create." % self.dname
+            return
+
         sql = ("SELECT id, name "
                "FROM domain "
                "WHERE master_domain = %s;" % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
             child_name = child_name.lower()
-            Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs)
+            Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs,
+                 secondary=secondary)
 
     def get_dname(self):
         """
@@ -543,18 +583,6 @@ def gen_reverses():
     add_pointers_manual()
     Domain.objects.get_or_create(name='arpa', is_reverse=True)
     Domain.objects.get_or_create(name='in-addr.arpa', is_reverse=True)
-
-    reverses = settings.REVERSE_DOMAINS
-
-    for i in reverses:
-        if '.' in i:
-            reverses.append(i.split('.', 1)[1])
-
-    reverses.reverse()
-
-    for i in reverses:
-        Domain.objects.get_or_create(name="%s.in-addr.arpa" % i,
-                                     is_reverse=True)
 
     gen_reverse_soa()
 

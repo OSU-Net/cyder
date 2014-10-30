@@ -16,3 +16,23 @@ def name_to_domain(fqdn):
         if longest_match:
             return longest_match[0]
     return None
+
+
+def is_name_descendant_of(name1, name2):
+    """Returns True if name1 is a descendant of name2, False otherwise."""
+
+    from itertools import izip_longest
+
+    for s, o in izip_longest(reversed(name1), reversed(name2),
+            fillvalue='!'):
+        if s == '!':  # self is shorter.
+            return False
+        if o == '!':  # other is shorter.
+            if s == '.':  # self matches and has more labels.
+                return True
+            else:  # self doesn't match (it has extra bytes in this label).
+                return False
+        if s != o:  # self doesn't match other (a byte differs).
+            return False
+    # The names are identical.
+    return False

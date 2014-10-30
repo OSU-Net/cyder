@@ -43,6 +43,7 @@ class StaticInterfaceForm(RangeWizard, ViewChoiceForm,
                                 'next_ip', 'ip_str', 'ttl', 'workgroup',
                                 'expire', 'views', 'dhcp_enabled',
                                 'dns_enabled', 'ctnr']
+        self.fields['expire'].widget.format = "%m/%d/%Y"
         self.fields['range'].queryset = Range.objects.filter(range_type=STATIC)
 
     class Meta:

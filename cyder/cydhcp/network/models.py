@@ -10,6 +10,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
+from cyder.base.utils import safe_delete, safe_save
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -28,7 +29,7 @@ class Network(BaseModel, ObjectUrlMixin):
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
     vrf = models.ForeignKey('cyder.Vrf',
-                            default=lambda: Vrf.objects.get(name='Legacy'))
+                            default=1)  # "Legacy"
 
     # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
@@ -41,8 +42,8 @@ class Network(BaseModel, ObjectUrlMixin):
     # This field is here so ES can search this model easier.
     network_str = models.CharField(
         max_length=49, editable=True,
-        help_text="The network address of this network.",
-        verbose_name="Network address")
+        help_text='Network address and prefix length, in CIDR notation',
+        verbose_name='Network string')
     prefixlen = models.PositiveIntegerField(
         null=False, help_text="The number of binary 1's in the netmask.")
     enabled = models.BooleanField(default=True)
@@ -109,6 +110,15 @@ class Network(BaseModel, ObjectUrlMixin):
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
 
+    def cyder_unique_error_message(self, model_class, unique_check):
+        if unique_check == ('ip_upper', 'ip_lower', 'prefixlen'):
+            return (
+                'Network with this address and prefix length already exists.')
+        else:
+            return super(Network, self).unique_error_message(
+                model_class, unique_check)
+
+    @safe_save
     def save(self, *args, **kwargs):
         self.update_network()
         super(Network, self).save(*args, **kwargs)
@@ -124,9 +134,9 @@ class Network(BaseModel, ObjectUrlMixin):
 
             #eav = NetworkAV(attribute=Attribute.objects.get(name="routers"),
                             #value=router, network=self)
-            #eav.clean()
-            #eav.save()
+            #eav.save(commit=False)
 
+    @safe_delete
     def delete(self, *args, **kwargs):
         if self.range_set.exists():
             raise ValidationError("Cannot delete this network because it has "
@@ -139,38 +149,25 @@ class Network(BaseModel, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         self.check_valid_range()
-        allocated = Network.objects.filter(prefixlen=self.prefixlen,
-                                           ip_upper=self.ip_upper,
-                                           ip_lower=self.ip_lower)
-        if allocated:
-            if not self.id or self not in allocated:
-                raise ValidationError(
-                    "This network has already been allocated.")
 
         super(Network, self).clean(*args, **kwargs)
 
+    # TODO: I was writing checks to make sure that subnets wouldn't
+    # orphan ranges. IPv6 needs support.
     def check_valid_range(self):
         # Look at all ranges that claim to be in this subnet, are they actually
         # in the subnet?
         self.update_network()
         fail = False
         for range_ in self.range_set.all():
-            # TODO
-            """
-                I was writing checks to make sure that subnets wouldn't orphan
-                ranges. IPv6 needs support.
-            """
             # Check the start addresses.
             if range_.start_upper < self.ip_upper:
-                fail = True
                 break
             elif (range_.start_upper > self.ip_upper and range_.start_lower <
                   self.ip_lower):
-                fail = True
                 break
             elif (range_.start_upper == self.ip_upper and range_.start_lower <
                     self.ip_lower):
-                fail = True
                 break
 
             if self.ip_type == IP_TYPE_4:
@@ -181,20 +178,19 @@ class Network(BaseModel, ObjectUrlMixin):
 
             # Check the end addresses.
             if range_.end_upper > brdcst_upper:
-                fail = True
                 break
             elif (range_.end_upper < brdcst_upper and range_.end_lower >
                     brdcst_lower):
-                fail = True
                 break
             elif (range_.end_upper == brdcst_upper and range_.end_lower
                     > brdcst_lower):
-                fail = True
+                break
+        else:  # All ranges are valid.
+            return
 
-            if fail:
-                raise ValidationError("Resizing this subnet to the requested "
-                                      "network prefix would orphan existing "
-                                      "ranges.")
+        raise ValidationError(
+            "Resizing this subnet to the requested network prefix would "
+            "orphan existing ranges.")
 
     def update_ipf(self):
         """Update the IP filter. Used for compiling search queries and firewall
@@ -263,9 +259,9 @@ class Network(BaseModel, ObjectUrlMixin):
             raise ValidationError("ERROR: No network str.")
         try:
             if self.ip_type == IP_TYPE_4:
-                self.network = ipaddr.IPv4Network(self.network_str)
+                self.network = ipaddr.IPv4Network(self.network_str).masked()
             elif self.ip_type == IP_TYPE_6:
-                self.network = ipaddr.IPv6Network(self.network_str)
+                self.network = ipaddr.IPv6Network(self.network_str).masked()
             else:
                 raise ValidationError("Could not determine IP type of network"
                                       " %s" % (self.network_str))
@@ -277,6 +273,33 @@ class Network(BaseModel, ObjectUrlMixin):
         self.ip_lower = int(self.network) & (1 << 64) - 1  # Mask off
                                                     # the last sixty-four bits
         self.prefixlen = self.network.prefixlen
+        self.network_str = str(self.network)
+
+    @property
+    def descendants(self):
+        self.update_network()
+        if self.ip_type == '4':
+            return Network.objects.filter(
+                ip_lower__gte=int(self.network.ip),
+                ip_lower__lte=int(self.network.broadcast)
+            ).exclude(prefixlen__lte=self.prefixlen)
+        elif self.ip_type == '6':
+            raise Exception(
+                'Network.descendants does not currently support IPv6')
+
+    @property
+    def parent(self):
+        self.update_network()
+        net = self.network
+        while net.prefixlen > 0:
+            net = net.supernet().masked()
+            try:
+                return Network.objects.get(
+                    ip_upper=(int(net) / (1<<64)),
+                    ip_lower=(int(net) % (1<<64)),
+                    prefixlen=net.prefixlen)
+            except Network.DoesNotExist:
+                pass
 
 
 class NetworkAV(EAVBase):

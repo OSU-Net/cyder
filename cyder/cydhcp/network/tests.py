@@ -9,19 +9,16 @@ from cyder.cydns.ip.models import ipv6_to_longs
 
 
 class NetworkTests(TestCase):
-
     def do_basic_add(self, network, prefixlen, ip_type,
                      ame=None, number=None, site=None):
         s = Network(network_str=network + "/" + prefixlen,
                     ip_type=ip_type, site=site)
-        s.clean()
         s.save()
         self.assertTrue(s)
         return s
 
     def do_basic_add_site(self, name, parent=None):
         s = Site(name=name, parent=parent)
-        s.clean()
         s.save()
         self.assertTrue(s)
         return s
@@ -47,7 +44,9 @@ class NetworkTests(TestCase):
         str(s)
         s.__repr__()
         self.assertTrue(s)
-        ip_upper, ip_lower = ipv6_to_longs(network)
+        ip_upper, ip_lower = ipv6_to_longs(
+            'ffff:ff00:0000:0000:0000:0000:0000:0000')
+        # Network address was canonicalized.
         self.assertEqual(s.ip_upper, ip_upper)
         self.assertEqual(s.ip_lower, ip_lower)
 
@@ -75,7 +74,7 @@ class NetworkTests(TestCase):
         self.assertTrue(len(s.range_set.all()) == 1)
 
         s.network_str = "129.0.0.0/25"
-        self.assertRaises(ValidationError, s.clean)
+        self.assertRaises(ValidationError, s.save)
 
     def test_bad_delete(self):
         network = "129.0.0.0"
@@ -96,7 +95,6 @@ class NetworkTests(TestCase):
 
         r = Range(start_str=start_str, end_str=end_str, network=network,
                   ip_type='4')
-        r.clean()
         r.save()
 
         self.assertEqual(r.network, s)
@@ -188,3 +186,92 @@ class NetworkTests(TestCase):
 
         if we choose
         """
+
+    def test_check_valid_ranges_v4_valid(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.4.0.2', end_str='10.4.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        n.full_clean()
+        n.save()
+
+    def test_check_valid_ranges_v4_start_low(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.4.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_start_end_low(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.3.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_end_high(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.4.0.2', end_str='10.5.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_start_end_high(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.5.0.2', end_str='10.5.255.254',
+                  network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()
+
+    def test_check_valid_ranges_v4_start_low_end_high(self):
+        n = Network(network_str='10.0.0.0/8')
+        n.full_clean()
+        n.save()
+
+        r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.5.255.254',
+                network=n)
+        r.full_clean()
+        r.save()
+
+        n.network_str = '10.4.0.0/16'
+        with self.assertRaises(ValidationError):
+            n.full_clean()
+            n.save()

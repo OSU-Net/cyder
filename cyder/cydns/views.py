@@ -7,12 +7,8 @@ from cyder.base.constants import ACTION_CREATE, get_klasses
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
-from cyder.base.views import (BaseCreateView, BaseDeleteView,
-                              BaseDetailView, BaseListView, BaseUpdateView,
-                              cy_delete, search_obj, table_update)
+from cyder.base.views import search_obj, table_update
 from cyder.core.cyuser.utils import perm
-
-from cyder.cydns.utils import ensure_label_domain, prune_tree, slim_form
 
 import json
 
@@ -33,20 +29,7 @@ def cydns_view(request, pk=None):
     if request.method == 'POST':
         page_obj = None
 
-        if obj_type == "ptr":
-            qd, domain, errors = request.POST.copy(), None, None
-        else:
-            qd, domain, errors = _fqdn_to_domain(request.POST.copy())
-
-        # Validate form.
-        if errors:
-            form = FormKlass(request.POST)
-            form._errors = ErrorDict()
-            form._errors['__all__'] = ErrorList(errors)
-            if is_ajax_form(request):
-                return HttpResponse(json.dumps({'errors': form.errors}))
-        else:
-            form = FormKlass(qd, instance=obj)
+        form = FormKlass(request.POST, instance=obj)
         try:
             if perm(request, ACTION_CREATE, obj=obj, obj_class=Klass):
                 obj = form.save()
@@ -60,7 +43,6 @@ def cydns_view(request, pk=None):
                     return redirect(obj.get_list_url())
 
         except (ValidationError, ValueError), e:
-            form = _revert(domain, request.POST, form, FormKlass)
             if hasattr(e, 'messages'):
                 e = e.messages
 
@@ -88,29 +70,6 @@ def cydns_view(request, pk=None):
         'pretty_obj_type': Klass.pretty_type,
         'pk': pk,
     })
-
-
-def _revert(domain, orig_qd, orig_form, FormKlass):
-    """Revert domain if not valid."""
-    prune_tree(domain)
-    form = FormKlass(orig_qd)
-    form._errors = orig_form._errors
-    return form
-
-
-def _fqdn_to_domain(qd):
-    """Resolve FQDN to domain and attach to record object. """
-    domain = None
-    if 'fqdn' in qd:
-        fqdn = qd.pop('fqdn')[0]
-        try:
-            # Call prune tree later if error, else domain leak.
-            label, domain = ensure_label_domain(fqdn)
-        except ValidationError, e:
-            return None, None, e.messages
-
-        qd['label'], qd['domain'] = label, str(domain.pk)
-    return qd, domain, None
 
 
 def cydns_table_update(request, pk, object_type=None):
@@ -156,43 +115,3 @@ def cydns_index(request):
     ]
 
     return render(request, 'cydns/cydns_index.html', {'counts': counts})
-
-
-class CydnsListView(BaseListView):
-    template_name = 'cydns/cydns_list.html'
-
-
-class CydnsDetailView(BaseDetailView):
-    template_name = 'cydns/cydns_detail.html'
-
-
-class CydnsCreateView(BaseCreateView):
-    template_name = 'cydns/cydns_form.html'
-
-    def get_form(self, form_class):
-        form = super(CydnsCreateView, self).get_form(form_class)
-        domain_pk = self.kwargs.get('domain', False)
-
-        # The use of slim_form makes my eyes bleed and stomach churn.
-        if domain_pk:
-            form = slim_form(domain_pk=domain_pk, form=form)
-
-        reverse_domain_pk = self.kwargs.get('reverse_domain', False)
-        if reverse_domain_pk:
-            slim_form(reverse_domain_pk=reverse_domain_pk, form=form)
-
-        # Filtering domain selection here.
-        # form.fields['domain'].queryset = Domain.objects.filter(name =
-        # 'foo.com') will make query set controllable.
-        # Permissions in self.request.
-
-        return form
-
-
-class CydnsUpdateView(BaseUpdateView):
-    template_name = 'cydns/cydns_form.html'
-
-
-class CydnsDeleteView(BaseDeleteView):
-    template_name = 'cydns/cydns_confirm_delete.html'
-    succcess_url = '/cydns/'
