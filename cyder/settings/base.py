@@ -290,6 +290,7 @@ MINIFY_BUNDLES = {
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/views.js',
+            'js/cy_delete.js',
             'js/rangewizard.js',
         ),
         'rangeform': (
