@@ -12,7 +12,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.validation import (validate_fqdn, validate_ttl,
                                     validate_minimum)
 from cyder.core.task.models import Task
@@ -149,7 +149,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def get_debug_build_url(self):
         return reverse('build-debug', args=[self.pk])
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         root_domain = self.root_domain
         super(SOA, self).delete(*args, **kwargs)
@@ -174,8 +174,10 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         if save:
             self.save()
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         is_new = self.pk is None
 
         if is_new:

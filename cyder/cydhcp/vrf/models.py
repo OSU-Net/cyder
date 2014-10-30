@@ -8,7 +8,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
@@ -67,8 +67,10 @@ class Vrf(BaseModel, ObjectUrlMixin):
             {'name': 'network', 'datatype': 'string', 'editable': False},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Vrf, self).save(*args, **kwargs)
 
     def build_vrf(self):

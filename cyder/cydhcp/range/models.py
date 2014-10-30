@@ -9,7 +9,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save, simple_descriptor
+from cyder.base.utils import simple_descriptor, transaction_atomic
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_VRF, RANGE_TYPE,
@@ -196,8 +196,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             {'name': 'vlan', 'datatype': 'string', 'editable': False},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         if update_range_usage:
             self.range_usage = self.get_usage()

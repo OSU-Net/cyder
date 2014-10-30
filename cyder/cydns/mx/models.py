@@ -3,7 +3,7 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 from cyder.cydns.validation import validate_fqdn, validate_mx_priority
@@ -69,8 +69,10 @@ class MX(LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'MX'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(MX, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):

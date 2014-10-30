@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.search_utils import smart_fqdn_exists
 from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
@@ -133,7 +133,17 @@ class Domain(BaseModel, ObjectUrlMixin):
             {'name': 'delegated', 'datatype': 'boolean', 'editable': True},
         ]}
 
-    @safe_delete
+    @classmethod
+    @transaction_atomic
+    def create_recursive(cls, name, commit=True):
+        first_dot = name.find('.')
+        if first_dot >= 0:  # not a TLD
+            rest = name[(first_dot + 1):]
+            cls.create_recursive(name=rest)
+        domain, created = cls.objects.get_or_create(name=name)
+        return domain
+
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         self.check_for_children()
         if self.has_record_set():
@@ -143,8 +153,10 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         super(Domain, self).delete(*args, **kwargs)
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Domain, self).save(*args, **kwargs)
 
         # Ensure all descendants in this zone have the same SOA as this domain.

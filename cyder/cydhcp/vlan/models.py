@@ -8,7 +8,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.utils import networks_to_Q
 
@@ -86,8 +86,10 @@ class Vlan(BaseModel, ObjectUrlMixin):
 
         return None
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Vlan, self).save(*args, **kwargs)
 
 

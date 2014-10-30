@@ -7,7 +7,7 @@ from cyder.base.eav.utils import is_hex_byte_sequence
 from cyder.base.eav.validators import VALUE_TYPES
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.utils import classproperty, safe_save
+from cyder.base.utils import classproperty, transaction_atomic
 
 
 class Attribute(models.Model):
@@ -88,6 +88,8 @@ class EAVBase(BaseModel, ObjectUrlMixin):
         ]
         return data
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(EAVBase, self).save(*args, **kwargs)

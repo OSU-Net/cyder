@@ -193,48 +193,25 @@ def django_pretty_type(obj_type):
         return None
 
 
-def safe_save(func):
-    """Make a model's save method more safe.
+def transaction_atomic(func):
+    """Make the outermost function run in a transaction
 
-    This decorator should only be used on model save methods. It slightly
-    changes the effects of the method so that fewer things can go wrong. First
-    the model's full_clean method is called, so that an invalid instance can't
-    be saved. Then (if the save method is the outermost one being called) it
-    runs it inside a transaction that is committed if the function returns or
-    rolled back if it raises an exception. (The exception is re-raised.)
+    This decorator should be used on any function that saves or deletes model
+    instances. This includes `save` and `delete` methods.  An exception will
+    roll back any changes performed during the outermost method. If a
+    `transaction_atomic`-wrapped function calls another
+    `transaction_atomic`-wrapped function (including itself), it should pass
+    `commit=False`.
+
+    Exceptions pass through this decorator intact.
     """
 
-    def outer(self, *args, **kwargs):
-        commit = kwargs.pop('commit', True)
-        self.full_clean()
-        if commit:
+    def outer(*args, **kwargs):
+        if kwargs.pop('commit', True):
             with transaction.commit_on_success():
-                return func(self, *args, **kwargs)
+                return func(*args, **kwargs)
         else:
-            return func(self, *args, **kwargs)
-    outer.__name__ = func.__name__
-    outer.__module__ = func.__module__
-    outer.__doc__ = func.__doc__
-    return outer
-
-
-def safe_delete(func):
-    """Make a model's delete method more safe.
-
-    This decorator should only be used on model delete methods. It slightly
-    changes the effects of the method so that fewer things can go wrong. If the
-    delete method is the outermost one being called it runs it inside a
-    transaction that is committed if the function returns or rolled back if it
-    raises an exception. (The exception is re-raised.)
-    """
-
-    def outer(self, *args, **kwargs):
-        commit = kwargs.pop('commit', True)
-        if commit:
-            with transaction.commit_on_success():
-                return func(self, *args, **kwargs)
-        else:
-            return func(self, *args, **kwargs)
+            return func(*args, **kwargs)
     outer.__name__ = func.__name__
     outer.__module__ = func.__module__
     outer.__doc__ = func.__doc__

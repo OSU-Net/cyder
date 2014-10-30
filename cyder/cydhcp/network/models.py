@@ -10,7 +10,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
@@ -110,9 +110,10 @@ class Network(BaseModel, ObjectUrlMixin):
             return self.network.network < other.network_address < \
                 other.broadcast_address < self.broadcast_address
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
-        self.update_network()
+        self.full_clean()
+
         super(Network, self).save(*args, **kwargs)
 
         #if (self.pk is None and
@@ -128,7 +129,7 @@ class Network(BaseModel, ObjectUrlMixin):
                             #value=router, network=self)
             #eav.save(commit=False)
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         if self.range_set.exists():
             raise ValidationError("Cannot delete this network because it has "

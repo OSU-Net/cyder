@@ -8,7 +8,7 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.utils import join_dhcp_args
 
 
@@ -47,8 +47,10 @@ class Workgroup(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Workgroup, self).save(*args, **kwargs)
 
     def build_workgroup(self):

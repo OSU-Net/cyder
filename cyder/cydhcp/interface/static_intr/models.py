@@ -16,7 +16,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.models import ExpirableMixin
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -132,8 +132,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             related_systems.update([interface.system])
         return related_systems
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -148,7 +150,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             if old_range:
                 old_range.save(commit=False)
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         rng = self.range
         update_range_usage = kwargs.pop('update_range_usage', True)
