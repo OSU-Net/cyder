@@ -4,7 +4,6 @@ from ipaddr import IPv6Address
 from cyder.base.tests import TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.utils import reverse_domain_name_to_ip
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA

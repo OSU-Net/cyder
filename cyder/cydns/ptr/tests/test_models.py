@@ -6,7 +6,7 @@ import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
-from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import Ip
@@ -50,7 +50,7 @@ class PTRTests(cyder.base.tests.TestCase):
 
     def create_domain(self, name, ip_type='4', delegated=False):
         if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            name = ip_to_domain_name(name, ip_type=ip_type)
+            name = ip_to_reverse_name(name)
         d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         return d
@@ -93,23 +93,6 @@ class PTRTests(cyder.base.tests.TestCase):
         else:
             self.assertEqual(fqdn, ptr.fqdn)
         return ret
-
-    def test_dns_form_ipv4(self):
-        self.create_network_range(network_str='128.193.1.0/24',
-                                  start_str='128.193.1.201',
-                                  end_str='128.193.1.240')
-        ret = self.do_generic_add(
-            ip_str='128.193.1.230', ip_type='4',
-            fqdn='foo.bar.oregonstate.edu')
-        self.assertEqual('230.1.193.128.in-addr.arpa.', ret.dns_name())
-
-    def test_dns_form_ipv6(self):
-        ret = self.do_generic_add(
-            ip_str='8620:105:F000::1', ip_type='6',
-            fqdn='foo.bar.oregonstate.edu')
-        self.assertEqual(
-            '1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.5.0.1.0.0.2.6.8'
-            '.ip6.arpa.', ret.dns_name())
 
     def test_no_domain(self):
         for fqdn in ('lol.foo', 'oregonstate.com', 'me.oregondfastate.edu'):

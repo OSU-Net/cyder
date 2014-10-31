@@ -116,7 +116,7 @@ class AutoDeleteTests(BaseDomain):
 
     def test_cleanup_cname(self):
         # Make sure CNAME record block
-        c = self.create_domain(name='foo1')
+        c = Domain.objects.create(name='foo1')
         self.assertFalse(c.purgeable)
         f_c = create_zone('foo.foo1')
         self.ctnr.domains.add(f_c)

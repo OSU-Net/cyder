@@ -8,7 +8,7 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
@@ -291,7 +291,7 @@ class PTRViewTests(TestCase, NoNSTests):
                              range_type='st', ip_type='4', domain=self.domain,
                              ctnr=self.ctnr)
 
-        Domain.objects.create(name=ip_to_domain_name(test_data['ip_str']))
+        Domain.objects.create(name=ip_to_reverse_name(test_data['ip_str']))
         do_postUp(self, test_data, use_domain=False, use_rdomain=True)
 
     def post_data(self):

@@ -8,12 +8,24 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.test import RequestFactory
 
+from cyder.base.tests import TestCase
+from cyder.core.ctnr.models import Ctnr
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.ip.utils import ip_prefix_to_reverse_name
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
 from cyder.cydns.utils import ensure_domain, prune_tree
-from cyder.cydhcp.vrf.models import Vrf
+
+
+class DNSTest(TestCase):
+    def setUp(self):
+        Domain.objects.create(name='arpa')
+        Domain.objects.create(name='in-addr.arpa')
+        Domain.objects.create(name='ip6.arpa')
+
+        self.ctnr = Ctnr.objects.create(name='test_ctnr')
 
 
 def get_post_data(random_str, suffix):
@@ -27,12 +39,8 @@ def get_post_data(random_str, suffix):
     }
 
 
-def create_basic_dns_data(dhcp=False):
-    for name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-        Domain.objects.create(name=name)
-
-    if dhcp:
-        Vrf.objects.create(name='test_vrf')
+def create_reverse_domain(ip, ip_type):
+    return Domain.create_recursive(name=ip_prefix_to_reverse_name(ip, ip_type))
 
 
 def create_zone(name):
@@ -44,4 +52,4 @@ def make_root(domain):
     Nameserver.objects.create(domain=domain, server='ns1.unused')
     SOA.objects.create(
         primary='ns1.unused', contact='webmaster.unused', root_domain=domain)
-    return Domain.objects.get(pk=domain.pk)  # Reload it.
+    return domain.reload()

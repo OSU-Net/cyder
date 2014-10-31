@@ -25,7 +25,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_dns_form
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.domain.models import Domain
 
 
@@ -268,13 +268,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         self.rdtype_clob = kwargs.pop('rdtype', 'INTR')
         if kwargs.pop('reverse', False):
             self.template = self.ptr_template
-            self.dns_ip = ip_to_dns_form(self.ip_str)
+            self.dns_ip = ip_to_reverse_name(self.ip_str) + '.'
         else:
             self.template = self.a_template
         return super(StaticInterface, self).bind_render_record(pk=pk, **kwargs)
-
-    def obj_type(self):
-        return 'A/PTR'
 
 
 class StaticInterfaceAV(EAVBase):

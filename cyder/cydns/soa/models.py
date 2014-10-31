@@ -18,8 +18,6 @@ from cyder.cydns.validation import (validate_fqdn, validate_ttl,
 from cyder.core.task.models import Task
 from cyder.settings import MIGRATING
 
-# import reversion
-
 
 #TODO, put these defaults in a config file.
 ONE_WEEK = 604800
@@ -217,18 +215,15 @@ class SOAAV(EAVBase):
         app_label = 'cyder'
         db_table = 'soa_av'
 
-
     entity = models.ForeignKey(SOA)
     attribute = EAVAttributeField(Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))
 
 
 def ip_str_to_name(ip_str, ip_type):
-    from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
+    from cyder.cydns.ip.utils import ip_to_reverse_name, nibbilize
 
-    if ip_type == '6':
-        ip_str = nibbilize(ip_str)
-    return ip_to_domain_name(ip_str, ip_type=ip_type)
+    return ip_to_reverse_name(ip_str)
 
 
 def reassign_reverse_records(old_domain, new_domain):

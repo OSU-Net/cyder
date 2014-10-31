@@ -7,40 +7,25 @@ from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
 from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
-from cyder.cydns.domain.models import Domain
 from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
-from cyder.cydns.tests.utils import create_zone
+from cyder.cydns.tests.utils import create_reverse_domain, create_zone
 
 from .basestatic import BaseStaticTests
 
 
 class V6StaticInterTests(BaseStaticTests):
     def setUp(self):
-        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
-        self.arpa = self.create_domain(name='arpa')
-        self.i_arpa = self.create_domain(name='ip6.arpa', ip_type='6')
+        super(V6StaticInterTests, self).setUp(ip_type='6')
 
-        self.c = Domain.objects.create(name="ccc")
-        self.f_c = Domain.objects.create(name="foo.ccc")
-        self.ctnr.domains.add(self.c)
-        self.ctnr.domains.add(self.f_c)
-        self.r1 = self.create_domain(name="0", ip_type='6')
-        self.r2 = create_zone('1.ip6.arpa')
-        self.s = System.objects.create(name='foobar')
-
-        self.net = Network.objects.create(network_str='1000::/16', ip_type='6')
-        self.range = Range.objects.create(
-            network=self.net, range_type=STATIC, ip_type='6',
-            start_str='1000::1',
-            end_str='1000:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
-        self.range.save()
-        self.ctnr.ranges.add(self.range)
+        create_reverse_domain('0', ip_type='6')
+        create_zone('1.ip6.arpa')
 
     def do_add(self, mac, label, domain, ip_str, ip_type='6'):
         r = StaticInterface.objects.create(
             mac=mac, label=label, domain=domain, ip_str=ip_str,
-            ip_type=ip_type, system=self.s, ctnr=self.ctnr, range=self.range)
+            ip_type=ip_type, system=self.n, ctnr=self.ctnr, range=self.range)
         repr(r)
         return r
 

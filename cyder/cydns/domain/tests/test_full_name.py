@@ -14,10 +14,10 @@ from basedomain import BaseDomain
 
 class FullNameTests(BaseDomain):
     def test_basic_add_remove1(self):
-        c = self.create_domain(name='com')
+        c = Domain.objects.create(name='com')
         self.assertFalse(c.purgeable)
 
-        f_c = self.create_domain(name='foo.com')
+        f_c = Domain.objects.create(name='foo.com')
         s = SOA.objects.create(
             primary="foo", contact="foo", root_domain=f_c,
             description="foo.zfoo.comom")

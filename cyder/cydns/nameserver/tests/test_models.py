@@ -1,48 +1,41 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
-from cyder.cydns.domain.models import Domain
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.soa.models import SOA
-from cyder.cydns.ptr.models import PTR
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.ip.utils import ip_to_domain_name
-from cyder.cydns.tests.utils import create_zone
-
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.network.models import Network
-from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.soa.models import SOA
+from cyder.cydns.tests.utils import create_zone, DNSTest
 
 
-class NSTestsModels(TestCase):
+class NSTestsModels(DNSTest):
     def create_domain(self, name, ip_type='4', delegated=False):
         if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            name = ip_to_domain_name(name, ip_type=ip_type)
+            name = ip_to_reverse_name(name)
         d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         return d
 
     def setUp(self):
-        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
-        self.arpa = self.create_domain(name='arpa')
-        self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i6_arpa = self.create_domain(name='ip6.arpa')
+        super(NSTestsModels, self).setUp()
 
         self.r = Domain.objects.create(name="ru")
         self.f_r = Domain.objects.create(name="foo.ru")
         self.b_f_r = Domain.objects.create(name="bar.foo.ru")
         Domain.objects.create(name="asdf")
 
-        self.f = Domain.objects.create(name="fam")
-
-        for d in (self.r, self.f_r, self.b_f_r, self.f):
+        for d in (self.r, self.f_r, self.b_f_r):
             self.ctnr.domains.add(d)
 
-        self._128 = create_zone('128.in-addr.arpa')
+        create_zone('128.in-addr.arpa')
 
         self.s = System.objects.create(name='test_system')
 
@@ -67,33 +60,37 @@ class NSTestsModels(TestCase):
         self.ctnr.domains.add(domain)
         return domain
 
-    def do_add(self, domain, server):
-        ns = Nameserver.objects.create(
-            ctnr=self.ctnr, domain=domain, server=server)
-        self.assertTrue(ns.__repr__())
-        self.assertTrue(ns.details())
-        self.assertEqual(
-            Nameserver.objects.filter(domain=domain, server=server).count(), 1)
-        return ns
+    def test_create(self):
+        nss = []
+        nss.append(Nameserver.objects.create(
+            domain=self.r, server='ns2.moot.ru'))
+        nss.append(Nameserver.objects.create(
+            domain=self.r, server='ns5.moot.ru'))
+        nss.append(Nameserver.objects.create(
+            domain=self.r, server=u'ns3.moot.ru'))
+        nss.append(Nameserver.objects.create(
+            domain=self.b_f_r, server='n1.moot.ru'))
+        nss.append(Nameserver.objects.create(
+            domain=self.b_f_r, server='ns2.moot.ru'))
+        nss.append(Nameserver.objects.create(
+            domain=self.r, server='asdf.asdf'))
 
-    def test_add_ns(self):
-        self.do_add(domain=self.r, server='ns2.moot.ru')
-        self.do_add(domain=self.r, server='ns5.moot.ru')
-        self.do_add(domain=self.r, server=u'ns3.moot.ru')
-        self.do_add(domain=self.b_f_r, server='n1.moot.ru')
-        self.do_add(domain=self.b_f_r, server='ns2.moot.ru')
-        self.do_add(domain=self.r, server='asdf.asdf')
+        for ns in nss:
+            self.assertTrue(ns.pk)
+            self.assertTrue(repr(ns))
+            self.assertTrue(ns.details())
 
     def test_add_invalid(self):
         self.assertRaises(
-            ValidationError, self.do_add, domain=self.f_r, server='ns3.foo.ru')
+            ValidationError, Nameserver.objects.create,
+            domain=self.f_r, server='ns3.foo.ru', ctnr=self.ctnr)
 
     def testtest_add_ns_in_domain(self):
         # Use an A record as a glue record.
         glue = AddressRecord.objects.create(
             label='ns2', ctnr=self.ctnr, domain=self.r, ip_str='128.193.1.10',
             ip_type='4')
-        ns = self.do_add(domain=self.r, server='ns2.ru')
+        ns = Nameserver.objects.create(domain=self.r, server='ns2.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.server, ns.glue.fqdn)
         self.assertRaises(ValidationError, glue.delete)
@@ -101,7 +98,7 @@ class NSTestsModels(TestCase):
         glue = AddressRecord.objects.create(
             label='ns3', ctnr=self.ctnr, domain=self.f_r,
             ip_str='128.193.1.10', ip_type='4')
-        ns = self.do_add(domain=self.f_r, server='ns3.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns3.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.server, ns.glue.fqdn)
 
@@ -110,7 +107,7 @@ class NSTestsModels(TestCase):
         glue = AddressRecord.objects.create(
             label='ns39', ctnr=self.ctnr, domain=self.f_r,
             ip_str='128.193.1.77', ip_type='4')
-        ns = self.do_add(domain=self.f_r, server='ns39.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns39.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.glue, glue)
 
@@ -123,7 +120,7 @@ class NSTestsModels(TestCase):
             label='ns24', domain=self.f_r, ctnr=self.ctnr,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
-        ns = self.do_add(domain=self.f_r, server='ns24.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns24.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.glue, glue)
 
@@ -136,7 +133,7 @@ class NSTestsModels(TestCase):
             label='ns24', domain=self.f_r, ctnr=self.ctnr,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
-        ns = self.do_add(domain=self.f_r, server='ns24.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns24.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.glue, glue)
 
@@ -149,7 +146,7 @@ class NSTestsModels(TestCase):
             label='ns25', domain=self.f_r, ctnr=self.ctnr,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
-        ns = self.do_add(domain=self.f_r, server='ns25.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns25.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.glue, glue)
 
@@ -181,7 +178,7 @@ class NSTestsModels(TestCase):
             label='ns232', domain=self.r, ctnr=self.ctnr,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="12:23:45:45:45:45")
-        ns = self.do_add(domain=self.r, server='ns232.ru')
+        ns = Nameserver.objects.create(domain=self.r, server='ns232.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.server, ns.glue.fqdn)
         self.assertRaises(ValidationError, glue.delete)
@@ -190,12 +187,12 @@ class NSTestsModels(TestCase):
             label='ns332', domain=self.f_r, ctnr=self.ctnr,
             ip_str='128.193.1.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
-        ns = self.do_add(domain=self.f_r, server='ns332.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns332.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.server, ns.glue.fqdn)
 
     def test_add_ns_outside_domain(self):
-        ns = self.do_add(domain=self.f_r, server='ns2.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns2.ru')
         self.assertFalse(ns.glue)
 
     def test_update_glue_to_no_intr(self):
@@ -203,7 +200,7 @@ class NSTestsModels(TestCase):
             label='ns34', domain=self.r, ctnr=self.ctnr, ip_str='128.193.1.10',
             ip_type='4', system=self.s, mac="11:22:33:44:55:66")
         data = {'domain': self.r, 'server': 'ns34.ru'}
-        ns = self.do_add(domain=self.r, server='ns34.ru')
+        ns = Nameserver.objects.create(domain=self.r, server='ns34.ru')
         self.assertTrue(ns.glue)
 
         ns.server = "ns4.wee"
@@ -216,7 +213,7 @@ class NSTestsModels(TestCase):
             label='ns788', domain=self.r, ctnr=self.ctnr,
             ip_str='128.193.1.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
-        ns = self.do_add(domain=self.r, server='ns788.ru')
+        ns = Nameserver.objects.create(domain=self.r, server='ns788.ru')
         self.assertTrue(ns.glue)
         glue.label = "asdfasdf"
         self.assertRaises(ValidationError, glue.save)
@@ -225,7 +222,7 @@ class NSTestsModels(TestCase):
         glue = AddressRecord.objects.create(
             label='ns3', ctnr=self.ctnr, domain=self.r, ip_str='128.193.1.10',
             ip_type='4')
-        ns = self.do_add(domain=self.r, server='ns3.ru')
+        ns = Nameserver.objects.create(domain=self.r, server='ns3.ru')
         self.assertTrue(ns.glue)
 
         ns.server = "ns4.wee"
@@ -236,7 +233,7 @@ class NSTestsModels(TestCase):
         glue = AddressRecord.objects.create(
             label='ns4', ctnr=self.ctnr, domain=self.f_r,
             ip_str='128.196.1.10', ip_type='4')
-        ns = self.do_add(domain=self.f_r, server='ns4.foo.ru')
+        ns = Nameserver.objects.create(domain=self.f_r, server='ns4.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.server, ns.glue.fqdn)
 
@@ -252,23 +249,28 @@ class NSTestsModels(TestCase):
         glue.save()
 
         self.assertRaises(
-            ValidationError, self.do_add, domain=self.r, server='ns2 .ru')
+            ValidationError, Nameserver.objects.create,
+            domain=self.r, server='ns2 .ru', ctnr=self.ctnr)
 
         self.assertRaises(
-            ValidationError, self.do_add, domain=self.r, server='ns2$.ru')
+            ValidationError, Nameserver.objects.create,
+            domain=self.r, server='ns2$.ru', ctnr=self.ctnr)
 
         self.assertRaises(
-            ValidationError, self.do_add, domain=self.r, server='ns2..ru')
+            ValidationError, Nameserver.objects.create,
+            domain=self.r, server='ns2..ru', ctnr=self.ctnr)
 
         self.assertRaises(
-            ValidationError, self.do_add, domain=self.r, server='ns2.ru ')
+            ValidationError, Nameserver.objects.create,
+            domain=self.r, server='ns2.ru ', ctnr=self.ctnr)
 
         self.assertRaises(
-            ValidationError, self.do_add, domain=self.r, server='')
+            ValidationError, Nameserver.objects.create,
+            domain=self.r, server='', ctnr=self.ctnr)
 
     def test_add_dup(self):
         def x():
-            self.do_add(domain=self.r, server='ns2.moot.ru')
+            Nameserver.objects.create(domain=self.r, server='ns2.moot.ru')
 
         x()
         self.assertRaises(ValidationError, x)

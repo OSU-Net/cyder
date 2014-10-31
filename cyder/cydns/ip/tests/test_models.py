@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 import ipaddr
 from cyder.cydns.ip.models import ipv6_to_longs, Ip
 from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain, Domain
-from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.ip.utils import ip_to_reverse_name
 
 
 class SimpleTest(TestCase):
@@ -17,7 +17,7 @@ class SimpleTest(TestCase):
 
     def create_domain(self, name, ip_type='4', delegated=False):
         if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            name = ip_to_domain_name(name, ip_type=ip_type)
+            name = ip_to_reverse_name(name)
         d = Domain.objects.create(name=name, delegated=delegated)
         self.assertTrue(d.is_reverse)
         return d

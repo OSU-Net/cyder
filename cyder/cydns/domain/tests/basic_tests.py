@@ -5,7 +5,7 @@ from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.soa.models import SOA
-from cyder.cydns.tests.utils import make_root
+from cyder.cydns.tests.utils import create_zone
 
 from basedomain import BaseDomain
 
@@ -112,19 +112,17 @@ class DomainTests(BaseDomain):
         # TODO A records, Mx, TXT... all of the records!!
 
     def test_delegation_add_domain(self):
-        boom = self.create_domain(name='boom')
-        boom = make_root(boom)
-        bleh = self.create_domain(name='bleh.boom', delegated=True)
+        boom = create_zone('boom')
+        bleh = Domain.objects.create(name='bleh.boom', delegated=True)
 
         self.assertRaises(
             ValidationError, Domain.objects.create,
             name='baa.bleh.boom', delegated=False)
 
     def test_delegation(self):
-        boom = self.create_domain(name='boom')
-        boom = make_root(boom)
-
-        bleh = self.create_domain(name='bleh.boom', delegated=True)
+        boom = create_zone('boom')
+        bleh = Domain.objects.create(name='bleh.boom', delegated=True)
+        self.ctnr.domains.add(bleh)
 
         # Creating objects in the domain should be disallowed.
         arec = AddressRecord(
@@ -174,9 +172,9 @@ class DomainTests(BaseDomain):
             ip_type='4')
 
     def test_existing_record_new_domain(self):
-        b_dom = self.create_domain(name='bo', delegated=False)
-
-        t_dom = self.create_domain(name='to.bo', delegated=False)
+        b_dom = Domain.objects.create(name='bo', delegated=False)
+        t_dom = Domain.objects.create(name='to.bo', delegated=False)
+        self.ctnr.domains.add(t_dom)
 
         AddressRecord.objects.create(
             label="no", ctnr=self.ctnr, domain=t_dom, ip_str="128.193.99.9",
@@ -187,9 +185,9 @@ class DomainTests(BaseDomain):
             name='no.to.bo', delegated=False)
 
     def test_existing_cname_new_domain(self):
-        b_dom = self.create_domain(name='bo', delegated=False)
-
-        t_dom = self.create_domain(name='to.bo', delegated=False)
+        b_dom = Domain.objects.create(name='bo', delegated=False)
+        t_dom = Domain.objects.create(name='to.bo', delegated=False)
+        self.ctnr.domains.add(t_dom)
 
         CNAME.objects.create(
             ctnr=self.ctnr, domain=t_dom, label="no", target="asdf")

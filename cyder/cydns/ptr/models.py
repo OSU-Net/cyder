@@ -12,7 +12,6 @@ from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.models import ViewMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
-from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
@@ -136,13 +135,6 @@ class BasePTR(object):
                 "PTR records must point back to a valid A record, not a "
                 "alias defined by a CNAME. -- RFC 1034"
             )
-
-    def dns_name(self):
-        """
-        Return the cononical name of this ptr that can be placed in a
-        reverse zone file.
-        """
-        return ip_to_dns_form(self.ip_str)
 
 
 class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):

@@ -4,7 +4,6 @@ import cyder.base.tests
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.utils import ip_to_domain_name
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.mx.models import MX
 from cyder.cydns.ptr.models import PTR

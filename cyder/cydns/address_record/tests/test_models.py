@@ -2,7 +2,6 @@ import ipaddr
 
 from django.core.exceptions import ValidationError
 
-import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -11,28 +10,21 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
-from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import ipv6_to_longs
-from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
+from cyder.cydns.tests.utils import create_reverse_domain, create_zone, DNSTest
 
 
-class AddressRecordTests(cyder.base.tests.TestCase):
-    def create_domain(self, name, ip_type='4', delegated=False):
-        if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain.objects.create(name=name, delegated=delegated)
-        self.assertTrue(d.is_reverse)
-        return d
-
+class AddressRecordTests(DNSTest):
     def setUp(self):
-        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        super(AddressRecordTests, self).setUp()
 
-        create_basic_dns_data(dhcp=True)
+        Vrf.objects.create(name='test_vrf')
 
         self.osu_block = "633:105:F000:"
-        boot_strap_ipv6_reverse_domain("0.6.3")
+        create_reverse_domain('0.6.3')
 
         self.e = Domain.objects.create(name='edu')
         self.o_e = Domain.objects.create(name='oregonstate.edu')
@@ -43,10 +35,10 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
         self._128 = create_zone('128.in-addr.arpa')
 
-        self._128_193 = self.create_domain(name='128.193')
+        self._128_193 = create_reverse_domain('128.193', ip_type='4')
 
-        for dom in [self.e, self.o_e, self.f_o_e, self.m_o_e, self.z_o_e,
-                    self.g_o_e, self._128, self._128_193]:
+        for dom in (self.e, self.o_e, self.f_o_e, self.m_o_e, self.z_o_e,
+                    self.g_o_e, self._128, self._128_193):
             self.ctnr.domains.add(dom)
 
     def create_A(self, **kwargs):
@@ -135,7 +127,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         rec1.save()
 
     def test_update_AAAA_record(self):
-        boot_strap_ipv6_reverse_domain("8.6.2.0")
+        create_reverse_domain('8.6.2.0', ip_type='6')
         osu_block = "8620:105:F000:"
         rec0 = self.create_A(
             label='', domain=self.z_o_e, ip_str=(osu_block + ":1"),
@@ -189,7 +181,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_invalid_name(self):
         osu_block = "7620:105:F000:"
-        boot_strap_ipv6_reverse_domain("7.6.2.0")
+        create_reverse_domain('7.6.2.0', ip_type='6')
         a_v4 = self.create_A(
             label='bar', domain=self.m_o_e, ip_str="128.193.23.1", ip_type='4')
         a_v6 = self.create_A(
@@ -229,7 +221,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_invalid_ip_v6(self):
         osu_block = "7620:105:F000:"
-        boot_strap_ipv6_reverse_domain("7.6.2.0")
+        create_reverse_domain('7.6.2.0', ip_type='6')
         a_v6 = self.create_A(
             label='bar', domain=self.m_o_e, ip_str=(osu_block + ':1'),
             ip_type='6')
@@ -275,7 +267,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_remove_AAAA_address_records(self):
         osu_block = "4620:105:F000:"
-        boot_strap_ipv6_reverse_domain("4.6.2.0")
+        create_reverse_domain('4.6.2.0', ip_type='6')
         self.create_delete_A(
             label="", domain=self.o_e, ip_str=(osu_block + ":1"), ip_type='6')
         self.create_delete_A(
@@ -341,7 +333,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_add_AAAA_address_records(self):
         osu_block = "2620:105:F000:"
-        boot_strap_ipv6_reverse_domain("2.6.2.0")
+        create_reverse_domain('2.6.2.0', ip_type='6')
 
         self.create_A(
             label='', domain=self.f_o_e, ip_str=(osu_block + ':4'),
@@ -443,7 +435,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
         ### IPv6 ###
 
         osu_block = "9620:105:F000:"
-        boot_strap_ipv6_reverse_domain("9.6.2.0")
+        create_reverse_domain('9.6.2.0', ip_type='6')
 
         def a3():
             self.create_A(
@@ -488,7 +480,7 @@ class AddressRecordTests(cyder.base.tests.TestCase):
 
     def test_add_AAAA_invalid_address_records(self):
         osu_block = "3620:105:F000:"
-        boot_strap_ipv6_reverse_domain("3.6.2.0")
+        create_reverse_domain('3.6.2.0', ip_type='6')
 
         self.assertRaises(
             ValidationError, self.create_A,

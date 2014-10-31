@@ -7,7 +7,7 @@ from cyder.base.models import BaseModel
 from cyder.base.utils import transaction_atomic
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.search_utils import smart_fqdn_exists
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain, is_name_descendant_of
 
@@ -166,6 +166,7 @@ class Domain(BaseModel, ObjectUrlMixin):
             child.soa = self.soa
             child.save(commit=False)  # Recurse.
 
+    @property
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
             return '4'
@@ -291,23 +292,6 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     def is_descendant_of(self, other):
         return is_name_descendant_of(self.name, other.name)
-
-
-def boot_strap_ipv6_reverse_domain(ip, soa=None):
-    """
-    This function is here to help create IPv6 reverse domains.
-
-    :param ip: The IP address in nibble format
-    :type ip: str
-    :raises: ReverseDomainNotFoundError
-    """
-    validate_reverse_name(ip, '6')
-
-    for i in xrange(1, len(ip) + 1, 2):
-        cur_reverse_domain = ip[:i]
-        domain_name = ip_to_domain_name(cur_reverse_domain, ip_type='6')
-        reverse_domain, _ = Domain.objects.get_or_create(name=domain_name)
-    return reverse_domain
 
 
 # A handy function that would cause circular dependencies if it were in
