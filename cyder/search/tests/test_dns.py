@@ -6,14 +6,14 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
+from cyder.cydns.tests.utils import create_zone, DNSTest
 from cyder.cydns.ptr.models import PTR
 from cyder.search.compiler.django_compile import compile_to_django
 
 
-class SearchDNSTests(TestCase):
+class SearchDNSTests(DNSTest):
     def setUp(self):
-        create_basic_dns_data()
+        super(SearchDNSTests, self).setUp()
 
         self.ctnr = Ctnr.objects.create(name='abloobloobloo')
         self.c = Client()

@@ -1,5 +1,10 @@
-from django.test import TestCase
-
+from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.task.models import Task
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
@@ -9,23 +14,13 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
-
-from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.range.models import Range
-
-from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
-from cyder.core.task.models import Task
+from cyder.cydns.tests.utils import create_zone, DNSTest
 
 
-class DirtySOATests(TestCase):
+class DirtySOATests(DNSTest):
     def setUp(self):
-        create_basic_dns_data()
+        super(DirtySOATests, self).setUp()
 
-        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
         self.r1 = create_zone(name='10.in-addr.arpa')
         self.sr = self.r1.soa
         self.sr.dirty = False
@@ -33,12 +28,12 @@ class DirtySOATests(TestCase):
 
         Domain.objects.create(name='bgaz')
         self.dom = create_zone('azg.bgaz')
-        Domain.objects.create(name='com')
-        Domain.objects.create(name='bar.com')
-        create_zone('foo.bar.com')
         self.soa = self.dom.soa
         self.soa.dirty = False
         self.soa.save()
+        Domain.objects.create(name='com')
+        Domain.objects.create(name='bar.com')
+        create_zone('foo.bar.com')
 
         self.rdom = create_zone('123.in-addr.arpa')
         self.rsoa = self.r1.soa

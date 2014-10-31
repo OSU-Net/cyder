@@ -2,12 +2,11 @@ from functools import partial
 
 from django.core.exceptions import ValidationError
 
-import cyder.base.tests
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
+from cyder.cydns.tests.utils import create_reverse_domain, create_zone, DNSTest
 from cyder.cydns.ip.utils import ip_to_reverse_name
-from cyder.cydns.domain.models import Domain, boot_strap_ipv6_reverse_domain
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.ip.models import Ip
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -16,11 +15,11 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.vrf.models import Vrf
 
 
-class PTRTests(cyder.base.tests.TestCase):
+class PTRTests(DNSTest):
     def setUp(self):
-        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        super(PTRTests, self).setUp()
 
-        create_basic_dns_data(dhcp=True)
+        Vrf.objects.create(name='test_vrf')
 
         self._128 = create_zone('128.in-addr.arpa')
         create_zone('8.ip6.arpa')
@@ -41,19 +40,12 @@ class PTRTests(cyder.base.tests.TestCase):
             d = Domain.objects.create(name=name)
             self.c1.domains.add(d)
 
-        boot_strap_ipv6_reverse_domain("8.6.2.0")
+        create_reverse_domain('8.6.2.0', ip_type='6')
 
         self.osu_block = "8620:105:F000:"
         self.create_network_range(
             network_str="8620:105::/32", start_str='8620:105:F000::1',
             end_str='8620:105:F000::1000', ip_type='6')
-
-    def create_domain(self, name, ip_type='4', delegated=False):
-        if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            name = ip_to_reverse_name(name)
-        d = Domain.objects.create(name=name, delegated=delegated)
-        self.assertTrue(d.is_reverse)
-        return d
 
     def create_network_range(self, network_str, start_str, end_str,
                              range_type="st", ip_type='4', domain=None):
