@@ -1,71 +1,90 @@
 $(document).ready(function() {
-    function rangeWizardResult( data ) {
-        if ( data.ranges ) {
-            $('#id_range').find( 'option' ).remove().end();
-            if ( data.ranges[0].length === 0 ) {
-                $('#id_range')
-                   .find( 'option' )
-                   .end()
-                   .append( "<option value=''>No ranges in " +
-                            $('#id_vrf option:selected').text() +
-                            " and " +
-                            $('#id_site option:selected').text() +
-                            '</option>' );
-            } else {
-                for ( var i in data.ranges[0] ) {
-                $('#id_range')
-                    .find( 'option' )
-                    .end()
-                    .append( '<option value=' + data.ranges[1][i] +
-                             '>' + data.ranges[0][i] + '</option>');
-                }
-            }
-        }
-        if ( data.ip_type ) {
-            if ( data.ip_type == $('#id_ip_type_0').val() ) {
-                $('#id_ip_type_0').attr( 'checked', 'checked' );
-            } else {
-                $('#id_ip_type_1').attr( 'checked', 'checked' );
-            }
-
-            $('#id_ip_str').val( data.ip_str );
-        }
-    }
-
-
-    function rangeWizardController( source ) {
+    var RangeWizard = (function(){
         var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
-        var rangeType = $(
-            "input[type='radio'][name='interface_type']:checked" ).val();
-
-        if ( source.id == 'id_range' && $('#id_range').val() == '') {
-            $('#id_ip_str').val('');
-            return false;
+        var rng = '#id_range';
+        var freeIp = '#id_next_ip';
+        var ip = '#id_ip_str';
+        var ipv4 = '#id_ip_type_0';
+        var ipv6 = '#id_ip_type_1';
+        var site = '#id_site';
+        var vrf = '#id_vrf';
+        var rangeType = "input[type='radio'][name='interface_type']:checked";
+        return {
+            get_ip: function() {
+                if ( $(rng).val() == '' ) {
+                    $(ip).val('');
+                    return false;
+                }
+                var postData = {
+                    csrfmiddlewaretoken: csrfToken,
+                    freeIp: $(freeIp).attr( 'checked' ) ? true : false,
+                    range: $(rng).val(),
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/dhcp/range/range_wizard_get_ip/',
+                    data: postData,
+                    dataType: 'json',
+                    global: false,
+                }).done( function( data ) {
+                    if ( data.ip_type == $(ipv4).val() ) {
+                        $(ipv4).attr( 'checked', 'checked' );
+                    } else {
+                        $(ipv6).attr( 'checked', 'checked' );
+                    }
+                    $(ip).val( data.ip_str );
+                });
+            },
+            get_ranges: function() {
+                var postData = {
+                    csrfmiddlewaretoken: csrfToken,
+                    rangeType: $(rangeType).val(),
+                    site: $(site).val(),
+                    vrf: $(vrf).val(),
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/dhcp/range/range_wizard_get_ranges/',
+                    data: postData,
+                    dataType: 'json',
+                    global: false,
+                }).done( function( data ) {
+                    $(rng).find( 'option' ).remove().end();
+                    if ( data.ranges[0].length === 0 ) {
+                        $(rng)
+                           .find( 'option' )
+                           .end()
+                           .append( "<option value=''>No ranges in " +
+                                    $('#id_vrf option:selected').text() +
+                                    " and " +
+                                    $('#id_site option:selected').text() +
+                                    '</option>' );
+                    } else {
+                        for ( var i in data.ranges[0] ) {
+                            $(rng)
+                                .find( 'option' )
+                                .end()
+                                .append( '<option value=' + data.ranges[1][i] +
+                                    '>' + data.ranges[0][i] + '</option>');
+                        }
+                    }
+                    $(rng).change();
+                });
+            }
         }
+    }());
 
-        var postData = {
-            csrfmiddlewaretoken: csrfToken,
-            freeIp: $('#id_next_ip').attr( 'checked' ) ? true : false,
-            range: $('#id_range').val(),
-            rangeType: rangeType,
-            site: $('#id_site').val(),
-            vrf: $('#id_vrf').val(),
-        };
-        if ( source.id == 'id_next_ip' && $('#id_range').val() !== '' ||
-             source.id != 'id_next_ip' ) {
-            $.ajax({
-                type: 'POST',
-                url: '/dhcp/range/range_wizard/',
-                data: postData,
-                dataType: 'json',
-                global: false,
-                success: rangeWizardResult
-            });
+
+    function range_wizard_controller( source ) {
+        if ( source.id == 'id_range' || source.id == 'id_next_ip' ) {
+            RangeWizard.get_ip();
+        } else {
+            RangeWizard.get_ranges();
         }
     }
 
 
     $( document ).on( 'change', '.wizard', function() {
-        rangeWizardController( this );
+        range_wizard_controller( this );
     });
 });
