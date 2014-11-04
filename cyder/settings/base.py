@@ -292,6 +292,7 @@ MINIFY_BUNDLES = {
             'js/views.js',
             'js/cy_delete.js',
             'js/rangewizard.js',
+            'js/mobile.js',
         ),
         'rangeform': (
             'js/rangeform.js',
