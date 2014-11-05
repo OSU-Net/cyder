@@ -220,13 +220,9 @@ class SOAAV(EAVBase):
         type_choices=(ATTRIBUTE_INVENTORY,))
 
 
-def ip_str_to_name(ip_str, ip_type):
-    from cyder.cydns.ip.utils import ip_to_reverse_name, nibbilize
-
-    return ip_to_reverse_name(ip_str)
-
-
 def reassign_reverse_records(old_domain, new_domain):
+    from cyder.cydns.ip.utils import ip_to_reverse_name
+
     up = (None, None)  # from, to
     down = (None, None)  # from, to
     if new_domain:
@@ -250,7 +246,7 @@ def reassign_reverse_records(old_domain, new_domain):
         for obj in chain(down[0].reverse_ptr_set.all(),
                          down[0].reverse_staticintr_set.all()):
             if is_name_descendant_of(
-                    ip_str_to_name(obj.ip_str, ip_type=obj.ip_type),
+                    ip_to_reverse_name(obj.ip_str, ip_type=obj.ip_type),
                     down[1].name):
                 obj.reverse_domain = down[1]
                 obj.save(commit=False)

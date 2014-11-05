@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 
-import cyder.base.tests
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -9,7 +8,7 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.utils import create_basic_dns_data, create_zone
+from cyder.cydns.tests.utils import create_zone, DNSTest
 from cyder.cydns.txt.models import TXT
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -22,9 +21,11 @@ from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
 
 
-class CNAMETests(cyder.base.tests.TestCase):
+class CNAMETests(DNSTest):
     def setUp(self):
-        create_basic_dns_data(dhcp=True)
+        super(CNAMETests, self).setUp()
+
+        self.vrf = Vrf.objects.create(name='test_vrf')
 
         create_zone('128.in-addr.arpa')
 
@@ -277,7 +278,7 @@ class CNAMETests(cyder.base.tests.TestCase):
             contact='root.mail.example.gz')
 
         n = Network.objects.create(
-            vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
+            vrf=self.vrf, ip_type='4',
             network_str='128.193.0.0/24')
 
         r = Range.objects.create(

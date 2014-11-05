@@ -17,13 +17,6 @@ from cyder.cydns.tests.utils import create_zone, DNSTest
 
 
 class NSTestsModels(DNSTest):
-    def create_domain(self, name, ip_type='4', delegated=False):
-        if name not in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            name = ip_to_reverse_name(name)
-        d = Domain.objects.create(name=name, delegated=delegated)
-        self.assertTrue(d.is_reverse)
-        return d
-
     def setUp(self):
         super(NSTestsModels, self).setUp()
 

@@ -24,7 +24,7 @@ class AddressRecordTests(DNSTest):
         Vrf.objects.create(name='test_vrf')
 
         self.osu_block = "633:105:F000:"
-        create_reverse_domain('0.6.3')
+        create_reverse_domain('0.6.3', ip_type='4')
 
         self.e = Domain.objects.create(name='edu')
         self.o_e = Domain.objects.create(name='oregonstate.edu')
@@ -80,7 +80,7 @@ class AddressRecordTests(DNSTest):
         rec3.label = 'bar'
         self.assertRaises(ValidationError, rec3.save)
 
-    def test_update_A_record(self):
+    def test_update_v4(self):
         rec0 = self.create_A(
             label='', domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
 
@@ -126,7 +126,7 @@ class AddressRecordTests(DNSTest):
         rec1.label = "whoooasfdasdflasdfjoop3"
         rec1.save()
 
-    def test_update_AAAA_record(self):
+    def test_update_v6(self):
         create_reverse_domain('8.6.2.0', ip_type='6')
         osu_block = "8620:105:F000:"
         rec0 = self.create_A(
