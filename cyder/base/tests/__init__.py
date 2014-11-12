@@ -31,8 +31,7 @@ class TestCase(django.test.TestCase):
 
             x = first()
             try:
-                with savepoint_atomic():
-                    second()
+                second()
             except ValidationError:
                 pass
             else:
