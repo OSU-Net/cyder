@@ -39,6 +39,18 @@ class BasicDynamicInterfaceTests(TestCase):
 
         self.s2 = System.objects.create(name='bar')
 
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            DynamicInterface.objects.create(
+                ctnr=self.c, system=self.s1, range=self.r1,
+                mac='11:11:22:22:33:33'),
+            DynamicInterface.objects.create(
+                ctnr=self.c, system=self.s2, range=self.r1,
+                mac='44:44:55:55:66:66'),
+        )
+
     def test_same_mac_different_range(self):
         DynamicInterface.objects.create(
             ctnr=self.c, system=self.s1, range=self.r1,

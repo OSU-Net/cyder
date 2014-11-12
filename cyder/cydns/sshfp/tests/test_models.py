@@ -1,13 +1,13 @@
 from django.core.exceptions import ValidationError
 
-import cyder.base.tests
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.domain.models import Domain
 from cyder.core.ctnr.models import Ctnr
 
 
-class SSHFPTests(cyder.base.tests.TestCase):
+class SSHFPTests(TestCase, ModelTestMixin):
     def setUp(self):
         self.ctnr = Ctnr.objects.create(name='abloobloobloo')
         self.o = Domain.objects.create(name="org")
@@ -15,50 +15,28 @@ class SSHFPTests(cyder.base.tests.TestCase):
         self.ctnr.domains.add(self.o)
         self.ctnr.domains.add(self.o_e)
 
-    def do_generic_add(self, **data):
-        data['ctnr'] = self.ctnr
-        sshfp = SSHFP.objects.create(**data)
-        sshfp.__repr__()
-        self.assertTrue(sshfp.details())
-        self.assertEqual(SSHFP.objects.filter(**data).count(), 1)
-        return sshfp
+    def create_sshfp(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
+        return SSHFP.objects.create(**kwargs)
 
-    def do_remove(self, **data):
-        sshfp = self.do_generic_add(**data)
-        sshfp.delete()
-        self.assertEqual(SSHFP.objects.filter(**data).count(), 0)
-
-    def test_add_remove_sshfp(self):
-        self.do_generic_add(
-            label="asdf",
-            domain=self.o_e,
-            key="7d97e98f8af710c7e7fe703abc8f639e0ee507c4",
-            fingerprint_type=1,
-            algorithm_number=1,
-        )
-
-        self.do_generic_add(
-            label="asdf2",
-            domain=self.o_e,
-            key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
-            fingerprint_type=1,
-            algorithm_number=1,
-        )
-
-        self.do_generic_add(
-            label="df",
-            domain=self.o_e,
-            key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
-            fingerprint_type=1,
-            algorithm_number=1,
-        )
-
-        self.do_generic_add(
-            label="12314",
-            domain=self.o_e,
-            key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
-            fingerprint_type=1,
-            algorithm_number=1,
+    def test_create_delete(self):
+        return (
+            self.create_sshfp(
+                label="asdf", domain=self.o_e,
+                key="7d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+                fingerprint_type=1, algorithm_number=1),
+            self.create_sshfp(
+                label="asdf2", domain=self.o_e,
+                key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+                fingerprint_type=1, algorithm_number=1),
+            self.create_sshfp(
+                label="df", domain=self.o_e,
+                key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+                fingerprint_type=1, algorithm_number=1),
+            self.create_sshfp(
+                label="12314", domain=self.o_e,
+                key="8d97e98f8af710c7e7fe703abc8f639e0ee507c4",
+                fingerprint_type=1, algorithm_number=1),
         )
 
     def test_domain_ctnr(self):

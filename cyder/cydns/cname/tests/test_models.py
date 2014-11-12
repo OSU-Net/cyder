@@ -1,5 +1,13 @@
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -11,17 +19,8 @@ from cyder.cydns.srv.models import SRV
 from cyder.cydns.tests.utils import create_zone, DNSTest
 from cyder.cydns.txt.models import TXT
 
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.range.models import Range
-from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.vrf.models import Vrf
 
-from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
-
-
-class CNAMETests(DNSTest):
+class CNAMETests(DNSTest, ModelTestMixin):
     def setUp(self):
         super(CNAMETests, self).setUp()
 
@@ -29,7 +28,6 @@ class CNAMETests(DNSTest):
 
         create_zone('128.in-addr.arpa')
 
-        self.ctnr1 = Ctnr.objects.create(name='test_ctnr1')
         self.ctnr2 = Ctnr.objects.create(name='test_ctnr2')
 
         self.g = create_zone('gz')
@@ -38,8 +36,8 @@ class CNAMETests(DNSTest):
         Domain.objects.create(name='cd')
         self.whatcd = create_zone('what.cd')
 
-        for dom in [self.g, self.c_g, self.d, self.whatcd]:
-            self.ctnr1.domains.add(dom)
+        for dom in (self.g, self.c_g, self.d, self.whatcd):
+            self.ctnr.domains.add(dom)
 
         self.r1 = create_zone('10.in-addr.arpa')
         self.r1.save()
@@ -63,56 +61,60 @@ class CNAMETests(DNSTest):
             end_str='128.193.1.2')
 
         for r in (self.sr1, self.sr2, self.sr3):
-            self.ctnr1.ranges.add(r)
+            self.ctnr.ranges.add(r)
 
-    def do_add(self, label, domain, target):
-        cn = CNAME.objects.create(
-            label=label, ctnr=self.ctnr1, domain=domain, target=target)
-        self.assertTrue(cn.details())
+    def create_cname(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
+        return CNAME.objects.create(**kwargs)
 
-        count = CNAME.objects.filter(
-            label=label, ctnr=self.ctnr1, domain=domain, target=target).count()
-        self.assertEqual(count, 1)
-        return cn
-
-    def test_add(self):
-        self.do_add(label='foo', domain=self.g, target='foo.com')
-        self.do_add(label='boo', domain=self.c_g, target='foo.foo.com')
-        self.do_add(label='fo1', domain=self.g, target='foo.com')
-        self.do_add(label='hooo', domain=self.g, target='foo.com')
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            self.create_cname(
+                label='a', domain=self.g, target='foo.com'),
+            self.create_cname(
+                label='bbbbbbbbbbbbbbbbb', domain=self.c_g,
+                target='foo.foo.com'),
+            self.create_cname(
+                label='c-c-c-c-c-c-c-c-c', domain=self.g, target='foo.com'),
+            self.create_cname(
+                label='d1d', domain=self.g, target='foo.com'),
+        )
 
     def test1_add_glob(self):
-        self.do_add(label='*foo', domain=self.g, target='foo.com')
-        self.do_add(label='*', domain=self.c_g, target='foo.foo.com')
+        self.create_cname(label='*foo', domain=self.g, target='foo.com')
+        self.create_cname(label='*', domain=self.c_g, target='foo.foo.com')
         self.assertRaises(
-            ValidationError, self.do_add,
+            ValidationError, self.create_cname,
             label='*.fo1', domain=self.g, target='foo.com')
-        self.do_add(label='*sadfasfd-asdf', domain=self.g, target='foo.com')
+        self.create_cname(
+            label='*sadfasfd-asdf', domain=self.g, target='foo.com')
 
     def test2_add_glob(self):
-        self.do_add(label='*coo', domain=self.g, target='foo.com')
-        self.do_add(label='*', domain=self.c_g, target='foo.com')
+        self.create_cname(label='*coo', domain=self.g, target='foo.com')
+        self.create_cname(label='*', domain=self.c_g, target='foo.com')
 
     def test_soa_condition(self):
         self.assertRaises(
-            ValidationError, self.do_add,
+            ValidationError, self.create_cname,
             label='', domain=self.c_g, target='foo.com')
 
     def test_add_bad(self):
         self.assertRaises(
-            ValidationError, self.do_add,
+            ValidationError, self.create_cname,
             label='', domain=self.g, target='..foo.com')
 
     def test_add_mx_with_cname(self):
         def create_mx():
             return MX.objects.create(
-                label='', domain=self.c_g, ctnr=self.ctnr1,
+                label='', domain=self.c_g, ctnr=self.ctnr,
                 server=('cnamederp1.' + self.c_g.name), priority=2, ttl=2222)
         create_mx.name = 'MX'
 
         def create_cname():
             return CNAME.objects.create(
-                label='cnamederp1', domain=self.c_g, ctnr=self.ctnr1,
+                label='cnamederp1', domain=self.c_g, ctnr=self.ctnr,
                 target='foo.com')
         create_cname.name = 'CNAME'
 
@@ -121,13 +123,13 @@ class CNAMETests(DNSTest):
     def test_address_record_exists(self):
         def create_a():
             return AddressRecord.objects.create(
-                label='testyfoo', ctnr=self.ctnr1, domain=self.whatcd,
+                label='testyfoo', ctnr=self.ctnr, domain=self.whatcd,
                 ip_type='4', ip_str="128.193.1.1")
         create_a.name = 'AddressRecord'
 
         def create_cname():
             return CNAME.objects.create(
-                label='testyfoo', ctnr=self.ctnr1, domain=self.whatcd,
+                label='testyfoo', ctnr=self.ctnr, domain=self.whatcd,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -136,13 +138,13 @@ class CNAMETests(DNSTest):
     def test_address_record_exists_uppercase(self):
         def create_a():
             return AddressRecord.objects.create(
-                label='testyfoo', ctnr=self.ctnr1, domain=self.whatcd,
+                label='testyfoo', ctnr=self.ctnr, domain=self.whatcd,
                 ip_type='4', ip_str="128.193.1.1")
         create_a.name = 'AddressRecord'
 
         def create_cname():
             return CNAME.objects.create(
-                label='Testyfoo', ctnr=self.ctnr1, domain=self.whatcd,
+                label='Testyfoo', ctnr=self.ctnr, domain=self.whatcd,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -151,13 +153,13 @@ class CNAMETests(DNSTest):
     def test_srv_exists(self):
         def create_srv():
             return SRV.objects.create(
-                label='_testyfoo', ctnr=self.ctnr1, domain=self.whatcd,
+                label='_testyfoo', ctnr=self.ctnr, domain=self.whatcd,
                 target='asdf', port=2, priority=2, weight=4)
         create_srv.name = 'SRV'
 
         def create_cname():
             return CNAME.objects.create(
-                label='_testyfoo', ctnr=self.ctnr1, domain=self.whatcd,
+                label='_testyfoo', ctnr=self.ctnr, domain=self.whatcd,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -166,13 +168,13 @@ class CNAMETests(DNSTest):
     def test_txt_exists(self):
         def create_txt():
             return TXT.objects.create(
-                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr1,
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
                 txt_data='asdf')
         create_txt.name = 'TXT'
 
         def create_cname():
             return CNAME.objects.create(
-                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr1,
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -181,13 +183,13 @@ class CNAMETests(DNSTest):
     def test_mx_exists(self):
         def create_mx():
             return MX.objects.create(
-                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr1,
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
                 server='asdf', priority=123, ttl=123)
         create_mx.name = 'MX'
 
         def create_cname():
             return CNAME.objects.create(
-                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr1,
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -195,7 +197,7 @@ class CNAMETests(DNSTest):
 
     def test_ns_exists(self):
         bleh = Domain.objects.create(name='bleh.what.cd')
-        self.ctnr1.domains.add(bleh)
+        self.ctnr.domains.add(bleh)
 
         def create_ns():
             return Nameserver.objects.create(domain=bleh, server='asdf')
@@ -203,7 +205,7 @@ class CNAMETests(DNSTest):
 
         def create_cname():
             return CNAME.objects.create(
-                label='', ctnr=self.ctnr1, domain=bleh, target='wat')
+                label='', ctnr=self.ctnr, domain=bleh, target='wat')
         create_cname.name = 'CNAME'
 
         self.assertObjectsConflict((create_ns, create_cname))
@@ -212,13 +214,13 @@ class CNAMETests(DNSTest):
         def create_static_intr():
             return StaticInterface.objects.create(
                 label='testyfoo', domain=self.whatcd, ip_str='10.0.0.1',
-                ip_type='4', system=self.s, ctnr=self.ctnr1,
+                ip_type='4', system=self.s, ctnr=self.ctnr,
                 mac="11:22:33:44:55:66")
         create_static_intr.name = 'StaticInterface'
 
         def create_cname():
             return CNAME.objects.create(
-                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr1,
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -228,12 +230,12 @@ class CNAMETests(DNSTest):
         def create_ptr():
             return PTR.objects.create(
                 ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd',
-                ctnr=self.ctnr1)
+                ctnr=self.ctnr)
         create_ptr.name = 'PTR'
 
         def create_cname():
             return CNAME.objects.create(
-                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr1,
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
                 target='wat')
         create_cname.name = 'CNAME'
 
@@ -242,16 +244,16 @@ class CNAMETests(DNSTest):
     def test_cname_point_to_itself(self):
         self.assertRaises(
             ValidationError, CNAME.objects.create,
-            label='foopy', domain=self.whatcd, ctnr=self.ctnr1,
+            label='foopy', domain=self.whatcd, ctnr=self.ctnr,
             target='foopy.what.cd')
 
     def test_domain_ctnr(self):
         """Test that a CNAME's domain must be in the CNAME's container"""
         gz = Domain.objects.get(name='gz')
-        self.ctnr1.domains.add(gz)
+        self.ctnr.domains.add(gz)
 
         CNAME.objects.create(
-            label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
+            label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr)
 
         self.assertRaises(
             ValidationError, CNAME.objects.create,
@@ -260,10 +262,10 @@ class CNAMETests(DNSTest):
     def test_name_uniqueness(self):
         """Test that CNAMEs must share a ctnr if they have the same name"""
         cn1 = CNAME.objects.create(
-            label='bar', domain=self.g, target='foo1.gz', ctnr=self.ctnr1)
+            label='bar', domain=self.g, target='foo1.gz', ctnr=self.ctnr)
 
         cn2 = CNAME.objects.create(
-            label='bar', domain=self.g, target='foo2.gz', ctnr=self.ctnr1)
+            label='bar', domain=self.g, target='foo2.gz', ctnr=self.ctnr)
 
         self.assertRaises(
             ValidationError, CNAME.objects.create,
@@ -271,7 +273,7 @@ class CNAMETests(DNSTest):
 
     def bootstrap_zone_and_range(self):
         d = Domain.objects.create(name='example.gz')
-        self.ctnr1.domains.add(d)
+        self.ctnr.domains.add(d)
 
         soa = SOA.objects.create(
             root_domain=d, primary='ns.example.gz',
@@ -295,7 +297,7 @@ class CNAMETests(DNSTest):
         ns = Nameserver.objects.create(domain=d, server='cyderhack')
 
         glue = AddressRecord.objects.create(
-            label='ns', domain=d, ip_str='128.193.0.2', ctnr=self.ctnr1)
+            label='ns', domain=d, ip_str='128.193.0.2', ctnr=self.ctnr)
 
         ns.server = 'ns.example.gz'
         ns.save()
@@ -310,20 +312,20 @@ class CNAMETests(DNSTest):
         def create_cname():
             return CNAME.objects.create(
                 label='foo', domain=e_g, target='bar.example.gz',
-                ctnr=self.ctnr1)
+                ctnr=self.ctnr)
         create_cname.name = 'CNAME'
 
         def create_si():
             s = System.objects.create(name='test_system')
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=e_g,
-                ip_str='128.193.0.3', ip_type='4', system=s, ctnr=self.ctnr1)
+                ip_str='128.193.0.3', ip_type='4', system=s, ctnr=self.ctnr)
         create_si.name = 'StaticInterface'
 
         def create_mx():
             return MX.objects.create(
                 label='foo', domain=e_g, server='mail.example.gz', priority=1,
-                ctnr=self.ctnr1)
+                ctnr=self.ctnr)
         create_mx.name = 'MX'
 
         self.assertObjectsConflict((create_cname, create_si))
@@ -335,12 +337,12 @@ class CNAMETests(DNSTest):
         self.bootstrap_zone_and_range()
 
         f_e_g = Domain.objects.create(name='foo.example.gz')
-        self.ctnr1.domains.add(f_e_g)
+        self.ctnr.domains.add(f_e_g)
 
         def create_cname():
             return CNAME.objects.create(
                 label='', domain=f_e_g.reload(), target='bar.example.gz',
-                ctnr=self.ctnr1)
+                ctnr=self.ctnr)
         create_cname.name = 'CNAME'
 
         def create_soa():
@@ -362,7 +364,7 @@ class CNAMETests(DNSTest):
 
         for target in valid_targets:
             cn = CNAME.objects.create(
-                label='bar', domain=self.g, target=target, ctnr=self.ctnr1)
+                label='bar', domain=self.g, target=target, ctnr=self.ctnr)
             cn.delete()
 
         invalid_targets = (
@@ -373,7 +375,7 @@ class CNAMETests(DNSTest):
         for target in invalid_targets:
             self.assertRaises(
                 ValidationError, CNAME.objects.create,
-                label='bar', domain=self.g, target=target, ctnr=self.ctnr1)
+                label='bar', domain=self.g, target=target, ctnr=self.ctnr)
 
     def test_staticinterface_conflict(self):
         """Test that a CNAME can't have the same name as a StaticInterface"""
@@ -384,7 +386,7 @@ class CNAMETests(DNSTest):
         def create_cname():
             return CNAME.objects.create(
                 label='foo', domain=d, target='www.example.gz',
-                ctnr=self.ctnr1)
+                ctnr=self.ctnr)
         create_cname.name = 'CNAME'
 
         def create_si():
@@ -392,7 +394,7 @@ class CNAMETests(DNSTest):
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,
-                ctnr=self.ctnr1)
+                ctnr=self.ctnr)
         create_si.name = 'StaticInterface'
 
         self.assertObjectsConflict((create_cname, create_si))

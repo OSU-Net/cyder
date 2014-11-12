@@ -55,3 +55,17 @@ class TestCase(django.test.TestCase):
             y = second()
 
             transaction.savepoint_rollback(sid)
+
+
+class ModelTestMixin(object):
+    def test_create_delete(self):
+        for obj in self.objs:
+            self.assertTrue(obj.pk)
+            self.assertTrue(repr(obj))
+            self.assertTrue(str(obj))
+            self.assertTrue(unicode(obj))
+            self.assertTrue(obj.details())
+            self.assertTrue(obj.get_update_url())
+            self.assertTrue(obj.get_delete_url())
+            obj.delete()
+            self.assertFalse(obj.pk)

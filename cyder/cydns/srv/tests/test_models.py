@@ -17,56 +17,44 @@ class SRVTests(TestCase):
         for dom in (self.o, self.o_e, self.b_o_e):
             self.ctnr.domains.add(dom)
 
-    def do_generic_add(self, **data):
-        data['ctnr'] = self.ctnr
-        srv = SRV.objects.create(**data)
-        repr(srv)
-        self.assertTrue(srv.details())
-        rsrv = SRV.objects.filter(**data)
-        self.assertTrue(len(rsrv) == 1)
-        return srv
+    def create_srv(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
+        return SRV.objects.create(**kwargs)
 
-    def do_remove(self, **data):
-        srv = self.do_generic_add(**data)
-        srv.delete()
-        rsrv = SRV.objects.filter(**data)
-        self.assertTrue(len(rsrv) == 0)
-
-    def test_add_remove_srv(self):
-        self.do_remove(
-            label='_df', domain=self.o_e, target='relay.oregonstate.edu',
-            priority=2, weight=2222, port=222)
-
-        self.do_remove(
-            label='_df', domain=self.o, target='foo.com.nar', priority=1234,
-            weight=23414, port=222)
-
-        self.do_remove(
-            label='_sasfd', domain=self.b_o_e, target='foo.safasdlcom.nar',
-            priority=12234, weight=23414, port=222)
-
-        self.do_remove(
-            label='_faf', domain=self.o, target='foo.com.nar', priority=1234,
-            weight=23414, port=222)
-
-        self.do_remove(
-            label='_bar', domain=self.o_e, target='relay.oregonstate.edu',
-            priority=2, weight=2222, port=222)
-
-        self.do_remove(
-            label='_bar', domain=self.o_e, target='', priority=2, weight=2222,
-            port=222)
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return [
+            self.create_srv(
+                label='_df', domain=self.o_e, target='relay.oregonstate.edu',
+                priority=2, weight=2222, port=222),
+            self.create_srv(
+                label='_df', domain=self.o, target='foo.com.nar',
+                priority=1234, weight=23414, port=222),
+            self.create_srv(
+                label='_sasfd', domain=self.b_o_e, target='foo.safasdlcom.nar',
+                priority=12234, weight=23414, port=222),
+            self.create_srv(
+                label='_faf', domain=self.o, target='foo.com.nar',
+                priority=1234, weight=23414, port=222),
+            self.create_srv(
+                label='_bar', domain=self.o_e, target='relay.oregonstate.edu',
+                priority=2, weight=2222, port=222),
+            self.create_srv(
+                label='_bar', domain=self.o_e, target='', priority=2,
+                weight=2222, port=222),
+        ]
 
     def test_invalid_add_update(self):
         def create_srv():
-            return self.do_generic_add(
+            return self.create_srv(
                 label='_df', domain=self.o_e, target='relay.oregonstate.edu',
                 priority=2, weight=2222, port=222)
 
         srv = create_srv()
         self.assertRaises(ValidationError, create_srv)
 
-        self.do_generic_add(
+        self.create_srv(
             label='_df', domain=self.o_e, target='foo.oregonstate.edu',
             priority=2, weight=2222, port=222)
 

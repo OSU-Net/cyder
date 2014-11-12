@@ -1,5 +1,4 @@
-from django.test import TestCase
-
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.constants import STATIC
@@ -13,7 +12,7 @@ from cyder.cydns.tests.utils import create_zone
 from cyder.cydns.view.models import View
 
 
-class ViewTests(TestCase):
+class ViewTests(TestCase, ModelTestMixin):
     """
     Cases we need to cover:
     1) Give an A/PTR/StaticInterface private IP and the private view.
@@ -46,6 +45,15 @@ class ViewTests(TestCase):
             network=self.net, range_type=STATIC, start_str='10.0.0.1',
             end_str='10.0.0.3')
         self.ctnr.ranges.add(self.sr)
+
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            View.objects.create(name='blip'),
+            View.objects.create(name='fork'),
+            View.objects.create(name='eeeeeeeee'),
+        )
 
     def test_private_view_case_1_addr(self):
         a = AddressRecord.objects.create(

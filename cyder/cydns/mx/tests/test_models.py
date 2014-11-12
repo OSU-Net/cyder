@@ -18,60 +18,35 @@ class MXTests(cyder.base.tests.TestCase):
         for dom in [self.o, self.o_e, self.b_o_e]:
             self.ctnr.domains.add(dom)
 
-    def do_generic_add(self, **data):
-        data['ctnr'] = self.ctnr
-        mx = MX(**data)
-        mx.__repr__()
-        mx.save()
-        self.assertTrue(mx.details())
-        self.assertEqual(MX.objects.filter(**data).count(), 1)
-        return mx
+    def create_mx(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
+        return MX.objects.create(**kwargs)
 
-    def test_add_mx(self):
-        self.do_generic_add(
-            label='osumail',
-            domain=self.o,
-            server='relay.oregonstate.edu',
-            priority=2,
-            ttl=2222,
-        )
-
-        self.do_generic_add(
-            label='',
-            domain=self.o_e,
-            server='mail.sdf.fo',
-            priority=9,
-            ttl=34234,
-        )
-
-        self.do_generic_add(
-            label='mail',
-            domain=self.b_o_e,
-            server='asdf.asdf',
-            priority=123,
-            ttl=213,
-        )
-
-        self.do_generic_add(
-            label='',
-            domain=self.b_o_e,
-            server='oregonstate.edu',
-            priority=2,
-            ttl=2,
-        )
-
-        self.do_generic_add(
-            label=u'dsfasdfasdfasdfasdfasdfasdf',
-            domain=self.o,
-            server='nope.mail',
-            priority=12,
-            ttl=124,
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            self.create_mx(
+                label='osumail', domain=self.o, server='relay.oregonstate.edu',
+                priority=2, ttl=2222),
+            self.create_mx(
+                label='', domain=self.o_e, server='mail.sdf.fo', priority=9,
+                ttl=34234),
+            self.create_mx(
+                label='mail', domain=self.b_o_e, server='asdf.asdf',
+                priority=123, ttl=213),
+            self.create_mx(
+                label='', domain=self.b_o_e, server='oregonstate.edu',
+                priority=2, ttl=2),
+            self.create_mx(
+                label=u'dsfasdfasdfasdfasdfasdfasdf', domain=self.o,
+                server='nope.mail', priority=12, ttl=124),
         )
 
     def test_add_invalid(self):
         # TLD condition
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='',
             domain=self.o,
             server='mail.oregonstate.edu',
@@ -80,7 +55,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='adsf.com',
             domain=self.o_e,
             server='mail.oregonstate.edu',
@@ -89,7 +64,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='foo',
             domain=self.o_e,
             server='mail..com',
@@ -98,7 +73,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='foo.bar',
             domain=self.o_e,
             server='mail.com',
@@ -107,7 +82,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='asdf#$@',
             domain=self.o_e,
             server='coo.com',
@@ -116,7 +91,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='asdf',
             domain=self.o_e,
             server='coo.com',
@@ -125,7 +100,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='asdf',
             domain=self.o_e,
             server='coo.com',
@@ -134,7 +109,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='asdf',
             domain=self.o_e,
             server=234,
@@ -143,7 +118,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='a',
             domain=self.o_e,
             server='foo',
@@ -152,7 +127,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
     def do_remove(self, **data):
-        mx = self.do_generic_add(**data)
+        mx = self.create_mx(**data)
         mx.delete()
         self.assertFalse(MX.objects.filter(**data).exists())
 
@@ -198,7 +173,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
     def test_add_and_update_dup(self):
-        mx0 = self.do_generic_add(
+        mx0 = self.create_mx(
             label='',
             domain=self.o_e,
             server='relaydf.oregonstate.edu',
@@ -207,7 +182,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='',
             domain=self.o_e,
             server='relaydf.oregonstate.edu',
@@ -216,7 +191,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         def y():
-            self.do_generic_add(
+            self.create_mx(
                 label='',
                 domain=self.o_e,
                 server='mail.sddf.fo',
@@ -242,7 +217,7 @@ class MXTests(cyder.base.tests.TestCase):
         )
 
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_mx,
             label='',
             domain=self.o_e,
             server='cnamederp.oregonstate.org',

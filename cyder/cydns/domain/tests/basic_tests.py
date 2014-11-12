@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -10,33 +11,26 @@ from cyder.cydns.tests.utils import create_zone
 from basedomain import BaseDomain
 
 
-class DomainTests(BaseDomain):
-    def test_remove_domain(self):
-        Domain.objects.create(name='com')
-        f_c = Domain.objects.create(name='foo.com')
-        str(f_c)
-        f_c.__repr__()
-        f_c.delete()
+class DomainTests(BaseDomain, ModelTestMixin):
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return reversed((
+            Domain.objects.create(name='a'),
+            Domain.objects.create(name='bbbbbbbbbb.a'),
+            Domain.objects.create(name='c-c-c-c-c.a'),
+            Domain.objects.create(name='d1d.bbbbbbbbbb.a'),
+            Domain.objects.create(name='_foo.a'),
+            Domain.objects.create(name='moo_foo._foo.a'),
+        ))
 
-    def test1_add_domain(self):
-        c = Domain.objects.create(name='com')
-
-        f_c = Domain.objects.create(name='foo.com')
-        f_c.details()
-        self.assertEqual(f_c.master_domain, c)
-
-        b_c = Domain.objects.create(name='bar.com')
-        self.assertEqual(b_c.master_domain, c)
-
-        b_b_c = Domain.objects.create(name='baz.bar.com')
-        self.assertEqual(b_b_c.master_domain, b_c)
-
-    def test2_add_domain(self):
-        # Some domains have '_' in their name. Make sure validation allows
-        # this.
-        Domain.objects.create(name='cz')
-        Domain.objects.create(name='_foo.cz')
-        Domain.objects.create(name='moo_foo._foo.cz')
+    def test_master_domain(self):
+        a = Domain.objects.create(name='a')
+        self.assertEqual(a.master_domain, None)
+        b = Domain.objects.create(name='b.a')
+        self.assertEqual(b.master_domain, a)
+        c = Domain.objects.create(name='c.b.a')
+        self.assertEqual(c.master_domain, b)
 
     def test_soa_validators(self):
         m = Domain.objects.create(name='moo')

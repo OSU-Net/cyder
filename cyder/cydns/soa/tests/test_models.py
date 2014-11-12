@@ -1,57 +1,37 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.domain.models import Domain
 
 
-class SOATests(TestCase):
-    def test_create_soa(self):
-        d = Domain.objects.create(name='bluh')
-        soa = SOA.objects.create(
-            primary="ns1.oregonstate.edu", contact="admin.oregonstate.edu",
-            retry=1234, refresh=1234123, description="bluh", root_domain=d)
-        repr(soa)
-        self.assertTrue(soa.details())
-
-        d = Domain.objects.create(name='wep')
-        SOA.objects.create(
-            primary="do.com", contact="admf.asdf", retry=432152,
-            refresh=1235146134, description="wep", root_domain=d)
-        repr(soa)
-        self.assertTrue(soa.details())
-
-        d = Domain.objects.create(name='bloop')
-        soa = SOA.objects.create(
-            primary='ns1.derp.com', contact='admf.asdf', root_domain=d)
-        repr(soa)
-        self.assertTrue(soa.serial)
-        self.assertTrue(soa.expire)
-        self.assertTrue(soa.retry)
-        self.assertTrue(soa.refresh)
-        self.assertTrue(soa.details())
-
-    def test_create_delete(self):
-        d = Domain.objects.create(name='marp')
-        soa = SOA.objects.create(
-            primary="ns2.oregonstate.edu", contact="admin.oregonstate.edu",
-            retry=1234, refresh=1234123, description="marp", root_domain=d)
-        soa.delete()
-        self.assertIsNone(soa.pk)
-
-        d = Domain.objects.create(name='blook')
-        soa = SOA.objects.create(
-            primary="dddo.com", contact="admf.asdf", retry=432152,
-            refresh=1235146134, description="blook", root_domain=d)
-        soa.delete()
-        self.assertIsNone(soa.pk)
+class SOATests(TestCase, ModelTestMixin):
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        d1 = Domain.objects.create(name='marp')
+        d2 = Domain.objects.create(name='blook')
+        d3 = Domain.objects.create(name='bluh')
+        d4 = Domain.objects.create(name='wep')
+        d5 = Domain.objects.create(name='blah')
+        return (
+            SOA.objects.create(
+                primary="ns2.oregonstate.edu", contact="admin.oregonstate.edu",
+                retry=1234, refresh=1234123, description="marp",
+                root_domain=d1),
+            SOA.objects.create(
+                primary="dddo.com", contact="admf.asdf", retry=432152,
+                refresh=1235146134, description="blook", root_domain=d2),
+            SOA.objects.create(
+                primary="ns1.oregonstate.edu", contact="admin.oregonstate.edu",
+                retry=1234, refresh=1234123, description="bluh",
+                root_domain=d3),
+            SOA.objects.create(
+                primary="do.com", contact="admf.asdf", retry=432152,
+                refresh=1235146134, description="wep", root_domain=d4),
+            SOA.objects.create(
+                primary='ns1.derp.com', contact='admf.asdf', root_domain=d5),
+        )
 
     def test_duplicate(self):
         d = Domain.objects.create(name='flop')

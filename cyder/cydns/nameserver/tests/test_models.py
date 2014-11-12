@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.constants import STATIC
@@ -16,7 +17,7 @@ from cyder.cydns.soa.models import SOA
 from cyder.cydns.tests.utils import create_zone, DNSTest
 
 
-class NSTestsModels(DNSTest):
+class NSTestsModels(DNSTest, ModelTestMixin):
     def setUp(self):
         super(NSTestsModels, self).setUp()
 
@@ -53,25 +54,23 @@ class NSTestsModels(DNSTest):
         self.ctnr.domains.add(domain)
         return domain
 
-    def test_create(self):
-        nss = []
-        nss.append(Nameserver.objects.create(
-            domain=self.r, server='ns2.moot.ru'))
-        nss.append(Nameserver.objects.create(
-            domain=self.r, server='ns5.moot.ru'))
-        nss.append(Nameserver.objects.create(
-            domain=self.r, server=u'ns3.moot.ru'))
-        nss.append(Nameserver.objects.create(
-            domain=self.b_f_r, server='n1.moot.ru'))
-        nss.append(Nameserver.objects.create(
-            domain=self.b_f_r, server='ns2.moot.ru'))
-        nss.append(Nameserver.objects.create(
-            domain=self.r, server='asdf.asdf'))
-
-        for ns in nss:
-            self.assertTrue(ns.pk)
-            self.assertTrue(repr(ns))
-            self.assertTrue(ns.details())
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            Nameserver.objects.create(
+                domain=self.r, server='ns2.moot.ru'),
+            Nameserver.objects.create(
+                domain=self.r, server='ns5.moot.ru'),
+            Nameserver.objects.create(
+                domain=self.r, server=u'ns3.moot.ru'),
+            Nameserver.objects.create(
+                domain=self.b_f_r, server='n1.moot.ru'),
+            Nameserver.objects.create(
+                domain=self.b_f_r, server='ns2.moot.ru'),
+            Nameserver.objects.create(
+                domain=self.r, server='asdf.asdf'),
+        )
 
     def test_add_invalid(self):
         self.assertRaises(

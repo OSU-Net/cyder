@@ -2,6 +2,7 @@ from functools import partial
 
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydns.tests.utils import create_reverse_domain, create_zone, DNSTest
@@ -15,7 +16,7 @@ from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.vrf.models import Vrf
 
 
-class PTRTests(DNSTest):
+class PTRTests(DNSTest, ModelTestMixin):
     def setUp(self):
         super(PTRTests, self).setUp()
 
@@ -61,41 +62,36 @@ class PTRTests(DNSTest):
             end_str=end_str, domain=domain, ip_type=ip_type)
         self.c1.ranges.add(r)
 
-    def do_generic_add(self, ip_str, fqdn, ip_type, domain=None, ctnr=None):
-        if ctnr is None:
-            ctnr = self.c1
+    def create_ptr(self, **kwargs):
+        kwargs.setdefault('ctnr', self.c1)
+        return PTR.objects.create(**kwargs)
 
-        ret = PTR.objects.create(
-            fqdn=fqdn, ip_str=ip_str, ip_type=ip_type, ctnr=ctnr)
-
-        self.assertTrue(ret.details())
-
-        ip = Ip(ip_str=ip_str, ip_type=ip_type)
-        ip.clean_ip()
-        ptr = PTR.objects.get(
-            fqdn=fqdn, ip_upper=ip.ip_upper, ip_lower=ip.ip_lower)
-        ptr.__repr__()
-        ip_str = ip_str.lower()
-        self.assertEqual(ptr.ip_str, ip_str)
-        if domain:
-            if ptr.fqdn == '':
-                self.assertEqual(fqdn, domain.name)
-            else:
-                self.assertEqual(fqdn, ptr.fqdn + '.' + domain.name)
-        else:
-            self.assertEqual(fqdn, ptr.fqdn)
-        return ret
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            self.create_ptr(
+                ip_str='128.123.123.2', ip_type='4', fqdn='a.oregonstate.edu'),
+            self.create_ptr(
+                ip_str='128.123.123.45', ip_type='4',
+                fqdn='bbbbbbbbbbbbbb.nothing.nothing'),
+            self.create_ptr(
+                ip_str='128.123.123.197', ip_type='4',
+                fqdn='c-c-c-c-c-c.nothing'),
+            self.create_ptr(
+                ip_str='128.123.123.254', ip_type='4', fqdn='d1d.edu'),
+        )
 
     def test_no_domain(self):
         for fqdn in ('lol.foo', 'oregonstate.com', 'me.oregondfastate.edu'):
             self.assertRaises(
-                ValidationError, self.do_generic_add,
+                ValidationError, self.create_ptr,
                 ip_str='244.123.123.123', ip_type='4', fqdn=fqdn)
 
     def test_invalid_name(self):
-        ptr_v4 = self.do_generic_add(
+        ptr_v4 = self.create_ptr(
             ip_str='128.123.123.99', ip_type='4', fqdn='foo.oregonstate.edu')
-        ptr_v6 = self.do_generic_add(
+        ptr_v6 = self.create_ptr(
             ip_str=(self.osu_block + ':1'), ip_type='6',
             fqdn='foo.oregonstate.edu')
 
@@ -104,7 +100,7 @@ class PTRTests(DNSTest):
             '%.s#.com')
         for fqdn in bad_fqdns:
             self.assertRaises(
-                ValidationError, self.do_generic_add,
+                ValidationError, self.create_ptr,
                 ip_str='128.123.123.123', ip_type='4', fqdn=fqdn)
 
             self.assertRaises(
@@ -112,7 +108,7 @@ class PTRTests(DNSTest):
                 ptr_v4, fqdn=fqdn)
 
             self.assertRaises(
-                ValidationError, self.do_generic_add,
+                ValidationError, self.create_ptr,
                 ip_str=(self.osu_block + ':2'), ip_type='6', fqdn=fqdn)
 
             self.assertRaises(
@@ -120,21 +116,21 @@ class PTRTests(DNSTest):
                 ptr_v6, fqdn=fqdn)
 
     def test_invalid_ip(self):
-        ptr_v4 = self.do_generic_add(
+        ptr_v4 = self.create_ptr(
             ip_str='128.123.123.99', ip_type='4', fqdn='foo.oregonstate.edu')
         bad_ipv4_ips = (
             '123.123', 'asdfasdf', 32141243, '128.123.123.123.123', '....',
             '1234.', None, False, True)
         for ip_str in bad_ipv4_ips:
             self.assertRaises(
-                ValidationError, self.do_generic_add,
+                ValidationError, self.create_ptr,
                 fqdn='oregonstate.edu', ip_str=ip_str, ip_type='4')
 
             self.assertRaises(
                 ValidationError, self.do_generic_update,
                 ptr_v4, ip_str=ip_str)
 
-        ptr_v6 = self.do_generic_add(
+        ptr_v6 = self.create_ptr(
             ip_str=(self.osu_block + ':1'), ip_type='6',
             fqdn='foo.oregonstate.edu')
         bad_ipv6_ips = (
@@ -142,7 +138,7 @@ class PTRTests(DNSTest):
             lambda x: x, '8::9:9:1', '11:9:9::1', '8.9.9.1', '11.9.9.1')
         for ip_str in bad_ipv6_ips:
             self.assertRaises(
-                ValidationError, self.do_generic_add,
+                ValidationError, self.create_ptr,
                 ip_str=ip_str, fqdn='oregonstate.edu', ip_type='6')
 
             self.assertRaises(
@@ -151,10 +147,10 @@ class PTRTests(DNSTest):
 
     def test_no_reverse_domain(self):
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_ptr,
             fqdn='oregonstate.edu', ip_str='8.9.9.1', ip_type='4')
         self.assertRaises(
-            ValidationError, self.do_generic_add,
+            ValidationError, self.create_ptr,
             fqdn='oregonstate.edu', ip_str='11.9.9.1', ip_type='4')
 
     def do_generic_remove(self, ip_str, fqdn, ip_type):
@@ -229,7 +225,7 @@ class PTRTests(DNSTest):
             network_str='128.193.1.0/24', start_str='128.193.1.1',
             end_str='128.193.1.100')
 
-        ptr = self.do_generic_add(
+        ptr = self.create_ptr(
             ip_str='128.193.1.1', ip_type='4', fqdn='oregonstate.edu')
 
         self.do_generic_update(ptr, fqdn='nothing.nothing.nothing')
@@ -237,7 +233,7 @@ class PTRTests(DNSTest):
         self.do_generic_update(ptr, fqdn='bar.oregonstate.edu')
 
     def test_update_ipv6(self):
-        ptr = self.do_generic_add(
+        ptr = self.create_ptr(
             ip_str=(self.osu_block + ':1'), ip_type='6',
             fqdn='oregonstate.edu')
 
@@ -253,16 +249,18 @@ class PTRTests(DNSTest):
         r = self.r
         self.c1.ranges.add(r)
 
-        self.do_generic_add('128.193.0.2', 'www1.oregonstate.edu', '4',
-                            ctnr=self.c1)
+        self.create_ptr(
+            fqdn='www1.oregonstate.edu', ip_str='128.193.0.2', ip_type='4',
+            ctnr=self.c1)
 
         with self.assertRaises(ValidationError):
-            self.do_generic_add('128.193.0.3', 'www2.oregonstate.edu', '4',
-                                ctnr=c2)
+            self.create_ptr(
+                fqdn='www2.oregonstate.edu', ip_str='128.193.0.3', ip_type='4',
+                ctnr=c2)
 
     def test_target_existence(self):
         """Test that a PTR's target is not required to exist"""
-        self.do_generic_add(
+        self.create_ptr(
             ip_str='128.193.0.2', fqdn='nonexistent.oregonstate.edu',
             ip_type='4')
 
@@ -274,10 +272,10 @@ class PTRTests(DNSTest):
         c2 = Ctnr.objects.create(name='test_ctnr2')
         c2.ranges.add(self.r)
 
-        self.do_generic_add(
+        self.create_ptr(
             ip_str='128.193.0.2', fqdn='foo1.oregonstate.edu',
             ip_type='4', ctnr=self.c1)
-        self.do_generic_add(
+        self.create_ptr(
             ip_str='128.193.0.3', fqdn='foo2.oregonstate.edu',
             ip_type='4', ctnr=c2)
 
@@ -285,7 +283,7 @@ class PTRTests(DNSTest):
         """Test that a PTR's target cannot resemble an IP address"""
         for fqdn in ('10.234.30.253', '128.193.0.3', 'fe80::e1c9:1:228d:d8'):
             with self.assertRaises(ValidationError):
-                self.do_generic_add(ip_str='128.193.0.2', fqdn=fqdn,
+                self.create_ptr(ip_str='128.193.0.2', fqdn=fqdn,
                                     ip_type='4')
 
     def test_same_ip_as_static_intr(self):
@@ -308,7 +306,7 @@ class PTRTests(DNSTest):
         create_si_disabled.name = "StaticInterface with DNS disabled"
 
         def create_ptr():
-            return self.do_generic_add(
+            return self.create_ptr(
                 ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu')
         create_ptr.name = 'PTR'
 
@@ -317,11 +315,11 @@ class PTRTests(DNSTest):
 
     def test_same_ip(self):
         """Test that two PTRs cannot have the same IP"""
-        self.do_generic_add(
+        self.create_ptr(
             ip_str='128.193.0.2', ip_type='4', fqdn='foo1.oregonstate.edu')
 
         with self.assertRaises(ValidationError):
-            self.do_generic_add(
+            self.create_ptr(
                 ip_str='128.193.0.2', ip_type='4', fqdn='foo2.oregonstate.edu')
 
     def test_ptr_in_dynamic_range(self):
@@ -331,5 +329,5 @@ class PTRTests(DNSTest):
             end_str='128.193.1.100', range_type='dy')
 
         with self.assertRaises(ValidationError):
-            self.do_generic_add(
+            self.create_ptr(
                 ip_str='128.193.1.2', ip_type='4', fqdn='foo.oregonstate.edu')

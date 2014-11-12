@@ -2,6 +2,7 @@ import ipaddr
 
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -17,7 +18,7 @@ from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.tests.utils import create_reverse_domain, create_zone, DNSTest
 
 
-class AddressRecordTests(DNSTest):
+class AddressRecordTests(DNSTest, ModelTestMixin):
     def setUp(self):
         super(AddressRecordTests, self).setUp()
 
@@ -41,20 +42,34 @@ class AddressRecordTests(DNSTest):
                     self.g_o_e, self._128, self._128_193):
             self.ctnr.domains.add(dom)
 
-    def create_A(self, **kwargs):
-        kwargs['ctnr'] = self.ctnr
+    def create_ar(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
         return AddressRecord.objects.create(**kwargs)
+
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            self.create_ar(
+                label='a', domain=self.e, ip_str='128.193.40.1', ip_type='4'),
+            self.create_ar(
+                label='bbbbbbbbbbbbbbbbbbbbbbbbbb', domain=self.o_e,
+                ip_str='128.193.40.2', ip_type='4'),
+            self.create_ar(
+                label='c-c-c-c-c-c-c', domain=self.z_o_e,
+                ip_str='128.193.40.3', ip_type='4'),
+        )
 
     ######################
     ### Updating Tests ###
     ######################
 
     def test_invalid_update_to_existing(self):
-        rec1 = self.create_A(
+        rec1 = self.create_ar(
             label='bar', domain=self.z_o_e, ip_str="128.193.40.1", ip_type='4')
-        rec2 = self.create_A(
+        rec2 = self.create_ar(
             label='bar', domain=self.z_o_e, ip_str="128.193.40.2", ip_type='4')
-        rec3 = self.create_A(
+        rec3 = self.create_ar(
             label='foo', domain=self.z_o_e, ip_str="128.193.40.1", ip_type='4')
 
         rec1.label = "foo"
@@ -64,13 +79,13 @@ class AddressRecordTests(DNSTest):
         self.assertRaises(ValidationError, rec3.save)
 
         osu_block = "633:105:F000:"
-        rec1 = self.create_A(
+        rec1 = self.create_ar(
             label='bar', domain=self.z_o_e, ip_str=osu_block + ":1",
             ip_type='6')
-        rec2 = self.create_A(
+        rec2 = self.create_ar(
             label='bar', domain=self.z_o_e, ip_str=osu_block + ":2",
             ip_type='6')
-        rec3 = self.create_A(
+        rec3 = self.create_ar(
             label='foo', domain=self.z_o_e, ip_str=osu_block + ":1",
             ip_type='6')
 
@@ -81,16 +96,16 @@ class AddressRecordTests(DNSTest):
         self.assertRaises(ValidationError, rec3.save)
 
     def test_update_v4(self):
-        rec0 = self.create_A(
+        rec0 = self.create_ar(
             label='', domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
 
-        rec1 = self.create_A(
+        rec1 = self.create_ar(
             label='foo', domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
 
-        rec2 = self.create_A(
+        rec2 = self.create_ar(
             label='bar', domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
 
-        rec3 = self.create_A(
+        rec3 = self.create_ar(
             label='0123456780123456780123456780123456780123456789999901'
                   '234567891',
             domain=self.m_o_e, ip_str="128.193.0.1", ip_type='4')
@@ -129,13 +144,13 @@ class AddressRecordTests(DNSTest):
     def test_update_v6(self):
         create_reverse_domain('8.6.2.0', ip_type='6')
         osu_block = "8620:105:F000:"
-        rec0 = self.create_A(
+        rec0 = self.create_ar(
             label='', domain=self.z_o_e, ip_str=(osu_block + ":1"),
             ip_type='6')
-        rec1 = self.create_A(
+        rec1 = self.create_ar(
             label='foo', domain=self.z_o_e, ip_str=(osu_block + ":1"),
             ip_type='6')
-        rec2 = self.create_A(
+        rec2 = self.create_ar(
             label='bar', domain=self.z_o_e, ip_str=(osu_block + ":1"),
             ip_type='6')
 
@@ -182,20 +197,20 @@ class AddressRecordTests(DNSTest):
     def test_invalid_name(self):
         osu_block = "7620:105:F000:"
         create_reverse_domain('7.6.2.0', ip_type='6')
-        a_v4 = self.create_A(
+        a_v4 = self.create_ar(
             label='bar', domain=self.m_o_e, ip_str="128.193.23.1", ip_type='4')
-        a_v6 = self.create_A(
+        a_v6 = self.create_ar(
             label='baz', domain=self.m_o_e, ip_str=(osu_block + ':1'),
             ip_type='6')
 
         for label in ('.', ' sdfsa ', 'asdf.', '%asdfsaf'):
             self.assertRaises(
-                ValidationError, self.create_A,
+                ValidationError, self.create_ar,
                 label=label, domain=self.f_o_e, ip_str='128.193.23.2',
                 ip_type='4')
 
             self.assertRaises(
-                ValidationError, self.create_A,
+                ValidationError, self.create_ar,
                 label=label, domain=self.f_o_e, ip_str=(osu_block + ':2'),
                 ip_type='6')
 
@@ -206,14 +221,14 @@ class AddressRecordTests(DNSTest):
             self.assertRaises(ValidationError, a_v6.save)
 
     def test_invalid_ip_v4(self):
-        a_v4 = self.create_A(
+        a_v4 = self.create_ar(
             label='bar', domain=self.m_o_e, ip_str="128.193.23.1", ip_type='4')
 
         bad_ips = (
             71134, '19.193.23.1.2', 12314123, 1214123, '1928.193.23.1')
         for ip_str in bad_ips:
             self.assertRaises(
-                ValidationError, self.create_A,
+                ValidationError, self.create_ar,
                 label='baz', domain=self.m_o_e, ip_str=ip_str, ip_type='4')
 
             a_v4.ip_str = ip_str
@@ -222,7 +237,7 @@ class AddressRecordTests(DNSTest):
     def test_invalid_ip_v6(self):
         osu_block = "7620:105:F000:"
         create_reverse_domain('7.6.2.0', ip_type='6')
-        a_v6 = self.create_A(
+        a_v6 = self.create_ar(
             label='bar', domain=self.m_o_e, ip_str=(osu_block + ':1'),
             ip_type='6')
 
@@ -231,7 +246,7 @@ class AddressRecordTests(DNSTest):
             '128.193.1.1')
         for ip_str in bad_ips:
             self.assertRaises(
-                ValidationError, self.create_A,
+                ValidationError, self.create_ar,
                 label='baz', domain=self.m_o_e, ip_str=ip_str, ip_type='6')
 
             a_v6.ip_str = ip_str
@@ -242,7 +257,7 @@ class AddressRecordTests(DNSTest):
     ######################
 
     def create_delete_A(self, label, domain, ip_str, ip_type='4'):
-        a = self.create_A(
+        a = self.create_ar(
             label=label, domain=domain, ip_str=ip_str, ip_type=ip_type)
         a.delete()
 
@@ -297,86 +312,86 @@ class AddressRecordTests(DNSTest):
 
     def test_add_A_address_glob_records(self):
         # Test the glob form: *.foo.com A 10.0.0.1
-        rec = self.create_A(
+        rec = self.create_ar(
             label='', domain=self.o_e, ip_str="128.193.0.1", ip_type='4')
         self.assertEqual(str(rec), "oregonstate.edu A 128.193.0.1")
 
-        self.create_A(label='*', domain=self.f_o_e, ip_str='128.193.0.10')
-        self.create_A(label='*foo', domain=self.f_o_e, ip_str='128.193.0.10')
+        self.create_ar(label='*', domain=self.f_o_e, ip_str='128.193.0.10')
+        self.create_ar(label='*foo', domain=self.f_o_e, ip_str='128.193.0.10')
 
-        self.create_A(label='*foo', domain=self.o_e, ip_str='128.193.0.5')
-        self.create_A(label='*foo2', domain=self.f_o_e, ip_str='128.193.0.7')
-        self.create_A(label='*foo2', domain=self.o_e, ip_str='128.193.0.2')
-        self.create_A(label='*ba-r', domain=self.f_o_e, ip_str='128.193.0.9')
-        self.create_A(label='*ba-r', domain=self.o_e, ip_str='128.193.0.4')
+        self.create_ar(label='*foo', domain=self.o_e, ip_str='128.193.0.5')
+        self.create_ar(label='*foo2', domain=self.f_o_e, ip_str='128.193.0.7')
+        self.create_ar(label='*foo2', domain=self.o_e, ip_str='128.193.0.2')
+        self.create_ar(label='*ba-r', domain=self.f_o_e, ip_str='128.193.0.9')
+        self.create_ar(label='*ba-r', domain=self.o_e, ip_str='128.193.0.4')
 
     # Understore '_' tests
     def test_add_address_underscore_in_name_domain(self):
         d = Domain.objects.create(name="_mssucks.edu")
         self.ctnr.domains.add(d)
 
-        self.create_A(label='*', domain=d, ip_str='128.193.0.10')
-        self.create_A(label='foo', domain=d, ip_str='128.193.0.10')
-        self.create_A(label='noop', domain=d, ip_str='128.193.0.10')
+        self.create_ar(label='*', domain=d, ip_str='128.193.0.10')
+        self.create_ar(label='foo', domain=d, ip_str='128.193.0.10')
+        self.create_ar(label='noop', domain=d, ip_str='128.193.0.10')
 
     def test_add_A_address_records(self):
-        rec = self.create_A(
+        rec = self.create_ar(
             label='', domain=self.o_e, ip_str="128.193.0.1")
         self.assertEqual(str(rec), "oregonstate.edu A 128.193.0.1")
 
-        self.create_A(label='foobar', domain=self.f_o_e, ip_str='128.193.0.10')
-        self.create_A(label='foob1ar', domain=self.o_e, ip_str='128.193.0.5')
-        self.create_A(label='foo2', domain=self.f_o_e, ip_str='128.193.0.7')
-        self.create_A(label='foo2', domain=self.o_e, ip_str='128.193.0.2')
-        self.create_A(label='ba-r', domain=self.f_o_e, ip_str='128.193.0.9')
-        self.create_A(label='ba-r', domain=self.o_e, ip_str='128.193.0.4')
+        self.create_ar(label='foobar', domain=self.f_o_e, ip_str='128.193.0.10')
+        self.create_ar(label='foob1ar', domain=self.o_e, ip_str='128.193.0.5')
+        self.create_ar(label='foo2', domain=self.f_o_e, ip_str='128.193.0.7')
+        self.create_ar(label='foo2', domain=self.o_e, ip_str='128.193.0.2')
+        self.create_ar(label='ba-r', domain=self.f_o_e, ip_str='128.193.0.9')
+        self.create_ar(label='ba-r', domain=self.o_e, ip_str='128.193.0.4')
 
     def test_add_AAAA_address_records(self):
         osu_block = "2620:105:F000:"
         create_reverse_domain('2.6.2.0', ip_type='6')
 
-        self.create_A(
+        self.create_ar(
             label='', domain=self.f_o_e, ip_str=(osu_block + ':4'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='', domain=self.o_e, ip_str=(osu_block + ':1'), ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6ba-r', domain=self.o_e, ip_str=(osu_block + ':6'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6ba-r', domain=self.f_o_e, ip_str=(osu_block + ':7'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6foo', domain=self.f_o_e, ip_str=(osu_block + ':5'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6foo', domain=self.o_e, ip_str=(osu_block + ':3'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6ba3z', domain=self.o_e, ip_str=(osu_block + ':4'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6ba3z', domain=self.f_o_e, ip_str=(osu_block + ':6'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6foob1ar', domain=self.o_e, ip_str=(osu_block + ':5'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='6foob1ar', domain=self.f_o_e, ip_str=(osu_block + ':8'),
             ip_type='6')
-        self.create_A(
+        self.create_ar(
             label='23412341253254243', domain=self.f_o_e,
             ip_str=(osu_block + ':8'), ip_type='6')
 
     def test_ip_type(self):
         # invalid ip_type
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='uuu', domain=self.f_o_e, ip_str='128.193.4.1', ip_type='x')
 
         # ip_type defaults to '4', but ip_str is IPv6
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='uuu', domain=self.f_o_e, ip_str='111:22:3::')
 
     def test_bad_A_ip(self):
@@ -385,35 +400,35 @@ class AddressRecordTests(DNSTest):
         ### IPv4 ###
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf0', domain=self.o_e, ip_str=(osu_block + ':1'))
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf1', domain=self.o_e, ip_str=123142314)
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf1', domain=self.o_e, ip_str='128.193.0.1.22',
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf2', domain=self.o_e, ip_str='128.193.8')
 
         ### IPv6 ###
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf5', domain=self.o_e, ip_str='128.193.8.1', ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf4', domain=self.o_e, ip_str=(osu_block + ':::'),
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='asdf4', domain=self.o_e, ip_str=123213487823762347612346,
             ip_type='6')
 
@@ -421,13 +436,13 @@ class AddressRecordTests(DNSTest):
         ### IPv4 ###
 
         def a1():
-            self.create_A(label='', domain=self.f_o_e, ip_str='128.193.0.2')
+            self.create_ar(label='', domain=self.f_o_e, ip_str='128.193.0.2')
 
         a1()
         self.assertRaises(ValidationError, a1)
 
         def a2():
-            self.create_A(label='a2', domain=self.f_o_e, ip_str='128.193.0.2')
+            self.create_ar(label='a2', domain=self.f_o_e, ip_str='128.193.0.2')
 
         a2()
         self.assertRaises(ValidationError, a2)
@@ -438,7 +453,7 @@ class AddressRecordTests(DNSTest):
         create_reverse_domain('9.6.2.0', ip_type='6')
 
         def a3():
-            self.create_A(
+            self.create_ar(
                 label='a3', domain=self.f_o_e, ip_str=(osu_block + ':2'),
                 ip_type='6')
 
@@ -446,7 +461,7 @@ class AddressRecordTests(DNSTest):
         self.assertRaises(ValidationError, a3)
 
         def a4():
-            self.create_A(
+            self.create_ar(
                 label='a4', domain=self.f_o_e, ip_str=(osu_block + ':0:9'),
                 ip_type='6')
 
@@ -454,7 +469,7 @@ class AddressRecordTests(DNSTest):
         self.assertRaises(ValidationError, a4)
 
         def a5():
-            self.create_A(
+            self.create_ar(
                 label='nope', domain=self.o_e, ip_str=(osu_block + ':4'),
                 ip_type='6')
 
@@ -463,19 +478,19 @@ class AddressRecordTests(DNSTest):
 
     def test_add_A_invalid_address_records(self):
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='', domain=self.e, ip_str='128.193.0.2')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='foo.baz.bar.nas', domain=self.o_e, ip_str='128.193.0.2')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='n%as', domain=self.o_e, ip_str='128.193.0.2')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='n+as', domain=self.o_e, ip_str='128.193.0.2')
 
     def test_add_AAAA_invalid_address_records(self):
@@ -483,37 +498,37 @@ class AddressRecordTests(DNSTest):
         create_reverse_domain('3.6.2.0', ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='foo.nas', domain=self.o_e, ip_str=(osu_block + ':1'),
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='foo.bar.nas', domain=self.o_e, ip_str=(osu_block + ':2'),
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='foo.baz.bar.nas', domain=self.o_e,
             ip_str=(osu_block + ':3'), ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='n as', domain=self.o_e, ip_str=(osu_block + ':4'),
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='n!+/*&#@as', domain=self.o_e, ip_str=(osu_block + ':5'),
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='n%as', domain=self.o_e, ip_str=(osu_block + ':6'),
             ip_type='6')
 
         self.assertRaises(
-            ValidationError, self.create_A,
+            ValidationError, self.create_ar,
             label='n+as', domain=self.o_e, ip_str=(osu_block + ':7'),
             ip_type='6')
 
@@ -521,7 +536,7 @@ class AddressRecordTests(DNSTest):
         """A record shouldn't update its label or domain when it is a glue
         record"""
 
-        glue = self.create_A(
+        glue = self.create_ar(
             label='ns99', domain=self.o_e, ip_str='128.193.1.10')
 
         ns = Nameserver.objects.create(
@@ -547,7 +562,7 @@ class AddressRecordTests(DNSTest):
         glue.save()
 
     def test_delete_with_cname_pointing_to_a(self):
-        a = self.create_A(
+        a = self.create_ar(
             label='foo100', domain=self.o_e, ip_str='128.193.1.10')
         cn = CNAME.objects.create(
             label="foomom", domain=self.o_e,
@@ -673,5 +688,5 @@ class AddressRecordTests(DNSTest):
 
         for ip_str, ip_type in invalid_ips:
             self.assertRaises(
-                ValidationError, self.create_A,
+                ValidationError, self.create_ar,
                 label='foo', domain=self.o_e, ip_str=ip_str, ip_type=ip_type)

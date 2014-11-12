@@ -68,13 +68,12 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         if kwargs.pop('validate_glue', True):
             if self.nameserver_set.exists():
                 raise ValidationError(
-                    "Cannot delete the record {0}. It is a glue "
-                    "record.".format(self.record_type()))
+                    'Cannot delete this address record. It is a glue record.')
         if kwargs.pop('check_cname', True):
             if CNAME.objects.filter(target=self.fqdn):
                 raise ValidationError(
-                    "A CNAME points to this {0} record. Change the CNAME "
-                    "before deleting this record.".format(self.record_type()))
+                    'A CNAME points to this address record. Change the CNAME '
+                    'before deleting this record.')
         super(BaseAddressRecord, self).delete(*args, **kwargs)
 
     def check_name_ctnr_collision(self):
@@ -152,12 +151,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                 "This record is a glue record for a Nameserver. Change the "
                 "Nameserver to edit this record."
             )
-
-    def record_type(self):
-        if self.ip_type == IP_TYPE_4:
-            return 'A'
-        else:
-            return 'AAAA'
 
 
 class AddressRecord(BaseAddressRecord):
