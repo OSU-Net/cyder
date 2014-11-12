@@ -95,15 +95,17 @@ class Zone(object):
                         print "%s has been marked as delegated." % self.dname
                         self.domain.save()
 
-                elif self.domain_id is not None:
+                if self.domain_id is not None:
                     # XXX: if SOA is created before AR and NS, then
                     # creating glue will raise an error. However,
                     # when creating delegated domains, an SOA is needed
-                    self.gen_MX()
-                    self.gen_static()
-                    self.gen_AR()
+                    if self.dname not in get_delegated():
+                        self.gen_MX()
+                        self.gen_static()
+                        self.gen_AR()
                     self.gen_NS()
-                    self.domain.soa = self.gen_SOA() or soa
+                    if self.dname not in get_delegated():
+                        self.domain.soa = self.gen_SOA() or soa
 
         else:
             self.domain = self.gen_domain()
