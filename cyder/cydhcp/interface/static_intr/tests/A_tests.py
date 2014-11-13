@@ -5,14 +5,14 @@ from .basestatic import BaseStaticTests
 
 
 class AStaticRegTests(BaseStaticTests):
-    def test1_conflict(self):
+    def test_conflict(self):
         # Add an intr and make sure A can't exist.
         label = "foo4"
         domain = self.f_c
         ip_str = "10.0.0.2"
 
         def i():
-            return self.do_add_intr(
+            return self.create_si(
                 mac="11:22:33:44:55:66",
                 label=label,
                 domain=domain,
@@ -31,12 +31,12 @@ class AStaticRegTests(BaseStaticTests):
 
         self.assertObjectsConflict((i, a))
 
-    def test2_conflict_add_intr_first(self):
+    def test_conflict_add_intr_first(self):
         # Add an intr and update an existing A to conflict. Test for exception.
         label = "fo99"
         domain = self.f_c
 
-        self.do_add_intr(
+        self.create_si(
             mac="12:22:33:44:55:66",
             label=label,
             domain=domain,
@@ -53,7 +53,7 @@ class AStaticRegTests(BaseStaticTests):
         a.ip_str = "10.0.0.2"
         self.assertRaises(ValidationError, a.save)
 
-    def test2_conflict_add_A_first(self):
+    def test_conflict_add_A_first(self):
         # Add an A and update and existing intr to conflict. Test for
         # exception.
         label = "foo98"
@@ -66,7 +66,7 @@ class AStaticRegTests(BaseStaticTests):
             ctnr=self.ctnr,
         )
 
-        intr = self.do_add_intr(
+        intr = self.create_si(
             mac="11:22:33:44:55:66",
             label=label,
             domain=domain,

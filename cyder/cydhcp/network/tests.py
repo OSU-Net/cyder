@@ -1,7 +1,7 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from nose.plugins.skip import SkipTest
 
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
@@ -9,11 +9,20 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import ipv6_to_longs
 
 
-class NetworkTests(TestCase):
-    def test1_create_ipv6(self):
-        s = Network.objects.create(network_str='f::/24', ip_type='6')
-        str(s)
-        s.__repr__()
+class NetworkTests(TestCase, ModelTestMixin):
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            Network.objects.create(network_str='10.0.0.0/8', ip_type='4'),
+            Network.objects.create(network_str='10.0.0.0/16', ip_type='4'),
+            Network.objects.create(network_str='10.0.0.0/17', ip_type='4'),
+            Network.objects.create(network_str='192.168.0.0/24', ip_type='4'),
+            Network.objects.create(network_str='192.168.128.0/25',
+                ip_type='4'),
+            Network.objects.create(network_str='abcd::1234/126', ip_type='6'),
+            Network.objects.create(network_str='f::/24', ip_type='6'),
+        )
 
     def test2_create_ipv6(self):
         s = Network.objects.create(

@@ -1,17 +1,19 @@
-from django.test import TestCase
-
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 
 
-class SiteTests(TestCase):
-    def do_basic_add_network(self, network, prefixlen, ip_type,
-                             name=None, number=None, site=None):
-        return Network.objects.create(
-            network_str=network + "/" + prefixlen, ip_type=ip_type, site=site)
-
-    def do_basic_add_site(self, name, parent=None):
-        return Site.objects.create(name=name, parent=parent)
+class SiteTests(TestCase, ModelTestMixin):
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            Site.objects.create(name='a'),
+            Site.objects.create(name='bbbbbbbbbbbbbbbbbb'),
+            Site.objects.create(name='c-c-c'),
+            Site.objects.create(name='100'),
+            Site.objects.create(name='Hello, world.'),
+        )
 
     def test_related_sites(self):
         s1 = Site.objects.create(name="Site 1")

@@ -5,10 +5,10 @@ from .basestatic import BaseStaticTests
 
 
 class PTRStaticRegTests(BaseStaticTests):
-    def test1_conflict_add_intr_first(self):
+    def test_conflict_add_intr_first(self):
         # Make sure static interface conflicts with PTR.
         def create_intr():
-            return self.do_add_intr(
+            return self.create_si(
                 mac='11:22:33:44:55:66',
                 label='foo4',
                 domain=self.f_c,
@@ -24,8 +24,8 @@ class PTRStaticRegTests(BaseStaticTests):
 
         self.assertObjectsConflict((create_intr, create_ptr))
 
-    def test2_conflict_add_intr_first(self):
-        self.do_add_intr(
+    def test_conflict_add_intr_first(self):
+        self.create_si(
             mac='12:22:33:44:55:66',
             label='fo99',
             domain=self.f_c,
@@ -41,14 +41,14 @@ class PTRStaticRegTests(BaseStaticTests):
         ptr.ip_str = '10.0.0.2'
         self.assertRaises(ValidationError, ptr.save)  # IP conflict
 
-    def test2_conflict_add_A_first(self):
+    def test_conflict_add_A_first(self):
         PTR.objects.create(
             fqdn='foo98.foo.ccc',
             ip_str='10.0.0.2',
             ctnr=self.ctnr,
         )
 
-        intr = self.do_add_intr(
+        intr = self.create_si(
             mac='11:22:33:44:55:66',
             label='foo98',
             domain=self.f_c,

@@ -5,11 +5,11 @@ from basestatic import BaseStaticTests
 
 
 class DeleteStaticInterTests(BaseStaticTests):
-    def test1_delete_basic(self):
+    def test_delete_basic(self):
         # Deleting a system should delete its interfaces.
-        system = System.objects.create(name='test1_delete_basic')
+        system = System.objects.create(name='test_delete_basic')
 
-        i = self.do_add_intr(
+        i = self.create_si(
             mac='112233445566',
             label='foo',
             domain=self.f_c,
