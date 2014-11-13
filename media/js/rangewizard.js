@@ -1,5 +1,7 @@
 $(document).ready(function() {
-    var RangeWizard = (function(){
+    var RangeWizard = null;
+    function enableRangeWizard() {
+    RangeWizard = (function(){
         var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
         var rng = '#id_range';
         var freeIp = '#id_next_ip';
@@ -73,6 +75,7 @@ $(document).ready(function() {
             }
         }
     }());
+    }
 
 
     function range_wizard_controller( source ) {
@@ -85,6 +88,9 @@ $(document).ready(function() {
 
 
     $( document ).on( 'change', '.wizard', function() {
+        if (RangeWizard == null) {
+            enableRangeWizard();
+        }
         range_wizard_controller( this );
     });
 });
