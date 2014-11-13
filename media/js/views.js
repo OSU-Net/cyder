@@ -87,6 +87,16 @@ $(document).ready( function() {
 
     $( document ).on( 'click', '.js-get-form', function( e ) {
         // Show update form on clicking update icon.
+        e.preventDefault();
+        get_update_form( this );
+    });
+
+    function btn_not_toggle_close( btn ) {
+        return ($(btn).hasClass( 'selected' ) ||
+            $(btn).parents().attr( 'class' ) == 'actions_column');
+    };
+
+    function get_update_form( btn ) {
         var kwargs;
         var formTitle;
         var buttonLabel;
@@ -94,12 +104,9 @@ $(document).ready( function() {
         var buttonAttrs;
         var initData;
         slideUp( $('#obj-form') );
-        e.preventDefault();
-        form.action = this.href;
-        if ( $(this).hasClass( 'selected' ) ||
-                $(this).parents().attr( 'class' ) == 'actions_column') {
-            kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
-            // #TODO move all this logic to get_update_form
+        form.action = btn.href;
+        if ( btn_not_toggle_close( btn ) ) {
+            kwargs = JSON.parse( $(btn).attr( 'data-kwargs' ) );
             if ( kwargs.pk ) {
                 buttonAttrs = 'btn c submit_update js-submit';
                 getData = {
@@ -108,8 +115,8 @@ $(document).ready( function() {
                 };
             } else {
                 buttonAttrs = 'btn c submit_create js-submit';
-                if ( $(this).attr( 'data-init' ) ) {
-                    initData = $(this).attr( 'data-init' );
+                if ( $(btn).attr( 'data-init' ) ) {
+                    initData = $(btn).attr( 'data-init' );
                 }
 
                 getData = {
@@ -144,7 +151,7 @@ $(document).ready( function() {
                 });
             });
         }
-    });
+    };
 
 
     function av_form_submit_handler( data ) {
