@@ -530,6 +530,7 @@ def gen_CNAME():
     for pk, server, name, enabled, zone, dname in cursor.fetchall():
         server, name = server.lower(), name.lower()
         dname = dname.lower()
+        server = server.strip('.')
 
         fqdn = ".".join([name, dname])
         name, dname = fqdn.split(".", 1)
@@ -577,7 +578,7 @@ def gen_CNAME():
                 cn.views.add(public)
                 cn.views.add(private)
         except ValidationError, e:
-            print "Error:", e
+            print "Error for CNAME %s.%s: %s" % (name, domain.name, e)
 
 
 def gen_reverses():
