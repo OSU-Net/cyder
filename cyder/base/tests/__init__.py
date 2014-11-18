@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.test.client import Client
 
+from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.utils import savepoint_atomic
 from cyder.core.ctnr.models import Ctnr
 
@@ -64,7 +65,8 @@ class ModelTestMixin(object):
             self.assertTrue(str(obj))
             self.assertTrue(unicode(obj))
             self.assertTrue(obj.details())
-            self.assertTrue(obj.get_update_url())
-            self.assertTrue(obj.get_delete_url())
+            if isinstance(obj, ObjectUrlMixin):
+                self.assertTrue(obj.get_update_url())
+                self.assertTrue(obj.get_delete_url())
             obj.delete()
             self.assertFalse(obj.pk)

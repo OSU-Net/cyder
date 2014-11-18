@@ -400,8 +400,8 @@ class CNAMETests(DNSTest, ModelTestMixin):
         self.assertObjectsConflict((create_cname, create_si))
 
     def test_duplicate_cname(self):
-        label = "foo"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
-        self.assertRaises(ValidationError, self.do_add, label, domain, target)
+        def x():
+            self.create_cname(label='foo', domain=self.g, target='foo.com')
+
+        x()
+        self.assertRaises(ValidationError, x)
