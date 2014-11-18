@@ -37,6 +37,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     class Meta:
         app_label = 'cyder'
         db_table = 'dynamic_interface'
+        unique_together = (('range', 'mac'),)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -44,10 +45,13 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         return objects.filter(ctnr=ctnr)
 
     def __str__(self):
-        return "{0}".format(self.mac)
+        if self.mac:
+            return '{0}'.format(self.mac)
+        else:
+            return '(no MAC address)'
 
     def __repr__(self):
-        return "Interface {0}".format(str(self))
+        return 'Interface {0}'.format(str(self))
 
     def details(self):
         data = super(DynamicInterface, self).details()
@@ -74,7 +78,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         s = s.replace('%6m', self.mac.replace(':', '')[0:6])
         return s
 
-    def build_host(self, options=None):
+    def build_host(self, options=()):
         build_str = "\thost {0} {{\n".format(self.get_fqdn())
         build_str += "\t\thardware ethernet {0};\n".format(self.mac)
         build_str += join_dhcp_args(map(self.format_host_option, options),

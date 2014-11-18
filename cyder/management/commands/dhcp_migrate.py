@@ -20,7 +20,6 @@ from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
 
 from sys import stderr
-from random import choice
 from datetime import datetime
 import ipaddr
 import MySQLdb
@@ -342,13 +341,20 @@ def migrate_dynamic_hosts():
     for values in cursor.fetchall():
         items = dict(zip(keys, values))
         enabled = items['enabled']
-        mac = items['ha']
 
-        if len(mac) != 12 or mac == '0' * 12:
-            mac = ""
-
-        if mac == "":
-            enabled = False
+        if len(items['ha']) == 0:
+            mac = None
+        elif len(items['ha']) == 12:
+            if items['ha'] == '0' * 12:
+                mac = None
+                enabled = False
+            else:
+                mac = items['ha']
+        else:
+            stderr.write(
+                'Host with id {} has invalid hardware address "{}"'.format(
+                    items['id'], items['ha']))
+            continue
 
         # TODO: Verify that there is no valid range/zone/workgroup with id 0
         r, c, w = None, None, default
@@ -356,9 +362,10 @@ def migrate_dynamic_hosts():
             try:
                 r = maintain_find_range(items['dynamic_range'])
             except ObjectDoesNotExist:
-                print ("Could not create dynamic interface %s: Range %s "
-                       "is in Maintain, but was not created in Cyder." %
-                       (mac, items['dynamic_range']))
+                stderr.write(
+                    'Could not create dynamic interface %s: Range %s '
+                    'is in Maintain, but was not created in Cyder.' %
+                    (items['ha'], items['dynamic_range']))
 
         if items['zone']:
             c = maintain_find_zone(items['zone'])
@@ -367,7 +374,7 @@ def migrate_dynamic_hosts():
             w = maintain_find_workgroup(items['workgroup'])
 
         if not all([r, c]):
-            stderr.write("Trouble migrating host with mac {0}\n"
+            stderr.write('Trouble migrating host with mac {0}\n'
                          .format(items['ha']))
             continue
 
@@ -502,8 +509,12 @@ def migrate_zone_reverse():
         for octet in octets:
             doctets = [octet] + doctets
             dname = ".".join(doctets) + ".in-addr.arpa"
-            domain, _ = Domain.objects.get_or_create(name=dname,
-                                                     is_reverse=True)
+            try:
+                domain, _ = Domain.objects.get_or_create(name=dname,
+                                                         is_reverse=True)
+            except ValidationError, e:
+                print "Could not migrate domain %s: %s" % (dname, e)
+                break
 
         ctnr.domains.add(domain)
         ctnr.save()
@@ -529,7 +540,12 @@ def maintain_find_range_domain(range_id):
     cursor.execute(sql)
     results = [r[0] for r in cursor.fetchall() if r[0] is not None]
     if results:
-        return maintain_find_domain(choice(results))
+        try:
+            return maintain_find_domain(results[0])
+        except Domain.DoesNotExist:
+            stderr.write("WARNING: Could not migrate range %s because "
+                         "domain does not exist.\n" % range_id)
+            return None
     else:
         return None
 
@@ -543,7 +559,12 @@ def maintain_find_range(range_id):
 def maintain_find_domain(domain_id):
     (name,) = maintain_get_cached('domain', ['name'], domain_id)
     if name:
-        return Domain.objects.get(name=name)
+        try:
+            return Domain.objects.get(name=name)
+        except Domain.DoesNotExist, e:
+            stderr.write("ERROR: Domain with name %s was "
+                         "never created.\n" % name)
+            raise e
 
 
 def maintain_find_workgroup(workgroup_id):

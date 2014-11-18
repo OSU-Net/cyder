@@ -229,8 +229,6 @@ MOBILE_COOKIE = 'mobile'
 #########
 
 
-from cyder.settings.dns import *
-
 TESTING = True if sys.argv[1:] and sys.argv[1] == 'test' else False
 MIGRATING = (True if sys.argv[1:] and sys.argv[1] == 'maintain_migrate'
              else False)
@@ -448,7 +446,24 @@ PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 POINTERS = [('128.193.76.253', 'cob-dc81.bus.oregonstate.edu', 'forward'),
             ('128.193.76.254', 'cob-dc82.bus.oregonstate.edu', 'forward'),
             ('128.193.76.252', 'cob-dc83.bus.oregonstate.edu', 'forward'),
-            ('128.193.76.255', 'cob-dc84.bus.oregonstate.edu', 'forward')]
+            ('128.193.76.255', 'cob-dc84.bus.oregonstate.edu', 'forward'),
+            ]
+
+NONDELEGATED_NS = ['dns.merit.net', 'ns1.nero.net', 'ns1.oregonstate.edu',
+                   'ns1.ucsb.edu', 'ns2.oregonstate.edu']
+
+SECONDARY_ZONES = ["oscs.orst.edu", "oscs.oregonstate.edu", "oscs.orst.net",
+                   "100.193.128.in-addr.arpa", "101.193.128.in-addr.arpa",
+                   "4.215.10.in-addr.arpa", "5.215.10.in-addr.arpa",
+                   "bus.oregonstate.edu", "74.193.128.in-addr.arpa",
+                   "75.193.128.in-addr.arpa", "76.193.128.in-addr.arpa",
+                   "77.193.128.in-addr.arpa", "78.193.128.in-addr.arpa",
+                   "ceoas.oregonstate.edu", "coas.oregonstate.edu",
+                   "oce.orst.edu", "64.193.128.in-addr.arpa",
+                   "65.193.128.in-addr.arpa", "66.193.128.in-addr.arpa",
+                   "67.193.128.in-addr.arpa", "68.193.128.in-addr.arpa",
+                   "69.193.128.in-addr.arpa", "70.193.128.in-addr.arpa",
+                   "71.193.128.in-addr.arpa"]
 
 REVERSE_SOAS = [
     '139.201.199', '17.211.140', '18.211.140', '19.211.140', '20.211.140',
@@ -467,10 +482,18 @@ NONAUTHORITATIVE_DOMAINS = [
     'nero.net', 'peak.org', 'orvsd.org', 'pdx.orvsd.org',
 ]
 
-VERIFICATION_SERVER = "ns1.oregonstate.edu"
-ZONES_FILE = "/tmp/dns_prod/cyzones/config/master.public"
-ZONE_PATH = "cyder/management/commands/lib/zones"
-ZONE_BLACKLIST = []
+# This list contains tuples that have a zone's name as their 0th element and a
+# view's name as the 1st element. For example:
+#
+# ('mozilla.net', 'public'),
+# ('mozilla.net', 'private')
+#
+# This will cause the public and private view of the mozilla.net zone to not
+# have a config statement in the produced config/master.private and
+# config/master.public files. The files net/mozilla/mozilla.net.public and
+# net/mozilla.net.private *will* be generated and written to disk.
+ZONES_WITH_NO_CONFIG = [
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

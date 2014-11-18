@@ -12,9 +12,9 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.models import BaseModel
+from cyder.base.validators import validate_positive_integer_field
 from cyder.base.utils import transaction_atomic
-from cyder.cydns.validation import (validate_fqdn, validate_ttl,
-                                    validate_minimum)
+from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.core.task.models import Task
 from cyder.settings import MIGRATING
 
@@ -61,16 +61,25 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                                       verbose_name="Time to live")
     primary = models.CharField(max_length=100, validators=[validate_fqdn])
     contact = models.CharField(max_length=100, validators=[validate_fqdn])
-    serial = models.PositiveIntegerField(null=False, default=int(time.time()))
+    serial = models.PositiveIntegerField(
+        null=False, default=int(time.time()),
+        validators=[validate_positive_integer_field])
     # Indicates when the zone data is no longer authoritative. Used by slave.
-    expire = models.PositiveIntegerField(null=False, default=DEFAULT_EXPIRE)
+    expire = models.PositiveIntegerField(
+        null=False, default=DEFAULT_EXPIRE,
+        validators=[validate_positive_integer_field])
     # The time between retries if a slave fails to contact the master
     # when refresh (below) has expired.
-    retry = models.PositiveIntegerField(null=False, default=DEFAULT_RETRY)
+    retry = models.PositiveIntegerField(
+        null=False, default=DEFAULT_RETRY,
+        validators=[validate_positive_integer_field])
     # The time when the slave will try to refresh the zone from the master
-    refresh = models.PositiveIntegerField(null=False, default=DEFAULT_REFRESH)
-    minimum = models.PositiveIntegerField(null=False, default=DEFAULT_MINIMUM,
-                                          validators=[validate_minimum])
+    refresh = models.PositiveIntegerField(
+        null=False, default=DEFAULT_REFRESH,
+        validators=[validate_positive_integer_field])
+    minimum = models.PositiveIntegerField(
+        null=False, default=DEFAULT_MINIMUM,
+        validators=[validate_positive_integer_field])
     description = models.CharField(max_length=200, blank=True)
     root_domain = models.ForeignKey("cyder.Domain", null=False, unique=True,
                                     related_name="root_of_soa")

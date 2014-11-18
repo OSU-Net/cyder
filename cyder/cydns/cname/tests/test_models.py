@@ -398,3 +398,10 @@ class CNAMETests(DNSTest, ModelTestMixin):
         create_si.name = 'StaticInterface'
 
         self.assertObjectsConflict((create_cname, create_si))
+
+    def test_duplicate_cname(self):
+        label = "foo"
+        domain = self.g
+        target = "foo.com"
+        self.do_add(label, domain, target)
+        self.assertRaises(ValidationError, self.do_add, label, domain, target)

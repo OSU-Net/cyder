@@ -135,9 +135,8 @@ class Nameserver(CydnsRecord):
     glue = property(get_glue, set_glue, del_glue, "The Glue property.")
 
     def __init__(self, *args, **kwargs):
-        if 'ctnr' not in kwargs:
-            kwargs['ctnr'] = Ctnr.objects.get(pk=1)
         super(Nameserver, self).__init__(*args, **kwargs)
+        self.ctnr = Ctnr.objects.get(name="global")
 
     @transaction_atomic
     def delete(self, *args, **kwargs):

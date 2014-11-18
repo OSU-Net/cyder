@@ -49,6 +49,7 @@ def range_usage_get_create(Klass, **kwargs):
         obj = Klass.objects.get(**kwargs)
     except Klass.DoesNotExist:
         obj = Klass(**kwargs)
+        obj.full_clean()
         created = True
 
     obj.save(update_range_usage=False)

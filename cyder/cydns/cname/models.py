@@ -38,6 +38,7 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     class Meta:
         app_label = 'cyder'
         db_table = 'cname'
+        unique_together = ('label', 'domain', 'target')
 
     def __str__(self):
         return "{0} CNAME {1}".format(self.fqdn, self.target)
@@ -147,7 +148,8 @@ class CNAME(LabelDomainMixin, CydnsRecord):
         if qset:
             objects = qset.all()
             raise ValidationError(
-                "Objects with this name already exist: {0}".format(objects)
+                "Objects with this name already exist: {0}".format(
+                    ', '.join(unicode(object) for object in objects))
             )
 
         MX = get_model('cyder', 'MX')

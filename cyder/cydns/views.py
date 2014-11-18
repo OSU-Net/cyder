@@ -7,12 +7,8 @@ from cyder.base.constants import ACTION_CREATE, get_klasses
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
-from cyder.base.views import (BaseCreateView, BaseDeleteView,
-                              BaseDetailView, BaseListView, BaseUpdateView,
-                              cy_delete, search_obj, table_update)
+from cyder.base.views import search_obj, table_update
 from cyder.core.cyuser.utils import perm
-
-from cyder.cydns.utils import slim_form
 
 import json
 
@@ -119,43 +115,3 @@ def cydns_index(request):
     ]
 
     return render(request, 'cydns/cydns_index.html', {'counts': counts})
-
-
-class CydnsListView(BaseListView):
-    template_name = 'cydns/cydns_list.html'
-
-
-class CydnsDetailView(BaseDetailView):
-    template_name = 'cydns/cydns_detail.html'
-
-
-class CydnsCreateView(BaseCreateView):
-    template_name = 'cydns/cydns_form.html'
-
-    def get_form(self, form_class):
-        form = super(CydnsCreateView, self).get_form(form_class)
-        domain_pk = self.kwargs.get('domain', False)
-
-        # The use of slim_form makes my eyes bleed and stomach churn.
-        if domain_pk:
-            form = slim_form(domain_pk=domain_pk, form=form)
-
-        reverse_domain_pk = self.kwargs.get('reverse_domain', False)
-        if reverse_domain_pk:
-            slim_form(reverse_domain_pk=reverse_domain_pk, form=form)
-
-        # Filtering domain selection here.
-        # form.fields['domain'].queryset = Domain.objects.filter(name =
-        # 'foo.com') will make query set controllable.
-        # Permissions in self.request.
-
-        return form
-
-
-class CydnsUpdateView(BaseUpdateView):
-    template_name = 'cydns/cydns_form.html'
-
-
-class CydnsDeleteView(BaseDeleteView):
-    template_name = 'cydns/cydns_confirm_delete.html'
-    succcess_url = '/cydns/'

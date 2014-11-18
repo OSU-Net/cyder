@@ -9,7 +9,6 @@ South>=0.8.1
 Parsley
 
 -e git://github.com/KTHse/django-cas2#egg=django-cas2
--e git://github.com/uberj/dnspython.git#egg=dnspython
 
 # from playdoh-lib
 

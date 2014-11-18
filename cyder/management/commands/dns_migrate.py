@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from sys import stderr
+from settings import NONDELEGATED_NS, SECONDARY_ZONES
 
 from cyder.base.eav.models import Attribute
 from cyder.core.system.models import System, SystemAV
@@ -40,33 +41,93 @@ connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
 cursor = connection.cursor()
 
 
+def get_delegated():
+    global delegated_dnames
+    if delegated_dnames is None:
+        print 'Fetching delegated domain names...'
+
+        sql = ("SELECT domain.name FROM maintain_sb.domain "
+               "INNER JOIN maintain_sb.nameserver "
+               "ON domain.id=nameserver.domain "
+               "WHERE %s")
+        where = ' and '.join(["nameserver.name != '%s'" % ns
+                              for ns in NONDELEGATED_NS])
+        cursor.execute(sql % where)
+        results = [i for (i,) in cursor.fetchall()]
+
+        delegated_dnames = set(results)
+    return delegated_dnames
+
+
+delegated_dnames = None
+
+
 class Zone(object):
 
-    def __init__(self, domain_id=None, dname=None, soa=None, gen_recs=True):
+    def __init__(self, domain_id=None, dname=None, soa=None,
+                 gen_recs=True, secondary=False):
         self.domain_id = domain_id
         self.dname = self.get_dname() if dname is None else dname
         self.dname = self.dname.lower()
+        self.domain = None
 
-        self.domain = self.gen_domain()
-        if self.domain:
-            if gen_recs:
-                if self.domain_id is not None:
+        if gen_recs:
+            try:
+                self.domain = Domain.objects.get(name=self.dname)
+            except Domain.DoesNotExist:
+                print "WARNING: Domain %s does not exist." % self.dname
+                return
+
+            if self.dname in SECONDARY_ZONES or secondary:
+                print ("WARNING: Domain %s is a secondary, so its records "
+                       "will not be migrated." % self.dname)
+                secondary = True
+            else:
+                if self.dname in get_delegated():
+                    self.domain.soa = self.gen_SOA() or soa
+                    if not self.domain.soa:
+                        print ("WARNING: Could not migrate domain %s; no SOA"
+                               % self.domain.name)
+                        self.domain.delete()
+                        return
+                    else:
+                        self.domain.delegated = True
+                        print "%s has been marked as delegated." % self.dname
+                        self.domain.save()
+
+                elif self.domain_id is not None:
+                    # XXX: if SOA is created before AR and NS, then
+                    # creating glue will raise an error. However,
+                    # when creating delegated domains, an SOA is needed
                     self.gen_MX()
                     self.gen_static()
                     self.gen_AR()
                     self.gen_NS()
                     self.domain.soa = self.gen_SOA() or soa
-                else:
-                    self.gen_AR()
+
+        else:
+            self.domain = self.gen_domain()
+            if not self.domain:
+                return
             self.domain.save()
-            if self.domain_id is not None:
-                self.walk_zone(gen_recs=gen_recs)
+
+        if self.domain:
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.delegated:
+                raise Exception("Whoa dude %s has a delegated master"
+                                % self.domain.name)
+
+        if self.domain and self.domain_id is not None:
+            self.walk_zone(gen_recs=gen_recs, secondary=secondary)
 
     def gen_SOA(self):
         """Generates an SOA record object if the SOA record exists.
 
         :uniqueness: primary, contact, refresh, retry, expire, minimum, comment
         """
+        if self.domain_id is None:
+            return None
+
         cursor.execute("SELECT primary_master, hostmaster, refresh, "
                        "retry, expire, ttl "
                        "FROM soa "
@@ -94,7 +155,14 @@ class Zone(object):
 
             return soa
         else:
-            return None
+            master_domain = self.domain.master_domain
+            if master_domain and master_domain.soa:
+                soa = master_domain.soa
+            else:
+                print "WARNING: No SOA exists for %s." % self.domain.name
+                return None
+
+        return soa
 
     def gen_domain(self):
         """Generates a Domain object for this Zone from a hostname.
@@ -102,8 +170,17 @@ class Zone(object):
         :uniqueness: domain
         """
         if not (self.dname in BAD_DNAMES):
-            return ensure_domain(name=self.dname, force=True,
-                                 update_range_usage=False)
+            try:
+                domain = ensure_domain(name=self.dname, force=True,
+                                       update_range_usage=False)
+                domain.clean()
+                domain.save()
+                return domain
+            except ValidationError, e:
+                print "Could not migrate domain %s: %s" % (self.dname, e)
+                return None
+        else:
+            print "Did not migrate %s because it is blacklisted." % self.dname
 
     def gen_MX(self):
         """Generates the MX Record objects related to this zone's domain.
@@ -207,7 +284,7 @@ class Zone(object):
 
             # check for duplicate
             static = StaticInterface.objects.filter(
-                label=name, mac=clean_mac(ha), ip_str=long2ip(ip))
+                label=name, mac=(clean_mac(ha) or None), ip_str=long2ip(ip))
             if static:
                 stderr.write("Ignoring host %s: already exists.\n"
                              % items['host.id'])
@@ -241,7 +318,7 @@ class Zone(object):
                 last_seen = datetime.fromtimestamp(last_seen)
 
             static = StaticInterface(
-                label=name, domain=self.domain, mac=clean_mac(ha),
+                label=name, domain=self.domain, mac=(clean_mac(ha) or None),
                 system=system, ip_str=long2ip(ip), ip_type='4',
                 workgroup=w, ctnr=ctnr, ttl=items['ttl'],
                 dns_enabled=dns_enabled, dhcp_enabled=dhcp_enabled,
@@ -370,8 +447,9 @@ class Zone(object):
                 ns.views.add(private)
             except ValidationError, e:
                 stderr.write("Error generating NS %s. %s\n" % (pk, e))
+                import pdb; pdb.set_trace()
 
-    def walk_zone(self, gen_recs=True):
+    def walk_zone(self, gen_recs=True, secondary=False):
         """
         Recursively traverses the domain tree, creating Zone objects and
         migrating related DNS objects along the way.
@@ -380,13 +458,18 @@ class Zone(object):
             Child domains will inherit this domain's SOA if they do not have
             their own.
         """
+        if self.dname in get_delegated():
+            print "%s is delegated, so no children to create." % self.dname
+            return
+
         sql = ("SELECT id, name "
                "FROM domain "
                "WHERE master_domain = %s;" % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
             child_name = child_name.lower()
-            Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs)
+            Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs,
+                 secondary=secondary)
 
     def get_dname(self):
         """

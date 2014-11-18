@@ -1,4 +1,6 @@
 from django.core.urlresolvers import reverse
+from django.db.models.query import QuerySet
+
 from cyder.base.constants import ACTION_UPDATE
 from cyder.base.helpers import cached_property
 
@@ -68,7 +70,8 @@ class Tablefier:
 
         if self.views:
             headers.append(['Views', None])
-            if hasattr(self.objects, 'object_list'):
+            if (hasattr(self.objects, 'object_list') and
+                    isinstance(self.objects.object_list, QuerySet)):
                 self.objects.object_list = (
                     self.objects.object_list.prefetch_related('views'))
 
@@ -79,7 +82,8 @@ class Tablefier:
         if self.can_update:
             headers.append(['Actions', None])
 
-        if hasattr(self.objects, 'object_list'):
+        if (hasattr(self.objects, 'object_list') and
+                isinstance(self.objects.object_list, QuerySet)):
             self.objects.object_list = (self.objects.object_list
                 .select_related(*[f for _, f in headers if f]))
 

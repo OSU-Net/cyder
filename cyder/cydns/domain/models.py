@@ -223,7 +223,9 @@ class Domain(BaseModel, ObjectUrlMixin):
             if qset:
                 objects = qset.all()
                 raise ValidationError("Objects with this name already "
-                                      "exist {0}".format(objects))
+                                      "exist: {0}".format(
+                    ', '.join(unicode(object) for object in objects))
+                )
         else:
             db_self = Domain.objects.get(pk=self.pk)
 
