@@ -447,7 +447,6 @@ class Zone(object):
                 ns.views.add(private)
             except ValidationError, e:
                 stderr.write("Error generating NS %s. %s\n" % (pk, e))
-                import pdb; pdb.set_trace()
 
     def walk_zone(self, gen_recs=True, secondary=False):
         """
