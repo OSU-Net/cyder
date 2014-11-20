@@ -32,9 +32,6 @@
 {% endblock %}
 
 {% block form %}
-  {% if pretty_obj_type == 'Range' %}
-    {{ js('rangeform') }}
-  {% endif %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"
@@ -57,5 +54,8 @@
         </div>
       </form>
     </div>
+  {% endif %}
+  {% if obj_type == 'range' %}
+    {{ js('rangeform') }}
   {% endif %}
 {% endblock %}
