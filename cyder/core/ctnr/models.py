@@ -21,7 +21,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True,
                             validators=[validate_ctnr_name])
-    users = models.ManyToManyField(User, null=False, related_name='users',
+    users = models.ManyToManyField(User, null=False, related_name='ctnrs',
                                    through='CtnrUser', blank=True)
     domains = models.ManyToManyField(Domain, null=False, blank=True)
     ranges = models.ManyToManyField(Range, null=False, blank=True)
