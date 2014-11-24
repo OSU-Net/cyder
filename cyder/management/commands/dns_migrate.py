@@ -82,6 +82,7 @@ class Zone(object):
                 print ("WARNING: Domain %s is a secondary, so its records "
                        "will not be migrated." % self.dname)
                 secondary = True
+                self.gen_AR(reverse_only=True)
             else:
                 if self.dname in get_delegated():
                     self.domain.soa = self.gen_SOA() or soa
@@ -103,6 +104,8 @@ class Zone(object):
                         self.gen_MX()
                         self.gen_static()
                         self.gen_AR()
+                    else:
+                        self.gen_AR(reverse_only=True)
                     self.gen_NS()
                     if self.dname not in get_delegated():
                         self.domain.soa = self.gen_SOA() or soa
@@ -348,7 +351,7 @@ class Zone(object):
                 static.views.add(public)
                 static.views.add(private)
 
-    def gen_AR(self):
+    def gen_AR(self, reverse_only=False):
         """
         Generates the Address Record and PTR objects related to this zone's
         domain.
@@ -394,7 +397,7 @@ class Zone(object):
             if ctnr is None:
                 continue
 
-            if ptr_type == 'forward':
+            if ptr_type == 'forward' and not reverse_only:
                 if AddressRecord.objects.filter(
                         fqdn=hostname, ip_str=long2ip(ip)).exists():
                     continue
@@ -411,7 +414,7 @@ class Zone(object):
                     arec.views.add(public)
                     arec.views.add(private)
 
-            elif ptr_type == 'reverse':
+            if ptr_type == 'reverse':
                 if not PTR.objects.filter(ip_str=long2ip(ip)).exists():
                     ptr = PTR(fqdn=hostname, ip_str=long2ip(ip),
                               ip_type='4', ctnr=ctnr)
