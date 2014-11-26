@@ -218,8 +218,9 @@ class Network(BaseModel, ObjectUrlMixin):
             related_networks = subnets
         return networks
 
-    @staticmethod
-    def get_related_sites(networks):
+    def get_related_sites(self, networks=None):
+        if not networks:
+            networks = (self,)
         return set(
             [network.site for network in networks]).discard(None)
 
@@ -251,7 +252,7 @@ class Network(BaseModel, ObjectUrlMixin):
 
     def get_related(self):
         related_networks = self.get_related_networks()
-        related_sites = Network.get_related_sites(related_networks)
+        related_sites = self.get_related_sites(related_networks)
         return [related_sites, related_networks]
 
     def update_network(self):
