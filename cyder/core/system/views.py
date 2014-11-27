@@ -59,7 +59,6 @@ def system_detail(request, pk):
 
 
 def system_create_view(request):
-    print request.POST
     static_form = StaticInterfaceForm()
     dynamic_form = DynamicInterfaceForm()
     system_form = ExtendedSystemForm()
