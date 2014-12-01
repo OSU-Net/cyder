@@ -16,12 +16,17 @@ $(document).ready( function() {
         });
     }
 
+    function is_interface( obj_type ) {
+        return ( obj_type == 'static_interface' ||
+                 obj_type == 'dynamic_interface' )
+    }
+
     // returns a deferred object, when resolved returns a string
     function get_delete_confirm_msg( kwargs, csrfToken ) {
         var deferred = $.Deferred();
         var msg = "Are you sure you want to delete this?";
         var ret_data = {}
-        if ( kwargs.obj_type.indexOf( 'interface' ) != -1) {
+        if ( is_interface( kwargs.obj_type ) ) {
             $.when( is_last_interface( kwargs, csrfToken ) ).done(
                 function( data ) {
                     if ( data.last_interface ) {

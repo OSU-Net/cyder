@@ -280,6 +280,10 @@ def cy_delete(request):
     if referer.endswith('/'):
         referer = obj.get_list_url()
 
+    # if the obj is an av do not redirect to av list view
+    if 'av' in obj_type:
+        referer = request.META.get( 'HTTP_REFERER', '')
+
     return HttpResponse(json.dumps({'msg': 'Object was successfully deleted',
                                     'url': referer}))
 
