@@ -82,6 +82,7 @@ class Zone(object):
                 print ("WARNING: Domain %s is a secondary, so its records "
                        "will not be migrated." % self.dname)
                 secondary = True
+                self.gen_static(simulate_delegated=True)
                 self.gen_AR(reverse_only=True)
             else:
                 if self.dname in get_delegated():
@@ -105,6 +106,7 @@ class Zone(object):
                         self.gen_static()
                         self.gen_AR()
                     else:
+                        self.gen_static(simulate_delegated=True)
                         self.gen_AR(reverse_only=True)
                     self.gen_NS()
                     if self.dname not in get_delegated():
@@ -227,7 +229,7 @@ class Zone(object):
             except ValidationError, e:
                 stderr.write("Error generating MX. %s\n" % e)
 
-    def gen_static(self):
+    def gen_static(self, simulate_delegated=False):
         """
         Generates the Static Interface objects related to this zone's domain.
 
@@ -269,11 +271,17 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
+            name = items['host.name']
+
+            if simulate_delegated:
+                print ("WARNING: Did not migrate host %s because it is in a "
+                       "delegated or secondary zone." % name)
+                continue
+
             ctnr = self.ctnr_from_zone_name(items['zone.name'])
             if ctnr is None:
                 continue
 
-            name = items['host.name']
             enabled = bool(items['enabled'])
             dns_enabled, dhcp_enabled = enabled, enabled
             ip = items['ip']
