@@ -60,6 +60,11 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
         ]
         return data
 
+    def __unicode__(self):
+        return u'{} SSHFP {} {} {}...'.format(
+            self.fqdn, self.algorithm_number, self.fingerprint_type,
+            self.key[:8])
+
     @staticmethod
     def eg_metadata():
         """EditableGrid metadata."""

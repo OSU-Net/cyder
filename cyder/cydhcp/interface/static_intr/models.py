@@ -84,12 +84,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         objects = objects or StaticInterface.objects
         return objects.filter(ctnr=ctnr)
 
-    def __repr__(self):
-        return '<StaticInterface: {0}>'.format(str(self))
-
-    def __str__(self):
-        #return 'IP:{0} Full Name:{1} MAC:{2}'.format(self.ip_str,
-        #        self.fqdn, self.mac)
+    def __unicode__(self):
         return self.fqdn
 
     @property

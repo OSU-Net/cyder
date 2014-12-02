@@ -5,7 +5,6 @@ from django.db.models import Q
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.helpers import get_display
 from cyder.base.validators import validate_integer_field
 from cyder.base.utils import safe_save
 from cyder.cydns.domain.models import Domain
@@ -29,8 +28,8 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     description = models.CharField(max_length=200, blank=True)
     email_contact = models.CharField(max_length=75, blank=True)
 
-    display_fields = ('name',)
     search_fields = ('name', 'description')
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
@@ -40,8 +39,8 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     def save(self, *args, **kwargs):
         super(Ctnr, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

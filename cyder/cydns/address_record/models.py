@@ -19,17 +19,14 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         ... ip_type=ip_type)
 
     """
-    search_fields = ("fqdn", "ip_str")
+    search_fields = ('fqdn', 'ip_str')
+    sort_fields = ('fqdn', 'ip_str')
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return '{0} {1} {2}'.format(self.fqdn,
-                                    self.rdtype, str(self.ip_str))
-
-    def __repr__(self):
-        return "<Address Record '{0}'>".format(str(self))
+    def __unicode__(self):
+        return u'{} {} {}'.format(self.fqdn, self.rdtype, self.ip_str)
 
     @property
     def rdtype(self):

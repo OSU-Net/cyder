@@ -23,7 +23,7 @@ class UserProfile(BaseModel, ObjectUrlMixin):
         app_label = 'cyder'
         db_table = 'auth_user_profile'
 
-    def __str__(self):
+    def __unicode__(self):
         return self.user.username
 
     def details(self):

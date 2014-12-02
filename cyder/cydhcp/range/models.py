@@ -104,7 +104,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str', 'name')
-    display_fields = ('start_str', 'end_str')
+    sort_fields = ('start_str', 'end_str')
 
     class Meta:
         app_label = 'cyder'
@@ -114,7 +114,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     @property
     def range_str(self):
-        return u'{0}-{1}'.format(self.start_str, self.end_str)
+        return u'{0}–{1}'.format(self.start_str, self.end_str)
 
     @property
     def range_str_padded(self):
@@ -147,9 +147,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     def __unicode__(self):
         return self.get_self_str(padded=True)
-
-    def __repr__(self):
-        return "<Range: {0}>".format(str(self))
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -348,25 +345,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         rules."""
         self.ipf = IPFilter(self.start_str, self.end_str, self.network.ip_type,
                             object_=self)
-
-    def display(self):
-        return "Range: {3} to {4} {0} -- {2} -- {1}".format(
-            self.network.site, self.network.vlan, self.network,
-            self.start_str, self.end_str)
-
-    def choice_display(self):
-        if not self.network.site:
-            site_name = "No site"
-        else:
-            site_name = self.network.site.name.upper()
-
-        if not self.network.vlan:
-            vlan_name = "No VLAN"
-        else:
-            vlan_name = str(self.network.vlan)
-        return "{0} - {1} - ({2}) {3} to {4}".format(
-            site_name, vlan_name,
-            self.network, self.start_str, self.end_str)
 
     def get_usage(self):
         if self.range_type == 'st':

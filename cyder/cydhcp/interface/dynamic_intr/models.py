@@ -44,14 +44,11 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         objects = objects or DynamicInterface.objects
         return objects.filter(ctnr=ctnr)
 
-    def __str__(self):
+    def __unicode__(self):
         if self.mac:
-            return '{0}'.format(self.mac)
+            return self.mac
         else:
             return '(no MAC address)'
-
-    def __repr__(self):
-        return 'Interface {0}'.format(str(self))
 
     def details(self):
         data = super(DynamicInterface, self).details()

@@ -5,7 +5,6 @@ from django.db.models.loading import get_model
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
-from cyder.base.helpers import get_display
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.utils import safe_delete, safe_save
@@ -18,10 +17,13 @@ class System(BaseModel, ObjectUrlMixin):
         validators=[validate_no_spaces])
 
     search_fields = ('name',)
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<System: >'.format(self)
 
     class Meta:
         app_label = 'cyder'

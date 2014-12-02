@@ -60,6 +60,9 @@ class SRV(CydnsRecord, LabelDomainUtilsMixin):
         ]
         return data
 
+    def __unicode__(self):
+        return u'{} SRV {}'.format(self.fqdn, self.target)
+
     @staticmethod
     def eg_metadata():
         """EditableGrid metadata."""

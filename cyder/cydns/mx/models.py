@@ -30,12 +30,8 @@ class MX(LabelDomainMixin, CydnsRecord):
         db_table = 'mx'
         unique_together = (('domain', 'label', 'server'),)
 
-    def __str__(self):
-        return "{0} {1} {3} {4} {5}".format(self.fqdn, self.ttl, 'IN', 'MX',
-                                            self.priority, self.server)
-
-    def __repr__(self):
-        return "<MX '{0}'>".format(str(self))
+    def __unicode__(self):
+        return u'{} MX {} {}'.format(self.fqdn, self.priority, self.server)
 
     def details(self):
         """For tables."""
