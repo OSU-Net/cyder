@@ -220,9 +220,8 @@ class Network(BaseModel, ObjectUrlMixin):
 
     def get_related_sites(self, networks=None):
         if not networks:
-            networks = (self,)
-        return set(
-            [network.site for network in networks]).discard(None)
+            networks = self.get_related_networks()
+        return set([network.site for network in networks]).discard(None)
 
     def build_subnet(self, raw=False):
         self.update_network()
@@ -311,7 +310,6 @@ class NetworkAV(EAVBase):
     class Meta(EAVBase.Meta):
         app_label = 'cyder'
         db_table = 'network_av'
-
 
     entity = models.ForeignKey(Network)
     attribute = EAVAttributeField(Attribute)
