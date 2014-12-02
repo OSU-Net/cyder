@@ -128,12 +128,9 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
     class Meta:
         abstract = True
 
-    def __str__(self):
+    def __unicode__(self):
         self.label_domain_from_fqdn()
         return self.bind_render_record()
-
-    def __repr__(self):
-        return "<{0} '{1}'>".format(self.rdtype, str(self))
 
     @classmethod
     def filter_by_ctnr(cls, ctnr, objects=None):
