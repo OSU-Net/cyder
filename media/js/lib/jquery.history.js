@@ -1,4 +1,11 @@
 /*
+ * UPSTREAM INFORMATION:
+ *   Web site:  http://tkyk.github.io/jquery-history-plugin/
+ *   Git repository:  https://github.com/tkyk/jquery-history-plugin
+ *   Closest common ancestor:  Git revision 3ea4a89d5b (2012-02-25)
+ */
+
+/*
  * jQuery history plugin
  *
  * The MIT License

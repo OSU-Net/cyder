@@ -1,5 +1,7 @@
-// This code is from here: http://www.openjs.com/scripts/examples/addfield.php
-//
+/* UPSTREAM INFORMATION:
+ *   Web site:  http://www.openjs.com/scripts/examples/addfield.php
+ */
+
 /*
 function addField(area, field, limit) {
     if(!document.getElementById) return; //Prevent older browsers from getting any further.
