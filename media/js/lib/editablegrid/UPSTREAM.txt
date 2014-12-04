@@ -1,0 +1,5 @@
+UPSTREAM INFORMATION:
+  Web site:  http://www.editablegrid.net/en
+  Git repository:  https://github.com/webismymind/editablegrid
+  Closest common ancestor:  Git revision 98b1efb49edc96 (2013-04-16) (see notes)
+  Notes:  editablegrid.js and editablegrid_renderers.js have no known common ancestor with the upstream Git repo.

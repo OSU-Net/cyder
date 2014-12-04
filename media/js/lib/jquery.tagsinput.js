@@ -1,4 +1,11 @@
 /*
+ * UPSTREAM INFORMATION:
+ *   Web site:  http://xoxco.com/projects/code/tagsinput/
+ *   Git repository:  https://github.com/xoxco/jQuery-Tags-Input
+ *   Closest common ancestor:  probably Git revision 1221c0b280
+ */
+
+/*
 
 	jQuery Tags Input Plugin 1.3.3
 

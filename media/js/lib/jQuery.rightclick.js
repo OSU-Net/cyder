@@ -1,3 +1,9 @@
+/*
+ * UPSTREAM INFORMATION:
+ *   Web site:  https://web.archive.org/web/20090918234521/http://abeautifulsite.net/notebook/68
+ */
+
+
 // jQuery Right-Click Plugin
 //
 // Version 1.01
