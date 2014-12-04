@@ -6,7 +6,6 @@ from constants import *
 
 
 class ParserTests(unittest.TestCase):
-
     def setUp(self):
         self.subnet_input = """
         subnet 128.193.212.0 netmask 255.255.254.0 {
@@ -118,6 +117,3 @@ class ParserTests(unittest.TestCase):
         expected_group = Group(options=[o1,o2,o3], hosts=[host])
         group = iscgrammar(self.group_input).Group()
         self.assertEqual(expected_group, group)
-
-if __name__ == '__main__':
-    unittest.main()

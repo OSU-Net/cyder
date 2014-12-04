@@ -13,12 +13,10 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin, DisplayMixin
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_positive_integer_field
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.core.task.models import Task
 from cyder.settings import MIGRATING
-
-# import reversion
 
 
 #TODO, put these defaults in a config file.
@@ -158,7 +156,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     def get_debug_build_url(self):
         return reverse('build-debug', args=[self.pk])
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         root_domain = self.root_domain
         super(SOA, self).delete(*args, **kwargs)
@@ -183,8 +181,10 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
         if save:
             self.save()
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         is_new = self.pk is None
 
         if is_new:
@@ -224,21 +224,14 @@ class SOAAV(EAVBase):
         app_label = 'cyder'
         db_table = 'soa_av'
 
-
     entity = models.ForeignKey(SOA)
     attribute = EAVAttributeField(Attribute,
         type_choices=(ATTRIBUTE_INVENTORY,))
 
 
-def ip_str_to_name(ip_str, ip_type):
-    from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
-
-    if ip_type == '6':
-        ip_str = nibbilize(ip_str)
-    return ip_to_domain_name(ip_str, ip_type=ip_type)
-
-
 def reassign_reverse_records(old_domain, new_domain):
+    from cyder.cydns.ip.utils import ip_to_reverse_name
+
     up = (None, None)  # from, to
     down = (None, None)  # from, to
     if new_domain:
@@ -262,7 +255,7 @@ def reassign_reverse_records(old_domain, new_domain):
         for obj in chain(down[0].reverse_ptr_set.all(),
                          down[0].reverse_staticintr_set.all()):
             if is_name_descendant_of(
-                    ip_str_to_name(obj.ip_str, ip_type=obj.ip_type),
+                    ip_to_reverse_name(obj.ip_str),
                     down[1].name):
                 obj.reverse_domain = down[1]
                 obj.save(commit=False)

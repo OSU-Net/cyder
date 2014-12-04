@@ -4,7 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPE_6, IP_TYPE_4
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.ip.models import Ip
@@ -68,13 +68,12 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         if kwargs.pop('validate_glue', True):
             if self.nameserver_set.exists():
                 raise ValidationError(
-                    "Cannot delete the record {0}. It is a glue "
-                    "record.".format(self.record_type()))
+                    'Cannot delete this address record. It is a glue record.')
         if kwargs.pop('check_cname', True):
             if CNAME.objects.filter(target=self.fqdn):
                 raise ValidationError(
-                    "A CNAME points to this {0} record. Change the CNAME "
-                    "before deleting this record.".format(self.record_type()))
+                    'A CNAME points to this address record. Change the CNAME '
+                    'before deleting this record.')
         super(BaseAddressRecord, self).delete(*args, **kwargs)
 
     def check_name_ctnr_collision(self):
@@ -162,12 +161,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
                 "Nameserver to edit this record."
             )
 
-    def record_type(self):
-        if self.ip_type == IP_TYPE_4:
-            return 'A'
-        else:
-            return 'AAAA'
-
 
 class AddressRecord(BaseAddressRecord):
     """
@@ -211,8 +204,10 @@ class AddressRecord(BaseAddressRecord):
             return super(AddressRecord, self).unique_error_message(
                 model_class, unique_check)
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -225,7 +220,7 @@ class AddressRecord(BaseAddressRecord):
             if old_range:
                 old_range.save(commit=False)
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         rng = find_range(self.ip_str)

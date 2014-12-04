@@ -8,4 +8,4 @@ class UserAPI_Test(APITests):
     url = "core/user"
 
     def create_data(self):
-        return self.model.objects.get_or_create(username="test_user")[0]
+        return User.objects.get(username="test_user")

@@ -4,7 +4,6 @@ from ipaddr import IPv6Address
 from cyder.base.tests import TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.utils import reverse_domain_name_to_ip
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
@@ -53,7 +52,8 @@ class LinearReverseDomainTests(TestCase):
 
     def assertMembers(self, *pairs):
         for p, d in pairs:
-            self.assertIn(p, d.reverse_ptr_set.all(),
+            self.assertIn(
+                p, d.reverse_ptr_set.all(),
                 u'{} has reverse domain {}, not {}'.format(
                     repr(p), repr(p.reverse_domain), repr(d)))
 
@@ -61,37 +61,37 @@ class LinearReverseDomainTests(TestCase):
         self.add_zone(self.one)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.two),
-                (self.p4, self.four),
-                (self.p5, self.four))
+            (self.p2, self.two),
+            (self.p3, self.two),
+            (self.p4, self.four),
+            (self.p5, self.four))
 
     def test_add3(self):
         self.add_zone(self.three)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.three),
-                (self.p4, self.four),
-                (self.p5, self.four))
+            (self.p2, self.two),
+            (self.p3, self.three),
+            (self.p4, self.four),
+            (self.p5, self.four))
 
     def test_add5(self):
         self.add_zone(self.five)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.two),
-                (self.p4, self.four),
-                (self.p5, self.five))
+            (self.p2, self.two),
+            (self.p3, self.two),
+            (self.p4, self.four),
+            (self.p5, self.five))
 
     def test_move21(self):
         self.move_zone(self.two, self.one)
 
         self.assertMembers(
-                (self.p2, self.one),
-                (self.p3, self.one),
-                (self.p4, self.four),
-                (self.p5, self.four))
+            (self.p2, self.one),
+            (self.p3, self.one),
+            (self.p4, self.four),
+            (self.p5, self.four))
 
     def test_move23_disallowed(self):
         self.assertRaises(ValidationError,
@@ -105,28 +105,28 @@ class LinearReverseDomainTests(TestCase):
         self.move_zone(self.four, self.one)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.two),
-                (self.p4, self.two),
-                (self.p5, self.two))
+            (self.p2, self.two),
+            (self.p3, self.two),
+            (self.p4, self.two),
+            (self.p5, self.two))
 
     def test_move43(self):
         self.move_zone(self.four, self.three)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.three),
-                (self.p4, self.three),
-                (self.p5, self.three))
+            (self.p2, self.two),
+            (self.p3, self.three),
+            (self.p4, self.three),
+            (self.p5, self.three))
 
     def test_move45(self):
         self.move_zone(self.four, self.five)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.two),
-                (self.p4, self.two),
-                (self.p5, self.five))
+            (self.p2, self.two),
+            (self.p3, self.two),
+            (self.p4, self.two),
+            (self.p5, self.five))
 
     def test_remove2_disallowed(self):
         self.assertRaises(ValidationError,
@@ -136,7 +136,7 @@ class LinearReverseDomainTests(TestCase):
         self.remove_zone(self.four)
 
         self.assertMembers(
-                (self.p2, self.two),
-                (self.p3, self.two),
-                (self.p4, self.two),
-                (self.p5, self.two))
+            (self.p2, self.two),
+            (self.p3, self.two),
+            (self.p4, self.two),
+            (self.p5, self.two))

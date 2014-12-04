@@ -186,7 +186,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         if self.pk:
             # We need to get the domain from the db. If it's not our current
             # domain, call prune_tree on the domain in the db later.
-            db_domain = self.__class__.objects.get(pk=self.pk).domain
+            db_domain = self.reload().domain
             if self.domain == db_domain:
                 db_domain = None
         else:

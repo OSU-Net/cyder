@@ -3,8 +3,8 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.test import TestCase
 
-from cyder.base.constants import (ACTION_CREATE, ACTION_VIEW, ACTION_UPDATE,
-                             ACTION_DELETE)
+from cyder.base.constants import (
+    ACTION_CREATE, ACTION_VIEW, ACTION_UPDATE, ACTION_DELETE)
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.cyuser.views import login_session, become_user, unbecome_user
 from cyder.cydns.address_record.models import AddressRecord
@@ -26,9 +26,7 @@ class AuthenticationTest(TestCase):
         self.dev_middleware = DevAuthenticationMiddleware()
 
     def test_middleware_login_dev(self):
-        """
-        Test development middleware logs on development user
-        """
+        """Test development middleware logs on development user"""
         self.setup_request()
         self.request.user = AnonymousUser()
 
@@ -38,9 +36,7 @@ class AuthenticationTest(TestCase):
                             "")
 
     def test_user_profile_create(self):
-        """
-        Test that user profile is created on user creation
-        """
+        """Test that user profile is created on user creation"""
         user = User(username='user_profile_test')
         user.save()
         try:
@@ -50,9 +46,7 @@ class AuthenticationTest(TestCase):
                       "user creation")
 
     def test_session_has_ctnr_dev(self):
-        """
-        Test session ctnr set on log in
-        """
+        """Test session ctnr set on log in"""
         self.setup_request()
         self.request.user = AnonymousUser()
 
@@ -142,9 +136,7 @@ class PermissionsTest(TestCase):
         self.pleb_user = User.objects.create(username='pleb_user')
 
     def test_soa_perms(self):
-        """
-        Test SOA perms
-        """
+        """Test SOA perms"""
         self.setup_request()
 
         perm_table = {
@@ -169,9 +161,7 @@ class PermissionsTest(TestCase):
         self.check_perms_each_user(obj, perm_table)
 
     def test_domain_perms(self):
-        """
-        Test domain perms
-        """
+        """Test domain perms"""
         self.setup_request()
 
         perm_table = {
@@ -192,9 +182,7 @@ class PermissionsTest(TestCase):
         self.check_perms_each_user(obj, perm_table)
 
     def test_domain_records_perms(self):
-        """
-        Test common domain record perms (cname, mx, txt, srv, ns)
-        """
+        """Test common domain record perms (CNAME, MX, TXT, SRV, NS)"""
         self.setup_request()
 
         perm_table = {
@@ -238,8 +226,8 @@ class PermissionsTest(TestCase):
         self.request.session = SessionStore()
 
     def save_all_ctnrs(self):
-        """
-        Utility function that simply saves all of the defined ctnrs
+        """Utility function that simply saves all of the defined ctnrs
+
         Called after adding an object to each one
         """
         self.ctnr_admin.save()
@@ -250,6 +238,7 @@ class PermissionsTest(TestCase):
         """
         Utility function for checking permissions
         """
+
         # Superuser.
         self.request.user = self.superuser
         self.request.session['ctnr'] = self.ctnr_guest
@@ -292,6 +281,7 @@ class PermissionsTest(TestCase):
         Utility function that gets each type of permissions for an object and
         asserts against perm table.
         """
+
         create_perm = self.request.user.get_profile().has_perm(
             self.request, ACTION_CREATE, obj=obj)
         view_perm = self.request.user.get_profile().has_perm(

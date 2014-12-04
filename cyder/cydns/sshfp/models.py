@@ -4,7 +4,7 @@ from gettext import gettext as _
 from django.db import models
 from django.core.exceptions import ValidationError
 
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.models import CydnsRecord, LabelDomainMixin
 
 
@@ -76,6 +76,8 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
     def rdtype(self):
         return 'SSHFP'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(SSHFP, self).save(*args, **kwargs)

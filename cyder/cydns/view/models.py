@@ -4,7 +4,7 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.helpers import get_display
 
 
-class View(models.Model, ObjectUrlMixin):
+class View(models.Model):
     """
     >>> View(name=name)
     """
