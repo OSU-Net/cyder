@@ -149,7 +149,7 @@ $(document).ready( function() {
                 }
             }).done( function() {
                 $('#obj-form form :input:visible:last').on( 'keypress', function( e ) {
-                    if ( e.which == 13 ) {
+                    if ( e.keyCode == 13 ) {
                         $('.js-submit').focus().click();
                     }
                 });

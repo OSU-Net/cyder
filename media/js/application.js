@@ -28,7 +28,7 @@ function initForms() {
         $(this).closest('form').submit();
     });
     $('input').keypress(function(e) {
-        if (e.which == 13) {
+        if (e.keyCode == 13) {
             $(this).closest('form').submit();
         }
     });
