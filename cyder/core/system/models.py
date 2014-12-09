@@ -22,9 +22,6 @@ class System(BaseModel, ObjectUrlMixin):
     def __unicode__(self):
         return self.name
 
-    def __repr__(self):
-        return '<System: >'.format(self)
-
     class Meta:
         app_label = 'cyder'
         db_table = 'system'
