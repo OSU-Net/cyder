@@ -10,10 +10,10 @@ $(document).ready( function() {
     }
 
     // displays the loading gif on ajax event
-    $('.load').ajaxStart( function() {
-        $(this).show();
+    $(document).ajaxStart( function() {
+        $('.load').fadeIn();
     }).ajaxStop( function() {
-        $(this).hide();
+        $('.load').fadeOut('fast');
     });
 
     // toggles the settings menu in mobile view
