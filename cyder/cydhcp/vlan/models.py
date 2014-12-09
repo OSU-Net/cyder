@@ -6,7 +6,6 @@ from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_positive_integer_field
 from cyder.base.utils import transaction_atomic
@@ -27,18 +26,15 @@ class Vlan(BaseModel, ObjectUrlMixin):
         validators=[validate_positive_integer_field])
 
     search_fields = ('name', 'number',)
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = "vlan"
         unique_together = ("name", "number")
 
-    def __str__(self):
-        return '{0} ({1})'.format(get_display(self), self.number)
-
-    def __repr__(self):
-        return "<Vlan {0}>".format(str(self))
+    def __unicode__(self):
+        return u'{} ({})'.format(self.name, self.number)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

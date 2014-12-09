@@ -169,11 +169,8 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         db_table = 'ptr'
         unique_together = ('ip_str', 'ip_type', 'fqdn')
 
-    def __str__(self):
-        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.fqdn)
-
-    def __repr__(self):
-        return "<{0}>".format(str(self))
+    def __unicode__(self):
+        return u'{} PTR {}'.format(self.ip_str, self.fqdn)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

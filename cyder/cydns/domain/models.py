@@ -2,7 +2,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.base.utils import transaction_atomic
 from cyder.cydns.validation import validate_domain_name
@@ -88,18 +87,15 @@ class Domain(BaseModel, ObjectUrlMixin):
     purgeable = models.BooleanField(default=False)
     delegated = models.BooleanField(default=False, null=False, blank=True)
 
-    display_fields = ('name',)
     search_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'domain'
 
-    def __str__(self):
-        return get_display(self)
-
-    def __repr__(self):
-        return "<Domain '{0}'>".format(self.name)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

@@ -19,21 +19,18 @@ class Site(BaseModel, ObjectUrlMixin):
                                verbose_name="Parent site")
 
     search_fields = ('name', 'parent__name')
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'site'
         unique_together = ('name', 'parent')
 
-    def __str__(self):
+    def __unicode__(self):
         if self.parent:
             return "%s in %s" % (self.name, self.parent.get_full_name())
         else:
             return self.name
-
-    def __repr__(self):
-        return "<Site {0}>".format(str(self))
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -70,19 +67,16 @@ class Site(BaseModel, ObjectUrlMixin):
 
     def get_full_name(self):
         if self.parent is not None:
-            return (self.parent.get_full_name() + "/" + self.name).title()
+            return (self.parent.get_full_name() + u'/' + self.name).title()
         else:
             return self.name.title()
 
     def get_site_path(self):
         full_name = self.name
         target = self
-        while True:
-            if target.parent is None:
-                break
-            else:
-                full_name = target.name + '.' + target.parent.name
-                target = target.parent
+        while target.parent is not None:
+            full_name = target.name + u'.' + target.parent.name
+            target = target.parent
         return full_name
 
     @staticmethod

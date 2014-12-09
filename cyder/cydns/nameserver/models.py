@@ -59,8 +59,8 @@ class Nameserver(CydnsRecord):
         db_table = "nameserver"
         unique_together = ("domain", "server")
 
-    def __str__(self):
-        return self.bind_render_record()
+    def __unicode__(self):
+        return u'{} NS {}'.format(self.domain.name, self.server)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

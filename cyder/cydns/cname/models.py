@@ -34,14 +34,15 @@ class CNAME(LabelDomainMixin, CydnsRecord):
                  "{rdtype:$rdtype_just} {target:$rhs_just}.")
 
     search_fields = ('fqdn', 'target')
+    sort_fields = ('fqdn', 'target')
 
     class Meta:
         app_label = 'cyder'
         db_table = 'cname'
         unique_together = ('label', 'domain', 'target')
 
-    def __str__(self):
-        return "{0} CNAME {1}".format(self.fqdn, self.target)
+    def __unicode__(self):
+        return u'{} CNAME {}'.format(self.fqdn, self.target)
 
     def details(self):
         """For tables."""

@@ -17,6 +17,9 @@ class BaseModel(models.Model):
         abstract = True
         get_latest_by = 'created'
 
+    def __str__(self):
+        return unicode(self).encode('ascii', 'replace')
+
     @classproperty
     @classmethod
     def pretty_type(cls):

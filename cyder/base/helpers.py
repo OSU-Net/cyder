@@ -56,7 +56,7 @@ def do_sort(request, qs):
 
             if isinstance(field, ForeignKey):
                 qs = qs.select_related(sort)
-                sort = "__".join([sort, field.rel.to.display_fields[0]])
+                sort = "__".join([sort, field.rel.to.sort_fields[0]])
         except AttributeError:
             pass
 
@@ -166,10 +166,6 @@ def sort_link(request, pretty_name, sort_field):
 
     return create_sort_link(pretty_name, sort_field, get_params,
                             sort, order)
-
-
-def get_display(obj):
-    return " - ".join(getattr(obj, f) for f in obj.display_fields)
 
 
 def cached_property(fn):

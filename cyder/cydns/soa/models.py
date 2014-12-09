@@ -89,7 +89,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     dns_enabled = models.BooleanField(default=True)
 
     search_fields = ('primary', 'contact', 'description', 'root_domain__name')
-    display_fields = ('root_domain__name',)
+    sort_fields = ('root_domain__name',)
     template = _("{root_domain}. {ttl} {rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just}" "{primary}. {contact}. ({serial} "
                  "{refresh} {retry} {expire})")
@@ -109,11 +109,8 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
                                rdtype=self.rdtype, rdclass='IN',
                                **self.__dict__)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.root_domain.name
-
-    def __repr__(self):
-        return "<'{0}'>".format(str(self))
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

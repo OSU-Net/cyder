@@ -8,7 +8,6 @@ from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
 from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.constants import DYNAMIC
@@ -54,18 +53,15 @@ class Network(BaseModel, ObjectUrlMixin):
     network = None
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
-    display_fields = ('network_str',)
+    sort_fields = ('network_str',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'network'
         unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
 
-    def __str__(self):
-        return get_display(self)
-
-    def __repr__(self):
-        return "<Network {0}>".format(str(self))
+    def __unicode__(self):
+        return self.network_str
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

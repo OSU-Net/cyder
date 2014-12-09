@@ -41,6 +41,9 @@ class TXT(LabelDomainMixin, CydnsRecord):
         ]
         return data
 
+    def __unicode__(self):
+        return u'{} TXT {}'.format(self.fqdn, self.txt_data)
+
     @staticmethod
     def eg_metadata():
         """EditableGrid metadata."""
