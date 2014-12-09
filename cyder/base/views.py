@@ -266,15 +266,14 @@ def cy_delete(request):
     if obj.exists():
         obj = obj.get()
     else:
-        messages.error(request, "Object does not exist")
-        return HttpResponse(json.dumps({'msg': 'Object does not exist'}))
+        return HttpResponse(json.dumps({'error': 'Object does not exist'}))
     try:
         if perm(request, ACTION_DELETE, obj=obj):
             if Klass.__name__ == 'Ctnr':
                 request = ctnr_delete_session(request, obj)
             obj.delete()
     except ValidationError as e:
-        messages.error(request, ', '.join(e.messages))
+        return HttpResponse(json.dumps({'error': ', '.join(e.messages)}))
 
     referer = request.META.get('HTTP_REFERER', obj.get_list_url())
     if referer.endswith('/'):

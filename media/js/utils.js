@@ -169,6 +169,34 @@ function button_to_form( button, csrfToken, success) {
     success( postForm );
 }
 
+function slideUp_and_remove( elem ) {
+    var deferred = $.Deferred();
+    elem.slideUp( 400 );
+    setTimeout( function () {
+        $(this).remove();
+        deferred.resolve();
+    }, 400 );
+    return deferred;
+}
+
+function header_message( msg ) {
+    var message = $('<ul>').attr( 'class', 'messages')
+                           .attr( 'style', 'display:none' );
+    message.append(
+        $('<div>').attr( 'class', 'exit-message').text('X')
+    );
+    message.append(
+        $('<li>').attr( 'class', 'error').text( msg )
+    );
+    if ( $('.messages').length ) {
+        $.when( slideUp_and_remove( $('.messages') ) ).done( function() {
+            message.appendTo($('.container.message')).slideDown();
+        });
+    } else {
+        message.appendTo($('.container.message')).slideDown();
+    }
+}
+
 // fields is a serialized array taken from inputs in a form
 function ajax_form_submit( url, fields, csrfToken ) {
     var deferred = $.Deferred();

@@ -50,13 +50,17 @@ $(document).ready( function() {
     function delete_object( btn, kwargs, csrfToken, msg ) {
         if ( confirm( msg ) ) {
             $.when( button_to_post( btn, csrfToken ) ).done( function( data ) {
-                // if the object is in a table and not the last element of
-                // that table delete the row
-                if ( $( btn ).hasClass( 'table_delete' ) &&
-                        $( btn ).parents( 'tbody' ).find( 'tr' ).length > 1 ) {
-                    $( btn ).parents( 'tr' ).remove();
+                if ( data.error ) {
+                    header_message( data.error );
                 } else {
-                    window.location.href = data.url;
+                    // if the object is in a table and not the last element of
+                    // that table delete the row
+                    if ( $( btn ).hasClass( 'table_delete' ) &&
+                            $( btn ).parents( 'tbody' ).find( 'tr' ).length > 1 ) {
+                        $( btn ).parents( 'tr' ).remove();
+                    } else {
+                        window.location.href = data.url;
+                    }
                 }
             });
         } else {

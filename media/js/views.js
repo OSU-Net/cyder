@@ -47,6 +47,10 @@ $(document).ready( function() {
         });
     });
 
+    $( document ).on( 'click', '.exit-message', function( e ) {
+        slideUp_and_remove( $(this).parent() );
+    });
+
     $( document ).on( 'focus', '#id_attribute', function() {
         $('#id_attribute').autocomplete({
             minLength: 1,
