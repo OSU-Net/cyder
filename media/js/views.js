@@ -4,10 +4,12 @@ $(document).ready( function() {
     var domainsUrl = metadata.attr( 'data-domainsUrl' );
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
-    if ( domainsUrl ) {
-        make_smart_name_get_domains(
-            $('#id_fqdn, #id_target, #id_server'), true, domainsUrl );
-    }
+    $( document ).on( 'click', '#id_fqdn, #id_target, #id_server', function() {
+        if ( domainsUrl ) {
+            make_smart_name_get_domains(
+                $('#id_fqdn, #id_target, #id_server'), true, domainsUrl );
+        }
+    });
 
     // displays the loading gif on ajax event
     $(document).ajaxStart( function() {
