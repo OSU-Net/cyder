@@ -341,17 +341,18 @@ class Zone(object):
             try:
                 static.save(update_range_usage=False)
             except ValidationError as e:
+                fqdn = ".".join((name, self.domain.name))
                 try:
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
                     static.save(update_range_usage=False)
-                    stderr.write('WARNING: Static interface with IP {} has '
-                                 'been disabled\n'.format(static.ip_str))
-                    stderr.write('    {}\n'.format(e))
+                    stderr.write('WARNING: Static interface {} has '
+                                 'been disabled: '.format(fqdn))
+                    stderr.write('{}\n'.format(e))
                 except ValidationError as e:
-                    stderr.write('WARNING: Could not create static interface '
-                                 'with IP {}\n'.format(static.ip_str))
-                    stderr.write('    {}\n'.format(e))
+                    stderr.write('WARNING: Could not create the static '
+                                 'interface {}: '.format(fqdn))
+                    stderr.write('{}\n'.format(e))
                     static = None
                     system.delete()
 
