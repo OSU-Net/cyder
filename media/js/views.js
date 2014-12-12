@@ -13,9 +13,9 @@ $(document).ready( function() {
 
     // displays the loading gif on ajax event
     $(document).ajaxStart( function() {
-        $('.load').fadeIn();
+        $('.load').stop().fadeIn( 160 );
     }).ajaxStop( function() {
-        $('.load').fadeOut('fast');
+        $('.load').stop().fadeOut( 160 );
     });
 
     // toggles the settings menu in mobile view
