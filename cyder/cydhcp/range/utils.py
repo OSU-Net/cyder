@@ -145,7 +145,28 @@ def range_usage(ip_start, ip_end, ip_type, get_objects=True):
     }
 
 
-def range_wizard(request):
+def range_wizard_get_ip(request):
+    if not request.POST:
+        return None
+
+    freeIp = request.POST.get('freeIp', '')
+    rngId = request.POST.get('range', '')
+    Range = get_model('cyder', 'range')
+    rng = Range.objects.get(id=rngId)
+
+    if freeIp == 'true' and rng and rng.ip_type == '4':
+        ip_str = rng.get_next_ip()
+        if not ip_str:
+            ip_str = 'This range is full!'
+    else:
+        ip_str = '.'.join(rng.start_str.split('.')[:-1])
+
+    return HttpResponse(json.dumps({
+        'ip_type': rng.ip_type,
+        'ip_str': str(ip_str), }))
+
+
+def range_wizard_get_ranges(request):
     if not request.POST:
         return None
 
@@ -156,44 +177,27 @@ def range_wizard(request):
     networks = []
     all_ranges = False
     data = request.POST
-    if data['range']:
-        Range = get_model('cyder', 'range')
-        rng = Range.objects.get(id=data['range'])
 
-        if data['free_ip'] and rng and rng.ip_type == '4':
-            ip_str = rng.get_next_ip()
-            if not ip_str:
-                ip_str = 'This range is full!'
-        else:
-            ip_str = '.'.join(rng.start_str.split('.')[:-1])
+    if data.get('rangeType', None):
+        range_types = [data.get('rangeType')[:2]]
+    else:
+        range_types = ['st', 'dy']
 
-        return HttpResponse(json.dumps({
-            'ip_type': rng.ip_type,
-            'ip_str': str(ip_str), }))
-
-    if data['vrf']:
+    if data.get('vrf', None):
         Vrf = get_model('cyder', 'vrf')
         vrf = Vrf.objects.get(id=data['vrf'])
         vrf_networks = Network.objects.filter(vrf=vrf)
 
-    if data['site']:
+    if data.get('site', None):
         Site = get_model('cyder', 'site')
         site = Site.objects.get(id=data['site'])
         site_networks = Network.objects.filter(site=site)
 
-    if data.get('range_type', None):
-        range_types = [data.get('range_type')[:2]]
-    else:
-        range_types = ['st', 'dy']
-
-    if data['site'] and data['vrf']:
+    if data.get('site', None) and data.get('vrf', None):
         networks = vrf_networks & site_networks
 
-    elif data['site'] or data['vrf']:
-        if vrf_networks:
-            networks = vrf_networks
-        else:
-            networks = site_networks
+    elif data.get('site', None) or data.get('vrf', None):
+        networks = vrf_networks or site_networks
 
     else:
         all_ranges = True
@@ -203,21 +207,7 @@ def range_wizard(request):
         networks, ctnr=request.session['ctnr'],
         range_types=range_types, all_ranges=all_ranges)
 
-    if len(ranges) > 0:
-        if data['free_ip'] and ranges[0].ip_type == '4':
-            ip_str = ranges[0].get_next_ip()
-            ip_type = 4
-            if not ip_str:
-                ip_str = 'This range is full!'
-        else:
-            ip_str = '.'.join(ranges[0].start_str.split('.')[:-1])
-            ip_type = ranges[0].ip_type
-    else:
-        ip_str = ''
-        ip_type = 4
-
     ranges = [([r.get_self_str(padded=True) for r in ranges]),
               ([r.id for r in ranges])]
-    return HttpResponse(json.dumps({'ranges': ranges,
-                                    'ip_type': ip_type,
-                                    'ip_str': str(ip_str)}))
+
+    return HttpResponse(json.dumps({'ranges': ranges}))

@@ -4,6 +4,8 @@ from django.db.models.query import QuerySet
 from cyder.base.constants import ACTION_UPDATE
 from cyder.base.helpers import cached_property
 
+import json
+
 
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
@@ -115,7 +117,7 @@ class Tablefier:
 
     @staticmethod
     def build_extra(d):
-        data_fields = ['value', 'url', 'img', 'class']
+        data_fields = ['value', 'url', 'img', 'class', 'data']
         if not isinstance(d['value'], list):
             for k, v in d.items():
                 d[k] = [v]
@@ -139,17 +141,20 @@ class Tablefier:
     def build_update_field(self, obj):
         if self.profile and self.profile.has_perm(self.request, ACTION_UPDATE,
                                                   obj=obj):
+            data = [
+                [('kwargs', json.dumps({
+                    'obj_type': obj._meta.db_table, 'pk': obj.id,
+                    'obj_name': obj.pretty_name,
+                    'get_url': reverse('get-update-form'),
+                    'pretty_obj_type': obj.pretty_type}))],
+                [('kwargs', json.dumps({
+                    'obj_type': obj._meta.db_table,
+                    'pk': obj.id}))]]
+
             col = {'value': ['Update', 'Delete'],
                    'url': [obj.get_update_url(), obj.get_delete_url()],
-                   'data': [[('pk', obj.id),
-                             ('objName', obj.pretty_name),
-                             ('objType', obj._meta.db_table),
-                             ('getUrl', reverse('get-update-form')),
-                             ('prettyObjType', obj.pretty_type)],
-                            [('kwargs', '{"obj_type": "'
-                             + str(obj._meta.db_table)
-                             + '", "pk": "' + str(obj.id) + '"}')]],
-                   'class': ['update', 'delete'],
+                   'data': data,
+                   'class': ['js-get-form', 'delete table_delete'],
                    'img': ['/media/img/update.png', '/media/img/delete.png']}
         else:
             col = {'value': []}
@@ -162,7 +167,6 @@ class Tablefier:
             extra_datas = zip(*[col['data'] for col in self.extra_cols])
         else:
             extra_datas = [[]] * len(self.objects)
-
         for obj, extra_data in zip(self.objects, extra_datas):
             row_data = []
             if self.add_info:

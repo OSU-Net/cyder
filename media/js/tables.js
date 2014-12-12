@@ -1,10 +1,4 @@
-function enableEditableGrid() {
-    var $eg = $('#eg');
-    var csrfToken = $('#view-metadata').attr('data-csrfToken');
-    if (!$eg) {
-        return;
-    }
-
+function cleanTablesForEditableGrid() {
     // Remove Action column.
     if ($('th:contains("Actions")')) {
         $('th:contains("Actions")').remove();
@@ -26,23 +20,36 @@ function enableEditableGrid() {
         }
         $td.text($td.text().trim());
     });
+}
 
+
+/*
+Callback function on change. Send whatever was changed so the change
+can be validated and the object can be updated.
+*/
+function editableGridCallback(rowIndex, columnIndex, oldValue, newValue, row) {
+    var postData = {};
+    var csrfToken = $('#view-metadata').attr('data-csrfToken');
+    postData[editableGrid.getColumnName(columnIndex)] = newValue;
+    postData.csrfmiddlewaretoken = csrfToken;
+    $.post($(row).attr('data-url'), postData, function(resp) {
+        if (resp && resp.error) {
+            $(row).after($('<tr></tr>').html(resp.error[0]));
+        }
+    }, 'json');
+}
+
+
+function enableEditableGrid() {
+    var $eg = $('#eg');
+    if (!$eg) {
+        return;
+    }
+
+    cleanTablesForEditableGrid();
     editableGrid = new EditableGrid("My Editable Grid");
     editableGrid.loadJSONFromString($eg.attr('data-metadata'));
-    editableGrid.modelChanged = function(rowIndex, columnIndex, oldValue, newValue, row) {
-        /*
-        Callback function on change. Send whatever was changed so the change
-        can be validated and the object can be updated.
-        */
-        var postData = {};
-        postData[editableGrid.getColumnName(columnIndex)] = newValue;
-        postData['csrfmiddlewaretoken'] = csrfToken;
-        $.post($(row).attr('data-url'), postData, function(resp) {
-            if (resp && resp.error) {
-                $(row).after($('<tr></tr>').html(resp.error[0]));
-            }
-        }, 'json');
-    };
+    editableGrid.modelChanged = editableGridCallback;
     editableGrid.attachToHTMLTable('egtable');
     editableGrid.renderGrid();
 }

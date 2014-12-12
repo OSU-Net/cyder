@@ -1,15 +1,21 @@
 {% macro create_button(obj_type, pretty_obj_type, get_url, post_url, obj_name=None, data=None,
                        button_prefix="Create ", button_name=None) %}
-  <a class="btn create-obj" data-objType="{{ obj_type }}"
-     data-prettyObjType="{{ pretty_obj_type }}"
-     {% if data %}
-       data-kwargs='{{ data }}'
-     {% endif %}
-       href="{{ post_url }}"
-     {% if button_name %}
-       data-getUrl="{{ get_url }}">{{ button_prefix }}{{ button_name }}
-     {% else %}
-       data-getUrl="{{ get_url }}">{{ button_prefix }}{{ pretty_obj_type }}
-     {% endif %}
+  <a class="btn js-get-form"
+    data-kwargs='{"obj_type": "{{ obj_type }}",
+                  "get_url": "{{ get_url }}",
+                  "pretty_obj_type": "{{ pretty_obj_type }}"}'
+    {% if data %}
+      data-init='{{ data }}'
+    {% endif %}
+      href="{{ post_url }}"
+    {% if button_name %}
+      >{{ button_prefix }}{{ button_name }}
+    {% else %}
+      >{{ button_prefix }}{{ pretty_obj_type }}
+    {% endif %}
   </a>
 {% endmacro %}
+      <a id="btn js-create-object" class="btn js-get-form"
+          data-kwargs='{"obj_type": "{{ obj_type }}", "get_url": "{{ url('get-update-form') }}", "pretty_obj_type": "{{ pretty_obj_type }}"}'>
+        Create {{ pretty_obj_type }}
+      </a>

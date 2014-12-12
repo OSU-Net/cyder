@@ -6,7 +6,8 @@
 
 {% block content %}
   <span id="ctnr-data"
-        data-ctnr-pk="{{ obj.pk }}"
+        data-ctnrName="{{ obj }}"
+        data-ctnrPk="{{ obj.pk }}"
         data-searchUserUrl="{{ url('user-search') }}"
         data-searchDomainUrl="{{ url('domain-search') }}"
         data-searchRangeUrl="{{ url('range-search') }}"
@@ -24,17 +25,17 @@
         {% endif %}
         <div class="inner-form" id="add-object-inner-form">
           <ul style="float:top; left:0;" id="add-object-errorlist"></ul>
-            {{ object_select_form.as_p() }}
+          {{ object_select_form.as_p() }}
+          <div id="add-user-form" style="display: none">
+            <ul style="float:top; left:0;" id="add-user-errorlist"></ul>
+            {{ add_user_form.as_p() }}
+          </div>
         </div>
         <div class="form-btns">
           <hr>
           <a id="add-object-ctnr" class="btn c submit">Add</a>
         </div>
       </form>
-      <div id ="add-user-form" style="display: none">
-          <ul style="float:top; left:0;" id="add-user-errorlist"></ul>
-        {{ add_user_form.as_p() }}
-      </div>
     </div>
   {% endif %}
 

@@ -13,7 +13,12 @@
   {% if obj_type == 'system' %}
     <a class="btn submit c" href={{ url('system-create') }}>Create {{ pretty_obj_type }}</a>
   {% else %}
-    <a class="btn create-obj" id={{ pretty_obj_type }}>Create {{ pretty_obj_type }}</a>
+      <a id="btn js-create-object" class="btn js-get-form"
+          data-kwargs='{"obj_type": "{{ obj_type }}",
+                        "get_url": "{{ url('get-update-form') }}",
+                        "pretty_obj_type": "{{ pretty_obj_type }}"}'>
+        Create {{ pretty_obj_type }}
+      </a>
   {% endif %}
   {% endif %}
 {% endblock %}
