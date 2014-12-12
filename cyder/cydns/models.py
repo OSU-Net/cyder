@@ -128,12 +128,9 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
     class Meta:
         abstract = True
 
-    def __str__(self):
+    def __unicode__(self):
         self.label_domain_from_fqdn()
         return self.bind_render_record()
-
-    def __repr__(self):
-        return "<{0} '{1}'>".format(self.rdtype, str(self))
 
     @classmethod
     def filter_by_ctnr(cls, ctnr, objects=None):
@@ -186,7 +183,7 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         if self.pk:
             # We need to get the domain from the db. If it's not our current
             # domain, call prune_tree on the domain in the db later.
-            db_domain = self.__class__.objects.get(pk=self.pk).domain
+            db_domain = self.reload().domain
             if self.domain == db_domain:
                 db_domain = None
         else:

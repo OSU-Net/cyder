@@ -9,7 +9,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel, ExpirableMixin
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
@@ -44,14 +44,11 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         objects = objects or DynamicInterface.objects
         return objects.filter(ctnr=ctnr)
 
-    def __str__(self):
+    def __unicode__(self):
         if self.mac:
-            return '{0}'.format(self.mac)
+            return self.mac
         else:
             return '(no MAC address)'
-
-    def __repr__(self):
-        return 'Interface {0}'.format(str(self))
 
     def details(self):
         data = super(DynamicInterface, self).details()
@@ -123,7 +120,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
                 raise ValidationError(
                     "MAC address must be unique in this interface's range")
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         delete_system = kwargs.pop('delete_system', True)
         update_range_usage = kwargs.pop('update_range_usage', True)
@@ -137,8 +134,10 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         if rng and update_range_usage:
             rng.save(commit=False)
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:

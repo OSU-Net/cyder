@@ -7,12 +7,6 @@ class NameserverAPI_Test(APITests):
     model = Nameserver
 
     def create_data(self):
-        data = {
-            'ctnr': self.ctnr,
-            'server': 'relay.oregonstate.edu',
-            'description': 'Nameserver Record',
-            'ttl': 420,
-            'domain': self.domain,
-        }
-        obj, _ = self.model.objects.get_or_create(**data)
-        return obj
+        return Nameserver.objects.create(
+            ctnr=self.ctnr, server='relay.oregonstate.edu',
+            description='Nameserver Record', ttl=420, domain=self.domain)

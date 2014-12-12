@@ -1,80 +1,51 @@
 from django.core.exceptions import ValidationError
 
-import cyder.base.tests
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.domain.models import Domain
 from cyder.core.ctnr.models import Ctnr
 
 
-class TXTTests(cyder.base.tests.TestCase):
+class TXTTests(TestCase, ModelTestMixin):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        self.o = Domain(name="org")
-        self.o.save()
-        self.o_e = Domain(name="oregonstate.org")
-        self.o_e.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        self.o = Domain.objects.create(name="org")
+        self.o_e = Domain.objects.create(name="oregonstate.org")
         self.ctnr.domains.add(self.o)
         self.ctnr.domains.add(self.o_e)
 
-    def do_generic_add(self, **data):
-        if 'ctnr' not in data:
-            data['ctnr'] = self.ctnr
-        txt = TXT(**data)
-        txt.save()
-        txt.__repr__()
-        rtxt = TXT.objects.filter(**data)
-        self.assertTrue(len(rtxt) == 1)
-        return txt
+    def create_txt(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
+        return TXT.objects.create(**kwargs)
 
-    def do_remove(self, **data):
-        txt = self.do_generic_add(data)
-        txt.delete()
-        rmx = TXT.objects.filter(**data)
-        self.assertTrue(len(rmx) == 0)
-
-    def test_add_remove_txt(self):
-        label = "asdf"
-        data = "asdf"
-        data = {'label': label, 'txt_data': data, 'domain': self.o_e}
-        self.do_generic_add(**data)
-
-        label = "asdf"
-        data = "asdfasfd"
-        data = {'label': label, 'txt_data': data, 'domain': self.o_e}
-        self.do_generic_add(**data)
-
-        label = "df"
-        data = "aasdf"
-        data = {'label': label, 'txt_data': data, 'domain': self.o_e}
-        self.do_generic_add(**data)
-
-        label = "12314"
-        data = "dd"
-        data = {'label': label, 'txt_data': data, 'domain': self.o}
-        self.do_generic_add(**data)
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            self.create_txt(label="asdf", txt_data="asdf", domain=self.o_e),
+            self.create_txt(
+                label="asdf", txt_data="asdfasfd", domain=self.o_e),
+            self.create_txt(label="df", txt_data="aasdf", domain=self.o_e),
+            self.create_txt(label="12314", txt_data="dd", domain=self.o),
+        )
 
     def test_domain_ctnr(self):
-        ctnr1 = Ctnr(name='test_ctnr1')
-        ctnr1.save()
+        ctnr1 = Ctnr.objects.create(name='test_ctnr1')
         ctnr1.domains.add(self.o_e)
 
-        ctnr2 = Ctnr(name='test_ctnr2')
-        ctnr2.save()
-
-        self.do_generic_add(
+        self.create_txt(
             label='foo', domain=self.o_e, txt_data='Data data data',
             ctnr=ctnr1)
 
-        with self.assertRaises(ValidationError):
-            self.do_generic_add(
-                label='bleh', domain=self.o_e, txt_data='Data data data',
-                ctnr=ctnr2)
+        ctnr2 = Ctnr.objects.create(name='test_ctnr2')
+
+        self.assertRaises(
+            ValidationError, self.create_txt,
+            label='bleh', domain=self.o_e, txt_data='Data data data',
+            ctnr=ctnr2)
 
     def test_name_duplicates(self):
         """Test that multiple TXTs may share a name"""
         for txt_data in ('qwertyuiop', 'asdfghjkl', 'zxcvbnm'):
-            t = TXT(label='foo', domain=self.o_e, txt_data=txt_data,
-                    ctnr=self.ctnr)
-            t.save()
+            self.create_txt(label='foo', domain=self.o_e, txt_data=txt_data)

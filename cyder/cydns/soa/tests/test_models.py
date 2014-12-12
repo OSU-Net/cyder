@@ -1,164 +1,109 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.domain.models import Domain
 
 
-class SOATests(TestCase):
-    def setUp(self):
-        pass
+class SOATests(TestCase, ModelTestMixin):
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        d1 = Domain.objects.create(name='marp')
+        d2 = Domain.objects.create(name='blook')
+        d3 = Domain.objects.create(name='bluh')
+        d4 = Domain.objects.create(name='wep')
+        d5 = Domain.objects.create(name='blah')
+        return (
+            SOA.objects.create(
+                primary="ns2.oregonstate.edu", contact="admin.oregonstate.edu",
+                retry=1234, refresh=1234123, description="marp",
+                root_domain=d1),
+            SOA.objects.create(
+                primary="dddo.com", contact="admf.asdf", retry=432152,
+                refresh=1235146134, description="blook", root_domain=d2),
+            SOA.objects.create(
+                primary="ns1.oregonstate.edu", contact="admin.oregonstate.edu",
+                retry=1234, refresh=1234123, description="bluh",
+                root_domain=d3),
+            SOA.objects.create(
+                primary="do.com", contact="admf.asdf", retry=432152,
+                refresh=1235146134, description="wep", root_domain=d4),
+            SOA.objects.create(
+                primary='ns1.derp.com', contact='admf.asdf', root_domain=d5),
+        )
 
-    def do_generic_add(self, primary, contact, retry, refresh, description):
-        d = Domain.objects.create(name=description)
-        soa = SOA(primary=primary, contact=contact, root_domain=d,
-                  retry=retry, refresh=refresh, description=description)
-        soa.save()
-        soa.save()
-        rsoa = SOA.objects.filter(primary=primary, contact=contact,
-                                  retry=retry, refresh=refresh)
-        self.assertTrue(len(rsoa) == 1)
-        return soa
+    def test_duplicate(self):
+        d = Domain.objects.create(name='flop')
 
-    def test_add_soa(self):
-        primary = "ns1.oregonstate.edu"
-        contact = "admin.oregonstate.edu"
-        retry = 1234
-        refresh = 1234123
-        description = "bluh"
-        self.do_generic_add(primary, contact, retry, refresh,
-                            description=description)
-        soa = SOA.objects.filter(primary=primary, contact=contact,
-                                 retry=retry, refresh=refresh)
-        soa[0].save()
-        self.assertTrue(soa)
-        soa[0].__repr__()
-        soa = soa[0]
-        self.assertTrue(soa.details())
+        SOA.objects.create(
+            primary='hoo.ha', contact='me', retry=100009,
+            refresh=2003, description='flippy', root_domain=d)
 
-        primary = "do.com"
-        contact = "admf.asdf"
-        retry = 432152
-        refresh = 1235146134
-        description = "bloh"
-        self.do_generic_add(primary, contact, retry, refresh,
-                            description=description)
-        soa = SOA.objects.filter(primary=primary, contact=contact,
-                                 retry=retry, refresh=refresh)
-        self.assertTrue(soa)
-        soa = soa[0]
-        self.assertTrue(soa.details())
-
-        primary = "ns1.derp.com"
-        contact = "admf.asdf"
-        d = Domain.objects.create(name="bwah")
-        soa = SOA(primary=primary, contact=contact, root_domain=d)
-        soa.save()
-        self.assertTrue(
-            soa.serial and soa.expire and soa.retry and soa.refresh)
-        self.assertTrue(soa.details())
-
-    def test_add_remove(self):
-        primary = "ns2.oregonstate.edu"
-        contact = "admin.oregonstate.edu"
-        retry = 1234
-        refresh = 1234123
-        description = "bluk"
-        soa = self.do_generic_add(
-            primary, contact, retry, refresh, description=description)
-        soa.delete()
-        soa = SOA.objects.filter(primary=primary, contact=contact,
-                                 retry=retry, refresh=refresh)
-        self.assertTrue(len(soa) == 0)
-
-        primary = "dddo.com"
-        contact = "admf.asdf"
-        retry = 432152
-        refresh = 1235146134
-        description = "blook"
-        soa = self.do_generic_add(
-            primary, contact, retry, refresh, description=description)
-        soa.delete()
-        soa = SOA.objects.filter(primary=primary, contact=contact, retry=retry,
-                                 refresh=refresh, description=description)
-        self.assertTrue(len(soa) == 0)
-
-        # Add dup
-        description = "blork"
-        soa = self.do_generic_add(
-            primary, contact, retry, refresh, description=description)
-        soa.save()
-        self.assertRaises(ValidationError, self.do_generic_add, *(
-            primary, contact, retry, refresh, description))
+        # Same root_domain.
+        self.assertRaises(
+            ValidationError, SOA.objects.create, primary='hee.ha',
+            contact='you', retry=40404, refresh=10038, description='floppy',
+            root_domain=d)
 
     def test_add_invalid(self):
-        data = {'primary': "daf..fff", 'contact': "foo.com"}
-        soa = SOA(**data)
-        self.assertRaises(ValidationError, soa.save)
-        data = {'primary': 'foo.com', 'contact': 'dkfa..'}
-        soa = SOA(**data)
-        self.assertRaises(ValidationError, soa.save)
-        data = {'primary': 'adf', 'contact': '*@#$;'}
-        soa = SOA(**data)
-        self.assertRaises(ValidationError, soa.save)
+        self.assertRaises(
+            ValidationError, SOA.objects.create, primary='daf..fff',
+            contact='foo.com')
+
+        self.assertRaises(
+            ValidationError, SOA.objects.create, primary='foo.com',
+            contact='dkfa..')
+
+        self.assertRaises(
+            ValidationError, SOA.objects.create, primary='adf',
+            contact='*@#$;')
 
     def test_chain_soa_domain_add(self):
-        d0 = Domain(name='com')
-        d0.save()
-        data = {'primary': "ns1.foo.com", 'contact': "email.foo.com",
-                'root_domain':d0}
-        soa = SOA(**data)
-        soa.save()
-        d1 = Domain(name='foo.com', soa=soa)
-        d1.save()
-        self.assertTrue(soa == d1.soa)
-        d2 = Domain(name='bar.foo.com', soa=soa)
-        d2.save()
-        self.assertTrue(soa == d2.soa)
-        d3 = Domain(name='new.foo.com', soa=soa)
-        d3.save()
-        self.assertTrue(soa == d3.soa)
-        d4 = Domain(name='far.bar.foo.com', soa=soa)
-        d4.save()
-        self.assertTrue(soa == d4.soa)
-        d5 = Domain(name='tee.new.foo.com', soa=soa)
-        d5.save()
-        self.assertTrue(soa == d5.soa)
+        d0 = Domain.objects.create(name='com')
+        soa = SOA.objects.create(
+            primary='ns1.foo.com', contact='email.foo.com', root_domain=d0)
+
+        d1 = Domain.objects.create(name='foo.com')
+        self.assertEqual(soa, d1.soa)
+
+        d2 = Domain.objects.create(name='bar.foo.com')
+        self.assertEqual(soa, d2.soa)
+
+        d3 = Domain.objects.create(name='new.foo.com')
+        self.assertEqual(soa, d3.soa)
+
+        d4 = Domain.objects.create(name='far.bar.foo.com')
+        self.assertEqual(soa, d4.soa)
+
+        d5 = Domain.objects.create(name='tee.new.foo.com')
+        self.assertEqual(soa, d5.soa)
+
         d5.delete()
         d4.delete()
-        self.assertTrue(soa == d1.soa)
-        self.assertTrue(soa == d2.soa)
-        self.assertTrue(soa == d3.soa)
+        self.assertEqual(soa, d1.soa)
+        self.assertEqual(soa, d2.soa)
+        self.assertEqual(soa, d3.soa)
 
     def test_nested_zones(self):
         self.domain_names = (
             'y', 'x.y', 'p.x.y', 'q.x.y',
             'a.q.x.y', 'b.q.x.y', 'c.q.x.y')
         for name in self.domain_names:
-            d = Domain(name=name)
-            d.save()
+            d = Domain.objects.create(name=name)
 
-        soa_q_x_y = SOA(
+        soa_q_x_y = SOA.objects.create(
             root_domain=Domain.objects.get(name='q.x.y'),
             primary='bleh1', contact='bleh1')
-        soa_q_x_y.save()
 
         for name in ('y', 'x.y', 'p.x.y'):
             self.assertEqual(Domain.objects.get(name=name).soa, None)
         for name in ('q.x.y', 'a.q.x.y', 'b.q.x.y', 'c.q.x.y'):
             self.assertEqual(Domain.objects.get(name=name).soa, soa_q_x_y)
 
-        soa_x_y = SOA(
+        soa_x_y = SOA.objects.create(
             root_domain=Domain.objects.get(name='x.y'),
             primary='bleh2', contact='bleh2')
-        soa_x_y.save()
 
         soa_q_x_y = SOA.objects.get(root_domain__name='q.x.y')
 

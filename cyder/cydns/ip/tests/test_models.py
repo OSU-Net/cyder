@@ -1,40 +1,25 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 import ipaddr
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import ipv6_to_longs, Ip
-from cyder.cydns.domain.models import boot_strap_ipv6_reverse_domain, Domain
-from cyder.cydns.ip.utils import ip_to_domain_name
+from cyder.cydns.ip.utils import ip_to_reverse_name
+from cyder.cydns.tests.utils import create_reverse_domain, DNSTest
 
 
-class SimpleTest(TestCase):
+class SimpleTest(DNSTest):
     def setUp(self):
-        self.arpa = self.create_domain(name='arpa')
-        self.i_arpa = self.create_domain(name='in-addr.arpa')
-        self.i6_arpa = self.create_domain(name='ip6.arpa')
+        super(SimpleTest, self).setUp()
 
-        rd = self.create_domain(name='66', ip_type='4')
-
-    def create_domain(self, name, ip_type=None, delegated=False):
-        if ip_type is None:
-            ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            pass
-        else:
-            name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain.objects.create(name=name, delegated=delegated)
-        self.assertTrue(d.is_reverse)
-        return d
+        rd = create_reverse_domain('66', ip_type='4')
 
     def test_ipv4_str(self):
-        rd = self.create_domain(name='192', ip_type='4')
-        rd.save()
+        rd = create_reverse_domain('192', ip_type='4')
         ip_str = '192.168.1.1'
         ipaddr.IPv4Address(ip_str)
         Ip(ip_str=ip_str, ip_type='4').clean_ip()
 
-        rd = self.create_domain(name='128', ip_type='4')
-        rd.save()
+        rd = create_reverse_domain('128', ip_type='4')
         ip_str = '128.168.1.1'
         ipaddr.IPv4Address(ip_str)
         Ip(ip_str=ip_str, ip_type='4').clean_ip()
@@ -47,7 +32,7 @@ class SimpleTest(TestCase):
         self.assertEqual(ip.ip_upper, 0)
         self.assertEqual(ip.ip_lower, int(v_ip))
 
-        # Make sure ip_lower is update.
+        # Make sure ip_lower is updated.
         ip_str = '66.213.1.9'
         v_ip = ipaddr.IPv4Address(ip_str)
         ip.ip_str = ip_str
@@ -56,7 +41,7 @@ class SimpleTest(TestCase):
         self.assertEqual(ip.ip_lower, int(v_ip))
 
     def test_ipv6_str(self):
-        boot_strap_ipv6_reverse_domain('1.2.3.4')
+        create_reverse_domain('1.2.3.4', '6')
 
         ip_str = '1234:1234:1243:1243:1243::'
         new_ip = Ip(ip_str=ip_str, ip_type='6')
@@ -75,11 +60,7 @@ class SimpleTest(TestCase):
         self.assertEqual(new_ip.ip_lower, ip_lower)
 
     def test_large_ipv6(self):
-        try:
-            rd = boot_strap_ipv6_reverse_domain('f')
-            rd.save()
-        except ValidationError:
-            pass
+        rd = create_reverse_domain('f', ip_type='6')
         ip_str = 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
         ip = ipaddr.IPv6Address(ip_str)
         ip_upper, ip_lower = ipv6_to_longs(ip_str)
@@ -94,13 +75,12 @@ class SimpleTest(TestCase):
         self.assertRaises(ValidationError, ipv6_to_longs, {'addr': "1::::"})
 
     def test_int_ip(self):
-        rd = self.create_domain(name='129', ip_type='4')
-        rd.save()
+        rd = create_reverse_domain('129', ip_type='4')
         ip = Ip(ip_str="129.193.1.1", ip_type='4')
         ip.clean_ip()
         ip.__int__()
         ip.__repr__()
-        rd = boot_strap_ipv6_reverse_domain('e')
+        rd = create_reverse_domain('e', ip_type='6')
         ip_str = 'efff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
         ip = Ip(ip_str=ip_str, ip_type='6')
         ip.clean_ip()
@@ -108,8 +88,7 @@ class SimpleTest(TestCase):
         ip.__repr__()
 
     def test_creation(self):
-        rd = self.create_domain(name='130', ip_type='4')
-        rd.save()
+        rd = create_reverse_domain('130', ip_type='4')
 
         ip = Ip(ip_str="111:22:3::", ip_type='6')
         ip.clean_ip()

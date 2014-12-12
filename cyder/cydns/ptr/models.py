@@ -5,14 +5,13 @@ from django.db.models.loading import get_model
 from django.core.exceptions import ValidationError
 from ipaddr import AddressValueError, IPv4Address, IPv6Address
 
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.base.models import BaseModel
 from cyder.base.mixins import DisplayMixin, ObjectUrlMixin
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydns.models import ViewMixin
 from cyder.cydns.domain.models import Domain, name_to_domain
 from cyder.cydns.ip.models import Ip
-from cyder.cydns.ip.utils import ip_to_dns_form, ip_to_domain_name, nibbilize
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.validation import validate_fqdn, validate_ttl
 from cyder.cydns.view.validation import check_no_ns_soa_condition
@@ -137,13 +136,6 @@ class BasePTR(object):
                 "alias defined by a CNAME. -- RFC 1034"
             )
 
-    def dns_name(self):
-        """
-        Return the cononical name of this ptr that can be placed in a
-        reverse zone file.
-        """
-        return ip_to_dns_form(self.ip_str)
-
 
 class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     """
@@ -177,11 +169,8 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         db_table = 'ptr'
         unique_together = ('ip_str', 'ip_type', 'fqdn')
 
-    def __str__(self):
-        return "{0} {1} {2}".format(str(self.ip_str), 'PTR', self.fqdn)
-
-    def __repr__(self):
-        return "<{0}>".format(str(self))
+    def __unicode__(self):
+        return u'{} PTR {}'.format(self.ip_str, self.fqdn)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -211,8 +200,10 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         return super(PTR, self).bind_render_record(
             custom={'reverse_domain': reverse_domain})
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -227,7 +218,7 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
             if old_range:
                 old_range.save(commit=False)
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         update_range_usage = kwargs.pop('update_range_usage', True)
         if self.reverse_domain.soa:

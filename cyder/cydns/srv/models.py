@@ -2,7 +2,7 @@ from gettext import gettext as _
 
 from django.db import models
 
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.models import CydnsRecord, LabelDomainUtilsMixin
 from cyder.cydns.validation import (
@@ -60,6 +60,9 @@ class SRV(CydnsRecord, LabelDomainUtilsMixin):
         ]
         return data
 
+    def __unicode__(self):
+        return u'{} SRV {}'.format(self.fqdn, self.target)
+
     @staticmethod
     def eg_metadata():
         """EditableGrid metadata."""
@@ -81,6 +84,8 @@ class SRV(CydnsRecord, LabelDomainUtilsMixin):
     def rdtype(self):
         return 'SRV'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(SRV, self).save(*args, **kwargs)

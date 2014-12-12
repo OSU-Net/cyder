@@ -54,8 +54,8 @@ class DHCPBuildTest(TestCase):
         mgr.clone(PROD_ORIGIN_DIR, DHCPBUILD['prod_dir'])
 
         self.builder = DHCPBuilder(verbose=False, debug=False, **DHCPBUILD)
-        self.builder.repo.commit_and_push(empty=True,
-                                          message='Initial commit')
+        self.builder.repo.commit_and_push(
+            empty=True, message='Initial commit')
 
         copy_tree('cyder/cydhcp/build/tests/files/', DHCPBUILD['stage_dir'])
 
@@ -75,12 +75,12 @@ class DHCPBuildTest(TestCase):
 
         self.assertEqual(rev1, rev2)
 
-        NetworkAV(
+        NetworkAV.objects.create(
             entity=Network.objects.get(network_str='192.168.0.0/16'),
             attribute=Attribute.objects.get(attribute_type='o',
                                             name='routers'),
-            value='192.168.0.1'
-        ).save()
+            value='192.168.0.1',
+        )
 
         self.builder.build()
         self.builder.push(sanity_check=False)
@@ -98,18 +98,16 @@ class DHCPBuildTest(TestCase):
         self.builder.build()
         self.builder.push(sanity_check=False)
 
-        d = DynamicInterface(
+        d = DynamicInterface.objects.create(
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
             ctnr=Ctnr.objects.get(name='Global'),
         )
-        d.save()
 
         self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
 
     def test_sanity_check2(self):
         """Test that the sanity check fails when too many lines are removed"""
@@ -124,9 +122,8 @@ class DHCPBuildTest(TestCase):
             mac__in=('010204081020', 'aabbccddeeff')).delete()
 
         self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
 
     def test_sanity_check3(self):
         """Test that the sanity check succeeds when changes are sane"""
@@ -139,13 +136,12 @@ class DHCPBuildTest(TestCase):
 
         DynamicInterface.objects.filter(
             mac__in=('010204081020', 'aabbccddeeff')).delete()
-        d = DynamicInterface(
+        d = DynamicInterface.objects.create(
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
             ctnr=Ctnr.objects.get(name='Global'),
         )
-        d.save()
 
         self.builder.build()
         self.builder.push(sanity_check=True)

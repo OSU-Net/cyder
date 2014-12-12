@@ -6,9 +6,8 @@ from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
@@ -18,14 +17,14 @@ class Vrf(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
 
     search_fields = ('name',)
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'vrf'
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -51,7 +50,8 @@ class Vrf(BaseModel, ObjectUrlMixin):
     # vrfs will have one masked network,
     # but that may change when they are expanding
     # eg: network_id's in vrf
-    def get_related_networks(self, vrfs):
+    @staticmethod
+    def get_related_networks(vrfs):
         networks = set()
         for vrf in vrfs:
             for network in vrf.network_set.all():
@@ -66,8 +66,10 @@ class Vrf(BaseModel, ObjectUrlMixin):
             {'name': 'network', 'datatype': 'string', 'editable': False},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Vrf, self).save(*args, **kwargs)
 
     def build_vrf(self):
