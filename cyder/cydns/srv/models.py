@@ -23,7 +23,8 @@ class SRV(CydnsRecord, LabelDomainUtilsMixin):
     label = models.CharField(max_length=63, blank=True,
                              validators=[validate_srv_label],
                              help_text="Short name of the FQDN")
-    domain = models.ForeignKey(Domain, null=False)
+    domain = models.ForeignKey(Domain, null=False,
+                               limit_choices_to={'is_reverse': False})
     fqdn = models.CharField(max_length=255, blank=True,
                             validators=[validate_srv_name])
 
