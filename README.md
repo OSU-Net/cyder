@@ -107,7 +107,7 @@ Coding Standards
 
 Adhere to coding standards, or feel the wrath of my **erupting burning finger**.
 
-- [Mozilla Webdev Coding Guide](http://mozweb.readthedocs.org/en/latest/coding.html)
+- [Mozilla Webdev Coding Guide](http://mozweb.readthedocs.org/en/latest/reference/index.html)
 - [JQuery JavaScript Style Guide](http://contribute.jquery.org/style-guide/js/)
 - Strict 80-character limit on lines of code in Python, recommended in HTML and JS
 - 2-space HTML indents, 4-space indent everything else
