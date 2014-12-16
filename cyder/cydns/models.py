@@ -81,7 +81,8 @@ class LabelDomainMixin(LabelDomainUtilsMixin):
     class Meta:
         abstract = True
 
-    domain = models.ForeignKey(Domain, null=False)
+    domain = models.ForeignKey(
+        Domain, null=False, limit_choices_to={'is_reverse': False})
     # "The length of any one label is limited to between 1 and 63 octets."
     # -- RFC218
     label = models.CharField(
