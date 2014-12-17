@@ -28,10 +28,10 @@ class Vrf(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        if objects:
-            return objects
-        else:
+        if objects is None:
             return Vrf.objects.all()
+        else:
+            return objects
 
     def check_in_ctnr(self, ctnr):
         return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
