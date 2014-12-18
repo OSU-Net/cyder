@@ -184,9 +184,6 @@ def cy_view(request, template, pk=None, obj_type=None):
         if 'interface' not in obj_type or object_list.exists():
             form = FormKlass(instance=obj)
 
-        if obj_type == 'system' and not object_list.exists():
-            return redirect(reverse('system-create'))
-
         page_obj = make_paginator(request, do_sort(request, object_list), 50)
         object_table = tablefy(page_obj, request=request)
 

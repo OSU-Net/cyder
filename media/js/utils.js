@@ -135,38 +135,28 @@ function clear_form_all( form ) {
     }
 }
 
-function button_to_post( button, csrfToken ) {
+function button_to_ajax( button, csrfToken, opts ) {
+    var mode = opts.mode.length ? opts.mode : 'POST';
+    var dataType = opts.dataType.length ? opts.dataType : 'json';
     var url = $(button).attr( 'href' );
     var deferred = $.Deferred();
-    var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );
-    postData = {};
-    $.each( kwargs, function( key, value ) {
-        postData[ key ] = value;
-    });
-
-    postData.csrfmiddlewaretoken = csrfToken;
+    var data = {};
+    if ( $(button).attr( 'data-kwargs' ) ) {
+        var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );
+        $.each( kwargs, function( key, value ) {
+            data[ key ] = value;
+        });
+    }
+    if ( mode == 'POST' ) {
+        data.csrfmiddlewaretoken = csrfToken;
+    }
     return $.ajax({
-        type: 'POST',
+        type: mode,
         url: url,
-        data: postData,
-        dataType: 'json',
+        data: data,
+        global: false,
+        dataType: dataType,
     });
-}
-
-
-function button_to_form( button, csrfToken, success) {
-    var url = $(button).attr( 'href' );
-    var kwargs = JSON.parse( $(button).attr( 'data-kwargs' ) );
-    var postForm = $('<form style="display: none" action="' +
-        url + '" method="post"></form>');
-    $.each(kwargs, function( key, value ) {
-        postForm.append( $('<input>').attr(
-            { type: 'text', name: key, value: value } ) );
-    });
-    postForm.append($('<input>').attr(
-        { type: 'hidden', name: 'csrfmiddlewaretoken', value: csrfToken } ) );
-    $('.content').append( postForm );
-    success( postForm );
 }
 
 function slideUp_and_remove( elem ) {

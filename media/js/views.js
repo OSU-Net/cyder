@@ -41,13 +41,11 @@ $(document).ready( function() {
 
     // handles create buttons in dynamic/static interface view and range
     // detail view
-    $( document ).on( 'click', '#system_create', function( e ) {
-        e.preventDefault();
-        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
-        button_to_form( this, csrfToken, function( postForm ){
-            $(postForm).submit();
-        });
-    });
+    //$( document ).on( 'click', '#system_create', function( e ) {
+    //    e.preventDefault();
+    //    var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
+    //    button_to_ajax( this, csrfToken, { 'mode': 'GET', 'dataType': 'json' } );
+    //});
 
     $( document ).on( 'click', '.exit-message', function( e ) {
         slideUp_and_remove( $(this).parent() );
@@ -80,15 +78,19 @@ $(document).ready( function() {
 
     // button behavior logic, see css
     function buttonLogic() {
-        $('.js-get-form, .js-create-object, .update, .cancel').addClass( 'hover' );
+        var selectors = '.js-get-form, .js-create-object, .update, ' +
+            '.cancel, .system_form';
+        $(selectors).addClass( 'hover' );
         if ( $(this).hasClass( 'selected' ) ) {
             $(this).removeClass( 'selected' );
         } else {
-            $('.js-get-form, .js-create-object, .update, .cancel').removeClass( 'selected' );
+            $(selectors).removeClass( 'selected' );
             $(this).removeClass( 'hover' ).addClass( 'selected' );
         }
     }
-    $( document ).on('click', '.js-get-form, js-create-object, .update, .cancel', buttonLogic );
+    $( document ).on('click',
+        '.js-get-form, .js-create-object, .update, .cancel, .system_form',
+        buttonLogic );
 
 
     $( document ).on( 'click', '.js-get-form', function( e ) {
@@ -112,15 +114,14 @@ $(document).ready( function() {
         slideUp( $('#obj-form') );
         form.action = btn.href;
         if ( btn_not_toggle_close( btn ) ) {
+            buttonAttrs = 'btn c submit js-submit';
             kwargs = JSON.parse( $(btn).attr( 'data-kwargs' ) );
             if ( kwargs.pk ) {
-                buttonAttrs = 'btn c submit_update js-submit';
                 getData = {
                     'obj_type': kwargs.obj_type,
                     'pk': kwargs.pk
                 };
             } else {
-                buttonAttrs = 'btn c submit_create js-submit';
                 if ( $(btn).attr( 'data-init' ) ) {
                     initData = $(btn).attr( 'data-init' );
                 }
