@@ -18,12 +18,6 @@ $(document).ready( function() {
         $('.load').stop().fadeOut( 160 );
     });
 
-    // toggles the settings menu in mobile view
-    $('#settings-btn').click( function() {
-        $('.settings-menu').slideToggle();
-        $('#settings-btn').toggleClass( 'selected' );
-    });
-
     // sidebar animation logic
     $('.nav-item.parent').click( function( e ) {
         e.preventDefault();
