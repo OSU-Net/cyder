@@ -79,8 +79,8 @@ pip install -r requirements/dev.txt
 cp cyder/settings/local.py-dist cyder/settings/local.py
 sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
     ```
-
-<!-- If you want to use setting_test.py-dist, figure it out yourself. -->
+    
+    Then set `MIGRATION_*` appropriately. See [the Maintain migration docs](wiki/Overview:-Migration) for details.
 
 - Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
 
