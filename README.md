@@ -80,7 +80,7 @@ cp cyder/settings/local.py-dist cyder/settings/local.py
 sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
     ```
     
-    Then set `MIGRATION_*` appropriately. See [the Maintain migration docs](wiki/Overview:-Migration) for details.
+    Then set `MIGRATION_*` appropriately. See [the Maintain migration docs](https://github.com/OSU-Net/cyder/wiki/Overview:-Migration) for details.
 
 - Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
 
