@@ -1,5 +1,5 @@
 Cyder
-=====
+===
 
 [![Build Status](https://travis-ci.org/OSU-Net/cyder.png?branch=master)](https://travis-ci.org/OSU-Net/cyder)
 
@@ -24,9 +24,9 @@ data models have been designed-to-spec using the RFCs.
 Installation
 ============
 
-###Dependencies
+### Dependencies
 
-####Linux packages
+#### Linux packages
 
 - Fedora:
 
@@ -44,13 +44,13 @@ sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev rubygems
 
 <!-- TODO: add MySQL, pip, etc. -->
 
-####Miscellaneous
+#### Miscellaneous
 
 ```
 sudo gem install sass
 ```
 
-###Setup
+### Setup
 
 - Clone the repo:
 
@@ -80,30 +80,37 @@ cp cyder/settings/local.py-dist cyder/settings/local.py
 sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
     ```
     
-    Then set `MIGRATION_*` appropriately. See [the Maintain migration docs](https://github.com/OSU-Net/cyder/wiki/Overview:-Migration) for details.
+    Then set the *MIGRATION* settings appropriately. See [the Maintain migration docs](https://github.com/OSU-Net/cyder/wiki/Overview:-Migration) for details.
 
 - Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
 
-- Sync the database and run migrations (don't create a superuser unless you know what you're doing):
+- Bring database schema up to date:
 
     ```
-python manage.py syncdb
-python manage.py migrate
+./manage.py syncdb
+./manage.py migrate cyder
     ```
+    
+    Creating a superuser is unnecessary—Cyder comes with a test superuser named `test_superuser`.
+
+- Copy data from Maintain's database into *MIGRATION\_DB* and sanitize it, then migrate data from *MIGRATION\_DB* to Cyder:
+
+    ```
+./manage.py maintain_migrate -qt
+    ```
+
+### Optional setup
 
 - Install a PEP8 linter as a git pre-commit hook:
 
     (With virtualenv, omit the `sudo`.)
 
     ```
-git clone git@github.com:jbalogh/check && cd check
-sudo python setup.py install && cd -
+pip install git+https://github.com/jbalogh/check.git#egg=check
 cp requirements/.pre-commit .git/hooks/pre-commit
     ```
 
-
-Coding Standards
-================
+### Coding Standards
 
 Adhere to coding standards, or feel the wrath of my **erupting burning finger**.
 
