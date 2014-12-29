@@ -21,94 +21,13 @@ data models have been designed-to-spec using the RFCs.
 ![Cyder](http://i.imgur.com/p8Rmbvv.png)
 
 
-Installation
-============
+Setup
+===
 
-### Dependencies
+[Read the Setup wiki page](https://github.com/OSU-Net/cyder/wiki/Setup).
 
-#### Linux packages
-
-- Fedora:
-
-    ```
-sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel python-pip community-mysql
-sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems bind
-sudo systemctl start mysqld
-    ```
-
-- Debian:
-
-    ```
-sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev rubygems
-    ```
-
-<!-- TODO: add MySQL, pip, etc. -->
-
-#### Miscellaneous
-
-```
-sudo gem install sass
-```
-
-### Setup
-
-- Clone the repo:
-
-    ```
-git clone 'git@github.com:OSU-Net/cyder.git'
-cd cyder
-    ```
-
-- Set up virtualenv (recommended):
-
-    ```
-virtualenv .env
-    ```
-
-    Do `source .env/bin/activate` now and every time you run your shell.
-
-- Install submodules and other dependencies:
-
-    ```
-git submodule update --init --recursive
-pip install -r requirements/dev.txt
-    ```
-- Set up settings
-
-    ```
-cp cyder/settings/local.py-dist cyder/settings/local.py
-sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
-    ```
-    
-    Then set the *MIGRATION* settings appropriately. See [the Maintain migration docs](https://github.com/OSU-Net/cyder/wiki/Overview:-Migration) for details.
-
-- Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
-
-- Bring database schema up to date:
-
-    ```
-./manage.py syncdb
-./manage.py migrate cyder
-    ```
-    
-    Creating a superuser is unnecessary—Cyder comes with a test superuser named `test_superuser`.
-
-- Copy data from Maintain's database into *MIGRATION\_DB* and sanitize it, then migrate data from *MIGRATION\_DB* to Cyder:
-
-    ```
-./manage.py maintain_migrate -qt
-    ```
-
-### Optional setup
-
-- Install a PEP8 linter as a git pre-commit hook:
-
-    ```
-pip install git+https://github.com/jbalogh/check.git#egg=check
-cp requirements/.pre-commit .git/hooks/pre-commit
-    ```
-
-### Coding Standards
+Coding Standards
+===
 
 Adhere to coding standards, or feel the wrath of my **erupting burning finger**.
 
