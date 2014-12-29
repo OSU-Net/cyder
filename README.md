@@ -103,8 +103,6 @@ sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
 
 - Install a PEP8 linter as a git pre-commit hook:
 
-    (With virtualenv, omit the `sudo`.)
-
     ```
 pip install git+https://github.com/jbalogh/check.git#egg=check
 cp requirements/.pre-commit .git/hooks/pre-commit
