@@ -5,9 +5,11 @@ import shlex
 import shutil
 import subprocess
 import syslog
+from copy import copy
 from sys import stderr
 
-from cyder import settings
+import MySQLdb
+from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
 from django.db.models import Q
@@ -228,3 +230,31 @@ class savepoint_atomic(object):
             transaction.savepoint_rollback(self.sid)
         else:
             transaction.savepoint_commit(self.sid)
+
+
+def get_cursor(db_name, use=True):
+    """Return a cursor for database `db_name` and the name of the database.
+
+    If `use` is False, don't pass the db argument.
+    """
+    if db_name in settings.DATABASES:
+        db_conf = settings.DATABASES[db_name]
+        db = db_conf['NAME']
+        kwargs = {
+            'host': db_conf['HOST'],
+            'port': int(db_conf['PORT'] or '0'),
+            'user': db_conf['USER'],
+            'passwd': db_conf['PASSWORD'],
+        }
+        kwargs.update(db_conf['OPTIONS'])
+        if use:
+            kwargs['db'] = db
+    elif db_name in settings.OTHER_DATABASES:
+        db_conf = settings.OTHER_DATABASES[db_name]
+        db = db_conf['db']
+        kwargs = copy(db_conf)
+        if not use:
+            del kwargs['db']
+    else:
+        raise Exception('No such database in DATABASES or OTHER_DATABASES')
+    return MySQLdb.connect(**kwargs).cursor(), db
