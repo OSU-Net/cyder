@@ -28,10 +28,10 @@ class Vrf(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('cyder', 'network')
-        networks = Network.objects.filter(range__in=ctnr.ranges.all())
-        objects = objects or Vrf.objects
-        return objects.filter(network__in=networks)
+        if objects is None:
+            return Vrf.objects.all()
+        else:
+            return objects
 
     def check_in_ctnr(self, ctnr):
         return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
@@ -43,13 +43,6 @@ class Vrf(BaseModel, ObjectUrlMixin):
         )
         return data
 
-    # NOTE: The following comment was written when Network had a one-to-many
-    #       relationship with Vrf (which was wrong). The schema has been fixed,
-    #       as has this function. However, the comment was not fixed because I
-    #       can't understand it.
-    # vrfs will have one masked network,
-    # but that may change when they are expanding
-    # eg: network_id's in vrf
     @staticmethod
     def get_related_networks(vrfs):
         networks = set()
