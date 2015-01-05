@@ -5,6 +5,7 @@ from optparse import make_option
 from sys import stderr
 
 from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from cyder.base.eav.models import Attribute
@@ -665,3 +666,48 @@ def do_everything(skip_edu=False):
     delete_CNAME()
     gen_DNS(skip_edu)
     gen_CNAME()
+
+
+class Command(BaseCommand):
+    option_list = BaseCommand.option_list + (
+        make_option('-d', '--dns',
+                    dest='dns',
+                    default=False,
+                    action='store_true',
+                    help='Migrate DNS objects'),
+        make_option('-o', '--domains-only',
+                    dest='domains',
+                    default=False,
+                    action='store_true',
+                    help='Migrate domains only'),
+        make_option('-c', '--cname',
+                    action='store_true',
+                    dest='cname',
+                    default=False,
+                    help='Migrate CNAMEs'),
+        make_option('-X', '--delete',
+                    dest='delete',
+                    action='store_true',
+                    default=False,
+                    help='Delete old objects'),
+        make_option('-s', '--skip',
+                    dest='skip',
+                    action='store_true',
+                    default=False,
+                    help='Skip edu zone.'))
+
+    def handle(self, **options):
+        if options['delete']:
+            if options['dns']:
+                delete_DNS()
+            if options['cname']:
+                delete_CNAME()
+
+        if options['dns']:
+            gen_DNS(options['skip'])
+
+        if options['cname']:
+            gen_CNAME()
+
+        if options['domains']:
+            gen_domains_only()
