@@ -1,5 +1,5 @@
 Cyder
-=====
+===
 
 [![Build Status](https://travis-ci.org/OSU-Net/cyder.png?branch=master)](https://travis-ci.org/OSU-Net/cyder)
 
@@ -21,89 +21,13 @@ data models have been designed-to-spec using the RFCs.
 ![Cyder](http://i.imgur.com/p8Rmbvv.png)
 
 
-Installation
-============
+Setup
+===
 
-###Dependencies
-
-####Linux packages
-
-- Fedora:
-
-    ```
-sudo yum install python-devel openldap-devel cyrus-sasl-devel openssl-devel python-pip community-mysql
-sudo yum install community-mysql-devel community-mysql-server MySQL-python gcc rubygems bind
-sudo systemctl start mysqld
-    ```
-
-- Debian:
-
-    ```
-sudo apt-get install python-dev libldap2-dev libsasl2-dev libssl-dev rubygems
-    ```
-
-<!-- TODO: add MySQL, pip, etc. -->
-
-####Miscellaneous
-
-```
-sudo gem install sass
-```
-
-###Setup
-
-- Clone the repo:
-
-    ```
-git clone 'git@github.com:OSU-Net/cyder.git'
-cd cyder
-    ```
-
-- Set up virtualenv (recommended):
-
-    ```
-virtualenv .env
-    ```
-
-    Do `source .env/bin/activate` now and every time you run your shell.
-
-- Install submodules and other dependencies:
-
-    ```
-git submodule update --init --recursive
-pip install -r requirements/dev.txt
-    ```
-- Set up settings
-
-    ```
-cp cyder/settings/local.py-dist cyder/settings/local.py
-sed -i "s|SASS_BIN = '[^']*'|SASS_BIN = '`which sass`'|" cyder/settings/local.py
-    ```
-
-<!-- If you want to use setting_test.py-dist, figure it out yourself. -->
-
-- Create an empty database for Cyder. (A separate user is recommended.) Enter database settings into `cyder/settings/local.py`.
-
-- Sync the database and run migrations (don't create a superuser unless you know what you're doing):
-
-    ```
-python manage.py syncdb
-python manage.py migrate
-    ```
-
-- Install a PEP8 linter as a git pre-commit hook:
-
-    (With virtualenv, omit the `sudo`.)
-
-    ```
-git clone git@github.com:jbalogh/check && cd check
-sudo python setup.py install && cd -
-cp requirements/.pre-commit .git/hooks/pre-commit
-    ```
-
+[Read the Setup wiki page](https://github.com/OSU-Net/cyder/wiki/Setup).
 
 Coding Standards
-================
+===
 
 Adhere to coding standards, or feel the wrath of my **erupting burning finger**.
 

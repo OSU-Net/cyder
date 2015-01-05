@@ -28,11 +28,7 @@ import ipaddr
 
 
 class Range(BaseModel, ViewMixin, ObjectUrlMixin):
-    """The Range class.
-
-        >>> Range(start=start_ip, end=end_ip,
-        >>>         defualt_domain=domain, network=network)
-
+    """
     Ranges live inside networks; their start ip address is greater than or
     equal to the the start of their network and their end ip address is less
     than or equal to the end of their network; both the Range and the network
@@ -85,7 +81,8 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True, editable=False)
     end_str = models.CharField(max_length=39, verbose_name="End address")
 
-    domain = models.ForeignKey(Domain, null=True, blank=True)
+    domain = models.ForeignKey(Domain, null=True, blank=True,
+                               limit_choices_to={'is_reverse': False})
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
