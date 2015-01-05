@@ -94,4 +94,9 @@ $(document).ready(function() {
             }
         });
     });
+
+    // If landing on an empty system list page, bring up create form
+    if( $('.table').length == 0 ) {
+        $('.system_form').click();
+    }
 });
