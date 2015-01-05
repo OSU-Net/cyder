@@ -114,7 +114,7 @@ $(document).ready( function() {
         slideUp( $('#obj-form') );
         form.action = btn.href;
         if ( btn_not_toggle_close( btn ) ) {
-            buttonAttrs = 'btn c submit js-submit';
+            buttonAttrs = 'btn c js-submit';
             kwargs = JSON.parse( $(btn).attr( 'data-kwargs' ) );
             if ( kwargs.pk ) {
                 getData = {
@@ -150,12 +150,6 @@ $(document).ready( function() {
                     $('.form-btns a.submit').attr( 'class', buttonAttrs );
                     $('#obj-form').slideDown();
                 }
-            }).done( function() {
-                $('#obj-form form :input:visible:last').on( 'keypress', function( e ) {
-                    if ( e.keyCode == 13 ) {
-                        $('.js-submit').focus().click();
-                    }
-                });
             });
         }
     };
@@ -188,7 +182,7 @@ $(document).ready( function() {
     }
 
     // Form submit handler, special logic for attributes
-    $( document ).on( 'submit', '#obj-form form', function( e ) {
+    $( document ).on( 'click', '.js-submit', function( e ) {
         e.preventDefault();
         var url = $('#obj-form form')[0].action;
         var fields = $('#obj-form form').find( ':input' ).serializeArray();

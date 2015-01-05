@@ -15,7 +15,7 @@
 {% block action_bar %}
   {% if obj_type_perm %}
     {% if obj_type in ["static_interface", "dynamic_interface"] %}
-    <a class="btn submit a" href={{ url('system-create') }}
+    <a class="btn system_form a" href={{ url('system-create') }}
           id="system_create"
           data-kwargs='{"initial": "True",
                         "interface_type": "{{ obj_type }}"}'>
@@ -49,7 +49,7 @@
         </div>
         <div class="form-btns">
           <hr>
-          <a class="btn submit c">{{ 'Update' if obj else 'Create ' + pretty_obj_type }}</a>
+          <a class="btn js-submit c">{{ 'Update' if obj else 'Create ' + pretty_obj_type }}</a>
           <a class="btn cancel c" data-formId="obj-form">Cancel</a>
         </div>
       </form>
@@ -57,5 +57,8 @@
   {% endif %}
   {% if obj_type == 'range' %}
     {{ js('rangeform') }}
+  {% endif %}
+  {% if obj_type in ["static_interface", "dynamic_interface"] %}
+    {{ js('systemform') }}
   {% endif %}
 {% endblock %}
