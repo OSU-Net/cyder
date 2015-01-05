@@ -122,37 +122,44 @@ def _build_queries(fqdn, dn=True, mx=True, sr=True, tx=True,
     qsets = []
     if dn:
         from cyder.cydns.domain.models import Domain
-        qsets.append(('Domain', Domain.objects.
-                      filter(**{'name{0}'.format(search_operator): fqdn})))
+        qsets.append(
+            ('Domain', Domain.objects.filter(
+                **{'name{0}'.format(search_operator): fqdn})))
     if mx:
         from cyder.cydns.mx.models import MX
-        qsets.append(('MX', MX.objects.
-                      filter(**{'fqdn{0}'.format(search_operator): fqdn})))
+        qsets.append(
+            ('MX', MX.objects.filter(
+                **{'fqdn{0}'.format(search_operator): fqdn})))
     if sr:
         from cyder.cydns.srv.models import SRV
-        qsets.append(('SRV', SRV.objects.
-                      filter(**{'fqdn{0}'.format(search_operator): fqdn})))
+        qsets.append(
+            ('SRV', SRV.objects.filter(
+                **{'fqdn{0}'.format(search_operator): fqdn})))
     if tx:
         from cyder.cydns.txt.models import TXT
-        qsets.append(('TXT', TXT.objects.
-                      filter(**{'fqdn{0}'.format(search_operator): fqdn})))
+        qsets.append(
+            ('TXT', TXT.objects.filter(
+                **{'fqdn{0}'.format(search_operator): fqdn})))
     if cn:
         from cyder.cydns.cname.models import CNAME
-        qsets.append(('CNAME', CNAME.objects.
-                      filter(**{'fqdn{0}'.format(search_operator): fqdn})))
+        qsets.append(
+            ('CNAME', CNAME.objects.filter(
+                **{'fqdn{0}'.format(search_operator): fqdn})))
     if ar:
         from cyder.cydns.address_record.models import AddressRecord
         ars = AddressRecord.objects.filter(Q(fqdn=fqdn) | Q(ip_str=ip))
         qsets.append(('AddressRecord', ars))
     if pt:
         from cyder.cydns.ptr.models import PTR
-        qsets.append(('PTR', PTR.objects.
-                      Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
-                      Q(**{'ip_str{0}'.format(search_operator): ip})))
+        qsets.append(
+            ('PTR', PTR.objects.filter(
+                  Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
+                  Q(**{'ip_str{0}'.format(search_operator): ip}))))
     if intr:
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
-        qsets.append(('StaticInterface', StaticInterface.objects.filter(
-            Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
-            Q(**{'ip_str{0}'.format(search_operator): ip}))))
+        qsets.append(
+            ('StaticInterface', StaticInterface.objects.filter(
+                Q(**{'fqdn{0}'.format(search_operator): fqdn}) |
+                Q(**{'ip_str{0}'.format(search_operator): ip}))))
 
     return qsets
