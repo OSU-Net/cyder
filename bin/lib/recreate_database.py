@@ -9,6 +9,18 @@ from cyder.base.utils import get_cursor
 
 
 def main():
+    print '****************************************************'
+    print '**** THIS WILL DROP THE CURRENT CYDER DATABASE! ****'
+    print '****************************************************'
+    print
+    while True:
+        response = raw_input('Proceed [y/n]? ')
+        if response.lower() == 'y':
+            break
+        elif response.lower() == 'n':
+            return
+    print
+
     cur, db = get_cursor('default', use=False)
     # We can't use django.db.connection because the database might not exist.
     print 'Dropping Cyder database...'
