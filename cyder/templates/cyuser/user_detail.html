@@ -30,7 +30,7 @@
   {% endif %}
 {% endblock %}
 {% block form %}
-  <div id="perm-hidden" style="display: none">
+  <div id="permissions-form-hidden" style="display: none">
       <form class="form" id="clone-perms-form" action="{{ url('clone-perms', user_id=obj.user.id) }}">
       <h3>Clone user permissions</h3>
       <div class="inner-form" id="hidden-inner-form">

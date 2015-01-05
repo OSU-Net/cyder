@@ -56,8 +56,7 @@ class DNSBuildTest(TestCase):
         mgr.clone(PROD_ORIGIN_DIR, BINDBUILD['prod_dir'])
 
         self.builder = DNSBuilder(verbose=False, debug=False, **BINDBUILD)
-        self.builder.repo.commit_and_push(empty=True,
-                                          message='Initial commit')
+        self.builder.repo.commit_and_push(empty=True, message='Initial commit')
 
         super(DNSBuildTest, self).setUp()
 
@@ -68,14 +67,14 @@ class DNSBuildTest(TestCase):
         self.builder.push(sanity_check=False)
         rev1 = self.builder.repo.get_revision()
 
-        sleep(1)  # ensure different serial if rebuilt
+        sleep(1)  # Ensure different serial if rebuilt.
         self.builder.build()
         self.builder.push(sanity_check=False)
         rev2 = self.builder.repo.get_revision()
 
         self.assertEqual(rev1, rev2)
 
-        sleep(1)  # ensure different serial if rebuilt
+        sleep(1)  # Ensure different serial if rebuilt.
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
         rev3 = self.builder.repo.get_revision()
@@ -93,7 +92,7 @@ class DNSBuildTest(TestCase):
         s = StaticInterface.objects.get(fqdn='www.example.com')
         s.domain.soa.schedule_rebuild()
 
-        sleep(1)  # ensure different serial if rebuilt
+        sleep(1)  # Ensure different serial if rebuilt.
         self.builder.build()
         self.builder.push(sanity_check=False)
         rev2 = self.builder.repo.get_revision()
@@ -109,7 +108,7 @@ class DNSBuildTest(TestCase):
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
 
-        s = StaticInterface(
+        s = StaticInterface.objects.create(
             system=System.objects.get(name='Test system'),
             label='www3',
             domain=Domain.objects.get(name='example.com'),
@@ -117,15 +116,13 @@ class DNSBuildTest(TestCase):
             mac='01:23:45:01:23:45',
             ctnr=Ctnr.objects.get(name='Global')
         )
-        s.save()
         s.views.add(
             View.objects.get(name='public'),
             View.objects.get(name='private'))
 
         self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
 
     def test_sanity_check2(self):
         """Test that the sanity check fails when too many lines are removed"""
@@ -141,9 +138,8 @@ class DNSBuildTest(TestCase):
             fqdn__in=('www.example.com', 'www2.example.com')).delete()
 
         self.builder.build()
-        def bad_push():
-            self.builder.push(sanity_check=True)
-        self.assertRaises(SanityCheckFailure, bad_push)
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
 
     def test_sanity_check3(self):
         """Test that the sanity check succeeds when changes are sane"""

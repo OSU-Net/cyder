@@ -7,14 +7,7 @@ class MXAPI_Test(APITests):
     model = MX
 
     def create_data(self):
-        data = {
-            'ctnr': self.ctnr,
-            'description': 'MX Record',
-            'label': 'mail',
-            'domain': self.domain,
-            'server': 'relay.oregonstate.edu',
-            'ttl': 420,
-            'priority': 420,
-        }
-        obj, _ = self.model.objects.get_or_create(**data)
-        return obj
+        return MX.objects.create(
+            ctnr=self.ctnr, description='MX Record', label='mail',
+            domain=self.domain, server='relay.oregonstate.edu', ttl=420,
+            priority=420)

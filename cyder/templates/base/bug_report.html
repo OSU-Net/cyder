@@ -14,14 +14,15 @@
 {% endblock %}
 
 {% block content %}
-<form class="form" id="Bug-Report" method="POST" action="">
-  <h3>Report a Bug</h3>
-  <div class="inner-form">
-    {{ form.as_p() }}
-  </div>
-  <div class="form-btns">
-    <hr>
-    <a id="Bug-Report-Submit" class="btn submit c">Submit</a>
-  </div>
-</form>
+  <form class="form" id="js-bugReport" method="POST" action="">
+    <h3>Report a Bug</h3>
+    <div class="inner-form">
+      {{ form.as_p() }}
+    </div>
+    <div class="form-btns">
+      <hr>
+      <a id="js-bugReportSubmit" class="btn submit c">Submit</a>
+    </div>
+  </form>
+  {{ js('bugreport') }}
 {% endblock %}

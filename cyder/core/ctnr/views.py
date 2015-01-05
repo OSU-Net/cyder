@@ -109,28 +109,37 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
             }
         else:
             if actions:
-                level = {
-                    'value': [LEVELS[ctnruser.level], '+', '-'],
-                    'url': [
-                        '',
-                        reverse('ctnr-update-user',
-                                kwargs={'ctnr_pk': ctnr.id}),
-                        reverse('ctnr-update-user',
-                                kwargs={'ctnr_pk': ctnr.id})],
-                    'img': ['', '/media/img/minus.png', '/media/img/plus.png'],
-                    'class': ['', 'minus', 'plus']
-                }
+                level = {}
+                level['value'] = [LEVELS[ctnruser.level], '-', '+']
+                level['url'] = [
+                    '',
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id}),
+                    reverse('ctnr-update-user', kwargs={'ctnr_pk': ctnr.id})]
+
+                level['img'] = [
+                    '', '/media/img/minus.png', '/media/img/plus.png']
+
+                level['class'] = ['', 'minus', 'plus']
+                level['data'] = [
+                    '',
+                    [('kwargs', json.dumps({'obj_type': 'user', 'pk': user.id,
+                                            'name': str(user), 'lvl': -1}))],
+                    [('kwargs', json.dumps({'obj_type': 'user', 'pk': user.id,
+                                            'name': str(user), 'lvl': 1}))]]
+
                 if level['value'][0] == 'Admin':
                     del level['value'][2]
                     del level['url'][2]
                     del level['img'][2]
                     del level['class'][2]
+                    del level['data'][2]
 
                 elif level['value'][0] == 'Guest':
                     del level['value'][1]
                     del level['url'][1]
                     del level['img'][1]
                     del level['class'][1]
+                    del level['data'][1]
             else:
                 level = {
                     'value': [LEVELS[ctnruser.level]],
@@ -145,7 +154,9 @@ def create_user_extra_cols(ctnr, ctnrusers, actions=False):
                 'url': reverse('ctnr-update-user',
                                kwargs={'ctnr_pk': ctnr.id}),
                 'img': '/media/img/remove.png',
-                'class': 'remove user'
+                'class': 'remove user',
+                'data': [('kwargs', json.dumps({
+                    'obj_type': 'user', 'pk': user.id, 'name': str(user)}))]
             })
 
     extra_cols[0]['data'] = level_data
@@ -166,7 +177,9 @@ def create_obj_extra_cols(ctnr, obj_set, obj_type):
             'url': reverse('ctnr-remove-object', kwargs={
                 'ctnr_pk': ctnr.id}),
             'img': '/media/img/remove.png',
-            'class': 'remove object'
+            'class': 'remove object',
+            'data': [('kwargs', json.dumps({
+                'obj_type': str(obj._meta.db_table), 'pk': obj.id}))]
         })
         objs.append(obj)
     extra_cols[0]['data'] = remove_data
@@ -243,7 +256,7 @@ def add_object(request, ctnr_pk):
     acting_user = request.user
     ctnr = Ctnr.objects.get(id=ctnr_pk)
     pk = request.POST.get('obj_pk', '')
-    name = request.POST.get('obj_name', '')
+    name = request.POST.get('obj', '')
     obj_type = request.POST.get('obj_type', '')
     if obj_type == 'user':
         if _has_perm(acting_user, ctnr, ACTION_UPDATE, obj_class=CtnrUser):

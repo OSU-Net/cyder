@@ -6,46 +6,36 @@ from cyder.api.v1.tests.base import APITests
 from cyder.cydhcp.constants import DYNAMIC
 
 
-class DynamicInterfaceBase(APITests):
+class DynamicInterfaceV4API_Test(APITests):
+    __test__ = True
     model = DynamicInterface
 
-    def setUp(self):
-        self.system, _ = System.objects.get_or_create(name="TestSystem")
-        super(DynamicInterfaceBase, self).setUp()
+    def create_data(self):
+        network = Network.objects.create(network_str="12.12.0.0/16")
+        range = Range.objects.create(
+            start_str="12.12.0.1", end_str="12.12.255.254", range_type=DYNAMIC,
+            is_reserved=True, domain=self.domain, network=network)
+        system = System.objects.create(name="TestSystem")
+
+        return DynamicInterface.objects.create(
+            ctnr=self.ctnr, mac='be:ef:fa:ce:f0:0d', range=range,
+            system=system)
+
+
+class DynamicInterfaceV6API_Test(APITests):
+    __test__ = True
+    model = DynamicInterface
 
     def create_data(self):
-        data = {
-            'ctnr': self.ctnr,
-            'mac': 'be:ef:fa:ce:f0:0d',
-            'range': self.range,
-            'system': self.system,
-        }
-        obj, _ = self.model.objects.get_or_create(**data)
-        return obj
-
-
-class DynamicInterfaceV4API_Test(DynamicInterfaceBase):
-    __test__ = True
-
-    def setUp(self):
-        super(DynamicInterfaceV4API_Test, self).setUp()
-        self.network, _ = Network.objects.get_or_create(
-            network_str="12.12.0.0/16")
-        self.range, _ = Range.objects.get_or_create(
-            start_str="12.12.0.1", end_str="12.12.255.254",
-            range_type=DYNAMIC, is_reserved=True, domain=self.domain,
-            network=self.network)
-
-
-class DynamicInterfaceV6API_Test(DynamicInterfaceBase):
-    __test__ = True
-
-    def setUp(self):
-        super(DynamicInterfaceV6API_Test, self).setUp()
-        self.network, _ = Network.objects.get_or_create(
+        network = Network.objects.create(
             ip_type='6', network_str="2001:db8:0:0:0:0:0:0/126")
-        self.range, _ = Range.objects.get_or_create(
+        range = Range.objects.create(
             start_str="2001:0db8:0000:0000:0000:0000:0000:0001",
-            end_str="2001:0db8:0000:0000:0000:0000:0000:0002",
-            ip_type='6', range_type=DYNAMIC, is_reserved=True,
-            domain=self.domain, network=self.network)
+            end_str="2001:0db8:0000:0000:0000:0000:0000:0002", ip_type='6',
+            range_type=DYNAMIC, is_reserved=True, domain=self.domain,
+            network=network)
+        system = System.objects.create(name="TestSystem")
+
+        return DynamicInterface.objects.create(
+            ctnr=self.ctnr, mac='be:ef:fa:ce:f0:0d', range=range,
+            system=system)

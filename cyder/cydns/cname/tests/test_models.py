@@ -1,452 +1,291 @@
 from django.core.exceptions import ValidationError
 
-import cyder.base.tests
-from cyder.cydns.address_record.models import AddressRecord
-from cyder.cydns.cname.models import CNAME
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.ip.utils import ip_to_domain_name
-from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.mx.models import MX
-from cyder.cydns.ptr.models import PTR
-from cyder.cydns.soa.models import SOA
-from cyder.cydns.srv.models import SRV
-from cyder.cydns.tests.utils import (
-    create_basic_dns_data, create_fake_zone, create_zone)
-from cyder.cydns.txt.models import TXT
-
+from cyder.base.tests import ModelTestMixin
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vrf.models import Vrf
+from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.cname.models import CNAME
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.mx.models import MX
+from cyder.cydns.ptr.models import PTR
+from cyder.cydns.soa.models import SOA
+from cyder.cydns.srv.models import SRV
+from cyder.cydns.tests.utils import create_zone, DNSTest
+from cyder.cydns.txt.models import TXT
 
-from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
 
-
-class CNAMETests(cyder.base.tests.TestCase):
-    def create_domain(self, name, ip_type=None, delegated=False):
-        if ip_type is None:
-            ip_type = '4'
-        if name in ('arpa', 'in-addr.arpa', 'ip6.arpa'):
-            pass
-        else:
-            name = ip_to_domain_name(name, ip_type=ip_type)
-        d = Domain(name=name, delegated=delegated)
-        self.assertTrue(d.is_reverse)
-        return d
-
+class CNAMETests(DNSTest, ModelTestMixin):
     def setUp(self):
-        create_basic_dns_data(dhcp=True)
+        super(CNAMETests, self).setUp()
+
+        self.vrf = Vrf.objects.create(name='test_vrf')
 
         create_zone('128.in-addr.arpa')
 
-        self.ctnr1 = Ctnr(name='test_ctnr1')
-        self.ctnr1.save()
-        self.ctnr2 = Ctnr(name='test_ctnr2')
-        self.ctnr2.save()
+        self.ctnr2 = Ctnr.objects.create(name='test_ctnr2')
 
-        self.g = create_fake_zone("gz", suffix="")
-        self.c_g = create_fake_zone("coo.gz", suffix="")
-        self.d = create_fake_zone("dz", suffix="")
-        self.whatcd = create_fake_zone("what.cd", suffix="")
+        self.g = create_zone('gz')
+        self.c_g = create_zone('coo.gz')
+        self.d = create_zone('dz')
+        Domain.objects.create(name='cd')
+        self.whatcd = create_zone('what.cd')
 
-        for dom in [self.g, self.c_g, self.d, self.whatcd]:
-            self.ctnr1.domains.add(dom)
+        for dom in (self.g, self.c_g, self.d, self.whatcd):
+            self.ctnr.domains.add(dom)
 
-        self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
+        self.r1 = create_zone('10.in-addr.arpa')
         self.r1.save()
 
-        self.s = System(name='test_system')
-        self.s.save()
+        self.s = System.objects.create(name='test_system')
 
-        self.net1 = Network(network_str='10.0.0.0/8')
-        self.net1.update_network()
-        self.net1.save()
+        self.net1 = Network.objects.create(network_str='10.0.0.0/8')
 
-        self.net2 = Network(network_str='128.193.1.0/30')
-        self.net2.update_network()
-        self.net2.save()
+        self.net2 = Network.objects.create(network_str='128.193.1.0/30')
 
-        self.sr1 = Range(network=self.net1, range_type=STATIC,
-                         start_str='10.0.0.1', end_str='10.0.0.3')
-        self.sr1.save()
+        self.sr1 = Range.objects.create(
+            network=self.net1, range_type=STATIC, start_str='10.0.0.1',
+            end_str='10.0.0.3')
 
-        self.sr2 = Range(network=self.net1, range_type=STATIC,
-                         start_str='10.193.1.1', end_str='10.193.1.2')
-        self.sr2.save()
+        self.sr2 = Range.objects.create(
+            network=self.net1, range_type=STATIC, start_str='10.193.1.1',
+            end_str='10.193.1.2')
 
-        self.sr3 = Range(network=self.net2, range_type=STATIC,
-                         start_str='128.193.1.1', end_str='128.193.1.2')
-        self.sr3.save()
+        self.sr3 = Range.objects.create(
+            network=self.net2, range_type=STATIC, start_str='128.193.1.1',
+            end_str='128.193.1.2')
 
-        for r in [self.sr1, self.sr2, self.sr3]:
-            self.ctnr1.ranges.add(r)
+        for r in (self.sr1, self.sr2, self.sr3):
+            self.ctnr.ranges.add(r)
 
-    def do_add(self, label, domain, target):
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain, target=target)
-        cn.save()
-        self.assertTrue(cn.details())
+    def create_cname(self, **kwargs):
+        kwargs.setdefault('ctnr', self.ctnr)
+        return CNAME.objects.create(**kwargs)
 
-        cs = CNAME.objects.filter(
-            label=label, ctnr=self.ctnr1, domain=domain, target=target)
-        self.assertEqual(len(cs), 1)
-        return cn
-
-    def test_add(self):
-        label = "foo"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
-
-        label = "boo"
-        domain = self.c_g
-        target = "foo.foo.com"
-        self.do_add(label, domain, target)
-
-        label = "fo1"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
-
-        label = "hooo"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            self.create_cname(
+                label='a', domain=self.g, target='foo.com'),
+            self.create_cname(
+                label='bbbbbbbbbbbbbbbbb', domain=self.c_g,
+                target='foo.foo.com'),
+            self.create_cname(
+                label='c-c-c-c-c-c-c-c-c', domain=self.g, target='foo.com'),
+            self.create_cname(
+                label='d1d', domain=self.g, target='foo.com'),
+        )
 
     def test1_add_glob(self):
-        label = "*foo"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
-
-        label = "*"
-        domain = self.c_g
-        target = "foo.foo.com"
-        self.do_add(label, domain, target)
-
-        label = "*.fo1"
-        domain = self.g
-        target = "foo.com"
-        self.assertRaises(ValidationError, self.do_add, *(label, domain, target))
-
-        label = "*sadfasfd-asdf"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
+        self.create_cname(label='*foo', domain=self.g, target='foo.com')
+        self.create_cname(label='*', domain=self.c_g, target='foo.foo.com')
+        self.assertRaises(
+            ValidationError, self.create_cname,
+            label='*.fo1', domain=self.g, target='foo.com')
+        self.create_cname(
+            label='*sadfasfd-asdf', domain=self.g, target='foo.com')
 
     def test2_add_glob(self):
-        label = "*coo"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
-
-        label = "*"
-        domain = self.c_g
-        target = "foo.com"
-        self.do_add(label, domain, target)
+        self.create_cname(label='*coo', domain=self.g, target='foo.com')
+        self.create_cname(label='*', domain=self.c_g, target='foo.com')
 
     def test_soa_condition(self):
-        label = ""
-        domain = self.c_g
-        target = "foo.com"
-        self.assertRaises(ValidationError, self.do_add, *(label, domain, target))
+        self.assertRaises(
+            ValidationError, self.create_cname,
+            label='', domain=self.c_g, target='foo.com')
 
     def test_add_bad(self):
-        label = ""
-        domain = self.g
-        target = "..foo.com"
-        self.assertRaises(ValidationError, self.do_add, *(label, domain, target))
+        self.assertRaises(
+            ValidationError, self.create_cname,
+            label='', domain=self.g, target='..foo.com')
 
     def test_add_mx_with_cname(self):
-        label = "cnamederp1"
-        domain = self.c_g
-        target = "foo.com"
-
-        fqdn = label + '.' + domain.name
-        mx_data = {'label': '', 'domain': self.c_g, 'ctnr': self.ctnr1,
-                   'server': fqdn, 'priority': 2, 'ttl': 2222}
-
         def create_mx():
-            mx = MX(**mx_data)
-            mx.save()
-            return mx
+            return MX.objects.create(
+                label='', domain=self.c_g, ctnr=self.ctnr,
+                server=('cnamederp1.' + self.c_g.name), priority=2, ttl=2222)
         create_mx.name = 'MX'
 
         def create_cname():
-            cn = CNAME(label=label, ctnr=self.ctnr1, domain=domain,
-                       target=target)
-            cn.save()
-            return cn
+            return CNAME.objects.create(
+                label='cnamederp1', domain=self.c_g, ctnr=self.ctnr,
+                target='foo.com')
         create_cname.name = 'CNAME'
 
         self.assertObjectsConflict((create_mx, create_cname))
 
     def test_address_record_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        def create_a():
+            return AddressRecord.objects.create(
+                label='testyfoo', ctnr=self.ctnr, domain=self.whatcd,
+                ip_type='4', ip_str="128.193.1.1")
+        create_a.name = 'AddressRecord'
 
-        rec, _ = AddressRecord.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, ip_type='4',
-            ip_str="128.193.1.1")
+        def create_cname():
+            return CNAME.objects.create(
+                label='testyfoo', ctnr=self.ctnr, domain=self.whatcd,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
+        self.assertObjectsConflict((create_a, create_cname))
 
-    def test_address_record_exists_upper_case(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+    def test_address_record_exists_uppercase(self):
+        def create_a():
+            return AddressRecord.objects.create(
+                label='testyfoo', ctnr=self.ctnr, domain=self.whatcd,
+                ip_type='4', ip_str="128.193.1.1")
+        create_a.name = 'AddressRecord'
 
-        rec, _ = AddressRecord.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, ip_type='4',
-            ip_str="128.193.1.1")
+        def create_cname():
+            return CNAME.objects.create(
+                label='Testyfoo', ctnr=self.ctnr, domain=self.whatcd,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label.title(), ctnr=self.ctnr1, domain=dom,
-                   target=target)
-        self.assertRaises(ValidationError, cn.save)
-
-    def test_address_record_cname_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        CNAME.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, target=target
-        )
-        rec = AddressRecord(label=label, ctnr=self.ctnr1, domain=dom,
-                            ip_str="128.193.1.1")
-
-        self.assertRaises(ValidationError, rec.save)
+        self.assertObjectsConflict((create_a, create_cname))
 
     def test_srv_exists(self):
-        label = "_testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        def create_srv():
+            return SRV.objects.create(
+                label='_testyfoo', ctnr=self.ctnr, domain=self.whatcd,
+                target='asdf', port=2, priority=2, weight=4)
+        create_srv.name = 'SRV'
 
-        rec, _ = SRV.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, target="asdf",
-            port=2, priority=2, weight=4)
+        def create_cname():
+            return CNAME.objects.create(
+                label='_testyfoo', ctnr=self.ctnr, domain=self.whatcd,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
-
-    def test_srv_cname_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        CNAME.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, target=target)
-
-        rec = SRV(label=label, ctnr=self.ctnr1, domain=dom, target="asdf",
-                  port=2, priority=2, weight=4)
-
-        self.assertRaises(ValidationError, rec.save)
+        self.assertObjectsConflict((create_srv, create_cname))
 
     def test_txt_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        def create_txt():
+            return TXT.objects.create(
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
+                txt_data='asdf')
+        create_txt.name = 'TXT'
 
-        rec, _ = TXT.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, txt_data="asdf")
+        def create_cname():
+            return CNAME.objects.create(
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
-
-    def test_txt_cname_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        cn, _ = CNAME.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        cn.save()
-
-        rec = TXT(label=label, ctnr=self.ctnr1, domain=dom, txt_data="asdf1")
-
-        self.assertRaises(ValidationError, rec.save)
+        self.assertObjectsConflict((create_txt, create_cname))
 
     def test_mx_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        def create_mx():
+            return MX.objects.create(
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
+                server='asdf', priority=123, ttl=123)
+        create_mx.name = 'MX'
 
-        rec, _ = MX.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, server="asdf",
-            priority=123, ttl=123)
+        def create_cname():
+            return CNAME.objects.create(
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
-
-    def test_mx_cname_exists(self):
-        # Duplicate test?
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        cn, _ = CNAME.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        cn.save()
-
-        rec = MX(label=label, ctnr=self.ctnr1, domain=dom, server="asdf1",
-                 priority=123, ttl=123)
-
-        self.assertRaises(ValidationError, rec.save)
+        self.assertObjectsConflict((create_mx, create_cname))
 
     def test_ns_exists(self):
-        # Duplicate test?
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        bleh = Domain.objects.create(name='bleh.what.cd')
+        self.ctnr.domains.add(bleh)
 
-        rec = Nameserver(domain=dom, server="asdf1")
-        rec.save()
-        cn = CNAME(label='', ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
+        def create_ns():
+            return Nameserver.objects.create(domain=bleh, server='asdf')
+        create_ns.name = 'Nameserver'
 
-    def test_ns_cname_exists(self):
-        # Duplicate test?
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="not.cd")
+        def create_cname():
+            return CNAME.objects.create(
+                label='', ctnr=self.ctnr, domain=bleh, target='wat')
+        create_cname.name = 'CNAME'
 
-        self.ctnr1.domains.add(dom)
-
-        cn, _ = CNAME.objects.get_or_create(
-            label='', ctnr=self.ctnr1, domain=dom, target=target)
-        cn.save()
-
-        rec = Nameserver(domain=dom, server="asdf1")
-        self.assertRaises(ValidationError, rec.save)
+        self.assertObjectsConflict((create_ns, create_cname))
 
     def test_intr_exists(self):
-        label = "tdfestyfoo"
-        target = "waasdft"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        def create_static_intr():
+            return StaticInterface.objects.create(
+                label='testyfoo', domain=self.whatcd, ip_str='10.0.0.1',
+                ip_type='4', system=self.s, ctnr=self.ctnr,
+                mac="11:22:33:44:55:66")
+        create_static_intr.name = 'StaticInterface'
 
-        intr = StaticInterface(label=label, domain=dom, ip_str="10.0.0.1",
-                               ip_type='4', system=self.s, ctnr=self.ctnr1,
-                               mac="11:22:33:44:55:66")
-        intr.save()
+        def create_cname():
+            return CNAME.objects.create(
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
-
-    def test_intr_cname_exists(self):
-        # Duplicate test?
-        label = "tesafstyfoo"
-        target = "wadfakt"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        cn, _ = CNAME.objects.get_or_create(
-            label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        cn.save()
-
-        intr = StaticInterface(
-            label=label, domain=dom, ip_str="10.0.0.2", ip_type='4',
-            system=self.s, mac="00:11:22:33:44:55", ctnr=self.ctnr1,
-        )
-
-        self.assertRaises(ValidationError, intr.save)
-        cn.label = "differentlabel"
-        cn.save()
-        intr.save()
+        self.assertObjectsConflict((create_static_intr, create_cname))
 
     def test_ptr_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
+        def create_ptr():
+            return PTR.objects.create(
+                ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd',
+                ctnr=self.ctnr)
+        create_ptr.name = 'PTR'
 
-        rec = PTR(ctnr=self.ctnr1, ip_str="10.193.1.1", ip_type='4',
-                  fqdn='testyfoo.what.cd')
-        rec.save()
+        def create_cname():
+            return CNAME.objects.create(
+                label='testyfoo', domain=self.whatcd, ctnr=self.ctnr,
+                target='wat')
+        create_cname.name = 'CNAME'
 
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
-
-    def test_ptr_cname_exists(self):
-        label = "testyfoo"
-        target = "wat"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        CNAME.objects.get_or_create(label=label, ctnr=self.ctnr1, domain=dom,
-                                    target=target)
-        rec = PTR(ip_str="10.193.1.1", ip_type='4', fqdn='testyfoo.what.cd',
-                  ctnr=self.ctnr1)
-
-        self.assertRaises(ValidationError, rec.save)
+        self.assertObjectsConflict((create_ptr, create_cname))
 
     def test_cname_point_to_itself(self):
-        label = "foopy"
-        target = "foopy.what.cd"
-        dom, _ = Domain.objects.get_or_create(name="cd")
-        dom, _ = Domain.objects.get_or_create(name="what.cd")
-
-        cn = CNAME(label=label, ctnr=self.ctnr1, domain=dom, target=target)
-        self.assertRaises(ValidationError, cn.save)
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
+            label='foopy', domain=self.whatcd, ctnr=self.ctnr,
+            target='foopy.what.cd')
 
     def test_domain_ctnr(self):
         """Test that a CNAME's domain must be in the CNAME's container"""
         gz = Domain.objects.get(name='gz')
+        self.ctnr.domains.add(gz)
 
-        self.ctnr1.domains.add(gz)
+        CNAME.objects.create(
+            label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr)
 
-        cn1 = CNAME(label='bar1', domain=gz, target='foo1.gz', ctnr=self.ctnr1)
-        cn1.save()
-
-        with self.assertRaises(ValidationError):
-            cn2 = CNAME(label='bar2', domain=gz, target='foo2.gz',
-                        ctnr=self.ctnr2)
-            cn2.save()
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
+            label='bar2', domain=gz, target='foo2.gz', ctnr=self.ctnr2)
 
     def test_name_uniqueness(self):
         """Test that CNAMEs must share a ctnr if they have the same name"""
-        cn1 = CNAME(label='bar', domain=self.g, target='foo1.gz',
-                    ctnr=self.ctnr1)
-        cn1.save()
+        cn1 = CNAME.objects.create(
+            label='bar', domain=self.g, target='foo1.gz', ctnr=self.ctnr)
 
-        cn2 = CNAME(label='bar', domain=self.g, target='foo2.gz',
-                    ctnr=self.ctnr1)
-        cn2.save()
+        cn2 = CNAME.objects.create(
+            label='bar', domain=self.g, target='foo2.gz', ctnr=self.ctnr)
 
-        with self.assertRaises(ValidationError):
-            cn3 = CNAME(label='bar', domain=self.g, target='foo3.gz',
-                        ctnr=self.ctnr2)
-            cn3.save()
+        self.assertRaises(
+            ValidationError, CNAME.objects.create,
+            label='bar', domain=self.g, target='foo3.gz', ctnr=self.ctnr2)
 
     def bootstrap_zone_and_range(self):
-        d = Domain(name='example.gz')
-        d.save()
+        d = Domain.objects.create(name='example.gz')
+        self.ctnr.domains.add(d)
 
-        self.ctnr1.domains.add(d)
+        soa = SOA.objects.create(
+            root_domain=d, primary='ns.example.gz',
+            contact='root.mail.example.gz')
 
-        soa = SOA(root_domain=d, primary='ns.example.gz',
-                  contact='root.mail.example.gz')
-        soa.save()
+        n = Network.objects.create(
+            vrf=self.vrf, ip_type='4',
+            network_str='128.193.0.0/24')
 
-        n = Network(vrf=Vrf.objects.get(name='test_vrf'), ip_type='4',
-                    network_str='128.193.0.0/24')
-        n.save()
-
-        r = Range(network=n, range_type=STATIC, start_str='128.193.0.2',
-                  end_str='128.193.0.100')
-        r.save()
+        r = Range.objects.create(
+            network=n, range_type=STATIC, start_str='128.193.0.2',
+            end_str='128.193.0.100')
 
         # Cyder has a catch-22 relating to nameservers: If a nameserver's name
         # is in the same domain it serves as a nameserver for, a glue record
@@ -455,64 +294,63 @@ class CNAMETests(cyder.base.tests.TestCase):
         # set the nameserver's name to something outside the domain it's a
         # nameserver for, add the glue record, then fix the nameserver's name.
 
-        ns = Nameserver(domain=d, server='cyderhack')
-        ns.save()
+        ns = Nameserver.objects.create(domain=d, server='cyderhack')
 
-        glue = AddressRecord(label='ns', domain=d,
-                             ip_str='128.193.0.2', ctnr=self.ctnr1)
-        glue.save()
+        glue = AddressRecord.objects.create(
+            label='ns', domain=d, ip_str='128.193.0.2', ctnr=self.ctnr)
 
         ns.server = 'ns.example.gz'
         ns.save()
 
-    def test_a_mx_soa_conflict(self):
-        """Test that a CNAME cannot have the same name as an AR, MX, or SOA"""
+    def test_a_mx_conflict(self):
+        """Test that a CNAME cannot have the same name as an AR or MX"""
+
         self.bootstrap_zone_and_range()
 
-        d = Domain.objects.get(name='example.gz')
+        e_g = Domain.objects.get(name='example.gz')
 
         def create_cname():
-            cn = CNAME(label='foo', domain=d, target='bar.example.gz',
-                       ctnr=self.ctnr1)
-            cn.save()
-            return cn
+            return CNAME.objects.create(
+                label='foo', domain=e_g, target='bar.example.gz',
+                ctnr=self.ctnr)
         create_cname.name = 'CNAME'
 
         def create_si():
-            s = System(name='test_system')
-            s.save()
-
-            si = StaticInterface(
-                mac='be:ef:fa:ce:11:11', label='foo', domain=d,
-                ip_str='128.193.0.3', ip_type='4', system=s,
-                ctnr=self.ctnr1)
-            si.save()
-            return si
+            s = System.objects.create(name='test_system')
+            return StaticInterface.objects.create(
+                mac='be:ef:fa:ce:11:11', label='foo', domain=e_g,
+                ip_str='128.193.0.3', ip_type='4', system=s, ctnr=self.ctnr)
         create_si.name = 'StaticInterface'
 
         def create_mx():
-            mx = MX(label='foo', domain=d, server='mail.example.gz',
-                    priority=1, ctnr=self.ctnr1)
-            mx.save()
-            return mx
+            return MX.objects.create(
+                label='foo', domain=e_g, server='mail.example.gz', priority=1,
+                ctnr=self.ctnr)
         create_mx.name = 'MX'
-
-        def create_soa():
-            d = Domain(name='foo.example.gz')
-            d.save()
-
-            soa = SOA(
-                root_domain=d, primary='ns1.example.gz',
-                contact='root.mail.example.gz',
-                description='SOA for foo.example.gz'
-            )
-            soa.save()
-
-            return d
-        create_soa.name = 'SOA'
 
         self.assertObjectsConflict((create_cname, create_si))
         self.assertObjectsConflict((create_cname, create_mx))
+
+    def test_soa_conflict(self):
+        """Test that a CNAME cannot have the same name as an SOA"""
+
+        self.bootstrap_zone_and_range()
+
+        f_e_g = Domain.objects.create(name='foo.example.gz')
+        self.ctnr.domains.add(f_e_g)
+
+        def create_cname():
+            return CNAME.objects.create(
+                label='', domain=f_e_g.reload(), target='bar.example.gz',
+                ctnr=self.ctnr)
+        create_cname.name = 'CNAME'
+
+        def create_soa():
+            return SOA.objects.create(
+                root_domain=f_e_g.reload(), primary='ns1.example.gz',
+                contact='root.mail.example.gz')
+        create_soa.name = 'SOA'
+
         self.assertObjectsConflict((create_cname, create_soa))
 
     def test_target_validation(self):
@@ -525,9 +363,8 @@ class CNAMETests(cyder.base.tests.TestCase):
         )
 
         for target in valid_targets:
-            cn = CNAME(label='bar', domain=self.g, target=target,
-                       ctnr=self.ctnr1)
-            cn.save()
+            cn = CNAME.objects.create(
+                label='bar', domain=self.g, target=target, ctnr=self.ctnr)
             cn.delete()
 
         invalid_targets = (
@@ -536,10 +373,9 @@ class CNAMETests(cyder.base.tests.TestCase):
         )
 
         for target in invalid_targets:
-            with self.assertRaises(ValidationError):
-                cn = CNAME(label='bar', domain=self.g, target=target,
-                           ctnr=self.ctnr1)
-                cn.save()
+            self.assertRaises(
+                ValidationError, CNAME.objects.create,
+                label='bar', domain=self.g, target=target, ctnr=self.ctnr)
 
     def test_staticinterface_conflict(self):
         """Test that a CNAME can't have the same name as a StaticInterface"""
@@ -548,29 +384,24 @@ class CNAMETests(cyder.base.tests.TestCase):
         d = Domain.objects.get(name='example.gz')
 
         def create_cname():
-            cn = CNAME(label='foo', domain=d, target='www.example.gz',
-                       ctnr=self.ctnr1)
-            cn.save()
-            return cn
+            return CNAME.objects.create(
+                label='foo', domain=d, target='www.example.gz',
+                ctnr=self.ctnr)
         create_cname.name = 'CNAME'
 
         def create_si():
-            s = System(name='test_system')
-            s.save()
-
-            si = StaticInterface(
+            s = System.objects.create(name='test_system')
+            return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,
-                ctnr=self.ctnr1)
-            si.save()
-            return si
+                ctnr=self.ctnr)
         create_si.name = 'StaticInterface'
 
         self.assertObjectsConflict((create_cname, create_si))
 
     def test_duplicate_cname(self):
-        label = "foo"
-        domain = self.g
-        target = "foo.com"
-        self.do_add(label, domain, target)
-        self.assertRaises(ValidationError, self.do_add, label, domain, target)
+        def x():
+            self.create_cname(label='foo', domain=self.g, target='foo.com')
+
+        x()
+        self.assertRaises(ValidationError, x)

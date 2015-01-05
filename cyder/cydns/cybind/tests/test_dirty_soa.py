@@ -1,5 +1,11 @@
-from django.test import TestCase
-
+from cyder.core.system.models import System
+from cyder.core.ctnr.models import Ctnr
+from cyder.core.task.models import Task
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.range.models import Range
+from cyder.cydns.domain.models import Domain
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.txt.models import TXT
@@ -8,54 +14,45 @@ from cyder.cydns.mx.models import MX
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.nameserver.models import Nameserver
-from cyder.cydns.tests.utils import create_fake_zone
-
-from cyder.cydhcp.constants import STATIC
-from cyder.cydhcp.interface.static_intr.models import StaticInterface
-from cyder.cydhcp.network.models import Network
-from cyder.cydhcp.range.models import Range
-
-from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
-from cyder.core.task.models import Task
+from cyder.cydns.tests.utils import create_zone, DNSTest
 
 
-class DirtySOATests(TestCase):
+class DirtySOATests(DNSTest):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        self.r1 = create_fake_zone("10.in-addr.arpa", suffix="")
+        super(DirtySOATests, self).setUp()
+
+        self.r1 = create_zone(name='10.in-addr.arpa')
         self.sr = self.r1.soa
         self.sr.dirty = False
         self.sr.save()
 
-        self.dom = create_fake_zone("azg.bgaz", suffix="")
-        create_fake_zone("foo.bar.com", suffix="")
+        Domain.objects.create(name='bgaz')
+        self.dom = create_zone('azg.bgaz')
         self.soa = self.dom.soa
         self.soa.dirty = False
         self.soa.save()
+        Domain.objects.create(name='com')
+        Domain.objects.create(name='bar.com')
+        create_zone('foo.bar.com')
 
-        self.rdom = create_fake_zone("123.in-addr.arpa", suffix="")
+        self.rdom = create_zone('123.in-addr.arpa')
         self.rsoa = self.r1.soa
         self.rsoa.dirty = False
         self.rsoa.save()
 
         self.ctnr.domains.add(self.dom, self.rdom)
 
-        self.s = System(name='test_system')
-        self.s.save()
+        self.s = System.objects.create(name='test_system')
 
-        self.net = Network(network_str='10.2.3.0/30')
-        self.net.update_network()
-        self.net.save()
-        self.range = Range(network=self.net, range_type=STATIC,
-                           start_str='10.2.3.1', end_str='10.2.3.2')
-        self.range.save()
+        self.net = Network.objects.create(network_str='10.2.3.0/30')
+        self.range = Range.objects.create(
+            network=self.net, range_type=STATIC, start_str='10.2.3.1',
+            end_str='10.2.3.2')
         self.ctnr.ranges.add(self.range)
 
     def test_print_soa(self):
-        self.assertTrue(self.soa.bind_render_record() not in ('', None))
-        self.assertTrue(self.rsoa.bind_render_record() not in ('', None))
+        self.assertNotIn(self.soa.bind_render_record(), ('', None))
+        self.assertNotIn(self.rsoa.bind_render_record(), ('', None))
 
     def generic_dirty(self, Klass, create_data, update_data, local_soa,
                       tdiff=1):
@@ -63,9 +60,8 @@ class DirtySOATests(TestCase):
         Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
-        rec = Klass(**create_data)
-        rec.save()
-        self.assertTrue(rec.bind_render_record() not in ('', None))
+        rec = Klass.objects.create(**create_data)
+        self.assertNotIn(rec.bind_render_record(), ('', None))
         local_soa = SOA.objects.get(pk=local_soa.pk)
         self.assertTrue(local_soa.dirty)
         self.assertLessEqual(tdiff, Task.dns.count())
@@ -190,7 +186,7 @@ class DirtySOATests(TestCase):
         create_data = {
             'label': 'asdf8',
             'domain': self.dom,
-            'txt_data': 'some shit',
+            'txt_data': 'some stuff',
         }
         update_data = {
             'label': 'asdfx5',

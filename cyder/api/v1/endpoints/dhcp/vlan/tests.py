@@ -7,9 +7,4 @@ class VlanAPI_Test(APITests, APIEAVTestMixin):
     model = Vlan
 
     def create_data(self):
-        data = {
-            'name': 'vlan',
-            'number': 420,
-        }
-        obj, _ = self.model.objects.get_or_create(**data)
-        return obj
+        return Vlan.objects.create(name='vlan', number=420)

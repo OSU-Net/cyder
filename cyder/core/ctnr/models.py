@@ -5,9 +5,8 @@ from django.db.models import Q
 from cyder.base.constants import LEVELS
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.helpers import get_display
 from cyder.base.validators import validate_integer_field
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
@@ -21,7 +20,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True,
                             validators=[validate_ctnr_name])
-    users = models.ManyToManyField(User, null=False, related_name='users',
+    users = models.ManyToManyField(User, null=False, related_name='ctnrs',
                                    through='CtnrUser', blank=True)
     domains = models.ManyToManyField(Domain, null=False, blank=True)
     ranges = models.ManyToManyField(Range, null=False, blank=True)
@@ -29,19 +28,21 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     description = models.CharField(max_length=200, blank=True)
     email_contact = models.CharField(max_length=75, blank=True)
 
-    display_fields = ('name',)
     search_fields = ('name', 'description')
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'ctnr'
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Ctnr, self).save(*args, **kwargs)
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

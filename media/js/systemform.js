@@ -1,59 +1,72 @@
 $(document).ready(function() {
-    var form = document.getElementById('hidden-inner-form');
-    var interface_type = document.getElementsByName('interface_type');
-    var static_form = document.getElementById('static-form');
-    var static_clone = static_form.cloneNode(true);
-    static_clone.id ="static_clone";
-    $(static_clone).removeAttr('style');
-    var dynamic_form = document.getElementById('dynamic-form');
-    var dynamic_clone = dynamic_form.cloneNode(true);
-    dynamic_clone.id ="static_clone";
-    $(dynamic_clone).removeAttr('style');
-    initial_interface_type = $('#view-metadata').attr(
-        'data-initial_interface_type');
-    if (initial_interface_type) {
-        $('input[name=interface_type][value=' +
-            initial_interface_type + ']').attr('checked', true);
-    };
-    for(var i = 0; i < interface_type.length; i++) {
-        if (interface_type[i].checked) {
-            if (form.lastChild.textContent != '') {
-                form.removeChild(form.childNodes[form.childNodes.length -1]);
-            };
-            if (interface_type[i].value =='static_interface') {
-                form.appendChild(static_clone);
-            } else {
-                form.appendChild(dynamic_clone);
-            };
+    var systemForm = (function(){
+        // avoid duplicate fields id's
+        var staticForm = $('#static-form')
+            .clone().wrap( '<div>' ).parent().html();
+        var dynamicForm = $('#dynamic-form')
+            .clone().wrap( '<div>' ).parent().html();
+        $('#static-form').remove();
+        $('#dynamic-form').remove();
+        return {
+            showStaticForm: function( delay, speed ) {
+                setTimeout( function() {
+                    $('#hidden-inner-form').append( staticForm );
+                    $('#static-form').slideDown( speed );
+                }, delay);
+                $('#dynamic-form').slideUp( function() {
+                    $('#dynamic-form').remove();
+                });
+            },
+            showDynamicForm: function( delay, speed ) {
+                setTimeout( function() {
+                    $('#hidden-inner-form').append( dynamicForm );
+                    $('#dynamic-form').slideDown( speed );
+                }, delay);
+                $('#static-form').slideUp( function() {
+                    $('#static-form').remove();
+                });
+            }
         };
-        interface_type[i].onclick = function() {
-            if (form.lastChild.textContent != '') {
-                form.removeChild(form.childNodes[form.childNodes.length -1]);
-            };
-            if (this.value =='static_interface') {
-                form.appendChild(static_clone);
-            } else {
-                form.appendChild(dynamic_clone);
-            };
-        };
-    };
+    }());
 
-    $('form#system-form').live('submit', function(event) {
-        event.preventDefault();
+    function changeSystemForm( value, delay, speed ) {
+        if ( value == 'static_interface' ) {
+            systemForm.showStaticForm( delay, speed );
+        } else {
+            systemForm.showDynamicForm( delay, speed );
+        }
+    }
 
-        var url = $('form#system-form')[0].action;
-        var data = ajax_form_submit(url, $('form#system-form'),
-                $('#csrfToken').val(), function (ret_data) {
-            location.reload();
-        });
-        if (!data.errors) {
-            location.href = '/core/system/' + data.system_id.toString();
-        };
+    // if initial page load
+    jQuery.each( $("input[name='interface_type']:checked"), function() {
+        changeSystemForm( this.value, 0, 'fast' );
+    });
 
+    $("input[name='interface_type']").change( function() {
+        // dont delay on initial page load
+        if( $('#dynamic-form').length || $('#static-form').length ) {
+            changeSystemForm( this.value, 500, 'slow' );
+        } else {
+            changeSystemForm( this.value, 0, 'fast' );
+        }
+    });
+
+    $( document ).on('submit', '#system-form form', function( e ) {
+        e.preventDefault();
+        var fields;
+        $(this).find('.error').remove();
         if ($("input[name=interface_type]:checked").val() === undefined) {
             $("label[for=id_interface_type_0]:first").after(
-                '<p id="error"><font color="red">This field is required.' +
-                '</font></p>')
-        };
+                '<p class="error">This field is required.</p>');
+            return false;
+        } else {
+            fields = $(this).find(':input:visible').serializeArray();
+        }
+
+        var url = '/core/system/create/';
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
+        $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( ret_data ) {
+            location.href = '/core/system/' + ret_data.system_id.toString();
+        })
     });
 });

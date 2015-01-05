@@ -6,9 +6,8 @@ from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
@@ -18,21 +17,21 @@ class Vrf(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
 
     search_fields = ('name',)
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'vrf'
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('cyder', 'network')
-        networks = Network.objects.filter(range__in=ctnr.ranges.all())
-        objects = objects or Vrf.objects
-        return objects.filter(network__in=networks)
+        if objects is None:
+            return Vrf.objects.all()
+        else:
+            return objects
 
     def check_in_ctnr(self, ctnr):
         return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
@@ -44,14 +43,8 @@ class Vrf(BaseModel, ObjectUrlMixin):
         )
         return data
 
-    # NOTE: The following comment was written when Network had a one-to-many
-    #       relationship with Vrf (which was wrong). The schema has been fixed,
-    #       as has this function. However, the comment was not fixed because I
-    #       can't understand it.
-    # vrfs will have one masked network,
-    # but that may change when they are expanding
-    # eg: network_id's in vrf
-    def get_related_networks(self, vrfs):
+    @staticmethod
+    def get_related_networks(vrfs):
         networks = set()
         for vrf in vrfs:
             for network in vrf.network_set.all():
@@ -66,8 +59,10 @@ class Vrf(BaseModel, ObjectUrlMixin):
             {'name': 'network', 'datatype': 'string', 'editable': False},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Vrf, self).save(*args, **kwargs)
 
     def build_vrf(self):

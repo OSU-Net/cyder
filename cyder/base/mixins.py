@@ -103,9 +103,9 @@ class UsabilityFormMixin(object):
         for fieldname, field in self.fields.items():
             if hasattr(field, 'queryset'):
                 self.fields[fieldname].queryset = field.queryset.order_by(
-                    *field.queryset.model.display_fields)
+                    *field.queryset.model.sort_fields)
 
-    def filter_by_ctnr_all(self, request, allow_reverse_domains=False):
+    def filter_by_ctnr_all(self, request):
         from cyder.core.ctnr.models import Ctnr
         from cyder.cydns.domain.models import Domain
         ctnr = request.session['ctnr']
@@ -127,9 +127,6 @@ class UsabilityFormMixin(object):
             else:
                 queryset = filter_by_ctnr(ctnr=ctnr,
                                           objects=field.queryset).distinct()
-
-            if queryset.model == Domain and not allow_reverse_domains:
-                queryset = queryset.filter(is_reverse=False)
 
             if queryset.count() == 1:
                 self.fields[fieldname].initial = queryset[0]

@@ -16,7 +16,7 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.models import ExpirableMixin
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
@@ -25,7 +25,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 
 from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_dns_form
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.domain.models import Domain
 
 
@@ -84,12 +84,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         objects = objects or StaticInterface.objects
         return objects.filter(ctnr=ctnr)
 
-    def __repr__(self):
-        return '<StaticInterface: {0}>'.format(str(self))
-
-    def __str__(self):
-        #return 'IP:{0} Full Name:{1} MAC:{2}'.format(self.ip_str,
-        #        self.fqdn, self.mac)
+    def __unicode__(self):
         return self.fqdn
 
     @property
@@ -132,8 +127,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             related_systems.update([interface.system])
         return related_systems
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         old_range = None
         if self.id is not None:
@@ -148,7 +145,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             if old_range:
                 old_range.save(commit=False)
 
-    @safe_delete
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         rng = self.range
         update_range_usage = kwargs.pop('update_range_usage', True)
@@ -266,13 +263,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         self.rdtype_clob = kwargs.pop('rdtype', 'INTR')
         if kwargs.pop('reverse', False):
             self.template = self.ptr_template
-            self.dns_ip = ip_to_dns_form(self.ip_str)
+            self.dns_ip = ip_to_reverse_name(self.ip_str) + '.'
         else:
             self.template = self.a_template
         return super(StaticInterface, self).bind_render_record(pk=pk, **kwargs)
-
-    def obj_type(self):
-        return 'A/PTR'
 
 
 class StaticInterfaceAV(EAVBase):

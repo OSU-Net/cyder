@@ -22,24 +22,21 @@ API_VERSION = '1'
 
 def create_network_range(network_str, start_str, end_str, range_type,
                          ip_type, domain, ctnr):
-    n = Network(ip_type=ip_type, network_str=network_str)
-    n.save()
-
-    r = Range(network=n, range_type=range_type, start_str=start_str,
-              end_str=end_str, domain=domain, ip_type=ip_type)
-    r.save()
-
+    n = Network.objects.create(ip_type=ip_type, network_str=network_str)
+    r = Range.objects.create(
+        network=n, range_type=range_type, start_str=start_str, end_str=end_str,
+        domain=domain, ip_type=ip_type)
     ctnr.ranges.add(r)
 
 
 def build_sample_domain():
     """Build SOA, domain, view, and nameserver records for testing."""
-    domain, _ = Domain.objects.get_or_create(name="domain")
-    soa, _ = SOA.objects.get_or_create(
+    domain = Domain.objects.create(name="domain")
+    soa = SOA.objects.create(
         primary="ns1.oregonstate.edu", contact="hostmaster.oregonstate.edu",
         root_domain=domain, description="Test SOA")
-    view, _ = View.objects.get_or_create(name='public')
-    nameserver, _ = Nameserver.objects.get_or_create(
+    view = View.objects.create(name='public')
+    nameserver = Nameserver.objects.create(
         domain=domain, server="ns1.oregonstate.edu", ttl=3600)
     nameserver.views.add(view)
     return domain, view
@@ -48,8 +45,7 @@ def build_sample_domain():
 def build_domain(label, domain_obj):
     """Create a domain from a label and domain object."""
     domain_name = label + "." + domain_obj.name
-    domain, _ = Domain.objects.get_or_create(name=domain_name)
-    return domain
+    return Domain.objects.create(name=domain_name)
 
 
 class APIEAVTestMixin(object):
@@ -59,24 +55,25 @@ class APIEAVTestMixin(object):
 
         obj = self.create_data()
 
-        # init attribute
-        attr, _ = Attribute.objects.get_or_create(
+        # Create attribute.
+        attr = Attribute.objects.create(
             name="Test Attribute", attribute_type=ATTRIBUTE_INVENTORY,
             value_type="string")
 
-        getattr(obj, eav_attr).get_or_create(
+        getattr(obj, eav_attr).create(
             attribute=attr, value='Test Value', entity=obj)
 
         resp = self.http_get(self.object_url(obj.id))
         eavs = json.loads(resp.content)[eav_attr]
 
-        for eav in eavs:
-            if eav['attribute'] == 'Test Attribute':
-                assert eav['value'] == 'Test Value'
-                break
-        else:
-            assert 1 == 0, "The test attribute-value pair could not be found."
-        self.model.objects.filter(id=obj.id).delete()
+        matches = filter(
+            lambda eav: (eav['attribute'] == 'Test Attribute' and
+                         eav['value'] == 'Test Value'),
+            eavs)
+        self.assertEqual(
+            len(matches), 1,
+            'The test attribute-value pair could not be found.')
+        obj.reload().delete()
 
 
 class APITests(TestCase):
@@ -99,19 +96,12 @@ class APITests(TestCase):
             model = XXX
 
             def create_data(self):
-                data = {
-                    'label': 'foo',
-                    'domain': self.domain,
-                    # ...
-                }
-                obj = self.model(**data)
-                obj.save()
-                # further changes, such as adding views, can be done here
-                return obj
+                # create other necessary objects
+                return self.model.objects.create(...)
 
     More complex implementations are possible. For example, for records that
     are mostly similar except for small differences (such as address records,
-    PTR records, and interfaces), I have created abstract base classes that
+    PTR records, and interfaces), you could create abstract base classes that
     inherit from this class and create basic test data, while allowing the
     classes that inherit from it to define the case-specific data.
     """
@@ -131,7 +121,7 @@ class APITests(TestCase):
             url = self.model.get_list_url()
         root, urlname = tuple(url.strip("/").split("/"))
 
-        self.ctnr, _ = Ctnr.objects.get_or_create(name="TestCtnr")
+        self.ctnr = Ctnr.objects.create(name="TestCtnr")
         self.domain, self.view = build_sample_domain()
         self.ctnr.domains.add(self.domain)
         self.token = Token.objects.create(

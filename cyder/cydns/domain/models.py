@@ -2,12 +2,11 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_delete, safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydns.validation import validate_domain_name
 from cyder.cydns.search_utils import smart_fqdn_exists
-from cyder.cydns.ip.utils import ip_to_domain_name, nibbilize
+from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.validation import validate_reverse_name
 from cyder.cydns.domain.utils import name_to_domain, is_name_descendant_of
 
@@ -88,18 +87,15 @@ class Domain(BaseModel, ObjectUrlMixin):
     purgeable = models.BooleanField(default=False)
     delegated = models.BooleanField(default=False, null=False, blank=True)
 
-    display_fields = ('name',)
     search_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'domain'
 
-    def __str__(self):
-        return get_display(self)
-
-    def __repr__(self):
-        return "<Domain '{0}'>".format(self.name)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -133,7 +129,17 @@ class Domain(BaseModel, ObjectUrlMixin):
             {'name': 'delegated', 'datatype': 'boolean', 'editable': True},
         ]}
 
-    @safe_delete
+    @classmethod
+    @transaction_atomic
+    def create_recursive(cls, name, commit=True):
+        first_dot = name.find('.')
+        if first_dot >= 0:  # not a TLD
+            rest = name[(first_dot + 1):]
+            cls.create_recursive(name=rest)
+        domain, created = cls.objects.get_or_create(name=name)
+        return domain
+
+    @transaction_atomic
     def delete(self, *args, **kwargs):
         self.check_for_children()
         if self.has_record_set():
@@ -143,8 +149,10 @@ class Domain(BaseModel, ObjectUrlMixin):
 
         super(Domain, self).delete(*args, **kwargs)
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Domain, self).save(*args, **kwargs)
 
         # Ensure all descendants in this zone have the same SOA as this domain.
@@ -154,6 +162,7 @@ class Domain(BaseModel, ObjectUrlMixin):
             child.soa = self.soa
             child.save(commit=False)  # Recurse.
 
+    @property
     def ip_type(self):
         if self.name.endswith('in-addr.arpa'):
             return '4'
@@ -281,23 +290,6 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     def is_descendant_of(self, other):
         return is_name_descendant_of(self.name, other.name)
-
-
-def boot_strap_ipv6_reverse_domain(ip, soa=None):
-    """
-    This function is here to help create IPv6 reverse domains.
-
-    :param ip: The IP address in nibble format
-    :type ip: str
-    :raises: ReverseDomainNotFoundError
-    """
-    validate_reverse_name(ip, '6')
-
-    for i in xrange(1, len(ip) + 1, 2):
-        cur_reverse_domain = ip[:i]
-        domain_name = ip_to_domain_name(cur_reverse_domain, ip_type='6')
-        reverse_domain, _ = Domain.objects.get_or_create(name=domain_name)
-    return reverse_domain
 
 
 # A handy function that would cause circular dependencies if it were in

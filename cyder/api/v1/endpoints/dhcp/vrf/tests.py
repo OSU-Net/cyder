@@ -7,4 +7,4 @@ class VrfAPI_Test(APITests, APIEAVTestMixin):
     model = Vrf
 
     def create_data(self):
-        return self.model.objects.get_or_create(name='vrf')[0]
+        return Vrf.objects.create(name='vrf')

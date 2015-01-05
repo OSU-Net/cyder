@@ -6,9 +6,8 @@ from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.utils import join_dhcp_args
 
 
@@ -17,14 +16,14 @@ class Workgroup(BaseModel, ObjectUrlMixin):
     name = models.CharField(max_length=100, unique=True)
 
     search_fields = ('name',)
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'workgroup'
 
-    def __str__(self):
-        return get_display(self)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -47,8 +46,10 @@ class Workgroup(BaseModel, ObjectUrlMixin):
             {'name': 'name', 'datatype': 'string', 'editable': True},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         super(Workgroup, self).save(*args, **kwargs)
 
     def build_workgroup(self):

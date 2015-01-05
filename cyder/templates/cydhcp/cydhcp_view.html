@@ -6,14 +6,25 @@
     {% include "base/sidebar.html" %}
 {% endblock %}
 
+{% block view_metadata %}
+    <span id="view-metadata"
+        data-csrfToken="{{ csrf_token }}">
+    </span>
+{% endblock %}
+
 {% block action_bar %}
   {% if obj_type_perm %}
     {% if obj_type in ["static_interface", "dynamic_interface"] %}
-      {{ js('interface_delete') }}
-      <a class="btn submit c" href="{{ url('system-create') }}?interface_type={{ obj_type }}"
-          id="system_create">Create {{ pretty_obj_type }}</a>
+    <a class="btn submit a" href={{ url('system-create') }}
+          id="system_create"
+          data-kwargs='{"initial": "True",
+                        "interface_type": "{{ obj_type }}"}'>
+        Create {{ pretty_obj_type }}</a>
     {% else %}
-      <a id="btn create-obj" class="btn create-obj">
+      <a id="btn js-create-object" class="btn js-get-form"
+          data-kwargs='{"obj_type": "{{ obj_type }}",
+                        "get_url": "{{ url('get-update-form') }}",
+                        "pretty_obj_type": "{{ pretty_obj_type }}"}'>
         Create {{ pretty_obj_type }}
       </a>
     {% endif %}
@@ -21,9 +32,6 @@
 {% endblock %}
 
 {% block form %}
-  {% if pretty_obj_type == 'Range' %}
-    {{ js('rangeform') }}
-  {% endif %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"
@@ -46,5 +54,8 @@
         </div>
       </form>
     </div>
+  {% endif %}
+  {% if obj_type == 'range' %}
+    {{ js('rangeform') }}
   {% endif %}
 {% endblock %}

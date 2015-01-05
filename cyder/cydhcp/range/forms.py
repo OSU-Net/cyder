@@ -25,5 +25,8 @@ class RangeForm(ViewChoiceForm, UsabilityFormMixin):
             {'cols': '80',
              'style': 'display: none;width: 680px'})
 
+        self.fields['network'].widget.attrs.update({'class': 'networkWizard'})
+
+
 
 RangeAVForm = get_eav_form(RangeAV, Range)

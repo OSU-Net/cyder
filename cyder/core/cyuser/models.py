@@ -5,7 +5,7 @@ from django.db.models import signals
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_integer_field
-from cyder.base.utils import safe_save
+from cyder.base.utils import transaction_atomic
 from cyder.core.cyuser import backends
 from cyder.core.ctnr.models import Ctnr
 
@@ -23,7 +23,7 @@ class UserProfile(BaseModel, ObjectUrlMixin):
         app_label = 'cyder'
         db_table = 'auth_user_profile'
 
-    def __str__(self):
+    def __unicode__(self):
         return self.user.username
 
     def details(self):
@@ -37,8 +37,10 @@ class UserProfile(BaseModel, ObjectUrlMixin):
         ]
         return data
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         if not self.pk:
             try:
                 p = UserProfile.objects.get(user=self.user)

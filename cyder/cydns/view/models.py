@@ -1,10 +1,9 @@
 from django.db import models
 
 from cyder.base.mixins import ObjectUrlMixin
-from cyder.base.helpers import get_display
 
 
-class View(models.Model, ObjectUrlMixin):
+class View(models.Model):
     """
     >>> View(name=name)
     """
@@ -12,7 +11,7 @@ class View(models.Model, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
 
-    display_fields = ('name',)
+    sort_fields = ('name',)
 
     class Meta:
         app_label = 'cyder'
@@ -24,11 +23,8 @@ class View(models.Model, ObjectUrlMixin):
             ('Name', self.name),
         )
 
-    def __str__(self):
-        return get_display(self)
-
-    def __repr__(self):
-        return "<View: {0}>".format(self)
+    def __unicode__(self):
+        return self.name
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):

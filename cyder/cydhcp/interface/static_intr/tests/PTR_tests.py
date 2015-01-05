@@ -1,66 +1,59 @@
 from django.core.exceptions import ValidationError
 
-from basestatic import BaseStaticTests
+from cyder.cydns.ptr.models import PTR
+from .basestatic import BaseStaticTests
 
 
 class PTRStaticRegTests(BaseStaticTests):
-    def test1_conflict_add_intr_first(self):
-        # PTRdd an intr and make sure PTR can't exist.
-        mac = "11:22:33:44:55:66"
-        label = "foo4"
-        domain = self.f_c
-        ip_str = "10.0.0.2"
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add_intr(**kwargs)
-        kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
-        self.assertRaises(ValidationError, self.do_add_ptr, **kwargs)
+    def test_conflict_add_intr_first(self):
+        # Make sure static interface conflicts with PTR.
+        def create_intr():
+            return self.create_si(
+                mac='11:22:33:44:55:66',
+                label='foo4',
+                domain=self.f_c,
+                ip_str='10.0.0.2',
+            )
+        create_intr.name = 'StaticInterface'
 
-    def test1_conflict_add_PTR_first(self):
-        # Add an PTR and make sure an intr can't exist.
-        mac = "11:22:33:44:55:66"
-        label = "foo5"
-        domain = self.f_c
-        ip_str = "10.0.0.2"
-        kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
-        self.do_add_ptr(**kwargs)
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.assertRaises(ValidationError, self.do_add_intr, **kwargs)
+        def create_ptr():
+            return PTR.objects.create(
+                ip_str='10.0.0.2', fqdn='foo4.foo.ccc',
+                ctnr=self.ctnr)
+        create_ptr.name = 'PTR'
 
-    def test2_conflict_add_intr_first(self):
-        # Add an intr and update an existing PTR to conflict.
-        # Test for exception.
-        mac = "12:22:33:44:55:66"
-        label = "fo99"
-        domain = self.f_c
-        ip_str = "10.0.0.2"
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        self.do_add_intr(**kwargs)
-        ip_str = "10.0.0.3"
-        kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
-        ptr = self.do_add_ptr(**kwargs)
-        ptr.ip_str = "10.0.0.2"
-        self.assertRaises(ValidationError, ptr.save)
+        self.assertObjectsConflict((create_intr, create_ptr))
 
-    def test2_conflict_add_A_first(self):
-        # Add an PTR and update and existing intr to conflict.
-        # Test for exception.
-        mac = "11:22:33:44:55:66"
-        label = "foo98"
-        domain = self.f_c
-        ip_str = "10.0.0.2"
-        # Add PTR
-        kwargs = {'label': label, 'domain': domain, 'ip_str': ip_str}
-        self.do_add_ptr(**kwargs)
+    def test_conflict_add_intr_first(self):
+        self.create_si(
+            mac='12:22:33:44:55:66',
+            label='fo99',
+            domain=self.f_c,
+            ip_str='10.0.0.2',
+        )
 
-        # Add Intr with diff IP
-        ip_str = "10.0.0.3"
-        kwargs = {'mac': mac, 'label': label, 'domain': domain,
-                  'ip_str': ip_str}
-        intr = self.do_add_intr(**kwargs)
+        ptr = PTR.objects.create(
+            ip_str='10.0.0.3',
+            fqdn='fo99.foo.ccc',
+            ctnr=self.ctnr,
+        )
 
-        # Conflict the IP on the intr
-        intr.ip_str = "10.0.0.2"
-        self.assertRaises(ValidationError, intr.save)
+        ptr.ip_str = '10.0.0.2'
+        self.assertRaises(ValidationError, ptr.save)  # IP conflict
+
+    def test_conflict_add_A_first(self):
+        PTR.objects.create(
+            fqdn='foo98.foo.ccc',
+            ip_str='10.0.0.2',
+            ctnr=self.ctnr,
+        )
+
+        intr = self.create_si(
+            mac='11:22:33:44:55:66',
+            label='foo98',
+            domain=self.f_c,
+            ip_str='10.0.0.3',
+        )
+
+        intr.ip_str = '10.0.0.2'
+        self.assertRaises(ValidationError, intr.save)  # IP conflict

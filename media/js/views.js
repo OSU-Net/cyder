@@ -1,90 +1,62 @@
-$(document).ready(function() {
+$(document).ready( function() {
     var metadata = $('#view-metadata');
     var form = $('#obj-form form')[0];
-    var hidden_inner_form = document.getElementById('hidden-inner-form');
-    if(hidden_inner_form) {
-        var defaults = hidden_inner_form.innerHTML;
-    };
-    var objType = metadata.attr('data-objType');
-    var objName = metadata.attr('data-objName');
-    var prettyObjType = metadata.attr('data-prettyObjType');
-    var searchUrl = metadata.attr('data-searchUrl');
-    var getUrl = metadata.attr('data-getUrl');
-    var domainsUrl = metadata.attr('data-domainsUrl');
-    var objPk = metadata.attr('data-objPk');
-    var csrfToken = metadata.attr('data-csrfToken');
+    var domainsUrl = metadata.attr( 'data-domainsUrl' );
 
     // For inputs with id = 'id_fqdn' | 'id_target' | server, make smart names.
-    if (domainsUrl) {
-        make_smart_name_get_domains(
-            $('#id_fqdn, #id_target, #id_server'), true, domainsUrl);
-    }
-    $('.load').ajaxStart(function() {
-        $(this).show();
-    }).ajaxStop(function() {
-        $(this).hide();
-    });
-
-    $('#settings-btn').click( function(e) {
-        $('.settings-menu').slideToggle();
-        $('#settings-btn').toggleClass('selected');
-    });
-    $('#menu-btn').click( function(e) {
-        $('#menu-btn').toggleClass('selected');
-        $('#sidebar_div').toggleClass('displayed');
-    });
-    $('.nav-item.parent').click( function(e) {
-        e.preventDefault();
-        var parentsChild = ('#' + this.id + '-children');
-        if ($(parentsChild).css('display') != 'none') {
-            $(parentsChild).slideUp('slow');
-        } else {
-            var children = [
-                '#dns-sidebar-children',
-                '#dhcp-sidebar-children',
-                '#core-sidebar-children'];
-            $.each(children, function(i, child) {
-                if (parentsChild != child) {
-                    if ($(child).css('display') != 'none') {
-                        $(child).slideToggle('slow');
-                    };
-                };
-            });
-            $(parentsChild).slideToggle('slow');
-        };
-    });
-
-    $('#system_create, #delete, .delete').live( 'click', function(e) {
-        e.preventDefault();
-        if ($(this).attr('id') == 'delete'
-                || $(this).attr('class') == 'delete') {
-            var msg = "Are you sure you want to delete this?";
-            if ($(this).attr('data-kwargs').indexOf('"system"') >= 0) {
-                msg = "Deleting this system will also delete its"
-                    + " interfaces. Are you sure you want to continue?";
-            }
-            if (!confirm(msg)) {
-                return false;
-            }
+    $( document ).on( 'click', '#id_fqdn, #id_target, #id_server', function() {
+        if ( domainsUrl ) {
+            make_smart_name_get_domains(
+                $('#id_fqdn, #id_target, #id_server'), true, domainsUrl );
         }
-        var url = $(this).attr('href');
-        var postData = JSON.parse($(this).attr('data-kwargs'));
-        var postForm = $('<form style="display: none" action="' + url
-            + '" method="post"></form>');
-        $.each(postData, function(key, value) {
-            postForm.append($('<input>').attr(
-                {type: 'text', name: key, value: value}));
-        });
-        postForm.append($('<input>').attr(
-            {type: 'hidden', name: 'csrfmiddlewaretoken', value: csrfToken}));
-        $('.content').append(postForm);
-        $(postForm).submit();
     });
 
-    $('#id_attribute').live('focus', function() {
+    // displays the loading gif on ajax event
+    $(document).ajaxStart( function() {
+        $('.load').stop().fadeIn( 160 );
+    }).ajaxStop( function() {
+        $('.load').stop().fadeOut( 160 );
+    });
+
+    // toggles the settings menu in mobile view
+    $('#settings-btn').click( function() {
+        $('.settings-menu').slideToggle();
+        $('#settings-btn').toggleClass( 'selected' );
+    });
+
+    // toggles the sidebar in mobile view
+    $('#menu-btn').click( function() {
+        $('#menu-btn').toggleClass( 'selected' );
+        $('#sidebar_div').toggleClass( 'displayed' );
+    });
+
+    // sidebar animation logic
+    $('.nav-item.parent').click( function( e ) {
+        e.preventDefault();
+        var parentsChild = ( '#' + this.id + '-children' );
+        $('#dns-sidebar-children, #dhcp-sidebar-children, #core-sidebar-children')
+            .not(parentsChild).slideUp( 'slow' );
+        $(parentsChild).slideToggle( 'slow' );
+    });
+
+    // handles create buttons in dynamic/static interface view and range
+    // detail view
+    $( document ).on( 'click', '#system_create', function( e ) {
+        e.preventDefault();
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
+        button_to_form( this, csrfToken, function( postForm ){
+            $(postForm).submit();
+        });
+    });
+
+    $( document ).on( 'click', '.exit-message', function( e ) {
+        slideUp_and_remove( $(this).parent() );
+    });
+
+    $( document ).on( 'focus', '#id_attribute', function() {
         $('#id_attribute').autocomplete({
             minLength: 1,
-            source: function(request, response) {
+            source: function( request, response ) {
                 $.ajax({
                     url: '/eav/search',
                     dataType: 'json',
@@ -93,215 +65,140 @@ $(document).ready(function() {
                         attribute_type: $('#id_attribute_type').val()
                     },
                     success: response
-                })
+                });
             },
             delay: 400,
-            select: function(event, ui) {
-                attributeName = ui.item.label
+            select: function( event, ui ) {
+                attributeName = ui.item.label;
             }
         });
     });
 
-    $('#id_attribute_type').live('change', function() {
-        $('#id_attribute').val('');
+    $( document ).on( 'change', '#id_attribute_type', function() {
+        $('#id_attribute').val( '' );
     });
 
-    $('.create-obj, .update, .cancel').each(function() {
-        $('.create-obj, .update, .cancel').addClass('hover');
-        $(this).click(function(e) {
-            if ($(this).hasClass('selected')) {
-                $(this).removeClass('selected');
-            } else {
-                $('.create-obj, .update, .cancel').removeClass('selected');
-                $(this).removeClass('hover').addClass('selected');
-            };
-        });
-    });
+    // button behavior logic, see css
+    function buttonLogic() {
+        $('.js-get-form, .js-create-object, .update, .cancel').addClass( 'hover' );
+        if ( $(this).hasClass( 'selected' ) ) {
+            $(this).removeClass( 'selected' );
+        } else {
+            $('.js-get-form, .js-create-object, .update, .cancel').removeClass( 'selected' );
+            $(this).removeClass( 'hover' ).addClass( 'selected' );
+        }
+    }
+    $( document ).on('click', '.js-get-form, js-create-object, .update, .cancel', buttonLogic );
 
-    $('.create-obj').click(function(e) {
-        // Show create form on clicking create button.
-        e.preventDefault();
 
-        slideUp($('#obj-form'));
-        if ($(this).hasClass('selected')) {
-            form.action = this.href;
-            if(this.hasAttribute('data-objType')) {
-                var $createBtn = $(this);
-                var formPrettyObjType = $createBtn.attr('data-prettyobjtype');
-                var formObjType = $createBtn.attr('data-objType');
-                $('#obj-form form').attr('objType', formObjType);
-                var formGetUrl = $createBtn.attr('data-getUrl');
-                var data_to_post = $createBtn.attr('data-kwargs');
-                var formTitle = 'Creating ' + formPrettyObjType;
-
-                $.get(formGetUrl,
-                    {
-                        'obj_type': formObjType,
-                        'related_type': objType,
-                        'related_pk': objPk,
-                        'data': data_to_post
-                    },
-                    function(data) {
-                        setTimeout(function() {
-                            $('#form-title').html(formTitle);
-                            data.form.action = $createBtn.attr('href');
-                            $('.inner-form').empty().append(data.form);
-                            initForms();
-                        }, 150);
-                        $('#obj-form form')[0].action = $createBtn.attr('href');
-                        $('.form-btns a.submit, .btn.ajax').text(
-                            'Create ' + formPrettyObjType);
-                        $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
-                        $('#obj-form').slideToggle();
-                    }, 'json');
-            } else {
-                $('#obj-form form').attr('objType', objType);
-                setTimeout(function() {
-                    $('#form-title').html('Creating ' + prettyObjType);
-
-                    if(defaults) {
-                        $('#hidden-inner-form').empty().html(defaults);
-                    } else {
-                        clear_form_all(form);
-                    };
-                }, 150);
-                $('.form-btns a.submit, .btn.ajax').text('Create ' + prettyObjType);
-
-                $('.form-btns a.submit').attr('class', 'btn c submit_create ajax');
-                $('#obj-form').slideToggle();
-            };
-            $('#id_value').live("keypress", function(e) {
-                if (e.which == 13) {
-                    jQuery('.submit_create').focus().click();
-                };
-            });
-            $('.form').append($('<input>',
-                              {type: 'hidden', name: 'csrfmiddlewaretoken',
-                               value: csrfToken}));
-        };
-    });
-
-    $('.update').live( 'click', function(e) {
+    $( document ).on( 'click', '.js-get-form', function( e ) {
         // Show update form on clicking update icon.
-        slideUp($('#obj-form'));
         e.preventDefault();
-        if ($(this).hasClass('selected') ||
-                $(this).parents().attr('class') == 'actions_column') {
-            form.action = this.href;
-            var formObjName = $(this).attr('data-objName') || objName;
-            var formObjType = $(this).attr('data-objType');
-            $('#obj-form form').attr('objType', formObjType);
-            var formPrettyObjType = $(this).attr('data-prettyObjType');
-            var formTitle = 'Updating ' + formPrettyObjType + ' ' + formObjName;
+        get_update_form( this );
+    });
 
-            $.get($(this).attr('data-getUrl') || getUrl,
-                    {'obj_type': formObjType, 'pk': $(this).attr('data-pk')},
-                    function(data) {
-                setTimeout(function() {
-                    $('#form-title').html(formTitle);
-                    $('#hidden-inner-form').empty().append(data.form);
-                    initForms();
-                }, 150);
-                $('.form-btns a.submit, .btn.ajax').text('Update ' + formPrettyObjType);
+    function btn_not_toggle_close( btn ) {
+        return ($(btn).hasClass( 'selected' ) ||
+            $(btn).parents().attr( 'class' ) == 'actions_column');
+    };
 
-                $('.form-btns a.submit').attr('class', 'btn c submit_update ajax');
-                $('#obj-form').slideDown();
-            }, 'json');
-            $('#id_value').live("keypress", function(e) {
-                if (e.which == 13) {
-                    jQuery('.submit_update').focus().click();
+    function get_update_form( btn ) {
+        var kwargs;
+        var formTitle;
+        var buttonLabel;
+        var getData;
+        var buttonAttrs;
+        var initData;
+        slideUp( $('#obj-form') );
+        form.action = btn.href;
+        if ( btn_not_toggle_close( btn ) ) {
+            kwargs = JSON.parse( $(btn).attr( 'data-kwargs' ) );
+            if ( kwargs.pk ) {
+                buttonAttrs = 'btn c submit_update js-submit';
+                getData = {
+                    'obj_type': kwargs.obj_type,
+                    'pk': kwargs.pk
                 };
+            } else {
+                buttonAttrs = 'btn c submit_create js-submit';
+                if ( $(btn).attr( 'data-init' ) ) {
+                    initData = $(btn).attr( 'data-init' );
+                }
+
+                getData = {
+                    'data': initData,
+                    'obj_type': kwargs.obj_type,
+                    'related_pk': metadata.attr( 'data-objPk' ),
+                    'related_type': metadata.attr( 'data-objType' ),
+                };
+            }
+
+            $.ajax({
+                type: 'GET',
+                url: kwargs.get_url,
+                data: getData,
+                global: false,
+                dataType: 'json',
+                success: function( data ) {
+                    setTimeout( function() {
+                        $('#hidden-inner-form').empty().append( data.form );
+                        initForms();
+                    }, 150 );
+                    $('#form-title').html( data.form_title );
+                    $('.form-btns a.submit, .btn.js-submit').text( data.submit_btn_label );
+                    $('.form-btns a.submit').attr( 'class', buttonAttrs );
+                    $('#obj-form').slideDown();
+                }
+            }).done( function() {
+                $('#obj-form form :input:visible:last').on( 'keypress', function( e ) {
+                    if ( e.keyCode == 13 ) {
+                        $('.js-submit').focus().click();
+                    }
+                });
             });
+        }
+    };
 
-            $('.form').append($('<input>', {type: 'hidden',
-                name: 'csrfmiddlewaretoken', value: csrfToken}));
-        };
-    });
-    $('#Bug-Report').live('submit', function(event) {
-        event.preventDefault();
-        url = $(location).attr('href');
-        var data = ajax_form_submit(url, $('#Bug-Report'), csrfToken, function(data) {
-            if (!data.errors) {
-                alert('Your bug report was sent successfully. '
-                      + 'Thank you for your input!');
-                $('#Bug-Report')[0].reset();
-                window.location.href = '/';
-            };
+
+    function av_form_submit_handler( data ) {
+        var is_update = false;
+        var id = data.row.postback_urls[0].match(/[1-9]+/g);
+        var kwargs;
+        if ( $('.attrs_table:hidden') ) {
+            $('.attrs_table').slideDown();
+            $('.attrs_title').slideDown();
+        }
+        jQuery.each( $('.attrs_table > tbody > tr'), function( i, row ) {
+            kwargs = JSON.parse(
+                $(row).find( '.table_delete' ).attr( 'data-kwargs') );
+            if ( kwargs.pk == id ) {
+                $(this).remove();
+                is_update = true;
+
+            }
         });
-    });
+        insertTablefyRow( data.row, $('.attrs_table > tbody') );
+        if ( is_update ) {
+            $('#obj-form form').find( '.cancel' ).click();
+        } else {
+            $('#obj-form form').trigger( 'reset' );
+            $('#id_attribute').focus();
+        }
+    }
 
-    $('#obj-form form').live('submit', function(event) {
+    // Form submit handler, special logic for attributes
+    $( document ).on( 'submit', '#obj-form form', function( e ) {
+        e.preventDefault();
         var url = $('#obj-form form')[0].action;
-        event.preventDefault();
-        ajax_form_submit(url, $('#obj-form'), csrfToken,
-                         function(data) {
-            if (!data.errors) {
-                if ($('#obj-form form').attr('action').indexOf('_av') >= 0) {
-                    var style = $('.attrs_table').attr('style');
-                    if (style != undefined && style != false &&
-                            !$('.attrs_table').attr('style').indexOf(
-                            'display:none') >= 0) {
-                        $('#attr_title').slideDown();
-                        $('.attrs_table').attr('style', '');
-                    };
-                    var is_update = false;
-                    jQuery.each($('.attrs_table > tbody > tr'), function(i, row) {
-                        if (row.cells[0].innerHTML.indexOf(
-                                data.row.data[0][0].value[0]) >= 0) {
-                            $(this.remove());
-                            is_update = true;
-
-                        };
-                    });
-                    insertTablefyRow(data.row, $('.attrs_table > tbody'));
-                    if (is_update) {
-                        $('#obj-form form').find('.cancel').click();
-                    } else {
-                        $('#obj-form form').trigger('reset');
-                        $('#id_attribute').focus();
-                    };
-                } else {
-                    location.reload();
-                };
-            };
+        var fields = $('#obj-form form').find( ':input' ).serializeArray();
+        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
+        $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( data ) {
+            // for av forms
+            if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
+                av_form_submit_handler( data );
+            } else {
+                location.reload();
+            }
         });
     });
 });
-
-
-function ajax_form_submit(url, form, csrfToken, success) {
-    jQuery.ajaxSettings.traditional = true;
-    var fields = form.find(':input').serializeArray();
-    var postData = {}
-    jQuery.each(fields, function (i, field) {
-        if (i > 0 && fields[i-1].name == field.name) {
-            postData[field.name].push(field.value);
-        } else {
-            postData[field.name] = [field.value];
-        };
-    });
-    postData['csrfmiddlewaretoken'] = csrfToken;
-    var ret_data = null;
-    $.post(url, postData, function(data) {
-        ret_data = data;
-        if ($('#hidden-inner-form').find('#error').length) {
-            $('#hidden-inner-form').find('#error').remove();
-        };
-        if (data.errors) {
-            jQuery.each(fields, function (i, field) {
-                if (data.errors[field.name]) {
-                    $('#id_' + field.name).after(
-                        '<p id="error"><font color="red">'
-                        + data.errors[field.name] + '</font></p>');
-                };
-            });
-            if (data.errors['__all__']) {
-                $('#hidden-inner-form').find('p:first').before(
-                    '<p id="error"><font color="red">'
-                    + data.errors['__all__'] + '</font></p>');
-            };
-        } else {
-            success(ret_data);
-        };
-    }, 'json');
-};

@@ -245,7 +245,7 @@ sys.path.append(site_root + '/vendor')
 
 EMAIL_SUFFIX = '@onid.oregonstate.edu'
 CAS_SERVER_URL = 'https://login.oregonstate.edu/cas/login'
-CAS_AUTO_CREATE_USERS = True  # Not to be used in production.
+CAS_AUTO_CREATE_USERS = False
 BUG_REPORT_EMAIL = 'CyderProject@oregonstate.edu'
 EMAIL_HOST = 'mail.oregonstate.edu'
 
@@ -260,7 +260,6 @@ MINIFY_BUNDLES = {
     'css': {
         'cyder_css': (
             'css/lib/jquery-ui-1.8.11.custom.css',
-            'css/lib/jquery.autocomplete.css',
             'css/sticky_footer.css',
 
             'css/globals.scss',
@@ -273,14 +272,12 @@ MINIFY_BUNDLES = {
     },
     'js': {
         'cyder_js': (
-            'js/lib/jquery-1.8.3.min.js',
+            'js/lib/jquery-1.11.1.min.js',
+            'js/lib/jquery-migrate-1.2.1.min.js',
             'js/lib/attribute_adder.js',
-            'js/lib/jquery.history.js',
             'js/lib/jQuery.rightclick.js',
-            'js/lib/jquery.tools.min.js',
             'js/lib/jquery.validate.min.js',
-            'js/lib/jquery.autocomplete.min.js',
-            'js/lib/jquery-ui-1.8.11.custom.min.js',
+            'js/lib/jquery-ui.min.js',
             'js/lib/tablesorter.js',
             'js/lib/editablegrid/editablegrid.js',
             'js/lib/editablegrid/editablegrid_renderers.js',
@@ -293,7 +290,9 @@ MINIFY_BUNDLES = {
             'js/application.js',
             'js/dhcp_raw_include.js',
             'js/views.js',
+            'js/cy_delete.js',
             'js/rangewizard.js',
+            'js/mobile.js',
         ),
         'rangeform': (
             'js/rangeform.js',
@@ -310,11 +309,11 @@ MINIFY_BUNDLES = {
         'cyuser': (
             'js/cyuser/cyuser.js',
         ),
-        'interface_delete': (
-            'js/interface_delete.js',
-        ),
         'systemform': (
             'js/systemform.js',
+        ),
+        'bugreport': (
+            'js/bugreport.js',
         ),
         'tags_js': (
             'js/lib/jquery.tagsinput.js',

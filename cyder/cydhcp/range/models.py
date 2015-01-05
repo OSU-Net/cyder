@@ -9,7 +9,7 @@ from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
-from cyder.base.utils import safe_save, simple_descriptor
+from cyder.base.utils import simple_descriptor, transaction_atomic
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydhcp.constants import (ALLOW_OPTIONS, ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, ALLOW_VRF, RANGE_TYPE,
@@ -28,11 +28,7 @@ import ipaddr
 
 
 class Range(BaseModel, ViewMixin, ObjectUrlMixin):
-    """The Range class.
-
-        >>> Range(start=start_ip, end=end_ip,
-        >>>         defualt_domain=domain, network=network)
-
+    """
     Ranges live inside networks; their start ip address is greater than or
     equal to the the start of their network and their end ip address is less
     than or equal to the end of their network; both the Range and the network
@@ -85,7 +81,8 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     end_upper = models.BigIntegerField(null=True, editable=False)
     end_str = models.CharField(max_length=39, verbose_name="End address")
 
-    domain = models.ForeignKey(Domain, null=True, blank=True)
+    domain = models.ForeignKey(Domain, null=True, blank=True,
+                               limit_choices_to={'is_reverse': False})
 
     is_reserved = models.BooleanField(default=False, blank=False)
 
@@ -104,7 +101,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str', 'name')
-    display_fields = ('start_str', 'end_str')
+    sort_fields = ('start_str', 'end_str')
 
     class Meta:
         app_label = 'cyder'
@@ -114,7 +111,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     @property
     def range_str(self):
-        return u'{0}-{1}'.format(self.start_str, self.end_str)
+        return u'{0}–{1}'.format(self.start_str, self.end_str)
 
     @property
     def range_str_padded(self):
@@ -147,9 +144,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     def __unicode__(self):
         return self.get_self_str(padded=True)
-
-    def __repr__(self):
-        return "<Range: {0}>".format(str(self))
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -196,8 +190,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             {'name': 'vlan', 'datatype': 'string', 'editable': False},
         ]}
 
-    @safe_save
+    @transaction_atomic
     def save(self, *args, **kwargs):
+        self.full_clean()
+
         update_range_usage = kwargs.pop('update_range_usage', True)
         if update_range_usage:
             self.range_usage = self.get_usage()
@@ -348,25 +344,6 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         rules."""
         self.ipf = IPFilter(self.start_str, self.end_str, self.network.ip_type,
                             object_=self)
-
-    def display(self):
-        return "Range: {3} to {4} {0} -- {2} -- {1}".format(
-            self.network.site, self.network.vlan, self.network,
-            self.start_str, self.end_str)
-
-    def choice_display(self):
-        if not self.network.site:
-            site_name = "No site"
-        else:
-            site_name = self.network.site.name.upper()
-
-        if not self.network.vlan:
-            vlan_name = "No VLAN"
-        else:
-            vlan_name = str(self.network.vlan)
-        return "{0} - {1} - ({2}) {3} to {4}".format(
-            site_name, vlan_name,
-            self.network, self.start_str, self.end_str)
 
     def get_usage(self):
         if self.range_type == 'st':

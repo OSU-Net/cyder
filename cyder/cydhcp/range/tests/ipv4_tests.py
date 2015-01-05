@@ -1,6 +1,6 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
@@ -10,408 +10,244 @@ from cyder.core.system.models import System
 from cyder.core.ctnr.models import Ctnr
 
 
-class V4RangeTests(TestCase):
-
+class V4RangeTests(TestCase, ModelTestMixin):
     def setUp(self):
-        self.ctnr = Ctnr(name='abloobloobloo')
-        self.ctnr.save()
-        self.d = Domain(name="com")
-        self.d.save()
+        self.ctnr = Ctnr.objects.create(name='abloobloobloo')
+        self.d = Domain.objects.create(name="com")
         self.ctnr.domains.add(self.d)
-        Domain(name="arpa").save()
-        Domain(name="in-addr.arpa").save()
+
+        Domain.objects.create(name="arpa")
+        Domain.objects.create(name="in-addr.arpa")
         create_zone('10.in-addr.arpa')
-        self.s = Network(network_str="10.0.0.0/16", ip_type='4')
-        self.s.update_network()
-        self.s.save()
 
-        self.s1 = Network(network_str="10.2.1.0/24", ip_type='4')
-        self.s1.update_network()
-        self.s1.save()
+        self.s = Network.objects.create(network_str="10.0.0.0/16", ip_type='4')
+        self.s1 = Network.objects.create(
+            network_str="10.2.1.0/24", ip_type='4')
 
-    def do_add(self, start_str, end_str, default_domain,
-               network, rtype, ip_type):
-        r = Range(start_str=start_str, end_str=end_str, network=network,
-                  ip_type=ip_type)
-        r.__repr__()
-        r.save()
-        return r
+    @property
+    def objs(self):
+        """Create objects for test_create_delete."""
+        return (
+            Range.objects.create(
+                start_str="10.0.0.1",
+                end_str="10.0.0.55",
+                network=self.s,
+                ip_type='4',
+            ),
+            Range.objects.create(
+                start_str="10.0.1.1",
+                end_str="10.0.1.55",
+                network=self.s,
+                ip_type='4',
+            ),
+        )
 
-    def test1_create(self):
-        start_str = "10.0.0.1"
-        end_str = "10.0.0.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-
-    def test2_create(self):
-        start_str = "10.0.1.1"
-        end_str = "10.0.1.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-
-    def test1_bad_create(self):
-        # start == end
-        start_str = "10.0.0.0"
-        end_str = "10.1.0.0"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test2_bad_create(self):
+    def test_bad_create1(self):
         # start > end
-        start_str = "10.0.0.2"
-        end_str = "10.0.0.1"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.0.0.2",
+            end_str="10.0.0.1",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test3_bad_create(self):
+    def test_bad_create2(self):
         # outside of network
-        start_str = "11.0.0.2"
-        end_str = "10.0.0.88"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="11.0.0.2",
+            end_str="10.0.0.88",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test4_bad_create(self):
+    def test_bad_create3(self):
         # outside of network
-        start_str = "10.2.0.0"
-        end_str = "10.2.1.88"
-        default_domain = self.d
-        network = self.s1
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.2.0.0",
+            end_str="10.2.1.88",
+            network=self.s1,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
+    def test_bad_create4(self):
+        def x():
+            Range.objects.create(
+                start_str="10.0.4.1",
+                end_str="10.0.4.55",
+                network=self.s,
+                ip_type='4',
+            )
 
-    def test5_bad_create(self):
+        x()
+
         # duplicate
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(ValidationError, x)
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
+    def test_bad_create5(self):
+        Range.objects.create(
+            start_str="10.0.4.1",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test6_bad_create(self):
         # Partial overlap
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.0.4.1",
+            end_str="10.0.4.30",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
+    def test_bad_create6(self):
+        Range.objects.create(
+            start_str="10.0.4.1",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        self.do_add(**kwargs)
-
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.30"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test7_bad_create(self):
         # Partial overlap
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.0.4.1",
+            end_str="10.0.4.56",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
+    def test_bad_create7(self):
+        Range.objects.create(
+            start_str="10.0.4.1",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.56"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test8_bad_create(self):
         # Full overlap
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.0.4.2",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-
-        start_str = "10.0.4.2"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test9_bad_create(self):
+    def test_bad_create8(self):
         # Full overlap
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        Range.objects.create(
+            start_str="10.0.4.1",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.0.4.2",
+            end_str="10.0.4.54",
+            network=self.s,
+            ip_type='4',
+        )
 
-        start_str = "10.0.4.2"
-        end_str = "10.0.4.54"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test10_bad_create(self):
-        # Duplicate add
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-
-        start_str = "10.0.5.2"
-        end_str = "10.0.5.56"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-
-        self.do_add(**kwargs)
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test11_bad_create(self):
+    def test_bad_create9(self):
         # More overlap tests
-        start_str = "10.0.4.5"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        Range.objects.create(
+            start_str="10.0.4.5",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
+        Range.objects.create(
+            start_str="10.0.4.60",
+            end_str="10.0.4.63",
+            network=self.s,
+            ip_type='4',
+        )
 
-        start_str = "10.0.4.60"
-        end_str = "10.0.4.63"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        Range.objects.create(
+            start_str="10.0.4.1",
+            end_str="10.0.4.4",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
+        self.assertRaises(
+            ValidationError, Range.objects.create,
+            start_str="10.0.4.2",
+            end_str="10.0.4.54",
+            network=self.s,
+            ip_type='4',
+        )
 
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.4"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-
-        start_str = "10.0.4.2"
-        end_str = "10.0.4.54"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
-
-    def test12_bad_create(self):
+    def test_bad_create10(self):
         # Update range to something outside of the subnet.
-        start_str = "10.0.4.5"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        Range.objects.create(
+            start_str="10.0.4.5",
+            end_str="10.0.4.55",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
+        Range.objects.create(
+            start_str="10.0.4.60",
+            end_str="10.0.4.63",
+            network=self.s,
+            ip_type='4',
+        )
 
-        start_str = "10.0.4.60"
-        end_str = "10.0.4.63"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+        r = Range.objects.create(
+            start_str="10.0.4.1",
+            end_str="10.0.4.4",
+            network=self.s,
+            ip_type='4',
+        )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-
-        start_str = "10.0.4.1"
-        end_str = "10.0.4.4"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
-
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        r = self.do_add(**kwargs)
         r.end_str = "160.0.4.60"
-
         self.assertRaises(ValidationError, r.save)
 
-    def test13_bad_create(self):
-        start_str = "10.0.4.5"
-        end_str = "10.0.4.55"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+    def test_duplicate(self):
+        def x():
+            Range.objects.create(
+                start_str="10.0.4.5",
+                end_str="10.0.4.55",
+                network=self.s,
+                ip_type='4',
+            )
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        self.do_add(**kwargs)
-        self.assertRaises(ValidationError, self.do_add, **kwargs)
+        x()
+        self.assertRaises(ValidationError, x)
 
-    def test1_freeip(self):
-        start_str = "10.0.33.1"
-        end_str = "10.0.33.3"
-        default_domain = self.d
-        network = self.s
-        rtype = 's'
-        ip_type = '4'
+    def test_freeip(self):
         system = System(name='foobar')
         system.save()
 
-        kwargs = {'start_str': start_str, 'end_str': end_str,
-                  'default_domain': default_domain, 'network': network,
-                  'rtype': rtype, 'ip_type': ip_type}
-        r = self.do_add(**kwargs)
+        r = Range.objects.create(
+            start_str="10.0.33.1",
+            end_str="10.0.33.3",
+            network=self.s,
+            ip_type='4',
+        )
+
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
-        s = StaticInterface(label="foo1", domain=self.d, ip_type='4',
-                            ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.save()
+        s = StaticInterface.objects.create(
+            label="foo1", domain=self.d, ip_type='4',
+            ip_str=str(r.get_next_ip()), system=system,
+            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         self.assertEqual(str(r.get_next_ip()), "10.0.33.2")
-        s = StaticInterface(label="foo2", domain=self.d, ip_type='4',
-                            ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.save()
+        s = StaticInterface.objects.create(
+            label="foo2", domain=self.d, ip_type='4',
+            ip_str=str(r.get_next_ip()), system=system,
+            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         self.assertEqual(str(r.get_next_ip()), "10.0.33.3")
-        s = StaticInterface(label="foo3", domain=self.d, ip_type='4',
-                            ip_str=str(r.get_next_ip()), system=system,
-                            mac="00:00:00:00:00:01", ctnr=self.ctnr)
-        s.save()
+        s = StaticInterface.objects.create(
+            label="foo3", domain=self.d, ip_type='4',
+            ip_str=str(r.get_next_ip()), system=system,
+            mac="00:00:00:00:00:01", ctnr=self.ctnr)
         self.assertEqual(r.get_next_ip(), None)

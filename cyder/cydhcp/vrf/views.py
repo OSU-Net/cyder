@@ -18,16 +18,20 @@ def get_static_intr_q(vrf):
             q_list += [start_end_filter(two[0], two[1], range_.ip_type)[2]]
 
     q = reduce(lambda x, y: x | y, q_list, Q())
-    return q
+    return q or None
 
 def vrf_detail(request, pk):
     from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 
     vrf = get_object_or_404(Vrf, pk=pk)
 
+    static_intr_q = get_static_intr_q(vrf)
+    static_intrs = (
+        StaticInterface.objects.filter(static_intr_q) if static_intr_q else ())
+
     return cy_detail(request, Vrf, 'vrf/vrf_detail.html', {
-        'Dynamic Hosts': DynamicInterface.objects.filter(
+        'Dynamic Interfaces': DynamicInterface.objects.filter(
             range__network__vrf=vrf),
-        'Static Hosts': StaticInterface.objects.filter(get_static_intr_q(vrf)),
+        'Static Interfaces': static_intrs,
         'Attributes': 'vrfav_set',
     }, pk=pk, obj=vrf)

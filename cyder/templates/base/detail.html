@@ -10,8 +10,12 @@
 {% block action_bar %}
   {% if obj_type_perm %}
     {% if obj.get_update_url and obj_type != "ctnr" %}
-      <a class="btn btn-primary update" href="{{ obj.get_update_url() }}" data-pk="{{ obj.pk }}"
-        data-objType= {{ obj_type }} data-prettyObjType="{{ obj.pretty_type }}">Edit</a>
+      <a class="btn btn-primary js-get-form" href="{{ obj.get_update_url() }}"
+          data-kwargs='{"obj_type": "{{ obj_type }}", "pk": "{{ obj.pk }}",
+                        "pretty_obj_type": "{{ obj.pretty_type }}",
+                        "get_url": "{{ url('get-update-form') }}",
+                        "obj_name": "{{ obj.pretty_name }}"}'>
+      Edit</a>
     {% endif %}
     {% if obj.get_delete_url %}
       <a class="btn btn-danger" id="delete" href="{{ obj.get_delete_url() }}"
@@ -43,7 +47,7 @@
     {% if table.table or "Attributes" in table.name %}
       {% if "Attributes" in table.name %}
         {% if table.table %}
-          <h3 id="attr_title">{{ table.name }}</h3>
+          <h3 class="attrs_title">{{ table.name }}</h3>
           {% with page_obj = table.page_obj %}
             {% include "base/includes/pagination.html" %}
           {% endwith %}
