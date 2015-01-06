@@ -1,5 +1,5 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
-{% from "base/tables.html" import render_table %}
+{% from "base/tables.html" import render_table, render_object %}
 {% from "base/utility.html" import create_button %}
 
 {% block extra_action_bar %}
@@ -19,8 +19,8 @@
     <a href="{{ url('build-network', obj.network.pk) }}">DHCP Build Output</a>
   {% endif %}
 
-  {{ render_table(request, ranges_table) }}
-
+  {# {{ render_table(request, ranges_table) }} #}
+  {{ render_object(request, ranges_table) }}
   {% if allow_list %}
     <h3>Allowed</h3>
     <table class="table">
