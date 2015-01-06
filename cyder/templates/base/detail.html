@@ -42,7 +42,7 @@
 {% endblock %}
 
 {% block content %}
- {{ render_object(request, obj_table) }}
+  {{ render_object(request, obj_table) }}
   {% for table in tables %}
     {% if table.table or "Attributes" in table.name %}
       {% if "Attributes" in table.name %}

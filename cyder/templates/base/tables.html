@@ -51,73 +51,40 @@
 {% if object_table %}
   <table id="obj-info">
 
-    {% set i = 0 %}
     {% for row in object_table['data']%}
       {% for col in row %}
-        {% set header, sort_field = object_table['headers'][i] %}
-        
-        {% if header == "Info" %} {# don't render row for 'Info' because it's useless (links back to same page) #}
-          {% set i = i + 1 %}
-          {% continue %}
-        {% endif %}
-        
-        {% if header == "Actions" %} {# render all action buttons in the same table cell #}
-          <td class = "{{ header | lower }}_column"><b>{{ header }}</b></td>
-          <td>
-          {% for cell in col['value'] %}
-            {% if col['url'][loop.index0] %}
-              <a class="info" 
-              {% if col['data'] %}
-                {% if col['data'][loop.index0] %}
-                  {% for data in col['data'][loop.index0] %}
-                    data-{{ data[0] }}="{{ data[1] }}"
-                  {% endfor %}
-                {% endif %}
-              {% endif %}
-                href="{{ col['url'][loop.index0] }}">
-              {% if col['img'] and col['img'][loop.index0] %}
-                <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}"/>
-              {% else %}
-                {{ cell }} 
-              {% endif %}
-              </a>
-            {% endif %}
-          {% endfor %}
-          </td>
-
-          {% set i = i + 1 %}
-          {% continue %}
-        {% endif %}
+        {% set header, sort_field = object_table['headers'][loop.index0] %}
+         
         <tr>
-          {#{% if sort_field %}
-            <td class="{{ header | lower }}_column">{{ sort_link(request, header, sort_field)|safe }}</td>
-          {% else %}#}
-            <td class="{{ header | lower }}_column"><b>{{ header }}</b></td>
-          {#{% endif %}#}
-
-          {% for cell in col['value'] %}
-            {% if col['url'][loop.index0] %}
-              <td><a class="info" 
-              {% if col['data'] %}
-                {% if col['data'][loop.index0] %}
-                  {% for data in col['data'][loop.index0] %}
-                    data-{{ data[0] }}="{{ data[1] }}"
-                  {% endfor %}
+          <td class="{{ header | lower }}_column"><b>{{ header }}</b></td>
+          
+          {% if col['value'] %}
+            <td>
+            {% for cell in col['value'] %}
+              {% if col['url'][loop.index0] %}
+                <a class="info" 
+                {% if col['data'] %}
+                  {% if col['data'][loop.index0] %}
+                    {% for data in col['data'][loop.index0] %}
+                      data-{{ data[0] }}="{{ data[1] }}"
+                    {% endfor %}
+                  {% endif %}
                 {% endif %}
-              {% endif %}
-                href="{{ col['url'][loop.index0] }}">
-              {% if col['img'] and col['img'][loop.index0] %}
-                <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}"/>
+                  href="{{ col['url'][loop.index0] }}">
+                {% if col['img'] and col['img'][loop.index0] %}
+                  <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}"/>
+                {% else %}
+                  {{ cell }} 
+                {% endif %}
+                </a>
               {% else %}
-                {{ cell }} 
+                {{cell}}
               {% endif %}
-              </a></td>
-            {% else %}
-              <td>{{cell}}</td>
-            {% endif %}
-          {% endfor %}
+            {% endfor %}
+            </td>
+          {% endif %}
+        
         </tr>
-        {% set i = i + 1 %}
       {% endfor %}
     {% endfor %}
   </table>

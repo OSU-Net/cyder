@@ -319,10 +319,20 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
             'page_obj': page_obj,
             'table': table
         })
+
     if obj_type == 'user':
         table = tablefy((obj,), info=False, request=request, update=False)
     else:
         table = tablefy((obj,), info=False, request=request)
+    
+    #remove references to Info from the object table
+    for i, header in enumerate(table['headers']):
+      if header[0] == 'Info':
+        del table['headers'][i]
+
+    for i, obj in enumerate(table['data'][0]):
+      if 'class' in obj and obj['class'][0] == 'info':
+        del table['data'][0][i]
 
     return render(request, template, dict({
         'obj': obj,
