@@ -388,8 +388,7 @@ class Zone(object):
         for ip, hostname, ptr_type, zone, enabled, in cursor.fetchall():
             hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
-            if dname != name:
-                continue
+            temp_reverse_only = True if dname != name else False
 
             dup_stats = StaticInterface.objects.filter(ip_str=long2ip(ip))
             if dup_stats.exists():
@@ -406,7 +405,8 @@ class Zone(object):
             if ctnr is None:
                 continue
 
-            if ptr_type == 'forward' and not reverse_only:
+            if (ptr_type == 'forward' and not reverse_only
+                    and not temp_reverse_only):
                 if AddressRecord.objects.filter(
                         fqdn=hostname, ip_str=long2ip(ip)).exists():
                     continue
@@ -570,8 +570,10 @@ def gen_CNAME():
         if ctnr is None:
             continue
 
+        fqdn = "%s.%s" % (name, domain.name)
+        fqdn = fqdn.lower().strip('.')
         if ctnr not in domain.ctnr_set.all():
-            print "CNAME %s has mismatching container for its domain." % pk
+            print "CNAME %s has mismatching container for its domain." % fqdn
             continue
 
         cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
@@ -630,6 +632,7 @@ def gen_DNS(skip_edu=False):
 
     for dname in settings.NONAUTHORITATIVE_DOMAINS:
         Zone(domain_id=None, dname=dname)
+        print "WARNING: %s is a nonauthoritative domain." % dname
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
@@ -644,6 +647,7 @@ def gen_domains_only():
 
     for dname in settings.NONAUTHORITATIVE_DOMAINS:
         Zone(domain_id=None, dname=dname, gen_recs=False)
+        print "WARNING: %s is a nonauthoritative domain." % dname
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
