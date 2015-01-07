@@ -64,14 +64,25 @@ def range_detail(request, pk):
         dynamic_interfaces = DynamicInterface.objects.filter(range=mrange)
         dynamic_interfaces_page_obj = make_paginator(
             request, do_sort(request, dynamic_interfaces), 10)
+    
+    range_table = tablefy((mrange,), info=False, request=request)
 
+    for i, header in enumerate(range_table['headers']):
+      if header[0] == 'Info':
+        del range_table['headers'][i]
+
+    #remove references to Info from the object table
+    for i, obj in enumerate(range_table['data'][0]):
+      if 'class' in obj and obj['class'][0] == 'info':
+        del range_table['data'][0][i]
+    
     if ip_usage_percent:
         ip_usage_percent = "{0}%".format(ip_usage_percent)
     return render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
         'pretty_obj_type': mrange.pretty_type,
-        'ranges_table': tablefy((mrange,), info=False, request=request),
+        'ranges_table': range_table, 
         'range_data': make_paginator(request, range_data, 50),
         'range_type': range_type,
         'attrs_table': tablefy(mrange.rangeav_set.all(),
