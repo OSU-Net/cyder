@@ -110,40 +110,47 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
                            'end_lower')
 
     @property
-    def range_str(self):
-        return u'{0}–{1}'.format(self.start_str, self.end_str)
+    def range_usage_str(self):
+        if self.range_usage >= 100:
+            return u'full'
+        else:
+            return u'{}%'.format(unicode(self.range_usage))
 
-    @property
-    def range_str_padded(self):
-        s = u'{0:*>15} – {1:*<15}'.format(self.start_str, self.end_str)
-        s = s.replace(u'*', u'\u00a0')
+    def get_ip_str(self, ascii=False, padded=True):
+        if padded:
+            if ascii:
+                return '{: >15} - {: <15}'.format(
+                    self.start_str, self.end_str)
+            else:
+                return u'{:\u00a0>15} – {:\u00a0<15}'.format(
+                    self.start_str, self.end_str)
+        else:
+            if ascii:
+                return '{} - {}'.format(self.start_str, self.end_str)
+            else:
+                return u'{}–{}'.format(self.start_str, self.end_str)
+
+    def get_str(self, ascii=False, padded=True):
+        if ascii:
+            s = self.get_ip_str(ascii=True, padded=padded)
+            if self.name:
+                s += ' ({})'.format(self.name)
+            if self.range_usage is not None:
+                s += ' ({})'.format(self.range_usage_str)
+        else:
+            s = self.get_ip_str(ascii=False, padded=padded)
+            if self.name:
+                s += u' ({})'.format(self.name)
+            if self.range_usage is not None:
+                s += u' ({})'.format(self.range_usage_str)
+
         return s
 
-    def get_self_str(self, padded=False, add_usage=True, add_name=True):
-        if padded:
-            range_str = self.range_str_padded
-        else:
-            range_str = self.range_str
-
-        if add_name and self.name:
-            name = u' ({0})'.format(self.name)
-        else:
-            name = u''
-
-        if add_usage and self.range_usage is not None:
-            if self.range_usage >= 100:
-                usage = u'full'
-            else:
-                usage = u'{0}%'.format(str(self.range_usage))
-
-            usage = u' ({0})'.format(usage)
-        else:
-            usage = u''
-
-        return u''.join((range_str, name, usage))
-
     def __unicode__(self):
-        return self.get_self_str(padded=True)
+        return self.get_str()
+
+    def __str__(self):
+        return self.get_str(ascii=True, padded=False)
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -171,7 +178,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         data = super(Range, self).details()
         data['data'] = [
             ('Name', 'name', self.name),
-            ('Range', 'start_str', self.get_self_str(add_name=False)),
+            ('Range', 'start_str', self.get_ip_str()),
             ('Domain', 'domain', self.domain),
             ('Type', 'range_type',
              'static' if self.range_type == 'st' else 'dynamic'),
@@ -272,8 +279,9 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         elif self.allow == ALLOW_KNOWN:
             # FIXME: add hyphen once compatibility with Maintain is established
             allow = ['allow known clients']
-            allow += ['allow members of "{0}:{1}:{2}"'.format(
-                ctnr.name, self.start_str, self.end_str)
+            allow += [
+                'allow members of "{0}:{1}:{2}"'.format(
+                    ctnr.name, self.start_str, self.end_str)
                 for ctnr in self.ctnr_set.all()]
         else:
             allow = []
@@ -283,8 +291,9 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
                 allow += ['allow members of "{0}"'.format(
                     self.network.vrf.name)]
             if self.allow == ALLOW_LEGACY:
-                allow += ['allow members of "{0}:{1}:{2}"'.format(
-                    ctnr.name, self.start_str, self.end_str)
+                allow += [
+                    'allow members of "{0}:{1}:{2}"'.format(
+                        ctnr.name, self.start_str, self.end_str)
                     for ctnr in self.ctnr_set.all()]
             if not allow:
                 allow += ['deny unknown-clients']
@@ -308,9 +317,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             # start > end
             if self._end < oldrange._start:
                 continue
-            raise ValidationError(u"Old range {0} would overlap with new "
-                                  "range {1}".format(oldrange.range_str,
-                                                     self.range_str))
+            raise ValidationError(
+                u"Old range {0} would overlap with new range {1}".format(
+                    oldrange.get_ip_str(padded=False),
+                    self.get_ip_str(padded=False)))
 
     def build_range(self):
         range_options = self.rangeav_set.filter(
