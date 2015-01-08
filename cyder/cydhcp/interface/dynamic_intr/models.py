@@ -7,10 +7,10 @@ from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.fields import MacAddrField
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel, ExpirableMixin
 from cyder.base.utils import transaction_atomic
-from cyder.core.fields import MacAddrField
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
