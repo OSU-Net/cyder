@@ -122,8 +122,10 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
                 return '{: >15} - {: <15}'.format(
                     self.start_str, self.end_str)
             else:
-                return u'{:\u00a0>15} – {:\u00a0<15}'.format(
-                    self.start_str, self.end_str)
+                # For some reason, Python can't handle
+                # u'{:\xa0>15}'.format(x) if x is a str object.
+                return u'{:\xa0>15} – {:\xa0<15}'.format(
+                    unicode(self.start_str), unicode(self.end_str))
         else:
             if ascii:
                 return '{} - {}'.format(self.start_str, self.end_str)
