@@ -630,10 +630,6 @@ def gen_reverse_soa():
 def gen_DNS(skip_edu=False):
     gen_reverses()
 
-    for dname in settings.NONAUTHORITATIVE_DOMAINS:
-        Zone(domain_id=None, dname=dname)
-        print "WARNING: %s is a nonauthoritative domain." % dname
-
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
         if "edu" in dname and skip_edu:
@@ -644,10 +640,6 @@ def gen_DNS(skip_edu=False):
 
 def gen_domains_only():
     gen_reverses()
-
-    for dname in settings.NONAUTHORITATIVE_DOMAINS:
-        Zone(domain_id=None, dname=dname, gen_recs=False)
-        print "WARNING: %s is a nonauthoritative domain." % dname
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():

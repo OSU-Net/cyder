@@ -477,10 +477,6 @@ REVERSE_SOAS = [
     '69.193.128', '70.193.128', '71.193.128',
 ]
 
-NONAUTHORITATIVE_DOMAINS = [
-    'nero.net', 'peak.org', 'orvsd.org', 'pdx.orvsd.org',
-]
-
 # This list contains tuples that have a zone's name as their 0th element and a
 # view's name as the 1st element. For example:
 #
