@@ -16,12 +16,12 @@ class Command(BaseCommand):
                     default=False,
                     help='Check files into vcs and push upstream.'),
         ### logging/debug options ###
-        make_option('-l', '--log-syslog',
-                    dest='log_syslog',
+        make_option('-l', '--syslog',
+                    dest='to_syslog',
                     action='store_true',
                     help='Log to syslog.'),
-        make_option('-L', '--no-log-syslog',
-                    dest='log_syslog',
+        make_option('-L', '--no-syslog',
+                    dest='to_syslog',
                     action='store_false',
                     help="Don't log to syslog."),
         ### miscellaneous ###
@@ -40,11 +40,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         builder_opts = {}
 
-        if options['log_syslog']:
+        if options['to_syslog']:
             syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
-            options['logger'] = syslog.syslog
-        else:
-            options['logger'] = lambda log_level, msg: None
 
         verbosity = int(options['verbosity'])
         if verbosity:

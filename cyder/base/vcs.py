@@ -44,12 +44,13 @@ class VCSRepo(object):
 
     def __init__(self, repo_dir, line_change_limit=None,
                  line_removal_limit=None, log_debug=lambda msg: msg,
-                 error=lambda msg: msg):
+                 log_info=lambda msg: msg, error=lambda msg: msg):
         set_attrs(self, {
             'repo_dir': repo_dir,
             'line_change_limit': line_change_limit,
             'line_removal_limit': line_removal_limit,
             'log_debug': log_debug,
+            'log_info': log_info,
             'error': error,
         })
 
@@ -107,8 +108,7 @@ class GitRepo(VCSRepo):
             self._add_all()
 
         if not self._is_index_dirty() and not empty:
-            self.log_debug('There were no changes. Nothing to commit.',
-                      log_level='LOG_INFO')
+            self.log_info('There were no changes. Nothing to commit.')
             return
 
         if sanity_check:

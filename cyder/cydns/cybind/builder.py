@@ -30,20 +30,21 @@ class DNSBuilder(MutexMixin):
         kwargs = dict_merge(BINDBUILD, {
             'quiet': False,
             'verbose': False,
-            'logger': lambda log_level, msg: None,
+            'to_syslog': False,
         }, kwargs)
         set_attrs(self, kwargs)
 
         self.repo = GitRepo(
             self.prod_dir, self.line_change_limit,
             self.line_removal_limit, log_debug=self.log_debug,
-            error=self.error)
+            log_info=self.log_info, error=self.error)
 
     def log(self, log_level, msg, root_domain=None):
         if root_domain:
             msg = '< {} > {}'.format(root_domain.name, msg)
-        for line in msg.splitlines():
-            self.logger(log_level, line)
+        if self.to_syslog:
+            for line in msg.splitlines():
+                syslog.syslog(log_level, line)
         return msg
 
     def log_debug(self, msg, root_domain=None):
