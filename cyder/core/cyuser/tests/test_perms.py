@@ -165,7 +165,7 @@ class PermissionsTest(TestCase):
         self.setup_request()
 
         perm_table = {
-            'cyder_admin': [ACTION_VIEW, ACTION_UPDATE],
+            'cyder_admin': ['all'],
             'admin': [ACTION_VIEW],
             'user': [ACTION_VIEW],
             'guest': [ACTION_VIEW],

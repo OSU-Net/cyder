@@ -200,7 +200,7 @@ def has_soa_perm(user_level, obj, ctnr, action):
     SOAs are global, related to domains and reverse domains.
     """
     return {
-        'cyder_admin': True,  # ?
+        'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
         'user': action == ACTION_VIEW,
         'guest': action == ACTION_VIEW,
@@ -214,7 +214,7 @@ def has_domain_perm(user_level, obj, ctnr, action):
         return False
 
     return {
-        'cyder_admin': action in (ACTION_VIEW, ACTION_UPDATE),  # ?
+        'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
         'user': action == ACTION_VIEW,
         'guest': action == ACTION_VIEW,
@@ -271,7 +271,7 @@ def has_subnet_perm(user_level, obj, ctnr, action):
         return False
 
     return {
-        'cyder_admin': True,  # ?
+        'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
         'user': action == ACTION_VIEW,
         'guest': action == ACTION_VIEW,
@@ -283,7 +283,7 @@ def has_range_perm(user_level, obj, ctnr, action):
     if obj and not obj in ctnr.ranges.all():
         return False
     return {
-        'cyder_admin': True,  # ?
+        'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
         'user': action == ACTION_VIEW,
         'guest': action == ACTION_VIEW,
@@ -291,15 +291,15 @@ def has_range_perm(user_level, obj, ctnr, action):
 
 
 def has_workgroup_perm(user_level, obj, ctnr, action):
-    """Permissions for groups. Groups are assigned a subnet."""
+    """Permissions for groups."""
     # if obj and not obj.network in [ip_range.network for ip_range in
     #                                ctnr.ranges.all()]:
     #    return False
 
     return {
-        'cyder_admin': True,  # ?
-        'ctnr_admin': action == ACTION_VIEW,  # ?
-        'user': action == ACTION_VIEW,  # ?
+        'cyder_admin': True,
+        'ctnr_admin': action == ACTION_VIEW,
+        'user': action == ACTION_VIEW,
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
@@ -307,9 +307,9 @@ def has_workgroup_perm(user_level, obj, ctnr, action):
 def has_workgroupav_perm(user_level, obj, ctnr, action):
     """Permissions for group options."""
     return {
-        'cyder_admin': True,  # ?
-        'ctnr_admin': True,  # ?
-        'user': action == ACTION_VIEW,  # ?
+        'cyder_admin': True,
+        'ctnr_admin': True,
+        'user': action == ACTION_VIEW,
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
@@ -378,9 +378,9 @@ def has_network_perm(user_level, obj, ctnr, action):
 def has_static_registration_perm(user_level, obj, ctnr, action):
     """Permissions for static registrations."""
     return {
-        'cyder_admin': True,  # ?
-        'ctnr_admin': True,  # ?
-        'user': True,  # ?
+        'cyder_admin': True,
+        'ctnr_admin': True,
+        'user': True,
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
@@ -388,9 +388,9 @@ def has_static_registration_perm(user_level, obj, ctnr, action):
 def has_dynamic_registration_perm(user_level, obj, ctnr, action):
     """Permissions for static registrations."""
     return {
-        'cyder_admin': True,  # ?
-        'ctnr_admin': True,  # ?
-        'user': True,  # ?
+        'cyder_admin': True,
+        'ctnr_admin': True,
+        'user': True,
         'guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
