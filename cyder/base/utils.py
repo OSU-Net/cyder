@@ -36,39 +36,24 @@ def shell_out(command, use_shlex=True):
     return out, err, p.returncode
 
 
-def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
-        logger=syslog):
-    msg = unicode(msg)
-    if to_syslog:
-        ll = getattr(logger, log_level)
-        for line in msg.splitlines():
-            logger.syslog(ll, line)
-    if to_stderr:
-        stderr.write(msg + '\n')
+def _error(msg):
+    raise Exception(msg)
 
 
-def run_command(command, command_logger=None, failure_logger=None,
-                failure_msg=None, ignore_failure=False):
-    if command_logger:
-        command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
-
+def run_command(command, log_debug=lambda msg: msg, error=_error,
+                ignore_failure=False, failure_msg=None):
+    log_debug('Calling `{0}` in {1}'.format(command, os.getcwd()))
     out, err, returncode = shell_out(command)
-
     if returncode != 0 and not ignore_failure:
-        msg = ('`{0}` failed in {1}\n\n'
-               'command: {2}\n\n'
-               .format(command, os.getcwd(), failure_msg, command))
+        msg = '{}: '.format(failure_msg) if failure_msg else ''
+        msg += '`{}` failed in {}\n\n'.format(
+            failure_msg, command, os.getcwd())
         if out:
             msg += '=== stdout ===\n{0}\n'.format(out)
         if err:
             msg += '=== stderr ===\n{0}\n'.format(err)
         msg = msg.rstrip('\n') + '\n'
-
-        if failure_logger:
-            failure_logger(msg)
-
-        raise Exception(msg)
-
+        error(msg)
     return out, err, returncode
 
 

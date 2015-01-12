@@ -5,12 +5,13 @@ import os
 import sys
 import syslog
 import time
+from contextlib import contextmanager
 from traceback import format_exception
 
 from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (copy_tree, dict_merge, log, remove_dir_contents,
+from cyder.base.utils import (copy_tree, dict_merge, remove_dir_contents,
                               run_command, set_attrs)
 from cyder.base.vcs import GitRepo
 
@@ -24,83 +25,65 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-def format_log_message(msg, root_domain=None):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-
-        frame_number = 2
-        while calframe[frame_number][3] == 'run_command':
-            frame_number += 1
-        callername = "[{0}]".format(calframe[frame_number][3])
-
-        if root_domain:
-            return "{0:24} < {1} > {2}".format(callername,
-                                               root_domain.name, msg)
-        else:
-            return "{0:24} {1}".format(callername, msg)
-
-
 class DNSBuilder(MutexMixin):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
-            'verbose': True,
-            'debug': False,
-            'bs': DNSBuildRun(),  # Build statistic
+            'quiet': False,
+            'verbose': False,
+            'logger': lambda log_level, msg: None,
         }, kwargs)
         set_attrs(self, kwargs)
 
-        if self.log_syslog:
-            syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
-
         self.repo = GitRepo(
             self.prod_dir, self.line_change_limit,
-            self.line_removal_limit, debug=self.debug,
-            log_syslog=self.log_syslog, logger=syslog)
+            self.line_removal_limit, log_debug=self.log_debug,
+            error=self.error)
 
-    def log_debug(self, msg, root_domain=None, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.debug
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
-            logger=syslog)
+    def log(self, log_level, msg, root_domain=None):
+        if root_domain:
+            msg = '< {} > {}'.format(root_domain.name, msg)
+        for line in msg.splitlines():
+            self.logger(log_level, line)
+        return msg
 
-    def log_info(self, msg, root_domain=None, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.verbose
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
+    def log_debug(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_DEBUG, msg, root_domain)
+        if self.verbose:
+            print msg
 
-    def log_notice(self, msg, root_domain=None, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.verbose
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
+    def log_info(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_INFO, msg, root_domain)
+        if not self.quiet:
+            print msg
 
-    def log_err(self, msg, root_domain=None, to_stderr=True):
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_ERR', to_stderr=to_stderr, logger=syslog)
+    def log_notice(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_NOTICE, msg, root_domain)
+        if not self.quiet:
+            print msg
+
+    def error(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_ERR, msg, root_domain)
+        raise Exception(msg)
+
+    @contextmanager
+    def handle_errors(self):
+        try:
+            yield
+        except Exception as e:
+            self.log(syslog.LOG_ERR,
+                'DNS build failed.\nOriginal exception: ' + e.message)
+            raise
 
     def run_command(self, command, log=True, failure_msg=None):
-        if log:
-            command_logger = self.log_debug
-            failure_logger = self.log_err
-        else:
-            command_logger = None
-            failure_logger = None
-
-        return run_command(command, command_logger=command_logger,
-                           failure_logger=failure_logger,
+        return run_command(command, log_debug=self.log_debug, error=self.error,
                            failure_msg=failure_msg)
-
-    def format_title(self, title):
-        return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
 
     def get_scheduled(self):
         """
         Find all dns tasks that indicate we need to rebuild a certain zone.
         Evalutate the queryset so nothing slips in (our DB isolation *should*
         cover this). This will ensure that if a record is changed during the
-        build it's build request will not be deleted and will be serviced
+        build its build request will not be deleted and will be serviced
         during the next build.
 
         If the build is successful we will delete all the scheduled tasks
@@ -216,17 +199,17 @@ class DNSBuilder(MutexMixin):
         return "{0}.{1}".format(root_domain.name, view.name)
 
     def render_zone_stmt(self, soa, zone_name, file_meta):
-        zone_stmt = "zone \"{0}\" IN {{{{\n".format(zone_name)
-        zone_stmt += "\ttype {ztype};\n"  # We'll format this later
+        zone_stmt = 'zone "{0}" IN {{{{\n'.format(zone_name)
+        zone_stmt += '\ttype {ztype};\n'  # We'll format this later
         if soa.is_signed:
-            zone_stmt += "\tfile \"{0}.signed\";\n".format(
+            zone_stmt += '\tfile "{0}.signed";\n'.format(
                 file_meta['bind_fname']
             )
         else:
-            zone_stmt += "\tfile \"{0}\";\n".format(
+            zone_stmt += '\tfile "{0}";\n'.format(
                 file_meta['bind_fname']
             )
-        zone_stmt += "}};\n"
+        zone_stmt += '}};\n'
         return zone_stmt
 
     def verify_previous_build(self, file_meta, view, root_domain, soa):
@@ -296,7 +279,7 @@ class DNSBuilder(MutexMixin):
             # If anything happens during this soa's build we need to mark
             # it as dirty so it can be rebuild
             try:
-                root_domain = soa.root_domain  # This is an expensive lookup
+                root_domain = soa.root_domain
 
                 if not root_domain:
                     continue
@@ -330,7 +313,7 @@ class DNSBuilder(MutexMixin):
                     root_domain=root_domain
                 )
 
-                # This for loop decides which views will be canidates for
+                # This for loop decides which views will be candidates for
                 # rebuilding.
                 for view in View.objects.all():
                     self.log_debug("++++++ Looking at < {0} > view ++++++"
@@ -467,14 +450,12 @@ class DNSBuilder(MutexMixin):
 
             raise Exception(msg)
         except IOError as e:
-            if e.errno == 2:  # IOError: [Errno 2] No such file or directory
-                pass
-            else:
+            if e.errno != 2:  # IOError: [Errno 2] No such file or directory
                 raise
 
         self.log_info('Building...')
 
-        try:
+        with self.handle_errors():
             remove_dir_contents(self.stage_dir)
             self.dns_tasks = self.get_scheduled()
 
@@ -488,16 +469,6 @@ class DNSBuilder(MutexMixin):
                                     force=force))
 
             self.log_info('DNS build successful')
-        except:
-            self.error()
-
-    def error(self):
-        ei = sys.exc_info()
-        exc_msg = ''.join(format_exception(*ei)).rstrip('\n')
-
-        self.log_err('DNS build failed.\nOriginal exception: ' + exc_msg,
-                     to_stderr=False)
-        raise
 
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
@@ -512,13 +483,12 @@ class DNSBuilder(MutexMixin):
         map(lambda t: t.delete(), self.dns_tasks)
 
     def _lock_failure(self, pid):
-        self.log_err(
-            'Failed to acquire lock on {0}. Process {1} currently '
-            'has it.'.format(self.lock_file, pid),
-            to_stderr=False)
         fail_mail(
             'An attempt was made to start the DNS build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
             subject="Concurrent DNS builds attempted.")
-        super(DNSBuilder, self)._lock_failure(pid)
+        self.error(
+            'Failed to acquire lock on {0}. Process {1} currently '
+            'has it.'.format(self.lock_file, pid),
+            to_stderr=False)
