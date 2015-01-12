@@ -6,27 +6,23 @@ from django.core.exceptions import ValidationError
 import datetime
 import re
 
-from cyder.core.fields import MacAddrField
-
-from cyder.core.system.models import System
-
 from cyder.base.constants import IP_TYPE_6
 from cyder.base.eav.constants import (ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT,
                                       ATTRIBUTE_INVENTORY)
 from cyder.base.eav.fields import EAVAttributeField
 from cyder.base.eav.models import Attribute, EAVBase
+from cyder.base.fields import MacAddrField
 from cyder.base.models import ExpirableMixin
 from cyder.base.utils import transaction_atomic
-
+from cyder.core.system.models import System
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
-
-from cyder.cydns.ptr.models import BasePTR, PTR
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
-from cyder.cydns.ip.utils import ip_to_reverse_name
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.ip.utils import ip_to_reverse_name
+from cyder.cydns.ptr.models import BasePTR, PTR
 
 
 class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
