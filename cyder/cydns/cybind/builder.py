@@ -5,7 +5,6 @@ import os
 import sys
 import syslog
 import time
-from contextlib import contextmanager
 from traceback import format_exception
 
 from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
@@ -35,9 +34,8 @@ class DNSBuilder(MutexMixin):
         set_attrs(self, kwargs)
 
         self.repo = GitRepo(
-            self.prod_dir, self.line_change_limit,
-            self.line_removal_limit, log_debug=self.log_debug,
-            log_info=self.log_info, error=self.error)
+            self.prod_dir, self.line_change_limit, self.line_removal_limit,
+            log_debug=self.log_debug, log_info=self.log_info, error=self.error)
 
     def log(self, log_level, msg, root_domain=None):
         if root_domain:
@@ -66,22 +64,13 @@ class DNSBuilder(MutexMixin):
         msg = self.log(syslog.LOG_ERR, msg, root_domain)
         raise Exception(msg)
 
-    @contextmanager
-    def handle_errors(self):
-        try:
-            yield
-        except Exception as e:
-            self.log(syslog.LOG_ERR,
-                'DNS build failed.\nOriginal exception: ' + e.message)
-            raise
-
-    def run_command(self, command, log=True, failure_msg=None):
+    def run_command(self, command, failure_msg=None):
         return run_command(command, log_debug=self.log_debug, error=self.error,
                            failure_msg=failure_msg)
 
     def get_scheduled(self):
         """
-        Find all dns tasks that indicate we need to rebuild a certain zone.
+        Find all DNS tasks that indicate we need to rebuild a certain zone.
         Evalutate the queryset so nothing slips in (our DB isolation *should*
         cover this). This will ensure that if a record is changed during the
         build its build request will not be deleted and will be serviced
@@ -159,7 +148,6 @@ class DNSBuilder(MutexMixin):
         self.run_command(
             ' '.join((self.named_checkzone, self.named_checkzone_opts,
                       root_domain.name, zone_file)),
-            log=True,
             failure_msg='named-checkzone failed on zone {0}'
                         .format(root_domain.name)
         )
@@ -443,7 +431,7 @@ class DNSBuilder(MutexMixin):
             msg = ("The stop file ({0}) exists. Build canceled.\n"
                    "Reason for skipped build:\n"
                    "{1}".format(self.stop_file, contents))
-            self.log_notice(msg, to_stderr=False)
+            self.log_notice(msg)
             if (self.stop_file_email_interval is not None and
                     now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
@@ -456,7 +444,7 @@ class DNSBuilder(MutexMixin):
 
         self.log_info('Building...')
 
-        with self.handle_errors():
+        try:
             remove_dir_contents(self.stage_dir)
             self.dns_tasks = self.get_scheduled()
 
@@ -470,6 +458,10 @@ class DNSBuilder(MutexMixin):
                                     force=force))
 
             self.log_info('DNS build successful')
+        except Exception as e:
+            self.log(syslog.LOG_ERR,
+                'DNS build failed.\nOriginal exception: ' + e.message)
+            raise
 
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
@@ -491,5 +483,4 @@ class DNSBuilder(MutexMixin):
             subject="Concurrent DNS builds attempted.")
         self.error(
             'Failed to acquire lock on {0}. Process {1} currently '
-            'has it.'.format(self.lock_file, pid),
-            to_stderr=False)
+            'has it.'.format(self.lock_file, pid))

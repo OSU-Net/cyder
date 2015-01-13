@@ -42,14 +42,11 @@ class Command(BaseCommand):
 
         if options['to_syslog']:
             syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
+            builder_opts['to_syslog'] = True
 
         verbosity = int(options['verbosity'])
-        if verbosity is None:
-            builder_opts['quiet'] = False
-            builder_opts['verbose'] = False
-        else:
-            builder_opts['quiet'] = verbosity == 0
-            builder_opts['verbose'] = verbosity >= 2
+        builder_opts['quiet'] = verbosity == 0
+        builder_opts['verbose'] = verbosity >= 2
 
         with DNSBuilder(**builder_opts) as b:
             b.build(force=options['force_build'])
