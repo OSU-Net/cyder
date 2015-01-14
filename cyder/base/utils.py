@@ -36,13 +36,23 @@ def shell_out(command, use_shlex=True):
     return out, err, p.returncode
 
 
-def _error(msg):
-    raise Exception(msg)
+class Logger(object):
+    def log_debug(self, msg):
+        pass
+
+    def log_info(self, msg):
+        pass
+
+    def log_notice(self, msg):
+        pass
+
+    def error(self, msg):
+        raise Exception(msg)
 
 
-def run_command(command, log_debug=lambda msg: msg, error=_error,
-                ignore_failure=False, failure_msg=None):
-    log_debug('Calling `{0}` in {1}'.format(command, os.getcwd()))
+def run_command(command, logger=Logger(), ignore_failure=False,
+                failure_msg=None):
+    logger.log_debug('Calling `{0}` in {1}'.format(command, os.getcwd()))
     out, err, returncode = shell_out(command)
     if returncode != 0 and not ignore_failure:
         msg = '{}: '.format(failure_msg) if failure_msg else ''

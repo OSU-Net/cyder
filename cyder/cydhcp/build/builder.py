@@ -10,7 +10,7 @@ from traceback import format_exception
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
-    copy_tree, dict_merge, run_command, set_attrs, shell_out)
+    copy_tree, dict_merge, Logger, run_command, set_attrs, shell_out)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.utils import fail_mail
@@ -22,7 +22,7 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.settings import DHCPBUILD
 
 
-class DHCPBuilder(MutexMixin):
+class DHCPBuilder(MutexMixin, Logger):
     def __init__(self, *args, **kwargs):
         kwargs = dict_merge(DHCPBUILD, {
             'quiet': False,
@@ -33,7 +33,7 @@ class DHCPBuilder(MutexMixin):
 
         self.repo = GitRepo(
             self.prod_dir, self.line_change_limit, self.line_removal_limit,
-            log_debug=self.log_debug, log_info=self.log_info, error=self.error)
+            logger=self)
 
     def log(self, log_level, msg):
         if self.to_syslog:

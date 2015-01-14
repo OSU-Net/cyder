@@ -10,8 +10,8 @@ from traceback import format_exception
 from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (copy_tree, dict_merge, remove_dir_contents,
-                              run_command, set_attrs)
+from cyder.base.utils import (
+    copy_tree, dict_merge, Logger, remove_dir_contents, run_command, set_attrs)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
@@ -24,7 +24,7 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-class DNSBuilder(MutexMixin):
+class DNSBuilder(MutexMixin, Logger):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
             'quiet': False,
@@ -35,7 +35,7 @@ class DNSBuilder(MutexMixin):
 
         self.repo = GitRepo(
             self.prod_dir, self.line_change_limit, self.line_removal_limit,
-            log_debug=self.log_debug, log_info=self.log_info, error=self.error)
+            logger=self)
 
     def log(self, log_level, msg, root_domain=None):
         if root_domain:
@@ -65,8 +65,7 @@ class DNSBuilder(MutexMixin):
         raise Exception(msg)
 
     def run_command(self, command, failure_msg=None):
-        return run_command(command, log_debug=self.log_debug, error=self.error,
-                           failure_msg=failure_msg)
+        return run_command(command, logger=self, failure_msg=failure_msg)
 
     def get_scheduled(self):
         """

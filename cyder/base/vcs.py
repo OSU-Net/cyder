@@ -2,11 +2,7 @@ import os
 import re
 from os.path import dirname, basename
 
-from cyder.base.utils import set_attrs, dict_merge, run_command
-
-
-def _error(msg):
-    raise Exception(msg)
+from cyder.base.utils import dict_merge, Logger, run_command
 
 
 class SanityCheckFailure(Exception):
@@ -39,20 +35,15 @@ def repo_chdir_wrapper(func):
 
 class VCSRepo(object):
     def _run_command(self, command, ignore_failure=False):
-        return run_command(command, log_debug=self.log_debug, error=self.error,
+        return run_command(command, logger=self.logger,
                            ignore_failure=ignore_failure)
 
     def __init__(self, repo_dir, line_change_limit=None,
-                 line_removal_limit=None, log_debug=lambda msg: msg,
-                 log_info=lambda msg: msg, error=lambda msg: msg):
-        set_attrs(self, {
-            'repo_dir': repo_dir,
-            'line_change_limit': line_change_limit,
-            'line_removal_limit': line_removal_limit,
-            'log_debug': log_debug,
-            'log_info': log_info,
-            'error': error,
-        })
+                 line_removal_limit=None, logger=Logger()):
+        self.repo_dir = repo_dir
+        self.line_change_limit = line_change_limit
+        self.line_removal_limit = line_removal_limit
+        self.logger = logger
 
     @repo_chdir_wrapper
     def reset_to_head(self):
@@ -108,13 +99,13 @@ class GitRepo(VCSRepo):
             self._add_all()
 
         if not self._is_index_dirty() and not empty:
-            self.log_info('There were no changes. Nothing to commit.')
+            self.logger.log_notice('There were no changes. Nothing to commit.')
             return
 
         if sanity_check:
             self._sanity_check()
         else:
-            self.log_debug(
+            self.logger.log_debug(
                 'Skipping sanity check because sanity_check=False was passed.')
 
         self._commit(message, allow_empty=empty)
@@ -159,12 +150,11 @@ class GitRepo(VCSRepo):
 
 
 class VCSRepoManager(object):
-    def __init__(self, log_debug=lambda msg: msg, error=_error):
-        self.log_debug = log_debug
-        self.error = error
+    def __init__(self, logger=Logger()):
+        self.logger = logger
 
     def _run_command(self, command, ignore_failure=False):
-        return run_command(command, log_debug=self.log_debug, error=self.error,
+        return run_command(command, logger=Logger(),
                            ignore_failure=ignore_failure)
 
     def open(self, *args, **kwargs):
