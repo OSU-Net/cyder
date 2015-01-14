@@ -37,6 +37,11 @@ def shell_out(command, use_shlex=True):
 
 
 class Logger(object):
+    """
+    A Logger logs messages passed to it. Possible destinations include stderr
+    and the system journal (syslog).
+    """
+
     def log_debug(self, msg):
         pass
 
