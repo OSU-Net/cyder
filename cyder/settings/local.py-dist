@@ -40,7 +40,7 @@ DATABASES = {  # databases used through Django
         'OPTIONS': {
             'init_command': 'SET storage_engine=InnoDB',
             'charset': 'utf8',
-            'use_unicode' : True,
+            'use_unicode': True,
             'sql_mode': 'TRADITIONAL',
         },
         'TEST_CHARSET': 'utf8',
@@ -57,7 +57,7 @@ OTHER_DATABASES = {  # databases used through cyder.base.utils.get_cursor
         'passwd': '',
         'init_command': 'SET storage_engine=InnoDB',
         'charset': 'utf8',
-        'use_unicode' : True,
+        'use_unicode': True,
         'sql_mode': 'TRADITIONAL',
     },
     'maintain_sb': {
@@ -68,7 +68,7 @@ OTHER_DATABASES = {  # databases used through cyder.base.utils.get_cursor
         'passwd': '',
         'init_command': 'SET storage_engine=InnoDB',
         'charset': 'utf8',
-        'use_unicode' : True,
+        'use_unicode': True,
         'sql_mode': 'TRADITIONAL',
     },
 }
@@ -152,7 +152,7 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
     'HIDE_DJANGO_SQL': False,
     'TAG': 'div',
-    'ENABLE_STACKTRACES' : True,
+    'ENABLE_STACKTRACES': True,
 }
 
 CAS_IGNORE_URL_PATTERNS = (
