@@ -41,7 +41,7 @@ class Command(BaseCommand):
         builder_opts = {}
 
         if options['to_syslog']:
-            syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
+            syslog.openlog('bindbuild', facility=syslog.LOG_LOCAL6)
             builder_opts['to_syslog'] = True
 
         verbosity = int(options['verbosity'])

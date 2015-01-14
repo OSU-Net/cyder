@@ -77,7 +77,7 @@ class DNSBuilder(MutexMixin):
         during the next build.
 
         If the build is successful we will delete all the scheduled tasks
-        return by this function
+        returned by this function.
 
         note::
             When we are not checking files into Git we do not need to delete

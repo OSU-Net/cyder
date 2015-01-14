@@ -35,7 +35,7 @@ class Command(BaseCommand):
         builder_opts = {}
 
         if options['to_syslog']:
-            syslog.openlog(b'dhcp_build', 0, syslog.LOG_LOCAL6)
+            syslog.openlog('dhcp_build', facility=syslog.LOG_LOCAL6)
             builder_opts['to_syslog'] = True
 
         verbosity = int(options['verbosity'])
