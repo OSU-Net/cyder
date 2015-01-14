@@ -25,7 +25,6 @@ DHCPBUILD = {
     'line_removal_limit': None,
     'stop_file': '/tmp/cyder_dhcp_test.stop',
     'stop_file_email_interval': None,  # never
-    'log_syslog': False,
 }
 
 PROD_ORIGIN_DIR = '/tmp/cyder_dhcp_test/prod_origin'
@@ -46,7 +45,7 @@ class DHCPBuildTest(TestCase):
             os.makedirs(PROD_ORIGIN_DIR)
         remove_dir_contents(PROD_ORIGIN_DIR)
 
-        mgr = GitRepoManager(debug=False, log_syslog=False, config={
+        mgr = GitRepoManager(config={
             'user.name': 'test',
             'user.email': 'test',
         })
