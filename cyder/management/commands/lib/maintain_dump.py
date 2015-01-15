@@ -22,13 +22,13 @@ def main():
     except MySQLdb.OperationalError:
         pass
     msb.execute('CREATE DATABASE `{}`'.format(msb_conf['db']))
-    msb.execute('SHOW TABLES IN `{}`'.format(m_conf['db']))
 
     print 'Copying data from {} to {}...'.format(m_conf['db'], msb_conf['db'])
 
     if (m_conf['host'] == msb_conf['host'] and
             m_conf['user'] == msb_conf['user']):
-        for table, in msb.fetchall():
+        m.execute('SHOW TABLES IN `{}`'.format(m_conf['db']))
+        for table, in m.fetchall():
             if table in ('bandwidth_usage', 'session', 'host_history'):
                 continue
 
