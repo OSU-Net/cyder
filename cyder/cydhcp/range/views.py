@@ -67,15 +67,10 @@ def range_detail(request, pk):
     
     range_table = tablefy((mrange,), info=False, request=request)
 
-    for i, header in enumerate(range_table['headers']):
-      if header[0] == 'Info':
-        del range_table['headers'][i]
+    from cyder.base.tablefier import Tablefier
+    Tablefier.remove_field(range_table, 'Info')
+    Tablefier.remove_field(range_table, 'Actions')
 
-    #remove references to Info from the object table
-    for i, obj in enumerate(range_table['data'][0]):
-      if 'class' in obj and obj['class'][0] == 'info':
-        del range_table['data'][0][i]
-    
     if ip_usage_percent:
         ip_usage_percent = "{0}%".format(ip_usage_percent)
     return render(request, 'range/range_detail.html', {

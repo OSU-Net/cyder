@@ -193,6 +193,14 @@ class Tablefier:
 
         return objs, data, urls
 
+    @staticmethod 
+    def remove_field(table_dict, header_name): 
+        for i, header in enumerate(table_dict['headers']):
+          if header[0] == header_name:
+            del table_dict['headers'][i]
+            del table_dict['data'][0][i]
+            return 
+
     def get_table(self):
         if not self.objects:
             return None
