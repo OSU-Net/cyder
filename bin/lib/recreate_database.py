@@ -21,18 +21,18 @@ def main():
             return
     print
 
-    cur, db = get_cursor('default', use=False)
+    cur, conf = get_cursor('default', use=False)
     # We can't use django.db.connection because the database might not exist.
     print 'Dropping Cyder database...'
     try:
-        cur.execute('DROP DATABASE `{}`'.format(db))
+        cur.execute('DROP DATABASE `{}`'.format(conf['db']))
     except MySQLdb.OperationalError:
         pass
 
     print 'Creating Cyder database...'
     cur.execute(
         'CREATE DATABASE `{}` CHARACTER SET utf8 '
-        'COLLATE utf8_general_ci'.format(db))
+        'COLLATE utf8_general_ci'.format(conf['db']))
 
 
 if __name__ == '__main__':
