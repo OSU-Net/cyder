@@ -239,7 +239,6 @@ def get_cursor(db_name, use=True):
     """
     if db_name in settings.DATABASES:
         db_conf = settings.DATABASES[db_name]
-        db = db_conf['NAME']
         kwargs = {
             'host': db_conf['HOST'],
             'port': int(db_conf['PORT'] or '0'),
@@ -248,13 +247,12 @@ def get_cursor(db_name, use=True):
         }
         kwargs.update(db_conf['OPTIONS'])
         if use:
-            kwargs['db'] = db
+            kwargs['db'] = db_conf['NAME']
     elif db_name in settings.OTHER_DATABASES:
         db_conf = settings.OTHER_DATABASES[db_name]
-        db = db_conf['db']
         kwargs = copy(db_conf)
         if not use:
             del kwargs['db']
     else:
         raise Exception('No such database in DATABASES or OTHER_DATABASES')
-    return MySQLdb.connect(**kwargs).cursor(), db
+    return MySQLdb.connect(**kwargs).cursor(), db_conf
