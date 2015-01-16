@@ -99,8 +99,7 @@ class NetworkTests(TestCase, ModelTestMixin):
         if we choose s3 then n2, n3, and n4 should be returned
         """
 
-    def test_parent_children(self):
-        raise SkipTest
+    def test_parent_children_descendants(self):
         n1 = Network.objects.create(network_str='10.0.0.0/8')
         n2 = Network.objects.create(network_str='10.0.0.0/14')
         n3 = Network.objects.create(network_str='10.1.0.0/16')
@@ -119,8 +118,15 @@ class NetworkTests(TestCase, ModelTestMixin):
         self.assertEqual(set(n2.children), {n3, n6})
         self.assertEqual(set(n3.children), {n4})
         self.assertEqual(set(n4.children), {n5})
-        self.assertEqual(set(n5.children), {})
-        self.assertEqual(set(n6.children), {})
+        self.assertEqual(set(n5.children), set())
+        self.assertEqual(set(n6.children), set())
+
+        self.assertEqual(set(n1.descendants), {n2, n3, n4, n5, n6})
+        self.assertEqual(set(n2.descendants), {n3, n4, n5, n6})
+        self.assertEqual(set(n3.descendants), {n4, n5})
+        self.assertEqual(set(n4.descendants), {n5})
+        self.assertEqual(set(n5.descendants), set())
+        self.assertEqual(set(n6.descendants), set())
 
     def test_check_valid_ranges_v4_valid(self):
         n = Network(network_str='10.0.0.0/8')
