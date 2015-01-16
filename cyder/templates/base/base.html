@@ -41,7 +41,7 @@
             </a>
           </span>
           <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
             <select name="ctnr_name" class="submit-on-change">
               {% for ctnr in request.session.ctnrs %}
                 {% if ctnr == request.session.ctnr %}
@@ -57,7 +57,7 @@
                 request.session.ctnr.get_detail_url() == request.path }}"
              href="{{ request.session.ctnr.get_detail_url() }}"></a>
           <form id="setDefaultCtnr" action="{{ url('set-default-ctnr') }}" method="post">
-              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
               <a id="defaultCtnrBtn" class="submit">Set as default container?</a>
           </form>
       </div>
@@ -88,7 +88,7 @@
        </a>
      </span>
      <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
-       <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+       <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
        <select name="ctnr_name" class="submit-on-change">
          {% for ctnr in request.session.ctnrs %}
            {% if ctnr == request.session.ctnr %}
@@ -104,7 +104,7 @@
            request.session.ctnr.get_detail_url() == request.path }}"
         href="{{ request.session.ctnr.get_detail_url() }}"></a>
           <form id="setDefaultCtnr" action="{{ url('set-default-ctnr') }}" method="post">
-              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
               <a id="defaultCtnrBtn" class="submit">Set as default container?</a>
           </form>
     </div>
