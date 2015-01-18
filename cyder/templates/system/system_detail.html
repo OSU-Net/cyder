@@ -33,8 +33,6 @@
 {% endblock %}
 
 {% block content %}
-  {{ render_table(request, system_table, 'system') }}
-
   {% if attrs_table %}
     <h3 id="attr_title">System Attributes</h3>
     {{ render_table(request, attrs_table, 'attrs_table') }}
