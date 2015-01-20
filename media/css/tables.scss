@@ -60,7 +60,6 @@ table.table {
             }
             &:hover {
                 background: darken($white, 10%);
-                cursor: pointer;
             }
             &:nth-child(even) {
                 background: $light-gray;

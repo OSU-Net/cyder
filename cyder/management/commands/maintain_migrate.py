@@ -1,12 +1,8 @@
+from optparse import make_option
+
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.db.models.loading import get_model
-
-from optparse import make_option
-
-import dns_migrate
-import dhcp_migrate
-from lib import fix_maintain
 
 
 class Command(BaseCommand):
@@ -36,10 +32,14 @@ class Command(BaseCommand):
     def handle(self, **options):
         if options['qlobber']:
             print "Clobbering Maintain sandbox."
-            dns_migrate.dump_maintain()
+
+            from .lib import maintain_dump
+            maintain_dump.main()
+            from .lib import fix_maintain
             fix_maintain.main()
 
         if options['together']:
+            from . import dhcp_migrate, dns_migrate
             options['dns'], options['dhcp'] = False, False
             dns_migrate.delete_DNS()
             dns_migrate.delete_CNAME()

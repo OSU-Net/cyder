@@ -29,32 +29,49 @@ MIDDLEWARE_CLASSES = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
+DATABASES = {  # databases used through Django
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '',
+        'NAME': 'FIXME',
+        'USER': 'FIXME',
+        'PASSWORD': '',
         'OPTIONS': {
             'init_command': 'SET storage_engine=InnoDB',
-            'charset' : 'utf8',
-            'use_unicode' : True,
+            'charset': 'utf8',
+            'use_unicode': True,
             'sql_mode': 'TRADITIONAL',
         },
         'TEST_CHARSET': 'utf8',
         'TEST_COLLATION': 'utf8_general_ci',
     },
-    # 'slave': {
-    #     ...
-    # },
 }
 
-MIGRATION_HOST=''
-MIGRATION_USER=''
-MIGRATION_PASSWD=''
-MIGRATION_DB=''
+OTHER_DATABASES = {  # databases used through cyder.base.utils.get_cursor
+    'maintain': {
+        'host': 'localhost',
+        'port': 0,
+        'db': 'maintain',
+        'user': 'maintain_sb',
+        'passwd': '',
+        'init_command': 'SET storage_engine=InnoDB',
+        'charset': 'utf8',
+        'use_unicode': True,
+        'sql_mode': 'TRADITIONAL',
+    },
+    'maintain_sb': {
+        'host': 'localhost',
+        'port': 0,
+        'db': 'maintain_sb',
+        'user': 'maintain_sb',
+        'passwd': '',
+        'init_command': 'SET storage_engine=InnoDB',
+        'charset': 'utf8',
+        'use_unicode': True,
+        'sql_mode': 'TRADITIONAL',
+    },
+}
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ''
@@ -135,7 +152,7 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
     'HIDE_DJANGO_SQL': False,
     'TAG': 'div',
-    'ENABLE_STACKTRACES' : True,
+    'ENABLE_STACKTRACES': True,
 }
 
 CAS_IGNORE_URL_PATTERNS = (

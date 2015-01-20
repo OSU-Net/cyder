@@ -88,4 +88,4 @@ add_introspection_rules([
         [], # args
         {'dhcp_enabled': ('dhcp_enabled', {})}, # kwargs
     )
-], [r'^cyder\.core\.fields\.MacAddrField'])
+], [r'^cyder\.base\.fields\.MacAddrField'])

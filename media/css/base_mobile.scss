@@ -49,9 +49,9 @@
     }
     div#sidebar_div {
         position: fixed;
-        display: block;
+        display: none;
         &.displayed {
-            display: none;
+            display: block;
         }
     }
     /* Pagination */
@@ -98,9 +98,9 @@
     }
     div#sidebar_div {
         position: fixed;
-        display: block;
+        display: none;
         &.displayed {
-            display: none;
+            display: block;
         }
     }
     /* Pagination */

@@ -207,7 +207,7 @@ def range_wizard_get_ranges(request):
         networks, ctnr=request.session['ctnr'],
         range_types=range_types, all_ranges=all_ranges)
 
-    ranges = [([r.get_self_str(padded=True) for r in ranges]),
+    ranges = [([r.get_str() for r in ranges]),
               ([r.id for r in ranges])]
 
     return HttpResponse(json.dumps({'ranges': ranges}))

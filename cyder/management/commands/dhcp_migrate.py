@@ -1,14 +1,18 @@
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.management.base import BaseCommand
+from datetime import datetime
+from optparse import make_option
+from sys import stderr
+
+import ipaddr
+import MySQLdb
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 
 from cyder.base.eav.models import Attribute
+from cyder.base.utils import get_cursor
 from cyder.core.ctnr.models import Ctnr, CtnrUser
 from cyder.core.system.models import System, SystemAV
-from cyder.cydns.domain.models import Domain
-from cyder.cydns.models import View
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN,
                                     ALLOW_LEGACY, STATIC, DYNAMIC)
@@ -18,14 +22,9 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.workgroup.models import Workgroup, WorkgroupAV
-
-from sys import stderr
-from datetime import datetime
-import ipaddr
-import MySQLdb
-from optparse import make_option
-
-from lib.utilities import long2ip, fix_attr_name, range_usage_get_create
+from cyder.cydns.domain.models import Domain
+from cyder.cydns.models import View
+from .lib.utilities import fix_attr_name, long2ip, range_usage_get_create
 
 
 cached = {}
@@ -50,6 +49,9 @@ voip_networks = {
 }
 
 
+cursor, _ = get_cursor('maintain_sb')
+
+
 class NotInMaintain(Exception):
     """"""
 
@@ -60,14 +62,6 @@ def calc_prefixlen(netmask):
         bits += netmask & 1
         netmask >>= 1
     return bits
-
-connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
-                             user=settings.MIGRATION_USER,
-                             passwd=settings.MIGRATION_PASSWD,
-                             db=settings.MIGRATION_DB,
-                             charset='utf8')
-
-cursor = connection.cursor()
 
 
 def clean_zone_name(name):
@@ -632,114 +626,3 @@ def delete_all():
 def do_everything(skip=False):
     delete_all()
     migrate_all(skip)
-
-
-class Command(BaseCommand):
-
-    option_list = BaseCommand.option_list + (
-        make_option('-D', '--delete',
-                    action='store_true',
-                    dest='delete',
-                    default=False,
-                    help='Delete things'),
-        make_option('-a', '--all',
-                    action='store_true',
-                    dest='all',
-                    default=False,
-                    help='Migrate everything'),
-        make_option('-S', '--skip',
-                    action='store_true',
-                    dest='skip',
-                    default=False,
-                    help='Ignore dynamic hosts when using -a option'),
-        make_option('-n', '--vlan',
-                    action='store_true',
-                    dest='vlan',
-                    default=False,
-                    help='Migrate vlans'),
-        make_option('-Z', '--zone',
-                    action='store_true',
-                    dest='zone',
-                    default=False,
-                    help='Migrate zones to ctnrs'),
-        make_option('-w', '--workgroup',
-                    action='store_true',
-                    dest='workgroup',
-                    default=False,
-                    help='Migrate workgroups'),
-        make_option('-s', '--subnet',
-                    action='store_true',
-                    dest='subnet',
-                    default=False,
-                    help='Migrate subnets'),
-        make_option('-r', '--range',
-                    action='store_true',
-                    dest='range',
-                    default=False,
-                    help='Migrate ranges'),
-        make_option('-d', '--dynamic',
-                    action='store_true',
-                    dest='dynamic',
-                    default=False,
-                    help='Migrate dynamic interfaces'),
-        make_option('-R', '--zone-range',
-                    action='store_true',
-                    dest='zone-range',
-                    default=False,
-                    help='Migrate zone/range relationship'),
-        make_option('-W', '--zone-workgroup',
-                    action='store_true',
-                    dest='zone-workgroup',
-                    default=False,
-                    help='Migrate zone/workgroup relationship'),
-        make_option('-z', '--zone-domain',
-                    action='store_true',
-                    dest='zone-domain',
-                    default=False,
-                    help='Migrate zone/domain relationship'),
-        make_option('-e', '--zone-reverse',
-                    action='store_true',
-                    dest='zone-reverse',
-                    default=False,
-                    help='Migrate zone/reverse domain relationship'),
-        make_option('-u', '--user',
-                    action='store_true',
-                    dest='user',
-                    default=False,
-                    help='Migrate users'),
-        make_option('-U', '--zone-user',
-                    action='store_true',
-                    dest='zone-user',
-                    default=False,
-                    help='Migrate zone/user relationship'))
-
-    def handle(self, **options):
-        if options['delete']:
-            delete_all()
-        if options['all']:
-            migrate_all(skip=options['skip'])
-        else:
-            if options['vlan']:
-                migrate_vlans()
-            if options['zone']:
-                migrate_zones()
-            if options['workgroup']:
-                migrate_workgroups()
-            if options['subnet']:
-                migrate_subnets()
-            if options['range']:
-                migrate_ranges()
-            if options['dynamic']:
-                migrate_dynamic_hosts()
-            if options['zone-range']:
-                migrate_zone_range()
-            if options['zone-workgroup']:
-                migrate_zone_workgroup()
-            if options['zone-domain']:
-                migrate_zone_domain()
-            if options['zone-reverse']:
-                migrate_zone_reverse()
-            if options['user']:
-                migrate_user()
-            if options['zone-user']:
-                migrate_zone_user()
