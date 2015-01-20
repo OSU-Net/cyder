@@ -292,7 +292,7 @@ class Network(BaseModel, ObjectUrlMixin):
         descendants = set(self.descendants)
         children = []
         for d in descendants:
-            if d.parent not in descendants:
+            if d.parent == self:
                 children.append(d)
         return children
 
