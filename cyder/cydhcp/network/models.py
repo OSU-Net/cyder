@@ -289,9 +289,8 @@ class Network(BaseModel, ObjectUrlMixin):
     @property
     def children(self):
         self.update_network()
-        descendants = set(self.descendants)
         children = []
-        for d in descendants:
+        for d in self.descendants:
             if d.parent == self:
                 children.append(d)
         return children
