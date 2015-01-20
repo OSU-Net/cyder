@@ -596,6 +596,9 @@ DATETIME_INPUT_FORMATS = (
     '%m/%d/%y %H:%M:%S',     # '10/25/06 14:30:59'
 )
 
+MYSQL = 'mysql'
+MYSQLDUMP = 'mysqldump'
+
 ###############################
 # more copied from funfactory #
 ###############################

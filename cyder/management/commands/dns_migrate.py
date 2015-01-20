@@ -1,31 +1,29 @@
 #! /usr/bin/python
+
+from datetime import datetime
+from optparse import make_option
+from sys import stderr
+
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from sys import stderr
-from settings import NONDELEGATED_NS, SECONDARY_ZONES
 
 from cyder.base.eav.models import Attribute
-from cyder.core.system.models import System, SystemAV
-
+from cyder.base.utils import get_cursor
 from cyder.core.ctnr.models import Ctnr
+from cyder.core.system.models import System, SystemAV
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.models import View
 from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydns.ptr.models import PTR
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.utils import ensure_domain
-from cyder.cydns.models import View
-
-import MySQLdb
-from optparse import make_option
-from datetime import datetime
-from lib import maintain_dump, fix_maintain
-from lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
+from .lib.utilities import (clean_mac, ip2long, long2ip, fix_attr_name,
                            range_usage_get_create, get_label_domain_workaround,
                            ensure_domain_workaround)
 
@@ -33,12 +31,9 @@ public, _ = View.objects.get_or_create(name="public")
 private, _ = View.objects.get_or_create(name="private")
 
 BAD_DNAMES = ['', '.', '_']
-connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
-                             user=settings.MIGRATION_USER,
-                             passwd=settings.MIGRATION_PASSWD,
-                             db=settings.MIGRATION_DB,
-                             charset='utf8')
-cursor = connection.cursor()
+
+
+cursor, _ = get_cursor('maintain_sb')
 
 
 def get_delegated():
@@ -51,7 +46,7 @@ def get_delegated():
                "ON domain.id=nameserver.domain "
                "WHERE %s")
         where = ' and '.join(["nameserver.name != '%s'" % ns
-                              for ns in NONDELEGATED_NS])
+                              for ns in settings.NONDELEGATED_NS])
         cursor.execute(sql % where)
         results = [i for (i,) in cursor.fetchall()]
 
@@ -78,7 +73,7 @@ class Zone(object):
                 print "WARNING: Domain %s does not exist." % self.dname
                 return
 
-            if self.dname in SECONDARY_ZONES or secondary:
+            if self.dname in settings.SECONDARY_ZONES or secondary:
                 print ("WARNING: Domain %s is a secondary, so its records "
                        "will not be migrated." % self.dname)
                 secondary = True
@@ -654,10 +649,6 @@ def add_pointers_manual():
             cursor.execute(sql)
 
 
-def dump_maintain():
-    maintain_dump.main()
-
-
 def delete_DNS():
     print "Deleting DNS objects."
     for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
@@ -678,18 +669,7 @@ def do_everything(skip_edu=False):
 
 
 class Command(BaseCommand):
-
     option_list = BaseCommand.option_list + (
-        make_option('-D', '--dump',
-                    action='store_true',
-                    dest='dump',
-                    default=False,
-                    help='Get a fresh dump of MAINTAIN'),
-        make_option('-f', '--fix',
-                    action='store_true',
-                    dest='fix',
-                    default=False,
-                    help='Fix MAINTAIN'),
         make_option('-d', '--dns',
                     dest='dns',
                     default=False,
@@ -717,17 +697,11 @@ class Command(BaseCommand):
                     help='Skip edu zone.'))
 
     def handle(self, **options):
-        if options['dump']:
-            dump_maintain()
-
         if options['delete']:
             if options['dns']:
                 delete_DNS()
             if options['cname']:
                 delete_CNAME()
-
-        if options['fix']:
-            fix_maintain.main()
 
         if options['dns']:
             gen_DNS(options['skip'])

@@ -1,16 +1,3 @@
-import MySQLdb
-from django.conf import settings
-
-
-def get_cursor(name):
-    connection = MySQLdb.connect(host=settings.MIGRATION_HOST,
-                                 user=settings.MIGRATION_USER,
-                                 passwd=settings.MIGRATION_PASSWD,
-                                 db=settings.MIGRATION_DB)
-    cursor = connection.cursor()
-    return cursor
-
-
 def long2ip(ip):
     return ".".join(map(lambda x: str((ip >> x) & 255), range(24, -1, -8)))
 
