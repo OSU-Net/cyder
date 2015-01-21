@@ -40,7 +40,7 @@ def main():
     print 'Fixing domains...'
     cursor.execute("SELECT name FROM domain")
 
-    for name in cursor.fetchall():
+    for (name,) in cursor.fetchall():
         if '.in-addr.arpa' in name or name in ('', ' ', '.'):
             continue
         fix_domain(name)
