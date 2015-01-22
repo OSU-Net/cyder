@@ -8,8 +8,12 @@ $(document).ready(function() {
                 .html(data.static_form);
             var dynamicForm = $('<div id=dynamic-form>')
                 .html(data.dynamic_form);
-            var initial_type = data.initial_type;
+            var initialType = data.initial_type;
+            var intrType = "input[name=interface_type]";
             return {
+                getInitialType: function() {
+                    return initialType;
+                },
                 showStaticForm: function( delay, speed ) {
                     setTimeout( function() {
                         $('#hidden-inner-form').append( staticForm );
@@ -32,15 +36,17 @@ $(document).ready(function() {
                     var fields;
                     var form = $('#obj-form form');
                     form.find('.error').remove();
-                    if ($("input[name=interface_type]:checked").val() === undefined) {
+                    if ( $(intrType).attr( 'type' ) != "hidden"
+                            && $(intrType + ":checked").val() === undefined) {
                         $("label[for=id_interface_type_0]:first").after(
                             '<p class="error">This field is required.</p>');
                         return false;
                     } else {
                         fields = form.find(':input:visible').serializeArray();
                     }
-                    if ( initial_type && initial_type.length ) {
-                        fields.interface_type = initial_type;
+                    if ( initialType && initialType.length ) {
+                        field = form.find(intrType).serializeArray()[0]
+                        fields.push(field);
                     }
 
                     var url = '/core/system/create/';
@@ -86,8 +92,10 @@ $(document).ready(function() {
         button_to_ajax( this, null, { 'mode': 'GET', 'dataType': 'json' } )
         .done( function( data ) {
             $('#form-title').html( data.form_title );
-            $('.form-btns .submit').text( data.submit_btn_label );
-            $('.form-btns .submit').attr( 'class', 'btn c system-submit');
+            $('.form-btns .btn').not('.cancel')
+                .text( data.submit_btn_label );
+            $('.form-btns .btn').not('.cancel')
+                .attr( 'class', 'btn c system-submit');
             $('#hidden-inner-form').empty().append( data.system_form );
             slideDown( $('#obj-form') );
             enable_system_form( data );
