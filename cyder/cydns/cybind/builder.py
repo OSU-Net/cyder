@@ -172,8 +172,8 @@ class DNSBuilder(MutexMixin, Logger):
 
     def build_zone(self, view, file_meta, view_data, root_domain):
         """
-        This function will write the zone's zone file to the the staging area
-        and call named-checkconf on the files.
+        This function will write the zone's zone file to the staging area and
+        call named-checkconf on the files.
         """
         stage_fname = os.path.join(self.stage_dir, file_meta['rel_fname'])
         self.write_stage_zone(
