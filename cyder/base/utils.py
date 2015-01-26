@@ -57,6 +57,8 @@ class Logger(object):
 
 def run_command(command, logger=Logger(), ignore_failure=False,
                 failure_msg=None):
+    # A single default Logger instance is shared between every call to this
+    # function. Keep that in mind if you give Logger more state.
     logger.log_debug('Calling `{0}` in {1}'.format(command, os.getcwd()))
     out, err, returncode = shell_out(command)
     if returncode != 0 and not ignore_failure:
@@ -68,7 +70,7 @@ def run_command(command, logger=Logger(), ignore_failure=False,
         if err:
             msg += '=== stderr ===\n{0}\n'.format(err)
         msg = msg.rstrip('\n') + '\n'
-        error(msg)
+        logger.error(msg)
     return out, err, returncode
 
 
