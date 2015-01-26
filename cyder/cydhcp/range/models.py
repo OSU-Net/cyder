@@ -30,7 +30,7 @@ import ipaddr
 class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     """
     Ranges live inside networks; their start ip address is greater than or
-    equal to the the start of their network and their end ip address is less
+    equal to the start of their network and their end ip address is less
     than or equal to the end of their network; both the Range and the network
     class enforce these requirements. Good practice says ranges should not
     start on the network address of their network and they should not end on

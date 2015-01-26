@@ -1,3 +1,4 @@
+import syslog
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
@@ -13,16 +14,16 @@ class Command(BaseCommand):
                     dest='push',
                     action='store_true',
                     default=False,
-                    help="Check files into vcs and push upstream."),
+                    help='Check files into vcs and push upstream.'),
         ### logging/debug options ###
-        make_option('-l', '--log-syslog',
-                    dest='log_syslog',
+        make_option('-l', '--syslog',
+                    dest='to_syslog',
                     action='store_true',
-                    help="Log to syslog."),
-        make_option('-L', '--no-log-syslog',
-                    dest='log_syslog',
+                    help='Log to syslog.'),
+        make_option('-L', '--no-syslog',
+                    dest='to_syslog',
                     action='store_false',
-                    help="Do not log to syslog."),
+                    help="Don't log to syslog."),
         ### miscellaneous ###
         make_option('-f', '--force-build',
                     dest='force_build',
@@ -38,18 +39,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         builder_opts = {}
-        for name in ('log_syslog',):
-            val = options.pop(name)
-            if val is not None:  # user specified value
-                builder_opts[name] = val
-            # else get value from settings
 
-        if options['verbosity']:
-            builder_opts['verbose'] = int(options['verbosity']) >= 1
-            builder_opts['debug'] = int(options['verbosity']) >= 2
-        else:
-            builder_opts['verbose'] = True
-            builder_opts['debug'] = False
+        if options['to_syslog']:
+            syslog.openlog('bindbuild', facility=syslog.LOG_LOCAL6)
+            builder_opts['to_syslog'] = True
+
+        verbosity = int(options['verbosity'])
+        builder_opts['quiet'] = verbosity == 0
+        builder_opts['verbose'] = verbosity >= 2
 
         with DNSBuilder(**builder_opts) as b:
             b.build(force=options['force_build'])
