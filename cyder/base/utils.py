@@ -38,39 +38,41 @@ def shell_out(command, use_shlex=True):
     return out, err, p.returncode
 
 
-def log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=True,
-        logger=syslog):
-    msg = unicode(msg)
-    if to_syslog:
-        ll = getattr(logger, log_level)
-        for line in msg.splitlines():
-            logger.syslog(ll, line)
-    if to_stderr:
-        stderr.write(msg + '\n')
+class Logger(object):
+    """
+    A Logger logs messages passed to it. Possible destinations include stderr
+    and the system journal (syslog).
+    """
+
+    def log_debug(self, msg):
+        pass
+
+    def log_info(self, msg):
+        pass
+
+    def log_notice(self, msg):
+        pass
+
+    def error(self, msg):
+        raise Exception(msg)
 
 
-def run_command(command, command_logger=None, failure_logger=None,
-                failure_msg=None, ignore_failure=False):
-    if command_logger:
-        command_logger('Calling `{0}` in {1}'.format(command, os.getcwd()))
-
+def run_command(command, logger=Logger(), ignore_failure=False,
+                failure_msg=None):
+    # A single default Logger instance is shared between every call to this
+    # function. Keep that in mind if you give Logger more state.
+    logger.log_debug('Calling `{0}` in {1}'.format(command, os.getcwd()))
     out, err, returncode = shell_out(command)
-
     if returncode != 0 and not ignore_failure:
-        msg = ('`{0}` failed in {1}\n\n'
-               'command: {2}\n\n'
-               .format(command, os.getcwd(), failure_msg, command))
+        msg = '{}: '.format(failure_msg) if failure_msg else ''
+        msg += '`{}` failed in {}\n\n'.format(
+            failure_msg, command, os.getcwd())
         if out:
             msg += '=== stdout ===\n{0}\n'.format(out)
         if err:
             msg += '=== stderr ===\n{0}\n'.format(err)
         msg = msg.rstrip('\n') + '\n'
-
-        if failure_logger:
-            failure_logger(msg)
-
-        raise Exception(msg)
-
+        logger.error(msg)
     return out, err, returncode
 
 

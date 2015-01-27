@@ -48,7 +48,7 @@ class DNSBuildTest(TestCase):
             os.makedirs(PROD_ORIGIN_DIR)
         remove_dir_contents(PROD_ORIGIN_DIR)
 
-        mgr = GitRepoManager(debug=False, log_syslog=False, config={
+        mgr = GitRepoManager(config={
             'user.name': 'test',
             'user.email': 'test',
         })

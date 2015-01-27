@@ -10,8 +10,8 @@ from traceback import format_exception
 from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (copy_tree, dict_merge, log, remove_dir_contents,
-                              run_command, set_attrs)
+from cyder.base.utils import (
+    copy_tree, dict_merge, Logger, remove_dir_contents, run_command, set_attrs)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
@@ -24,87 +24,59 @@ from cyder.cydns.cybind.models import DNSBuildRun
 from cyder.cydns.cybind.serial_utils import get_serial
 
 
-def format_log_message(msg, root_domain=None):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-
-        frame_number = 2
-        while calframe[frame_number][3] == 'run_command':
-            frame_number += 1
-        callername = "[{0}]".format(calframe[frame_number][3])
-
-        if root_domain:
-            return "{0:24} < {1} > {2}".format(callername,
-                                               root_domain.name, msg)
-        else:
-            return "{0:24} {1}".format(callername, msg)
-
-
-class DNSBuilder(MutexMixin):
+class DNSBuilder(MutexMixin, Logger):
     def __init__(self, **kwargs):
         kwargs = dict_merge(BINDBUILD, {
-            'verbose': True,
-            'debug': False,
-            'bs': DNSBuildRun(),  # Build statistic
+            'quiet': False,
+            'verbose': False,
+            'to_syslog': False,
         }, kwargs)
         set_attrs(self, kwargs)
 
-        if self.log_syslog:
-            syslog.openlog(b'bindbuild', 0, syslog.LOG_LOCAL6)
-
         self.repo = GitRepo(
-            self.prod_dir, self.line_change_limit,
-            self.line_removal_limit, debug=self.debug,
-            log_syslog=self.log_syslog, logger=syslog)
+            self.prod_dir, self.line_change_limit, self.line_removal_limit,
+            logger=self)
 
-    def log_debug(self, msg, root_domain=None, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.debug
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
-            logger=syslog)
+    def log(self, log_level, msg, root_domain=None):
+        if root_domain:
+            msg = '< {} > {}'.format(root_domain.name, msg)
+        if self.to_syslog:
+            for line in msg.splitlines():
+                syslog.syslog(log_level, line)
+        return msg
 
-    def log_info(self, msg, root_domain=None, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.verbose
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_INFO', to_stderr=to_stderr, logger=syslog)
+    def log_debug(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_DEBUG, msg, root_domain)
+        if self.verbose:
+            print msg
 
-    def log_notice(self, msg, root_domain=None, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.verbose
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_NOTICE', to_stderr=to_stderr, logger=syslog)
+    def log_info(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_INFO, msg, root_domain)
+        if not self.quiet:
+            print msg
 
-    def log_err(self, msg, root_domain=None, to_stderr=True):
-        log(format_log_message(msg, root_domain=root_domain),
-            log_level='LOG_ERR', to_stderr=to_stderr, logger=syslog)
+    def log_notice(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_NOTICE, msg, root_domain)
+        if not self.quiet:
+            print msg
 
-    def run_command(self, command, log=True, failure_msg=None):
-        if log:
-            command_logger = self.log_debug
-            failure_logger = self.log_err
-        else:
-            command_logger = None
-            failure_logger = None
+    def error(self, msg, root_domain=None):
+        msg = self.log(syslog.LOG_ERR, msg, root_domain)
+        raise Exception(msg)
 
-        return run_command(command, command_logger=command_logger,
-                           failure_logger=failure_logger,
-                           failure_msg=failure_msg)
-
-    def format_title(self, title):
-        return "{0} {1} {0}".format('=' * ((30 - len(title)) / 2), title)
+    def run_command(self, command, failure_msg=None):
+        return run_command(command, logger=self, failure_msg=failure_msg)
 
     def get_scheduled(self):
         """
-        Find all dns tasks that indicate we need to rebuild a certain zone.
+        Find all DNS tasks that indicate we need to rebuild a certain zone.
         Evalutate the queryset so nothing slips in (our DB isolation *should*
         cover this). This will ensure that if a record is changed during the
-        build it's build request will not be deleted and will be serviced
+        build its build request will not be deleted and will be serviced
         during the next build.
 
         If the build is successful we will delete all the scheduled tasks
-        return by this function
+        returned by this function.
 
         note::
             When we are not checking files into Git we do not need to delete
@@ -175,7 +147,6 @@ class DNSBuilder(MutexMixin):
         self.run_command(
             ' '.join((self.named_checkzone, self.named_checkzone_opts,
                       root_domain.name, zone_file)),
-            log=True,
             failure_msg='named-checkzone failed on zone {0}'
                         .format(root_domain.name)
         )
@@ -201,8 +172,8 @@ class DNSBuilder(MutexMixin):
 
     def build_zone(self, view, file_meta, view_data, root_domain):
         """
-        This function will write the zone's zone file to the the staging area
-        and call named-checkconf on the files.
+        This function will write the zone's zone file to the staging area and
+        call named-checkconf on the files.
         """
         stage_fname = os.path.join(self.stage_dir, file_meta['rel_fname'])
         self.write_stage_zone(
@@ -216,17 +187,17 @@ class DNSBuilder(MutexMixin):
         return "{0}.{1}".format(root_domain.name, view.name)
 
     def render_zone_stmt(self, soa, zone_name, file_meta):
-        zone_stmt = "zone \"{0}\" IN {{{{\n".format(zone_name)
-        zone_stmt += "\ttype {ztype};\n"  # We'll format this later
+        zone_stmt = 'zone "{0}" IN {{{{\n'.format(zone_name)
+        zone_stmt += '\ttype {ztype};\n'  # We'll format this later
         if soa.is_signed:
-            zone_stmt += "\tfile \"{0}.signed\";\n".format(
+            zone_stmt += '\tfile "{0}.signed";\n'.format(
                 file_meta['bind_fname']
             )
         else:
-            zone_stmt += "\tfile \"{0}\";\n".format(
+            zone_stmt += '\tfile "{0}";\n'.format(
                 file_meta['bind_fname']
             )
-        zone_stmt += "}};\n"
+        zone_stmt += '}};\n'
         return zone_stmt
 
     def verify_previous_build(self, file_meta, view, root_domain, soa):
@@ -297,7 +268,7 @@ class DNSBuilder(MutexMixin):
             # If anything happens during this soa's build we need to mark
             # it as dirty so it can be rebuild
             try:
-                root_domain = soa.root_domain  # This is an expensive lookup
+                root_domain = soa.root_domain
 
                 if not root_domain:
                     continue
@@ -332,6 +303,8 @@ class DNSBuilder(MutexMixin):
                 )
 
                 def get_view_data(view):
+                    self.log_debug("++++++ Looking at < {0} > view ++++++"
+                                   .format(view.name), root_domain=root_domain)
                     t_start = time.time()  # tic
                     view_data = build_zone_data(view, root_domain, soa,
                                                 logf=self.log_notice)
@@ -466,7 +439,7 @@ class DNSBuilder(MutexMixin):
             msg = ("The stop file ({0}) exists. Build canceled.\n"
                    "Reason for skipped build:\n"
                    "{1}".format(self.stop_file, contents))
-            self.log_notice(msg, to_stderr=False)
+            self.log_notice(msg)
             if (self.stop_file_email_interval is not None and
                     now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
@@ -474,9 +447,7 @@ class DNSBuilder(MutexMixin):
 
             raise Exception(msg)
         except IOError as e:
-            if e.errno == 2:  # IOError: [Errno 2] No such file or directory
-                pass
-            else:
+            if e.errno != 2:  # IOError: [Errno 2] No such file or directory
                 raise
 
         self.log_info('Building...')
@@ -495,16 +466,10 @@ class DNSBuilder(MutexMixin):
                                     force=force))
 
             self.log_info('DNS build successful')
-        except:
-            self.error()
-
-    def error(self):
-        ei = sys.exc_info()
-        exc_msg = ''.join(format_exception(*ei)).rstrip('\n')
-
-        self.log_err('DNS build failed.\nOriginal exception: ' + exc_msg,
-                     to_stderr=False)
-        raise
+        except Exception as e:
+            self.log(syslog.LOG_ERR,
+                'DNS build failed.\nOriginal exception: ' + e.message)
+            raise
 
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
@@ -519,13 +484,11 @@ class DNSBuilder(MutexMixin):
         map(lambda t: t.delete(), self.dns_tasks)
 
     def _lock_failure(self, pid):
-        self.log_err(
-            'Failed to acquire lock on {0}. Process {1} currently '
-            'has it.'.format(self.lock_file, pid),
-            to_stderr=False)
         fail_mail(
             'An attempt was made to start the DNS build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
             subject="Concurrent DNS builds attempted.")
-        super(DNSBuilder, self)._lock_failure(pid)
+        self.error(
+            'Failed to acquire lock on {0}. Process {1} currently '
+            'has it.'.format(self.lock_file, pid))

@@ -9,8 +9,8 @@ import time
 from traceback import format_exception
 
 from cyder.base.mixins import MutexMixin
-from cyder.base.utils import (copy_tree, dict_merge, log, run_command,
-                              set_attrs, shell_out)
+from cyder.base.utils import (
+    copy_tree, dict_merge, Logger, run_command, set_attrs, shell_out)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.utils import fail_mail
@@ -22,42 +22,42 @@ from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.settings import DHCPBUILD
 
 
-class DHCPBuilder(MutexMixin):
+class DHCPBuilder(MutexMixin, Logger):
     def __init__(self, *args, **kwargs):
         kwargs = dict_merge(DHCPBUILD, {
-            'verbose': True,
-            'debug': False,
+            'quiet': False,
+            'verbose': False,
+            'to_syslog': False,
         }, kwargs)
         set_attrs(self, kwargs)
 
-        if self.log_syslog:
-            syslog.openlog(b'dhcp_build', 0, syslog.LOG_LOCAL6)
+        self.repo = GitRepo(
+            self.prod_dir, self.line_change_limit, self.line_removal_limit,
+            logger=self)
 
-        self.repo = GitRepo(self.prod_dir, self.line_change_limit,
-            self.line_removal_limit, debug=self.debug,
-            log_syslog=self.log_syslog, logger=syslog)
+    def log(self, log_level, msg):
+        if self.to_syslog:
+            for line in msg.splitlines():
+                syslog.syslog(log_level, line)
 
-    def log_debug(self, msg, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.debug
-        log(msg, log_level='LOG_DEBUG', to_syslog=False, to_stderr=to_stderr,
-                logger=syslog)
+    def log_debug(self, msg):
+        self.log(syslog.LOG_DEBUG, msg)
+        if self.verbose:
+            print msg
 
-    def log_info(self, msg, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.verbose
-        log(msg, log_level='LOG_INFO', to_syslog=self.log_syslog,
-                to_stderr=to_stderr, logger=syslog)
+    def log_info(self, msg):
+        self.log(syslog.LOG_INFO, msg)
+        if not self.quiet:
+            print msg
 
-    def log_notice(self, msg, to_stderr=None):
-        if to_stderr is None:
-            to_stderr = self.verbose
-        log(msg, log_level='LOG_NOTICE', to_syslog=self.log_syslog,
-                to_stderr=to_stderr, logger=syslog)
+    def log_notice(self, msg):
+        self.log(syslog.LOG_NOTICE, msg)
+        if not self.quiet:
+            print msg
 
-    def log_err(self, msg, to_stderr=True):
-        log(msg, log_level='LOG_ERR', to_syslog=self.log_syslog,
-                to_stderr=to_stderr, logger=syslog)
+    def error(self, msg):
+        self.log(syslog.LOG_ERR, msg)
+        raise Exception(msg)
 
     def run_command(self, command, log=True, failure_msg=None):
         if log:
@@ -108,7 +108,9 @@ class DHCPBuilder(MutexMixin):
                 for workgroup in Workgroup.objects.all():
                     f.write(workgroup.build_workgroup())
         except:
-            self.error()
+            self.log(syslog.LOG_ERR,
+                'DHCP build failed.\nOriginal exception: ' + e.message)
+            raise
 
         if self.check_file:
             self.check_syntax()

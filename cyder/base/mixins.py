@@ -197,10 +197,10 @@ class MutexMixin(object):
         except IOError as exc_value:
             # IOError: [Errno 2] No such file or directory
             if exc_value[0] == 2:
-                raise Exception("Failed to acquire lock on {0}, but the "
-                                "the process that has it hasn't written "
-                                "the PID file {1} yet."
-                                .format(self.lock_file, self.pid_file))
+                self.error(
+                    "Failed to acquire lock on {0}, but the process that has "
+                    "it hasn't written the PID file ({1}) yet.".format(
+                        self.lock_file, self.pid_file))
             else:
                 raise
 
@@ -219,5 +219,5 @@ class MutexMixin(object):
         return True
 
     def _lock_failure(self, pid):
-        raise Exception('Failed to acquire lock on {0}. Process {1} currently '
+        self.error('Failed to acquire lock on {0}. Process {1} currently '
                         'has it.'.format(self.lock_file, pid))

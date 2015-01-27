@@ -1,28 +1,8 @@
 import os
 import re
-import syslog
 from os.path import dirname, basename
 
-from cyder.base.utils import set_attrs, dict_merge, log, run_command
-
-
-def _log(self, message, log_level='LOG_DEBUG'):
-    log(message, log_level=log_level, to_stderr=self.debug,
-            to_syslog=self.log_syslog, logger=self.logger)
-
-
-def _run_command(self, command, log=True, failure_msg=None,
-                 ignore_failure=False):
-    if log:
-        command_logger = self._log
-        failure_logger = lambda msg: self._log(msg, log_level='LOG_ERR')
-    else:
-        command_logger, failure_logger = None, None
-
-    return run_command(
-        command, command_logger=command_logger,
-        failure_logger=failure_logger, failure_msg=failure_msg,
-        ignore_failure=ignore_failure)
+from cyder.base.utils import dict_merge, Logger, run_command
 
 
 class SanityCheckFailure(Exception):
@@ -54,21 +34,16 @@ def repo_chdir_wrapper(func):
 
 
 class VCSRepo(object):
-    _run_command = _run_command
-
-    _log = _log
+    def _run_command(self, command, ignore_failure=False):
+        return run_command(command, logger=self.logger,
+                           ignore_failure=ignore_failure)
 
     def __init__(self, repo_dir, line_change_limit=None,
-                 line_removal_limit=None, debug=False, log_syslog=False,
-                 logger=syslog):
-        set_attrs(self, {
-            'repo_dir': repo_dir,
-            'line_change_limit': line_change_limit,
-            'line_removal_limit': line_removal_limit,
-            'debug': debug,
-            'log_syslog': log_syslog,
-            'logger': logger,
-        })
+                 line_removal_limit=None, logger=Logger()):
+        self.repo_dir = repo_dir
+        self.line_change_limit = line_change_limit
+        self.line_removal_limit = line_removal_limit
+        self.logger = logger
 
     @repo_chdir_wrapper
     def reset_to_head(self):
@@ -77,7 +52,6 @@ class VCSRepo(object):
     @repo_chdir_wrapper
     def reset_and_pull(self):
         """Make the working tree match what's currently upstream."""
-
         self._reset_to_head()
         self._pull()
 
@@ -125,15 +99,14 @@ class GitRepo(VCSRepo):
             self._add_all()
 
         if not self._is_index_dirty() and not empty:
-            self._log('There were no changes. Nothing to commit.',
-                      log_level='LOG_INFO')
+            self.logger.log_notice('There were no changes. Nothing to commit.')
             return
 
         if sanity_check:
             self._sanity_check()
         else:
-            self._log('Skipping sanity check because sanity_check=False was '
-                      'passed.')
+            self.logger.log_debug(
+                'Skipping sanity check because sanity_check=False was passed.')
 
         self._commit(message, allow_empty=empty)
         self._push()
@@ -152,10 +125,9 @@ class GitRepo(VCSRepo):
         self._run_command('git add -A .')
 
     def _lines_changed(self):
-        diff_ignore = (re.compile(r'--- \S'),
-                       re.compile(r'\+\+\+ \S'))
+        diff_ignore = (re.compile(r'--- \S'), re.compile(r'\+\+\+ \S'))
 
-        output, _, _ = self._run_command('git diff --cached', log=False)
+        output, _, _ = self._run_command('git diff --cached')
 
         added, removed = 0, 0
         for line in output.split('\n'):
@@ -169,8 +141,8 @@ class GitRepo(VCSRepo):
         return added, removed
 
     def _commit(self, message, allow_empty=False):
-        cmd = ('git commit ' + ('--allow-empty ' if allow_empty else '') +
-               '-m "{0}"'.format(message))
+        cmd = ('git commit' + (' --allow-empty' if allow_empty else '') +
+               ' -m "{0}"'.format(message))
         self._run_command(cmd)
 
     def _push(self):
@@ -178,25 +150,20 @@ class GitRepo(VCSRepo):
 
 
 class VCSRepoManager(object):
-    _run_command = _run_command
+    def __init__(self, logger=Logger()):
+        self.logger = logger
 
-    def __init__(self, debug=False, log_syslog=False, logger=syslog):
-        set_attrs(self, {
-            'debug': debug,
-            'log_syslog': log_syslog,
-            'logger': logger,
-        })
+    def _run_command(self, command, ignore_failure=False):
+        return run_command(command, logger=Logger(),
+                           ignore_failure=ignore_failure)
 
     def open(self, *args, **kwargs):
         return VCSRepo(*args, **kwargs)
 
 
 class GitRepoManager(VCSRepoManager):
-    _log = _log
-
-    def __init__(self, **kwargs):
-        self.config = kwargs.pop('config', {})
-        super(GitRepoManager, self).__init__(**kwargs)
+    def __init__(self, config):
+        self.config = config
 
     def open(self, *args, **kwargs):
         return GitRepo(*args, **kwargs)
