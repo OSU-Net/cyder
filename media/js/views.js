@@ -39,14 +39,6 @@ $(document).ready( function() {
         $(parentsChild).slideToggle( 'slow' );
     });
 
-    // handles create buttons in dynamic/static interface view and range
-    // detail view
-    //$( document ).on( 'click', '#system_create', function( e ) {
-    //    e.preventDefault();
-    //    var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
-    //    button_to_ajax( this, csrfToken, { 'mode': 'GET', 'dataType': 'json' } );
-    //});
-
     $( document ).on( 'click', '.exit-message', function( e ) {
         slideUp_and_remove( $(this).parent() );
     });
