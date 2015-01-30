@@ -10,7 +10,16 @@ $(document).ready(function() {
         var ipv6 = '#id_ip_type_1';
         var site = '#id_site';
         var vrf = '#id_vrf';
+        var form = '#hidden-inner-form';
+
         var rangeType = "input[type='radio'][name='interface_type']:checked";
+        if ( !$(rangeType).length && $(form).find("#metaData").length ) {
+            metaData = $(form).find('#metaData');
+            rangeType = metaData.attr('interface_type');
+        } else {
+            rangeType = $(rangeType).val();
+        }
+
         return {
             get_ip: function() {
                 if ( $(rng).val() == '' ) {
@@ -40,7 +49,7 @@ $(document).ready(function() {
             get_ranges: function() {
                 var postData = {
                     csrfmiddlewaretoken: csrfToken,
-                    rangeType: $(rangeType).val(),
+                    rangeType: rangeType,
                     site: $(site).val(),
                     vrf: $(vrf).val(),
                 };

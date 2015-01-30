@@ -101,6 +101,10 @@ $(document).ready(function() {
             enable_system_form( data );
             if ( data.initial_type ) {
                 changeSystemForm( data.initial_type, 0, 'fast' );
+                metaData = $('<div id="metaData">')
+                    .attr( 'interface_type', data.initial_type )
+                    .attr( 'style', 'display:none' );
+                $('#hidden-inner-form').append( metaData );
             }
         });
     });
