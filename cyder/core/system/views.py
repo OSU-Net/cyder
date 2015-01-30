@@ -3,9 +3,10 @@ import simplejson as json
 from copy import copy
 
 from django import forms
-from django.forms.util import ErrorDict, ErrorList
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
+from django.db.models import get_model
+from django.forms.util import ErrorDict, ErrorList
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
@@ -124,8 +125,11 @@ def system_create_view(request):
             dynamic_form.fields['vrf'].widget = forms.HiddenInput()
             dynamic_form.fields['site'].widget = forms.HiddenInput()
 
+    Range = get_model('cyder', 'range')
     static_form.fields['system'].widget = forms.HiddenInput()
+    static_form.fields['range'].queryset = Range.objects.filter(range_type='st')
     dynamic_form.fields['system'].widget = forms.HiddenInput()
+    dynamic_form.fields['range'].queryset = Range.objects.filter(range_type='dy')
     static_form.fields['ip_type'].widget = forms.HiddenInput()
 
     if request.session['ctnr'].name != 'global':
@@ -133,6 +137,7 @@ def system_create_view(request):
         static_form.fields['ctnr'].widget = forms.HiddenInput()
 
     system_form.make_usable(request)
+
     static_form.make_usable(request)
     dynamic_form.make_usable(request)
 
