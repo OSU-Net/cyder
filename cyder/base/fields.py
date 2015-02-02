@@ -51,9 +51,9 @@ class MacAddrField(CharField):
         value = super(MacAddrField, self).to_python(value)
 
         if value:
-            value = value.lower().replace(':', '').replace('-', '')
+            raw = value.lower().replace(':', '').replace('-', '')
             value = reduce(lambda x,y: x + ':' + y,
-                           (value[i:i+2] for i in xrange(0, 12, 2)))
+                           (raw[i:i+2] for i in xrange(0, 12, 2))) + raw[12:]
         elif value == '':
             value = None
         return value
