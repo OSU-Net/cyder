@@ -313,10 +313,13 @@ class DNSBuilder(MutexMixin, Logger):
                                    .format(view.name, soa, build_time),
                                    root_domain=root_domain)
                     if not view_data:
+                        # Though there is no zone file, we keep it in the
+                        # config to claim authority (for DNS poison, etc.)
                         self.log_debug(
                             '< {0} > No data found in this view. '
-                            'No zone file will be made or included in any'
-                            ' config for this view.'.format(view.name),
+                            'No zone file will be made, but it will be '
+                            'included in the config for '
+                            'this view.'.format(view.name),
                             root_domain=root_domain)
                         return None
                     self.log_debug(
