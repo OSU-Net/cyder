@@ -89,7 +89,7 @@ class DHCPBuilder(MutexMixin):
 
             raise Exception(msg)
         except IOError as e:
-            if e.errno == 2:  # IOError: [Errno 2] No such file or directory
+            if e.errno == errno.ENOENT:  # IOError: [Errno 2] No such file or directory
                 pass
             else:
                 raise

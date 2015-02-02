@@ -1,6 +1,6 @@
 import re
 import os
-
+import errno
 
 def get_serial(file_):
     """
@@ -13,7 +13,7 @@ def get_serial(file_):
         with open(file_, 'r') as fd:
             return _str_get_serial(fd)
     except IOError as e:
-        if e.errno == 2:  # IOError: [Errno 2] No such file or directory
+        if e.errno == errno.ENOENT:  # IOError: [Errno 2] No such file or directory
             return ''
         else:
             raise
