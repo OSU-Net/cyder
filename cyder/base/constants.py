@@ -9,6 +9,9 @@ ACTIONS = {
     ACTION_DELETE: 'Delete',
 }
 
+STATIC = 'st'
+DYNAMIC = 'dy'
+
 LEVEL_GUEST = 0
 LEVEL_USER = 1
 LEVEL_ADMIN = 2

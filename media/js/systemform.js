@@ -101,8 +101,9 @@ $(document).ready(function() {
             enable_system_form( data );
             if ( data.initial_type ) {
                 changeSystemForm( data.initial_type, 0, 'fast' );
-                metaData = $('<div id="metaData">')
-                    .attr( 'interface_type', data.initial_type )
+                metaData = $('<div id="form-metadata">')
+                    .attr( 'interfaceType', data.initial_type )
+                    .attr( 'objType', 'system' )
                     .attr( 'style', 'display:none' );
                 $('#hidden-inner-form').append( metaData );
             }

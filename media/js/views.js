@@ -133,8 +133,14 @@ $(document).ready( function() {
                 global: false,
                 dataType: 'json',
                 success: function( data ) {
+                    metaData = $('<div id="form-metadata">')
+                        .attr( 'objType', kwargs.obj_type )
+                        .attr( 'style', 'display:none' );
                     setTimeout( function() {
-                        $('#hidden-inner-form').empty().append( data.form );
+                        $('#hidden-inner-form')
+                            .empty()
+                            .append( data.form )
+                            .append( metaData );
                         initForms();
                     }, 150 );
                     $('#form-title').html( data.form_title );

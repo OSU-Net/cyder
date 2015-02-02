@@ -1,5 +1,16 @@
 $(document).ready(function() {
     var RangeWizard = null;
+    function get_range_type( objType ) {
+        var rangeType = '';
+        var staticTypes = [ 'ptr', 'address_record', 'static_interface' ];
+        if ( $.inArray( objType, staticTypes ) != -1 ) {
+           rangeType = Constants.STATIC;
+        } else {
+           rangeType = Constants.DYNAMIC;
+        }
+        return rangeType;
+    }
+
     function enableRangeWizard() {
     RangeWizard = (function(){
         var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
@@ -11,14 +22,12 @@ $(document).ready(function() {
         var site = '#id_site';
         var vrf = '#id_vrf';
         var form = '#hidden-inner-form';
-
-        var rangeType = "input[type='radio'][name='interface_type']:checked";
-        if ( !$(rangeType).length && $(form).find("#metaData").length ) {
-            metaData = $(form).find('#metaData');
-            rangeType = metaData.attr('interface_type');
-        } else {
-            rangeType = $(rangeType).val();
+        var metaData = '#form-metadata';
+        var objType = $(metaData).attr('objType');
+        if ( objType == 'system' ) {
+           objType = $(metaData).attr('interfaceType');
         }
+        var rangeType = get_range_type( objType );
 
         return {
             get_ip: function() {
