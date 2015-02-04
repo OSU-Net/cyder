@@ -47,6 +47,20 @@ class MacAddrField(CharField):
             return super(MacAddrField, self).get_prep_lookup(
                 lookup_type, value)
 
+    def to_python(self, value):
+        value = super(MacAddrField, self).to_python(value)
+
+        if value:
+            raw = value.lower().replace(':', '').replace('-', '')
+            if len(raw) != 12:
+                # We can't raise a ValidationError in to_python() (because
+                # nothing will catch it), so all we can do is make sure clean()
+                # will raise a ValidationError when it's called next.
+                return 'TOO LONG'
+            return ':'.join(raw[i:i+2] for i in xrange(0, 12, 2))
+        else:
+            return
+
     def clean(self, value, model_instance):
         value_required = (self.dhcp_enabled is True
             or (isinstance(self.dhcp_enabled, basestring) and
@@ -57,10 +71,6 @@ class MacAddrField(CharField):
                 "This field is required when DHCP is enabled")
 
         if value:
-            raw = value.lower().replace(':', '').replace('-', '')
-            if len(raw) != 12:
-                raise ValidationError('Invalid MAC address')
-            value = ':'.join(raw[i:i+2] for i in xrange(0, 12, 2))
             validate_mac(value)
             return super(MacAddrField, self).clean(value, model_instance)
         else:
