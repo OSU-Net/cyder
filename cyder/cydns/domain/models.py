@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 from cyder.base.mixins import ObjectUrlMixin
@@ -251,6 +252,23 @@ class Domain(BaseModel, ObjectUrlMixin):
             children |= child.get_children_recursive()
 
         return children
+
+    def get_related_ranges(self):
+        if not self.is_reverse:
+            return None
+
+        if self.ip_type == '6':
+            raise NotImplemented
+
+        from cyder.cydhcp.range.models import Range
+        ip_str = self.name.rsplit('.', 2)[0]
+        ip_str = '.'.join(reversed(ip_str.split('.')))
+        if ip_str.count('.') < 3:
+            ip_str += '.'
+        ranges = Range.objects.filter(ip_type=self.ip_type)
+        ranges = Range.objects.filter(Q(start_str__startswith=ip_str) |
+                                      Q(end_str__startswith=ip_str))
+        return ranges
 
     def has_record_set(self, view=None, exclude_ns=False):
         object_sets = [
