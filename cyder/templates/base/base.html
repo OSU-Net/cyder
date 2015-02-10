@@ -135,7 +135,15 @@
       {% block view_metadata %}{% endblock %}
       <div class="content">
         {% block form %}{% endblock %}
-        {% block content %}{% endblock %}
+        {% block content %}
+          <div id="front-page-links">
+            <a class="front-page-link" href="#">Register a new device</a>
+            <a class="front-page-link" href="/search/help">How to use search</a>
+            <a class="front-page-link"
+               href="http://is.oregonstate.edu/it-infrastructure/net/dns-dhcp/cyder/cyder-user-guide"
+               >Cyder User Guide and Reference</a>
+          </div>
+        {% endblock %}
       </div>
     </div>
     <div id="footer" class="footer">
