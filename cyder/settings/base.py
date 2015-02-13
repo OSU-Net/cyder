@@ -297,9 +297,6 @@ MINIFY_BUNDLES = {
         'rangeform': (
             'js/rangeform.js',
         ),
-        'tables': (
-            'js/tables.js',
-        ),
         'admin': (
             'js/admin.js',
         ),
