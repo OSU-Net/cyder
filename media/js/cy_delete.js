@@ -49,7 +49,9 @@ $(document).ready( function() {
 
     function delete_object( btn, kwargs, csrfToken, msg ) {
         if ( confirm( msg ) ) {
-            $.when( button_to_post( btn, csrfToken ) ).done( function( data ) {
+            $.when( button_to_ajax(
+                btn, csrfToken, { 'mode': 'POST', 'dataType': 'json' } ) )
+                    .done( function( data ) {
                 if ( data.error ) {
                     header_message( data.error );
                 } else {
