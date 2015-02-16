@@ -408,6 +408,7 @@ def migrate_dynamic_hosts():
                     'address {}\n'.format(intr.mac))
                 stderr.write('    {}\n'.format(e))
                 intr = None
+                s.delete()
 
         if intr:
             count += 1
