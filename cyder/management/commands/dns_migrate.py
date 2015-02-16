@@ -299,7 +299,7 @@ class Zone(object):
                 continue
 
             # create system
-            system = System(name=name)
+            system = System(name=name, ctnr=ctnr)
             system.save()
             for key in sys_value_keys.keys():
                 value = items[key].strip()
