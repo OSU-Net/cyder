@@ -30,14 +30,8 @@ class System(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        objects = objects or System.objects
-        DynamicInterface = get_model('cyder', 'dynamicinterface')
-        StaticInterface = get_model('cyder', 'staticinterface')
-        dynamic_query = DynamicInterface.objects.filter(
-            ctnr=ctnr).values_list('system')
-        static_query = StaticInterface.objects.filter(
-            ctnr=ctnr).values_list('system')
-        return objects.filter(Q(id__in=static_query) | Q(id__in=dynamic_query))
+        objects = objects if objects is not None else System.objects
+        return objects.filter(ctnr=ctnr)
 
     def check_in_ctnr(self, ctnr):
         return (self.staticinterface_set.filter(ctnr=ctnr).exists() or
