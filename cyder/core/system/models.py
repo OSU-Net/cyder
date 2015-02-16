@@ -15,6 +15,8 @@ class System(BaseModel, ObjectUrlMixin):
     name = models.CharField(
         max_length=255, unique=False, null=False, blank=False,
         validators=[validate_no_spaces])
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     search_fields = ('name',)
     sort_fields = ('name',)
