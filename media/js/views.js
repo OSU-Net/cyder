@@ -13,9 +13,9 @@ $(document).ready( function() {
 
     // displays the loading gif on ajax event
     $(document).ajaxStart( function() {
-        $('.load').stop().fadeIn( 160 );
+        $('#busy-spinner').stop().fadeIn( 160 );
     }).ajaxStop( function() {
-        $('.load').stop().fadeOut( 160 );
+        $('#busy-spinner').stop().fadeOut( 160 );
     });
 
     // sidebar animation logic
