@@ -61,6 +61,7 @@ $(document).ready(function() {
     }
 
     function changeSystemForm( value, delay, speed ) {
+        $('#form-metadata').attr( 'interfaceType', value );
         if ( value == 'static_interface' ) {
             systemForm.showStaticForm( delay, speed );
         } else {
@@ -69,7 +70,6 @@ $(document).ready(function() {
     }
 
     $( document ).on( 'change', 'input[name="interface_type"]', function() {
-        $('#form-metadata').attr( 'interfaceType', this.value );
         // dont delay on initial page load
         if( $('#dynamic-form').length || $('#static-form').length ) {
             changeSystemForm( this.value, 500, 'slow' );
@@ -107,7 +107,6 @@ $(document).ready(function() {
             $('#hidden-inner-form').append( metaData );
             if ( data.initial_type ) {
                 changeSystemForm( data.initial_type, 0, 'fast' );
-                $('#form-metadata').attr( 'interfaceType', data.initial_type );
             }
         });
     });
