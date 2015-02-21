@@ -179,7 +179,6 @@ def range_wizard_get_ranges(request):
     networks = []
     all_ranges = False
     data = request.POST
-
     if data.get('rangeType', None):
         range_types = [data.get('rangeType')]
     else:
@@ -204,7 +203,11 @@ def range_wizard_get_ranges(request):
     else:
         all_ranges = True
 
-    networks = list(networks)
+    if networks:
+        networks = list(networks)
+    else:
+        networks = []
+
     ranges = get_ranges(
         networks, ctnr=request.session['ctnr'],
         range_types=range_types, all_ranges=all_ranges)
