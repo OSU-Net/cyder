@@ -77,6 +77,8 @@ class Zone(object):
                 print ("WARNING: Domain %s is a secondary, so its records "
                        "will not be migrated." % self.dname)
                 secondary = True
+                self.gen_static(simulate_delegated=True)
+                self.gen_AR(reverse_only=True)
             else:
                 if self.dname in get_delegated():
                     self.domain.soa = self.gen_SOA() or soa
@@ -90,15 +92,20 @@ class Zone(object):
                         print "%s has been marked as delegated." % self.dname
                         self.domain.save()
 
-                elif self.domain_id is not None:
+                if self.domain_id is not None:
                     # XXX: if SOA is created before AR and NS, then
                     # creating glue will raise an error. However,
                     # when creating delegated domains, an SOA is needed
-                    self.gen_MX()
-                    self.gen_static()
-                    self.gen_AR()
+                    if self.dname not in get_delegated():
+                        self.gen_MX()
+                        self.gen_static()
+                        self.gen_AR()
+                    else:
+                        self.gen_static(simulate_delegated=True)
+                        self.gen_AR(reverse_only=True)
                     self.gen_NS()
-                    self.domain.soa = self.gen_SOA() or soa
+                    if self.dname not in get_delegated():
+                        self.domain.soa = self.gen_SOA() or soa
 
         else:
             self.domain = self.gen_domain()
@@ -217,7 +224,7 @@ class Zone(object):
             except ValidationError, e:
                 stderr.write("Error generating MX. %s\n" % e)
 
-    def gen_static(self):
+    def gen_static(self, simulate_delegated=False):
         """
         Generates the Static Interface objects related to this zone's domain.
 
@@ -259,11 +266,17 @@ class Zone(object):
         cursor.execute(sql)
         for values in cursor.fetchall():
             items = dict(zip(keys, values))
+            name = items['host.name']
+
+            if simulate_delegated:
+                print ("WARNING: Did not migrate host %s because it is in a "
+                       "delegated or secondary zone." % name)
+                continue
+
             ctnr = self.ctnr_from_zone_name(items['zone.name'])
             if ctnr is None:
                 continue
 
-            name = items['host.name']
             enabled = bool(items['enabled'])
             dns_enabled, dhcp_enabled = enabled, enabled
             ip = items['ip']
@@ -323,17 +336,18 @@ class Zone(object):
             try:
                 static.save(update_range_usage=False)
             except ValidationError as e:
+                fqdn = ".".join((name, self.domain.name))
                 try:
                     static.dhcp_enabled = False
                     static.dns_enabled = dns_enabled
                     static.save(update_range_usage=False)
-                    stderr.write('WARNING: Static interface with IP {} has '
-                                 'been disabled\n'.format(static.ip_str))
-                    stderr.write('    {}\n'.format(e))
+                    stderr.write('WARNING: Static interface {} has '
+                                 'been disabled: '.format(fqdn))
+                    stderr.write('{}\n'.format(e))
                 except ValidationError as e:
-                    stderr.write('WARNING: Could not create static interface '
-                                 'with IP {}\n'.format(static.ip_str))
-                    stderr.write('    {}\n'.format(e))
+                    stderr.write('WARNING: Could not create the static '
+                                 'interface {}: '.format(fqdn))
+                    stderr.write('{}\n'.format(e))
                     static = None
                     system.delete()
 
@@ -341,7 +355,7 @@ class Zone(object):
                 static.views.add(public)
                 static.views.add(private)
 
-    def gen_AR(self):
+    def gen_AR(self, reverse_only=False):
         """
         Generates the Address Record and PTR objects related to this zone's
         domain.
@@ -369,8 +383,7 @@ class Zone(object):
         for ip, hostname, ptr_type, zone, enabled, in cursor.fetchall():
             hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
-            if dname != name:
-                continue
+            temp_reverse_only = True if dname != name else False
 
             dup_stats = StaticInterface.objects.filter(ip_str=long2ip(ip))
             if dup_stats.exists():
@@ -387,7 +400,8 @@ class Zone(object):
             if ctnr is None:
                 continue
 
-            if ptr_type == 'forward':
+            if (ptr_type == 'forward' and not reverse_only
+                    and not temp_reverse_only):
                 if AddressRecord.objects.filter(
                         fqdn=hostname, ip_str=long2ip(ip)).exists():
                     continue
@@ -404,7 +418,7 @@ class Zone(object):
                     arec.views.add(public)
                     arec.views.add(private)
 
-            elif ptr_type == 'reverse':
+            if ptr_type == 'reverse':
                 if not PTR.objects.filter(ip_str=long2ip(ip)).exists():
                     ptr = PTR(fqdn=hostname, ip_str=long2ip(ip),
                               ip_type='4', ctnr=ctnr)
@@ -522,6 +536,7 @@ def gen_CNAME():
     for pk, server, name, enabled, zone, dname in cursor.fetchall():
         server, name = server.lower(), name.lower()
         dname = dname.lower()
+        server = server.strip('.')
 
         fqdn = ".".join([name, dname])
         name, dname = fqdn.split(".", 1)
@@ -550,8 +565,10 @@ def gen_CNAME():
         if ctnr is None:
             continue
 
+        fqdn = "%s.%s" % (name, domain.name)
+        fqdn = fqdn.lower().strip('.')
         if ctnr not in domain.ctnr_set.all():
-            print "CNAME %s has mismatching container for its domain." % pk
+            print "CNAME %s has mismatching container for its domain." % fqdn
             continue
 
         cn = CNAME(label=name, domain=domain, target=server, ctnr=ctnr)
@@ -569,7 +586,7 @@ def gen_CNAME():
                 cn.views.add(public)
                 cn.views.add(private)
         except ValidationError, e:
-            print "Error:", e
+            print "Error for CNAME %s.%s: %s" % (name, domain.name, e)
 
 
 def gen_reverses():
@@ -608,9 +625,6 @@ def gen_reverse_soa():
 def gen_DNS(skip_edu=False):
     gen_reverses()
 
-    for dname in settings.NONAUTHORITATIVE_DOMAINS:
-        Zone(domain_id=None, dname=dname)
-
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():
         if "edu" in dname and skip_edu:
@@ -621,9 +635,6 @@ def gen_DNS(skip_edu=False):
 
 def gen_domains_only():
     gen_reverses()
-
-    for dname in settings.NONAUTHORITATIVE_DOMAINS:
-        Zone(domain_id=None, dname=dname, gen_recs=False)
 
     cursor.execute('SELECT * FROM domain WHERE master_domain = 0')
     for domain_id, dname, _, _ in cursor.fetchall():

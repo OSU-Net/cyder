@@ -4,6 +4,8 @@ from cyder.cydhcp.utils import start_end_filter, two_to_one, one_to_two
 
 from django.http import HttpResponse
 
+from cyder.base.constants import STATIC, DYNAMIC
+
 import json
 
 import ipaddr
@@ -179,9 +181,9 @@ def range_wizard_get_ranges(request):
     data = request.POST
 
     if data.get('rangeType', None):
-        range_types = [data.get('rangeType')[:2]]
+        range_types = [data.get('rangeType')]
     else:
-        range_types = ['st', 'dy']
+        range_types = [STATIC, DYNAMIC]
 
     if data.get('vrf', None):
         Vrf = get_model('cyder', 'vrf')

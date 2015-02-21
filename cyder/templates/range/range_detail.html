@@ -9,7 +9,7 @@
   {% endif %}
 
   {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamicinterface') and obj.range_type == 'dy' %}
-  <a class="btn submit a" href={{ url('system-create') }} id="system_create"
+  <a class="btn a system_form" href={{ url('system-create') }} id="system_create"
       data-kwargs='{"initial": "True", "range": "{{ obj.pk }}", "interface_type": "dynamic_interface"}'>Create Dynamic Interface</a>
   {% endif %}
 {% endblock %}
@@ -81,7 +81,7 @@
                                    {% endif %}
                 {% if request.user.get_profile().has_perm(
                     request, 2, obj_class='staticinterface') and obj.range_type == 'st' %}
-                    <a class="btn submit a"
+                    <a class="btn a system_form"
                         data-kwargs='{"initial": "True", "interface_type": "static_interface",
                             "ip_str":"{{ x[1].__str__() }}" }'
                         id=system_create
@@ -123,4 +123,5 @@
         {% include "base/includes/object_table.html" %}
       {% endif %}
   {% endif %}
+  {{ js('systemform') }}
 {% endblock %}

@@ -17,31 +17,25 @@ ns2=localhost
 ns2_target=localhost
 
 zones="
-    0.0.127.in-addr.arpa
     10.in-addr.arpa
     139.201.199.in-addr.arpa
-    193.128.in-addr.arpa
     16.211.140.in-addr.arpa
-    17.211.140.in-addr.arpa
-    18.211.140.in-addr.arpa
-    19.211.140.in-addr.arpa
-    20.211.140.in-addr.arpa
-    21.211.140.in-addr.arpa
-    23.211.140.in-addr.arpa
-    26.211.140.in-addr.arpa
-    28.211.140.in-addr.arpa
-    33.211.140.in-addr.arpa
-    71.211.140.in-addr.arpa
     162.211.140.in-addr.arpa
     163.211.140.in-addr.arpa
     165.211.140.in-addr.arpa
-    168.211.140.in-addr.arpa
+    17.211.140.in-addr.arpa
+    18.211.140.in-addr.arpa
+    19.211.140.in-addr.arpa
+    193.128.in-addr.arpa
+    20.211.140.in-addr.arpa
+    21.211.140.in-addr.arpa
     224.211.140.in-addr.arpa
     225.211.140.in-addr.arpa
     226.211.140.in-addr.arpa
     227.211.140.in-addr.arpa
     228.211.140.in-addr.arpa
     229.211.140.in-addr.arpa
+    23.211.140.in-addr.arpa
     230.211.140.in-addr.arpa
     231.211.140.in-addr.arpa
     232.211.140.in-addr.arpa
@@ -52,7 +46,13 @@ zones="
     237.211.140.in-addr.arpa
     238.211.140.in-addr.arpa
     239.211.140.in-addr.arpa
+    26.211.140.in-addr.arpa
+    28.211.140.in-addr.arpa
+    32.211.140.in-addr.arpa
+    33.211.140.in-addr.arpa
+    71.211.140.in-addr.arpa
     aftol.org
+    alfataxi.com.ua
     askmars.com
     askmars.net
     askmars.org
@@ -62,21 +62,29 @@ zones="
     beaverracing.org
     beaverturf.com
     beetlebank.org
+    cabannes-informatique.com
     campaignforosu.com
     campaignforosu.net
     campaignforosu.org
     cascadeprint.org
+    cdadic.com
+    cdadic.org
+    chemistryisawesome.com
+    clermatheinternational.com
+    cm-sabugal.pt
     code4lib.org
     collaborationcorvallis.org
+    coralreefmovie.com
+    coralreefmovie.org
     cordyceps.us
     ctemps.org
     deschutesexplorer.info
     educational-resources-pactrans.org
-    eduy.ir
     ellieslog.com
     ellieslog.org
     eorganic.info
     eusesconsortium.org
+    evafashiongroup.com
     experienceosu.com
     extensionservice.com
     extensionservice.net
@@ -91,14 +99,20 @@ zones="
     foodinnovationcenter.org
     forestphytophthora.org
     forestphytophthoras.org
+    gcngroup.co.in
     globalclimatedata.org
     granderondeexplorer.info
+    hairdesign-ms.ch
     hoodexplorer.info
-    hostcenter.dk
+    hydrophilesresearchsymposium.org
     hydroville.org
+    i-m.co
     icaarconcrete.org
     icoastalatlas.net
+    ie3global.com
+    ie3global.org
     iifet.org
+    importfashionwear.com.br
     intertidalweb.org
     intunewith.com
     intunewith.info
@@ -106,32 +120,39 @@ zones="
     intunewith.org
     ipmnet.org
     ipmprime.org
+    istropolitanaproject.sk
     johndayexplorer.info
+    kazcollector.kz
     kbvr.com
     kbvrtv.com
     klamathexplorer.info
+    krishnait.in
+    labourseconfidentielle.fr
     lakesbasinexplorer.info
+    learnmobilelidar.com
     librariesoforegon.org
     libraryfind.org
     lowercolumbiaexplorer.info
     maizegametophyte.org
     majordiscovery.org
+    makken.desarrollomediasoft.com
     marinecoastalgis.net
     marinemammalinstitute.com
     marinemammalinstitute.net
     marinemammalinstitute.org
     marinemammalprogram.org
+    matospereira.com
     mbi-online.org
     mbi-online.us
     meetatosu.com
+    microbe-id.org
     micronbc.org
     midvalleycoastlearn.org
     milkweedgenome.org
     myorangerewards.com
     naafe.org
     nacse.org
-    nichemeatprocessing.com
-    nichemeatprocessing.org
+    nhacoviet.net
     nitrificationnetwork.org
     northcoastexplorer.info
     nowebsto.org
@@ -146,6 +167,9 @@ zones="
     opencampusoregon.com
     opencampusoregon.net
     opencampusoregon.org
+    openx.com
+    openx.net
+    openx.org
     or-firstforce.org
     oraapt.org
     oregon-state.edu
@@ -158,6 +182,7 @@ zones="
     oregonflora.org
     oregonfoodsystems.com
     oregonfoodsystems.org
+    oregongearup.org
     oregonmasternaturalist.com
     oregonmasternaturalist.net
     oregonmasternaturalist.org
@@ -184,9 +209,7 @@ zones="
     orst.info
     orst.net
     orst.org
-    ortop.org
     ortransfer.com
-    orvsd.org
     ospud.org
     osu1868society.com
     osu1868society.net
@@ -221,6 +244,7 @@ zones="
     osupresidentscircle.org
     osusuccess.com
     ous.edu
+    ovq.jp
     owri.org
     owyheemalheurexplorer.info
     paulingcatalog.org
@@ -243,17 +267,24 @@ zones="
     poweredbyorange.com
     poweredbyorange.org
     qlz.cn
+    raincorvallis.com
+    raincorvallis.info
+    raincorvallis.org
+    raincorvallis.us
     rebeaved.com
     rogueexplorer.info
     rotbusters.org
+    savingatlantis.org
+    scripts.hostcenter.dk
     seafloormapping.net
     seps.org
-    siantsis.com
+    shrisarojkrishnaupvan.in
     simearth.org
     singorange.com
     songsofpowerandprayer.com
     songsofpowerandprayer.org
     southcoastexplorer.info
+    spacewer.sk
     spottedwing.com
     spottedwing.org
     staterblog.com
@@ -267,7 +298,6 @@ zones="
     tiestotheland.org
     tillikum.org
     trtr.org
-    ucoz.hu
     umatillaexplorer.info
     umpquaexplorer.info
     uoregon.eu
@@ -280,6 +310,11 @@ zones="
     westernlandscapesexplorer.info
     wildstrawberry.org
     willametteexplorer.info
+    www.casasolylunasevilla.com
+    www.cleemydejong.nl
+    www.firminoturismo.com.br
+    www.saoklongyai.go.th
+    www.spacewer.sk
     yachatsdocuments.info
 "
 
@@ -315,7 +350,7 @@ function axfr() {
     local outfile="$4"
     eval $outfile=$build_out  # Set it for the caller
 
-    echo "ssh $1 dig $dig_args @$2 $3 axfr | etc."
+    echo "dig $dig_args @$2 $3 axfr | etc."
     dig $dig_args @$2 $3 axfr |
         grep -v RSIG | # Don't care
         grep -v SOA | # Don't care

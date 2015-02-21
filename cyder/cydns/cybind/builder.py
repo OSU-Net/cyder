@@ -263,7 +263,8 @@ class DNSBuilder(MutexMixin, Logger):
     def build_zone_files(self, soa_pks_to_rebuild, force=False):
         zone_stmts = {}
 
-        for soa in SOA.objects.filter(dns_enabled=True):
+        for soa in (SOA.objects.filter(dns_enabled=True)
+                               .order_by("root_domain__name")):
             # If anything happens during this soa's build we need to mark
             # it as dirty so it can be rebuild
             try:
@@ -301,9 +302,7 @@ class DNSBuilder(MutexMixin, Logger):
                     root_domain=root_domain
                 )
 
-                # This for loop decides which views will be candidates for
-                # rebuilding.
-                for view in View.objects.all():
+                def get_view_data(view):
                     self.log_debug("++++++ Looking at < {0} > view ++++++"
                                    .format(view.name), root_domain=root_domain)
                     t_start = time.time()  # tic
@@ -314,16 +313,26 @@ class DNSBuilder(MutexMixin, Logger):
                                    .format(view.name, soa, build_time),
                                    root_domain=root_domain)
                     if not view_data:
+                        # Though there is no zone file, we keep it in the
+                        # config to claim authority (for DNS poison, etc.)
                         self.log_debug(
                             '< {0} > No data found in this view. '
-                            'No zone file will be made or included in any'
-                            ' config for this view.'.format(view.name),
+                            'No zone file will be made, but it will be '
+                            'included in the config for '
+                            'this view.'.format(view.name),
                             root_domain=root_domain)
-                        continue
+                        return None
                     self.log_debug(
                         '< {0} > Non-empty data set for this '
                         'view. Its zone file will be included in the '
                         'config.'.format(view.name), root_domain=root_domain)
+                    return view_data
+
+                # This for loop decides which views will be canidates for
+                # rebuilding.
+                for view in View.objects.all():
+                    self.log_debug("++++++ Looking at < {0} > view ++++++"
+                                   .format(view.name), root_domain=root_domain)
                     file_meta = self.get_file_meta(view, root_domain, soa)
 
                     if force:
@@ -338,12 +347,12 @@ class DNSBuilder(MutexMixin, Logger):
                         force_rebuild = True
 
                     views_to_build.append(
-                        (view, file_meta, view_data)
+                        (view, file_meta)
                     )
 
                 self.log_debug(
                     '----- Building < {0} > ------'.format(
-                        ' | '.join([v.name for v, _, _ in views_to_build])
+                        ' | '.join([v.name for v, _ in views_to_build])
                     ), root_domain=root_domain
                 )
 
@@ -359,7 +368,7 @@ class DNSBuilder(MutexMixin, Logger):
                                    .format(soa.serial),
                                    root_domain=root_domain)
 
-                for view, file_meta, view_data in views_to_build:
+                for view, file_meta in views_to_build:
                     if (root_domain.name, view.name) in ZONES_WITH_NO_CONFIG:
                         self.log_notice(
                             '!!! Not going to emit zone statements for {0}\n'
@@ -379,6 +388,9 @@ class DNSBuilder(MutexMixin, Logger):
                             'Rebuilding < {0} > view file {1}'
                             .format(view.name, file_meta['prod_fname']),
                             root_domain=root_domain)
+                        view_data = get_view_data(view)
+                        if view_data is None:
+                            continue
                         self.build_zone(
                             view, file_meta,
                             # Lazy string evaluation

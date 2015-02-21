@@ -1,5 +1,16 @@
 $(document).ready(function() {
     var RangeWizard = null;
+    function get_range_type( objType ) {
+        var rangeType = '';
+        var staticTypes = [ 'ptr', 'address_record', 'static_interface' ];
+        if ( $.inArray( objType, staticTypes ) != -1 ) {
+           rangeType = Constants.STATIC;
+        } else {
+           rangeType = Constants.DYNAMIC;
+        }
+        return rangeType;
+    }
+
     function enableRangeWizard() {
     RangeWizard = (function(){
         var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
@@ -10,7 +21,14 @@ $(document).ready(function() {
         var ipv6 = '#id_ip_type_1';
         var site = '#id_site';
         var vrf = '#id_vrf';
-        var rangeType = "input[type='radio'][name='interface_type']:checked";
+        var form = '#hidden-inner-form';
+        var metaData = '#form-metadata';
+        var objType = $(metaData).attr('objType');
+        if ( objType == 'system' ) {
+           objType = $(metaData).attr('interfaceType');
+        }
+        var rangeType = get_range_type( objType );
+
         return {
             get_ip: function() {
                 if ( $(rng).val() == '' ) {
@@ -40,7 +58,7 @@ $(document).ready(function() {
             get_ranges: function() {
                 var postData = {
                     csrfmiddlewaretoken: csrfToken,
-                    rangeType: $(rangeType).val(),
+                    rangeType: rangeType,
                     site: $(site).val(),
                     vrf: $(vrf).val(),
                 };
