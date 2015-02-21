@@ -71,14 +71,22 @@ $(document).ready(function() {
                 }).done( function( data ) {
                     $(rng).find( 'option' ).remove().end();
                     if ( data.ranges[0].length === 0 ) {
+                        var args = [];
+                        if ( $('#id_vrf').val() ) {
+                            var arg = 'vrf, ' +
+                                $('#id_vrf option:selected').text();
+                            args.push( arg );
+                        }
+                        if ( $('#id_site').val() ) {
+                            var arg = 'site, ' +
+                                $('#id_site option:selected').text();
+                            args.push( arg );
+                        }
+                        var msg = getMsg( 'RangeWizard', 'NoRanges', args );
                         $(rng)
                            .find( 'option' )
                            .end()
-                           .append( "<option value=''>No ranges in " +
-                                    $('#id_vrf option:selected').text() +
-                                    " and " +
-                                    $('#id_site option:selected').text() +
-                                    '</option>' );
+                           .append( "<option value=''>" + msg + '</option>' );
                     } else {
                         for ( var i in data.ranges[0] ) {
                             $(rng)
