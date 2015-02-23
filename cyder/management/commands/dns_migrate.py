@@ -319,7 +319,7 @@ class Zone(object):
                 wname = cursor.fetchone()[0]
                 w, _ = Workgroup.objects.get_or_create(name=wname)
             else:
-                w = None
+                w = Workgroup.objects.get(name="default")
 
             last_seen = items['last_seen'] or None
             if last_seen:
