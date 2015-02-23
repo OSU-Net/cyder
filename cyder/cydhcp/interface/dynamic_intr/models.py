@@ -13,6 +13,7 @@ from cyder.base.models import BaseModel, ExpirableMixin
 from cyder.base.utils import transaction_atomic
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
+from cyder.cydhcp.constants import DEFAULT_WORKGROUP
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
@@ -23,9 +24,8 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     pretty_type = 'dynamic interface'
 
     ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
-    workgroup = models.ForeignKey(
-        Workgroup, null=False, blank=False,
-        default=Workgroup.objects.get(name='default'))
+    workgroup = models.ForeignKey(Workgroup, null=False, blank=False,
+                                  default=DEFAULT_WORKGROUP)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',

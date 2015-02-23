@@ -21,3 +21,5 @@ RANGE_TYPE = (
 DHCP_EAV_MODELS = ("static_interface_av", "dynamic_interface_av", "range_av",
                    "network_av", "workgroup_av", "vlan_av", "vrf_av",
                    "site_av")
+
+DEFAULT_WORKGROUP = 1

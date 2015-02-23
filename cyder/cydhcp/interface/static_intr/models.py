@@ -15,7 +15,7 @@ from cyder.base.fields import MacAddrField
 from cyder.base.models import ExpirableMixin
 from cyder.base.utils import transaction_atomic
 from cyder.core.system.models import System
-from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.constants import STATIC, DEFAULT_WORKGROUP
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -59,9 +59,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     system = models.ForeignKey(
         System, help_text='System to associate the interface with')
 
-    workgroup = models.ForeignKey(
-        Workgroup, null=False, blank=False,
-        default=Workgroup.objects.get(name='default'))
+    workgroup = models.ForeignKey(Workgroup, null=False, blank=False,
+                                  default=DEFAULT_WORKGROUP)
 
     dhcp_enabled = models.BooleanField(verbose_name='Enable DHCP?',
                                        default=True)
