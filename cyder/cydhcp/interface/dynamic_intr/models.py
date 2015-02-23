@@ -148,6 +148,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             self.range.save(commit=False)
             if old_range:
                 old_range.save(commit=False)
+        assert self.ctnr == self.system.ctnr
 
 
 class DynamicInterfaceAV(EAVBase):

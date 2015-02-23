@@ -140,6 +140,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
                 new_range.save(commit=False)
             if old_range:
                 old_range.save(commit=False)
+        assert self.ctnr == self.system.ctnr
 
     @transaction_atomic
     def delete(self, *args, **kwargs):

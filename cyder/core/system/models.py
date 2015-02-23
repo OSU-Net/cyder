@@ -42,6 +42,7 @@ class System(BaseModel, ObjectUrlMixin):
         data = super(System, self).details()
         data['data'] = [
             ('Name', 'name', self),
+            ('Ctnr', 'ctnr', self.ctnr),
         ]
         return data
 
@@ -67,6 +68,10 @@ class System(BaseModel, ObjectUrlMixin):
         self.full_clean()
 
         super(System, self).save(*args, **kwargs)
+        for i in self.staticinterface_set.all():
+            assert self.ctnr == i.ctnr
+        for i in self.dynamicinterface_set.all():
+            assert self.ctnr == i.ctnr
 
 
 class SystemAV(EAVBase):
