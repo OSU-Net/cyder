@@ -181,6 +181,7 @@
   "pk": 1,
   "model": "cyder.staticinterface",
   "fields": {
+   "workgroup": 1,
    "system": 1,
    "dns_enabled": true,
    "domain": 5,
@@ -201,7 +202,7 @@
    "ip_str": "192.168.0.30",
    "last_seen": "2014-02-01T12:06:20",
    "reverse_domain": 3,
-   "workgroup": null,
+   "workgroup": 1,
    "ctnr": 3,
    "description": ""
   }
@@ -210,6 +211,7 @@
   "pk": 2,
   "model": "cyder.staticinterface",
   "fields": {
+   "workgroup": 1,
    "system": 1,
    "dns_enabled": true,
    "domain": 5,
@@ -230,7 +232,7 @@
    "ip_str": "192.168.0.30",
    "last_seen": "2014-02-01T12:06:20",
    "reverse_domain": 3,
-   "workgroup": null,
+   "workgroup": 1,
    "ctnr": 3,
    "description": ""
   }
@@ -239,6 +241,7 @@
   "pk": 3,
   "model": "cyder.staticinterface",
   "fields": {
+   "workgroup": 1,
    "system": 1,
    "dns_enabled": true,
    "domain": 5,
@@ -259,7 +262,7 @@
    "ip_str": "192.168.0.3",
    "last_seen": "2014-02-01T11:55:57",
    "reverse_domain": 3,
-   "workgroup": null,
+   "workgroup": 1,
    "ctnr": 3,
    "description": ""
   }
@@ -268,6 +271,7 @@
   "pk": 4,
   "model": "cyder.staticinterface",
   "fields": {
+   "workgroup": 1,
    "system": 2,
    "dns_enabled": true,
    "domain": 7,
@@ -288,7 +292,7 @@
    "ip_str": "192.168.0.21",
    "last_seen": "2014-02-01T12:15:42",
    "reverse_domain": 3,
-   "workgroup": null,
+   "workgroup": 1,
    "ctnr": 3,
    "description": ""
   }
