@@ -59,7 +59,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     system = models.ForeignKey(
         System, help_text='System to associate the interface with')
 
-    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+    workgroup = models.ForeignKey(Workgroup, null=False, blank=False)
 
     dhcp_enabled = models.BooleanField(verbose_name='Enable DHCP?',
                                        default=True)

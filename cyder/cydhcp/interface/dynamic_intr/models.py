@@ -23,7 +23,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     pretty_type = 'dynamic interface'
 
     ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
-    workgroup = models.ForeignKey(Workgroup, null=True, blank=True)
+    workgroup = models.ForeignKey(Workgroup, null=False, blank=False)
     system = models.ForeignKey(System, help_text="System to associate "
                                                  "the interface with")
     mac = MacAddrField(dhcp_enabled='dhcp_enabled', verbose_name='MAC address',
