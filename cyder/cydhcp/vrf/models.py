@@ -8,13 +8,15 @@ from cyder.base.eav.models import Attribute, EAVBase
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.utils import transaction_atomic
+from cyder.cydhcp.vrf.validators import validate_vrf_name
 
 
 class Vrf(BaseModel, ObjectUrlMixin):
     pretty_type = 'VRF'
 
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(
+        max_length=100, unique=True, validators=[validate_vrf_name])
 
     search_fields = ('name',)
     sort_fields = ('name',)
