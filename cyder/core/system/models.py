@@ -66,12 +66,15 @@ class System(BaseModel, ObjectUrlMixin):
     @transaction_atomic
     def save(self, *args, **kwargs):
         self.full_clean()
-
         super(System, self).save(*args, **kwargs)
-        for i in self.staticinterface_set.all():
-            assert self.ctnr == i.ctnr
-        for i in self.dynamicinterface_set.all():
-            assert self.ctnr == i.ctnr
+
+    def clean(self, *args, **kwargs):
+        for i in (list(self.staticinterface_set.all()) +
+                  list(self.dynamicinterface_set.all())):
+            if self.ctnr != i.ctnr:
+                i.ctnr = self.ctnr
+                i.save()
+        super(System, self).clean(*args, **kwargs)
 
 
 class SystemAV(EAVBase):

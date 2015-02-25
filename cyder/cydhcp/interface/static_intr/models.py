@@ -211,6 +211,11 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
+        if self.ctnr != self.system.ctnr:
+            raise ValidationError(
+                "Cannot change container; interface's container "
+                "and system's container must be the same. Please change "
+                "the system's container instead.")
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():

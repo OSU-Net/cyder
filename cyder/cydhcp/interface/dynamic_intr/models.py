@@ -112,6 +112,11 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
+        if self.ctnr != self.system.ctnr:
+            raise ValidationError(
+                "Cannot change container; interface's container "
+                "and system's container must be the same. Please change "
+                "the system's container instead.")
         if self.mac:
             siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
             if self.pk is not None:
