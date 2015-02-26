@@ -5,6 +5,8 @@ import os
 import sys
 import syslog
 import time
+import errno
+
 from traceback import format_exception
 
 from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
@@ -450,7 +452,7 @@ class DNSBuilder(MutexMixin, Logger):
 
             raise Exception(msg)
         except IOError as e:
-            if e.errno != 2:  # IOError: [Errno 2] No such file or directory
+            if e.errno != errno.ENOENT:  # IOError: [Errno 2] No such file or directory
                 raise
 
         self.log_info('Building...')

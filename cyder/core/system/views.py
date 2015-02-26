@@ -17,7 +17,7 @@ from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.interface.dynamic_intr.forms import DynamicInterfaceForm
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
-
+from cyder.base.tablefier import Tablefier
 
 def system_detail(request, pk):
     try:
@@ -46,8 +46,8 @@ def system_detail(request, pk):
                                      request=request)))
 
     related_systems.discard(system)
+
     return render(request, 'system/system_detail.html', {
-        'system_table': tablefy([system], info=False, request=request),
         'attrs_table': tablefy(attrs, request=request),
         'static_intr_tables': static_intr,
         'dynamic_intr_tables': dynamic_intr,

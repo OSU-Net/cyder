@@ -3,6 +3,10 @@
 .info_column, .actions_column, .remove_column {
     width: 50px;
 }
+table#obj-info {
+    padding-top: 12px;
+    padding-bottom: 5px;
+}
 table.table {
     clear: both;
     margin-bottom: 13px;

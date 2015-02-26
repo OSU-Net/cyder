@@ -2,6 +2,8 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
+from cyder.cydhcp.network.models import Network
+from cyder.cydhcp.site.models import Site
 from cyder.base.views import cy_detail
 from cyder.cydhcp.vrf.models import Vrf
 
@@ -28,10 +30,14 @@ def vrf_detail(request, pk):
     static_intr_q = get_static_intr_q(vrf)
     static_intrs = (
         StaticInterface.objects.filter(static_intr_q) if static_intr_q else ())
+    networks = Network.objects.filter(vrf=vrf)
+    sites = Site.objects.filter(network__in=networks).distinct()
 
     return cy_detail(request, Vrf, 'vrf/vrf_detail.html', {
         'Dynamic Interfaces': DynamicInterface.objects.filter(
             range__network__vrf=vrf),
         'Static Interfaces': static_intrs,
+        'Sites': sites,
+        'Networks': networks,
         'Attributes': 'vrfav_set',
     }, pk=pk, obj=vrf)
