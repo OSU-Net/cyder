@@ -308,7 +308,7 @@ def migrate_zones():
 @transaction.commit_on_success
 def migrate_dynamic_hosts():
     print "Migrating dynamic hosts."
-    default, _ = Workgroup.objects.get_or_create(name='default')
+    default = Workgroup.objects.get(name='default')
 
     sys_value_keys = {"type": "Hardware Type",
                       "os": "Operating System",
