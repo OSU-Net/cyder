@@ -313,10 +313,15 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
             'page_obj': page_obj,
             'table': table
         })
+
     if obj_type == 'user':
         table = tablefy((obj,), info=False, request=request, update=False)
     else:
         table = tablefy((obj,), info=False, request=request)
+
+    from cyder.base.tablefier import Tablefier  
+    Tablefier.remove_field(table, 'Info')
+    Tablefier.remove_field(table, 'Actions')
 
     return render(request, template, dict({
         'obj': obj,

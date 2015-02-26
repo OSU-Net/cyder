@@ -45,3 +45,48 @@
 
 {% endif %}
 {% endmacro %}
+
+{# render a table containing a single object so that it doesn't look like a table #}
+{% macro render_object(request, object_table, class) %}
+{% if object_table %}
+  <table id="obj-info">
+
+    {% for row in object_table['data']%}
+      {% for col in row %}
+        {% set header, sort_field = object_table['headers'][loop.index0] %}
+         
+        <tr>
+          <td class="{{ header | lower }}_column"><b>{{ header }}</b></td>
+          
+          {% if col['value'] %}
+            <td>
+            {% for cell in col['value'] %}
+              {% if col['url'][loop.index0] %}
+                <a
+                {% if col['data'] %}
+                  {% if col['data'][loop.index0] %}
+                    {% for data in col['data'][loop.index0] %}
+                      data-{{ data[0] }}="{{ data[1] }}"
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}
+                  href="{{ col['url'][loop.index0] }}">
+                {% if col['img'] and col['img'][loop.index0] %}
+                  <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}"/>
+                {% else %}
+                  {{ cell }} 
+                {% endif %}
+                </a>
+              {% else %}
+                {{cell}}
+              {% endif %}
+            {% endfor %}
+            </td>
+          {% endif %}
+        
+        </tr>
+      {% endfor %}
+    {% endfor %}
+  </table>
+{% endif %}
+{% endmacro %}

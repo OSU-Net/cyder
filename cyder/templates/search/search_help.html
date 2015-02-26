@@ -13,7 +13,7 @@
       <table border="0" cellspacing="10">
       <h2><u>Search Patterns</u></h2>
       <tr>
-        <td>
+        <td id="sub-header">
           a&#8209;zA&#8209;Z0&#8209;9.
         </td>
         <td>
@@ -21,13 +21,13 @@
           Bare words are used to match text in objects. Objects that match <b>all</b> bare words
           are returned. For example: <code>foo bar scl3</code> will match objects that contain the
           words <code>foo</code> <b>AND</b> <code>bar</code> <b>AND</b> <code>scl3</code>
-          ('<code>foo.bar.scl3.mozilla.com</code>' would match but
-          <code>foo.baz.scl3.mozilla.com</code> would not).
+          ('<code>foo.bar.scl3.com</code>' would match but
+          <code>foo.baz.scl3.com</code> would not).
           </p>
         </td>
       </tr>
       <tr>
-        <td>
+        <td id="sub-header">
           '/'
         </td>
         <td>
@@ -38,13 +38,13 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td id="sub-header">
           '..'
         </td>
         <td>
           <p>
           When you surround '..' with numbers, inventory will expand your query into multiple
-          queires. For example: A search for <code>web1..3</code> is understood to be a search for
+          queries. For example: A search for <code>web1..3</code> is understood to be a search for
           <code>web1</code> <b>OR</b> <code>web2</code> <b>OR</b> <code>web3</code>.
           </p>
         </td>
@@ -53,12 +53,12 @@
     <table border="0" cellspacing="10">
       <h2><u>Operators</u></h2>
       <tr>
-        <td>
-          '-'
+        <td id="sub-header">
+          '!'
         </td>
         <td>
           <p>
-          The dash character '-' can be used to negate any search pattern. It can also negate the
+          An exclamation point can be used to negate any search pattern. It can also negate the
           <code>type</code> directive.
           </p>
         </td>
@@ -67,20 +67,20 @@
     <table border="0" cellspacing="10">
       <h2><u>Directives</u></h2>
       <tr>
-        <td>
+        <td id="sub-header">
           type:
         </td>
         <td>
           <p>
           The 'type' directive can be used to target a type of DNS record. For example: to see all
           CNAME records that contained the word 'web' you could search <code>type:CNAME web</code>.
-          To search for StaticInterface records or domains use <code>type:STATIC</code> and
+          To search for Static Interface records or domains use <code>type:STATIC</code> and
           <code>type:Domain</code>. Type is case insensitive.
           </p>
         </td>
       </tr>
       <tr>
-        <td>
+        <td id="sub-header">
           site:
         </td>
         <td>
@@ -93,7 +93,7 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td id="sub-header">
           vlan:
         </td>
         <td>
@@ -106,7 +106,7 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td id="sub-header">
           network:
         </td>
         <td>
@@ -118,7 +118,7 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td id="sub-header">
           range:
         </td>
         <td>

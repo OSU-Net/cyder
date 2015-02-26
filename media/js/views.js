@@ -36,6 +36,7 @@ $(document).ready( function() {
             minLength: 1,
             source: function( request, response ) {
                 $.ajax({
+                    global: false,
                     url: '/eav/search',
                     dataType: 'json',
                     data: {
