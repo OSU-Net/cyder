@@ -63,7 +63,6 @@ class Zone(object):
                  gen_recs=True, secondary=False):
         self.domain_id = domain_id
         self.dname = self.get_dname() if dname is None else dname
-        self.dname = self.dname.lower()
         self.domain = None
 
         if gen_recs:
@@ -138,7 +137,6 @@ class Zone(object):
 
         if record:
             primary, contact, refresh, retry, expire, minimum = record
-            primary, contact = primary.lower(), contact.lower()
 
             try:
                 soa = SOA.objects.get(root_domain=self.domain)
@@ -200,7 +198,6 @@ class Zone(object):
 
         for (name, server, priority, ttl,
                 enabled, zone) in cursor.fetchall():
-            name, server = name.lower(), server.lower()
             if MX.objects.filter(label=name,
                                  domain=self.domain,
                                  server=server,
@@ -381,7 +378,6 @@ class Zone(object):
                        "FROM pointer JOIN zone ON pointer.zone = zone.id "
                        "WHERE hostname LIKE '%%.%s';" % name)
         for ip, hostname, ptr_type, zone, enabled, in cursor.fetchall():
-            hostname = hostname.lower()
             label, dname = hostname.split('.', 1)
             temp_reverse_only = True if dname != name else False
 
@@ -448,7 +444,6 @@ class Zone(object):
                        "FROM nameserver "
                        "WHERE domain='%s';" % self.domain_id)
         for pk, name, _, _ in cursor.fetchall():
-            name = name.lower()
             try:
                 ns, _ = Nameserver.objects.get_or_create(domain=self.domain,
                                                          server=name)
@@ -475,7 +470,6 @@ class Zone(object):
                "WHERE master_domain = %s;" % self.domain_id)
         cursor.execute(sql)
         for child_id, child_name in cursor.fetchall():
-            child_name = child_name.lower()
             Zone(child_id, child_name, self.domain.soa, gen_recs=gen_recs,
                  secondary=secondary)
 
@@ -485,7 +479,6 @@ class Zone(object):
         """
         cursor.execute('SELECT * FROM domain WHERE id = %s;' % self.domain_id)
         _, dname, _, _ = cursor.fetchone()
-        dname = dname.lower()
         return dname
 
     @staticmethod
@@ -534,8 +527,6 @@ def gen_CNAME():
     cursor.execute(sql)
 
     for pk, server, name, enabled, zone, dname in cursor.fetchall():
-        server, name = server.lower(), name.lower()
-        dname = dname.lower()
         server = server.strip('.')
 
         fqdn = ".".join([name, dname])
@@ -566,7 +557,7 @@ def gen_CNAME():
             continue
 
         fqdn = "%s.%s" % (name, domain.name)
-        fqdn = fqdn.lower().strip('.')
+        fqdn = fqdn.strip('.')
         if ctnr not in domain.ctnr_set.all():
             print "CNAME %s has mismatching container for its domain." % fqdn
             continue
