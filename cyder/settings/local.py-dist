@@ -25,6 +25,7 @@ MIDDLEWARE_CLASSES = (
     'cyder.middleware.dev_authentication.DevAuthenticationMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     # 'reversion.middleware.RevisionMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 MANAGERS = ADMINS
