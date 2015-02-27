@@ -283,10 +283,7 @@ a.btn {
     width: 110px;
     height: 1000px;
     margin-right: 25px;
-    display: none;
-    &.displayed {
-        display: block;
-    }
+    display: block;
 }
 
 #sidebar {
