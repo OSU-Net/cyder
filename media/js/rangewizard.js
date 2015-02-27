@@ -23,11 +23,6 @@ $(document).ready(function() {
         var vrf = '#id_vrf';
         var form = '#hidden-inner-form';
         var metaData = '#form-metadata';
-        var objType = $(metaData).attr('objType');
-        if ( objType == 'system' ) {
-           objType = $(metaData).attr('interfaceType');
-        }
-        var rangeType = get_range_type( objType );
 
         return {
             get_ip: function() {
@@ -56,6 +51,11 @@ $(document).ready(function() {
                 });
             },
             get_ranges: function() {
+                var objType = $(metaData).attr('objType');
+                if ( objType == 'system' ) {
+                   objType = $(metaData).attr('interfaceType');
+                }
+                var rangeType = get_range_type( objType );
                 var postData = {
                     csrfmiddlewaretoken: csrfToken,
                     rangeType: rangeType,
