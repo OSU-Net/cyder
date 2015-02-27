@@ -66,6 +66,7 @@ $(document).ready(function() {
         } else {
             systemForm.showDynamicForm( delay, speed );
         }
+        initForms();
     }
 
     $( document ).on( 'change', 'input[name="interface_type"]', function() {
@@ -97,6 +98,7 @@ $(document).ready(function() {
             $('.form-btns .btn').not('.cancel')
                 .attr( 'class', 'btn c system-submit');
             $('#hidden-inner-form').empty().append( data.system_form );
+            $('#id_name').addClass('js-noSubmitOnEnter');
             slideDown( $('#obj-form') );
             enable_system_form( data );
             if ( data.initial_type ) {
