@@ -15,8 +15,6 @@ function add_tablesorter(table) {
     });
 }
 
-
-
 function initForms() {
     // Removes 'Hold down' helptext.
     $('.helptext:contains(' + 'Hold down "Control"' + ')').remove();
