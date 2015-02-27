@@ -8,14 +8,14 @@ div.tagsinput {
 }
 
 div.tagsinput span.tag {
-    border: 1px solid #003399;
+    border: 1px solid #c34500;
     -moz-border-radius:2px;
     -webkit-border-radius:2px;
     display: block;
     float: left;
     padding: 5px;
     text-decoration:none;
-    background: #003399;
+    background: #c34500;
     color: #fafafa;
     margin-right: 5px;
     margin-bottom:5px;
