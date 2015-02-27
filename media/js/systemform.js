@@ -66,7 +66,7 @@ $(document).ready(function() {
         } else {
             systemForm.showDynamicForm( delay, speed );
         }
-        initForms();
+        setTimeout( 'initForms()', delay);
     }
 
     $( document ).on( 'change', 'input[name="interface_type"]', function() {

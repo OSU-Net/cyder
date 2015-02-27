@@ -30,9 +30,10 @@ function initForms() {
     $('.submit-on-change').change(function() {
         this.form.submit();
     });
-    $('#obj-form form :input:visible:last').on( 'keypress', function(e) {
+    var keypressSelector = '#obj-form form :input:visible:not(textarea)';
+    $(keypressSelector).on( 'keypress', function(e) {
         if (e.keyCode == 13) {
-            $('.js-submit').focus().click();
+            $('.js-submit, .system-submit').focus().click();
         }
     });
 }
