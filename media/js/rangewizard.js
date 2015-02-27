@@ -23,11 +23,6 @@ $(document).ready(function() {
         var vrf = '#id_vrf';
         var form = '#hidden-inner-form';
         var metaData = '#form-metadata';
-        var objType = $(metaData).attr('objType');
-        if ( objType == 'system' ) {
-           objType = $(metaData).attr('interfaceType');
-        }
-        var rangeType = get_range_type( objType );
 
         return {
             get_ip: function() {
@@ -56,6 +51,11 @@ $(document).ready(function() {
                 });
             },
             get_ranges: function() {
+                var objType = $(metaData).attr('objType');
+                if ( objType == 'system' ) {
+                   objType = $(metaData).attr('interfaceType');
+                }
+                var rangeType = get_range_type( objType );
                 var postData = {
                     csrfmiddlewaretoken: csrfToken,
                     rangeType: rangeType,
@@ -71,14 +71,22 @@ $(document).ready(function() {
                 }).done( function( data ) {
                     $(rng).find( 'option' ).remove().end();
                     if ( data.ranges[0].length === 0 ) {
+                        var args = [];
+                        if ( $('#id_vrf').val() ) {
+                            var arg = 'vrf, ' +
+                                $('#id_vrf option:selected').text();
+                            args.push( arg );
+                        }
+                        if ( $('#id_site').val() ) {
+                            var arg = 'site, ' +
+                                $('#id_site option:selected').text();
+                            args.push( arg );
+                        }
+                        var msg = getMsg( 'RangeWizard', 'NoRanges', args );
                         $(rng)
                            .find( 'option' )
                            .end()
-                           .append( "<option value=''>No ranges in " +
-                                    $('#id_vrf option:selected').text() +
-                                    " and " +
-                                    $('#id_site option:selected').text() +
-                                    '</option>' );
+                           .append( "<option value=''>" + msg + '</option>' );
                     } else {
                         for ( var i in data.ranges[0] ) {
                             $(rng)

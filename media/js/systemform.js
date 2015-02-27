@@ -61,6 +61,7 @@ $(document).ready(function() {
     }
 
     function changeSystemForm( value, delay, speed ) {
+        $('#form-metadata').attr( 'interfaceType', value );
         if ( value == 'static_interface' ) {
             systemForm.showStaticForm( delay, speed );
         } else {
@@ -99,13 +100,13 @@ $(document).ready(function() {
             $('#hidden-inner-form').empty().append( data.system_form );
             slideDown( $('#obj-form') );
             enable_system_form( data );
+            metaData = $('<div id="form-metadata">')
+                .attr( 'interfaceType', data.initial_type )
+                .attr( 'objType', 'system' )
+                .attr( 'style', 'display:none' );
+            $('#hidden-inner-form').append( metaData );
             if ( data.initial_type ) {
                 changeSystemForm( data.initial_type, 0, 'fast' );
-                metaData = $('<div id="form-metadata">')
-                    .attr( 'interfaceType', data.initial_type )
-                    .attr( 'objType', 'system' )
-                    .attr( 'style', 'display:none' );
-                $('#hidden-inner-form').append( metaData );
             }
         });
     });
