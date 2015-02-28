@@ -35,9 +35,9 @@ class BasicDynamicInterfaceTests(TestCase):
             end_str='192.168.0.40')
         self.c.ranges.add(self.r2)
 
-        self.s1 = System.objects.create(name='foo')
+        self.s1 = System.objects.create(name='foo', ctnr=self.c)
 
-        self.s2 = System.objects.create(name='bar')
+        self.s2 = System.objects.create(name='bar', ctnr=self.c)
 
     @property
     def objs(self):
