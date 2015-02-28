@@ -39,10 +39,12 @@ class SystemViewTests(TestCase, GenericViewTests):
     def setUp(self):
         test_data = {
             'name': 'test_system',
+            'ctnr': Ctnr.objects.get(name='test_ctnr'),
         }
         do_setUp(self, test_data)
 
     def post_data(self):
         return {
             'name': 'post_system',
+            'ctnr': Ctnr.objects.get(name='test_ctnr').pk,
         }
