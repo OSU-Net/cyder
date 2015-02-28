@@ -101,8 +101,16 @@ class DHCPBuildTest(TestCase):
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Global'),
+            ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
+
+        d = DynamicInterface.objects.create(
+            system=System.objects.get(name='Test_system_5'),
+            mac='ab:cd:ef:ab:cd:ee',
+            range=Range.objects.get(name='Test range 1'),
+            ctnr=Ctnr.objects.get(name='Test_ctnr'),
+        )
+
 
         self.builder.build()
         self.assertRaises(
@@ -139,7 +147,7 @@ class DHCPBuildTest(TestCase):
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Global'),
+            ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
 
         self.builder.build()
