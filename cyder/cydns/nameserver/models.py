@@ -68,6 +68,9 @@ class Nameserver(CydnsRecord):
         objects = objects.filter(domain__in=ctnr.domains.all())
         return objects
 
+    def get_ctnrs(self):
+        raise TypeError("This object has no container.")
+
     @property
     def rdtype(self):
         return 'NS'

@@ -29,6 +29,14 @@ class BaseModel(models.Model):
     def pretty_name(self):
         return unicode(self)
 
+    def get_ctnrs(self):
+        if hasattr(self, "ctnr") and self.ctnr.name.lower() != "global":
+            return [self.ctnr]
+        elif hasattr(self, "ctnr_set"):
+            return self.ctnr_set.exclude(name="global")
+        else:
+            raise TypeError("This object has no container.")
+
     def cyder_unique_error_message(self, model_class, unique_check):
         """
         Override this method to provide a custom error message for

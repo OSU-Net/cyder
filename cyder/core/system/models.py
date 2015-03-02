@@ -37,6 +37,10 @@ class System(BaseModel, ObjectUrlMixin):
             ctnr=ctnr).values_list('system')
         return objects.filter(Q(id__in=static_query) | Q(id__in=dynamic_query))
 
+    def get_ctnrs(self):
+        return ([self.staticinterface_set.values_list('ctnr', flat=True)] +
+                [self.dynamicinterface_set.values_list('ctnr', flat=True)])
+
     def check_in_ctnr(self, ctnr):
         return (self.staticinterface_set.filter(ctnr=ctnr).exists() or
                 self.dynamicinterface_set.filter(ctnr=ctnr).exists())
