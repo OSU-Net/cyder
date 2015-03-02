@@ -237,7 +237,7 @@ def static_dynamic_view(request):
             sort = int(request.GET['sort'])
             order = request.GET['order'] if 'order' in request.GET else 'asc'
 
-        sort_fn = lambda x: str(x[sort]['value'][0]).lower()
+        sort_fn = lambda x: (x[sort]['value'][0]).encode('utf-8').lower()
         table['data'] = sorted(table['data'], key=sort_fn,
                                reverse=(order == 'desc'))
         return render(request, template, {
@@ -319,7 +319,7 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     else:
         table = tablefy((obj,), info=False, request=request)
 
-    from cyder.base.tablefier import Tablefier  
+    from cyder.base.tablefier import Tablefier
     Tablefier.remove_field(table, 'Info')
     Tablefier.remove_field(table, 'Actions')
 
