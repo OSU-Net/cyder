@@ -293,7 +293,7 @@ class PTRTests(DNSTest, ModelTestMixin):
         """
 
         def create_si(dns_enabled):
-            s = System.objects.create(name='test_system')
+            s = System.objects.create(name='test_system', ctnr=self.c1)
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:12:34', label='foo1',
                 domain=Domain.objects.get(name='oregonstate.edu'),

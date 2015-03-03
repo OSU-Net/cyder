@@ -643,7 +643,7 @@ class AddressRecordTests(DNSTest, ModelTestMixin):
         c2.domains.add(self.o_e)
 
         def create_si():
-            s = System.objects.create(name='test_system')
+            s = System.objects.create(name='test_system', ctnr=c1)
 
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo1', domain=self.o_e,
