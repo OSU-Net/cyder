@@ -662,8 +662,8 @@ def add_pointers_manual():
 
 def delete_DNS():
     print "Deleting DNS objects."
-    for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
-                  StaticInterface, System, Workgroup]:
+    for thing in (Domain, AddressRecord, PTR, SOA, MX, Nameserver,
+                  StaticInterface, System):
         thing.objects.all().delete()
 
 
