@@ -13,9 +13,9 @@ $(document).ready( function() {
 
     // displays the loading gif on ajax event
     $(document).ajaxStart( function() {
-        $('.load').stop().fadeIn( 160 );
+        $('#busy-spinner').stop().fadeIn( 160 );
     }).ajaxStop( function() {
-        $('.load').stop().fadeOut( 160 );
+        $('#busy-spinner').stop().fadeOut( 160 );
     });
 
     // sidebar animation logic
@@ -27,16 +27,6 @@ $(document).ready( function() {
         $(parentsChild).slideToggle( 'slow' );
     });
 
-    // handles create buttons in dynamic/static interface view and range
-    // detail view
-    $( document ).on( 'click', '#system_create', function( e ) {
-        e.preventDefault();
-        var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
-        button_to_form( this, csrfToken, function( postForm ){
-            $(postForm).submit();
-        });
-    });
-
     $( document ).on( 'click', '.exit-message', function( e ) {
         slideUp_and_remove( $(this).parent() );
     });
@@ -46,6 +36,7 @@ $(document).ready( function() {
             minLength: 1,
             source: function( request, response ) {
                 $.ajax({
+                    global: false,
                     url: '/eav/search',
                     dataType: 'json',
                     data: {
@@ -68,15 +59,19 @@ $(document).ready( function() {
 
     // button behavior logic, see css
     function buttonLogic() {
-        $('.js-get-form, .js-create-object, .update, .cancel').addClass( 'hover' );
+        var selectors = '.js-get-form, .js-create-object, .update, ' +
+            '.cancel, .system_form';
+        $(selectors).addClass( 'hover' );
         if ( $(this).hasClass( 'selected' ) ) {
             $(this).removeClass( 'selected' );
         } else {
-            $('.js-get-form, .js-create-object, .update, .cancel').removeClass( 'selected' );
+            $(selectors).removeClass( 'selected' );
             $(this).removeClass( 'hover' ).addClass( 'selected' );
         }
     }
-    $( document ).on('click', '.js-get-form, js-create-object, .update, .cancel', buttonLogic );
+    $( document ).on('click',
+        '.js-get-form, .js-create-object, .update, .cancel, .system_form',
+        buttonLogic );
 
 
     $( document ).on( 'click', '.js-get-form', function( e ) {
@@ -100,15 +95,14 @@ $(document).ready( function() {
         slideUp( $('#obj-form') );
         form.action = btn.href;
         if ( btn_not_toggle_close( btn ) ) {
+            buttonAttrs = 'btn c js-submit';
             kwargs = JSON.parse( $(btn).attr( 'data-kwargs' ) );
             if ( kwargs.pk ) {
-                buttonAttrs = 'btn c submit_update js-submit';
                 getData = {
                     'obj_type': kwargs.obj_type,
                     'pk': kwargs.pk
                 };
             } else {
-                buttonAttrs = 'btn c submit_create js-submit';
                 if ( $(btn).attr( 'data-init' ) ) {
                     initData = $(btn).attr( 'data-init' );
                 }
@@ -128,21 +122,21 @@ $(document).ready( function() {
                 global: false,
                 dataType: 'json',
                 success: function( data ) {
+                    metaData = $('<div id="form-metadata">')
+                        .attr( 'objType', kwargs.obj_type )
+                        .attr( 'style', 'display:none' );
                     setTimeout( function() {
-                        $('#hidden-inner-form').empty().append( data.form );
+                        $('#hidden-inner-form')
+                            .empty()
+                            .append( data.form )
+                            .append( metaData );
                         initForms();
                     }, 150 );
                     $('#form-title').html( data.form_title );
-                    $('.form-btns a.submit, .btn.js-submit').text( data.submit_btn_label );
-                    $('.form-btns a.submit').attr( 'class', buttonAttrs );
+                    $('.form-btns .btn').not('.cancel').text( data.submit_btn_label );
+                    $('.form-btns .btn').not('.cancel').attr( 'class', buttonAttrs );
                     $('#obj-form').slideDown();
                 }
-            }).done( function() {
-                $('#obj-form form :input:visible:last').on( 'keypress', function( e ) {
-                    if ( e.keyCode == 13 ) {
-                        $('.js-submit').focus().click();
-                    }
-                });
             });
         }
     };
@@ -175,7 +169,7 @@ $(document).ready( function() {
     }
 
     // Form submit handler, special logic for attributes
-    $( document ).on( 'submit', '#obj-form form', function( e ) {
+    $( document ).on( 'click', '.js-submit', function( e ) {
         e.preventDefault();
         var url = $('#obj-form form')[0].action;
         var fields = $('#obj-form form').find( ':input' ).serializeArray();

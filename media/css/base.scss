@@ -7,6 +7,17 @@
     width: 1280px;
 }
 
+#search input
+{
+    font-family: "Courier New", Courier, monospace;
+}
+
+#sub-header
+{
+    max-width: 60px;
+    min-width: 60px;
+}
+
 html {
     border: 0;
     margin: 0;
@@ -272,10 +283,7 @@ a.btn {
     width: 110px;
     height: 1000px;
     margin-right: 25px;
-    display: none;
-    &.displayed {
-        display: block;
-    }
+    display: block;
 }
 
 #sidebar {
@@ -451,7 +459,7 @@ a.btn {
     margin-bottom: 26px;
 }
 
-.load {
+#busy-spinner {
     display: none;
     position: absolute;
     background: url('../img/loadingGif.gif')
@@ -482,6 +490,10 @@ a.btn {
             text-decoration: underline;
         }
     }
+}
+
+.front-page-link {
+    display: block;
 }
 
 /* Clearfix */

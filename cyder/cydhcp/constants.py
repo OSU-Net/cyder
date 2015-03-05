@@ -25,3 +25,4 @@ DHCP_EAV_MODELS = ("static_interface_av", "dynamic_interface_av", "range_av",
 SYSTEM_INTERFACE_CTNR_ERROR = (
     "Cannot change container; interface's container and system's container "
     "must be the same. Please change the system's container instead.")
+DEFAULT_WORKGROUP = 1

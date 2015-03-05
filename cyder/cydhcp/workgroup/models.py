@@ -1,6 +1,7 @@
 from itertools import chain
 
 from django.db import models
+from django.db.models import Q
 
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
@@ -27,10 +28,11 @@ class Workgroup(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        if objects:
-            return ctnr.workgroups.filter(pk__in=objects)
-        else:
-            return ctnr.workgroups
+        workgroups = Workgroup.objects.filter(Q(id__in=ctnr.workgroups.all()) |
+                                              Q(name="default"))
+        if objects is not None:
+            workgroups = workgroups.filter(pk__in=objects)
+        return workgroups
 
     def details(self):
         data = super(Workgroup, self).details()

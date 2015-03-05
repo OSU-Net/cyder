@@ -115,7 +115,7 @@ class SOA(BaseModel, ObjectUrlMixin, DisplayMixin):
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         objects = objects or SOA.objects
-        domains = ctnr.domains.values_list('soa')
+        domains = ctnr.domains.values_list('id')
         return objects.filter(root_domain__id__in=domains)
 
     def check_in_ctnr(self, ctnr):

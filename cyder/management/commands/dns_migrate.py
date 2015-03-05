@@ -319,7 +319,7 @@ class Zone(object):
                 wname = cursor.fetchone()[0]
                 w, _ = Workgroup.objects.get_or_create(name=wname)
             else:
-                w = None
+                w = Workgroup.objects.get(name="default")
 
             last_seen = items['last_seen'] or None
             if last_seen:
@@ -662,8 +662,8 @@ def add_pointers_manual():
 
 def delete_DNS():
     print "Deleting DNS objects."
-    for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
-                  StaticInterface, System, Workgroup]:
+    for thing in (Domain, AddressRecord, PTR, SOA, MX, Nameserver,
+                  StaticInterface, System):
         thing.objects.all().delete()
 
 

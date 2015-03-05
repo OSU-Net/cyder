@@ -27,13 +27,13 @@ function initForms() {
     $('.submit').click(function() {
         $(this).closest('form').submit();
     });
-    $('input').keypress(function(e) {
-        if (e.keyCode == 13) {
-            $(this).closest('form').submit();
-        }
-    });
     $('.submit-on-change').change(function() {
         this.form.submit();
+    });
+    $('#obj-form form :input:visible:last').on( 'keypress', function(e) {
+        if (e.keyCode == 13) {
+            $('.js-submit').focus().click();
+        }
     });
 }
 

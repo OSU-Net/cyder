@@ -1,5 +1,5 @@
 {% extends "cydhcp/cydhcp_detail.html" %}
-{% from "base/tables.html" import render_table %}
+{% from "base/tables.html" import render_table, render_object %}
 {% from "base/utility.html" import create_button %}
 
 {% block extra_action_bar %}
@@ -9,7 +9,7 @@
   {% endif %}
 
   {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamicinterface') and obj.range_type == 'dy' %}
-  <a class="btn submit a" href={{ url('system-create') }} id="system_create"
+  <a class="btn a system_form" href={{ url('system-create') }} id="system_create"
       data-kwargs='{"initial": "True", "range": "{{ obj.pk }}", "interface_type": "dynamic_interface"}'>Create Dynamic Interface</a>
   {% endif %}
 {% endblock %}
@@ -19,10 +19,8 @@
     <a href="{{ url('build-network', obj.network.pk) }}">DHCP Build Output</a>
   {% endif %}
 
-  {{ render_table(request, ranges_table) }}
-
+  {{ render_object(request, ranges_table) }}
   {% if allow_list %}
-    <h3>Allowed</h3>
     <table class="table">
         <thead><th>Allowed</th></thead>
         <tbody>
@@ -81,7 +79,7 @@
                                    {% endif %}
                 {% if request.user.get_profile().has_perm(
                     request, 2, obj_class='staticinterface') and obj.range_type == 'st' %}
-                    <a class="btn submit a"
+                    <a class="btn a system_form"
                         data-kwargs='{"initial": "True", "interface_type": "static_interface",
                             "ip_str":"{{ x[1].__str__() }}" }'
                         id=system_create
@@ -123,4 +121,5 @@
         {% include "base/includes/object_table.html" %}
       {% endif %}
   {% endif %}
+  {{ js('systemform') }}
 {% endblock %}

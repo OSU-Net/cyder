@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% from "base/tables.html" import render_table %}
+{% from "base/tables.html" import render_table, render_object %}
 
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj=obj) %}
 
@@ -34,7 +34,7 @@
      <div class="inner-form" id="hidden-inner-form"></div>
      <div class="form-btns">
        <hr>
-       <a class="btn submit c">Update</a>
+       <a class="btn js-submit c">Update</a>
        <a class="btn cancel c" data-formId="obj-form">Cancel</a>
      </div>
    </form>
@@ -42,7 +42,7 @@
 {% endblock %}
 
 {% block content %}
-  {{ render_table(request, obj_table) }}
+  {{ render_object(request, obj_table) }}
   {% for table in tables %}
     {% if table.table or "Attributes" in table.name %}
       {% if "Attributes" in table.name %}
@@ -63,5 +63,5 @@
         {{ render_table(request, table.table) }}
       {% endif %}
     {% endif %}
-  {% endfor %}
+  {% endfor %} 
 {% endblock %}
