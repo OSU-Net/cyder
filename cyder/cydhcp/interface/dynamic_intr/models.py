@@ -13,6 +13,7 @@ from cyder.base.models import BaseModel, ExpirableMixin
 from cyder.base.utils import transaction_atomic
 from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
+from cyder.cydhcp.constants import SYSTEM_INTERFACE_CTNR_ERROR
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
@@ -113,10 +114,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
         if self.ctnr != self.system.ctnr:
-            raise ValidationError(
-                "Cannot change container; interface's container "
-                "and system's container must be the same. Please change "
-                "the system's container instead.")
+            raise ValidationError(SYSTEM_INTERFACE_CTNR_ERROR)
         if self.mac:
             siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
             if self.pk is not None:

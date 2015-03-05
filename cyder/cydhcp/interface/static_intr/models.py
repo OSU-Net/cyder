@@ -15,7 +15,7 @@ from cyder.base.fields import MacAddrField
 from cyder.base.models import ExpirableMixin
 from cyder.base.utils import transaction_atomic
 from cyder.core.system.models import System
-from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.constants import STATIC, SYSTEM_INTERFACE_CTNR_ERROR
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
@@ -212,10 +212,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
         if self.ctnr != self.system.ctnr:
-            raise ValidationError(
-                "Cannot change container; interface's container "
-                "and system's container must be the same. Please change "
-                "the system's container instead.")
+            raise ValidationError(SYSTEM_INTERFACE_CTNR_ERROR)
 
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
