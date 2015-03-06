@@ -5,7 +5,6 @@ from string import Template
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db.models.loading import get_model
 from django.forms import ModelChoiceField, HiddenInput
-from django import forms
 
 from cyder.base.utils import filter_by_ctnr
 
@@ -107,7 +106,6 @@ class UsabilityFormMixin(object):
 
     def filter_by_ctnr_all(self, request):
         from cyder.core.ctnr.models import Ctnr
-        from cyder.cydns.domain.models import Domain
         ctnr = request.session['ctnr']
         for fieldname, field in self.fields.items():
             if not hasattr(field, 'queryset'):
@@ -147,11 +145,16 @@ class UsabilityFormMixin(object):
         if 'ctnr' not in self.fields:
             return
 
-        ctnr = request.session['ctnr']
-        if ctnr.name != "global":
-            if 'ctnr' not in self.initial:
-                self.fields['ctnr'].initial = request.session['ctnr']
+        session_ctnr = request.session['ctnr']
+        if session_ctnr.name != "global":
             self.fields['ctnr'].widget = HiddenInput()
+
+        if 'ctnr' not in self.initial:
+            if 'system' in self.fields:
+                ctnr = self.fields['system'].ctnr
+                self.fields['ctnr'].initial = ctnr
+            elif session_ctnr.name != "global":
+                self.fields['ctnr'].initial = session_ctnr
 
     def make_usable(self, request):
         self.autoselect_system()

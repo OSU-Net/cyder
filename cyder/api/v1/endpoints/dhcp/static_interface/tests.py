@@ -15,7 +15,7 @@ class StaticInterfaceV4API_Test(APITests):
 
     def create_data(self):
         Domain.objects.create(name='arpa')
-        system = System.objects.create(name="TestSystem")
+        system = System.objects.create(name="TestSystem", ctnr=self.ctnr)
 
         Domain.objects.create(name='in-addr.arpa')
         create_zone('11.in-addr.arpa')
@@ -38,7 +38,7 @@ class StaticInterfaceV6API_Test(APITests):
 
     def create_data(self):
         Domain.objects.create(name='arpa')
-        system = System.objects.create(name="TestSystem")
+        system = System.objects.create(name="TestSystem", ctnr=self.ctnr)
 
         Domain.objects.create(name='ip6.arpa')
         create_zone('2.ip6.arpa')

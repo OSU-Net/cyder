@@ -372,7 +372,7 @@ def migrate_dynamic_hosts():
                          .format(items['ha']))
             continue
 
-        s = System(name=items['name'])
+        s = System(name=items['name'], ctnr=c)
         s.save()
         for key in sys_value_keys.keys():
             value = items[key].strip()
@@ -408,6 +408,7 @@ def migrate_dynamic_hosts():
                     'address {}\n'.format(intr.mac))
                 stderr.write('    {}\n'.format(e))
                 intr = None
+                s.delete()
 
         if intr:
             count += 1
@@ -615,12 +616,12 @@ def delete_all():
     Range.objects.all().delete()
     Vlan.objects.all().delete()
     Network.objects.all().delete()
-    Vrf.objects.filter(id__gt=2).delete()  # First 2 are fixtures
-    Ctnr.objects.filter(id__gt=2).delete()  # First 2 are fixtures
+    Vrf.objects.filter(id__gt=2).delete()  # First 2 are initial data
+    Ctnr.objects.filter(id__gt=2).delete()  # First 2 are initial data
     DynamicInterface.objects.all().delete()
-    Workgroup.objects.all().delete()
-    User.objects.filter(id__gt=1).delete()  # First user is a fixture
-    CtnrUser.objects.filter(id__gt=2).delete()  # First 2 are fixtures
+    Workgroup.objects.filter(id__gt=1).delete()  # First one is initial data
+    User.objects.filter(id__gt=1).delete()  # First one is initial data
+    CtnrUser.objects.filter(id__gt=2).delete()  # First 2 are initial data
 
 
 def do_everything(skip=False):

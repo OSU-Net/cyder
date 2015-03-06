@@ -26,7 +26,7 @@ class ReverseDomainTests(DNSTest):
         Domain.objects.create(name='mozilla.com')
         self.domain = create_zone('foo.mozilla.com')
         self.ctnr.domains.add(self.domain)
-        self.s = System.objects.create(name='mozilla.com')
+        self.s = System.objects.create(name='mozilla.com', ctnr=self.ctnr)
 
         self.create_network_range(
             network_str="127.193.8.0/29", start_str="127.193.8.1",

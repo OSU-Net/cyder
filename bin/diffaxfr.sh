@@ -393,4 +393,4 @@ echo "$BUILD_DIR/ns1_all_outfile.axfr"
 sort_axfr $BUILD_DIR/ns1_all_outfile.axfr
 sort_axfr $BUILD_DIR/ns2_all_outfile.axfr
 
-vimdiff $BUILD_DIR/ns1_all_outfile.axfr.sorted $BUILD_DIR/ns2_all_outfile.axfr.sorted
+#vimdiff $BUILD_DIR/ns1_all_outfile.axfr.sorted $BUILD_DIR/ns2_all_outfile.axfr.sorted

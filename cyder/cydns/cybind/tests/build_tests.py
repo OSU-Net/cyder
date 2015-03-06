@@ -108,13 +108,14 @@ class DNSBuildTest(TestCase):
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
 
+        sys = System.objects.get(name='Test system')
         s = StaticInterface.objects.create(
-            system=System.objects.get(name='Test system'),
+            system=sys,
             label='www3',
             domain=Domain.objects.get(name='example.com'),
             ip_str='192.168.0.50',
             mac='01:23:45:01:23:45',
-            ctnr=Ctnr.objects.get(name='Global')
+            ctnr=sys.ctnr,
         )
         s.views.add(
             View.objects.get(name='public'),

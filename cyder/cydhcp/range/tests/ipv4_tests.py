@@ -224,7 +224,7 @@ class V4RangeTests(TestCase, ModelTestMixin):
         self.assertRaises(ValidationError, x)
 
     def test_freeip(self):
-        system = System(name='foobar')
+        system = System(name='foobar', ctnr=self.ctnr)
         system.save()
 
         r = Range.objects.create(

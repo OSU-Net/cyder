@@ -42,7 +42,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
         self.r1 = create_zone('10.in-addr.arpa')
         self.r1.save()
 
-        self.s = System.objects.create(name='test_system')
+        self.s = System.objects.create(name='test_system', ctnr=self.ctnr)
 
         self.net1 = Network.objects.create(network_str='10.0.0.0/8')
 
@@ -316,7 +316,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
         create_cname.name = 'CNAME'
 
         def create_si():
-            s = System.objects.create(name='test_system')
+            s = System.objects.create(name='test_system', ctnr=self.ctnr)
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=e_g,
                 ip_str='128.193.0.3', ip_type='4', system=s, ctnr=self.ctnr)
@@ -390,7 +390,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
         create_cname.name = 'CNAME'
 
         def create_si():
-            s = System.objects.create(name='test_system')
+            s = System.objects.create(name='test_system', ctnr=self.ctnr)
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,

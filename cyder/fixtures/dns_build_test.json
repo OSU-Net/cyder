@@ -110,6 +110,7 @@
   "fields": {
    "modified": "2014-02-01T11:14:35",
    "name": "Test system",
+   "ctnr": 3,
    "created": "2014-02-01T11:14:35"
   }
  },
@@ -119,6 +120,7 @@
   "fields": {
    "modified": "2014-02-01T12:15:42",
    "name": "Test system 2",
+   "ctnr": 3,
    "created": "2014-02-01T12:15:42"
   }
  },

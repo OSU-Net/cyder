@@ -299,7 +299,7 @@ class Zone(object):
                 continue
 
             # create system
-            system = System(name=name)
+            system = System(name=name, ctnr=ctnr)
             system.save()
             for key in sys_value_keys.keys():
                 value = items[key].strip()
@@ -662,8 +662,8 @@ def add_pointers_manual():
 
 def delete_DNS():
     print "Deleting DNS objects."
-    for thing in [Domain, AddressRecord, PTR, SOA, MX, Nameserver,
-                  StaticInterface, System, Workgroup]:
+    for thing in (Domain, AddressRecord, PTR, SOA, MX, Nameserver,
+                  StaticInterface, System):
         thing.objects.all().delete()
 
 

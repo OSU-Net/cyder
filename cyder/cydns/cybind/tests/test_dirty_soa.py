@@ -42,7 +42,7 @@ class DirtySOATests(DNSTest):
 
         self.ctnr.domains.add(self.dom, self.rdom)
 
-        self.s = System.objects.create(name='test_system')
+        self.s = System.objects.create(name='test_system', ctnr=self.ctnr)
 
         self.net = Network.objects.create(network_str='10.2.3.0/30')
         self.range = Range.objects.create(

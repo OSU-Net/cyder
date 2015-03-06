@@ -154,7 +154,7 @@ class AutoDeleteTests(BaseDomain):
         fqdn = "bar.x.y.z.foo.poo"
         label, the_domain = ensure_label_domain(fqdn)
         self.ctnr.domains.add(the_domain)
-        system = System.objects.create(name='foobar')
+        system = System.objects.create(name='foobar', ctnr=self.ctnr)
         addr = StaticInterface.objects.create(
             label=label, domain=the_domain, ip_type='4', ip_str="10.2.3.4",
             mac="00:11:22:33:44:55", system=system, ctnr=self.ctnr,)

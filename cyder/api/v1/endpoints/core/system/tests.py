@@ -7,4 +7,4 @@ class SystemAPI_Test(APITests, APIEAVTestMixin):
     model = System
 
     def create_data(self):
-        return System.objects.create(name='test_system')
+        return System.objects.create(name='test_system', ctnr=self.ctnr)

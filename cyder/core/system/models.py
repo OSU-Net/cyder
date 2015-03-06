@@ -15,6 +15,8 @@ class System(BaseModel, ObjectUrlMixin):
     name = models.CharField(
         max_length=255, unique=False, null=False, blank=False,
         validators=[validate_no_spaces])
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     search_fields = ('name',)
     sort_fields = ('name',)
@@ -28,14 +30,8 @@ class System(BaseModel, ObjectUrlMixin):
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        objects = objects or System.objects
-        DynamicInterface = get_model('cyder', 'dynamicinterface')
-        StaticInterface = get_model('cyder', 'staticinterface')
-        dynamic_query = DynamicInterface.objects.filter(
-            ctnr=ctnr).values_list('system')
-        static_query = StaticInterface.objects.filter(
-            ctnr=ctnr).values_list('system')
-        return objects.filter(Q(id__in=static_query) | Q(id__in=dynamic_query))
+        objects = objects if objects is not None else System.objects
+        return objects.filter(ctnr=ctnr)
 
     def get_ctnrs(self):
         return ([self.staticinterface_set.values_list('ctnr', flat=True)] +
@@ -50,6 +46,7 @@ class System(BaseModel, ObjectUrlMixin):
         data = super(System, self).details()
         data['data'] = [
             ('Name', 'name', self),
+            ('Ctnr', 'ctnr', self.ctnr),
         ]
         return data
 
@@ -73,8 +70,15 @@ class System(BaseModel, ObjectUrlMixin):
     @transaction_atomic
     def save(self, *args, **kwargs):
         self.full_clean()
-
         super(System, self).save(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        for i in (list(self.staticinterface_set.all()) +
+                  list(self.dynamicinterface_set.all())):
+            if self.ctnr != i.ctnr:
+                i.ctnr = self.ctnr
+                i.save()
+        super(System, self).clean(*args, **kwargs)
 
 
 class SystemAV(EAVBase):
