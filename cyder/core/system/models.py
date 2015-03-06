@@ -33,13 +33,8 @@ class System(BaseModel, ObjectUrlMixin):
         objects = objects if objects is not None else System.objects
         return objects.filter(ctnr=ctnr)
 
-    def get_ctnrs(self):
-        return ([self.staticinterface_set.values_list('ctnr', flat=True)] +
-                [self.dynamicinterface_set.values_list('ctnr', flat=True)])
-
     def check_in_ctnr(self, ctnr):
-        return (self.staticinterface_set.filter(ctnr=ctnr).exists() or
-                self.dynamicinterface_set.filter(ctnr=ctnr).exists())
+        return self.ctnr == ctnr
 
     def details(self):
         """For tables."""
