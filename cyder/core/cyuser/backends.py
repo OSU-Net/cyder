@@ -62,6 +62,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
     assert LEVEL_ADMIN > LEVEL_USER > LEVEL_GUEST > ctnr_level
 
     if obj:
+        ctnr = None
         try:
             ctnrs = obj.get_ctnrs()
         except TypeError:
@@ -226,10 +227,6 @@ def has_soa_perm(user_level, obj, ctnr, action):
 
 def has_domain_perm(user_level, obj, ctnr, action):
     """Permissions for domains. Ctnrs have domains."""
-    # TODO: can have create permissions for subdomains.
-    if obj and not obj in ctnr.domains.all():
-        return False
-
     return {
         'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
@@ -285,9 +282,6 @@ def has_reverse_domain_record_perm(user_level, obj, ctnr, action):
 
 def has_subnet_perm(user_level, obj, ctnr, action):
     """Permissions for subnet. Ranges have subnets."""
-    if obj and not obj in [ip_range.subnet for ip_range in ctnr.ranges.all()]:
-        return False
-
     return {
         'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
@@ -299,8 +293,6 @@ def has_subnet_perm(user_level, obj, ctnr, action):
 
 def has_range_perm(user_level, obj, ctnr, action):
     """Permissions for ranges. Ctnrs have ranges."""
-    if obj and not obj in ctnr.ranges.all():
-        return False
     return {
         'cyder_admin': True,
         'ctnr_admin': action == ACTION_VIEW,
