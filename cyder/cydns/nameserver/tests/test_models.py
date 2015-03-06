@@ -31,7 +31,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
 
         create_zone('128.in-addr.arpa')
 
-        self.s = System.objects.create(name='test_system')
+        self.s = System.objects.create(name='test_system', ctnr=self.ctnr)
 
         self.net1 = Network.objects.create(network_str='128.193.0.0/17')
         self.sr1 = Range.objects.create(

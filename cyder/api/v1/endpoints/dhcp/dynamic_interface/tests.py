@@ -15,7 +15,7 @@ class DynamicInterfaceV4API_Test(APITests):
         range = Range.objects.create(
             start_str="12.12.0.1", end_str="12.12.255.254", range_type=DYNAMIC,
             is_reserved=True, domain=self.domain, network=network)
-        system = System.objects.create(name="TestSystem")
+        system = System.objects.create(name="TestSystem", ctnr=self.ctnr)
 
         return DynamicInterface.objects.create(
             ctnr=self.ctnr, mac='be:ef:fa:ce:f0:0d', range=range,
@@ -34,7 +34,7 @@ class DynamicInterfaceV6API_Test(APITests):
             end_str="2001:0db8:0000:0000:0000:0000:0000:0002", ip_type='6',
             range_type=DYNAMIC, is_reserved=True, domain=self.domain,
             network=network)
-        system = System.objects.create(name="TestSystem")
+        system = System.objects.create(name="TestSystem", ctnr=self.ctnr)
 
         return DynamicInterface.objects.create(
             ctnr=self.ctnr, mac='be:ef:fa:ce:f0:0d', range=range,

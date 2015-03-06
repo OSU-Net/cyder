@@ -31,7 +31,7 @@ class ViewTests(TestCase, ModelTestMixin):
         self.f_o = Domain.objects.create(name="foo.org")
         self.ctnr.domains.add(self.o, self.f_o)
 
-        self.s = System.objects.create(name='foobar')
+        self.s = System.objects.create(name='foobar', ctnr=self.ctnr)
 
         Domain.objects.create(name="arpa")
         Domain.objects.create(name="in-addr.arpa")

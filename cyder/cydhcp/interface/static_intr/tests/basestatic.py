@@ -20,7 +20,7 @@ class BaseStaticTests(DNSTest):
         self.f_c = Domain.objects.create(name="foo.ccc")
         self.ctnr.domains.add(self.c)
         self.ctnr.domains.add(self.f_c)
-        self.n = System.objects.create(name='test_system')
+        self.n = System.objects.create(name='test_system', ctnr=self.ctnr)
         View.objects.get_or_create(name="private")
 
         if ip_type == '4':

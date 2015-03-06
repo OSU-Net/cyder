@@ -372,7 +372,7 @@ def migrate_dynamic_hosts():
                          .format(items['ha']))
             continue
 
-        s = System(name=items['name'])
+        s = System(name=items['name'], ctnr=c)
         s.save()
         for key in sys_value_keys.keys():
             value = items[key].strip()
@@ -408,6 +408,7 @@ def migrate_dynamic_hosts():
                     'address {}\n'.format(intr.mac))
                 stderr.write('    {}\n'.format(e))
                 intr = None
+                s.delete()
 
         if intr:
             count += 1
