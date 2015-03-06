@@ -32,8 +32,8 @@ function initForms() {
     });
     var keypressSelector = '#obj-form form :input:visible:not(textarea)';
     $(keypressSelector).on( 'keypress', function(e) {
-        e.preventDefault();
         if (e.keyCode == 13) {
+            e.preventDefault();
             $('.js-submit, .system-submit').focus().click();
         }
     });
