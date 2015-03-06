@@ -32,6 +32,7 @@ function initForms() {
     });
     var keypressSelector = '#obj-form form :input:visible:not(textarea)';
     $(keypressSelector).on( 'keypress', function(e) {
+        e.preventDefault();
         if (e.keyCode == 13) {
             $('.js-submit, .system-submit').focus().click();
         }
@@ -49,9 +50,4 @@ function slideDown($e) {
 
 $(document).ready(function() {
     initForms();
-    $( document ).on( 'keypress', '.js-noSubmitOnEnter', function( e ) {
-        if ( e.which == 13 ) {
-            e.preventDefault();
-        }
-    });
 });
