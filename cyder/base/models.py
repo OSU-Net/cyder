@@ -30,10 +30,15 @@ class BaseModel(models.Model):
         return unicode(self)
 
     def get_ctnrs(self):
-        if hasattr(self, "ctnr") and self.ctnr.name.lower() != "global":
-            return [self.ctnr]
-        elif hasattr(self, "ctnr_set"):
-            return self.ctnr_set.exclude(name="global")
+        from cyder.base.eav.models import EAVBase
+        if isinstance(self, EAVBase):
+            obj = self.entity
+        else:
+            obj = self
+        if hasattr(obj, "ctnr") and obj.ctnr.name.lower() != "global":
+            return [obj.ctnr]
+        elif hasattr(obj, "ctnr_set"):
+            return obj.ctnr_set.exclude(name="global")
         else:
             raise TypeError("This object has no container.")
 
