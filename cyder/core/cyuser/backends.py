@@ -78,6 +78,11 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
                     ctnr = c
                     if ctnr_level == LEVEL_ADMIN:
                         break
+    elif ctnr and user and not obj:
+        try:
+            ctnr_level = CtnrUser.objects.get(ctnr=ctnr, user=user).level
+        except CtnrUser.DoesNotExist:
+            pass
 
     if obj and ctnr and not ctnr.check_contains_obj(obj):
         return False
