@@ -67,6 +67,7 @@ $(document).ready(function() {
         } else {
             systemForm.showDynamicForm( delay, speed );
         }
+        setTimeout( 'initForms()', delay);
     }
 
     $( document ).on( 'change', 'input[name="interface_type"]', function() {
@@ -108,6 +109,7 @@ $(document).ready(function() {
             if ( data.initial_type ) {
                 changeSystemForm( data.initial_type, 0, 'fast' );
             }
+            initForms();
         });
     });
 
