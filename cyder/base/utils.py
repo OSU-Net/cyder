@@ -66,7 +66,7 @@ def run_command(command, logger=Logger(), ignore_failure=False,
     if returncode != 0 and not ignore_failure:
         msg = '{}: '.format(failure_msg) if failure_msg else ''
         msg += '`{}` failed in {}\n\n'.format(
-            failure_msg, command, os.getcwd())
+            command, os.getcwd())
         if out:
             msg += '=== stdout ===\n{0}\n'.format(out)
         if err:
