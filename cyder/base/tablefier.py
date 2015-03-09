@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models.query import QuerySet
 
 from cyder.base.constants import ACTION_UPDATE
@@ -142,11 +142,14 @@ class Tablefier:
                     'obj_type': obj._meta.db_table,
                     'pk': obj.id}))]]
 
-            col = {'value': ['Update', 'Delete'],
-                   'url': [obj.get_update_url(), obj.get_delete_url()],
-                   'data': data,
-                   'class': ['js-get-form', 'delete table_delete'],
-                   'img': ['/media/img/update.png', '/media/img/delete.png']}
+            try:
+                col = {'value': ['Update', 'Delete'],
+                       'url': [obj.get_update_url(), obj.get_delete_url()],
+                       'data': data,
+                       'class': ['js-get-form', 'delete table_delete'],
+                       'img': ['/media/img/update.png', '/media/img/delete.png']}
+            except NoReverseMatch:
+                col = {'value': []}
         else:
             col = {'value': []}
 
