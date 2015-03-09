@@ -237,7 +237,7 @@ def static_dynamic_view(request):
             sort = int(request.GET['sort'])
             order = request.GET['order'] if 'order' in request.GET else 'asc'
 
-        sort_fn = lambda x: (x[sort]['value'][0]).encode('utf-8').lower()
+        sort_fn = lambda x: (x[sort]['value'][0]).lower()
         table['data'] = sorted(table['data'], key=sort_fn,
                                reverse=(order == 'desc'))
         return render(request, template, {
