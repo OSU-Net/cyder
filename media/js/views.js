@@ -115,6 +115,7 @@ $(document).ready( function() {
                 };
             }
 
+            $(document).scrollTop(0);
             $.ajax({
                 type: 'GET',
                 url: kwargs.get_url,
