@@ -3,7 +3,7 @@ from django.db.models import CharField, NOT_PROVIDED, SubfieldBase
 from django.core.exceptions import ValidationError
 from south.modelsinspector import add_introspection_rules
 
-from cyder.cydhcp.validation import validate_mac
+from cyder.cydhcp.validation import ERROR_TOO_LONG, validate_mac
 
 
 class MacAddrField(CharField):
@@ -51,12 +51,15 @@ class MacAddrField(CharField):
         value = super(MacAddrField, self).to_python(value)
 
         if value:
-            value = value.lower().replace(':', '').replace('-', '')
-            value = reduce(lambda x,y: x + ':' + y,
-                           (value[i:i+2] for i in xrange(0, 12, 2)))
-        elif value == '':
-            value = None
-        return value
+            raw = value.lower().replace(':', '').replace('-', '')
+            if len(raw) > 12:
+                # We can't raise a ValidationError in to_python() (because
+                # nothing will catch it), so all we can do is make sure clean()
+                # will raise a ValidationError when it's called next.
+                return ERROR_TOO_LONG
+            return ':'.join(raw[i:i+2] for i in xrange(0, 12, 2))
+        else:
+            return
 
     def clean(self, value, model_instance):
         value_required = (self.dhcp_enabled is True
