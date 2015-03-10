@@ -172,12 +172,13 @@ $(document).ready( function() {
     // Form submit handler, special logic for attributes
     $( document ).on( 'click', '.js-submit', function( e ) {
         e.preventDefault();
-        var url = $('#obj-form form')[0].action;
-        var fields = $('#obj-form form').find( ':input' ).serializeArray();
+        var form = $('#obj-form form');
+        var url = form[0].action;
+        var fields = form.find( ':input' ).serializeArray();
         var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
         $.when( ajax_form_submit( url, fields, csrfToken ) ).done( function( data ) {
             // for av forms
-            if ( $('#obj-form form').attr( 'action' ).indexOf( '_av' ) >= 0 ) {
+            if ( url.indexOf( '_av' ) >= 0 ) {
                 av_form_submit_handler( data );
             } else {
                 location.reload();
