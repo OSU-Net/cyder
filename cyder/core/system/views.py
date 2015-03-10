@@ -44,6 +44,7 @@ def system_detail(request, pk):
     related_systems.discard(system)
 
     return render(request, 'system/system_detail.html', {
+        'attrs_table': tablefy(attrs, request=request),
         'static_intr_tables': static_intr,
         'dynamic_intr_tables': dynamic_intr,
         'related_systems_table': tablefy(list(related_systems),
