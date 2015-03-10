@@ -117,7 +117,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         super(DynamicInterface, self).clean(*args, **kwargs)
         if self.ctnr != self.system.ctnr:
             raise ValidationError(SYSTEM_INTERFACE_CTNR_ERROR)
-        if self.mac:
+        if self.mac and self.range_id is not None:
             siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
             if self.pk is not None:
                 siblings = siblings.exclude(pk=self.pk)
