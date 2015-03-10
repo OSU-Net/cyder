@@ -43,7 +43,8 @@ def main():
             args = [settings.MYSQLDUMP]
             if 'passwd' in m_conf:
                 dumper_conf.write('[mysqldump]\n')
-                dumper_conf.write('password={}\n'.format(m_conf['passwd']))
+                # This works even if the password contains '"'.
+                dumper_conf.write('password="{}"\n'.format(m_conf['passwd']))
                 dumper_conf.flush()
                 args.append('--defaults-extra-file=' + dumper_conf.name)
             args.extend([
@@ -60,7 +61,8 @@ def main():
             args = [settings.MYSQL]
             if 'passwd' in msb_conf:
                 loader_conf.write('[mysql]\n')
-                loader_conf.write('password={}\n'.format(msb_conf['passwd']))
+                # This works even if the password contains '"'.
+                loader_conf.write('password="{}"\n'.format(msb_conf['passwd']))
                 loader_conf.flush()
                 args.append('--defaults-extra-file=' + loader_conf.name)
             args.extend([
