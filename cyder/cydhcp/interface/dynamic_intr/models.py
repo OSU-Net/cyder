@@ -83,16 +83,6 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         build_str += "\t\thardware ethernet {0};\n".format(self.mac)
         build_str += join_dhcp_args(map(self.format_host_option, options),
                                     depth=2)
-        options = self.dynamicinterfaceav_set.filter(
-            attribute__attribute_type=ATTRIBUTE_OPTION)
-        statements = self.dynamicinterfaceav_set.filter(
-            attribute__attribute_type=ATTRIBUTE_STATEMENT)
-        if options:
-            build_str += "\t\t# Host Options\n"
-            build_str += join_dhcp_args(options, depth=2)
-        if statements:
-            build_str += "\t\t# Host Statemets\n"
-            build_str += join_dhcp_args(statements, depth=2)
         build_str += "\t}\n"
         return build_str
 
@@ -154,14 +144,3 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             if old_range:
                 old_range.save(commit=False)
         assert self.ctnr == self.system.ctnr
-
-
-class DynamicInterfaceAV(EAVBase):
-    class Meta(EAVBase.Meta):
-        app_label = 'cyder'
-        db_table = "dynamic_interface_av"
-
-    entity = models.ForeignKey(DynamicInterface)
-    attribute = EAVAttributeField(
-        Attribute,
-        type_choices=(ATTRIBUTE_INVENTORY,))
