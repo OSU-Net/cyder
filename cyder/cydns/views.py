@@ -92,7 +92,7 @@ def cydns_index(request):
         domains = ctnr.domains.all()
         soa_list = []
         for Klass in Klasses:
-            counts.append((Klass[1], Klass[0].objects.all().count()))
+            counts.append((Klass[1], Klass[0].objects.filter(ctnr=ctnr).count()))
 
         ns_count = 0
         for domain in domains:
@@ -105,15 +105,15 @@ def cydns_index(request):
         counts.append(('Nameservers', ns_count))
 
     else:
+        domains = Domain.objects.all()
         Klasses.append((SOA, 'SOAs'))
         Klasses.append((Nameserver, 'Nameservers'))
-        domains = Domain.objects.all()
         for Klass in Klasses:
             counts.append((Klass[1], Klass[0].objects.all().count()))
 
 
-    counts.append(('Domains', Domain.objects.filter(is_reverse=False).count()))
+    counts.append(('Domains', domains.filter(is_reverse=False).count()))
     counts.append(('Reverse Domains',
-               Domain.objects.filter(is_reverse=True).count()))
+               domains.filter(is_reverse=True).count()))
 
     return render(request, 'cydns/cydns_index.html', {'counts': counts})
