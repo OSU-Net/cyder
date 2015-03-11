@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models.query import QuerySet
 
 from cyder.base.constants import ACTION_UPDATE
@@ -44,14 +44,6 @@ class Tablefier:
         return klass
 
     @cached_property
-    def can_update(self):
-        if (self.profile and self.profile.has_perm(
-                self.request, ACTION_UPDATE, obj_class=self.klass) and
-                hasattr(self.klass, 'get_update_url') and self.update):
-            return True
-        return False
-
-    @cached_property
     def views(self):
         if self.custom:
             return False
@@ -81,8 +73,7 @@ class Tablefier:
             for col in self.extra_cols:
                 headers.append([col['header'], col['sort_field']])
 
-        if self.can_update:
-            headers.append(['Actions', None])
+        headers.append(['Actions', None])
 
         if (hasattr(self.objects, 'object_list') and
                 isinstance(self.objects.object_list, QuerySet)):
@@ -151,11 +142,14 @@ class Tablefier:
                     'obj_type': obj._meta.db_table,
                     'pk': obj.id}))]]
 
-            col = {'value': ['Update', 'Delete'],
-                   'url': [obj.get_update_url(), obj.get_delete_url()],
-                   'data': data,
-                   'class': ['js-get-form', 'delete table_delete'],
-                   'img': ['/media/img/update.png', '/media/img/delete.png']}
+            try:
+                col = {'value': ['Update', 'Delete'],
+                       'url': [obj.get_update_url(), obj.get_delete_url()],
+                       'data': data,
+                       'class': ['js-get-form', 'delete table_delete'],
+                       'img': ['/media/img/update.png', '/media/img/delete.png']}
+            except NoReverseMatch:
+                col = {'value': []}
         else:
             col = {'value': []}
 
@@ -184,8 +178,7 @@ class Tablefier:
             for d in extra_data:
                 row_data.append(self.build_extra(d))
 
-            if self.can_update:
-                row_data.append(self.build_update_field(obj))
+            row_data.append(self.build_update_field(obj))
 
             objs.append(obj)
             data.append(row_data)
@@ -193,13 +186,13 @@ class Tablefier:
 
         return objs, data, urls
 
-    @staticmethod 
-    def remove_field(table_dict, header_name): 
+    @staticmethod
+    def remove_field(table_dict, header_name):
         for i, header in enumerate(table_dict['headers']):
           if header[0] == header_name:
             del table_dict['headers'][i]
             del table_dict['data'][0][i]
-            return 
+            return
 
     def get_table(self):
         if not self.objects:

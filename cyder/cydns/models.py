@@ -143,7 +143,11 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         return objects
 
     def check_in_ctnr(self, ctnr):
-        if hasattr(self, "domain"):
+        if hasattr(self, "ctnr"):
+            return self.ctnr == ctnr
+        elif hasattr(self, "ctnr_set"):
+            return ctnr in self.ctnr_set.all()
+        elif hasattr(self, "domain"):
             return self.domain in ctnr.domains.all()
 
     @classmethod

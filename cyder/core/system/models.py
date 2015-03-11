@@ -34,8 +34,7 @@ class System(BaseModel, ObjectUrlMixin):
         return objects.filter(ctnr=ctnr)
 
     def check_in_ctnr(self, ctnr):
-        return (self.staticinterface_set.filter(ctnr=ctnr).exists() or
-                self.dynamicinterface_set.filter(ctnr=ctnr).exists())
+        return self.ctnr == ctnr
 
     def details(self):
         """For tables."""

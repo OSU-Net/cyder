@@ -18,11 +18,11 @@
 
 
 {% block extra_action_bar %}
-  {% if request.user.get_profile().has_perm(request, 2, obj_class='static_interface') %}
+  {% if request.user.get_profile().has_perm(request, 2, obj=obj) %}
     {{ create_button('static_interface', 'static_interface'|prettify_obj_type,
                      url('get-update-form'), url('static_interface'), obj_name=obj.name) }}
   {% endif %}
-  {% if request.user.get_profile().has_perm(request, 2, obj_class='dynamic_interface') %}
+  {% if request.user.get_profile().has_perm(request, 2, obj=obj) %}
     {{ create_button('dynamic_interface', 'dynamic_interface'|prettify_obj_type,
                      url('get-update-form'), url('dynamic_interface'), obj_name=obj.name) }}
   {% endif %}

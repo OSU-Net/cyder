@@ -29,6 +29,19 @@ class BaseModel(models.Model):
     def pretty_name(self):
         return unicode(self)
 
+    def get_ctnrs(self):
+        from cyder.base.eav.models import EAVBase
+        if isinstance(self, EAVBase):
+            obj = self.entity
+        else:
+            obj = self
+        if hasattr(obj, "ctnr") and obj.ctnr.name.lower() != "global":
+            return [obj.ctnr]
+        elif hasattr(obj, "ctnr_set"):
+            return obj.ctnr_set.exclude(name="global")
+        else:
+            raise TypeError("This object has no container.")
+
     def cyder_unique_error_message(self, model_class, unique_check):
         """
         Override this method to provide a custom error message for
