@@ -132,12 +132,16 @@ class Domain(BaseModel, ObjectUrlMixin):
 
     @classmethod
     @transaction_atomic
-    def create_recursive(cls, name, commit=True):
+    def create_recursive(cls, name):
         first_dot = name.find('.')
         if first_dot >= 0:  # not a TLD
             rest = name[(first_dot + 1):]
-            cls.create_recursive(name=rest)
-        domain, created = cls.objects.get_or_create(name=name)
+            cls.create_recursive(name=rest, commit=False)
+        try:
+            domain = cls.objects.get(name=name)
+        except cls.DoesNotExist:
+            domain = cls(name=name)
+            domain.save(commit=False)
         return domain
 
     @transaction_atomic
