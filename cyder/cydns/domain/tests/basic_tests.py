@@ -1,14 +1,19 @@
 from django.core.exceptions import ValidationError
 
 from cyder.base.tests import ModelTestMixin
+from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
+from cyder.cydns.mx.models import MX
 from cyder.cydns.nameserver.models import Nameserver
+from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.soa.models import SOA
+from cyder.cydns.srv.models import SRV
+from cyder.cydns.txt.models import TXT
 from cyder.cydns.tests.utils import create_zone
 
-from basedomain import BaseDomain
+from .basedomain import BaseDomain
 
 
 class DomainTests(BaseDomain, ModelTestMixin):
@@ -100,10 +105,44 @@ class DomainTests(BaseDomain, ModelTestMixin):
             self.assertRaises(
                 ValidationError, Domain.objects.create, name=name)
 
-    def test_remove_has_child_records(self):
-        pass
-        # Make sure deleting a domain doesn't leave stuff hanging.
-        # TODO A records, Mx, TXT... all of the records!!
+    def test_has_records(self):
+        ctnr = Ctnr.objects.get(name='test_ctnr')
+
+        creators = (
+            lambda d: AddressRecord.objects.create(
+                label='test1', domain=d, ip_str='10.2.3.1', ip_type='4',
+                ctnr=ctnr),
+            lambda d: CNAME.objects.create(
+                label='test2', domain=d, target='splat', ctnr=ctnr),
+            lambda d: MX.objects.create(
+                label='test3', domain=d, server='beep',
+                priority=1, ctnr=ctnr),
+            lambda d: SRV.objects.create(
+                label='_test4', domain=d, target='ding',
+                port=80, priority=1, weight=1, ctnr=ctnr),
+            lambda d: SSHFP.objects.create(
+                label='test5', domain=d, algorithm_number=1,
+                key='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                fingerprint_type=1, ctnr=ctnr),
+            lambda d: TXT.objects.create(
+                label='test6', domain=d, txt_data='zoom', ctnr=ctnr),
+        )
+
+        for creator in creators:
+            d = Domain.objects.create(name='testdomain')
+            d.ctnr_set.add(ctnr)
+            obj = creator(d)
+
+            with self.assertRaises(ValidationError):
+                d.name = 'testdomain2'
+                d.save()
+
+            d = d.reload()
+
+            self.assertRaises(ValidationError, d.delete)
+
+            obj.delete()
+            d.delete()
 
     def test_delegation_add_domain(self):
         boom = create_zone('boom')
