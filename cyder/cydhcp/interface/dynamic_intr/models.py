@@ -35,7 +35,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     dhcp_enabled = models.BooleanField(default=True,
                                        verbose_name='Enable DHCP?')
     last_seen = models.DateTimeField(null=True, blank=True)
-    search_fields = ('mac',)
+    search_fields = ('mac', 'system__name')
 
     class Meta:
         app_label = 'cyder'
