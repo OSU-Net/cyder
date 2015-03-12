@@ -5,8 +5,6 @@ from cyder.api.v1.endpoints.core.system.api import SystemAVViewSet
 from cyder.api.v1.endpoints.core.system.api import SystemViewSet
 from cyder.api.v1.endpoints.core.user.api import UserProfileViewSet
 from cyder.api.v1.endpoints.dhcp.dynamic_interface.api import \
-    DynamicInterfaceAVViewSet
-from cyder.api.v1.endpoints.dhcp.dynamic_interface.api import \
     DynamicInterfaceViewSet
 from cyder.api.v1.endpoints.dhcp.network.api import NetworkAVViewSet
 from cyder.api.v1.endpoints.dhcp.network.api import NetworkViewSet
@@ -14,8 +12,6 @@ from cyder.api.v1.endpoints.dhcp.range.api import RangeAVViewSet
 from cyder.api.v1.endpoints.dhcp.range.api import RangeViewSet
 from cyder.api.v1.endpoints.dhcp.site.api import SiteAVViewSet
 from cyder.api.v1.endpoints.dhcp.site.api import SiteViewSet
-from cyder.api.v1.endpoints.dhcp.static_interface.api import \
-    StaticInterfaceAVViewSet
 from cyder.api.v1.endpoints.dhcp.static_interface.api import \
     StaticInterfaceViewSet
 from cyder.api.v1.endpoints.dhcp.vlan.api import VlanAVViewSet
@@ -47,9 +43,6 @@ router.register(r'core/system', SystemViewSet, base_name='api-core-system')
 router.register(r'core/user', UserProfileViewSet, base_name='api-core-user')
 
 
-router.register(r'dhcp/dynamic_interface/attributes',
-                DynamicInterfaceAVViewSet,
-                base_name='api-dhcp-dynamicinterface_attributes')
 router.register(r'dhcp/dynamic_interface', DynamicInterfaceViewSet,
                 base_name='api-dhcp-dynamicinterface')
 router.register(r'dhcp/network/attributes', NetworkAVViewSet,
@@ -61,8 +54,6 @@ router.register(r'dhcp/range', RangeViewSet, base_name='api-dhcp-range')
 router.register(r'dhcp/site/attributes', SiteAVViewSet,
                 base_name='api-dhcp-site_attributes')
 router.register(r'dhcp/site', SiteViewSet, base_name='api-dhcp-site')
-router.register(r'dhcp/static_interface/attributes', StaticInterfaceAVViewSet,
-                base_name='api-dhcp-staticinterface_attributes')
 router.register(r'dhcp/static_interface', StaticInterfaceViewSet,
                 base_name='api-dhcp-staticinterface')
 router.register(r'dhcp/vlan/attributes', VlanAVViewSet,

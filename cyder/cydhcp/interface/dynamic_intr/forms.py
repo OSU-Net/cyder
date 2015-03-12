@@ -1,9 +1,7 @@
-from cyder.base.eav.forms import get_eav_form
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.cydhcp.forms import RangeWizard
-from cyder.cydhcp.interface.dynamic_intr.models import (DynamicInterface,
-                                                        DynamicInterfaceAV)
+from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.range.models import Range
 
 
@@ -21,6 +19,3 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
         model = DynamicInterface
         exclude = ('last_seen',)
         always_validate = ('mac',)
-
-
-DynamicInterfaceAVForm = get_eav_form(DynamicInterfaceAV, DynamicInterface)
