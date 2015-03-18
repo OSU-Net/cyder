@@ -45,7 +45,7 @@ class LabelDomainUtilsMixin(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(LabelDomainUtilsMixin, self).__init__(*args, **kwargs)
-        if self.fqdn:
+        if self.pk is None and self.fqdn:
             self.label_domain_from_fqdn()
 
     def label_domain_from_fqdn(self):

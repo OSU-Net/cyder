@@ -230,9 +230,15 @@ class Domain(BaseModel, ObjectUrlMixin):
         else:
             db_self = Domain.objects.get(pk=self.pk)
 
-            if db_self.name != self.name and self.domain_set.exists():
-                raise ValidationError("Child domains rely on this domain's "
-                                      "name remaining the same.")
+            if db_self.name != self.name:
+                if self.domain_set.exists():
+                    raise ValidationError(
+                        "This domain has subdomains. Delete them before "
+                        "renaming this domain.")
+                if self.has_record_set():
+                    raise ValidationError(
+                        "There are records associated with this domain. "
+                        "Delete them before renaming this domain.")
 
             # Raise an exception...
             # If our soa is different AND it's non-null AND we have records in
