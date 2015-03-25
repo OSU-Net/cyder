@@ -22,8 +22,8 @@ BINDBUILD = {
     'bind_prefix': '',
     'lock_file': '/tmp/cyder_dns_test.lock',
     'pid_file': '/tmp/cyder_dns_test.pid',
-    'line_change_limit': 500,
-    'line_removal_limit': 10,
+    'line_decrease_limit': 10,
+    'line_increase_limit': 500,
     'stop_file': '/tmp/cyder_dns_test.stop',
     'stop_file_email_interval': 1800,  # 30 minutes
     'last_run_file': '/tmp/last.run',
@@ -102,8 +102,8 @@ class DNSBuildTest(TestCase):
     def test_sanity_check1(self):
         """Test that the sanity check fails when too many lines are changed"""
 
-        self.builder.repo.line_change_limit = 2
-        self.builder.repo.line_removal_limit = 100
+        self.builder.repo.line_decrease_limit = 100
+        self.builder.repo.line_increase_limit = 2
 
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
@@ -128,8 +128,8 @@ class DNSBuildTest(TestCase):
     def test_sanity_check2(self):
         """Test that the sanity check fails when too many lines are removed"""
 
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 2
+        self.builder.repo.line_decrease_limit = 2
+        self.builder.repo.line_increase_limit = 100
 
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)
@@ -145,8 +145,8 @@ class DNSBuildTest(TestCase):
     def test_sanity_check3(self):
         """Test that the sanity check succeeds when changes are sane"""
 
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 100
+        self.builder.repo.line_decrease_limit = 100
+        self.builder.repo.line_increase_limit = 100
 
         self.builder.build(force=True)
         self.builder.push(sanity_check=False)

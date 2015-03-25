@@ -21,8 +21,8 @@ DHCPBUILD = {
     'pid_file': '/tmp/cyder_dhcp_test.pid',
     'target_file': 'dhcpd.conf.data',
     'check_file': 'dhcpd.conf',
-    'line_change_limit': 500,
-    'line_removal_limit': None,
+    'line_decrease_limit': None,
+    'line_increase_limit': None,
     'stop_file': '/tmp/cyder_dhcp_test.stop',
     'stop_file_email_interval': None,  # never
 }
@@ -91,8 +91,8 @@ class DHCPBuildTest(TestCase):
     def test_sanity_check1(self):
         """Test that the sanity check fails when too many lines are changed"""
 
-        self.builder.repo.line_change_limit = 1
-        self.builder.repo.line_removal_limit = 100
+        self.builder.repo.line_decrease_limit = 100
+        self.builder.repo.line_increase_limit = 1
 
         self.builder.build()
         self.builder.push(sanity_check=False)
@@ -111,8 +111,8 @@ class DHCPBuildTest(TestCase):
     def test_sanity_check2(self):
         """Test that the sanity check fails when too many lines are removed"""
 
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 1
+        self.builder.repo.line_decrease_limit = 1
+        self.builder.repo.line_increase_limit = 100
 
         self.builder.build()
         self.builder.push(sanity_check=False)
@@ -127,8 +127,8 @@ class DHCPBuildTest(TestCase):
     def test_sanity_check3(self):
         """Test that the sanity check succeeds when changes are sane"""
 
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 100
+        self.builder.repo.line_decrease_limit = 100
+        self.builder.repo.line_increase_limit = 100
 
         self.builder.build()
         self.builder.push(sanity_check=False)

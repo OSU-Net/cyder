@@ -36,7 +36,7 @@ class DNSBuilder(MutexMixin, Logger):
         set_attrs(self, kwargs)
 
         self.repo = GitRepo(
-            self.prod_dir, self.line_change_limit, self.line_removal_limit,
+            self.prod_dir, self.line_decrease_limit, self.line_increase_limit,
             logger=self)
 
     def log(self, log_level, msg, root_domain=None):
