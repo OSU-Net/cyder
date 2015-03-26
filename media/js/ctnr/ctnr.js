@@ -62,11 +62,7 @@ $(document).ready(function() {
 
     };
 
-    jQuery.each( $("input[name='obj_type']:checked"), function() {
-        changeCtnrForm( this.value );
-    });
-
-    $("input[name='obj_type']").change( function() {
+    $( document ).on( 'change', "input[name='obj_type']", function() {
         changeCtnrForm( this.value );
     });
 
@@ -82,9 +78,48 @@ $(document).ready(function() {
         });
     }
 
+    function get_add_form( btn ) {
+        var formTitle;
+        var buttonLabel;
+        var buttonAttrs = 'btn c ctnr-submit';
+        slideUp( $('#obj-form') );
+        $(document).scrollTop(0);
+        $.ajax({
+            type: 'GET',
+            url: btn.href,
+            global: false,
+            dataType: 'json',
+            success: function( data ) {
+                var add_user_form = $('<div id="add-user-form">')
+                    .append( data.add_user_form );
+                if ( !data.only_user ) {
+                    add_user_form.attr( 'style', 'display:none' );
+                }
+                setTimeout( function() {
+                    $('#hidden-inner-form')
+                        .empty()
+                        .append( data.object_form )
+                        .append( add_user_form );
+                    initForms();
+                }, 150 );
+                $('#form-title').html( data.form_title );
+                $('.form-btns .btn').not('.cancel')
+                    .text( data.submit_btn_label )
+                    .attr( 'class', buttonAttrs );
+                $('#obj-form').slideDown();
+            }
+        });
+    };
+
+    $( document ).on( 'click', '#ctnr-get-add-form', function( e ) {
+        e.preventDefault();
+        get_add_form( this );
+    });
+
+
     // Add object to ctnr.
-    $( document ).on( 'submit', '#obj-form form', function( event ) {
-        var fields = $(this).find( ':input' ).serializeArray();
+    $( document ).on( 'click', '.ctnr-submit', function() {
+        var fields = $('#obj-form').find( ':input' ).serializeArray();
         var postData = {};
         var addObjectUrl = $('#ctnr-data').attr( 'data-addObjectUrl' );
         jQuery.each( fields, function ( i, field ) {

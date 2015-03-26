@@ -134,8 +134,9 @@ $(document).ready( function() {
                         initForms();
                     }, 150 );
                     $('#form-title').html( data.form_title );
-                    $('.form-btns .btn').not('.cancel').text( data.submit_btn_label );
-                    $('.form-btns .btn').not('.cancel').attr( 'class', buttonAttrs );
+                    $('.form-btns .btn').not('.cancel')
+                        .text( data.submit_btn_label )
+                        .attr( 'class', buttonAttrs );
                     $('#obj-form').slideDown();
                 }
             });

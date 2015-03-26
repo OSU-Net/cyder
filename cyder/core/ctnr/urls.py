@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 
 from cyder.core.ctnr.views import (add_object, remove_object, change_ctnr,
-                                   ctnr_detail, update_user)
+                                   ctnr_detail, ctnr_get_add_form, update_user)
 from cyder.core.urls import core_urls
 
 
@@ -14,5 +14,7 @@ urlpatterns = core_urls('ctnr') + patterns(
     url(r'(?P<ctnr_pk>[\w-]+)/update_user/', update_user,
         name='ctnr-update-user'),
     url(r'(?P<pk>[\w-]+)?/?change/$', change_ctnr, name='ctnr-change'),
+    url(r'(?P<pk>[\w-]+)/get-add-form/', ctnr_get_add_form,
+        name='ctnr-get-add-form'),
     url(r'(?P<pk>[\w-]+)/$', ctnr_detail, name='ctnr-detail'),
 )
