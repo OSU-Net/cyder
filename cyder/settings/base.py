@@ -294,6 +294,7 @@ MINIFY_BUNDLES = {
             'js/rangewizard.js',
             'js/mobile.js',
             'js/constants.js',
+            'js/buttonLogic.js'
         ),
         'rangeform': (
             'js/rangeform.js',

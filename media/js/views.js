@@ -57,23 +57,6 @@ $(document).ready( function() {
         $('#id_attribute').val( '' );
     });
 
-    // button behavior logic, see css
-    function buttonLogic() {
-        var selectors = '.js-get-form, .js-create-object, .update, ' +
-            '.cancel, .system_form';
-        $(selectors).addClass( 'hover' );
-        if ( $(this).hasClass( 'selected' ) ) {
-            $(this).removeClass( 'selected' );
-        } else {
-            $(selectors).removeClass( 'selected' );
-            $(this).removeClass( 'hover' ).addClass( 'selected' );
-        }
-    }
-    $( document ).on('click',
-        '.js-get-form, .js-create-object, .update, .cancel, .system_form',
-        buttonLogic );
-
-
     $( document ).on( 'click', '.js-get-form', function( e ) {
         // Show update form on clicking update icon.
         e.preventDefault();
