@@ -9,7 +9,7 @@ import json
 
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
-                 users=False, custom=None, update=True):
+                 users=False, custom=None, update=True, detail_view=False):
         if users:
             from cyder.core.cyuser.models import UserProfile
             objects = UserProfile.objects.filter(user__in=objects)
@@ -17,12 +17,18 @@ class Tablefier:
         self.objects = objects
         self.request = request
         self.custom = custom
+        self.detail_view = detail_view
         if self.custom:
             self.extra_cols = None
             self.update = False
         else:
             self.extra_cols = extra_cols
             self.update = update
+
+        if detail_view and objects and hasattr(objects[0], 'ctnr'):
+            self.show_ctnr = True
+        else:
+            self.show_ctnr = False
 
     @cached_property
     def profile(self):
@@ -73,7 +79,8 @@ class Tablefier:
             for col in self.extra_cols:
                 headers.append([col['header'], col['sort_field']])
 
-        headers.append(['Actions', None])
+        if not self.detail_view:
+            headers.append(['Actions', None])
 
         if (hasattr(self.objects, 'object_list') and
                 isinstance(self.objects.object_list, QuerySet)):
@@ -83,11 +90,14 @@ class Tablefier:
         if self.add_info:
             headers.insert(0, ['Info', None])
 
+        if self.show_ctnr:
+            headers.append(['Container', ''])
+
         return headers
 
     @cached_property
     def add_info(self):
-        return bool(self.grab_url(self.first_obj))
+        return self.grab_url(self.first_obj) and not self.detail_view
 
     @staticmethod
     def grab_url(value):
@@ -178,7 +188,11 @@ class Tablefier:
             for d in extra_data:
                 row_data.append(self.build_extra(d))
 
-            row_data.append(self.build_update_field(obj))
+            if self.show_ctnr:
+                row_data.append(self.build_data(obj, obj.ctnr))
+
+            if not self.detail_view:
+                row_data.append(self.build_update_field(obj))
 
             objs.append(obj)
             data.append(row_data)
