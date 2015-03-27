@@ -185,6 +185,7 @@ function header_message( msg ) {
     } else {
         message.appendTo($('.container.message')).slideDown();
     }
+    $(document).scrollTop(0);
 }
 
 // fields is a serialized array taken from inputs in a form
