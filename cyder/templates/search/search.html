@@ -29,11 +29,7 @@
 {% block form %}
   <div class="hidden" id="obj-form">
     <form class="form" method="POST">
-      <h2 id="form-title">
-          {% if obj_type %}
-            {{ 'Updating ' + pretty_obj_type }}
-          {% endif %}
-      </h2>
+      <h2 id="form-title"></h2>
       <div class="inner-form" id="hidden-inner-form"></div>
       <div class="form-btns">
         <hr>

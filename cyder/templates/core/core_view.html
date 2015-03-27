@@ -4,25 +4,7 @@
 
 {% block title %}{{ pretty_obj_type|smart_capitalize + "s" }} {% endblock %}
 
-{% block sidebar %}
-    {% include "base/sidebar.html" %}
-{% endblock %}
-
-{% block action_bar %}
-{% if obj_type_perm %}
-  {% if obj_type == 'system' %}
-    <a class="btn c system_form" href={{ url('system-create') }}>Create {{ pretty_obj_type }}</a>
-  {% else %}
-      <a id="btn js-create-object" class="btn js-get-form"
-          data-kwargs='{"obj_type": "{{ obj_type }}",
-                        "get_url": "{{ url('get-update-form') }}",
-                        "pretty_obj_type": "{{ pretty_obj_type }}"}'>
-        Create {{ pretty_obj_type }}
-      </a>
-  {% endif %}
-  {% endif %}
-{% endblock %}
-{% block form %}
+{% block view_metadata %}
   <span id="view-metadata"
         data-objType="{{ obj_type }}"
         data-prettyObjType="{{ pretty_obj_type }}"
@@ -30,22 +12,25 @@
         data-getUrl="{{ url('get-update-form') }}"
         data-csrfToken="{{ csrf_token }}">
   </span>
+{% endblock %}
+
+
+{% block action_bar %}
   {% if obj_type_perm %}
-    <div {% if not form.errors and object_table or obj_type == 'system' %}class="hidden"{% endif %} id="obj-form">
-      <form class="form" method="POST">
-        <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_obj_type }}</h2>
-        <div class="inner-form" id="hidden-inner-form">
-          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
-          {{ form.as_p() }}
-        </div>
-        <div class="form-btns">
-          <hr>
-          <a class="btn js-submit c" id={{'Create' + pretty_obj_type }}>{{ 'Update' if obj else 'Create ' + pretty_obj_type }}</a>
-          <a class="btn cancel c" data-formId="obj-form">Cancel</a>
-        </div>
-      </form>
-    </div>
+    {% if obj_type == 'system' %}
+      <a class="btn c system_form" href={{ url('system-create') }}>
+        Create {{ pretty_obj_type }}
+      </a>
+    {% else %}
+      <a id="btn js-create-object" class="btn js-get-form"
+         data-kwargs='{"obj_type": "{{ obj_type }}",
+                       "get_url": "{{ url('get-update-form') }}",
+                       "pretty_obj_type": "{{ pretty_obj_type }}"}'>
+        Create {{ pretty_obj_type }}
+      </a>
+    {% endif %}
   {% endif %}
+
   {% if obj_type == 'system' %}
     {{ js('systemform') }}
   {% endif %}
