@@ -67,6 +67,8 @@ def range_detail(request, pk):
 
     range_table = tablefy((mrange,), request=request, detail_view=True)
 
+    ctnr_table = tablefy(mrange.ctnr_set.all(), request=request)
+
     if ip_usage_percent:
         ip_usage_percent = "{0}%".format(ip_usage_percent)
     return render(request, 'range/range_detail.html', {
@@ -82,7 +84,8 @@ def range_detail(request, pk):
         'range_used': ip_usage_percent,
         'dynamic_intr_table': tablefy(dynamic_interfaces_page_obj,
                                       request=request),
-        'page_obj': dynamic_interfaces_page_obj
+        'page_obj': dynamic_interfaces_page_obj,
+        'ctnr_table': ctnr_table
     })
 
 

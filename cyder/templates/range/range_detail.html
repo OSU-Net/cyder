@@ -121,5 +121,9 @@
         {% include "base/includes/object_table.html" %}
       {% endif %}
   {% endif %}
+  {% if ctnr_table %}
+    <h3>Containers</h3>
+    {{ render_table(request, ctnr_table) }}
+  {% endif %}
   {{ js('systemform') }}
 {% endblock %}
