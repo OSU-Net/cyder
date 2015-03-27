@@ -2,14 +2,14 @@
 
 {% set obj_type_perm = request.user.get_profile().has_perm(request, 2, obj_class=obj_type) %}
 
-{% block sidebar %}
-    {% include "base/sidebar.html" %}
-{% endblock %}
-
 {% block view_metadata %}
-    <span id="view-metadata"
+  <span id="view-metadata"
+        data-objType="{{ obj_type }}"
+        data-prettyObjType="{{ pretty_obj_type }}"
+        data-searchUrl="{{ url('cydhcp-search-record') }}"
+        data-getUrl="{{ url('get-update-form') }}"
         data-csrfToken="{{ csrf_token }}">
-    </span>
+  </span>
 {% endblock %}
 
 {% block action_bar %}
@@ -29,37 +29,11 @@
       </a>
     {% endif %}
   {% endif %}
-{% endblock %}
 
-{% block form %}
-  <span id="view-metadata"
-        data-objType="{{ obj_type }}"
-        data-prettyObjType="{{ pretty_obj_type }}"
-        data-searchUrl="{{ url('cydhcp-search-record') }}"
-        data-getUrl="{{ url('get-update-form') }}"
-        data-csrfToken="{{ csrf_token }}">
-  </span>
-  {% if obj_type_perm and form %}
-  <div {% if not form.errors and object_table or obj_type in ["static_interface", "dynamic_interface"] %}
-         class="hidden"
-       {% endif %} id="obj-form">
-      <form class="form" method="POST">
-        <h2 id="form-title">{{ 'Updating ' if obj else 'Creating ' + pretty_obj_type }}</h2>
-        <div class="inner-form" id="hidden-inner-form">
-          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"</input>
-          {{ form.as_p() }}
-        </div>
-        <div class="form-btns">
-          <hr>
-          <a class="btn js-submit c">{{ 'Update' if obj else 'Create ' + pretty_obj_type }}</a>
-          <a class="btn cancel c" data-formId="obj-form">Cancel</a>
-        </div>
-      </form>
-    </div>
-  {% endif %}
   {% if obj_type == 'range' %}
     {{ js('rangeform') }}
   {% endif %}
+
   {% if obj_type in ["static_interface", "dynamic_interface"] %}
     {{ js('systemform') }}
   {% endif %}
