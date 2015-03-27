@@ -37,7 +37,7 @@ $(document).ready(function() {
             args.push( kwargs.name );
         }
         args.push( ctnrName );
-        var msg = getMsg( 'CtnrDetail', 'Confirmation', args );
+        msg = getMsg( 'CtnrDetail', 'Confirmation', args );
 
         if ( confirm( msg ) ) {
             postData = {
@@ -75,7 +75,7 @@ $(document).ready(function() {
         $('label[for="object-searchbox"]').text( value + '*:' );
         search( $('#ctnr-data').attr( 'data-search' + value + 'Url' ) );
 
-    };
+    }
 
     $( document ).on( 'change', "input[name='obj_type']", function() {
         change_ctnr_form( this.value );
@@ -124,7 +124,7 @@ $(document).ready(function() {
                 $('#obj-form').slideDown();
             }
         });
-    };
+    }
 
     $( document ).on( 'click', '#ctnr-get-add-form', function( e ) {
         e.preventDefault();
