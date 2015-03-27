@@ -191,8 +191,6 @@ class Tablefier:
                 if field in columns:
                     del details['data'][columns.index(field)]
 
-            if 'Range' in columns:
-                print 'yup'
             for title, field, value in details['data']:
                 row_data.append(self.build_data(obj, value))
 
