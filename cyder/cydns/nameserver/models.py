@@ -145,6 +145,10 @@ class Nameserver(CydnsRecord):
     def delete(self, *args, **kwargs):
         self.check_no_ns_soa_condition(self.domain)
         super(Nameserver, self).delete(*args, **kwargs)
+        try:
+            self.del_glue()
+        except AttributeError:
+            pass
 
     @transaction_atomic
     def save(self, *args, **kwargs):

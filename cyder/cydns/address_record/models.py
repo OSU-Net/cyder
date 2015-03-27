@@ -224,3 +224,6 @@ class AddressRecord(BaseAddressRecord):
         super(AddressRecord, self).delete(*args, **kwargs)
         if rng and update_range_usage:
             rng.save(commit=False)
+
+    def set_is_glue(self):
+        self.is_glue = True
