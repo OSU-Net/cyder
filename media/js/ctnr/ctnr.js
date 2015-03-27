@@ -3,53 +3,68 @@ $(document).ready(function() {
     var confirmation = false;
     var csrfToken = $('#view-metadata').attr( 'data-csrfToken' );
 
-    $('.minus, .plus, .remove.user, .remove.object').click( function( e ) {
+    $( document ).on( 'click', '.minus, .plus', function( e ) {
         e.preventDefault();
         var ctnrName = $('#ctnr-data').attr( 'data-ctnrName' );
         var url = $(this).attr( 'href' );
         var kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
-        var lvl;
-        var action = 'user_level';
-        var acknowledge = true;
-        if ( kwargs.lvl ) {
-            lvl = kwargs.lvl;
-        } else {
-            action = 'obj_remove';
-            if ( kwargs.name ) {
-                acknowledge = confirm(
-                    "Are you sure you want to remove " + kwargs.obj_type +
-                    ", " + kwargs.name + ", from " + ctnrName + "?");
-            } else {
-                acknowledge = confirm(
-                    "Are you sure you want to remove this " +
-                    kwargs.obj_type + " from " + ctnrName + "?");
-            }
-        }
+        postData = {
+            action: 'user_level',
+            csrfmiddlewaretoken: csrfToken,
+            lvl: kwargs.lvl,
+            obj_type: kwargs.obj_type,
+            pk: kwargs.pk,
+        };
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: postData,
+            dataType: 'json',
+            global: false,
+            success: handleErrorMessage
+        });
+    });
 
-        if ( acknowledge ) {
+    $( document ).on( 'click', '.remove.user, .remove.object', function( e ) {
+        e.preventDefault();
+        var ctnrName = $('#ctnr-data').attr( 'data-ctnrName' );
+        var url = $(this).attr( 'href' );
+        var kwargs = JSON.parse( $(this).attr( 'data-kwargs' ) );
+        var msg;
+        var args = [];
+        args.push( kwargs.obj_type );
+        if ( kwargs.name ) {
+            args.push( kwargs.name );
+        }
+        args.push( ctnrName );
+        var msg = getMsg( 'CtnrDetail', 'Confirmation', args );
+
+        if ( confirm( msg ) ) {
             postData = {
-                action: action,
+                action: 'obj_remove',
                 csrfmiddlewaretoken: csrfToken,
-                lvl: lvl,
                 obj_type: kwargs.obj_type,
                 pk: kwargs.pk,
             };
-
-            $.post( url, postData, function( data ) {
-                if ( data.error ) {
-                    if ( $('.container.message').find( '.messages' ).length ) {
-                        $('.container.message').find( '.messages' ).remove();
-                    }
-                    $('.container.message').append(
-                        '<ul class="messages"><li class="error">' +
-                        data.error + '</li></ul>');
-                } else {
-                    location.reload();
-                }
-            }, 'json' );
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: postData,
+                dataType: 'json',
+                global: false,
+                success: handleErrorMessage
+            });
         }
         return false;
     });
+
+    function handleErrorMessage ( data ) {
+        if ( data.error ) {
+            header_message( data.error );
+        } else {
+            location.reload();
+        }
+    }
 
     function changeCtnrForm ( value ) {
         if ( value == 'user' ) {
