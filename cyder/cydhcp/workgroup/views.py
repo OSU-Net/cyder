@@ -14,6 +14,7 @@ def workgroup_detail(request, pk):
         'Attributes': 'workgroupav_set',
         'Dynamic Interfaces': workgroup.dynamicinterface_set.all(),
         'Static Interfaces': workgroup.staticinterface_set.all(),
+        'Containers': 'ctnr_set',
     }, obj=workgroup)
 
 
