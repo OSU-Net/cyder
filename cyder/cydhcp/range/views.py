@@ -49,6 +49,7 @@ def range_detail(request, pk):
     ip_usage_percent = None
     dynamic_interfaces = []
     dynamic_interfaces_page_obj = None
+    dynamic_interfaces_table = None
     if range_type == 'st':
         start_upper = mrange.start_upper
         start_lower = mrange.start_lower
@@ -64,6 +65,8 @@ def range_detail(request, pk):
         dynamic_interfaces = DynamicInterface.objects.filter(range=mrange)
         dynamic_interfaces_page_obj = make_paginator(
             request, do_sort(request, dynamic_interfaces), 10)
+        dynamic_interfaces_table = tablefy(dynamic_interfaces_page_obj,
+                                           request=request, excluded=['Range'])
 
     range_table = tablefy((mrange,), request=request, detail_view=True)
 
@@ -82,8 +85,7 @@ def range_detail(request, pk):
                                request=request),
         'allow_list': allow,
         'range_used': ip_usage_percent,
-        'dynamic_intr_table': tablefy(dynamic_interfaces_page_obj,
-                                      request=request),
+        'dynamic_intr_table': dynamic_interfaces_table,
         'page_obj': dynamic_interfaces_page_obj,
         'ctnr_table': ctnr_table
     })

@@ -9,7 +9,8 @@ import json
 
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
-                 users=False, custom=None, update=True, detail_view=False):
+                 users=False, custom=None, update=True, detail_view=False,
+                 excluded=[]):
         if users:
             from cyder.core.cyuser.models import UserProfile
             objects = UserProfile.objects.filter(user__in=objects)
@@ -18,6 +19,7 @@ class Tablefier:
         self.request = request
         self.custom = custom
         self.detail_view = detail_view
+        self.excluded = excluded
         if self.custom:
             self.extra_cols = None
             self.update = False
@@ -64,6 +66,11 @@ class Tablefier:
             data = self.custom(self.first_obj)['data']
         else:
             data = self.first_obj.details()['data']
+
+        columns = map(lambda x: x[0], data)
+        for field in self.excluded:
+            if field in columns:
+                del data[columns.index(field)]
 
         for title, sort_field, value in data:
             headers.append([title, sort_field])
@@ -179,6 +186,13 @@ class Tablefier:
                     'class': ['info'], 'img': ['/media/img/magnify.png']})
 
             details = self.custom(obj) if self.custom else obj.details()
+            columns = map(lambda x: x[0], details['data'])
+            for field in self.excluded:
+                if field in columns:
+                    del details['data'][columns.index(field)]
+
+            if 'Range' in columns:
+                print 'yup'
             for title, field, value in details['data']:
                 row_data.append(self.build_data(obj, value))
 
