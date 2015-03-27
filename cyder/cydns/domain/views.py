@@ -18,6 +18,7 @@ def domain_detail(request, pk):
         'SRVs': 'srv_set',
         'SSHFPs': 'sshfp_set',
         'TXTs': 'txt_set',
+        'Containers': 'ctnr_set',
     }, pk=pk)
 
 
