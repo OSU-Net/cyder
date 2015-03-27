@@ -21,7 +21,7 @@ $(document).ready(function() {
             data: postData,
             dataType: 'json',
             global: false,
-            success: handleErrorMessage
+            success: handle_error_message
         });
     });
 
@@ -52,13 +52,13 @@ $(document).ready(function() {
                 data: postData,
                 dataType: 'json',
                 global: false,
-                success: handleErrorMessage
+                success: handle_error_message
             });
         }
         return false;
     });
 
-    function handleErrorMessage ( data ) {
+    function handle_error_message ( data ) {
         if ( data.error ) {
             header_message( data.error );
         } else {
@@ -66,7 +66,7 @@ $(document).ready(function() {
         }
     }
 
-    function changeCtnrForm ( value ) {
+    function change_ctnr_form ( value ) {
         if ( value == 'user' ) {
             $('#add-user-form').slideDown();
         } else {
@@ -78,7 +78,7 @@ $(document).ready(function() {
     };
 
     $( document ).on( 'change', "input[name='obj_type']", function() {
-        changeCtnrForm( this.value );
+        change_ctnr_form( this.value );
     });
 
     // Auto complete for object search dialog.
