@@ -144,25 +144,31 @@ $(document).ready(function() {
         postData.csrfmiddlewaretoken = csrfToken;
         postData.confirmation = confirmation;
         confirmation = false;
-        $.post( addObjectUrl, postData, function( data ) {
-            if ( data.acknowledge ) {
-                if ( confirm( data.acknowledge ) ) {
-                    confirmation = true;
-                    $('#add-object-ctnr').click();
-                    data.removeClass( "error" );
-                }
-            }
-            if ( data.error ) {
-                $('.error').empty();
-                $('#add-object-errorlist').empty();
-                var forms = $('#add-object-errorlist');
-                forms.append( '<li><font color="red">' + data.error +'</font></li>' );
-            }
-            if ( data.success ) {
-                $('.error').empty();
-                document.location.reload();
-            }
-        }, 'json' );
+        $.ajax({
+            type: 'POST',
+            url: addObjectUrl,
+            data: postData,
+            dataType: 'json',
+            success: handle_add_object_errors
+        });
     });
+
+    function handle_add_object_errors( data ) {
+        if ( data.acknowledge ) {
+            if ( confirm( data.acknowledge ) ) {
+                confirmation = true;
+                $('.ctnr-submit').click();
+            }
+        }
+        if ( data.error ) {
+            $('.error').empty();
+            $('#add-object-errorlist').empty();
+            var forms = $('#add-object-errorlist');
+            forms.append( '<li class="error">' + data.error +'</li>' );
+        }
+        if ( data.success ) {
+            document.location.reload();
+        }
+    }
 
 });
