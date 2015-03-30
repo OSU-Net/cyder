@@ -25,6 +25,12 @@ class Token(models.Model, ObjectUrlMixin):
     class Meta:
         app_label = 'cyder'
 
+    @property
+    def pretty_name(self):
+        return u"{0}: {1}".format(self.user.username, self.purpose)
+
+    pretty_type = 'API Token'
+
     def save(self, *args, **kwargs):
         if not self.key:
             self.key = self.generate_key()
