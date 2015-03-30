@@ -58,27 +58,40 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
             glue_ip_str, glue_ctnr = (self.cleaned_data['glue_ip_str'],
                                       self.cleaned_data['glue_ctnr'])
             server = self.cleaned_data['server']
-            glue_label = server.split('.')[0]
-            if domain.delegated and not (glue_ip_str or glue_ctnr):
-                raise ValidationError("This zone is delegated, so "
-                                      "please provide information for glue.")
+            if '.' in server:
+                glue_label, glue_domain = tuple(server.split('.', 1))
+                glue_domain = glue_domain.strip('.').lower()
+            else:
+                glue_label, glue_domain = None, None
+            if domain.delegated:
+                if glue_domain and glue_domain != domain.name.lower():
+                    if glue_ip_str or glue_ctnr:
+                        raise ValidationError(
+                            "This record does not need glue, so "
+                            "please leave the glue fields blank.")
+                else:
+                    if not (glue_ip_str and glue_ctnr):
+                        raise ValidationError(
+                            "This zone is delegated, so "
+                            "please provide information for glue.")
+                    self.glue = AddressRecord(domain=domain, label=glue_label,
+                                              ip_str=glue_ip_str,
+                                              ctnr=glue_ctnr)
+                    self.glue.set_is_glue()
+                    self.glue.save()
             elif not domain.delegated and (glue_ip_str or glue_ctnr):
                 raise ValidationError("This zone is not delegated, so please "
                                       "leave the glue fields blank.")
-            if domain.delegated:
-                self.glue = AddressRecord(domain=domain, label=glue_label,
-                                          ip_str=glue_ip_str, ctnr=glue_ctnr)
-                self.glue.set_is_glue()
-                self.glue.save()
         cleaned_data = super(NameserverForm, self).clean(*args, **kwargs)
         return cleaned_data
 
     def save(self, *args, **kwargs):
         try:
             super(NameserverForm, self).save(*args, **kwargs)
-        except:
+        except ValidationError, e:
             if self.glue is not None:
                 self.glue.delete()
+            raise e
 
 
 class NSDelegated(forms.Form):
