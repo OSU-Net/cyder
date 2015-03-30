@@ -88,7 +88,7 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
     def save(self, *args, **kwargs):
         try:
             super(NameserverForm, self).save(*args, **kwargs)
-        except ValidationError, e:
+        except Exception, e:
             if self.glue is not None:
                 self.glue.delete()
             raise e
