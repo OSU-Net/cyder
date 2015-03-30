@@ -49,6 +49,7 @@ def range_detail(request, pk):
     ip_usage_percent = None
     dynamic_interfaces = []
     dynamic_interfaces_page_obj = None
+    dynamic_interfaces_table = None
     if range_type == 'st':
         start_upper = mrange.start_upper
         start_lower = mrange.start_lower
@@ -64,12 +65,12 @@ def range_detail(request, pk):
         dynamic_interfaces = DynamicInterface.objects.filter(range=mrange)
         dynamic_interfaces_page_obj = make_paginator(
             request, do_sort(request, dynamic_interfaces), 10)
-    
-    range_table = tablefy((mrange,), info=False, request=request)
+        dynamic_interfaces_table = tablefy(dynamic_interfaces_page_obj,
+                                           request=request, excluded=['Range'])
 
-    from cyder.base.tablefier import Tablefier
-    Tablefier.remove_field(range_table, 'Info')
-    Tablefier.remove_field(range_table, 'Actions')
+    range_table = tablefy((mrange,), request=request, detail_view=True)
+
+    ctnr_table = tablefy(mrange.ctnr_set.all(), request=request)
 
     if ip_usage_percent:
         ip_usage_percent = "{0}%".format(ip_usage_percent)
@@ -77,16 +78,16 @@ def range_detail(request, pk):
         'obj': mrange,
         'obj_type': 'range',
         'pretty_obj_type': mrange.pretty_type,
-        'ranges_table': range_table, 
+        'ranges_table': range_table,
         'range_data': make_paginator(request, range_data, 50),
         'range_type': range_type,
         'attrs_table': tablefy(mrange.rangeav_set.all(),
                                request=request),
         'allow_list': allow,
         'range_used': ip_usage_percent,
-        'dynamic_intr_table': tablefy(dynamic_interfaces_page_obj, info=True,
-                                      request=request),
-        'page_obj': dynamic_interfaces_page_obj
+        'dynamic_intr_table': dynamic_interfaces_table,
+        'page_obj': dynamic_interfaces_page_obj,
+        'ctnr_table': ctnr_table
     })
 
 
