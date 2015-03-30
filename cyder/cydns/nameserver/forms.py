@@ -74,6 +74,9 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
                         raise ValidationError(
                             "This zone is delegated, so "
                             "please provide information for glue.")
+                    if not glue_label or not glue_domain:
+                        raise ValidationError(
+                            "Please provide a fully qualified server name.")
                     self.glue = AddressRecord(domain=domain, label=glue_label,
                                               ip_str=glue_ip_str,
                                               ctnr=glue_ctnr)
@@ -89,9 +92,9 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
         try:
             super(NameserverForm, self).save(*args, **kwargs)
         except Exception, e:
-            if self.glue is not None:
-                self.glue.delete()
-            raise e
+            if self.glue and self.glue.pk is not None:
+                self.glue.delete(validate_glue=False)
+            raise ValidationError(e)
 
 
 class NSDelegated(forms.Form):
