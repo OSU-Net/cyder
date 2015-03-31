@@ -64,7 +64,7 @@ class VCSRepo(object):
         return self._get_revision()
 
     def _sanity_check(self):
-        difference = self._get_line_difference()
+        difference = self._get_line_count_difference()
 
         if -difference > self.line_decrease_limit:
             raise SanityCheckFailure(
@@ -125,7 +125,7 @@ class GitRepo(VCSRepo):
     def _add_all(self):
         self._run_command('git add -A .')
 
-    def _get_line_difference(self):
+    def _get_line_count_difference(self):
         old_line_count = new_line_count = 0
 
         old_filenames, _, _ = self._run_command(
