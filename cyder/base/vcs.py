@@ -66,13 +66,15 @@ class VCSRepo(object):
     def _sanity_check(self):
         difference = self._get_line_count_difference()
 
-        if -difference > self.line_decrease_limit:
+        if (self.line_decrease_limit is not None and
+                -difference > self.line_decrease_limit):
             raise SanityCheckFailure(
                 'Line count decrease ({0}) exceeded limit ({1}).\n'
                 'Aborting commit.\n'.format(-difference,
                                             self.line_decrease_limit))
 
-        if difference > self.line_increase_limit:
+        if (self.line_increase_limit is not None and
+                difference > self.line_increase_limit):
             raise SanityCheckFailure(
                 'Line count increase ({0}) exceeded limit ({1}).\n'
                 'Aborting commit.\n'.format(-difference,
