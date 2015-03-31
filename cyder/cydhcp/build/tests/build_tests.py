@@ -89,7 +89,7 @@ class DHCPBuildTest(TestCase):
         self.assertNotEqual(rev2, rev3)
 
     def test_sanity_check1(self):
-        """Test that the sanity check fails when too many lines are changed"""
+        """Test sanity check success"""
 
         self.builder.repo.line_decrease_limit = 100
         self.builder.repo.line_increase_limit = 1
@@ -105,8 +105,7 @@ class DHCPBuildTest(TestCase):
         )
 
         self.builder.build()
-        self.assertRaises(
-            SanityCheckFailure, self.builder.push, sanity_check=True)
+        self.builder.push(sanity_check=True)
 
     def test_sanity_check2(self):
         """Test that the sanity check fails when too many lines are removed"""
