@@ -32,7 +32,7 @@ class Token(models.Model, ObjectUrlMixin):
     pretty_type = 'API Token'
 
     def get_ctnrs(self):
-        return []
+        return None
 
     def save(self, *args, **kwargs):
         if not self.key:

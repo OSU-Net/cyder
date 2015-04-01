@@ -63,10 +63,12 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
 
     if obj:
         ctnr = None
-        try:
-            ctnrs = obj.get_ctnrs()
-        except TypeError:
-            ctnrs = None
+        ctnrs = None
+        if hasattr(obj, "get_ctnrs"):
+            try:
+                ctnrs = obj.get_ctnrs()
+            except TypeError:
+                pass
         if ctnrs is not None:
             for c in ctnrs:
                 try:
