@@ -57,12 +57,17 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
             domain = self.cleaned_data['domain']
             glue_ip_str, glue_ctnr = (self.cleaned_data['glue_ip_str'],
                                       self.cleaned_data['glue_ctnr'])
-            server = self.cleaned_data['server']
+            server = self.cleaned_data['server'].strip('.')
             if '.' in server:
-                glue_label, glue_domain = tuple(server.split('.', 1))
-                glue_domain = glue_domain.strip('.').lower()
+                if server.lower() != domain.name.lower():
+                    glue_label, glue_domain = tuple(server.split('.', 1))
+                    glue_domain = glue_domain.strip('.').lower()
+                else:
+                    glue_label, glue_domain = "", server.lower()
             else:
-                glue_label, glue_domain = None, None
+                raise ValidationError(
+                    "Please provide a fully qualified server name.")
+
             if domain.delegated:
                 if glue_domain and glue_domain != domain.name.lower():
                     if glue_ip_str or glue_ctnr:
@@ -74,12 +79,12 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
                         raise ValidationError(
                             "This zone is delegated, so "
                             "please provide information for glue.")
-                    if not glue_label or not glue_domain:
-                        raise ValidationError(
-                            "Please provide a fully qualified server name.")
-                    self.glue = AddressRecord(domain=domain, label=glue_label,
-                                              ip_str=glue_ip_str,
-                                              ctnr=glue_ctnr)
+                    gluekwargs = {'domain': domain, 'label': glue_label,
+                                  'ip_str': glue_ip_str, 'ctnr': glue_ctnr}
+                    try:
+                        self.glue = AddressRecord.objects.get(**gluekwargs)
+                    except AddressRecord.DoesNotExist:
+                        self.glue = AddressRecord(**gluekwargs)
                     self.glue.set_is_glue()
                     self.glue.save()
             elif not domain.delegated and (glue_ip_str or glue_ctnr):
