@@ -375,8 +375,6 @@ def get_update_form(request):
 
                 initial = copy(kwargs)
                 initial[related_type] = related_pk
-                if 'ctnr' in FormKlass.base_fields:
-                    initial['ctnr'] = request.session['ctnr']
                 form = FormKlass(initial=initial)
 
                 if related_type == 'range' and not obj_type.endswith('_av'):
