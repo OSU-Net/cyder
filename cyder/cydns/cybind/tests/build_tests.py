@@ -149,7 +149,6 @@ class DNSBuildTest(TestCase):
             View.objects.get(name='public'),
             View.objects.get(name='private'))
         StaticInterface.objects.get(fqdn='www2.example.com').delete()
-
         self.builder.build()
         self.builder.push(sanity_check=True)
 
