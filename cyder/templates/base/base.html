@@ -30,7 +30,7 @@
             {{ request.user.username }}:
           </a>
           <span class="user-info">
-            <a class="level">
+            <p class="level">
             {% if request.session.level == 0 %}
               guest on
             {% elif request.session.level == 1 %}
@@ -38,7 +38,7 @@
             {% else %}
               admin on
             {% endif %}
-            </a>
+            </p>
           </span>
           <form id="ctnr-change" action="{{ url('ctnr-change') }}" method="post">
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
