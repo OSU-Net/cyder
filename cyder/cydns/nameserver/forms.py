@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from cyder.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
+from cyder.cydns.view.models import View
 from cyder.cydns.forms import DNSForm
 from cyder.cydns.nameserver.models import Nameserver
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -87,6 +88,8 @@ class NameserverForm(DNSForm, UsabilityFormMixin):
                         self.glue = AddressRecord(**gluekwargs)
                     self.glue.set_is_glue()
                     self.glue.save()
+                    for v in View.objects.all():
+                        self.glue.views.add(v)
             elif not domain.delegated and (glue_ip_str or glue_ctnr):
                 raise ValidationError("This zone is not delegated, so please "
                                       "leave the glue fields blank.")
