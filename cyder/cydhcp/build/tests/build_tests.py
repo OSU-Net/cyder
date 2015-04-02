@@ -95,8 +95,7 @@ class DHCPBuildTest(TestCase):
         self.builder.push(sanity_check=False)
 
         self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
-        self.builder.repo.line_increase_limit = 100
-
+        self.builder.repo.line_increase_limit = 1
         d = DynamicInterface.objects.create(
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
@@ -104,29 +103,21 @@ class DHCPBuildTest(TestCase):
             ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
         self.builder.build()
-        self.builder.push(sanity_check=True)
-
-        self.builder.repo.line_increase_limit = 1
-
-        d = DynamicInterface.objects.create(
-            system=System.objects.get(name='Test_system_5'),
-            mac='99:88:77:ff:ee:dd',
-            range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Test_ctnr'),
-        )
-        self.builder.build()
         self.assertRaises(
             SanityCheckFailure, self.builder.push, sanity_check=True)
+
+        self.builder.repo.line_increase_limit = 100
+        self.builder.build()
+        self.builder.push(sanity_check=True)
 
     def test_sanity_check_no_change(self):
         """Test sanity check when line count doesn't change"""
 
-        self.builder.repo.line_decrease_limit = 100
-        self.builder.repo.line_increase_limit = 100
-
         self.builder.build()
         self.builder.push(sanity_check=False)
 
+        self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
+        self.builder.repo.line_increase_limit = 0  # No increase allowed.
         DynamicInterface.objects.filter(
             mac__in=('010204081020', 'aabbccddeeff')).delete()
         d = DynamicInterface.objects.create(
@@ -141,20 +132,16 @@ class DHCPBuildTest(TestCase):
     def test_sanity_check_decrease(self):
         """Test sanity check when line count decreases"""
 
-        self.builder.repo.line_decrease_limit = 100
-        self.builder.repo.line_increase_limit = 0  # No increase allowed
-
         self.builder.build()
         self.builder.push(sanity_check=False)
 
-        DynamicInterface.objects.get(mac='aa:bb:cc:dd:ee:ff').delete()
-
-        self.builder.build()
-        self.builder.push(sanity_check=True)
-
-        DynamicInterface.objects.get(mac='0a:1b:2c:3d:4e:5f').delete()
-
+        self.builder.repo.line_increase_limit = 0  # No increase allowed
         self.builder.repo.line_decrease_limit = 1
+        DynamicInterface.objects.get(mac='aa:bb:cc:dd:ee:ff').delete()
         self.builder.build()
         self.assertRaises(
             SanityCheckFailure, self.builder.push, sanity_check=True)
+
+        self.builder.repo.line_decrease_limit = 100
+        self.builder.build()
+        self.builder.push(sanity_check=True)
