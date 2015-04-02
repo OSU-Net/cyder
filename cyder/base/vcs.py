@@ -128,30 +128,20 @@ class GitRepo(VCSRepo):
         self._run_command('git add -A .')
 
     def _get_line_count_difference(self):
-        old_line_count = new_line_count = 0
+        diff_ignore = (re.compile(r'--- \S'), re.compile(r'\+\+\+ \S'))
 
-        old_filenames, _, _ = self._run_command(
-            'git ls-tree -r --name-only HEAD', ignore_failure=True)
-        for n in old_filenames.splitlines():
-            with open(n) as f:
-                while True:
-                    chunk = f.read(4096)
-                    if chunk == '':
-                        break
-                    old_line_count += chunk.count('\n')
-        del old_filenames
+        output, _, _ = self._run_command('git diff --cached')
 
-        new_filenames, _, _ = self._run_command('git ls-files',
-            ignore_failure=True)
-        for n in new_filenames.splitlines():
-            with open(n) as f:
-                while True:
-                    chunk = f.read(4096)
-                    if chunk == '':
-                        break
-                    new_line_count += chunk.count('\n')
+        added, removed = 0, 0
+        for line in output.split('\n'):
+            if any(regex.match(line) for regex in diff_ignore):
+                continue
+            if line.startswith('+'):
+                added += 1
+            elif line.startswith('-'):
+                removed += 1
 
-        return new_line_count - old_line_count
+        return added - removed
 
     def _commit(self, message, allow_empty=False):
         cmd = ('git commit' + (' --allow-empty' if allow_empty else '') +
