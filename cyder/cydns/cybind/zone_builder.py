@@ -27,9 +27,10 @@ def render_soa_only(soa, root_domain):
         'refresh': soa.refresh,
         'retry': soa.retry,
         'expire': soa.expire,
-        'minimum': soa.minimum
+        'minimum': soa.minimum,
+        'ttl': soa.ttl,
     }
-    BUILD_STR = _("{root_domain}.     IN   SOA     {primary}. {contact}. (\n"
+    BUILD_STR = _("{root_domain}.  {ttl}  IN  SOA  {primary}. {contact}. (\n"
                   "\t\t{{serial}}     ; Serial\n"
                   "\t\t{refresh}     ; Refresh\n"
                   "\t\t{retry}     ; Retry\n"
