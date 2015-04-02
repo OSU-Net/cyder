@@ -12,5 +12,11 @@ class SOAForm(ModelForm, UsabilityFormMixin):
                   'is_signed', 'dns_enabled')
         exclude = ('serial', 'dirty',)
 
+    def clean(self, *args, **kwargs):
+        contact = self.cleaned_data['contact']
+        self.cleaned_data['contact'] = contact.replace('@', '.')
+        return super(SOAForm, self).clean(*args, **kwargs)
+
+
 
 SOAAVForm = get_eav_form(SOAAV, SOA)
