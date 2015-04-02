@@ -77,7 +77,7 @@ class VCSRepo(object):
                 difference > self.line_increase_limit):
             raise SanityCheckFailure(
                 'Line count increase ({0}) exceeded limit ({1}).\n'
-                'Aborting commit.\n'.format(-difference,
+                'Aborting commit.\n'.format(difference,
                                             self.line_increase_limit))
 
 
