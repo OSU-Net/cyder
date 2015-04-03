@@ -95,7 +95,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         data['data'] = (
             ('Name', 'fqdn', self),
             ('System', 'system', self.system),
-            ('IP', 'ip_str', str(self.ip_str)),
+            ('IP', 'ip_lower', str(self.ip_str)),
             ('MAC', 'mac', self.mac),
             ('Workgroup', 'workgroup', self.workgroup),
             ('DHCP', 'dhcp_enabled',

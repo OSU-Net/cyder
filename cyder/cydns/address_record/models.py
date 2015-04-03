@@ -187,7 +187,7 @@ class AddressRecord(BaseAddressRecord):
         data['data'] = [
             ('Label', 'label', self.label),
             ('Domain', 'domain__name', self.domain),
-            ('IP', 'ip_str', str(self.ip_str)),
+            ('IP', 'ip_lower', str(self.ip_str)),
         ]
         return data
 
