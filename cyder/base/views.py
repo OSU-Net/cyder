@@ -36,6 +36,7 @@ from cyder.settings import BUG_REPORT_EMAIL
 
 def home(request):
     return render_to_response('base/index.html', {
+        'dev': settings.DEV,
         'read_only': getattr(request, 'read_only', False),
     })
 
