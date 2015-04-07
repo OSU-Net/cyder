@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
 from django.http import HttpResponse
@@ -62,6 +63,7 @@ def cydns_view(request, pk=None):
         form.make_usable(request)
 
     return render(request, 'cydns/cydns_view.html', {
+        'dev': settings.DEV,
         'form': form,
         'obj': obj,
         'obj_type': obj_type,

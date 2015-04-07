@@ -2,6 +2,7 @@ import simplejson as json
 from copy import copy
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail, BadHeaderError
@@ -188,6 +189,7 @@ def cy_view(request, template, pk=None, obj_type=None):
         form.make_usable(request)
 
     return render(request, template, {
+        'dev': settings.DEV,
         'form': form,
         'obj': obj,
         'page_obj': page_obj,
