@@ -18,5 +18,4 @@ class SOAForm(ModelForm, UsabilityFormMixin):
         return super(SOAForm, self).clean(*args, **kwargs)
 
 
-
 SOAAVForm = get_eav_form(SOAAV, SOA)
