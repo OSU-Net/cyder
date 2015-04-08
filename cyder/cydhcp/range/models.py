@@ -101,7 +101,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
     search_fields = ('start_str', 'end_str', 'name')
-    sort_fields = ('start_str', 'end_str')
+    sort_fields = ('start_lower', 'end_lower')
 
     class Meta:
         app_label = 'cyder'
@@ -180,7 +180,7 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
         data = super(Range, self).details()
         data['data'] = [
             ('Name', 'name', self.name),
-            ('Range', 'start_str', self.get_ip_str()),
+            ('Range', 'start_lower', self.get_ip_str()),
             ('Domain', 'domain', self.domain),
             ('Type', 'range_type',
              'static' if self.range_type == 'st' else 'dynamic'),
