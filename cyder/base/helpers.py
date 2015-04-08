@@ -39,7 +39,7 @@ def clean_sort_param(request):
 def do_sort(request, qs):
     """Returns an order_by string based on request GET parameters"""
     # NOTE: To sort IP addresses numerically, ip_lower is used in most cases.
-    # However, this means only the lower 32 bits of ipv6 addresses are used.
+    # However, this means only the lower 64 bits of ipv6 addresses are used.
     sort, order = clean_sort_param(request)
     if sort == "id" and hasattr(qs.model, 'eg_metadata'):
         fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
