@@ -55,6 +55,7 @@ def ctnr_detail(request, pk):
     ctnrRdomains = ctnr.domains.select_related().filter(is_reverse=True)
     ctnrRanges = ctnr.ranges.select_related()
     ctnrWorkgroups = ctnr.workgroups.select_related()
+    ctnr_table = tablefy([ctnr], request=request, detail_view=True)
 
     if request.user.get_profile().has_perm(
             request, ACTION_UPDATE, obj_class='CtnrObject', ctnr=ctnr):
@@ -96,6 +97,7 @@ def ctnr_detail(request, pk):
 
     return render(request, 'ctnr/ctnr_detail.html', {
         'obj': ctnr,
+        'obj_table': ctnr_table,
         'pretty_obj_type': ctnr.pretty_type,
         'obj_type': 'ctnr',
         'user_table': user_table,

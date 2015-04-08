@@ -164,7 +164,8 @@ class Tablefier:
                        'url': [obj.get_update_url(), obj.get_delete_url()],
                        'data': data,
                        'class': ['js-get-form', 'delete table_delete'],
-                       'img': ['/media/img/update.png', '/media/img/delete.png']}
+                       'img': ['/media/img/update.png',
+                               '/media/img/delete.png']}
             except NoReverseMatch:
                 col = {'value': []}
         else:
