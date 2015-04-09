@@ -97,8 +97,10 @@ class Tablefier:
         if self.add_info:
             headers.insert(0, ['Info', None])
 
-        if self.show_ctnr:
+        if self.show_ctnr and 'Container' not in columns:
             headers.append(['Container', ''])
+        else:
+            self.show_ctnr = False
 
         return headers
 

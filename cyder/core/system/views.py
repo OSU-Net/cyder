@@ -28,7 +28,6 @@ def system_detail(request, pk):
     dynamic = DynamicInterface.objects.filter(system=system)
     related_systems = set()
     system_table = tablefy([system], request=request, detail_view=True)
-
     static = StaticInterface.objects.filter(system=system)
     static_intr = []
     dynamic_intr = []
