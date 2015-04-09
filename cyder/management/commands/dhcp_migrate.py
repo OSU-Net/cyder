@@ -51,13 +51,6 @@ allow_all_subnets = [
     '10.251.128.128', '10.196.88.30']
 
 
-voip_networks = {
-    '10.112.17.0/25', '10.112.21.0/25', '10.160.0.32/28', '10.160.16.0/27',
-    '10.160.48.0/25', '10.160.49.0/25', '10.195.128.0/22', '10.195.172.0/23',
-    '10.195.180.0/26', '10.195.180.128/26', '140.211.26.0/24',
-}
-
-
 cursor, _ = get_cursor('maintain_sb')
 
 
@@ -98,8 +91,7 @@ def create_subnet(subnet_id, name, subnet, netmask, status, vlan_id):
                       "WHERE vlan_id = %s" % vlan_id):
         vlan_id, vlan_name, vlan_number = cursor.fetchone()
         vlan = Vlan.objects.get(name=vlan_name)
-    vrf = Vrf.objects.get(name=('VoIP' if network_str in voip_networks
-                                else 'Legacy'))
+    vrf = Vrf.objects.get(name='Legacy')
 
     n, created = Network.objects.get_or_create(
         network_str=network_str, ip_type='4',
