@@ -50,16 +50,13 @@
 {% macro render_object(request, object_table, class) %}
 {% if object_table %}
   <table id="obj-info">
-
     {% for row in object_table['data']%}
       {% for col in row %}
         {% set header, sort_field = object_table['headers'][loop.index0] %}
-         
         <tr>
-          <td class="{{ header | lower }}_column"><b>{{ header }}</b></td>
-          
+          <td class="{{ header | lower }}_column header_column"><b>{{ header }}:</b></td>
           {% if col['value'] %}
-            <td>
+            <td class="data_column">
             {% for cell in col['value'] %}
               {% if col['url'][loop.index0] %}
                 <a
@@ -74,7 +71,7 @@
                 {% if col['img'] and col['img'][loop.index0] %}
                   <img alt="{{ cell }}" src="{{ col['img'][loop.index0] }}"/>
                 {% else %}
-                  {{ cell }} 
+                  {{ cell }}
                 {% endif %}
                 </a>
               {% else %}
@@ -83,7 +80,6 @@
             {% endfor %}
             </td>
           {% endif %}
-        
         </tr>
       {% endfor %}
     {% endfor %}
