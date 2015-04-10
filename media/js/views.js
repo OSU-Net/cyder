@@ -118,7 +118,7 @@ $(document).ready( function() {
         if ( is_update ) {
             $('#obj-form form').find( '.cancel' ).click();
         } else {
-            $('#obj-form form').trigger( 'reset' );
+            $('select, input:text', form).val(''); // Clear fields in form.
         }
     }
 
