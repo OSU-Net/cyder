@@ -53,7 +53,7 @@ class Network(BaseModel, ObjectUrlMixin):
     network = None
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
-    sort_fields = ('network_str',)
+    sort_fields = ('ip_lower',)
 
     class Meta:
         app_label = 'cyder'
@@ -75,7 +75,7 @@ class Network(BaseModel, ObjectUrlMixin):
         """For tables."""
         data = super(Network, self).details()
         data['data'] = (
-            ('Network', 'network_str', self),
+            ('Network', 'ip_lower', self),
             ('Site', 'site', self.site),
             ('Vlan', 'vlan', self.vlan),
             ('Vrf', 'vrf', self.vrf),

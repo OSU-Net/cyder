@@ -256,7 +256,7 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
         data = super(PTR, self).details()
         data['data'] = [
             ('Target', 'fqdn', self.fqdn),
-            ('IP', 'ip_str', str(self.ip_str)),
+            ('IP', 'ip_lower', str(self.ip_str)),
         ]
         return data
 
