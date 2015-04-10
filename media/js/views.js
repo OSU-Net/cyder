@@ -99,7 +99,7 @@ $(document).ready( function() {
 
     function av_form_submit_handler( data ) {
         var is_update = false;
-        var id = data.row.postback_urls[0].match(/[1-9]+/g);
+        var id = data.row.postback_urls[0].match(/[0-9]+/g);
         var kwargs;
         if ( $('.attrs_table:hidden') ) {
             $('.attrs_table').slideDown();
