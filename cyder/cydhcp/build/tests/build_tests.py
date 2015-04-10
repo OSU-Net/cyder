@@ -21,8 +21,8 @@ DHCPBUILD = {
     'pid_file': '/tmp/cyder_dhcp_test.pid',
     'target_file': 'dhcpd.conf.data',
     'check_file': 'dhcpd.conf',
-    'line_change_limit': 500,
-    'line_removal_limit': None,
+    'line_decrease_limit': None,
+    'line_increase_limit': None,
     'stop_file': '/tmp/cyder_dhcp_test.stop',
     'stop_file_email_interval': None,  # never
 }
@@ -88,51 +88,36 @@ class DHCPBuildTest(TestCase):
 
         self.assertNotEqual(rev2, rev3)
 
-    def test_sanity_check1(self):
-        """Test that the sanity check fails when too many lines are changed"""
-
-        self.builder.repo.line_change_limit = 1
-        self.builder.repo.line_removal_limit = 100
+    def test_sanity_check_increase(self):
+        """Test sanity check when line count increases"""
 
         self.builder.build()
         self.builder.push(sanity_check=False)
 
+        self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
+        self.builder.repo.line_increase_limit = 1
         d = DynamicInterface.objects.create(
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
             ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
-
         self.builder.build()
         self.assertRaises(
             SanityCheckFailure, self.builder.push, sanity_check=True)
 
-    def test_sanity_check2(self):
-        """Test that the sanity check fails when too many lines are removed"""
+        self.builder.repo.line_increase_limit = 100
+        self.builder.build()
+        self.builder.push(sanity_check=True)
 
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 1
+    def test_sanity_check_no_change(self):
+        """Test sanity check when line count doesn't change"""
 
         self.builder.build()
         self.builder.push(sanity_check=False)
 
-        DynamicInterface.objects.filter(
-            mac__in=('010204081020', 'aabbccddeeff')).delete()
-
-        self.builder.build()
-        self.assertRaises(
-            SanityCheckFailure, self.builder.push, sanity_check=True)
-
-    def test_sanity_check3(self):
-        """Test that the sanity check succeeds when changes are sane"""
-
-        self.builder.repo.line_change_limit = 100
-        self.builder.repo.line_removal_limit = 100
-
-        self.builder.build()
-        self.builder.push(sanity_check=False)
-
+        self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
+        self.builder.repo.line_increase_limit = 0  # No increase allowed.
         DynamicInterface.objects.filter(
             mac__in=('010204081020', 'aabbccddeeff')).delete()
         d = DynamicInterface.objects.create(
@@ -141,6 +126,22 @@ class DHCPBuildTest(TestCase):
             range=Range.objects.get(name='Test range 1'),
             ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
+        self.builder.build()
+        self.builder.push(sanity_check=True)
 
+    def test_sanity_check_decrease(self):
+        """Test sanity check when line count decreases"""
+
+        self.builder.build()
+        self.builder.push(sanity_check=False)
+
+        self.builder.repo.line_increase_limit = 0  # No increase allowed
+        self.builder.repo.line_decrease_limit = 1
+        DynamicInterface.objects.get(mac='aa:bb:cc:dd:ee:ff').delete()
+        self.builder.build()
+        self.assertRaises(
+            SanityCheckFailure, self.builder.push, sanity_check=True)
+
+        self.builder.repo.line_decrease_limit = 100
         self.builder.build()
         self.builder.push(sanity_check=True)

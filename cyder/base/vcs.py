@@ -38,11 +38,11 @@ class VCSRepo(object):
         return run_command(command, logger=self.logger,
                            ignore_failure=ignore_failure)
 
-    def __init__(self, repo_dir, line_change_limit=None,
-                 line_removal_limit=None, logger=Logger()):
+    def __init__(self, repo_dir, line_decrease_limit=None,
+                 line_increase_limit=None, logger=Logger()):
         self.repo_dir = repo_dir
-        self.line_change_limit = line_change_limit
-        self.line_removal_limit = line_removal_limit
+        self.line_decrease_limit = line_decrease_limit
+        self.line_increase_limit = line_increase_limit
         self.logger = logger
 
     @repo_chdir_wrapper
@@ -64,18 +64,21 @@ class VCSRepo(object):
         return self._get_revision()
 
     def _sanity_check(self):
-        added, removed = self._lines_changed()
-        if (self.line_change_limit is not None and
-                added + removed > self.line_change_limit):
-            raise SanityCheckFailure(
-                'Lines changed ({0}) exceeded limit ({1}).\nAborting commit.\n'
-                .format(added + removed, self.line_change_limit))
+        difference = self._get_line_count_difference()
 
-        if (self.line_removal_limit is not None and
-                removed > self.line_removal_limit):
+        if (self.line_decrease_limit is not None and
+                -difference > self.line_decrease_limit):
             raise SanityCheckFailure(
-                'Lines removed ({0}) exceeded limit ({1}).\nAborting commit.\n'
-                .format(removed, self.line_removal_limit))
+                'Line count decrease ({0}) exceeded limit ({1}).\n'
+                'Aborting commit.\n'.format(-difference,
+                                            self.line_decrease_limit))
+
+        if (self.line_increase_limit is not None and
+                difference > self.line_increase_limit):
+            raise SanityCheckFailure(
+                'Line count increase ({0}) exceeded limit ({1}).\n'
+                'Aborting commit.\n'.format(difference,
+                                            self.line_increase_limit))
 
 
 class GitRepo(VCSRepo):
@@ -124,7 +127,7 @@ class GitRepo(VCSRepo):
     def _add_all(self):
         self._run_command('git add -A .')
 
-    def _lines_changed(self):
+    def _get_line_count_difference(self):
         diff_ignore = (re.compile(r'--- \S'), re.compile(r'\+\+\+ \S'))
 
         output, _, _ = self._run_command('git diff --cached')
@@ -138,7 +141,7 @@ class GitRepo(VCSRepo):
             elif line.startswith('-'):
                 removed += 1
 
-        return added, removed
+        return added - removed
 
     def _commit(self, message, allow_empty=False):
         cmd = ('git commit' + (' --allow-empty' if allow_empty else '') +

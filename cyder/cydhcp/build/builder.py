@@ -33,7 +33,7 @@ class DHCPBuilder(MutexMixin, Logger):
         set_attrs(self, kwargs)
 
         self.repo = GitRepo(
-            self.prod_dir, self.line_change_limit, self.line_removal_limit,
+            self.prod_dir, self.line_decrease_limit, self.line_increase_limit,
             logger=self)
 
     def log(self, log_level, msg):
@@ -128,15 +128,6 @@ class DHCPBuilder(MutexMixin, Logger):
             raise
 
         self.repo.commit_and_push('Update config', sanity_check=sanity_check)
-
-    def error(self):
-        ei = sys.exc_info()
-        exc_msg = ''.join(format_exception(*ei)).rstrip('\n')
-
-        self.log_err(
-            'DHCP build failed.\nOriginal exception: ' + exc_msg,
-            to_stderr=False)
-        raise
 
     def check_syntax(self):
         out, err, ret = run_command("{0} -t -cf {1}".format(
