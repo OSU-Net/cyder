@@ -89,6 +89,13 @@ class EAVBase(BaseModel, ObjectUrlMixin):
         ]
         return data
 
+    @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        if objects is None:
+            return cls.objects.all()
+        else:
+            return objects
+
     @transaction_atomic
     def save(self, *args, **kwargs):
         self.full_clean()

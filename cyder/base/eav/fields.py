@@ -115,9 +115,13 @@ class EAVAttributeField(models.ForeignKey):
     """
 
     def __init__(self, *args, **kwargs):
-        if 'type_choices' in kwargs:
-            kwargs['limit_choices_to'] = \
-                {'attribute_type__in': kwargs.pop('type_choices')}
+        self.type_choices = kwargs.pop('type_choices', None)
+        if self.type_choices is None:
+            self.type_choices = (
+                ATTRIBUTE_INVENTORY, ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
+        else:
+            kwargs['limit_choices_to'] = {
+                'attribute_type__in': self.type_choices}
 
         super(EAVAttributeField, self).__init__(*args, **kwargs)
 
@@ -125,10 +129,7 @@ class EAVAttributeField(models.ForeignKey):
         from cyder.base.eav.models import Attribute
 
         attr = Attribute.objects.get(pk=value)
-        type_ = attr.attribute_type
-        valid = any(type_choice == type_
-                    for (type_choice, _) in self.type_choices)
-        if not valid:
+        if attr.attribute_type not in self.type_choices:
             raise ValidationError("Attribute '%s' is not allowed on this "
                                   "object" % attr)
 
