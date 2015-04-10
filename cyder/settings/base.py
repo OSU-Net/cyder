@@ -560,11 +560,17 @@ DHCPBUILD = {
     'dhcpd': 'dhcpd',
 
     # target_file: The configuration file that will be generated
-    'target_file': 'dhcpd.conf.data',
-
     # check_file: The conf file whose syntax will be checked (None means don't
-    # check any file)
-    'check_file': None,
+    #     check any file)
+
+    'files_v4': {
+        'target_file': 'dhcpd.conf.data',
+        'check_file': None,
+    },
+    'files_v6': {
+        'target_file': 'dhcpd.conf.data',
+        'check_file': None,
+    },
 
     'line_change_limit': 500,
     'line_removal_limit': None,
