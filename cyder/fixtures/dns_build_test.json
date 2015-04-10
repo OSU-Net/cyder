@@ -309,15 +309,6 @@
   }
  },
  {
-  "pk": 2,
-  "model": "cyder.vrf",
-  "fields": {
-   "modified": null,
-   "name": "VoIP",
-   "created": null
-  }
- },
- {
   "pk": 1,
   "model": "cyder.network",
   "fields": {
@@ -352,7 +343,6 @@
    "dhcp_enabled": true,
    "range_type": "st",
    "dhcpd_raw_include": "",
-   "allow_voip_phones": true,
    "start_str": "192.168.0.2",
    "allow": "l",
    "start_lower": 3232235522,
@@ -382,7 +372,6 @@
    "dhcp_enabled": true,
    "range_type": "dy",
    "dhcpd_raw_include": "",
-   "allow_voip_phones": true,
    "start_str": "192.168.0.101",
    "allow": "l",
    "start_lower": 3232235621,
