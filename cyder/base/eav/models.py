@@ -16,6 +16,7 @@ class Attribute(models.Model):
     class Meta:
         app_label = 'cyder'
         db_table = 'attribute'
+        ordering = ('name',)
 
     name = models.CharField(max_length=255)
     attribute_type = models.CharField(max_length=1, choices=ATTRIBUTE_TYPES)
