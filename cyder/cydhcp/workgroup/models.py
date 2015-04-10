@@ -62,8 +62,8 @@ class Workgroup(BaseModel, ObjectUrlMixin):
             workgroup=self, range__ip_type=ip_type, dhcp_enabled=True)
         static_clients = StaticInterface.objects.filter(
             workgroup=self, ip_type=ip_type, dhcp_enabled=True)
-        #if not (static_clients or dynamic_clients):
-            #return build_str
+        if not (static_clients or dynamic_clients):
+            return ''
         build_str += 'group {{ #{0}\n'.format(self.name)
         statements = self.workgroupav_set.filter(
             attribute__attribute_type=ATTRIBUTE_STATEMENT)
