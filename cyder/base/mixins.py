@@ -147,10 +147,7 @@ class UsabilityFormMixin(object):
 
         session_ctnr = request.session['ctnr']
         if 'ctnr' not in self.initial:
-            if 'system' in self.fields:
-                ctnr = self.fields['system'].ctnr
-                self.fields['ctnr'].initial = ctnr
-            elif session_ctnr.name != "global":
+            if session_ctnr.name != "global":
                 self.fields['ctnr'].initial = session_ctnr
 
     def make_usable(self, request):
