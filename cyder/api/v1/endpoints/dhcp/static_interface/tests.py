@@ -26,7 +26,7 @@ class StaticInterfaceV4API_Test(APITests):
             start_str='11.12.14.253', end_str='11.12.14.254')
 
         return StaticInterface.objects.create(
-            ctnr=self.ctnr, description='Test Static Interface', ttl=420,
+            description='Test Static Interface', ttl=420,
             mac='11:22:33:44:55:00', system=system, label='stat',
             domain=self.domain, dhcp_enabled=False, dns_enabled=True,
             ip_str='11.12.14.253', ip_type='4')
@@ -48,7 +48,7 @@ class StaticInterfaceV6API_Test(APITests):
             end_str='2001:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
 
         return StaticInterface.objects.create(
-            ctnr=self.ctnr, description='Test Static Interface', ttl=420,
+            description='Test Static Interface', ttl=420,
             mac='11:22:33:44:55:00', system=system, label='stat',
             domain=self.domain, dhcp_enabled=False, dns_enabled=True,
             ip_str='2001:0db8:85a3:0000:0000:8a2e:0370:7344', ip_type='6')

@@ -108,7 +108,6 @@ class StaticInterTests(BaseStaticTests, ModelTestMixin):
             ip_str="10.0.0.1",
             ip_type='4',
             system=None,
-            ctnr=self.ctnr,
         )
 
     def test_has_range(self):

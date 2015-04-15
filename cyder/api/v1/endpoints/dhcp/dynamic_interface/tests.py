@@ -18,7 +18,7 @@ class DynamicInterfaceV4API_Test(APITests):
         system = System.objects.create(name="TestSystem", ctnr=self.ctnr)
 
         return DynamicInterface.objects.create(
-            ctnr=self.ctnr, mac='be:ef:fa:ce:f0:0d', range=range,
+            mac='be:ef:fa:ce:f0:0d', range=range,
             system=system)
 
 
@@ -37,5 +37,5 @@ class DynamicInterfaceV6API_Test(APITests):
         system = System.objects.create(name="TestSystem", ctnr=self.ctnr)
 
         return DynamicInterface.objects.create(
-            ctnr=self.ctnr, mac='be:ef:fa:ce:f0:0d', range=range,
+            mac='be:ef:fa:ce:f0:0d', range=range,
             system=system)

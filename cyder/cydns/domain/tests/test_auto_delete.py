@@ -85,7 +85,7 @@ class AutoDeleteTests(BaseDomain):
         label, the_domain = ensure_label_domain(fqdn)
         self.ctnr.domains.add(the_domain)
         ns = Nameserver.objects.create(
-            ctnr=self.ctnr, domain=the_domain, server="asdfasffoo")
+            domain=the_domain, server="asdfasffoo")
         self.assertFalse(prune_tree(the_domain))
         ns.delete()
 
@@ -157,7 +157,7 @@ class AutoDeleteTests(BaseDomain):
         system = System.objects.create(name='foobar', ctnr=self.ctnr)
         addr = StaticInterface.objects.create(
             label=label, domain=the_domain, ip_type='4', ip_str="10.2.3.4",
-            mac="00:11:22:33:44:55", system=system, ctnr=self.ctnr,)
+            mac="00:11:22:33:44:55", system=system)
         self.assertFalse(prune_tree(the_domain))
         addr.delete(**{'delete_system': False})
 

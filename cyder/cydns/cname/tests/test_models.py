@@ -214,7 +214,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
         def create_static_intr():
             return StaticInterface.objects.create(
                 label='testyfoo', domain=self.whatcd, ip_str='10.0.0.1',
-                ip_type='4', system=self.s, ctnr=self.ctnr,
+                ip_type='4', system=self.s,
                 mac="11:22:33:44:55:66")
         create_static_intr.name = 'StaticInterface'
 
@@ -319,7 +319,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
             s = System.objects.create(name='test_system', ctnr=self.ctnr)
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=e_g,
-                ip_str='128.193.0.3', ip_type='4', system=s, ctnr=self.ctnr)
+                ip_str='128.193.0.3', ip_type='4', system=s)
         create_si.name = 'StaticInterface'
 
         def create_mx():
@@ -394,7 +394,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo', domain=d,
                 ip_str='128.193.0.3', ip_type='4', system=s,
-                ctnr=self.ctnr)
+                )
         create_si.name = 'StaticInterface'
 
         self.assertObjectsConflict((create_cname, create_si))

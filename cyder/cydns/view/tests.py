@@ -78,6 +78,5 @@ class ViewTests(TestCase, ModelTestMixin):
             ip_type="4",
             mac="00:11:22:33:44:55",
             system=self.s,
-            ctnr=self.ctnr,
         )
         intr.views.add(self.private)
