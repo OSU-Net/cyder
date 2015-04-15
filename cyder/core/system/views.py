@@ -128,10 +128,6 @@ def system_create_view(request):
     dynamic_form.fields['range'].queryset = Range.objects.filter(range_type='dy')
     static_form.fields['ip_type'].widget = forms.HiddenInput()
 
-    # ctnr field shouldn't exist on these forms
-    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
-    static_form.fields['ctnr'].widget = forms.HiddenInput()
-
     system_form.make_usable(request)
 
     static_form.make_usable(request)

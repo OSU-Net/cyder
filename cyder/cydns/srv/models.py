@@ -27,18 +27,16 @@ class SRV(CydnsRecord, LabelDomainUtilsMixin):
                                limit_choices_to={'is_reverse': False})
     fqdn = models.CharField(max_length=255, blank=True,
                             validators=[validate_srv_name])
-
     target = models.CharField(max_length=100,
                               validators=[validate_srv_target], blank=True)
-
     port = models.PositiveIntegerField(null=False,
                                        validators=[validate_srv_port])
-
     priority = models.PositiveIntegerField(null=False,
                                            validators=[validate_srv_priority])
-
     weight = models.PositiveIntegerField(null=False,
                                          validators=[validate_srv_weight])
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "

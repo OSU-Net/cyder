@@ -11,10 +11,8 @@ from cyder.base.fields import MacAddrField
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel, ExpirableMixin
 from cyder.base.utils import transaction_atomic
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
-from cyder.cydhcp.constants import (SYSTEM_INTERFACE_CTNR_ERROR,
-                                    DEFAULT_WORKGROUP)
+from cyder.cydhcp.constants import DEFAULT_WORKGROUP
 from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
@@ -24,7 +22,6 @@ from cyder.cydhcp.workgroup.models import Workgroup
 class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     pretty_type = 'dynamic interface'
 
-    ctnr = models.ForeignKey(Ctnr, null=False, verbose_name="Container")
     workgroup = models.ForeignKey(Workgroup, null=False, blank=False,
                                   default=DEFAULT_WORKGROUP)
     system = models.ForeignKey(System, help_text="System to associate "
@@ -45,7 +42,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         objects = objects or DynamicInterface.objects
-        return objects.filter(ctnr=ctnr)
+        return objects.filter(system__ctnr=ctnr)
 
     def __unicode__(self):
         if self.mac:
@@ -104,8 +101,6 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
 
     def clean(self, *args, **kwargs):
         super(DynamicInterface, self).clean(*args, **kwargs)
-        if self.ctnr != self.system.ctnr:
-            raise ValidationError(SYSTEM_INTERFACE_CTNR_ERROR)
         if self.mac and self.range_id is not None:
             siblings = self.range.dynamicinterface_set.filter(mac=self.mac)
             if self.pk is not None:
@@ -142,4 +137,3 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             self.range.save(commit=False)
             if old_range:
                 old_range.save(commit=False)
-        assert self.ctnr == self.system.ctnr

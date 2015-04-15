@@ -29,6 +29,8 @@ class CNAME(LabelDomainMixin, CydnsRecord):
     # TODO cite an RFC for that ^ (it's around somewhere)
     id = models.AutoField(primary_key=True)
     target = models.CharField(max_length=100, validators=[validate_fqdn])
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {target:$rhs_just}.")
