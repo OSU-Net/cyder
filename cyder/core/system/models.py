@@ -66,11 +66,6 @@ class System(BaseModel, ObjectUrlMixin):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(System, self).save(*args, **kwargs)
-        for i in (list(self.staticinterface_set.all()) +
-                  list(self.dynamicinterface_set.all())):
-            if self.ctnr != i.ctnr:
-                i.ctnr = self.ctnr
-                i.save()
 
 
 class SystemAV(EAVBase):
