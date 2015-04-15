@@ -45,6 +45,7 @@ class EAVBase(BaseModel, ObjectUrlMixin):
 
     class Meta:
         abstract = True
+        ordering = ('attribute__name',)
         unique_together = ('entity', 'attribute')
 
     def check_in_ctnr(self, ctnr):
