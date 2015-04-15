@@ -187,3 +187,20 @@ LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = (
     'en-US',
 )
+
+
+##########################
+# failure email settings #
+##########################
+
+
+# sender
+FAIL_EMAIL_FROM = 'cyder@localhost'
+
+# recipients
+FAIL_EMAIL_TO = (
+    'admin@localhost',
+)
+
+# the SMTP server to send email via
+FAIL_EMAIL_SERVER = 'localhost'
