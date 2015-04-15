@@ -49,15 +49,20 @@ def build_domain(label, domain_obj):
 
 
 class APIEAVTestMixin(object):
-    """Mixin to test endpoints with key-value support."""
+    """Mixin to test endpoints with EAV support."""
+
     def test_eav(self):
         eav_attr = self.model.__name__.lower() + "av_set"
 
         obj = self.create_data()
 
+        attribute_field = getattr(obj, eav_attr).model._meta.get_field(
+            'attribute')
+
         # Create attribute.
         attr = Attribute.objects.create(
-            name="Test Attribute", attribute_type=ATTRIBUTE_INVENTORY,
+            name="Test Attribute",
+            attribute_type=attribute_field.type_choices[0],
             value_type="string")
 
         getattr(obj, eav_attr).create(
