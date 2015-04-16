@@ -1,5 +1,7 @@
-from email.mime.text import MIMEText
 import smtplib
+from email.mime.text import MIMEText
+
+from django.conf import settings
 
 
 # Reference http://dev.mysql.com/doc/refman/5.0/en/miscellaneous-functions.html
@@ -32,20 +34,15 @@ def locked_function(lock_name, timeout=10):
         return new_function
     return decorator
 
-# TODO, move this into a config file and decide on an email to send errors to.
-people_who_need_to_know_about_failures = ''
-inventorys_email = ''
 
-
-def fail_mail(content, subject='Inventory is having issues.',
-              to=people_who_need_to_know_about_failures,
-              from_=inventorys_email):
+def fail_mail(content, subject,
+              from_=settings.FAIL_EMAIL_FROM,
+              to=settings.FAIL_EMAIL_TO):
     """Send email about a failure."""
-    return  # TODO, enable this in production
     msg = MIMEText(content)
     msg['Subject'] = subject
-    msg['From'] = inventorys_email
-    # msg['To'] = to
-    s = smtplib.SMTP('localhost')
+    msg['From'] = from_
+    msg['To'] = ', '.join(to)
+    s = smtplib.SMTP(settings.FAIL_EMAIL_SERVER)
     s.sendmail(from_, to, msg.as_string())
     s.quit()
