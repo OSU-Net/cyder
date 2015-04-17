@@ -53,6 +53,7 @@ def get_klasses(obj_type):
     from cyder.cydns.soa.forms import SOAForm, SOAAVForm
     from cyder.cydns.srv.forms import SRVForm
     from cyder.cydns.sshfp.forms import SSHFPForm
+    from cyder.cydhcp.supernet.forms import SupernetForm
     from cyder.core.system.forms import SystemForm, SystemAVForm
     from cyder.cydhcp.interface.static_intr.forms import StaticInterfaceForm
     from cyder.cydns.txt.forms import TXTForm
@@ -63,8 +64,8 @@ def get_klasses(obj_type):
     from cyder.models import (
         AddressRecord, CNAME, Ctnr, Domain, DynamicInterface, MX, Nameserver,
         Network, NetworkAV, PTR, Range, RangeAV, Site, SiteAV, SOA, SOAAV, SRV,
-        SSHFP, StaticInterface, System, SystemAV, TXT, Vlan, VlanAV, Vrf,
-        VrfAV, Workgroup, WorkgroupAV
+        SSHFP, StaticInterface, Supernet, System, SystemAV, TXT, Vlan, VlanAV,
+        Vrf, VrfAV, Workgroup, WorkgroupAV
     )
 
 
@@ -87,6 +88,7 @@ def get_klasses(obj_type):
         'soa_av': (SOAAV, SOAAVForm),
         'srv': (SRV, SRVForm),
         'sshfp': (SSHFP, SSHFPForm),
+        'supernet': (Supernet, SupernetForm),
         'static_interface': (StaticInterface, StaticInterfaceForm),
         'system': (System, SystemForm),
         'system_av': (SystemAV, SystemAVForm),

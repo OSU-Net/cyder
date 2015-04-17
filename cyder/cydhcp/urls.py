@@ -35,6 +35,7 @@ urlpatterns = patterns(
         include('cyder.cydhcp.interface.dynamic_intr.urls')),
     url(r'^vrf/', include('cyder.cydhcp.vrf.urls')),
     url(r'^workgroup/', include('cyder.cydhcp.workgroup.urls')),
+    url(r'^supernet/', include('cyder.cydhcp.supernet.urls')),
 )
 for eav in DHCP_EAV_MODELS:
     urlpatterns += patterns(
