@@ -17,6 +17,7 @@ from cyder.cydhcp.interface.dynamic_intr.validation import is_dynamic_range
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydhcp.validation import validate_system_dynamic_ctnr
 
 
 class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
@@ -108,6 +109,7 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             if siblings.exists():
                 raise ValidationError(
                     "MAC address must be unique in this interface's range")
+        validate_system_dynamic_ctnr(self.system, self)
 
     @transaction_atomic
     def delete(self, *args, **kwargs):

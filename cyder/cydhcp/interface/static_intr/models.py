@@ -19,6 +19,7 @@ from cyder.cydhcp.constants import (STATIC, DEFAULT_WORKGROUP)
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydhcp.validation import validate_system_static_ctnr
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.utils import ip_to_reverse_name
@@ -217,6 +218,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             if not (self.range and self.range.range_type == STATIC):
                 raise ValidationError('DHCP is enabled for this interface, so '
                                       'its IP must be in a static range.')
+
+        validate_system_static_ctnr(self.system, self)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
