@@ -19,12 +19,18 @@ DHCPBUILD = {
     'prod_dir': '/tmp/cyder_dhcp_test/prod',
     'lock_file': '/tmp/cyder_dhcp_test.lock',
     'pid_file': '/tmp/cyder_dhcp_test.pid',
-    'target_file': 'dhcpd.conf.data',
-    'check_file': 'dhcpd.conf',
     'line_change_limit': 500,
     'line_removal_limit': None,
     'stop_file': '/tmp/cyder_dhcp_test.stop',
     'stop_file_email_interval': None,  # never
+    'files_v4': {
+        'target_file': 'dhcpd.conf',
+        'check_file': None,
+    },
+    'files_v6': {
+        'target_file': 'dhcpd.conf.6',
+        'check_file': None,
+    },
 }
 
 PROD_ORIGIN_DIR = '/tmp/cyder_dhcp_test/prod_origin'

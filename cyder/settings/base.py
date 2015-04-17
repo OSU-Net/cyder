@@ -568,7 +568,7 @@ DHCPBUILD = {
         'check_file': None,
     },
     'files_v6': {
-        'target_file': 'dhcpd.conf.data',
+        'target_file': 'dhcpd.conf.data.6',
         'check_file': None,
     },
 
