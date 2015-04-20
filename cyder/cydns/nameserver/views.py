@@ -7,7 +7,7 @@ from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.nameserver.forms import (Nameserver, NameserverForm,
                                           NSDelegated)
-from cyder.cydns.views import *
+from cyder.cydns.views import cy_render
 
 
 class NSView(object):
@@ -15,42 +15,6 @@ class NSView(object):
     form_class = NameserverForm
     queryset = Nameserver.objects.all()
     extra_context = {'obj_type': 'nameserver'}
-
-
-def update_ns(request, nameserver_pk):
-    nameserver = get_object_or_404(Nameserver, pk=nameserver_pk)
-    if request.method == "POST":
-        form = NameserverForm(request.POST, instance=nameserver)
-        try:
-            if form.is_valid():
-                server = form.cleaned_data['server']
-                domain = form.cleaned_data['domain']
-                if 'glue' in form.cleaned_data:
-                    glue_type, glue_pk = form.cleaned_data['glue'].split('_')
-                    try:
-                        if glue_type == 'addr':
-                            glue = AddressRecord.objects.get(pk=glue_pk)
-                        elif glue_type == 'intr':
-                            glue = StaticInterface.objects.get(pk=glue_pk)
-                    except ObjectDoesNotExists, e:
-                        raise ValidationError("Couldn't find glue: " + str(e))
-                    nameserver.glue = glue
-                nameserver.server = server
-                nameserver.domain = domain
-                nameserver.clean()
-                nameserver.save()
-        except ValidationError, e:
-            form = Nameserver(instance=nameserver)
-            if form._errors is None:
-                form._errors = ErrorDict()
-            form._errors['__all__'] = ErrorList(e.messages)
-
-        return redirect(nameserver)
-    else:
-        form = NameserverForm(instance=nameserver)
-    return render(request, "cydns/cydns_form.html", {
-        'form': form
-    })
 
 
 def create_ns_delegated(request, domain):
@@ -72,5 +36,5 @@ def create_ns_delegated(request, domain):
 
     # Blank form for all else.
     form = NSDelegated()
-    return render_to_response("nameserver/ns_delegated.html",
+    return cy_render("nameserver/ns_delegated.html",
                               {'form': form, 'request': request})

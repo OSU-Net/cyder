@@ -10,6 +10,15 @@ from cyder.cydns.view.models import View
 import json as json
 
 
+zone_template = """\
+;======= Private Data =======
+{0}
+
+;======= Public Data =======
+{1}
+"""
+
+
 def build_debug_soa(request, soa_pk):
     soa = get_object_or_404(SOA, pk=soa_pk)
     #DEBUG_BUILD_STRING = build_zone(soa, root_domain)
@@ -25,15 +34,9 @@ def build_debug_soa(request, soa_pk):
         except ObjectDoesNotExist:
             private_data = ''
 
-        output = _("""
-;======= Private Data =======
-{0}
+        output = _(zone_template.format(private_data, public_data))
 
-;======= Public Data =======
-{1}
-                   """.format(private_data, public_data))
-
-        return render(request, 'cybind/sample_build.html',
+        return cy_render(request, 'cybind/sample_build.html',
                       {'data': output, 'soa': soa})
 
     except Exception, e:

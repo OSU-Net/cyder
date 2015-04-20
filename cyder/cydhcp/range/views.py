@@ -7,8 +7,9 @@ from django.db.models.loading import get_model
 
 import ipaddr
 
-from cyder.base.utils import make_paginator, tablefy, make_megafilter
 from cyder.base.helpers import do_sort
+from cyder.base.utils import make_paginator, tablefy, make_megafilter
+from cyder.base.views import cy_render
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.constants import (ALLOW_ANY, ALLOW_KNOWN, ALLOW_VRF,
                                     ALLOW_LEGACY)
@@ -17,15 +18,6 @@ from cyder.cydhcp.range.range_usage import range_usage
 from cyder.cydhcp.utils import two_to_one
 from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydns.ip.models import ipv6_to_longs
-
-
-def delete_range_attr(request, attr_pk):
-    """
-    An view destined to be called by ajax to remove an attr.
-    """
-    attr = get_object_or_404(RangeAV, pk=attr_pk)
-    attr.delete()
-    return HttpResponse("Attribute Removed.")
 
 
 def range_detail(request, pk):
@@ -74,7 +66,7 @@ def range_detail(request, pk):
 
     if ip_usage_percent:
         ip_usage_percent = "{0}%".format(ip_usage_percent)
-    return render(request, 'range/range_detail.html', {
+    return cy_render(request, 'range/range_detail.html', {
         'obj': mrange,
         'obj_type': 'range',
         'pretty_obj_type': mrange.pretty_type,

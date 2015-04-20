@@ -1,6 +1,7 @@
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404
 
+from cyder.base.views import cy_render
 from cyder.cydhcp.network.models import Network
 
 
@@ -11,6 +12,6 @@ def build_network(request, network_pk):
         return HttpResponse(DEBUG_BUILD_STRING)
     else:
         DEBUG_BUILD_STRING = network.build_subnet(raw=False)
-        return render_to_response('build/sample_build.html',
-                                  {'data': DEBUG_BUILD_STRING,
-                                   'network': network})
+        return cy_render(
+            'build/sample_build.html',
+            {'data': DEBUG_BUILD_STRING, 'network': network})

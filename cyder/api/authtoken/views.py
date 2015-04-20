@@ -6,6 +6,7 @@ from django.shortcuts import render
 from rest_framework.authtoken.views import ObtainAuthToken as _
 
 from cyder.api.authtoken.models import Token
+from cyder.base.views import cy_render
 
 
 class ObtainAuthToken(_):
@@ -19,7 +20,7 @@ def token_detail(request, pk):
     token = Token.objects.get(pk=pk)
     user = token.user
 
-    return render(request, 'authtoken/token_detail.html',
+    return cy_render(request, 'authtoken/token_detail.html',
                   {'token': token, 'user': user})
 
 
@@ -40,7 +41,7 @@ def request_token(request):
                 '/api/authtoken/{0}'.format(str(token.pk)))
     else:
         form = TokenRequestForm()
-    return render(request, 'authtoken/request_token.html', {'form': form})
+    return cy_render(request, 'authtoken/request_token.html', {'form': form})
 
 
 class TokenRevokeForm(forms.Form):
@@ -58,10 +59,10 @@ def revoke_token(request, pk):
         form = TokenRevokeForm(request.POST)
         if form.is_valid():
             token.delete()
-            return render(request, 'authtoken/revoke_token_done.html')
+            return cy_render(request, 'authtoken/revoke_token_done.html')
         else:
             return HttpResponseBadRequest("Invalid form submission.")
     else:
         form = TokenRevokeForm()
-        return render(request, 'authtoken/revoke_token.html',
+        return cy_render(request, 'authtoken/revoke_token.html',
                       {'form': form, 'token': token})

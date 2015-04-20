@@ -12,8 +12,7 @@ from django.db.utils import DatabaseError
 from django.http import Http404, HttpResponse
 from django.forms import ValidationError, ModelChoiceField, HiddenInput
 from django.forms.util import ErrorDict
-from django.shortcuts import (get_object_or_404, redirect, render,
-                              render_to_response)
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
 
@@ -34,11 +33,10 @@ from cyder.cydns.utils import ensure_label_domain
 from cyder.settings import BUG_REPORT_EMAIL
 
 
-def home(request):
-    return render_to_response('base/index.html', {
-        'dev': settings.DEV,
-        'read_only': getattr(request, 'read_only', False),
-    })
+def cy_render(request, template, context={}):
+    if 'dev' not in context:
+        context['dev'] = settings.DEV
+    return render(request, template, context)
 
 
 def admin_page(request):
@@ -84,7 +82,7 @@ def admin_page(request):
                                       update=False)
             user_form = EditUserForm()
 
-            return render(request, 'base/admin_page.html', {
+            return cy_render(request, 'base/admin_page.html', {
                 'user_table': user_table,
                 'superuser_table': superuser_table,
                 'users': lost_users,
@@ -134,7 +132,7 @@ def send_email(request):
 
         form = BugReportForm(initial={'session_data': session_data})
 
-        return render(request, 'base/bug_report.html',
+        return cy_render(request, 'base/bug_report.html',
                       {'form': form})
 
 
@@ -189,8 +187,7 @@ def cy_view(request, template, pk=None, obj_type=None):
     if isinstance(form, UsabilityFormMixin):
         form.make_usable(request)
 
-    return render(request, template, {
-        'dev': settings.DEV,
+    return cy_render(request, template, {
         'form': form,
         'obj': obj,
         'page_obj': page_obj,
@@ -204,7 +201,7 @@ def cy_view(request, template, pk=None, obj_type=None):
 def static_dynamic_view(request):
     template = 'core/core_interfaces.html'
     if request.session['ctnr'].name == 'global':
-        return render(request, template, {})
+        return cy_render(request, template, {})
 
     StaticInterface = get_model('cyder', 'staticinterface')
     DynamicInterface = get_model('cyder', 'dynamicinterface')
@@ -243,12 +240,12 @@ def static_dynamic_view(request):
         sort_fn = lambda x: x[sort]['value'][0].lower()
         table['data'] = sorted(table['data'], key=sort_fn,
                                reverse=(order == 'desc'))
-        return render(request, template, {
+        return cy_render(request, template, {
             'page_obj': page_obj,
             'obj_table': table,
         })
     else:
-        return render(request, template, {'no_interfaces': True})
+        return cy_render(request, template, {'no_interfaces': True})
 
 
 def cy_delete(request):
@@ -323,7 +320,7 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
     else:
         table = tablefy((obj,), request=request, detail_view=True)
 
-    return render(request, template, dict({
+    return cy_render(request, template, dict({
         'obj': obj,
         'obj_table': table,
         'obj_type': obj_type,

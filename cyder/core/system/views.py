@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from cyder.base.utils import tablefy
+from cyder.base.views import cy_render
 from cyder.core.system.models import System
 from cyder.core.system.forms import ExtendedSystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -43,7 +44,7 @@ def system_detail(request, pk):
 
     related_systems.discard(system)
 
-    return render(request, 'system/system_detail.html', {
+    return cy_render(request, 'system/system_detail.html', {
         'attrs_table': tablefy(attrs, request=request),
         'static_intr_tables': static_intr,
         'dynamic_intr_tables': dynamic_intr,
