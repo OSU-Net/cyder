@@ -33,6 +33,9 @@
 {% endblock %}
 
 {% block content %}
+  {% if obj_table %}
+    {{ render_object(request, obj_table) }}
+  {% endif %}
   {% if attrs_table %}
     <h3 id="attr_title">System Attributes</h3>
     {{ render_table(request, attrs_table, 'attrs_table') }}

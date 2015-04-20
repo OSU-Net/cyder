@@ -27,9 +27,10 @@ def render_soa_only(soa, root_domain):
         'refresh': soa.refresh,
         'retry': soa.retry,
         'expire': soa.expire,
-        'minimum': soa.minimum
+        'minimum': soa.minimum,
+        'ttl': soa.ttl,
     }
-    BUILD_STR = _("{root_domain}.     IN   SOA     {primary}. {contact}. (\n"
+    BUILD_STR = _("{root_domain}.  {ttl}  IN  SOA  {primary}. {contact}. (\n"
                   "\t\t{{serial}}     ; Serial\n"
                   "\t\t{refresh}     ; Refresh\n"
                   "\t\t{retry}     ; Retry\n"
@@ -149,7 +150,7 @@ def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter,
     return data
 
 
-def build_zone_data(view, root_domain, soa, logf=None):
+def build_zone_data(view, root_domain, soa, logf):
     """
     This function does the heavy lifting of building a zone. It coordinates
     getting all of the data out of the db into BIND format.
@@ -180,7 +181,7 @@ def build_zone_data(view, root_domain, soa, logf=None):
                "won't be built. Use the search string 'zone=:{0} view=:{1}' "
                "to find the troublesome record(s)"
                .format(root_domain, view.name))
-        fail_mail(msg, subject="Shitty edge case detected.")
+        fail_mail(msg, subject="Record(s) without NS records can't be built")
         logf(msg)
         return ''
 

@@ -23,7 +23,9 @@
         data-searchWorkgroupUrl="{{ url('workgroup-search') }}"
         data-addObjectUrl="{{ url('ctnr-add-object', obj.pk) }}">
   </span>
-
+  {% if obj_table %}
+    {{ render_object(request, obj_table) }}
+  {% endif %}
   <div id=tables class=tableclass>
     {% if user_table %}
       <h3>Users</h3>

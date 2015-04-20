@@ -41,7 +41,7 @@ class System(BaseModel, ObjectUrlMixin):
         data = super(System, self).details()
         data['data'] = [
             ('Name', 'name', self),
-            ('Ctnr', 'ctnr', self.ctnr),
+            ('Container', 'container', self.ctnr),
         ]
         return data
 

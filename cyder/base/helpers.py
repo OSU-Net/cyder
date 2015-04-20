@@ -38,17 +38,13 @@ def clean_sort_param(request):
 
 def do_sort(request, qs):
     """Returns an order_by string based on request GET parameters"""
+    # NOTE: To sort IP addresses numerically, ip_lower is used in most cases.
+    # However, this means only the lower 64 bits of ipv6 addresses are used.
     sort, order = clean_sort_param(request)
     if sort == "id" and hasattr(qs.model, 'eg_metadata'):
         fields = [m['name'] for m in qs.model.eg_metadata()['metadata']]
         if fields[0] in [f.name for f in qs.model._meta.fields]:
             sort, order = fields[0], 'asc'
-
-    if sort in ['ip_str', 'network_str']:
-        sort = 'ip_lower'
-
-    if sort == 'start_str':
-        sort = 'start_lower'
 
     if sort in [f.name for f in qs.model._meta.fields]:
         try:

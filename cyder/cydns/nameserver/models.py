@@ -170,17 +170,21 @@ class Nameserver(CydnsRecord):
             #  * Address records are searched.
             #  * Interface records are searched.
             # AddressRecords take higher priority over interface records.
-            glue_label = self.server[:self.server.find('.')]  # foo.com -> foo
+            server = self.server.strip(".").lower()
+            if server == self.domain.name.lower():
+                glue_label = ""
+            else:
+                glue_label = server[:server.find('.')]  # foo.com -> foo
+            fqdn = ".".join([glue_label, self.domain.name]).strip(".")
+
             if (self.glue and self.glue.label == glue_label and
                     self.glue.domain == self.domain):
                 # Our glue record is valid. Don't go looking for a new one.
                 pass
             else:
                 # Ok, our glue record wasn't valid, let's find a new one.
-                addr_glue = AddressRecord.objects.filter(label=glue_label,
-                                                         domain=self.domain)
-                intr_glue = StaticInterface.objects.filter(label=glue_label,
-                                                           domain=self.domain)
+                addr_glue = AddressRecord.objects.filter(fqdn=fqdn)
+                intr_glue = StaticInterface.objects.filter(fqdn=fqdn)
                 if not (addr_glue or intr_glue):
                     raise ValidationError(
                         "This NS needs a glue record. Create a glue "
@@ -226,12 +230,19 @@ class Nameserver(CydnsRecord):
         # Replace the domain portion of the server with "".
         # if domain == foo.com and server == ns1.foo.com.
         #       ns1.foo.com --> ns1
+        server = self.server.strip('.').lower()
+        if server == self.domain.name.lower():
+            if self.domain.delegated:
+                return True
+            else:
+                return False
+
         try:
-            possible_label = self.server.replace("." + self.domain.name, "")
+            possible_label = server.replace("." + self.domain.name, "")
         except ObjectDoesNotExist:
             return False
 
-        if possible_label == self.server:
+        if possible_label == server:
             return False
         try:
             validate_label(possible_label)

@@ -4,9 +4,22 @@
     width: 50px;
 }
 table#obj-info {
-    padding-top: 12px;
-    padding-bottom: 5px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    td, th {
+        padding: 3px 0;
+    }
+    tr:nth-child(even) {
+        background: #CCC
+    }
+    .data_column {
+        padding: 0 5px 0 5px;
+    }
+    .header_column {
+        padding: 0 5px 0 5px;
+    }
 }
+
 table.table {
     clear: both;
     margin-bottom: 13px;
@@ -20,7 +33,7 @@ table.table {
         position: relative;
         top: 2px;
     }
-    .update:hover {
+    .js-get-form:hover {
         position: relative;
         top: 2px;
     }

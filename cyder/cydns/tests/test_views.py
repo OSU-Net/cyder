@@ -173,14 +173,14 @@ class NSViewTests(TestCase, GenericViewTests):
     def setUp(self):
         self.domain = create_zone('foo')
         test_data = {
-            'server': 'foo',
+            'server': 'foo2.foo',
         }
         do_setUp(self, test_data)
 
     def post_data(self):
         return {
             'domain': self.domain.pk,
-            'server': 'bar',
+            'server': 'bar2.bar',
         }
 
     def test_no_ns_in_view(self):
