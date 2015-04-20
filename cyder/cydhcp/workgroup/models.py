@@ -95,6 +95,6 @@ class WorkgroupAV(EAVBase):
         app_label = 'cyder'
         db_table = 'workgroup_av'
 
-
     entity = models.ForeignKey(Workgroup)
-    attribute = EAVAttributeField(Attribute)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT))
