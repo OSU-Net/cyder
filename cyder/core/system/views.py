@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import get_model
 from django.forms.util import ErrorDict, ErrorList
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 
 from cyder.base.utils import tablefy
 from cyder.base.views import cy_render

@@ -2,7 +2,7 @@ import json
 
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.db.models.loading import get_model
 
 import ipaddr

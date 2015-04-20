@@ -1,6 +1,6 @@
 from gettext import gettext as _
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.cydns.soa.models import SOA

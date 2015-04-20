@@ -2,7 +2,6 @@ from gettext import gettext as _
 from jinja2 import Environment, PackageLoader
 import json as json
 
-from django.shortcuts import render
 from django.http import HttpResponse
 
 from search.compiler.django_compile import compile_to_django

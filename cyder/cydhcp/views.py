@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 
 from cyder.base.constants import get_klasses
 from cyder.base.views import cy_render, cy_view, search_obj, table_update

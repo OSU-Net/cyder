@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from cyder.base.views import cy_render, cy_view, search_obj, table_update
 
 

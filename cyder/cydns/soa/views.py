@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.forms.util import ErrorList, ErrorDict
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render
 
 from cyder.cydns.soa.forms import SOAForm
 from cyder.cydns.soa.models import SOA, SOAAV

@@ -2,7 +2,6 @@
 from django import forms
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.http import HttpResponseBadRequest
-from django.shortcuts import render
 from rest_framework.authtoken.views import ObtainAuthToken as _
 
 from cyder.api.authtoken.models import Token

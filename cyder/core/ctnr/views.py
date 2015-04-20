@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.forms import ChoiceField, HiddenInput
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.db.models.loading import get_model
 
 from cyder.base.constants import LEVELS, ACTION_UPDATE
