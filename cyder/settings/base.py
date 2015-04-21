@@ -267,6 +267,8 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
+        'cyder_dev_css': ('css/dev.scss',),
+        'cyder_prod_css': ('css/prod.scss',),
         'search': ('css/search.scss',),
         'tags_css': ('css//lib/jquery.tagsinput.css',),
     },

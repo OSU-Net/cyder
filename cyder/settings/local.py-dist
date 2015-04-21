@@ -5,8 +5,8 @@ import os
 
 SASS_BIN = '/usr/local/bin/sass'
 
-DEV = True
 DEBUG = True
+DEV = DEBUG
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (

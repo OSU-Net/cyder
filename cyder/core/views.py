@@ -1,6 +1,4 @@
-from django.shortcuts import render
-
-from cyder.base.views import cy_view, search_obj, table_update
+from cyder.base.views import cy_render, cy_view, search_obj, table_update
 
 
 def core_view(request, pk=None):
@@ -16,4 +14,4 @@ def core_table_update(request, pk, obj_type=None):
 
 
 def core_index(request):
-    return render(request, 'core/core_index.html')
+    return cy_render(request, 'core/core_index.html')

@@ -3,11 +3,12 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="x-ua-compatible" content="IE=edge" >
-    <title>Cyder | {% block title %}Cyder{% endblock %}</title>
+    <title>Cyder | {% block title %}Cyder{% endblock %} | {{ dev }}</title>
     <link rel="shortcut icon" href="/media/img/favicon.ico?v=3">
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,600italic' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Gravitas+One' rel='stylesheet' type='text/css'>
     {{ css('cyder_css') }}
+    {% if dev %}{{ css('cyder_dev_css') }}{% else %}{{ css('cyder_prod_css') }}{% endif %}
     {{ js('cyder_js') }}
     {% block head %}{% endblock %}
   </head>

@@ -1,6 +1,6 @@
 from gettext import gettext as _
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
 from cyder.cydns.soa.models import SOA
@@ -8,6 +8,15 @@ from cyder.cydns.cybind.zone_builder import build_zone_data
 from cyder.cydns.view.models import View
 
 import json as json
+
+
+zone_template = """\
+;======= Private Data =======
+{0}
+
+;======= Public Data =======
+{1}
+"""
 
 
 def build_debug_soa(request, soa_pk):
@@ -25,15 +34,9 @@ def build_debug_soa(request, soa_pk):
         except ObjectDoesNotExist:
             private_data = ''
 
-        output = _("""
-;======= Private Data =======
-{0}
+        output = _(zone_template.format(private_data, public_data))
 
-;======= Public Data =======
-{1}
-                   """.format(private_data, public_data))
-
-        return render(request, 'cybind/sample_build.html',
+        return cy_render(request, 'cybind/sample_build.html',
                       {'data': output, 'soa': soa})
 
     except Exception, e:
