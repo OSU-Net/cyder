@@ -286,6 +286,7 @@ class CNAMETests(DNSTest, ModelTestMixin):
         r = Range.objects.create(
             network=n, range_type=STATIC, start_str='128.193.0.2',
             end_str='128.193.0.100')
+        self.ctnr.ranges.add(r)
 
         # Cyder has a catch-22 relating to nameservers: If a nameserver's name
         # is in the same domain it serves as a nameserver for, a glue record
