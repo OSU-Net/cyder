@@ -67,13 +67,13 @@ class Vrf(BaseModel, ObjectUrlMixin):
 
         super(Vrf, self).save(*args, **kwargs)
 
-    def build_vrf(self):
+    def build_vrf(self, ip_type):
         build_str = ('class "{0}" {{\n'
                      '\tmatch hardware;\n'
                      '}}\n'
                      .format(self.name))
 
-        for network_ in self.network_set.all():
+        for network_ in self.network_set.filter(ip_type=ip_type):
             for range_ in network_.range_set.all():
                 clients = chain(
                     range_.staticinterfaces.filter(dhcp_enabled=True),

@@ -46,10 +46,12 @@ class RangeViewTests(GenericViewTests, TestCase):
     fixtures = ['test_users/test_users.json']
     name = 'range'
     model = Range
-    domain, _ = Domain.objects.get_or_create(name="dummy")
-    network, _ = Network.objects.get_or_create(network_str="196.168.1.0/24")
 
     def setUp(self):
+        self.domain, _ = Domain.objects.get_or_create(name="dummy")
+        self.network, _ = Network.objects.get_or_create(
+            network_str="196.168.1.0/24")
+
         test_data = {
             'ip_type': IP_TYPE_4,
             'start_str': '196.168.1.1',

@@ -150,7 +150,7 @@ def render_reverse_zone(view, domain_mega_filter, rdomain_mega_filter,
     return data
 
 
-def build_zone_data(view, root_domain, soa, logf=None):
+def build_zone_data(view, root_domain, soa, logf):
     """
     This function does the heavy lifting of building a zone. It coordinates
     getting all of the data out of the db into BIND format.
@@ -181,7 +181,7 @@ def build_zone_data(view, root_domain, soa, logf=None):
                "won't be built. Use the search string 'zone=:{0} view=:{1}' "
                "to find the troublesome record(s)"
                .format(root_domain, view.name))
-        fail_mail(msg, subject="Shitty edge case detected.")
+        fail_mail(msg, subject="Record(s) without NS records can't be built")
         logf(msg)
         return ''
 

@@ -31,32 +31,6 @@ $(document).ready( function() {
         slideUp_and_remove( $(this).parent() );
     });
 
-    $( document ).on( 'focus', '#id_attribute', function() {
-        $('#id_attribute').autocomplete({
-            minLength: 1,
-            source: function( request, response ) {
-                $.ajax({
-                    global: false,
-                    url: '/eav/search',
-                    dataType: 'json',
-                    data: {
-                        term: request.term,
-                        attribute_type: $('#id_attribute_type').val()
-                    },
-                    success: response
-                });
-            },
-            delay: 400,
-            select: function( event, ui ) {
-                attributeName = ui.item.label;
-            }
-        });
-    });
-
-    $( document ).on( 'change', '#id_attribute_type', function() {
-        $('#id_attribute').val( '' );
-    });
-
     $( document ).on( 'click', '.js-get-form', function( e ) {
         // Show update form on clicking update icon.
         e.preventDefault();
@@ -125,7 +99,7 @@ $(document).ready( function() {
 
     function av_form_submit_handler( data ) {
         var is_update = false;
-        var id = data.row.postback_urls[0].match(/[1-9]+/g);
+        var id = data.row.postback_urls[0].match(/[0-9]+/g);
         var kwargs;
         if ( $('.attrs_table:hidden') ) {
             $('.attrs_table').slideDown();
@@ -144,8 +118,7 @@ $(document).ready( function() {
         if ( is_update ) {
             $('#obj-form form').find( '.cancel' ).click();
         } else {
-            $('#obj-form form').trigger( 'reset' );
-            $('#id_attribute').focus();
+            $('select, input:text', form).val(''); // Clear fields in form.
         }
     }
 

@@ -267,6 +267,8 @@ MINIFY_BUNDLES = {
             'css/forms.scss',
             'css/tables.scss',
         ),
+        'cyder_dev_css': ('css/dev.scss',),
+        'cyder_prod_css': ('css/prod.scss',),
         'search': ('css/search.scss',),
         'tags_css': ('css//lib/jquery.tagsinput.css',),
     },
@@ -560,11 +562,17 @@ DHCPBUILD = {
     'dhcpd': 'dhcpd',
 
     # target_file: The configuration file that will be generated
-    'target_file': 'dhcpd.conf.data',
-
     # check_file: The conf file whose syntax will be checked (None means don't
-    # check any file)
-    'check_file': None,
+    #     check any file)
+
+    'files_v4': {
+        'target_file': 'dhcpd.conf.data',
+        'check_file': None,
+    },
+    'files_v6': {
+        'target_file': 'dhcpd.conf.data.6',
+        'check_file': None,
+    },
 
     # None means no limit
     'line_decrease_limit': 500,

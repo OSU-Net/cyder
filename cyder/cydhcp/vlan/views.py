@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 
 from cyder.base.views import cy_detail
 from cyder.cydhcp.vlan.models import Vlan
