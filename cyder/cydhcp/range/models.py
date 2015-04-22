@@ -272,6 +272,15 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
         self.check_for_overlaps()
 
+    def delete(self, *args, **kwargs):
+        if ((self.range_type == STATIC and self.staticinterfaces.exists()) or
+                (self.range_type == DYNAMIC and
+                 self.dynamicinterface_set.exists())):
+            raise ValidationError('Cannot delete this range because '
+                                  'interfaces are using it.')
+
+        super(Range, self).delete(*args, **kwargs)
+
     def get_allow_deny_list(self):
         if self.allow == ALLOW_ANY:
             allow = []
