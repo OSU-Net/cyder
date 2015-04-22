@@ -31,7 +31,8 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
 
     class Meta:
         model = Network
-        exclude = ('ip_upper', 'ip_lower', 'prefixlen')
+        exclude = ('start_upper', 'start_lower',
+                   'end_upper', 'end_lower')
         widgets = {'ip_type': forms.RadioSelect}
 
     def clean(self):

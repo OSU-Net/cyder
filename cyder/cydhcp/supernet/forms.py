@@ -6,5 +6,6 @@ from cyder.cydhcp.supernet.models import Supernet
 class SupernetForm(forms.ModelForm, UsabilityFormMixin):
     class Meta:
         model = Supernet
-        exclude = ('ip_upper', 'ip_lower', 'prefixlen')
+        exclude = ('start_lower', 'start_upper',
+                   'end_lower', 'end_upper')
         widgets = {'ip_type': forms.RadioSelect}

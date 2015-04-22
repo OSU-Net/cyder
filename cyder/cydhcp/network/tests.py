@@ -5,6 +5,7 @@ from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.range.models import Range
+from cyder.cydhcp.validation import get_partial_overlap, get_total_overlap
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.models import ipv6_to_longs
 
@@ -15,11 +16,9 @@ class NetworkTests(TestCase, ModelTestMixin):
         """Create objects for test_create_delete."""
         return (
             Network.objects.create(network_str='10.0.0.0/8', ip_type='4'),
-            Network.objects.create(network_str='10.0.0.0/16', ip_type='4'),
-            Network.objects.create(network_str='10.0.0.0/17', ip_type='4'),
             Network.objects.create(network_str='192.168.0.0/24', ip_type='4'),
             Network.objects.create(network_str='192.168.128.0/25',
-                ip_type='4'),
+                                   ip_type='4'),
             Network.objects.create(network_str='abcd::1234/126', ip_type='6'),
             Network.objects.create(network_str='f::/24', ip_type='6'),
         )
@@ -30,11 +29,11 @@ class NetworkTests(TestCase, ModelTestMixin):
             ip_type='6')
         str(s)
         s.__repr__()
-        ip_upper, ip_lower = ipv6_to_longs(
+        start_upper, start_lower = ipv6_to_longs(
             'ffff:ff00:0000:0000:0000:0000:0000:0000')
         # Network address was canonicalized.
-        self.assertEqual(s.ip_upper, ip_upper)
-        self.assertEqual(s.ip_lower, ip_lower)
+        self.assertEqual(s.start_upper, start_upper)
+        self.assertEqual(s.start_lower, start_lower)
 
     def test_bad_resize(self):
         s = Network.objects.create(network_str='129.0.0.0/24', ip_type='4')
@@ -53,7 +52,7 @@ class NetworkTests(TestCase, ModelTestMixin):
 
     def test_bad_delete(self):
         s = Network.objects.create(
-            network_str='129.0.0.0/24', prefixlen='24', ip_type='4')
+            network_str='129.0.0.0/24', ip_type='4')
 
         d = Domain.objects.create(name="asdf")
 
@@ -70,63 +69,6 @@ class NetworkTests(TestCase, ModelTestMixin):
         s_pk = s.pk
         s.delete()
         self.assertFalse(Network.objects.filter(pk=s_pk).exists())
-
-    def test_get_related_networks(self):
-        s1 = Network.objects.create(network_str='129.0.0.1/20')
-        s2 = Network.objects.create(network_str='129.0.2.1/25')
-        s3 = Network.objects.create(network_str='129.0.4.1/29')
-        s4 = Network.objects.create(network_str='129.0.2.1/29')
-
-        self.assertEqual(set(s1.get_related_networks()), {s1, s2, s3, s4})
-
-    def test_get_related_sites(self):
-        s1 = Site.objects.create(name='Kerr')
-        s2 = Site.objects.create(name='Business', parent=s1)
-        s3 = Site.objects.create(name='Registration', parent=s1)
-
-        n1 = Network.objects.create(network_str='129.0.0.0/19', site=s1)
-        n2 = Network.objects.create(network_str='129.0.1.0/24', site=s2)
-        n3 = Network.objects.create(network_str='129.0.1.0/22', site=s3)
-        n4 = Network.objects.create(network_str='129.0.1.0/25')
-
-        self.assertEqual(set(n1.get_related_networks()), {n1, n2, n3, n4})
-
-        """
-        TODO:
-
-        if we choose s1 as a site then s2, s3, n1, n2, n3, and n4 are returned
-        if we choose n2 then n3 and n4 should be returned
-        if we choose s3 then n2, n3, and n4 should be returned
-        """
-
-    def test_parent_children_descendants(self):
-        n1 = Network.objects.create(network_str='10.0.0.0/8')
-        n2 = Network.objects.create(network_str='10.0.0.0/14')
-        n3 = Network.objects.create(network_str='10.1.0.0/16')
-        n4 = Network.objects.create(network_str='10.1.244.0/23')
-        n5 = Network.objects.create(network_str='10.1.245.0/24')
-        n6 = Network.objects.create(network_str='10.2.0.0/16')
-
-        self.assertEqual(n1.parent, None)
-        self.assertEqual(n2.parent, n1)
-        self.assertEqual(n3.parent, n2)
-        self.assertEqual(n4.parent, n3)
-        self.assertEqual(n5.parent, n4)
-        self.assertEqual(n6.parent, n2)
-
-        self.assertEqual(set(n1.children), {n2})
-        self.assertEqual(set(n2.children), {n3, n6})
-        self.assertEqual(set(n3.children), {n4})
-        self.assertEqual(set(n4.children), {n5})
-        self.assertEqual(set(n5.children), set())
-        self.assertEqual(set(n6.children), set())
-
-        self.assertEqual(set(n1.descendants), {n2, n3, n4, n5, n6})
-        self.assertEqual(set(n2.descendants), {n3, n4, n5, n6})
-        self.assertEqual(set(n3.descendants), {n4, n5})
-        self.assertEqual(set(n4.descendants), {n5})
-        self.assertEqual(set(n5.descendants), set())
-        self.assertEqual(set(n6.descendants), set())
 
     def test_check_valid_ranges_v4_valid(self):
         n = Network(network_str='10.0.0.0/8')
@@ -208,7 +150,7 @@ class NetworkTests(TestCase, ModelTestMixin):
         n.save()
 
         r = Range(ip_type='4', start_str='10.3.0.2', end_str='10.5.255.254',
-                network=n)
+                  network=n)
         r.full_clean()
         r.save()
 
@@ -216,3 +158,58 @@ class NetworkTests(TestCase, ModelTestMixin):
         with self.assertRaises(ValidationError):
             n.full_clean()
             n.save()
+
+    def test_overlap_validation(self):
+        n1 = Network(network_str='1::/65', ip_type='6')
+        n1.update_network()
+        n1.save()
+        self.assertFalse(n1 in get_total_overlap(n1))
+        self.assertFalse(n1 in get_partial_overlap(n1))
+
+        n2 = Network(network_str='1::/66', ip_type='6')
+        n2.update_network()
+        self.assertEqual(n1.start_upper, n2.start_upper)
+        self.assertEqual(n1.end_upper, n2.end_upper)
+        self.assertFalse(n1 in get_total_overlap(n2))
+        self.assertTrue(n1 in get_partial_overlap(n2))
+
+        n2 = Network(network_str='1::/64', ip_type='6')
+        n2.update_network()
+        self.assertEqual(n1.start_upper, n2.start_upper)
+        self.assertEqual(n1.end_upper, n2.end_upper)
+        self.assertTrue(n1 in get_total_overlap(n2))
+        self.assertTrue(n1 in get_partial_overlap(n2))
+
+        n2 = Network(network_str='1:0:0:0:8000::/65', ip_type='6')
+        n2.update_network()
+        self.assertEqual(n1.start_upper, n2.start_upper)
+        self.assertEqual(n1.end_upper, n2.end_upper)
+        self.assertFalse(n1 in get_total_overlap(n2))
+        self.assertFalse(n1 in get_partial_overlap(n2))
+
+        n1 = Network(network_str='2::/16', ip_type='6')
+        n1.update_network()
+        n1.save()
+        self.assertFalse(n1 in get_total_overlap(n1))
+        self.assertFalse(n1 in get_partial_overlap(n1))
+
+        n2 = Network(network_str='2::/17', ip_type='6')
+        n2.update_network()
+        self.assertEqual(n1.start_upper, n2.start_upper)
+        self.assertNotEqual(n1.end_upper, n2.end_upper)
+        self.assertFalse(n1 in get_total_overlap(n2))
+        self.assertTrue(n1 in get_partial_overlap(n2))
+
+        n2 = Network(network_str='2::/15', ip_type='6')
+        n2.update_network()
+        self.assertEqual(n1.start_upper, n2.start_upper)
+        self.assertNotEqual(n1.end_upper, n2.end_upper)
+        self.assertTrue(n1 in get_total_overlap(n2))
+        self.assertTrue(n1 in get_partial_overlap(n2))
+
+        n2 = Network(network_str='3::/16', ip_type='6')
+        n2.update_network()
+        self.assertNotEqual(n1.start_upper, n2.start_upper)
+        self.assertNotEqual(n1.end_upper, n2.end_upper)
+        self.assertFalse(n1 in get_total_overlap(n2))
+        self.assertFalse(n1 in get_partial_overlap(n2))
