@@ -13,7 +13,8 @@ from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
-    copy_tree, dict_merge, Logger, remove_dir_contents, run_command, set_attrs)
+    copy_tree, dict_merge, format_exc_verbose, Logger, remove_dir_contents,
+    run_command, set_attrs)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
