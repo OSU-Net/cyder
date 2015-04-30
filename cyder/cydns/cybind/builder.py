@@ -450,7 +450,7 @@ class DNSBuilder(MutexMixin, Logger):
                 if (self.stop_file_email_interval is not None and
                         now - last > self.stop_file_email_interval):
                     os.utime(self.stop_file, (now, now))
-                    fail_mail(msg, subject="DNS builds have stopped")
+                    fail_mail(msg, subject="Cyder DNS builds have stopped")
 
                 raise Exception(msg)
             except IOError as e:
@@ -497,7 +497,7 @@ class DNSBuilder(MutexMixin, Logger):
             'An attempt was made to start the DNS build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
-            subject="Concurrent DNS builds attempted.")
+            subject='Concurrent Cyder DNS builds attempted')
         self.error(
             'Failed to acquire lock on {0}. Process {1} currently '
             'has it.'.format(self.lock_file, pid))

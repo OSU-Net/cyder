@@ -63,7 +63,7 @@ class DHCPBuilder(MutexMixin, Logger):
     def run_command(self, command, log=True, failure_msg=None):
         if log:
             command_logger = self.log_debug
-            failure_logger = self.log_err
+            failure_logger = self.error
         else:
             command_logger = None
             failure_logger = None
@@ -87,7 +87,7 @@ class DHCPBuilder(MutexMixin, Logger):
                 if (self.stop_file_email_interval is not None and
                         now - last > self.stop_file_email_interval):
                     os.utime(self.stop_file, (now, now))
-                    fail_mail(msg, subject="DHCP builds have stopped")
+                    fail_mail(msg, subject="Cyder DHCP builds have stopped")
 
                 raise Exception(msg)
             except IOError as e:
@@ -144,17 +144,14 @@ class DHCPBuilder(MutexMixin, Logger):
             exception_msg = log_msg + ('\n{0} said:\n{1}'
                                        .format(self.dhcpd, err))
 
-            self.log_err(log_msg, to_stderr=False)
-            raise Exception(exception_msg)
+            self.error(log_msg)
 
     def _lock_failure(self, pid):
-        self.log_err(
-            'Failed to acquire lock on {0}. Process {1} currently '
-            'has it.'.format(self.lock_file, pid),
-            to_stderr=False)
         fail_mail(
             'An attempt was made to start the DHCP build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
-            subject="Concurrent DHCP builds attempted.")
-        super(DHCPBuilder, self)._lock_failure(pid)
+            subject='Concurrent Cyder DHCP builds attempted')
+        self.error(
+            'Failed to acquire lock on {0}. Process {1} currently '
+            'has it.'.format(self.lock_file, pid))
