@@ -260,3 +260,14 @@ def get_cursor(alias, use=True):
     if not use:
         del kwargs['db']
     return MySQLdb.connect(**kwargs).cursor(), conf
+
+
+def format_exc_verbose():
+    import traceback
+    s = 'Traceback (most recent call last):\n'
+    for line in traceback.format_stack()[:-2]:
+        s += line
+    last_frame = traceback.format_exc()
+    last_frame = last_frame[last_frame.find('\n')+1 : ]
+    s += last_frame
+    return s

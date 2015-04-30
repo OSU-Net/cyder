@@ -7,11 +7,11 @@ import subprocess
 import sys
 import syslog
 import time
-from traceback import format_exception
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
-    copy_tree, dict_merge, Logger, run_command, set_attrs, shell_out)
+    copy_tree, dict_merge, format_exc_verbose, Logger, run_command, set_attrs,
+    shell_out)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.utils import fail_mail
@@ -82,7 +82,7 @@ class DHCPBuilder(MutexMixin, Logger):
             msg = ('The stop file ({0}) exists. Build canceled.\n'
                    'Reason for skipped build:\n'
                    '{1}'.format(self.stop_file, contents))
-            self.log_notice(msg, to_stderr=False)
+            self.log_notice(msg)
             if (self.stop_file_email_interval is not None and
                     now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
@@ -114,8 +114,11 @@ class DHCPBuilder(MutexMixin, Logger):
                     self.check_syntax(
                         ip_type=ip_type, filename=files['check_file'])
         except:
-            self.log(syslog.LOG_ERR,
-                'DHCP build failed.\nOriginal exception: ' + e.message)
+            msg = 'DHCP build failed.\n' + format_exc_verbose()
+            self.log(syslog.LOG_ERR, msg)
+            fail_mail(msg, subject='DHCP build failed')
+            with open(self.stop_file, 'w') as f:
+                f.write(msg)
             raise
 
         self.log_info('DHCP build successful')

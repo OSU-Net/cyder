@@ -471,9 +471,12 @@ class DNSBuilder(MutexMixin, Logger):
                                     force=force))
 
             self.log_info('DNS build successful')
-        except Exception as e:
-            self.log(syslog.LOG_ERR,
-                'DNS build failed.\nOriginal exception: ' + e.message)
+        except:
+            msg = 'DNS build failed.\n' + format_exc_verbose()
+            self.log(syslog.LOG_ERR, msg)
+            fail_mail(msg, subject='DNS build failed')
+            with open(self.stop_file, 'w') as f:
+                f.write(msg)
             raise
 
     def push(self, sanity_check=True):
