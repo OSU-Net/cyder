@@ -116,7 +116,7 @@ class DHCPBuilder(MutexMixin, Logger):
         except:
             msg = 'DHCP build failed.\n' + format_exc_verbose()
             self.log(syslog.LOG_ERR, msg)
-            fail_mail(msg, subject='DHCP build failed')
+            fail_mail(msg, subject='Cyder DHCP build failed')
             with open(self.stop_file, 'w') as f:
                 f.write(msg)
             raise

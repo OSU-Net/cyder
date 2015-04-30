@@ -475,7 +475,7 @@ class DNSBuilder(MutexMixin, Logger):
         except:
             msg = 'DNS build failed.\n' + format_exc_verbose()
             self.log(syslog.LOG_ERR, msg)
-            fail_mail(msg, subject='DNS build failed')
+            fail_mail(msg, subject='Cyder DNS build failed')
             with open(self.stop_file, 'w') as f:
                 f.write(msg)
             raise
