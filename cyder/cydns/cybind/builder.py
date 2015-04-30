@@ -436,28 +436,28 @@ class DNSBuilder(MutexMixin, Logger):
 
     def build(self, force=False):
         try:
-            with open(self.stop_file) as stop_fd:
-                now = time.time()
-                contents = stop_fd.read()
-            last = os.path.getmtime(self.stop_file)
+            try:
+                with open(self.stop_file) as stop_fd:
+                    now = time.time()
+                    contents = stop_fd.read()
+                last = os.path.getmtime(self.stop_file)
 
-            msg = ("The stop file ({0}) exists. Build canceled.\n"
-                   "Reason for skipped build:\n"
-                   "{1}".format(self.stop_file, contents))
-            self.log_notice(msg)
-            if (self.stop_file_email_interval is not None and
-                    now - last > self.stop_file_email_interval):
-                os.utime(self.stop_file, (now, now))
-                fail_mail(msg, subject="DNS builds have stopped")
+                msg = ("The stop file ({0}) exists. Build canceled.\n"
+                       "Reason for skipped build:\n"
+                       "{1}".format(self.stop_file, contents))
+                self.log_notice(msg)
+                if (self.stop_file_email_interval is not None and
+                        now - last > self.stop_file_email_interval):
+                    os.utime(self.stop_file, (now, now))
+                    fail_mail(msg, subject="DNS builds have stopped")
 
-            raise Exception(msg)
-        except IOError as e:
-            if e.errno != errno.ENOENT:  # IOError: [Errno 2] No such file or directory
-                raise
+                raise Exception(msg)
+            except IOError as e:
+                if e.errno != errno.ENOENT:  # "No such file or directory"
+                    raise
 
-        self.log_info('Building...')
+            self.log_info('Building...')
 
-        try:
             remove_dir_contents(self.stage_dir)
             self.dns_tasks = self.get_scheduled()
 

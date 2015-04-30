@@ -74,28 +74,28 @@ class DHCPBuilder(MutexMixin, Logger):
 
     def build(self):
         try:
-            with open(self.stop_file) as stop_fd:
-                now = time.time()
-                contents = stop_fd.read()
-            last = os.path.getmtime(self.stop_file)
+            try:
+                with open(self.stop_file) as stop_fd:
+                    now = time.time()
+                    contents = stop_fd.read()
+                last = os.path.getmtime(self.stop_file)
 
-            msg = ('The stop file ({0}) exists. Build canceled.\n'
-                   'Reason for skipped build:\n'
-                   '{1}'.format(self.stop_file, contents))
-            self.log_notice(msg)
-            if (self.stop_file_email_interval is not None and
-                    now - last > self.stop_file_email_interval):
-                os.utime(self.stop_file, (now, now))
-                fail_mail(msg, subject="DHCP builds have stopped")
+                msg = ('The stop file ({0}) exists. Build canceled.\n'
+                       'Reason for skipped build:\n'
+                       '{1}'.format(self.stop_file, contents))
+                self.log_notice(msg)
+                if (self.stop_file_email_interval is not None and
+                        now - last > self.stop_file_email_interval):
+                    os.utime(self.stop_file, (now, now))
+                    fail_mail(msg, subject="DHCP builds have stopped")
 
-            raise Exception(msg)
-        except IOError as e:
-            if e.errno == errno.ENOENT:  # IOError: [Errno 2] No such file or directory
-                pass
-            else:
-                raise
+                raise Exception(msg)
+            except IOError as e:
+                if e.errno == errno.ENOENT:  # "No such file or directory"
+                    pass
+                else:
+                    raise
 
-        try:
             for ip_type, files in (('4', self.files_v4), ('6', self.files_v6)):
                 self.log_info('Building v{}...'.format(ip_type))
                 with open(os.path.join(self.stage_dir, files['target_file']),
