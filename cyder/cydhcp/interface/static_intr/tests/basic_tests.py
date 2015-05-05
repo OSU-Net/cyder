@@ -2,9 +2,12 @@ from django.core.exceptions import ValidationError
 from functools import partial
 
 from cyder.base.tests import ModelTestMixin
+from cyder.cydhcp.constants import STATIC
+from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.ptr.models import PTR
+from cyder.core.ctnr.models import Ctnr
 
 from basestatic import BaseStaticTests
 
@@ -122,4 +125,25 @@ class StaticInterTests(BaseStaticTests, ModelTestMixin):
         i.ip_str = "10.0.0.20"
         self.assertRaises(ValidationError, i.save)
         i.dhcp_enabled = False
+        self.assertRaises(ValidationError, i.save)
+        i.dns_enabled = False
+        i.save()
+
+    def test_range_ctnr_match(self):
+        i = self.create_si(
+            mac="15:22:33:44:55:66",
+            label="8888foo",
+            domain=self.f_c,
+            ip_str="10.0.0.1",
+        )
+        c1 = i.ctnr
+        r = Range.objects.create(
+            network=self.net, range_type=STATIC, start_str='10.0.0.11',
+            end_str='10.0.0.20')
+        c2 = Ctnr.objects.create(name="test_rcm")
+        c2.ranges.add(r)
+        c2.domains.add(self.f_c)
+        i.ip_str = "10.0.0.15"
+        self.assertRaises(ValidationError, i.save)
+        c1.ranges.add(r)
         i.save()

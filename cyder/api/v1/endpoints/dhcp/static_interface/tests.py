@@ -21,9 +21,10 @@ class StaticInterfaceV4API_Test(APITests):
         create_zone('11.in-addr.arpa')
         net = Network.objects.create(
             network_str='11.12.14.0/8', ip_type='4')
-        range = Range.objects.create(
+        r = Range.objects.create(
             network=net, range_type='st', ip_type='4',
             start_str='11.12.14.253', end_str='11.12.14.254')
+        self.ctnr.ranges.add(r)
 
         return StaticInterface.objects.create(
             ctnr=self.ctnr, description='Test Static Interface', ttl=420,
@@ -43,9 +44,10 @@ class StaticInterfaceV6API_Test(APITests):
         Domain.objects.create(name='ip6.arpa')
         create_zone('2.ip6.arpa')
         net = Network.objects.create(network_str='2001::/16', ip_type='6')
-        range = Range.objects.create(
+        r = Range.objects.create(
             network=net, range_type='st', ip_type='6', start_str='2001::1',
             end_str='2001:ffff:ffff:ffff:ffff:ffff:ffff:fffe')
+        self.ctnr.ranges.add(r)
 
         return StaticInterface.objects.create(
             ctnr=self.ctnr, description='Test Static Interface', ttl=420,
