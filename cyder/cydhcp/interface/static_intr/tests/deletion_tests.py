@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.core.system.models import System
 
@@ -21,3 +22,15 @@ class DeleteStaticInterTests(BaseStaticTests):
 
         system.delete()
         self.assertFalse(StaticInterface.objects.filter(pk=i.pk).exists())
+
+    def test_cant_delete_range(self):
+        i = self.create_si(
+            mac="15:22:33:44:55:66",
+            label="8888foo",
+            domain=self.f_c,
+            ip_str="10.0.0.1",
+        )
+        r = i.range
+        self.assertRaises(ValidationError, r.delete)
+        i.delete()
+        r.delete()

@@ -642,6 +642,9 @@ class AddressRecordTests(DNSTest, ModelTestMixin):
         c2 = Ctnr.objects.create(name='test_ctnr2')
         c2.domains.add(self.o_e)
 
+        c1.ranges.add(r)
+        c2.ranges.add(r)
+
         def create_si():
             s = System.objects.create(name='test_system', ctnr=c1)
 

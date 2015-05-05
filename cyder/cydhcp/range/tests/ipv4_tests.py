@@ -233,6 +233,7 @@ class V4RangeTests(TestCase, ModelTestMixin):
             network=self.s,
             ip_type='4',
         )
+        self.ctnr.ranges.add(r)
 
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")
         self.assertEqual(str(r.get_next_ip()), "10.0.33.1")

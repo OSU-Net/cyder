@@ -202,6 +202,15 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
+
+        if self.dhcp_enabled or self.dns_enabled:
+            if not self.range:
+                raise ValidationError("An appropriate static range can not be "
+                                      "found for this IP address.")
+            if self.ctnr not in self.range.ctnr_set.all():
+                raise ValidationError("Can't create interface because %s is "
+                                      "not in its container." % self.ip_str)
+
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
             raise ValidationError("A PTR already uses '%s' and '%s'" %
