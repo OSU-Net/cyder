@@ -1,8 +1,9 @@
 import re
 from copy import deepcopy
 from itertools import ifilter
-from parsley import makeGrammar
 from sys import argv, stderr, stdout
+
+from parsley import makeGrammar
 
 from dhcp_objects import (Statement, RangeStmt, Pool, Subnet, Class, Subclass,
                           Group, Host, ConfigFile)
