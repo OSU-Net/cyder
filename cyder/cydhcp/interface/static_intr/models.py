@@ -90,6 +90,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
         if self.ip_str:
             return find_range(self.ip_str)
 
+    @property
+    def ctnr(self):
+        return self.system.ctnr
+
     def details(self):
         data = super(StaticInterface, self).details()
         data['data'] = (

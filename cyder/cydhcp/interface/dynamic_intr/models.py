@@ -51,6 +51,10 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
         else:
             return '(no MAC address)'
 
+    @property
+    def ctnr(self):
+        return self.system.ctnr
+
     def details(self):
         data = super(DynamicInterface, self).details()
         data['data'] = [
