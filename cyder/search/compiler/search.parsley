@@ -1,4 +1,3 @@
-grammar = """
 # DSL for Cyder
 # Grammar base classes should implement the following functions:
 # - directive
@@ -9,53 +8,62 @@ grammar = """
 # - NOT_op
 # - compile
 
-ws = ' '*
 wss = ' '+
-not_ws = :c ?(c not in (' ', '\t')) -> c
-letter = :c ?('a' <= c <= 'z' or 'A' <= c <= 'Z') -> c
+not_ws = anything:c ?(c not in ' \t') -> c
 special = '_' | '.' | '-' | ':' | ','
+hex_digit =
+    anything:c ?('0' <= c <= '9' or 'a' <= c <= 'f' or 'A' <= c <= 'F')
+        -> c
+
 
 # Lexical Operators
 NOT = '!'
-AND = <letter+>:and_ ?(and_ == 'AND') -> self.AND_op()
-OR = <letter+>:or_ ?(or_ == 'OR') -> self.OR_op()
+AND = 'AND' -> self.AND_op()
+OR = 'OR' -> self.OR_op()
+
+# MAC address
+MAC_ADDR =
+    (
+        <(hex_digit{2} ':'){5} hex_digit{2}> |
+        <(hex_digit{2} '-'){5} hex_digit{2}> |
+        <hex_digit{12}>
+    ):addr ~not_ws
+        -> self.mac_addr(addr)
 
 # Directive
-EQ = ':'
-d_lhs = letter | '_'
+d_lhs = 'view' | 'network' | 'vlan' | 'zone' | 'range' | 'type' | 'site'
 d_rhs = letterOrDigit | special | '/'
-DRCT = <d_lhs+>:d EQ <d_rhs+>:v -> self.directive(d, v)
+DRCT = <d_lhs>:d ':' <d_rhs+>:v -> self.directive(d, v)
 
 # Regular Expression
 RE = '/' <(not_ws)+>:r -> self.regexpr(r)
 
 # Regular text
-text = (~OR ~AND ~NOT <(letterOrDigit | special )+>:t) -> t
+text = (~OR ~AND ~NOT <(letterOrDigit | special)+>:t) -> t
 TEXT = <text+>:t -> self.text(t)
 
 
 # DSF (Device Specific Filters)
-DSF = DRCT | RE | TEXT
+DSF = MAC_ADDR | DRCT | RE | TEXT
 
-# An atmon
+# An atom
 atom = DSF | parens
 
-value = NOT ws atom:a -> self.NOT_op()(a)
-| atom
+value = (NOT ws atom:a -> self.NOT_op()(a)) | atom
 
 # Parens
 parens = '(' ws expr:e ws ')' -> e
 
 # Operators Precidence
 # 1) i_and
-# 2) 2_and
+# 2) e_and
 # 3) e_or
 
 # x AND y <-- Explicit AND
 e_and = AND:op wss value:v -> (op, v)
 
 # x y <-- Implicit AND
-i_and = (' '+ ~OR ~AND) value:v -> (self.AND_op(), v)
+i_and = (wss ~OR ~AND) value:v -> (self.AND_op(), v)
 
 # x OR y <-- Explicit OR
 e_or = OR:op wss expr_2:v -> (op, v)
@@ -65,4 +73,3 @@ e_or = OR:op wss expr_2:v -> (op, v)
 expr = expr_2:left ws e_or*:right -> self.compile(left, right)
 expr_2 = expr_3:left ws e_and*:right -> self.compile(left, right)
 expr_3 = value:left i_and*:right -> self.compile(left, right)
-"""

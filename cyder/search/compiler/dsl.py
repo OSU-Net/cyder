@@ -1,18 +1,17 @@
-from parsley import wrapGrammar
-
 from ometa.grammar import OMeta
 from ometa.runtime import OMetaBase
+from parsley import wrapGrammar
 
-from cyder.search.compiler.invparsley import grammar
 
-name = 'CyDSL'
-B = OMeta.makeGrammar(grammar, name=name).createParserClass(
-    OMetaBase, globals()
-)
+with open('cyder/search/compiler/search.parsley') as g:
+    B = OMeta.makeGrammar(g.read()).createParserClass(OMetaBase, globals())
 
 
 class ICompiler(B):
     def directive(self, d, v):
+        raise NotImplemented()
+
+    def mac_addr(self, addr):
         raise NotImplemented()
 
     def regexpr(self, r):
@@ -38,6 +37,9 @@ class DebugCompiler(ICompiler):
     def directive(self, d, v):
         return d, v
 
+    def mac_addr(self, addr):
+        return '[' + addr + ']'
+
     def regexpr(self, r):
         return r
 
@@ -51,13 +53,13 @@ class DebugCompiler(ICompiler):
         return ret
 
     def OR_op(self):
-        return lambda a, b: '({0} {1} {2})'.format(a, 'OR', b)
+        return lambda a, b: '({} OR {})'.format(a, b)
 
     def AND_op(self):
-        return lambda a, b: '({0} {1} {2})'.format(a, 'AND', b)
+        return lambda a, b: '({} AND {})'.format(a, b)
 
     def NOT_op(self):
-        return lambda a: '({0} {1})'.format('NOT', a)
+        return lambda a: '(NOT {})'.format(a)
 
 
 def make_debug_compiler():
