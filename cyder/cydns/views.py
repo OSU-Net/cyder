@@ -1,13 +1,14 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms.util import ErrorDict, ErrorList
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 
 from cyder.base.constants import ACTION_CREATE, get_klasses
 from cyder.base.mixins import UsabilityFormMixin
 from cyder.base.helpers import do_sort
 from cyder.base.utils import (make_paginator, _filter, tablefy)
-from cyder.base.views import search_obj, table_update
+from cyder.base.views import cy_render, search_obj, table_update
 from cyder.core.cyuser.utils import perm
 
 import json
@@ -61,7 +62,7 @@ def cydns_view(request, pk=None):
     if issubclass(type(form), UsabilityFormMixin):
         form.make_usable(request)
 
-    return render(request, 'cydns/cydns_view.html', {
+    return cy_render(request, 'cydns/cydns_view.html', {
         'form': form,
         'obj': obj,
         'obj_type': obj_type,
@@ -116,4 +117,4 @@ def cydns_index(request):
     counts.append(('Reverse Domains',
                domains.filter(is_reverse=True).count()))
 
-    return render(request, 'cydns/cydns_index.html', {'counts': counts})
+    return cy_render(request, 'cydns/cydns_index.html', {'counts': counts})

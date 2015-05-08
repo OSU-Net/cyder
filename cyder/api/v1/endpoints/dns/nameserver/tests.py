@@ -8,5 +8,5 @@ class NameserverAPI_Test(APITests):
 
     def create_data(self):
         return Nameserver.objects.create(
-            ctnr=self.ctnr, server='relay.oregonstate.edu',
+            server='relay.oregonstate.edu',
             description='Nameserver Record', ttl=420, domain=self.domain)

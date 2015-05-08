@@ -59,21 +59,29 @@ class _Filter(object):
     def __str__(self):
         return self.value
 
-    def __repr__(self):
-        return "<{1}>".format(self.__class__, self)
-
     def compile_Q(self, ntype):
         pass
 
 
 def build_filter(filter_, fields, filter_type):
-    # rtucker++
     final_filter = Q()
     for t in fields:
         final_filter = final_filter | Q(**{"{0}__{1}".format(
             t, filter_type): filter_})
 
     return final_filter
+
+
+class MacAddressFilter(_Filter):
+    def __init__(self, addr):
+        self.addr = addr
+
+    def compile_Q(self):
+        result = []
+        for name, Klass in searchables:
+            result.append(
+                Q(mac=self.addr) if name in ('STATIC', 'DYNAMIC') else None)
+        return result
 
 
 class TextFilter(_Filter):
@@ -143,10 +151,11 @@ class DirectiveFilter(_Filter):
             )
 
 
-# TODO, move this into it's own file
+# TODO: move this into its own file
 ##############################################################################
 ##########################  Directive Filters  ###############################
 ##############################################################################
+
 
 class BadDirective(Exception):
     pass
@@ -221,7 +230,7 @@ def build_range_qsets(range_):
 
 
 def build_network_qsets(network_str):
-    # Todo move these directive processors into functions.
+    # TODO: move these directive processors into functions.
     if network_str.find(':') > -1:
         Klass = ipaddr.IPv6Network
         ip_type = '6'

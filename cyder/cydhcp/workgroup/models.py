@@ -54,17 +54,17 @@ class Workgroup(BaseModel, ObjectUrlMixin):
 
         super(Workgroup, self).save(*args, **kwargs)
 
-    def build_workgroup(self):
+    def build_workgroup(self, ip_type):
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
-        build_str = ""
+        build_str = ''
         dynamic_clients = DynamicInterface.objects.filter(
-            workgroup=self, dhcp_enabled=True)
+            workgroup=self, range__ip_type=ip_type, dhcp_enabled=True)
         static_clients = StaticInterface.objects.filter(
-            workgroup=self, dhcp_enabled=True)
-        #if not (static_clients or dynamic_clients):
-            #return build_str
-        build_str += "group {{ #{0}\n".format(self.name)
+            workgroup=self, ip_type=ip_type, dhcp_enabled=True)
+        if not (static_clients or dynamic_clients):
+            return ''
+        build_str += 'group {{ #{0}\n'.format(self.name)
         statements = self.workgroupav_set.filter(
             attribute__attribute_type=ATTRIBUTE_STATEMENT)
         options = list(self.workgroupav_set.filter(
@@ -77,16 +77,16 @@ class Workgroup(BaseModel, ObjectUrlMixin):
         for x in host_options:
             options.remove(x)
 
-        build_str += "\t# Workgroup Options\n"
+        build_str += '\t# Workgroup Options\n'
         if options:
             build_str += join_dhcp_args(options)
-        build_str += "\t# Workgroup Statements\n"
+        build_str += '\t# Workgroup Statements\n'
         if statements:
             build_str += join_dhcp_args(statements)
-        build_str += "\t# Static Hosts in Workgroup\n"
+        build_str += '\t# Static Hosts in Workgroup\n'
         for client in chain(dynamic_clients, static_clients):
             build_str += client.build_host(host_options)
-        build_str += "}\n"
+        build_str += '}\n'
         return build_str
 
 
@@ -95,6 +95,6 @@ class WorkgroupAV(EAVBase):
         app_label = 'cyder'
         db_table = 'workgroup_av'
 
-
     entity = models.ForeignKey(Workgroup)
-    attribute = EAVAttributeField(Attribute)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT))

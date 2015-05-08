@@ -5,7 +5,6 @@ from cyder.base.eav.models import Attribute
 from cyder.base.utils import copy_tree, remove_dir_contents
 from cyder.base.vcs import GitRepo, GitRepoManager, SanityCheckFailure
 
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 
 from cyder.cydhcp.build.builder import DHCPBuilder
@@ -19,12 +18,18 @@ DHCPBUILD = {
     'prod_dir': '/tmp/cyder_dhcp_test/prod',
     'lock_file': '/tmp/cyder_dhcp_test.lock',
     'pid_file': '/tmp/cyder_dhcp_test.pid',
-    'target_file': 'dhcpd.conf.data',
-    'check_file': 'dhcpd.conf',
     'line_decrease_limit': None,
     'line_increase_limit': None,
     'stop_file': '/tmp/cyder_dhcp_test.stop',
     'stop_file_email_interval': None,  # never
+    'files_v4': {
+        'target_file': 'dhcpd.conf',
+        'check_file': None,
+    },
+    'files_v6': {
+        'target_file': 'dhcpd.conf.6',
+        'check_file': None,
+    },
 }
 
 PROD_ORIGIN_DIR = '/tmp/cyder_dhcp_test/prod_origin'
@@ -100,7 +105,6 @@ class DHCPBuildTest(TestCase):
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
         self.builder.build()
         self.assertRaises(
@@ -124,7 +128,6 @@ class DHCPBuildTest(TestCase):
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
         self.builder.build()
         self.builder.push(sanity_check=True)

@@ -250,4 +250,5 @@ class NetworkAV(EAVBase):
         db_table = 'network_av'
 
     entity = models.ForeignKey(Network)
-    attribute = EAVAttributeField(Attribute)
+    attribute = EAVAttributeField(Attribute,
+        type_choices=(ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT))

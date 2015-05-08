@@ -5,10 +5,11 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.forms import ChoiceField, HiddenInput
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.db.models.loading import get_model
 
 from cyder.base.constants import LEVELS, ACTION_UPDATE
+from cyder.base.views import cy_render
 from cyder.base.utils import tablefy
 from cyder.core.ctnr.forms import CtnrForm, CtnrUserForm, CtnrObjectForm
 from cyder.core.ctnr.models import Ctnr, CtnrUser
@@ -95,7 +96,7 @@ def ctnr_detail(request, pk):
         user_table = tablefy(users, extra_cols=extra_cols, users=True,
                              request=request, update=False)
 
-    return render(request, 'ctnr/ctnr_detail.html', {
+    return cy_render(request, 'ctnr/ctnr_detail.html', {
         'obj': ctnr,
         'obj_table': ctnr_table,
         'pretty_obj_type': ctnr.pretty_type,

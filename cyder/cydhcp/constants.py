@@ -21,7 +21,4 @@ RANGE_TYPE = (
 DHCP_EAV_MODELS = ("range_av", "network_av", "workgroup_av", "vlan_av",
                    "vrf_av", "site_av")
 
-SYSTEM_INTERFACE_CTNR_ERROR = (
-    "Cannot change container; interface's container and system's container "
-    "must be the same. Please change the system's container instead.")
 DEFAULT_WORKGROUP = 1

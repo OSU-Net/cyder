@@ -86,3 +86,15 @@ def validate_network_overlap(n1):
         total_overlap = get_total_overlap(n1)
         if partial_overlap.count() - total_overlap.count() != 0:
             raise ValidationError("%s partially overlaps a network." % n1)
+
+
+def validate_system_static_ctnr(system, static):
+    if system.ctnr not in static.domain.ctnr_set.all():
+        raise ValidationError("System's container must match static "
+                              "interface's domain's containers.")
+
+
+def validate_system_dynamic_ctnr(system, dynamic):
+    if system.ctnr not in dynamic.range.domain.ctnr_set.all():
+        raise ValidationError("System's container must match dynamic "
+                              "interface's range's domain's containers.")

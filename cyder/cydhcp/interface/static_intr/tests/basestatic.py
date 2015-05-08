@@ -40,7 +40,6 @@ class BaseStaticTests(DNSTest):
             self.ctnr.ranges.add(self.sr)
 
     def create_si(self, **kwargs):
-        kwargs.setdefault('ctnr', self.ctnr)
         kwargs.setdefault('range', self.sr)
         kwargs.setdefault('system', self.n)
         return StaticInterface.objects.create(**kwargs)

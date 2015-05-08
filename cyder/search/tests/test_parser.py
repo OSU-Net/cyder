@@ -1,7 +1,7 @@
 from django.test import TestCase
 from ometa.runtime import ParseError
 
-from cyder.search.compiler.invdsl import make_debug_compiler
+from cyder.search.compiler.dsl import make_debug_compiler
 
 
 class T(TestCase):
@@ -19,20 +19,20 @@ class DRCTTest(T):
     rule = 'DRCT'
 
     def test1(self):
-        self.assertEqual(('foo', 'bar'), self.parse('foo:bar'))
+        self.assertEqual(('foo', 'bar'), self.parse('site:bar'))
 
     def test2(self):
-        lhs = 'foo'
+        lhs = 'view'
         rhs = '-df:,832kjda_'
         self.assertEqual((lhs, rhs), self.parse('{0}:{1}'.format(lhs, rhs)))
 
     def test3(self):
-        lhs = 'foo'
+        lhs = 'zone'
         rhs = '-=df:,832kjda_'
         self.fail('{0}:{1}'.format(lhs, rhs))
 
     def test4(self):
-        self.fail('foo')
+        self.fail('zone')
 
 
 class TextTest(T):

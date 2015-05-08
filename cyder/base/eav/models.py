@@ -16,6 +16,7 @@ class Attribute(models.Model):
     class Meta:
         app_label = 'cyder'
         db_table = 'attribute'
+        ordering = ('name',)
 
     name = models.CharField(max_length=255)
     attribute_type = models.CharField(max_length=1, choices=ATTRIBUTE_TYPES)
@@ -44,6 +45,7 @@ class EAVBase(BaseModel, ObjectUrlMixin):
 
     class Meta:
         abstract = True
+        ordering = ('attribute__name',)
         unique_together = ('entity', 'attribute')
 
     def check_in_ctnr(self, ctnr):
@@ -87,6 +89,13 @@ class EAVBase(BaseModel, ObjectUrlMixin):
             ('Value', 'value', self.value),
         ]
         return data
+
+    @classmethod
+    def filter_by_ctnr(cls, ctnr, objects=None):
+        if objects is None:
+            return cls.objects.all()
+        else:
+            return objects
 
     @transaction_atomic
     def save(self, *args, **kwargs):

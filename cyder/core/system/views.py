@@ -8,9 +8,10 @@ from django.core.exceptions import ValidationError
 from django.db.models import get_model
 from django.forms.util import ErrorDict, ErrorList
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 
 from cyder.base.utils import tablefy
+from cyder.base.views import cy_render
 from cyder.core.system.models import System
 from cyder.core.system.forms import ExtendedSystemForm
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
@@ -42,7 +43,7 @@ def system_detail(request, pk):
 
     related_systems.discard(system)
 
-    return render(request, 'system/system_detail.html', {
+    return cy_render(request, 'system/system_detail.html', {
         'attrs_table': tablefy(attrs, request=request),
         'static_intr_tables': static_intr,
         'dynamic_intr_tables': dynamic_intr,
@@ -127,10 +128,6 @@ def system_create_view(request):
     dynamic_form.fields['system'].widget = forms.HiddenInput()
     dynamic_form.fields['range'].queryset = Range.objects.filter(range_type='dy')
     static_form.fields['ip_type'].widget = forms.HiddenInput()
-
-    # ctnr field shouldn't exist on these forms
-    dynamic_form.fields['ctnr'].widget = forms.HiddenInput()
-    static_form.fields['ctnr'].widget = forms.HiddenInput()
 
     system_form.make_usable(request)
 

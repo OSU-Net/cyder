@@ -298,7 +298,7 @@ class PTRTests(DNSTest, ModelTestMixin):
                 mac='be:ef:fa:ce:12:34', label='foo1',
                 domain=Domain.objects.get(name='oregonstate.edu'),
                 ip_str='128.193.0.2', ip_type='4', system=s,
-                ctnr=self.c1, dns_enabled=dns_enabled)
+                dns_enabled=dns_enabled)
 
         create_si_enabled = partial(create_si, True)
         create_si_enabled.name = "StaticInterface with DNS enabled"

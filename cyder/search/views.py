@@ -2,12 +2,12 @@ from gettext import gettext as _
 from jinja2 import Environment, PackageLoader
 import json as json
 
-from django.shortcuts import render
 from django.http import HttpResponse
 
 from search.compiler.django_compile import compile_to_django
 
 from cyder.base.utils import tablefy
+from cyder.base.views import cy_render
 from cyder.base.helpers import strip_if_mac_with_colons
 from cyder.cydns.utils import get_zones
 
@@ -23,7 +23,7 @@ def search(request):
     else:
         meta, tables = [], []
 
-    return render(request, 'search/search.html', {
+    return cy_render(request, 'search/search.html', {
         'search': search,
         'meta': meta,
         'tables': tables,
@@ -32,8 +32,7 @@ def search(request):
 
 
 def _search(request):
-    search = request_to_search(request).split(' ')
-    search = ' '.join([strip_if_mac_with_colons(word) for word in search])
+    search = request_to_search(request)
 
     objs, error_resp = compile_to_django(search)
     if not objs:
@@ -98,34 +97,6 @@ def request_to_search(request):
         else:
             search = adv_search
     return search
-
-
-def search_ajax(request):
-    template = env.get_template('search/search_results.html')
-
-    def html_response(**kwargs):
-        return template.render(**kwargs)
-    return _search(request, html_response)
-
-
-def search_dns_text(request):
-
-    def render_rdtype(rdtype_set, **kwargs):
-        response_str = ""
-        for obj in rdtype_set:
-            response_str += _("{0:<6}".format(obj.pk) +
-                              obj.bind_render_record(**kwargs) + "\n")
-        return response_str
-
-    def text_response(**kwargs):
-        response_str = ""
-        for rdtype in ['soas', 'nss', 'srvs', 'cnames', 'sshfps', 'txts',
-                       'addrs', 'intrs', 'ptrs']:
-            response_str += render_rdtype(kwargs[rdtype])
-        response_str += render_rdtype(kwargs['intrs'], reverse=True)
-        return json.dumps({'text_response': response_str})
-
-    return _search(request, text_response)
 
 
 def get_zones_json(request):

@@ -6,7 +6,6 @@ from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.network.models import Network
 from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ptr.models import PTR
@@ -122,5 +121,4 @@ class V6StaticInterTests(BaseStaticTests, ModelTestMixin):
             ip_str=("1000:188:" + mac),
             ip_type='6',
             system=None,
-            ctnr=self.ctnr,
         )

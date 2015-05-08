@@ -13,9 +13,9 @@ class AttributeValueTypeField(models.CharField):
     This field represents the attribute value type -- in other words, the
     type of data the EAV value is allowed to hold. It names a validator defined
     in cyder.base.eav.validators, which is called in EAVValueField.validate
-    with the value as its argument. Informational attributes are not validated,
-    so this field's value is set to the empty string if the attribute is
-    informational.
+    with the value as its argument. Inventory attributes are not validated,
+    so this field's value is set to the empty string if the attribute has
+    type ATTRIBUTE_INVENTORY.
 
     Arguments:
         attribute_type_field: the name of the attribute_type field
@@ -34,7 +34,7 @@ class AttributeValueTypeField(models.CharField):
     def clean(self, value, model_instance):
         attribute_type = getattr(model_instance, self.attribute_type_field)
         if attribute_type == ATTRIBUTE_INVENTORY:
-            # If the attribute is informational, we don't validate the value.
+            # If the attribute is for inventory, we don't validate the value.
             value = u''
 
         return super(AttributeValueTypeField, self).clean(value,
@@ -111,21 +111,17 @@ class EAVAttributeField(models.ForeignKey):
     attribute_type filtering in the model and the UI.
 
     Arguments:
-        type_choices: an iterable containing the attribute_type values that
-                      specify allowable attributes
+        type_choices: an iterable containing the allowed attribute types
     """
 
     def __init__(self, *args, **kwargs):
-        if 'type_choices' in kwargs:
-            kwargs['limit_choices_to'] = \
-                {'attribute_type__in': kwargs['type_choices']}
-
-            self.type_choices = [
-                (attr_type, dict(ATTRIBUTE_TYPES)[attr_type])
-                for attr_type in kwargs.pop('type_choices')
-            ]
+        self.type_choices = kwargs.pop('type_choices', None)
+        if self.type_choices is None:
+            self.type_choices = (
+                ATTRIBUTE_INVENTORY, ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT)
         else:
-            self.type_choices = ATTRIBUTE_TYPES
+            kwargs['limit_choices_to'] = {
+                'attribute_type__in': self.type_choices}
 
         super(EAVAttributeField, self).__init__(*args, **kwargs)
 
@@ -133,18 +129,11 @@ class EAVAttributeField(models.ForeignKey):
         from cyder.base.eav.models import Attribute
 
         attr = Attribute.objects.get(pk=value)
-        type_ = attr.attribute_type
-        valid = any(type_choice == type_
-                    for (type_choice, _) in self.type_choices)
-        if not valid:
+        if attr.attribute_type not in self.type_choices:
             raise ValidationError("Attribute '%s' is not allowed on this "
                                   "object" % attr)
 
         super(EAVAttributeField, self).validate(value, model_instance)
-
-    def formfield(self, **kwargs):
-        return AttributeFormField(choices_query=self.rel.limit_choices_to,
-                                  **kwargs)
 
 
 class AttributeFormField(forms.CharField):
