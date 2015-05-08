@@ -6,7 +6,6 @@ from time import sleep
 
 from cyder.base.utils import remove_dir_contents
 from cyder.base.vcs import GitRepo, GitRepoManager, SanityCheckFailure
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
 from cyder.cydhcp.range.models import Range
@@ -114,7 +113,6 @@ class DNSBuildTest(TestCase):
             domain=Domain.objects.get(name='example.com'),
             ip_str='192.168.0.50',
             mac='01:23:45:01:23:45',
-            ctnr=sys.ctnr,
         )
         s.views.add(
             View.objects.get(name='public'),
@@ -143,7 +141,6 @@ class DNSBuildTest(TestCase):
             domain=Domain.objects.get(name='example.com'),
             ip_str='192.168.0.50',
             mac='01:23:45:01:23:45',
-            ctnr=sys.ctnr,
         )
         s.views.add(
             View.objects.get(name='public'),

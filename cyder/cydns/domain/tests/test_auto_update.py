@@ -58,7 +58,7 @@ class UpdateRecordDeleteDomainTests(BaseDomain):
         self.generic_check(mx)
 
     def test_ns_update(self):
-        ns = Nameserver(server="asdfasffoo", ctnr=self.ctnr)
+        ns = Nameserver(server="asdfasffoo")
         self.generic_check(ns, do_label=False)
 
     def test_srv_update(self):

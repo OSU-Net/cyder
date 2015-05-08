@@ -650,7 +650,7 @@ class AddressRecordTests(DNSTest, ModelTestMixin):
 
             return StaticInterface.objects.create(
                 mac='be:ef:fa:ce:11:11', label='foo1', domain=self.o_e,
-                ip_str='128.193.0.2', ip_type='4', system=s, ctnr=c1)
+                ip_str='128.193.0.2', ip_type='4', system=s)
         create_si.name = 'StaticInterface'
 
         def create_ar_same_ctnr():

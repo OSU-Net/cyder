@@ -88,8 +88,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         if ip_type == '4':
             ranges = self.ranges.filter(
                 Q(range_type=DYNAMIC, dhcp_enabled=True) |
-                    Q(start_str='10.255.255.255'),
-                ip_type='4')
+                Q(start_str='10.255.255.255'), ip_type='4')
         elif ip_type == '6':
             ranges = self.ranges.filter(
                 ip_type='6', range_type=DYNAMIC, dhcp_enabled=True)
@@ -103,7 +102,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
                 '\tmatch hardware;\n'
                 '}}\n'.format(classname))
             clients = range_.dynamicinterface_set.filter(
-                ctnr=self, dhcp_enabled=True).exclude(mac=None)
+                system__ctnr=self, dhcp_enabled=True).exclude(mac=None)
             for client in clients:
                 build_str += client.build_subclass(classname)
         return build_str

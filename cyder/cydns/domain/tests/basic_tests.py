@@ -163,7 +163,7 @@ class DomainTests(BaseDomain, ModelTestMixin):
             ip_type='4')
         self.assertRaises(ValidationError, arec.save)
 
-        ns = Nameserver(ctnr=self.ctnr, domain=bleh, server="ns1." + bleh.name)
+        ns = Nameserver(domain=bleh, server="ns1." + bleh.name)
         self.assertRaises(ValidationError, ns.save)
 
         cn = CNAME(label="999asdf", ctnr=self.ctnr, domain=bleh,

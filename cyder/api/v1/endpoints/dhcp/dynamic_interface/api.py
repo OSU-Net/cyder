@@ -9,8 +9,6 @@ class DynamicInterfaceSerializer(serializers.ModelSerializer):
         view_name='api-core-system-detail')
     range = serializers.HyperlinkedRelatedField(
         view_name='api-dhcp-range-detail')
-    ctnr = serializers.HyperlinkedRelatedField(
-        view_name='api-core-ctnr-detail')
     workgroup = serializers.HyperlinkedRelatedField(
         view_name='api-dhcp-workgroup-detail', required=False)
 

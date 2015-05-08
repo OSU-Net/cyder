@@ -29,6 +29,14 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         return u'{} {} {}'.format(self.fqdn, self.rdtype, self.ip_str)
 
     @property
+    def actual_ctnr(self):
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
+        if isinstance(self, StaticInterface):
+            return self.system.ctnr
+        else:
+            return self.ctnr
+
+    @property
     def rdtype(self):
         if self.ip_type == IP_TYPE_6:
             return 'AAAA'
@@ -80,11 +88,11 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             same container.
         """
 
-        from cyder.cydhcp.interface.static_intr.models import StaticInterface
         from cyder.core.ctnr.models import Ctnr
+        from cyder.cydhcp.interface.static_intr.models import StaticInterface
         assert self.fqdn
         try:
-            self.ctnr
+            self.actual_ctnr
         except Ctnr.DoesNotExist:
             # By this point, Django will already have encountered a
             # Validation error about the ctnr field, so there's no need to
@@ -92,9 +100,9 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             return
 
         ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
-                                    .exclude(ctnr=self.ctnr))
+                                    .exclude(ctnr=self.actual_ctnr))
         sis = (StaticInterface.objects.filter(fqdn=self.fqdn)
-                                      .exclude(ctnr=self.ctnr))
+                                      .exclude(system__ctnr=self.actual_ctnr))
 
         if isinstance(self, AddressRecord):
             ars = ars.exclude(pk=self.pk)
@@ -170,6 +178,8 @@ class AddressRecord(BaseAddressRecord):
     pretty_type = 'address record'
 
     id = models.AutoField(primary_key=True)
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "

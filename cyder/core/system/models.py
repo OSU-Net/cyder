@@ -9,6 +9,8 @@ from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.utils import transaction_atomic
 from cyder.core.system.validators import validate_no_spaces
+from cyder.cydhcp.validation import (validate_system_dynamic_ctnr,
+                                     validate_system_static_ctnr)
 
 
 class System(BaseModel, ObjectUrlMixin):
@@ -68,12 +70,11 @@ class System(BaseModel, ObjectUrlMixin):
         super(System, self).save(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        for i in (list(self.staticinterface_set.all()) +
-                  list(self.dynamicinterface_set.all())):
-            if self.ctnr != i.ctnr:
-                i.ctnr = self.ctnr
-                i.save()
         super(System, self).clean(*args, **kwargs)
+        for si in self.staticinterface_set.all():
+            validate_system_static_ctnr(self, si)
+        for di in self.dynamicinterface_set.all():
+            validate_system_static_ctnr(self, di)
 
 
 class SystemAV(EAVBase):

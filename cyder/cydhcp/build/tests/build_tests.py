@@ -5,7 +5,6 @@ from cyder.base.eav.models import Attribute
 from cyder.base.utils import copy_tree, remove_dir_contents
 from cyder.base.vcs import GitRepo, GitRepoManager, SanityCheckFailure
 
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 
 from cyder.cydhcp.build.builder import DHCPBuilder
@@ -106,7 +105,6 @@ class DHCPBuildTest(TestCase):
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
         self.builder.build()
         self.assertRaises(
@@ -130,7 +128,6 @@ class DHCPBuildTest(TestCase):
             system=System.objects.get(name='Test_system_5'),
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
-            ctnr=Ctnr.objects.get(name='Test_ctnr'),
         )
         self.builder.build()
         self.builder.push(sanity_check=True)

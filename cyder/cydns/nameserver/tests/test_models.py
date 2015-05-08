@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 
 from cyder.base.tests import ModelTestMixin
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -75,7 +74,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
     def test_add_invalid(self):
         self.assertRaises(
             ValidationError, Nameserver.objects.create,
-            domain=self.f_r, server='ns3.foo.ru', ctnr=self.ctnr)
+            domain=self.f_r, server='ns3.foo.ru')
 
     def testtest_add_ns_in_domain(self):
         # Use an A record as a glue record.
@@ -109,7 +108,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
     def test_disallow_name_update_of_glue_Intr(self):
         # Glue records should not be allowed to change their name.
         glue = StaticInterface.objects.create(
-            label='ns24', domain=self.f_r, ctnr=self.ctnr,
+            label='ns24', domain=self.f_r,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
         ns = Nameserver.objects.create(domain=self.f_r, server='ns24.foo.ru')
@@ -122,7 +121,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
     def test_disallow_delete_of_glue_intr(self):
         # Interface glue records should not be allowed to be deleted.
         glue = StaticInterface.objects.create(
-            label='ns24', domain=self.f_r, ctnr=self.ctnr,
+            label='ns24', domain=self.f_r,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
         ns = Nameserver.objects.create(domain=self.f_r, server='ns24.foo.ru')
@@ -135,7 +134,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
         # Test that assigning a different glue record doesn't get overriden by
         # the auto assinging during the Nameserver's clean function.
         glue = StaticInterface.objects.create(
-            label='ns25', domain=self.f_r, ctnr=self.ctnr,
+            label='ns25', domain=self.f_r,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
         ns = Nameserver.objects.create(domain=self.f_r, server='ns25.foo.ru')
@@ -167,7 +166,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
     def testtest_add_ns_in_domain_intr(self):
         # Use an Interface as a glue record.
         glue = StaticInterface.objects.create(
-            label='ns232', domain=self.r, ctnr=self.ctnr,
+            label='ns232', domain=self.r,
             ip_str='128.193.99.10', ip_type='4', system=self.s,
             mac="12:23:45:45:45:45")
         ns = Nameserver.objects.create(domain=self.r, server='ns232.ru')
@@ -176,7 +175,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
         self.assertRaises(ValidationError, glue.delete)
 
         glue = StaticInterface.objects.create(
-            label='ns332', domain=self.f_r, ctnr=self.ctnr,
+            label='ns332', domain=self.f_r,
             ip_str='128.193.1.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
         ns = Nameserver.objects.create(domain=self.f_r, server='ns332.foo.ru')
@@ -189,7 +188,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
 
     def test_update_glue_to_no_intr(self):
         glue = StaticInterface.objects.create(
-            label='ns34', domain=self.r, ctnr=self.ctnr, ip_str='128.193.1.10',
+            label='ns34', domain=self.r, ip_str='128.193.1.10',
             ip_type='4', system=self.s, mac="11:22:33:44:55:66")
         data = {'domain': self.r, 'server': 'ns34.ru'}
         ns = Nameserver.objects.create(domain=self.r, server='ns34.ru')
@@ -202,7 +201,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
     def test_update_glue_record_intr(self):
         # Glue records can't change their name.
         glue = StaticInterface.objects.create(
-            label='ns788', domain=self.r, ctnr=self.ctnr,
+            label='ns788', domain=self.r,
             ip_str='128.193.1.10', ip_type='4', system=self.s,
             mac="11:22:33:44:55:66")
         ns = Nameserver.objects.create(domain=self.r, server='ns788.ru')
@@ -242,23 +241,23 @@ class NSTestsModels(DNSTest, ModelTestMixin):
 
         self.assertRaises(
             ValidationError, Nameserver.objects.create,
-            domain=self.r, server='ns2 .ru', ctnr=self.ctnr)
+            domain=self.r, server='ns2 .ru')
 
         self.assertRaises(
             ValidationError, Nameserver.objects.create,
-            domain=self.r, server='ns2$.ru', ctnr=self.ctnr)
+            domain=self.r, server='ns2$.ru')
 
         self.assertRaises(
             ValidationError, Nameserver.objects.create,
-            domain=self.r, server='ns2..ru', ctnr=self.ctnr)
+            domain=self.r, server='ns2..ru')
 
         self.assertRaises(
             ValidationError, Nameserver.objects.create,
-            domain=self.r, server='ns2.ru ', ctnr=self.ctnr)
+            domain=self.r, server='ns2.ru ')
 
         self.assertRaises(
             ValidationError, Nameserver.objects.create,
-            domain=self.r, server='', ctnr=self.ctnr)
+            domain=self.r, server='')
 
     def test_add_dup(self):
         def x():
@@ -370,7 +369,7 @@ class NSTestsModels(DNSTest, ModelTestMixin):
         self.assertRaises(
             ValidationError, StaticInterface.objects.create,
             label="asdf", domain=root_domain, ip_str="14.10.1.1", ip_type="4",
-            mac="11:22:33:44:55:66", system=self.s, ctnr=self.ctnr)
+            mac="11:22:33:44:55:66", system=self.s)
 
     # See record.tests for the case a required view is deleted.
     def test_bad_nameserver_soa_state_case_2_0(self):

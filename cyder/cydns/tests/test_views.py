@@ -175,7 +175,7 @@ class NSViewTests(TestCase, GenericViewTests):
         test_data = {
             'server': 'foo2.foo',
         }
-        do_setUp(self, test_data)
+        do_setUp(self, test_data, use_ctnr=False)
 
     def post_data(self):
         return {

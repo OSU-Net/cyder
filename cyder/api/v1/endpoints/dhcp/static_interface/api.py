@@ -8,8 +8,6 @@ from cyder.cydhcp.interface.static_intr.models import StaticInterface
 class StaticInterfaceSerializer(CommonDNSSerializer):
     system = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-core-system-detail')
-    ctnr = serializers.HyperlinkedRelatedField(
-        read_only=True, view_name='api-core-ctnr-detail')
     reverse_domain = serializers.HyperlinkedRelatedField(
         read_only=True, view_name='api-dns-domain-detail')
     workgroup = serializers.HyperlinkedRelatedField(

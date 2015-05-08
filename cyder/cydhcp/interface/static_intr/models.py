@@ -15,11 +15,11 @@ from cyder.base.fields import MacAddrField
 from cyder.base.models import ExpirableMixin
 from cyder.base.utils import transaction_atomic
 from cyder.core.system.models import System
-from cyder.cydhcp.constants import (STATIC, SYSTEM_INTERFACE_CTNR_ERROR,
-                                    DEFAULT_WORKGROUP)
+from cyder.cydhcp.constants import (STATIC, DEFAULT_WORKGROUP)
 from cyder.cydhcp.range.utils import find_range
 from cyder.cydhcp.utils import format_mac, join_dhcp_args
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydhcp.validation import validate_system_static_ctnr
 from cyder.cydns.address_record.models import AddressRecord, BaseAddressRecord
 from cyder.cydns.domain.models import Domain
 from cyder.cydns.ip.utils import ip_to_reverse_name
@@ -80,7 +80,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
         objects = objects or StaticInterface.objects
-        return objects.filter(ctnr=ctnr)
+        return objects.filter(system__ctnr=ctnr)
 
     def __unicode__(self):
         return self.fqdn
@@ -89,6 +89,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     def range(self):
         if self.ip_str:
             return find_range(self.ip_str)
+
+    @property
+    def ctnr(self):
+        return self.system.ctnr
 
     def details(self):
         data = super(StaticInterface, self).details()
@@ -142,7 +146,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
                 new_range.save(commit=False)
             if old_range:
                 old_range.save(commit=False)
-        assert self.ctnr == self.system.ctnr
 
     @transaction_atomic
     def delete(self, *args, **kwargs):
@@ -203,8 +206,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
         super(StaticInterface, self).clean(validate_glue=False,
                                            ignore_intr=True)
-        if self.ctnr != self.system.ctnr:
-            raise ValidationError(SYSTEM_INTERFACE_CTNR_ERROR)
 
         if self.dhcp_enabled or self.dns_enabled:
             if not self.range:
@@ -230,6 +231,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
             if not (self.range and self.range.range_type == STATIC):
                 raise ValidationError('DHCP is enabled for this interface, so '
                                       'its IP must be in a static range.')
+
+        validate_system_static_ctnr(self.system, self)
 
     def check_glue_status(self):
         """If this interface is a 'glue' record for a Nameserver instance,
