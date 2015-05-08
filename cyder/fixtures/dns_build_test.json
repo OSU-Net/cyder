@@ -308,16 +308,17 @@
   "pk": 1,
   "model": "cyder.network",
   "fields": {
-   "ip_lower": 3232235520,
+   "start_lower": 3232235520,
+   "end_lower": 3232235775,
+   "start_upper": 0,
+   "end_upper": 0,
    "created": "2014-02-01T11:10:46",
    "dhcpd_raw_include": "",
-   "ip_upper": 0,
    "vlan": null,
    "enabled": true,
    "site": null,
    "modified": "2014-02-01T11:10:46",
    "vrf": 1,
-   "prefixlen": 24,
    "ip_type": "4",
    "network_str": "192.168.0.0/24"
   }
