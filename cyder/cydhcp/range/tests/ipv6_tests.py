@@ -13,8 +13,8 @@ class V6RangeTests(TestCase, ModelTestMixin):
             network_str="1234:1234:1234::/16", ip_type='6')
         self.s1 = Network.objects.create(
             network_str="eeee:eeee:eeee::/32", ip_type='6')
-        self.s2 = Network.objects.create(network_str="fff::/4", ip_type='6')
-        self.s3 = Network.objects.create(network_str="ffff::/4", ip_type='6')
+        self.s2 = Network.objects.create(network_str="f00::/8", ip_type='6')
+        self.s3 = Network.objects.create(network_str="ff00::/8", ip_type='6')
 
     @property
     def objs(self):
@@ -82,11 +82,10 @@ class V6RangeTests(TestCase, ModelTestMixin):
             ip_type='6',
         )
 
-
     def test_bad_create4(self):
         Range.objects.create(
-            start_str="fe:1::",
-            end_str="fe:1:4::",
+            start_str="ffe:1::",
+            end_str="ffe:1:4::",
             network=self.s2,
             ip_type='6',
         )
@@ -94,8 +93,8 @@ class V6RangeTests(TestCase, ModelTestMixin):
         # Partial overlap
         self.assertRaises(
             ValidationError, Range.objects.create,
-            start_str="fe:1::",
-            end_str="fe:1:3::",
+            start_str="ffe:1::",
+            end_str="ffe:1:3::",
             network=self.s2,
             ip_type='6',
         )
