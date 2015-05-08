@@ -74,7 +74,7 @@ class System(BaseModel, ObjectUrlMixin):
         for si in self.staticinterface_set.all():
             validate_system_static_ctnr(self, si)
         for di in self.dynamicinterface_set.all():
-            validate_system_static_ctnr(self, di)
+            validate_system_dynamic_ctnr(self, di)
 
 
 class SystemAV(EAVBase):
