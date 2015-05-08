@@ -1,9 +1,13 @@
+from os import path
+
 from ometa.grammar import OMeta
 from ometa.runtime import OMetaBase
 from parsley import wrapGrammar
 
+from lib.path_utils import ROOT
 
-with open('cyder/search/compiler/search.parsley') as g:
+
+with open(path.join(ROOT, 'cyder/search/compiler/search.parsley')) as g:
     B = OMeta.makeGrammar(g.read()).createParserClass(OMetaBase, globals())
 
 
