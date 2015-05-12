@@ -42,7 +42,7 @@ def compile_q_objects(search):
         qs = compiler(search).expr()
         return qs, None
     except (BadDirective, ParseError) as why:
-        return None, str(why)
+        return None, why.formatReason()
 
 
 class DjangoCompiler(ICompiler):
