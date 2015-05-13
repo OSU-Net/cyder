@@ -160,8 +160,8 @@ def _filter(request, Klass):
 
     if request.GET.get('filter'):
         try:
-            return objects.filter(make_megafilter(Klass,
-                                                  request.GET.get('filter')))
+            objects = objects.filter(
+                make_megafilter(Klass, request.GET.get('filter')))
         except TypeError:
             pass
 
