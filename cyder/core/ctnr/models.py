@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import m2m_changed
+from django.forms import ModelForm
 
-from cyder.base.constants import LEVELS
+from cyder.base.constants import LEVELS, get_klasses
 from cyder.base.mixins import ObjectUrlMixin
 from cyder.base.models import BaseModel
 from cyder.base.validators import validate_integer_field
@@ -133,3 +136,23 @@ class CtnrUser(BaseModel, ObjectUrlMixin):
             ('Level', 'level', LEVELS[self.level]),
         )
         return data
+
+
+def domains_changed(sender, **kwargs):
+    action = kwargs['action']
+    if action == "pre_remove":
+        ctnr = kwargs['instance']
+        for domain in Domain.objects.filter(pk__in=kwargs['pk_set']):
+            for klass, _ in get_klasses():
+                fields = [f.name for f in klass._meta.fields]
+                if isinstance(klass, ModelForm):
+                    continue
+                if (("domain" in fields or hasattr(klass, "domain_set"))
+                        and ("ctnr" in fields or hasattr(klass, "ctnr_set"))):
+                    objects = klass.objects.filter(domain=domain, ctnr=ctnr)
+                    if objects.exists():
+                        raise ValidationError(
+                            "Cannot remove domain because %s object depends on"
+                            " this domain and container." % klass.pretty_type)
+
+m2m_changed.connect(domains_changed, sender=Ctnr.domains.through)

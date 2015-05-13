@@ -38,7 +38,7 @@ DNS_OBJECTS = ("address_record", "cname", "domain", "mx", "nameserver", "ptr",
 CORE_OBJECTS = ("ctnr_users", "ctnr", "user", "system")
 
 
-def get_klasses(obj_type):
+def get_klasses(obj_type=None):
     from cyder.cydns.address_record.forms import AddressRecordForm
     from cyder.cydns.cname.forms import CNAMEForm
     from cyder.core.ctnr.forms import CtnrForm
@@ -66,7 +66,6 @@ def get_klasses(obj_type):
         SSHFP, StaticInterface, System, SystemAV, TXT, Vlan, VlanAV, Vrf,
         VrfAV, Workgroup, WorkgroupAV
     )
-
 
     klasses = {
         'address_record': (AddressRecord, AddressRecordForm),
@@ -98,5 +97,8 @@ def get_klasses(obj_type):
         'workgroup': (Workgroup, WorkgroupForm),
         'workgroup_av': (WorkgroupAV, WorkgroupAVForm),
     }
+
+    if obj_type is None:
+        return klasses.values()
 
     return klasses[obj_type]

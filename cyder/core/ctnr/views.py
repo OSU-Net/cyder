@@ -3,6 +3,7 @@ import json
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.forms import ChoiceField, HiddenInput
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -257,8 +258,11 @@ def remove_object(request, ctnr_pk):
 
         else:
             if obj in m2m.all():
-                m2m.remove(obj)
-                return_status['success'] = True
+                try:
+                    m2m.remove(obj)
+                    return_status['success'] = True
+                except ValidationError, e:
+                    return_status['error'] = "; ".join(e.messages)
             else:
                 return_status['error'] = (
                     '{0} does not exist in {1}'.format(str(obj), ctnr))
