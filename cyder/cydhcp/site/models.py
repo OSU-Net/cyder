@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.loading import get_model
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 from cyder.base.eav.constants import ATTRIBUTE_INVENTORY
@@ -32,12 +33,18 @@ class Site(BaseModel, ObjectUrlMixin):
         else:
             return self.name
 
+    def clean(self, *args, **kwargs):
+        site = self
+        while site.parent is not None:
+            if site.parent == self:
+                raise ValidationError("Site cannot be descended from itself.")
+            site = site.parent
+        super(Site, self).clean(*args, **kwargs)
+
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
-        Network = get_model('cyder', 'network')
-        networks = Network.objects.filter(range__in=ctnr.ranges.all())
-        objects = objects or Site.objects
-        return objects.filter(network__in=networks)
+        objects = objects if objects is not None else Site.objects
+        return objects
 
     def check_in_ctnr(self, ctnr):
         return self.network_set.filter(range__in=ctnr.ranges.all()).exists()
