@@ -10,11 +10,11 @@ import time
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
-    copy_tree, dict_merge, format_exc_verbose, Logger, run_command, set_attrs,
+    copy_tree, dict_merge, Logger, run_command, set_attrs,
     shell_out)
 from cyder.base.vcs import GitRepo
 
-from cyder.core.utils import fail_mail
+from cyder.core.utils import fail_mail, mail_if_failure
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydhcp.network.models import Network
 from cyder.cydhcp.vrf.models import Vrf
@@ -72,57 +72,51 @@ class DHCPBuilder(MutexMixin, Logger):
                            failure_logger=failure_logger,
                            failure_msg=failure_msg)
 
+    @mail_if_failure('Cyder DHCP build failed')
     def build(self):
         try:
-            try:
-                with open(self.stop_file) as stop_fd:
-                    now = time.time()
-                    contents = stop_fd.read()
-                last = os.path.getmtime(self.stop_file)
+            with open(self.stop_file) as stop_fd:
+                now = time.time()
+                contents = stop_fd.read()
+            last = os.path.getmtime(self.stop_file)
 
-                msg = ('The stop file ({0}) exists. Build canceled.\n'
-                       'Reason for skipped build:\n'
-                       '{1}'.format(self.stop_file, contents))
-                self.log_notice(msg)
-                if (self.stop_file_email_interval is not None and
-                        now - last > self.stop_file_email_interval):
-                    os.utime(self.stop_file, (now, now))
-                    fail_mail(msg, subject="Cyder DHCP builds have stopped")
+            msg = ('The stop file ({0}) exists. Build canceled.\n'
+                   'Reason for skipped build:\n'
+                   '{1}'.format(self.stop_file, contents))
+            self.log_notice(msg)
+            if (self.stop_file_email_interval is not None and
+                    now - last > self.stop_file_email_interval):
+                os.utime(self.stop_file, (now, now))
+                fail_mail(msg, subject="Cyder DHCP builds have stopped")
 
-                raise Exception(msg)
-            except IOError as e:
-                if e.errno == errno.ENOENT:  # "No such file or directory"
-                    pass
-                else:
-                    raise
+            raise Exception(msg)
+        except IOError as e:
+            if e.errno == errno.ENOENT:  # "No such file or directory"
+                pass
+            else:
+                raise
 
-            for ip_type, files in (('4', self.files_v4), ('6', self.files_v6)):
-                self.log_info('Building v{}...'.format(ip_type))
-                with open(os.path.join(self.stage_dir, files['target_file']),
-                          'w') as f:
-                    for ctnr in Ctnr.objects.all():
-                        f.write(ctnr.build_legacy_classes(ip_type))
-                    for vrf in Vrf.objects.all():
-                        f.write(vrf.build_vrf(ip_type))
-                    for network in Network.objects.filter(
-                            ip_type=ip_type, enabled=True):
-                        f.write(network.build_subnet())
-                    for workgroup in Workgroup.objects.all():
-                        f.write(workgroup.build_workgroup(ip_type))
+        for ip_type, files in (('4', self.files_v4), ('6', self.files_v6)):
+            self.log_info('Building v{}...'.format(ip_type))
+            with open(os.path.join(self.stage_dir, files['target_file']),
+                      'w') as f:
+                for ctnr in Ctnr.objects.all():
+                    f.write(ctnr.build_legacy_classes(ip_type))
+                for vrf in Vrf.objects.all():
+                    f.write(vrf.build_vrf(ip_type))
+                for network in Network.objects.filter(
+                        ip_type=ip_type, enabled=True):
+                    f.write(network.build_subnet())
+                for workgroup in Workgroup.objects.all():
+                    f.write(workgroup.build_workgroup(ip_type))
 
-                if files['check_file']:
-                    self.check_syntax(
-                        ip_type=ip_type, filename=files['check_file'])
-        except:
-            msg = 'DHCP build failed.\n' + format_exc_verbose()
-            self.log(syslog.LOG_ERR, msg)
-            fail_mail(msg, subject='Cyder DHCP build failed')
-            with open(self.stop_file, 'w') as f:
-                f.write(msg)
-            raise
+            if files['check_file']:
+                self.check_syntax(
+                    ip_type=ip_type, filename=files['check_file'])
 
         self.log_info('DHCP build successful')
 
+    @mail_if_failure('Cyder DHCP build failed')
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
 

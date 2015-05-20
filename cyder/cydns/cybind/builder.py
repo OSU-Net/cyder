@@ -13,12 +13,12 @@ from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
-    copy_tree, dict_merge, format_exc_verbose, Logger, remove_dir_contents,
+    copy_tree, dict_merge, Logger, remove_dir_contents,
     run_command, set_attrs)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
-from cyder.core.utils import fail_mail
+from cyder.core.utils import fail_mail, mail_if_failure
 
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
@@ -435,51 +435,45 @@ class DNSBuilder(MutexMixin, Logger):
                            .format(view_name))
             self.build_view_config(view_name, 'master', view_stmts)
 
+    @mail_if_failure('Cyder DNS build failed')
     def build(self, force=False):
         try:
-            try:
-                with open(self.stop_file) as stop_fd:
-                    now = time.time()
-                    contents = stop_fd.read()
-                last = os.path.getmtime(self.stop_file)
+            with open(self.stop_file) as stop_fd:
+                now = time.time()
+                contents = stop_fd.read()
+            last = os.path.getmtime(self.stop_file)
 
-                msg = ("The stop file ({0}) exists. Build canceled.\n"
-                       "Reason for skipped build:\n"
-                       "{1}".format(self.stop_file, contents))
-                self.log_notice(msg)
-                if (self.stop_file_email_interval is not None and
-                        now - last > self.stop_file_email_interval):
-                    os.utime(self.stop_file, (now, now))
-                    fail_mail(msg, subject="Cyder DNS builds have stopped")
+            msg = ("The stop file ({0}) exists. Build canceled.\n"
+                   "Reason for skipped build:\n"
+                   "{1}".format(self.stop_file, contents))
+            self.log_notice(msg)
+            if (self.stop_file_email_interval is not None and
+                    now - last > self.stop_file_email_interval):
+                os.utime(self.stop_file, (now, now))
+                fail_mail(msg, subject="Cyder DNS builds have stopped")
 
-                raise Exception(msg)
-            except IOError as e:
-                if e.errno != errno.ENOENT:  # "No such file or directory"
-                    raise
+            raise Exception(msg)
+        except IOError as e:
+            if e.errno != errno.ENOENT:  # "No such file or directory"
+                raise
 
-            self.log_info('Building...')
+        self.log_info('Building...')
 
-            remove_dir_contents(self.stage_dir)
-            self.dns_tasks = self.get_scheduled()
+        remove_dir_contents(self.stage_dir)
+        self.dns_tasks = self.get_scheduled()
 
-            if not self.dns_tasks and not force:
-                self.log_info('Nothing to do!')
-                return
+        if not self.dns_tasks and not force:
+            self.log_info('Nothing to do!')
+            return
 
-            # zone files
-            soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
-            self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
-                                    force=force))
+        # zone files
+        soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
+        self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
+                                force=force))
 
-            self.log_info('DNS build successful')
-        except:
-            msg = 'DNS build failed.\n' + format_exc_verbose()
-            self.log(syslog.LOG_ERR, msg)
-            fail_mail(msg, subject='Cyder DNS build failed')
-            with open(self.stop_file, 'w') as f:
-                f.write(msg)
-            raise
+        self.log_info('DNS build successful')
 
+    @mail_if_failure('Cyder DNS build failed')
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
 
