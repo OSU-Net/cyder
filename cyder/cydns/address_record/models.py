@@ -29,14 +29,6 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         return u'{} {} {}'.format(self.fqdn, self.rdtype, self.ip_str)
 
     @property
-    def actual_ctnr(self):
-        from cyder.cydhcp.interface.static_intr.models import StaticInterface
-        if isinstance(self, StaticInterface):
-            return self.system.ctnr
-        else:
-            return self.ctnr
-
-    @property
     def rdtype(self):
         if self.ip_type == IP_TYPE_6:
             return 'AAAA'
@@ -92,7 +84,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         assert self.fqdn
         try:
-            self.actual_ctnr
+            self.ctnr
         except Ctnr.DoesNotExist:
             # By this point, Django will already have encountered a
             # Validation error about the ctnr field, so there's no need to
@@ -100,9 +92,9 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             return
 
         ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
-                                    .exclude(ctnr=self.actual_ctnr))
+                                    .exclude(ctnr=self.ctnr))
         sis = (StaticInterface.objects.filter(fqdn=self.fqdn)
-                                      .exclude(system__ctnr=self.actual_ctnr))
+                                      .exclude(system__ctnr=self.ctnr))
 
         if isinstance(self, AddressRecord):
             ars = ars.exclude(pk=self.pk)
