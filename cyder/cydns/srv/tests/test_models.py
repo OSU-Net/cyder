@@ -5,8 +5,6 @@ from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.srv.models import SRV
 from cyder.cydns.domain.models import Domain
 
-from cyder.core.ctnr.models import Ctnr
-
 
 class SRVTests(TestCase):
     def setUp(self):

@@ -225,7 +225,7 @@ class FullNameTests(BaseDomain):
         label, the_domain = ensure_label_domain(fqdn)
         self.ctnr.domains.add(the_domain)
         ns = Nameserver.objects.create(
-            ctnr=self.ctnr, domain=the_domain, server="asdfasffoo")
+            domain=the_domain, server="asdfasffoo")
         self.assertFalse(prune_tree(the_domain))
         ns.delete()
 

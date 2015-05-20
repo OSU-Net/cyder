@@ -4,7 +4,6 @@ from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.txt.models import TXT
 from cyder.cydns.domain.models import Domain
-from cyder.core.ctnr.models import Ctnr
 
 
 class TXTTests(TestCase, ModelTestMixin):

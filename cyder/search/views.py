@@ -32,8 +32,7 @@ def search(request):
 
 
 def _search(request):
-    search = request_to_search(request).split(' ')
-    search = ' '.join([strip_if_mac_with_colons(word) for word in search])
+    search = request_to_search(request)
 
     objs, error_resp = compile_to_django(search)
     if not objs:

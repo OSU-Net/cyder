@@ -1,5 +1,4 @@
 from cyder.core.system.models import System
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.task.models import Task
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -56,7 +55,6 @@ class DirtySOATests(DNSTest):
 
     def generic_dirty(self, Klass, create_data, update_data, local_soa,
                       tdiff=1):
-        create_data['ctnr'] = self.ctnr
         Task.dns.all().delete()  # Delete all tasks
         local_soa.dirty = False
         local_soa.save()
@@ -92,10 +90,11 @@ class DirtySOATests(DNSTest):
 
     def test_dirty_a(self):
         create_data = {
+            'ctnr': self.ctnr,
             'label': 'asdf',
             'domain': self.dom,
             'ip_str': '10.2.3.1',
-            'ip_type': '4'
+            'ip_type': '4',
         }
         update_data = {
             'label': 'asdfx',
@@ -110,7 +109,6 @@ class DirtySOATests(DNSTest):
             'ip_type': '4',
             'system': self.s,
             'mac': '11:22:33:44:55:66',
-            'ctnr': self.ctnr,
         }
         update_data = {
             'label': 'asdfx1',
@@ -120,6 +118,7 @@ class DirtySOATests(DNSTest):
 
     def test_dirty_cname(self):
         create_data = {
+            'ctnr': self.ctnr,
             'label': 'asdf2',
             'domain': self.dom,
             'target': 'foo.bar.com',
@@ -131,6 +130,7 @@ class DirtySOATests(DNSTest):
 
     def test_dirty_ptr(self):
         create_data = {
+            'ctnr': self.ctnr,
             'ip_str': '10.2.3.1',
             'ip_type': '4',
             'fqdn': 'foo.bar.com',
@@ -142,6 +142,7 @@ class DirtySOATests(DNSTest):
 
     def test_dirty_mx(self):
         create_data = {
+            'ctnr': self.ctnr,
             'label': '',
             'domain': self.dom,
             'priority': 10,
@@ -170,6 +171,7 @@ class DirtySOATests(DNSTest):
 
     def test_dirty_srv(self):
         create_data = {
+            'ctnr': self.ctnr,
             'label': '_asdf7',
             'domain': self.dom,
             'priority': 10,
@@ -184,6 +186,7 @@ class DirtySOATests(DNSTest):
 
     def test_dirty_txt(self):
         create_data = {
+            'ctnr': self.ctnr,
             'label': 'asdf8',
             'domain': self.dom,
             'txt_data': 'some stuff',

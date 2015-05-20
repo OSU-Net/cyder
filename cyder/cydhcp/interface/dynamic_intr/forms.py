@@ -9,7 +9,7 @@ class DynamicInterfaceForm(RangeWizard, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(DynamicInterfaceForm, self).__init__(*args, **kwargs)
         self.fields.keyOrder = ['system', 'mac', 'vrf', 'site', 'range',
-                                'workgroup', 'expire', 'dhcp_enabled', 'ctnr']
+                                'workgroup', 'expire', 'dhcp_enabled']
         self.fields['expire'].widget.format = "%m/%d/%Y"
         self.fields['range'].required = True
         self.fields['range'].queryset = Range.objects.filter(

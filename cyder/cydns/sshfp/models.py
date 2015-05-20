@@ -31,6 +31,8 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
         verbose_name='algorithm')
     fingerprint_type = models.PositiveIntegerField(
         null=False, blank=False, default=1, choices=((1, 'SHA-1 (1)'),))
+    ctnr = models.ForeignKey("cyder.Ctnr", null=False,
+                             verbose_name="Container")
 
     template = _("{bind_name:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "

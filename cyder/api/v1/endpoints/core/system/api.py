@@ -33,6 +33,8 @@ class SystemNestedAVSerializer(CommonAPINestedAVSerializer):
 
 class SystemSerializer(serializers.ModelSerializer):
     systemav_set = SystemNestedAVSerializer(many=True, required=False)
+    ctnr = serializers.HyperlinkedRelatedField(
+        view_name='api-core-ctnr-detail')
 
     class Meta:
         model = System
@@ -43,4 +45,3 @@ class SystemViewSet(CommonAPIViewSet):
     serializer_class = SystemSerializer
     avmodel = SystemAV
     model = System
-

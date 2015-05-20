@@ -315,7 +315,6 @@
    "mac": "010204081020",
    "range": 1,
    "dhcp_enabled": false,
-   "ctnr": 3,
    "last_seen": "2014-02-08T14:30:46"
   }
  },
@@ -330,7 +329,6 @@
    "mac": "aabbccddeeff",
    "range": 1,
    "dhcp_enabled": true,
-   "ctnr": 3,
    "last_seen": "2014-02-08T14:33:07"
   }
  },
@@ -345,7 +343,6 @@
    "mac": "ffeeddaabbcc",
    "range": 3,
    "dhcp_enabled": true,
-   "ctnr": 3,
    "last_seen": "2014-02-08T14:35:18"
   }
  },
@@ -360,7 +357,6 @@
    "mac": "0a1b2c3d4e5f",
    "range": 4,
    "dhcp_enabled": true,
-   "ctnr": 3,
    "last_seen": "2014-02-08T14:37:58"
   }
  }

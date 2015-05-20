@@ -2,7 +2,6 @@ import ipaddr
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from cyder.core.ctnr.models import Ctnr
 from cyder.core.system.models import System
 from cyder.cydhcp.constants import STATIC
 from cyder.cydhcp.interface.static_intr.models import StaticInterface
@@ -53,7 +52,7 @@ class ReverseDomainTests(DNSTest):
     def add_intr_ipv4(self, ip, label):
         return StaticInterface.objects.create(
             label=label, domain=self.domain, ip_str=ip, ip_type='4',
-            system=self.s, mac='11:22:33:44:55:66', ctnr=self.ctnr,
+            system=self.s, mac='11:22:33:44:55:66',
         )
 
     def add_ptr_ipv4(self, ip):

@@ -375,12 +375,7 @@ def get_update_form(request):
 
                 initial = copy(kwargs)
                 initial[related_type] = related_pk
-                if 'ctnr' in FormKlass.base_fields:
-                    initial['ctnr'] = request.session['ctnr']
                 form = FormKlass(initial=initial)
-                if 'ctnr' in FormKlass.base_fields and \
-                        request.session['ctnr'].name != 'global':
-                    form.fields['ctnr'].widget = forms.HiddenInput()
 
                 if related_type == 'range' and not obj_type.endswith('_av'):
                     for field in ['vrf', 'site', 'next_ip']:
@@ -418,6 +413,7 @@ def get_update_form(request):
 
     if isinstance(form, UsabilityFormMixin):
         form.make_usable(request)
+
     return HttpResponse(
         json.dumps({
             'form': form.as_p(),

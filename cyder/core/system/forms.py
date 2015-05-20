@@ -5,7 +5,7 @@ from cyder.base.mixins import UsabilityFormMixin
 from cyder.core.system.models import System, SystemAV
 
 
-class SystemForm(forms.ModelForm):
+class SystemForm(forms.ModelForm, UsabilityFormMixin):
 
     class Meta:
         model = System

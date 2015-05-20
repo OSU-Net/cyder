@@ -90,6 +90,7 @@ class Pool(DHCPMixin):
 
         rs = next(ifilter(is_rangestmt, contents))
         self.start, self.end = rs.start, rs.end
+        self.comment = '{} - {}'.format(self.start, self.end)
 
     def set_sort_key(self):
         self._sort_key = (int(IPAddress(self.start)),

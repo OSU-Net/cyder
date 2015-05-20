@@ -4,7 +4,6 @@ from cyder.base.tests import ModelTestMixin, TestCase
 from cyder.core.ctnr.models import Ctnr
 from cyder.cydns.sshfp.models import SSHFP
 from cyder.cydns.domain.models import Domain
-from cyder.core.ctnr.models import Ctnr
 
 
 class SSHFPTests(TestCase, ModelTestMixin):

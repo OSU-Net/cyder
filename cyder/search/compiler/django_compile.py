@@ -3,13 +3,10 @@ from itertools import izip
 from parsley import wrapGrammar
 from ometa.runtime import ParseError
 
-
-from cyder.search.compiler.invdsl import ICompiler
+from cyder.search.compiler.dsl import ICompiler
 from cyder.search.compiler.invfilter import (
-    DirectiveFilter, REFilter, TextFilter, BadDirective
-)
-
-from cyder.search.compiler.invfilter import searchables
+    BadDirective, DirectiveFilter, MacAddressFilter, REFilter, searchables,
+    TextFilter)
 
 
 def compile_to_django(search):
@@ -45,13 +42,17 @@ def compile_q_objects(search):
         qs = compiler(search).expr()
         return qs, None
     except (BadDirective, ParseError) as why:
-        return None, str(why)
+        return None, why.formatReason()
 
 
 class DjangoCompiler(ICompiler):
     # directive, regexpr, and text all return a list of Qsets
+
     def directive(self, directive, value):
         return DirectiveFilter(directive, value).compile_Q()
+
+    def mac_addr(self, addr):
+        return MacAddressFilter(addr).compile_Q()
 
     def regexpr(self, reg_expr):
         return REFilter(reg_expr).compile_Q()
