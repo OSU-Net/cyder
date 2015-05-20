@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, FieldError
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import m2m_changed
@@ -14,6 +14,7 @@ from cyder.cydns.domain.models import Domain
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.range.models import Range
 from cyder.cydhcp.workgroup.models import Workgroup
+from cyder.cydns.ptr.models import BasePTR
 from cyder.core.validation import validate_ctnr_name
 
 
@@ -138,21 +139,57 @@ class CtnrUser(BaseModel, ObjectUrlMixin):
         return data
 
 
+def objects_removed(ctnr, objects, objtype="domain"):
+    for obj in objects:
+        for klass, _ in get_klasses():
+            if klass is Domain or klass is Range:
+                continue
+            if ((hasattr(klass, objtype) or hasattr(klass, "%s_set" % objtype))
+                    and (hasattr(klass, "ctnr")
+                         or hasattr(klass, "ctnr_set"))):
+                results = klass.filter_by_ctnr(ctnr, objects=None)
+
+                if issubclass(klass, BasePTR) and objtype == "range":
+                    results = [p for p in results if p.range == obj]
+                else:
+                    try:
+                        kwargs = {objtype: obj}
+                    except FieldError:
+                        continue
+                    results = results.filter(**kwargs)
+                    assert bool(results) == results.exists()
+
+                if results:
+                    raise ValidationError(
+                        "Cannot remove {0} because some {1} depends on"
+                        " this {0} and container.".format(objtype,
+                                                          klass.pretty_type))
+
+
 def domains_changed(sender, **kwargs):
     action = kwargs['action']
     if action == "pre_remove":
         ctnr = kwargs['instance']
-        for domain in Domain.objects.filter(pk__in=kwargs['pk_set']):
-            for klass, _ in get_klasses():
-                fields = [f.name for f in klass._meta.fields]
-                if isinstance(klass, ModelForm):
-                    continue
-                if (("domain" in fields or hasattr(klass, "domain_set"))
-                        and ("ctnr" in fields or hasattr(klass, "ctnr_set"))):
-                    objects = klass.objects.filter(domain=domain, ctnr=ctnr)
-                    if objects.exists():
-                        raise ValidationError(
-                            "Cannot remove domain because %s object depends on"
-                            " this domain and container." % klass.pretty_type)
+        domains = Domain.objects.filter(pk__in=kwargs['pk_set'])
+        objects_removed(ctnr, domains, objtype="domain")
+
+
+def ranges_changed(sender, **kwargs):
+    action = kwargs['action']
+    if action == "pre_remove":
+        ctnr = kwargs['instance']
+        ranges = Range.objects.filter(pk__in=kwargs['pk_set'])
+        objects_removed(ctnr, ranges, objtype="range")
+
+
+def workgroups_changed(sender, **kwargs):
+    action = kwargs['action']
+    if action == "pre_remove":
+        ctnr = kwargs['instance']
+        workgroups = Workgroup.objects.filter(pk__in=kwargs['pk_set'])
+        objects_removed(ctnr, workgroups, objtype="workgroup")
+
 
 m2m_changed.connect(domains_changed, sender=Ctnr.domains.through)
+m2m_changed.connect(ranges_changed, sender=Ctnr.ranges.through)
+m2m_changed.connect(workgroups_changed, sender=Ctnr.workgroups.through)
