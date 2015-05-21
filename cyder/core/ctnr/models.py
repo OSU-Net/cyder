@@ -157,7 +157,6 @@ def objects_removed(ctnr, objects, objtype="domain"):
                     except FieldError:
                         continue
                     results = results.filter(**kwargs)
-                    assert bool(results) == results.exists()
 
                 if results:
                     raise ValidationError(
