@@ -8,4 +8,5 @@ class SupernetForm(forms.ModelForm, UsabilityFormMixin):
         model = Supernet
         exclude = ('start_lower', 'start_upper',
                    'end_lower', 'end_upper')
-        widgets = {'ip_type': forms.RadioSelect}
+        widgets = {'ip_type': forms.RadioSelect,
+                   'description': forms.Textarea}
