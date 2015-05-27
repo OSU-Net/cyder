@@ -10,8 +10,7 @@ def network_detail(request, pk):
     parent_networks, child_networks = calc_networks(network)
 
     return cy_detail(request, Network, 'network/network_detail.html', {
+        'Supernet': 'supernets',
         'Ranges': 'range_set',
-        'Parent Networks': parent_networks,
-        'Child Networks': child_networks,
         'Attributes': 'networkav_set',
     }, obj=network)

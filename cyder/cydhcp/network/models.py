@@ -14,7 +14,8 @@ from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
 from cyder.cydhcp.site.models import Site
-from cyder.cydhcp.validation import validate_network_overlap
+from cyder.cydhcp.validation import (validate_network_overlap,
+                                     get_partial_overlap)
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
 
@@ -75,8 +76,7 @@ class Network(BaseNetwork):
                              blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True,
                              blank=True, on_delete=models.SET_NULL)
-    vrf = models.ForeignKey('cyder.Vrf',
-                            default=1)  # "Legacy"
+    vrf = models.ForeignKey('cyder.Vrf', default=1)  # "Legacy"
     enabled = models.BooleanField(default=True)
     dhcpd_raw_include = models.TextField(
         blank=True,
@@ -94,6 +94,12 @@ class Network(BaseNetwork):
 
     def __unicode__(self):
         return self.network_str
+
+    @property
+    def supernets(self):
+        from cyder.cydhcp.supernet.models import Supernet
+        supernets = get_partial_overlap(self, netmodel=Supernet)
+        return supernets
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
