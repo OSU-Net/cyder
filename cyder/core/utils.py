@@ -51,12 +51,16 @@ def fail_mail(content, subject,
     s.quit()
 
 
-def mail_if_failure(msg):
+def mail_if_failure(msg, ignore=()):
     def outer(func):
         def inner(self, *args, **kwargs):
             try:
                 return func(self, *args, **kwargs)
+            except ignore:
+                # Just let the exception through.
+                raise
             except Exception:
+                # Send mail first.
                 error = msg + '\n' + format_exc_verbose()
                 self.log(syslog.LOG_ERR, error)
                 fail_mail(error, subject=msg)

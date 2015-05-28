@@ -18,6 +18,10 @@ from django.db.models.loading import get_model
 from cyder.base.tablefier import Tablefier
 
 
+class StopFileExists(Exception):
+    pass
+
+
 def copy_tree(*args, **kwargs):
     distutils.dir_util._path_created = {}
     distutils.dir_util.copy_tree(*args, **kwargs)

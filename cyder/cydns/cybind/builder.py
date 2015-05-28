@@ -14,7 +14,7 @@ from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
     copy_tree, dict_merge, Logger, remove_dir_contents,
-    run_command, set_attrs)
+    run_command, set_attrs, StopFileExists)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
@@ -435,7 +435,7 @@ class DNSBuilder(MutexMixin, Logger):
                            .format(view_name))
             self.build_view_config(view_name, 'master', view_stmts)
 
-    @mail_if_failure('Cyder DNS build failed')
+    @mail_if_failure('Cyder DNS build failed', ignore=(StopFileExists,))
     def build(self, force=False):
         try:
             with open(self.stop_file) as stop_fd:
@@ -452,7 +452,7 @@ class DNSBuilder(MutexMixin, Logger):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="Cyder DNS builds have stopped")
 
-            raise Exception(msg)
+            raise StopFileExists
         except IOError as e:
             if e.errno != errno.ENOENT:  # "No such file or directory"
                 raise

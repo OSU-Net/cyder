@@ -1,12 +1,12 @@
+import errno
 import os
+
 from django.test import TestCase
 
 from cyder.base.eav.models import Attribute
 from cyder.base.utils import copy_tree, remove_dir_contents
 from cyder.base.vcs import GitRepo, GitRepoManager, SanityCheckFailure
-
 from cyder.core.system.models import System
-
 from cyder.cydhcp.build.builder import DHCPBuilder
 from cyder.cydhcp.interface.dynamic_intr.models import DynamicInterface
 from cyder.cydhcp.network.models import Network, NetworkAV
@@ -38,6 +38,16 @@ PROD_ORIGIN_DIR = '/tmp/cyder_dhcp_test/prod_origin'
 class DHCPBuildTest(TestCase):
     fixtures = ['dhcp_build_test.json']
 
+
+    def build_and_push(self, sanity_check=True):
+        try:
+            os.remove(DHCPBUILD['stop_file'])
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+        self.builder.build()
+        self.builder.push(sanity_check=sanity_check)
+
     def setUp(self):
         if not os.path.isdir(DHCPBUILD['stage_dir']):
             os.makedirs(DHCPBUILD['stage_dir'])
@@ -58,8 +68,7 @@ class DHCPBuildTest(TestCase):
         mgr.clone(PROD_ORIGIN_DIR, DHCPBUILD['prod_dir'])
 
         self.builder = DHCPBuilder(verbose=False, debug=False, **DHCPBUILD)
-        self.builder.repo.commit_and_push(
-            empty=True, message='Initial commit')
+        self.builder.repo.commit_and_push(empty=True, message='Initial commit')
 
         copy_tree('cyder/cydhcp/build/tests/files/', DHCPBUILD['stage_dir'])
 
@@ -67,13 +76,11 @@ class DHCPBuildTest(TestCase):
 
     def test_build_and_push(self):
         """Test that adding data triggers a rebuild"""
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
 
         rev1 = self.builder.repo.get_revision()
 
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
 
         rev2 = self.builder.repo.get_revision()
 
@@ -86,8 +93,7 @@ class DHCPBuildTest(TestCase):
             value='192.168.0.1',
         )
 
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
 
         rev3 = self.builder.repo.get_revision()
 
@@ -96,8 +102,7 @@ class DHCPBuildTest(TestCase):
     def test_sanity_check_increase(self):
         """Test sanity check when line count increases"""
 
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
 
         self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
         self.builder.repo.line_increase_limit = 1
@@ -106,19 +111,16 @@ class DHCPBuildTest(TestCase):
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
         )
-        self.builder.build()
         self.assertRaises(
-            SanityCheckFailure, self.builder.push, sanity_check=True)
+            SanityCheckFailure, self.build_and_push)
 
         self.builder.repo.line_increase_limit = 100
-        self.builder.build()
-        self.builder.push(sanity_check=True)
+        self.build_and_push()
 
     def test_sanity_check_no_change(self):
         """Test sanity check when line count doesn't change"""
 
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
 
         self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
         self.builder.repo.line_increase_limit = 0  # No increase allowed.
@@ -129,22 +131,18 @@ class DHCPBuildTest(TestCase):
             mac='ab:cd:ef:ab:cd:ef',
             range=Range.objects.get(name='Test range 1'),
         )
-        self.builder.build()
-        self.builder.push(sanity_check=True)
+        self.build_and_push()
 
     def test_sanity_check_decrease(self):
         """Test sanity check when line count decreases"""
 
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
 
         self.builder.repo.line_increase_limit = 0  # No increase allowed
         self.builder.repo.line_decrease_limit = 1
         DynamicInterface.objects.get(mac='aa:bb:cc:dd:ee:ff').delete()
-        self.builder.build()
         self.assertRaises(
-            SanityCheckFailure, self.builder.push, sanity_check=True)
+            SanityCheckFailure, self.build_and_push)
 
         self.builder.repo.line_decrease_limit = 100
-        self.builder.build()
-        self.builder.push(sanity_check=True)
+        self.build_and_push()

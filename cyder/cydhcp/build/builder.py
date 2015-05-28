@@ -11,7 +11,7 @@ import time
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
     copy_tree, dict_merge, Logger, run_command, set_attrs,
-    shell_out)
+    shell_out, StopFileExists)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.utils import fail_mail, mail_if_failure
@@ -72,7 +72,7 @@ class DHCPBuilder(MutexMixin, Logger):
                            failure_logger=failure_logger,
                            failure_msg=failure_msg)
 
-    @mail_if_failure('Cyder DHCP build failed')
+    @mail_if_failure('Cyder DHCP build failed', ignore=(StopFileExists,))
     def build(self):
         try:
             with open(self.stop_file) as stop_fd:
@@ -89,11 +89,9 @@ class DHCPBuilder(MutexMixin, Logger):
                 os.utime(self.stop_file, (now, now))
                 fail_mail(msg, subject="Cyder DHCP builds have stopped")
 
-            raise Exception(msg)
+            raise StopFileExists
         except IOError as e:
-            if e.errno == errno.ENOENT:  # "No such file or directory"
-                pass
-            else:
+            if e.errno != errno.ENOENT:  # "No such file or directory"
                 raise
 
         for ip_type, files in (('4', self.files_v4), ('6', self.files_v6)):
