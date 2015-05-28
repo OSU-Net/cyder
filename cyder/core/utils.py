@@ -63,7 +63,8 @@ def mail_if_failure(msg, ignore=()):
                 # Send mail first.
                 error = msg + '\n' + format_exc_verbose()
                 self.log(syslog.LOG_ERR, error)
-                fail_mail(error, subject=msg)
+                if not settings.TESTING:
+                    fail_mail(error, subject=msg)
                 with open(self.stop_file, 'w') as f:
                     f.write(error)
                 raise
