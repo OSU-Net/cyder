@@ -18,14 +18,16 @@ def activate():
     except:
         pass
 
-
-    import cyder.signal_handlers  # register the handlers
-
-
     site.addsitedir(cy_path('media/'))
     site.addsitedir(cy_path('media/css'))
     site.addsitedir(cy_path('vendor-local'))  # local (project) vendor library
     site.addsitedir(cy_path('vendor'))  # global (upstream) vendor library
+
+    from lib.monkeypatches import patch
+
+    patch()
+
+    import cyder.signal_handlers  # register the handlers
 
 
 ROOT = path.dirname(path.abspath(inspect.stack()[0][1]))

@@ -1,7 +1,6 @@
 src/bleach
 src/commonware
 src/django-appconf
-src/django-arecibo
 src/django-compressor
 src/django-cronjobs
 src/django-mobility

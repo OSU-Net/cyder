@@ -8,7 +8,7 @@ simplejson
 South>=0.8.1
 Parsley
 
--e git://github.com/KTHse/django-cas2#egg=django-cas2
+git+git://github.com/KTHse/django-cas2#egg=django-cas2
 
 # from playdoh-lib
 
@@ -17,13 +17,11 @@ anyjson==0.3
 async==0.6.1
 Babel==0.9.6
 carrot==0.10.7
-celery==2.1.4
 certifi==0.0.8
 chardet==1.0.1
 python-dateutil==1.5
 Django==1.4.1
 django-browserid==0.6
-django-celery==2.1.4
 GitPython==0.1.7
 gitdb==0.5.2
 html5lib==0.90
@@ -41,31 +39,31 @@ pyparsing==1.5.4
 # from funfactory
 
 # Django stuff
--e git://github.com/jbalogh/django-multidb-router.git#egg=django-multidb-router
--e git://github.com/jsocol/django-cronjobs.git#egg=django-cronjobs
+git+git://github.com/jbalogh/django-multidb-router.git#egg=django-multidb-router
+git+git://github.com/jsocol/django-cronjobs.git#egg=django-cronjobs
 
 # Forms
--e git://github.com/mozilla/happyforms.git#egg=happyforms
+git+git://github.com/mozilla/happyforms.git#egg=happyforms
 
 # Templates
--e git://github.com/jbalogh/jingo.git#egg=jingo
--e git://github.com/jsocol/jingo-minify.git#egg=jingo-minify
+git+git://github.com/jbalogh/jingo.git#egg=jingo
+git+git://github.com/jsocol/jingo-minify.git#egg=jingo-minify
 
 # Various tidbits
--e git://github.com/jsocol/commonware.git#egg=commonware
--e git://github.com/mozilla/nuggets.git#egg=nuggets
+git+git://github.com/jsocol/commonware.git#egg=commonware
+git+git://github.com/mozilla/nuggets.git#egg=nuggets
 
 # Security
--e git://github.com/fwenzel/django-sha2.git#egg=django-sha2
--e git://github.com/jsocol/bleach.git#egg=bleach
--e git://github.com/mozilla/django-session-csrf.git#egg=django-session-csrf
+git+git://github.com/fwenzel/django-sha2.git#egg=django-sha2
+git+git://github.com/jsocol/bleach.git#egg=bleach
+git+git://github.com/mozilla/django-session-csrf.git#egg=django-session-csrf
 
 # L10n
--e git://github.com/clouserw/tower.git#egg=tower
--e git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
+git+git://github.com/clouserw/tower.git#egg=tower
+git+git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
 
 # Mobile
--e git://github.com/jbalogh/django-mobility@644e0c1c58#egg=django-mobility
+git+git://github.com/jbalogh/django-mobility@644e0c1c58#egg=django-mobility
 
 MySQL-python==1.2.3c1
 Jinja2==2.5.5

@@ -2,8 +2,6 @@ from django.conf.urls.defaults import include, patterns, url
 from django.conf import settings
 from django.contrib import admin
 
-from lib.monkeypatches import patch
-patch()
 from cyder.api.v1.routes import router
 
 from cyder.core.views import core_index
