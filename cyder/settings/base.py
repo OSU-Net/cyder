@@ -7,6 +7,7 @@ import logging
 import os
 import socket
 import sys
+from os import path
 from django.utils.functional import lazy
 
 from activate import cy_path, ROOT
@@ -15,6 +16,7 @@ from activate import cy_path, ROOT
 ##########################
 # copied from funfactory #
 ##########################
+
 
 SLAVE_DATABASES = []
 
@@ -46,10 +48,11 @@ PROD_DETAILS_DIR = cy_path('lib/product_details_json')
 # testing the localization on the dev server.
 try:
     DEV_LANGUAGES = [
-        os.path.basename(loc).replace('_', '-')
-        for loc in itertools.chain(glob.iglob(ROOT + '/locale/*'),  # old style
-                                   glob.iglob(ROOT + '/*/locale/*'))
-        if (os.path.isdir(loc) and os.path.basename(loc) != 'templates')
+        path.basename(loc).replace('_', '-')
+        for loc in itertools.chain(
+            glob.iglob(cy_path('locale/*')),  # old style
+            glob.iglob(cy_path('*/locale/*')))
+        if path.isdir(loc) and path.basename(loc) != 'templates'
     ]
 except OSError:
     DEV_LANGUAGES = ('en-US',)
@@ -211,17 +214,19 @@ MOBILE_COOKIE = 'mobile'
 #########
 
 
-TESTING = True if sys.argv[1:] and sys.argv[1] == 'test' else False
-MIGRATING = (True if sys.argv[1:] and sys.argv[1] == 'maintain_migrate'
-             else False)
+if path.basename(sys.argv[0]) == 'manage.py' and len(sys.argv) >= 2:
+    TESTING = 'test' in sys.argv
+    MIGRATING = 'maintain_migrate' in sys.argv
+else:
+    TESTING = MIGRATING = False
 
 ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True
 MEDIA_ROOT = cy_path('media')
 MEDIA_URL = '/media/'
 
-_base = os.path.dirname(__file__)
-site_root = os.path.realpath(os.path.join(_base, '../'))
+_base = path.dirname(__file__)
+site_root = path.realpath(path.join(_base, '../'))
 sys.path.append(site_root)
 sys.path.append(site_root + '/vendor')
 
@@ -580,11 +585,14 @@ DATETIME_INPUT_FORMATS = (
 MYSQL = 'mysql'
 MYSQLDUMP = 'mysqldump'
 
+
 ###############################
 # more copied from funfactory #
 ###############################
 
+
 ## Middlewares, apps, URL configs.
+
 
 def get_middleware(exclude=(), append=(),
                    current={'middleware': MIDDLEWARE_CLASSES}):
