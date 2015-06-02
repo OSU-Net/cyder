@@ -1,12 +1,5 @@
 """Originally from funfactory (funfactory/path_utils.py) on a380a54"""
 
-import os
-from os.path import abspath, dirname
-
-
-def path(*a):
-    return os.path.join(ROOT, *a)
-
 
 def import_mod_by_name(target):
     # stolen from mock :)
@@ -26,5 +19,3 @@ def _dot_lookup(thing, comp, import_path):
     except AttributeError:
         __import__(import_path)
         return getattr(thing, comp)
-
-ROOT = dirname(dirname(abspath(__file__)))

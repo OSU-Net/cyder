@@ -9,7 +9,8 @@ import socket
 import sys
 from django.utils.functional import lazy
 
-from lib.path_utils import ROOT, path
+from activate import cy_path, ROOT
+
 
 ##########################
 # copied from funfactory #
@@ -22,13 +23,13 @@ DATABASE_ROUTERS = ('multidb.PinningMasterSlaveRouter',)
 ## Logging
 LOG_LEVEL = logging.INFO
 HAS_SYSLOG = True
-SYSLOG_TAG = "http_app_playdoh"  # Change this after you fork.
+SYSLOG_TAG = 'cyder'  # Change this after you fork.
 LOGGING_CONFIG = None
 LOGGING = {}
 
 # CEF Logging
-CEF_PRODUCT = 'Playdoh'
-CEF_VENDOR = 'Mozilla'
+CEF_PRODUCT = 'Cyder'
+CEF_VENDOR = 'Oregon State University'
 CEF_VERSION = '0'
 CEF_DEVICE_VERSION = '0'
 
@@ -36,7 +37,7 @@ CEF_DEVICE_VERSION = '0'
 
 # Tells the product_details module where to find our local JSON files.
 # This ultimately controls how LANGUAGES are constructed.
-PROD_DETAILS_DIR = path('lib/product_details_json')
+PROD_DETAILS_DIR = cy_path('lib/product_details_json')
 
 # On dev instances, the list of accepted locales defaults to the contents of
 # the `locale` directory within a project module or, for older Playdoh apps,
@@ -96,7 +97,7 @@ SUPPORTED_NONLOCALES = ['media', 'static', 'admin']
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = path('static')
+STATIC_ROOT = cy_path('static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -140,7 +141,7 @@ def get_template_context_processors(exclude=(), append=(),
 
 
 TEMPLATE_DIRS = (
-    path('templates'),
+    cy_path('templates'),
 )
 
 # Storage of static files
@@ -235,7 +236,7 @@ MIGRATING = (True if sys.argv[1:] and sys.argv[1] == 'maintain_migrate'
 
 ROOT_URLCONF = 'cyder.urls'
 APPEND_SLASH = True
-MEDIA_ROOT = path('media')
+MEDIA_ROOT = cy_path('media')
 MEDIA_URL = '/media/'
 
 _base = os.path.dirname(__file__)

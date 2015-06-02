@@ -36,6 +36,7 @@ from cyder.settings import BUG_REPORT_EMAIL
 def cy_render(request, template, context={}):
     if 'dev' not in context:
         context['dev'] = settings.DEV
+    context['cyder_revision'] = settings.CYDER_REVISION
     return render(request, template, context)
 
 
