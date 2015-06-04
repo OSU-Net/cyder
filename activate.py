@@ -1,6 +1,6 @@
+from glob import glob
 import inspect
 import os
-import site
 import subprocess
 import sys
 from os import path
@@ -8,6 +8,32 @@ from os import path
 
 def cy_path(x):
     return path.join(ROOT, x)
+
+
+def cy_addsitedir(x):
+    """Do essentially what site.addsitedir does, except prepend the paths
+
+    Note: Import lines aren't supported, because they're not useful to us.
+
+    """
+
+    if not path.exists(x):
+        return
+
+    for pth_name in glob(path.join(x, '*.pth')):
+        ps = []
+        with open(pth_name) as pth:
+            for line in pth:
+                line = line.strip()
+                if line[0] == '#':
+                    continue
+                p = path.join(x, line)
+                if path.exists(p) and p not in sys.path:
+                    ps.append(p)
+        sys.path[1:1] = ps
+
+    if x not in sys.path:
+        sys.path.insert(1, x)
 
 
 def activate():
@@ -19,10 +45,8 @@ def activate():
     except:
         pass
 
-    site.addsitedir(cy_path('media/'))
-    site.addsitedir(cy_path('media/css'))
-    site.addsitedir(cy_path('vendor-local'))  # local (project) vendor library
-    site.addsitedir(cy_path('vendor'))  # global (upstream) vendor library
+    cy_addsitedir(cy_path('vendor'))  # global (upstream) vendor library
+    cy_addsitedir(cy_path('vendor-local'))  # local (project) vendor library
 
     from lib.monkeypatches import patch
 
