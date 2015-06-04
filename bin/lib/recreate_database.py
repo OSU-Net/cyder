@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import manage
+import activate
+
+activate.activate()
 
 import MySQLdb
 from django.conf import settings
@@ -14,11 +16,11 @@ def main():
     print '****************************************************'
     print
     while True:
-        response = raw_input('Proceed [y/n]? ')
-        if response.lower() == 'y':
+        response = raw_input('Proceed [yes/no]? ')
+        if response.lower() == 'yes':
             break
-        elif response.lower() == 'n':
-            return
+        elif response.lower() == 'no':
+            return 1
     print
 
     cur, conf = get_cursor('default', use=False)
@@ -34,6 +36,8 @@ def main():
         'CREATE DATABASE `{}` CHARACTER SET utf8 '
         'COLLATE utf8_general_ci'.format(conf['db']))
 
+    return 0
+
 
 if __name__ == '__main__':
-    main()
+    exit(main())

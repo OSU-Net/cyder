@@ -1,6 +1,7 @@
 import inspect
 import os
 import site
+import subprocess
 import sys
 from os import path
 
@@ -33,3 +34,6 @@ def activate():
 ROOT = path.dirname(path.abspath(inspect.stack()[0][1]))
 if ROOT not in sys.path:
     sys.path.append(ROOT)
+
+CYDER_REVISION = subprocess.check_output(
+    ['git', '--git-dir=' + cy_path('.git'), 'rev-parse', 'HEAD']).rstrip()
