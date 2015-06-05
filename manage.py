@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import os
-import site
+
 import sys
 
 import activate

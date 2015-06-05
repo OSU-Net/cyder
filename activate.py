@@ -3,7 +3,7 @@ import inspect
 import os
 import subprocess
 import sys
-from os import path
+from os import environ, path
 
 
 def cy_path(x):
@@ -37,11 +37,11 @@ def cy_addsitedir(x):
 
 
 def activate():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cyder.settings')
+    environ.setdefault('DJANGO_SETTINGS_MODULE', 'cyder.settings')
 
-    filename = path.join(ROOT, '.env/bin/activate_this.py')
+    activator = cy_path('.env/bin/activate_this.py')
     try:
-        execfile(filename, {'__file__': filename})
+        execfile(activator, {'__file__': activator})
     except:
         pass
 
@@ -57,7 +57,7 @@ def activate():
 
 ROOT = path.dirname(path.abspath(inspect.stack()[0][1]))
 if ROOT not in sys.path:
-    sys.path.append(ROOT)
+    sys.path.insert(1, ROOT)
 
 CYDER_REVISION = subprocess.check_output(
     ['git', '--git-dir=' + cy_path('.git'), 'rev-parse', 'HEAD']).rstrip()
