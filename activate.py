@@ -48,10 +48,6 @@ def activate():
     cy_addsitedir(cy_path('vendor'))  # global (upstream) vendor library
     cy_addsitedir(cy_path('vendor-local'))  # local (project) vendor library
 
-    from lib.monkeypatches import patch
-
-    patch()
-
     import cyder.signal_handlers  # register the handlers
 
 

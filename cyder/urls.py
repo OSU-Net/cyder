@@ -6,10 +6,12 @@ from cyder.api.v1.routes import router
 
 from cyder.core.views import core_index
 from cyder.base.views import send_email, admin_page, cy_delete, get_update_form
+from lib.monkeypatches import patch
 
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
+
 admin.autodiscover()
+
+patch()
 
 urlpatterns = patterns(
     '',
