@@ -89,6 +89,8 @@ class CNAME(LabelDomainMixin, CydnsRecord):
         """
         existing = (CNAME.objects.filter(label=self.label, domain=self.domain)
                                  .exclude(ctnr=self.ctnr))
+        if self.pk:
+            existing = existing.exclude(pk=self.pk)
         if existing.exists():
             raise ValidationError("Cannot create CNAME because another CNAME "
                                   "with the name %s.%s already exists in a "
