@@ -1,6 +1,7 @@
 import inspect
 import os
 import site
+import sys
 from os import path
 
 
@@ -9,6 +10,5 @@ if ROOT not in sys.path:
     sys.path.append(ROOT)
 import activate
 activate.activate()
-
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
