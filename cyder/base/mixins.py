@@ -104,10 +104,13 @@ class UsabilityFormMixin(object):
                 self.fields[fieldname].queryset = field.queryset.order_by(
                     *field.queryset.model.sort_fields)
 
-    def filter_by_ctnr_all(self, request):
+    def filter_by_ctnr_all(self, request, skip=None):
         from cyder.core.ctnr.models import Ctnr
         ctnr = request.session['ctnr']
         for fieldname, field in self.fields.items():
+            if skip and fieldname in skip:
+                continue
+
             if not hasattr(field, 'queryset'):
                 continue
 
