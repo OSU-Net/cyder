@@ -16,11 +16,11 @@ def main():
     print '****************************************************'
     print
     while True:
-        response = raw_input('Proceed [yes/no]? ')
-        if response.lower() == 'yes':
+        response = raw_input('Proceed [y/n]? ')
+        if response.lower() == 'y':
             break
-        elif response.lower() == 'no':
-            return 1
+        elif response.lower() == 'n':
+            return
     print
 
     cur, conf = get_cursor('default', use=False)
@@ -36,8 +36,6 @@ def main():
         'CREATE DATABASE `{}` CHARACTER SET utf8 '
         'COLLATE utf8_general_ci'.format(conf['db']))
 
-    return 0
-
 
 if __name__ == '__main__':
-    exit(main())
+    main()
