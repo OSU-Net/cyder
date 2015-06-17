@@ -25,6 +25,6 @@ def validate_system_static_ctnr(system, static):
 
 
 def validate_system_dynamic_ctnr(system, dynamic):
-    if system.ctnr not in dynamic.range.domain.ctnr_set.all():
+    if system.ctnr not in dynamic.range.ctnr_set.all():
         raise ValidationError("System's container must match dynamic "
-                              "interface's range's domain's containers.")
+                              "interface's range's containers.")
