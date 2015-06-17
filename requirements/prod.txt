@@ -42,9 +42,6 @@ pyparsing==1.5.4
 # from funfactory #
 ###################
 
-# Forms
-git+git://github.com/mozilla/happyforms.git#egg=happyforms
-
 # Template engine
 Jinja2==2.5.5
 
