@@ -37,16 +37,18 @@ def _search(request):
     objs, error_resp = compile_to_django(search)
     if not objs:
         return ([], [])
-    (addrs, cnames, domains, static, dynamic, mxs, nss, ptrs, soas, srvs,
-     sshfps, sys, txts, misc) = (
+    (addrs, cnames, domains, static, dynamic, mxs, networks, nss, ptrs, ranges,
+     soas, srvs, sshfps, sys, txts, misc) = (
          objs['A'],
          objs['CNAME'],
          objs['DOMAIN'],
          objs['STATIC'],
          objs['DYNAMIC'],
          objs['MX'],
+         objs['NETWORK'],
          objs['NS'],
          objs['PTR'],
+         objs['RANGE'],
          objs['SOA'],
          objs['SRV'],
          objs['SSHFP'],
@@ -62,8 +64,10 @@ def _search(request):
         (static.count() if static else 0, 'static', 'Static Interfaces'),
         (dynamic.count() if dynamic else 0, 'dynamic', 'Dynamic Interfaces'),
         (mxs.count() if mxs else 0, 'mx', 'MXs'),
+        (networks.count() if networks else 0, 'network', 'Networks'),
         (nss.count() if nss else 0, 'nameserver', 'Nameservers'),
         (ptrs.count() if ptrs else 0, 'ptr', 'PTRs'),
+        (ranges.count() if ranges else 0, 'range', 'Ranges'),
         (srvs.count() if srvs else 0, 'srv', 'SRVs'),
         (sys.count() if srvs else 0, 'sys', 'Systems'),
         (txts.count() if txts else 0, 'txt', 'TXTs'),
@@ -77,8 +81,10 @@ def _search(request):
         (tablefy(static, request=request), 'static', 'Static Interfaces'),
         (tablefy(dynamic, request=request), 'dynamic', 'Dynamic Interfaces'),
         (tablefy(mxs, request=request), 'mx', 'MXs'),
+        (tablefy(networks, request=request), 'network', 'Networks'),
         (tablefy(nss, request=request), 'nameserver', 'Nameservers'),
         (tablefy(ptrs, request=request), 'ptr', 'PTRs'),
+        (tablefy(ranges, request=request), 'range', 'Ranges'),
         (tablefy(srvs, request=request), 'srv', 'SRVs'),
         (tablefy(sys, request=request), 'sys', 'Systems'),
         (tablefy(txts, request=request), 'txt', 'TXTs'),
