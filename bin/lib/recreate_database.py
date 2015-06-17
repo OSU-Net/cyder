@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import manage
+import activate
+
+activate.activate()
 
 import MySQLdb
 from django.conf import settings

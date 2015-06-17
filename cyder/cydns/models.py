@@ -148,18 +148,6 @@ class CydnsRecord(BaseModel, ViewMixin, DisplayMixin, ObjectUrlMixin):
         elif hasattr(self, "domain"):
             return self.domain in ctnr.domains.all()
 
-    @classmethod
-    def get_api_fields(cls):
-        """
-        The purpose of this is to help the API decide which fields to expose
-        to the user when they are creating and updating an Object. This
-        function should be implemented in inheriting models and overriden to
-        provide additional fields. Tastypie ignores any relational fields on
-        the model. See the ModelResource definitions for view and domain
-        fields.
-        """
-        return ['fqdn', 'ttl', 'description', 'views']
-
     def clean(self, *args, **kwargs):
         super(CydnsRecord, self).clean(*args, **kwargs)
 

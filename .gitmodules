@@ -14,10 +14,6 @@
 	path = vendor/src/django-appconf
 	url = https://github.com/jezdez/django-appconf.git
 	ignore = dirty
-[submodule "vendor/src/django-arecibo"]
-	path = vendor/src/django-arecibo
-	url = https://github.com/andymckay/django-arecibo.git
-	ignore = dirty
 [submodule "vendor/src/django-compressor"]
 	path = vendor/src/django-compressor
 	url = https://github.com/django-compressor/django-compressor.git

@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import syslog
 from copy import copy
+from os import path
 from sys import stderr
 
 import MySQLdb
@@ -15,6 +16,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.db.models.loading import get_model
 
+from activate import ROOT
 from cyder.base.tablefier import Tablefier
 
 

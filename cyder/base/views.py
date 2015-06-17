@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
 
+from activate import CYDER_REVISION
 from cyder.base.constants import (ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE,
                                   get_klasses)
 from cyder.base.forms import BugReportForm, EditUserForm
@@ -36,6 +37,7 @@ from cyder.settings import BUG_REPORT_EMAIL
 def cy_render(request, template, context={}):
     if 'dev' not in context:
         context['dev'] = settings.DEV
+    context['cyder_revision'] = CYDER_REVISION
     return render(request, template, context)
 
 
