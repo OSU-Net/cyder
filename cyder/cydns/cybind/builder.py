@@ -13,11 +13,12 @@ from cyder.settings import BINDBUILD, ZONES_WITH_NO_CONFIG
 
 from cyder.base.mixins import MutexMixin
 from cyder.base.utils import (
-    copy_tree, dict_merge, Logger, remove_dir_contents, run_command, set_attrs)
+    copy_tree, dict_merge, Logger, remove_dir_contents,
+    run_command, set_attrs, StopFileExists)
 from cyder.base.vcs import GitRepo
 
 from cyder.core.task.models import Task
-from cyder.core.utils import fail_mail
+from cyder.core.utils import fail_mail, mail_if_failure
 
 from cyder.cydns.soa.models import SOA
 from cyder.cydns.view.models import View
@@ -434,6 +435,7 @@ class DNSBuilder(MutexMixin, Logger):
                            .format(view_name))
             self.build_view_config(view_name, 'master', view_stmts)
 
+    @mail_if_failure('Cyder DNS build failed', ignore=(StopFileExists,))
     def build(self, force=False):
         try:
             with open(self.stop_file) as stop_fd:
@@ -448,34 +450,30 @@ class DNSBuilder(MutexMixin, Logger):
             if (self.stop_file_email_interval is not None and
                     now - last > self.stop_file_email_interval):
                 os.utime(self.stop_file, (now, now))
-                fail_mail(msg, subject="DNS builds have stopped")
+                fail_mail(msg, subject="Cyder DNS builds have stopped")
 
-            raise Exception(msg)
+            raise StopFileExists
         except IOError as e:
-            if e.errno != errno.ENOENT:  # IOError: [Errno 2] No such file or directory
+            if e.errno != errno.ENOENT:  # "No such file or directory"
                 raise
 
         self.log_info('Building...')
 
-        try:
-            remove_dir_contents(self.stage_dir)
-            self.dns_tasks = self.get_scheduled()
+        remove_dir_contents(self.stage_dir)
+        self.dns_tasks = self.get_scheduled()
 
-            if not self.dns_tasks and not force:
-                self.log_info('Nothing to do!')
-                return
+        if not self.dns_tasks and not force:
+            self.log_info('Nothing to do!')
+            return
 
-            # zone files
-            soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
-            self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
-                                    force=force))
+        # zone files
+        soa_pks_to_rebuild = set(int(t.task) for t in self.dns_tasks)
+        self.build_config_files(self.build_zone_files(soa_pks_to_rebuild,
+                                force=force))
 
-            self.log_info('DNS build successful')
-        except Exception as e:
-            self.log(syslog.LOG_ERR,
-                'DNS build failed.\nOriginal exception: ' + e.message)
-            raise
+        self.log_info('DNS build successful')
 
+    @mail_if_failure('Cyder DNS build failed')
     def push(self, sanity_check=True):
         self.repo.reset_and_pull()
 
@@ -493,7 +491,7 @@ class DNSBuilder(MutexMixin, Logger):
             'An attempt was made to start the DNS build script while an '
             'instance of the script was already running. The attempt was '
             'denied.',
-            subject="Concurrent DNS builds attempted.")
+            subject='Concurrent Cyder DNS builds attempted')
         self.error(
             'Failed to acquire lock on {0}. Process {1} currently '
             'has it.'.format(self.lock_file, pid))

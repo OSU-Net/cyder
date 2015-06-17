@@ -1,7 +1,10 @@
 import smtplib
+import syslog
 from email.mime.text import MIMEText
 
 from django.conf import settings
+
+from cyder.base.utils import format_exc_verbose
 
 
 # Reference http://dev.mysql.com/doc/refman/5.0/en/miscellaneous-functions.html
@@ -46,3 +49,27 @@ def fail_mail(content, subject,
     s = smtplib.SMTP(settings.FAIL_EMAIL_SERVER)
     s.sendmail(from_, to, msg.as_string())
     s.quit()
+
+
+def mail_if_failure(msg, ignore=()):
+    def outer(func):
+        def inner(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except ignore:
+                # Just let the exception through.
+                raise
+            except Exception:
+                # Send mail first.
+                error = msg + '\n' + format_exc_verbose()
+                self.log(syslog.LOG_ERR, error)
+                if not settings.TESTING:
+                    fail_mail(error, subject=msg)
+                with open(self.stop_file, 'w') as f:
+                    f.write(error)
+                raise
+        outer.__name__ = func.__name__
+        outer.__doc__ = func.__doc__
+        outer.__module__ = func.__module__
+        return inner
+    return outer

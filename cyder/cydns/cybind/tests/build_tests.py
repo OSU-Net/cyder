@@ -1,3 +1,4 @@
+import errno
 import os
 import shutil
 from django.core.management import call_command
@@ -24,7 +25,7 @@ BINDBUILD = {
     'line_decrease_limit': 10,
     'line_increase_limit': 500,
     'stop_file': '/tmp/cyder_dns_test.stop',
-    'stop_file_email_interval': 1800,  # 30 minutes
+    'stop_file_email_interval': None,  # never
     'last_run_file': '/tmp/last.run',
     'log_syslog': False,
 }
@@ -34,6 +35,20 @@ PROD_ORIGIN_DIR = '/tmp/cyder_dns_test/prod_origin/'
 
 class DNSBuildTest(TestCase):
     fixtures = ['dns_build_test.json']
+
+    def build_and_push(self, force=False, sanity_check=True):
+        """
+        force: whether to force unchanged zones to be rebuilt
+        sanity_check: whether to run the diff sanity check
+        """
+
+        try:
+            os.remove(BINDBUILD['stop_file'])
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+        self.builder.build(force=force)
+        self.builder.push(sanity_check=sanity_check)
 
     def setUp(self):
         if not os.path.isdir(BINDBUILD['stage_dir']):
@@ -62,20 +77,17 @@ class DNSBuildTest(TestCase):
     def test_force(self):
         """Test that the 'force' argument works"""
 
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
+        self.build_and_push(force=True, sanity_check=False)
         rev1 = self.builder.repo.get_revision()
 
         sleep(1)  # Ensure different serial if rebuilt.
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
         rev2 = self.builder.repo.get_revision()
 
         self.assertEqual(rev1, rev2)
 
         sleep(1)  # Ensure different serial if rebuilt.
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
+        self.build_and_push(force=True, sanity_check=False)
         rev3 = self.builder.repo.get_revision()
 
         self.assertNotEqual(rev2, rev3)
@@ -83,8 +95,7 @@ class DNSBuildTest(TestCase):
     def test_build_queue(self):
         """Test that the build queue works"""
 
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
+        self.build_and_push(force=True, sanity_check=False)
         rev1 = self.builder.repo.get_revision()
 
         CNAME.objects.get(fqdn='foo.example.com').delete()
@@ -92,8 +103,7 @@ class DNSBuildTest(TestCase):
         s.domain.soa.schedule_rebuild()
 
         sleep(1)  # Ensure different serial if rebuilt.
-        self.builder.build()
-        self.builder.push(sanity_check=False)
+        self.build_and_push(sanity_check=False)
         rev2 = self.builder.repo.get_revision()
 
         self.assertNotEqual(rev1, rev2)
@@ -101,8 +111,7 @@ class DNSBuildTest(TestCase):
     def test_sanity_check_increase(self):
         """Test sanity check when line count increases"""
 
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
+        self.build_and_push(force=True, sanity_check=False)
 
         self.builder.repo.line_decrease_limit = 0  # No decrease allowed.
         self.builder.repo.line_increase_limit = 1
@@ -117,13 +126,10 @@ class DNSBuildTest(TestCase):
         s.views.add(
             View.objects.get(name='public'),
             View.objects.get(name='private'))
-        self.builder.build(force=True)
-        self.assertRaises(
-            SanityCheckFailure, self.builder.push, sanity_check=True)
+        self.assertRaises(SanityCheckFailure, self.build_and_push, force=True)
 
         self.builder.repo.line_increase_limit = 100
-        self.builder.build()
-        self.builder.push(sanity_check=True)
+        self.build_and_push()
 
     def test_sanity_check_no_change(self):
         """Test that the sanity check succeeds when changes are sane"""
@@ -131,8 +137,7 @@ class DNSBuildTest(TestCase):
         self.builder.repo.line_decrease_limit = 0
         self.builder.repo.line_increase_limit = 0
 
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
+        self.build_and_push(force=True, sanity_check=False)
 
         sys = System.objects.get(name='Test system')
         s = StaticInterface.objects.create(
@@ -146,25 +151,19 @@ class DNSBuildTest(TestCase):
             View.objects.get(name='public'),
             View.objects.get(name='private'))
         StaticInterface.objects.get(fqdn='www2.example.com').delete()
-        self.builder.build()
-        self.builder.push(sanity_check=True)
+        self.build_and_push()
 
     def test_sanity_check_decrease(self):
         """Test sanity check when line count decreases"""
 
-        self.builder.build(force=True)
-        self.builder.push(sanity_check=False)
+        self.build_and_push(force=True, sanity_check=False)
 
-        self.builder.repo.line_increase_limit = 0  # No change allowed.
+        self.builder.repo.line_increase_limit = 0  # No increase allowed.
         self.builder.repo.line_decrease_limit = 1
         CNAME.objects.get(fqdn='foo.example.com').delete()
         StaticInterface.objects.filter(
             fqdn__in=('www.example.com', 'www2.example.com')).delete()
-        self.builder.build()
-        self.assertRaises(
-            SanityCheckFailure, self.builder.push, sanity_check=True)
+        self.assertRaises(SanityCheckFailure, self.build_and_push)
 
         self.builder.repo.line_decrease_limit = 100
-        self.builder.build()
-        self.builder.push(sanity_check=True)
-
+        self.build_and_push()
