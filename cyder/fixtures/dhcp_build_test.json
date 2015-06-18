@@ -273,7 +273,7 @@
    "description": "",
    "created": "2014-02-08T14:27:01",
    "modified": "2014-02-08T14:27:01",
-   "ranges": [],
+   "ranges": [1, 2, 3, 4],
    "domains": [
     2
    ],
