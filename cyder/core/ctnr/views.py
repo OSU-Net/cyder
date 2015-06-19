@@ -64,20 +64,22 @@ def ctnr_detail(request, pk):
 
         extra_cols, domains = create_obj_extra_cols(
             ctnr, ctnrDomains, 'domain')
-        domain_table = tablefy(domains, extra_cols=extra_cols, request=request)
+        domain_table = tablefy(domains, extra_cols=extra_cols,
+                               request=request, update=False)
 
         extra_cols, rdomains = create_obj_extra_cols(
             ctnr, ctnrRdomains, 'domain')
         rdomain_table = tablefy(rdomains, extra_cols=extra_cols,
-                                request=request)
+                                request=request, update=False)
 
         extra_cols, ranges = create_obj_extra_cols(ctnr, ctnrRanges, 'range')
-        range_table = tablefy(ranges, extra_cols=extra_cols, request=request)
+        range_table = tablefy(ranges, extra_cols=extra_cols,
+                              request=request, update=False)
 
         extra_cols, workgroups = create_obj_extra_cols(
             ctnr, ctnrWorkgroups, 'workgroup')
         workgroup_table = tablefy(workgroups, extra_cols=extra_cols,
-                                  request=request)
+                                  request=request, update=False)
 
     else:
         domain_table = tablefy(ctnrDomains, request=request)
