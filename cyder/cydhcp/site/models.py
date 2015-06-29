@@ -86,16 +86,6 @@ class Site(BaseModel, ObjectUrlMixin):
             target = target.parent
         return full_name
 
-    @staticmethod
-    def get_related_networks(sites):
-        from cyder.cydhcp.network.models import Network
-        networks = set()
-        for site in sites:
-            root_networks = Network.objects.filter(site=site)
-            for network in root_networks:
-                networks.update(network.get_related_networks())
-        return networks
-
     def get_related_sites(self):
         related_sites = Site.objects.filter(parent=self)
         sites = set(related_sites)
@@ -107,16 +97,6 @@ class Site(BaseModel, ObjectUrlMixin):
             related_sites = sub_sites
             sites.update(set(related_sites))
         return sites
-
-    @staticmethod
-    def get_related_vlans(networks):
-        return set([network.vlan for network in networks])
-
-    def get_related(self):
-        related_sites = self.get_related_sites()
-        related_networks = Site.get_related_networks(related_sites)
-        related_vlans = Site.get_related_vlans(related_networks)
-        return [related_sites, related_networks, related_vlans]
 
     def compile_Q(self):
         """Compile a Django Q that will match any IP inside this site."""

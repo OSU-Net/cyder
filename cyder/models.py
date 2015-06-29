@@ -9,6 +9,7 @@ from cyder.cydhcp.interface.static_intr.models import *
 from cyder.cydhcp.network.models import *
 from cyder.cydhcp.range.models import *
 from cyder.cydhcp.site.models import *
+from cyder.cydhcp.supernet.models import *
 from cyder.cydhcp.vlan.models import *
 from cyder.cydhcp.vrf.models import *
 from cyder.cydhcp.workgroup.models import *

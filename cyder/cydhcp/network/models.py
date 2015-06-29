@@ -13,38 +13,70 @@ from cyder.base.utils import transaction_atomic
 from cyder.cydhcp.constants import DYNAMIC
 from cyder.cydhcp.utils import IPFilter, join_dhcp_args
 from cyder.cydhcp.vlan.models import Vlan
-from cyder.cydhcp.vrf.models import Vrf
 from cyder.cydhcp.site.models import Site
+from cyder.cydhcp.validation import (validate_network_overlap,
+                                     get_partial_overlap)
 from cyder.cydns.validation import validate_ip_type
 from cyder.cydns.ip.models import ipv6_to_longs
 
-# import reversion
 
-
-class Network(BaseModel, ObjectUrlMixin):
+class BaseNetwork(BaseModel, ObjectUrlMixin):
     id = models.AutoField(primary_key=True)
-    vlan = models.ForeignKey(Vlan, null=True,
-                             blank=True, on_delete=models.SET_NULL)
-    site = models.ForeignKey(Site, null=True,
-                             blank=True, on_delete=models.SET_NULL)
-    vrf = models.ForeignKey('cyder.Vrf',
-                            default=1)  # "Legacy"
 
-    # NETWORK/NETMASK FIELDS
     ip_type = models.CharField(
         verbose_name='IP address type', max_length=1,
         choices=IP_TYPES.items(), default=IP_TYPE_4,
         validators=[validate_ip_type]
     )
-    ip_upper = models.BigIntegerField(null=False, blank=True)
-    ip_lower = models.BigIntegerField(null=False, blank=True)
-    # This field is here so ES can search this model easier.
+    start_upper = models.BigIntegerField(null=False, blank=True)
+    start_lower = models.BigIntegerField(null=False, blank=True)
+    end_upper = models.BigIntegerField(null=False, blank=True)
+    end_lower = models.BigIntegerField(null=False, blank=True)
     network_str = models.CharField(
         max_length=49, editable=True,
         help_text='Network address and prefix length, in CIDR notation',
         verbose_name='Network string')
-    prefixlen = models.PositiveIntegerField(
-        null=False, help_text="The number of binary 1's in the netmask.")
+
+    class Meta:
+        abstract = True
+
+    def update_network(self):
+        """This function will look at the value of network_str to update other
+        fields in the network object. This function will also set the 'network'
+        attribute to either an ipaddr.IPv4Network or ipaddr.IPv6Network object.
+        """
+        if not isinstance(self.network_str, basestring):
+            raise ValidationError("ERROR: No network str.")
+        try:
+            if self.ip_type == IP_TYPE_4:
+                self.network = ipaddr.IPv4Network(self.network_str).masked()
+            elif self.ip_type == IP_TYPE_6:
+                self.network = ipaddr.IPv6Network(self.network_str).masked()
+            else:
+                raise ValidationError("Could not determine IP type of network"
+                                      " %s" % (self.network_str))
+        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
+            raise ValidationError('Invalid IPv{0} network: {1}'
+                                  .format(self.ip_type, e))
+        # Update fields
+        self.start_upper = int(self.network.ip) >> 64
+        self.start_lower = int(self.network.ip) % (2**64)
+        self.end_upper = int(self.network.broadcast) >> 64
+        self.end_lower = int(self.network.broadcast) % (2**64)
+        self.network_str = str(self.network)
+
+    def clean(self, *args, **kwargs):
+        self.update_network()
+        validate_network_overlap(self)
+        super(BaseNetwork, self).clean(*args, **kwargs)
+
+
+class Network(BaseNetwork):
+    vlan = models.ForeignKey(Vlan, null=True,
+                             blank=True, on_delete=models.SET_NULL)
+    site = models.ForeignKey(Site, null=True,
+                             blank=True, on_delete=models.SET_NULL)
+    vrf = models.ForeignKey('cyder.Vrf', default=1)  # "Legacy"
     enabled = models.BooleanField(default=True)
     dhcpd_raw_include = models.TextField(
         blank=True,
@@ -53,15 +85,21 @@ class Network(BaseModel, ObjectUrlMixin):
     network = None
 
     search_fields = ('vlan__name', 'site__name', 'network_str')
-    sort_fields = ('ip_lower',)
+    sort_fields = ('start_lower',)
 
     class Meta:
         app_label = 'cyder'
         db_table = 'network'
-        unique_together = ('ip_upper', 'ip_lower', 'prefixlen')
+        unique_together = ('start_upper', 'start_lower')
 
     def __unicode__(self):
         return self.network_str
+
+    @property
+    def supernets(self):
+        from cyder.cydhcp.supernet.models import Supernet
+        supernets = get_partial_overlap(self, netmodel=Supernet)
+        return supernets
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -75,7 +113,7 @@ class Network(BaseModel, ObjectUrlMixin):
         """For tables."""
         data = super(Network, self).details()
         data['data'] = (
-            ('Network', 'ip_lower', self),
+            ('Network', 'start_lower', self),
             ('Site', 'site', self.site),
             ('Vlan', 'vlan', self.vlan),
             ('Vrf', 'vrf', self.vrf),
@@ -107,9 +145,9 @@ class Network(BaseModel, ObjectUrlMixin):
                 other.broadcast_address < self.broadcast_address
 
     def cyder_unique_error_message(self, model_class, unique_check):
-        if unique_check == ('ip_upper', 'ip_lower', 'prefixlen'):
+        if unique_check == ('start_upper', 'start_lower'):
             return (
-                'Network with this address and prefix length already exists.')
+                'Network with this address already exists.')
         else:
             return super(Network, self).unique_error_message(
                 model_class, unique_check)
@@ -119,19 +157,6 @@ class Network(BaseModel, ObjectUrlMixin):
         self.full_clean()
 
         super(Network, self).save(*args, **kwargs)
-
-        #if (self.pk is None and
-                #not self.networkkeyvalue_set.filter(key='routers').exists()):
-            #if self.ip_type == IP_TYPE_4:
-                #router = str(
-                #    ipaddr.IPv4Address(int(self.network.network) + 1))
-            #else:
-                #router = str(
-                #   ipaddr.IPv6Address(int(self.network.network) + 1))
-
-            #eav = NetworkAV(attribute=Attribute.objects.get(name="routers"),
-                            #value=router, network=self)
-            #eav.save(commit=False)
 
     @transaction_atomic
     def delete(self, *args, **kwargs):
@@ -146,7 +171,6 @@ class Network(BaseModel, ObjectUrlMixin):
 
     def clean(self, *args, **kwargs):
         self.check_valid_range()
-
         super(Network, self).clean(*args, **kwargs)
 
     # TODO: I was writing checks to make sure that subnets wouldn't
@@ -155,16 +179,15 @@ class Network(BaseModel, ObjectUrlMixin):
         # Look at all ranges that claim to be in this subnet, are they actually
         # in the subnet?
         self.update_network()
-        fail = False
         for range_ in self.range_set.all():
             # Check the start addresses.
-            if range_.start_upper < self.ip_upper:
+            if range_.start_upper < self.start_upper:
                 break
-            elif (range_.start_upper > self.ip_upper and range_.start_lower <
-                  self.ip_lower):
+            elif (range_.start_upper > self.start_upper and range_.start_lower <
+                  self.start_lower):
                 break
-            elif (range_.start_upper == self.ip_upper and range_.start_lower <
-                    self.ip_lower):
+            elif (range_.start_upper == self.start_upper and range_.start_lower <
+                    self.start_lower):
                 break
 
             if self.ip_type == IP_TYPE_4:
@@ -200,25 +223,6 @@ class Network(BaseModel, ObjectUrlMixin):
     def get_related_vlans(networks):
         return set([network.vlan for network in networks])
 
-    def get_related_networks(self):
-        from cyder.cydhcp.network.utils import calc_networks
-        _, related_networks = calc_networks(self)
-        networks = set(related_networks)
-        networks.add(self)
-        while related_networks:
-            subnets = set()
-            for network in related_networks:
-                _, sub_networks = calc_networks(network)
-                subnets.update(set(sub_networks))
-            networks.update(subnets)
-            related_networks = subnets
-        return networks
-
-    def get_related_sites(self, networks=None):
-        if not networks:
-            networks = self.get_related_networks()
-        return set([network.site for network in networks]).discard(None)
-
     def build_subnet(self, raw=False):
         self.update_network()
         statements = self.networkav_set.filter(
@@ -244,70 +248,6 @@ class Network(BaseModel, ObjectUrlMixin):
             build_str += range_.build_range()
         build_str += "}\n"
         return build_str
-
-    def get_related(self):
-        related_networks = self.get_related_networks()
-        related_sites = self.get_related_sites(related_networks)
-        return [related_sites, related_networks]
-
-    def update_network(self):
-        """This function will look at the value of network_str to update other
-        fields in the network object. This function will also set the 'network'
-        attribute to either an ipaddr.IPv4Network or ipaddr.IPv6Network object.
-        """
-        if not isinstance(self.network_str, basestring):
-            raise ValidationError("ERROR: No network str.")
-        try:
-            if self.ip_type == IP_TYPE_4:
-                self.network = ipaddr.IPv4Network(self.network_str).masked()
-            elif self.ip_type == IP_TYPE_6:
-                self.network = ipaddr.IPv6Network(self.network_str).masked()
-            else:
-                raise ValidationError("Could not determine IP type of network"
-                                      " %s" % (self.network_str))
-        except (ipaddr.AddressValueError, ipaddr.NetmaskValueError), e:
-            raise ValidationError('Invalid IPv{0} network: {1}'
-                                  .format(self.ip_type, e))
-        # Update fields
-        self.ip_upper = int(self.network) >> 64
-        self.ip_lower = int(self.network) & (1 << 64) - 1
-        self.prefixlen = self.network.prefixlen
-        self.network_str = str(self.network)
-
-    @property
-    def descendants(self):
-        self.update_network()
-        if self.ip_type == '4':
-            return Network.objects.filter(
-                ip_lower__gte=int(self.network.ip),
-                ip_lower__lte=int(self.network.broadcast)
-            ).exclude(prefixlen__lte=self.prefixlen)
-        elif self.ip_type == '6':
-            raise Exception(
-                'Network.descendants does not currently support IPv6')
-
-    @property
-    def children(self):
-        self.update_network()
-        children = []
-        for d in self.descendants:
-            if d.parent == self:
-                children.append(d)
-        return children
-
-    @property
-    def parent(self):
-        self.update_network()
-        net = self.network
-        while net.prefixlen > 0:
-            net = net.supernet().masked()
-            try:
-                return Network.objects.get(
-                    ip_upper=(int(net) / (1<<64)),
-                    ip_lower=(int(net) % (1<<64)),
-                    prefixlen=net.prefixlen)
-            except Network.DoesNotExist:
-                pass
 
 
 class NetworkAV(EAVBase):
