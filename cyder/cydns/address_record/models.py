@@ -1,6 +1,7 @@
 from gettext import gettext as _
 
 from django.db import models
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 from cyder.base.constants import IP_TYPE_6, IP_TYPE_4
@@ -76,8 +77,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
     def check_name_ctnr_collision(self):
         """
         Allow ARs with the same name iff they have the same container.
-        Allow ARs to share a name with a static interface iff they have the
-            same container.
+        Never allow ARs to share a name with an interface.
         """
 
         from cyder.core.ctnr.models import Ctnr
@@ -93,8 +93,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
 
         ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
                                     .exclude(ctnr=self.ctnr))
-        sis = (StaticInterface.objects.filter(fqdn=self.fqdn)
-                                      .exclude(system__ctnr=self.ctnr))
+        sis = StaticInterface.objects.filter(fqdn=self.fqdn)
 
         if isinstance(self, AddressRecord):
             ars = ars.exclude(pk=self.pk)
@@ -108,15 +107,14 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         elif sis.exists():
             raise ValidationError("Cannot create this object because a "
                                   "Static Interface with the name %s exists "
-                                  "in a different container." % self.fqdn)
+                                  "already." % self.fqdn)
 
     def check_intr_collision(self):
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         if StaticInterface.objects.filter(
-                fqdn=self.fqdn, ip_upper=self.ip_upper,
-                ip_lower=self.ip_lower).exists():
+                Q(fqdn=self.fqdn) | Q(ip_str=self.ip_str)).exists():
             raise ValidationError(
-                "A Static Interface with %s and %s already exists" %
+                "A Static Interface with %s or %s already exists" %
                 (self.fqdn, self.ip_str)
             )
 
