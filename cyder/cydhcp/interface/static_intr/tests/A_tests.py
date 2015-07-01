@@ -32,18 +32,17 @@ class AStaticRegTests(BaseStaticTests):
 
     def test_conflict_add_intr_first(self):
         # Add an intr and update an existing A to conflict. Test for exception.
-        label = "fo99"
         domain = self.f_c
 
         self.create_si(
             mac="12:22:33:44:55:66",
-            label=label,
+            label="fo99",
             domain=domain,
             ip_str='10.0.0.2',
         )
 
         a = AddressRecord.objects.create(
-            label=label,
+            label="fo999",
             domain=domain,
             ip_str='10.0.0.3',
             ctnr=self.ctnr,
@@ -55,11 +54,10 @@ class AStaticRegTests(BaseStaticTests):
     def test_conflict_add_A_first(self):
         # Add an A and update and existing intr to conflict. Test for
         # exception.
-        label = "foo98"
         domain = self.f_c
 
         AddressRecord.objects.create(
-            label=label,
+            label="foo98",
             domain=domain,
             ip_str='10.0.0.2',
             ctnr=self.ctnr,
@@ -67,7 +65,7 @@ class AStaticRegTests(BaseStaticTests):
 
         intr = self.create_si(
             mac="11:22:33:44:55:66",
-            label=label,
+            label="foo987",
             domain=domain,
             ip_str='10.0.0.3',
         )
