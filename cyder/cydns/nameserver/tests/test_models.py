@@ -133,10 +133,9 @@ class NSTestsModels(DNSTest, ModelTestMixin):
     def test_manual_assign_of_glue(self):
         # Test that assigning a different glue record doesn't get overriden by
         # the auto assinging during the Nameserver's clean function.
-        glue = StaticInterface.objects.create(
-            label='ns25', domain=self.f_r,
-            ip_str='128.193.99.10', ip_type='4', system=self.s,
-            mac="11:22:33:44:55:66")
+        glue = AddressRecord.objects.create(
+            label='ns25', ctnr=self.ctnr, domain=self.f_r,
+            ip_str='128.193.99.10', ip_type='4')
         ns = Nameserver.objects.create(domain=self.f_r, server='ns25.foo.ru')
         self.assertTrue(ns.glue)
         self.assertEqual(ns.glue, glue)

@@ -628,8 +628,7 @@ class AddressRecordTests(DNSTest, ModelTestMixin):
         self.assertObjectsConflict((create_cname, create_ar))
 
     def test_same_name_as_static_interface(self):
-        """Test that ARs and SIs can share a name iff they have the same ctnr
-        """
+        """Test that ARs and SIs cannot share a name"""
         n = Network.objects.create(
             vrf=Vrf.objects.get(name='test_vrf'), network_str='128.193.0.0/24',
             ip_type='4')
@@ -663,7 +662,7 @@ class AddressRecordTests(DNSTest, ModelTestMixin):
                 label='foo1', domain=self.o_e, ip_str='128.193.0.3', ctnr=c2)
         create_ar_different_ctnr.name = 'AddressRecord with different ctnr'
 
-        self.assertObjectsDontConflict((create_si, create_ar_same_ctnr))
+        self.assertObjectsConflict((create_si, create_ar_same_ctnr))
         self.assertObjectsConflict((create_si, create_ar_different_ctnr))
 
     def test_target_validation(self):
