@@ -7,14 +7,13 @@ from .basestatic import BaseStaticTests
 class AStaticRegTests(BaseStaticTests):
     def test_conflict(self):
         # Add an intr and make sure A can't exist.
-        label = "foo4"
         domain = self.f_c
         ip_str = "10.0.0.2"
 
         def i():
             return self.create_si(
                 mac="11:22:33:44:55:66",
-                label=label,
+                label="foo4",
                 domain=domain,
                 ip_str=ip_str,
             )
@@ -22,7 +21,7 @@ class AStaticRegTests(BaseStaticTests):
 
         def a():
             return AddressRecord.objects.create(
-                label=label,
+                label="foo5",
                 domain=domain,
                 ip_str=ip_str,
                 ctnr=self.ctnr,
