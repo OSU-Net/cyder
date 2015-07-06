@@ -227,7 +227,6 @@ def static_dynamic_view(request):
             data['data'].append(('MAC', '3', obj))
             data['data'].append(('IP', '4', obj.range))
 
-        data['data'].append(('Last seen', '5', obj.last_seen))
         return data
 
     from cyder.base.tablefier import Tablefier
