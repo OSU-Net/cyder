@@ -106,7 +106,6 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
                 'True' if self.dhcp_enabled else 'False'),
             ('DNS', 'dns_enabled',
                 'True' if self.dns_enabled else 'False'),
-            ('Last seen', 'last_seen', self.last_seen),
         )
         return data
 
