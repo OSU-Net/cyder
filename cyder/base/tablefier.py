@@ -86,7 +86,7 @@ class Tablefier:
             for col in self.extra_cols:
                 headers.append([col['header'], col['sort_field']])
 
-        if not self.detail_view:
+        if not self.detail_view and self.update:
             headers.append(['Actions', None])
 
         if (hasattr(self.objects, 'object_list') and
@@ -206,7 +206,7 @@ class Tablefier:
             if self.show_ctnr:
                 row_data.append(self.build_data(obj, obj.ctnr))
 
-            if not self.detail_view:
+            if not self.detail_view and self.update:
                 row_data.append(self.build_update_field(obj))
 
             objs.append(obj)
