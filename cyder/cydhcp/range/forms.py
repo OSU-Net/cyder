@@ -27,6 +27,8 @@ class RangeForm(ViewChoiceForm, UsabilityFormMixin):
 
         self.fields['network'].widget.attrs.update({'class': 'networkWizard'})
 
+    def filter_by_ctnr_all(self, ctnr):
+        super(RangeForm, self).filter_by_ctnr_all(ctnr, skip='network')
 
 
 RangeAVForm = get_eav_form(RangeAV, Range)

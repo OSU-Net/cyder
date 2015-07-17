@@ -160,10 +160,6 @@ def cy_view(request, template, pk=None, obj_type=None):
                     if Klass.__name__ == 'Ctnr':
                         request = ctnr_update_session(request, obj)
 
-                    if (hasattr(obj, 'ctnr_set') and
-                            not obj.ctnr_set.exists()):
-                        obj.ctnr_set.add(request.session['ctnr'])
-
                     object_table = tablefy([obj], request=request)
                     return HttpResponse(
                         json.dumps({'row': object_table}))
