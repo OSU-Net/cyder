@@ -150,7 +150,7 @@ def objects_removed(ctnr, objects, objtype="domain"):
                 results = klass.filter_by_ctnr(ctnr, objects=None)
 
                 if issubclass(klass, BasePTR) and objtype == "range":
-                    results = [p for p in results if p.range == obj]
+                    results = [p for p in results.all() if p.range == obj]
                 else:
                     try:
                         kwargs = {objtype: obj}
