@@ -1,6 +1,7 @@
 from gettext import gettext as _
 
 from django.db import models
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 import datetime
@@ -215,12 +216,11 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
                                       "not in its container." % self.ip_str)
 
         from cyder.cydns.ptr.models import PTR
-        if PTR.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn).exists():
-            raise ValidationError("A PTR already uses '%s' and '%s'" %
-                                  (self.fqdn, self.ip_str))
-        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
-                                        ).exists():
-            raise ValidationError("An A record already uses '%s' and '%s'" %
+        if PTR.objects.filter(ip_str=self.ip_str).exists():
+            raise ValidationError("A PTR already uses '%s'." % self.ip_str)
+        if AddressRecord.objects.filter(
+                Q(ip_str=self.ip_str) | Q(fqdn=self.fqdn)).exists():
+            raise ValidationError("An A record already uses '%s' or '%s'" %
                                   (self.fqdn, self.ip_str))
 
         if validate_glue:
