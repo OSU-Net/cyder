@@ -149,9 +149,9 @@ class UsabilityFormMixin(object):
             return
 
         session_ctnr = request.session['ctnr']
-        if 'ctnr' not in self.initial:
-            if session_ctnr.name != "global":
-                self.fields['ctnr'].initial = session_ctnr
+        if 'ctnr' not in self.initial and session_ctnr.name != "global":
+            self.fields['ctnr'].initial = session_ctnr
+            self.fields['ctnr'].widget = HiddenInput()
 
     def make_usable(self, request):
         self.autoselect_system()
