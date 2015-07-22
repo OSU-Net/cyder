@@ -178,8 +178,7 @@ class AddressRecord(BaseAddressRecord):
     class Meta:
         app_label = 'cyder'
         db_table = "address_record"
-        unique_together = ("label", "domain", "fqdn", "ip_upper", "ip_lower",
-                           "ip_type")
+        unique_together = (("fqdn", "ip_str"))
 
     def details(self):
         """For tables."""
@@ -192,14 +191,9 @@ class AddressRecord(BaseAddressRecord):
         return data
 
     def cyder_unique_error_message(self, model_class, unique_check):
-        if unique_check == ('label', 'domain', 'fqdn', 'ip_upper', 'ip_lower',
-                            'ip_type'):
-            return (
-                'Address record with this label, domain, and IP address '
-                'already exists.')
-        else:
-            return super(AddressRecord, self).unique_error_message(
-                model_class, unique_check)
+        return (
+            'Address record with this label, domain, and IP address '
+            'already exists.')
 
     @transaction_atomic
     def save(self, *args, **kwargs):

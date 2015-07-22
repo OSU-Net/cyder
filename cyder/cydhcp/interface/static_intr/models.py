@@ -76,7 +76,8 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     class Meta:
         app_label = 'cyder'
         db_table = 'static_interface'
-        unique_together = (('ip_upper', 'ip_lower'), ('label', 'domain'))
+        unique_together = (('fqdn',),
+                           ('ip_str',))
 
     @staticmethod
     def filter_by_ctnr(ctnr, objects=None):
@@ -171,12 +172,9 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
     def check_A_PTR_collision(self):
         if PTR.objects.filter(ip_str=self.ip_str).exists():
-            raise ValidationError("A PTR already uses '%s'" %
-                                  self.ip_str)
-        if AddressRecord.objects.filter(ip_str=self.ip_str, fqdn=self.fqdn
-                                        ).exists():
-            raise ValidationError("An A record already uses '%s' and '%s'" %
-                                  (self.fqdn, self.ip_str))
+            raise ValidationError("A PTR already uses '%s'." % self.ip_str)
+        if AddressRecord.objects.filter(fqdn=self.fqdn).exists():
+            raise ValidationError("An A record already uses '%s'." % self.fqdn)
 
     def format_host_option(self, option):
         s = str(option)
@@ -215,13 +213,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
                 raise ValidationError("Can't create interface because %s is "
                                       "not in its container." % self.ip_str)
 
-        from cyder.cydns.ptr.models import PTR
-        if PTR.objects.filter(ip_str=self.ip_str).exists():
-            raise ValidationError("A PTR already uses '%s'." % self.ip_str)
-        if AddressRecord.objects.filter(
-                Q(ip_str=self.ip_str) | Q(fqdn=self.fqdn)).exists():
-            raise ValidationError("An A record already uses '%s' or '%s'" %
-                                  (self.fqdn, self.ip_str))
+        self.check_A_PTR_collision()
 
         if validate_glue:
             self.check_glue_status()
