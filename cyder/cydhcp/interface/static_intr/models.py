@@ -173,8 +173,10 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
     def check_A_PTR_collision(self):
         if PTR.objects.filter(ip_str=self.ip_str).exists():
             raise ValidationError("A PTR already uses '%s'." % self.ip_str)
-        if AddressRecord.objects.filter(fqdn=self.fqdn).exists():
-            raise ValidationError("An A record already uses '%s'." % self.fqdn)
+        if AddressRecord.objects.filter(fqdn=self.fqdn,
+                                        ip_type=self.ip_type).exists():
+            raise ValidationError("An address record already "
+                                  "uses '%s'." % self.fqdn)
 
     def format_host_option(self, option):
         s = str(option)

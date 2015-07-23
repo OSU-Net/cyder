@@ -91,9 +91,11 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             # raise another one.
             return
 
-        ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
+        ars = (AddressRecord.objects.filter(fqdn=self.fqdn,
+                                            ip_type=self.ip_type)
                                     .exclude(ctnr=self.ctnr))
-        sis = StaticInterface.objects.filter(fqdn=self.fqdn)
+        sis = StaticInterface.objects.filter(fqdn=self.fqdn,
+                                             ip_type=self.ip_type)
 
         if isinstance(self, AddressRecord):
             ars = ars.exclude(pk=self.pk)
