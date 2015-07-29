@@ -50,7 +50,7 @@ class AStaticRegTests(BaseStaticTests):
             ctnr=self.ctnr,
         )
 
-        a.ip_str = "10.0.0.2"
+        a.label = "fo99"
         self.assertRaises(ValidationError, a.save)
 
     def test_conflict_add_A_first(self):
