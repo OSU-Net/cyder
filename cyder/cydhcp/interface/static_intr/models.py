@@ -217,6 +217,11 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
         self.check_A_PTR_collision()
 
+        if (self.workgroup.pk != DEFAULT_WORKGROUP
+                and self.ctnr not in self.workgroup.ctnr_set.all()):
+            raise ValidationError("Workgroup is not in this static "
+                                  "interface's container.")
+
         if validate_glue:
             self.check_glue_status()
 
