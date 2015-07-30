@@ -112,6 +112,12 @@ class DynamicInterface(BaseModel, ObjectUrlMixin, ExpirableMixin):
             if siblings.exists():
                 raise ValidationError(
                     "MAC address must be unique in this interface's range")
+
+        if (self.workgroup.pk != DEFAULT_WORKGROUP
+                and self.ctnr not in self.workgroup.ctnr_set.all()):
+            raise ValidationError("Workgroup is not in this dynamic "
+                                  "interface's container.")
+
         validate_system_dynamic_ctnr(self.system, self)
 
     @transaction_atomic

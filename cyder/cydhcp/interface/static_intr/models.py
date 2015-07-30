@@ -215,6 +215,11 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
                 raise ValidationError("Can't create interface because %s is "
                                       "not in its container." % self.ip_str)
 
+        if (self.workgroup.pk != DEFAULT_WORKGROUP
+                and self.ctnr not in self.workgroup.ctnr_set.all()):
+            raise ValidationError("Workgroup is not in this static "
+                                  "interface's container.")
+
         from cyder.cydns.ptr.models import PTR
         if PTR.objects.filter(ip_str=self.ip_str).exists():
             raise ValidationError("A PTR already uses '%s'." % self.ip_str)
