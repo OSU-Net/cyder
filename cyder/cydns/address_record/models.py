@@ -91,9 +91,11 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
             # raise another one.
             return
 
-        ars = (AddressRecord.objects.filter(fqdn=self.fqdn)
+        ars = (AddressRecord.objects.filter(fqdn=self.fqdn,
+                                            ip_type=self.ip_type)
                                     .exclude(ctnr=self.ctnr))
-        sis = StaticInterface.objects.filter(fqdn=self.fqdn)
+        sis = StaticInterface.objects.filter(fqdn=self.fqdn,
+                                             ip_type=self.ip_type)
 
         if isinstance(self, AddressRecord):
             ars = ars.exclude(pk=self.pk)
@@ -102,19 +104,20 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
 
         if ars.exists():
             raise ValidationError("Cannot create this object because an "
-                                  "Address Record with the name %s exists "
-                                  "in a different container." % self.fqdn)
+                                  "Address Record with the name %s and "
+                                  "same IP type exists in a different "
+                                  "container." % self.fqdn)
         elif sis.exists():
             raise ValidationError("Cannot create this object because a "
-                                  "Static Interface with the name %s exists "
-                                  "already." % self.fqdn)
+                                  "Static Interface with the name %s and "
+                                  "same IP type exists already." % self.fqdn)
 
     def check_intr_collision(self):
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
         if StaticInterface.objects.filter(
-                Q(fqdn=self.fqdn) | Q(ip_str=self.ip_str)).exists():
+                fqdn=self.fqdn, ip_type=self.ip_type).exists():
             raise ValidationError(
-                "A Static Interface with %s or %s already exists" %
+                "A Static Interface with %s and %s already exists" %
                 (self.fqdn, self.ip_str)
             )
 
@@ -178,8 +181,7 @@ class AddressRecord(BaseAddressRecord):
     class Meta:
         app_label = 'cyder'
         db_table = "address_record"
-        unique_together = ("label", "domain", "fqdn", "ip_upper", "ip_lower",
-                           "ip_type")
+        unique_together = (("fqdn", "ip_str"))
 
     def details(self):
         """For tables."""
@@ -192,14 +194,9 @@ class AddressRecord(BaseAddressRecord):
         return data
 
     def cyder_unique_error_message(self, model_class, unique_check):
-        if unique_check == ('label', 'domain', 'fqdn', 'ip_upper', 'ip_lower',
-                            'ip_type'):
-            return (
-                'Address record with this label, domain, and IP address '
-                'already exists.')
-        else:
-            return super(AddressRecord, self).unique_error_message(
-                model_class, unique_check)
+        return (
+            'Address record with this label, domain, and IP address '
+            'already exists.')
 
     @transaction_atomic
     def save(self, *args, **kwargs):

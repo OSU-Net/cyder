@@ -9,6 +9,7 @@ class AStaticRegTests(BaseStaticTests):
         # Add an intr and make sure A can't exist.
         domain = self.f_c
         ip_str = "10.0.0.2"
+        ip_str2 = "10.0.0.3"
 
         def i():
             return self.create_si(
@@ -16,14 +17,15 @@ class AStaticRegTests(BaseStaticTests):
                 label="foo4",
                 domain=domain,
                 ip_str=ip_str,
+                ctnr=self.ctnr,
             )
         i.name = 'StaticInterface'
 
         def a():
             return AddressRecord.objects.create(
-                label="foo5",
+                label="foo4",
                 domain=domain,
-                ip_str=ip_str,
+                ip_str=ip_str2,
                 ctnr=self.ctnr,
             )
         a.name = 'AddressRecord'
@@ -48,7 +50,7 @@ class AStaticRegTests(BaseStaticTests):
             ctnr=self.ctnr,
         )
 
-        a.ip_str = "10.0.0.2"
+        a.label = "fo99"
         self.assertRaises(ValidationError, a.save)
 
     def test_conflict_add_A_first(self):
@@ -70,5 +72,5 @@ class AStaticRegTests(BaseStaticTests):
             ip_str='10.0.0.3',
         )
 
-        intr.ip_str = "10.0.0.2"
+        intr.label = "foo98"
         self.assertRaises(ValidationError, intr.save)
