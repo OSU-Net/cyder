@@ -12,8 +12,7 @@ class Tablefier:
                  users=False, custom=None, update=True, detail_view=False,
                  excluded=[]):
         if users:
-            from cyder.core.cyuser.models import UserProfile
-            objects = UserProfile.objects.filter(user__in=objects)
+            objects = [u.profile for u in objects]
 
         self.objects = objects
         self.request = request
