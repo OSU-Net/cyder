@@ -38,7 +38,7 @@ def _search(request):
     if not objs:
         return ([], [])
     (addrs, cnames, domains, static, dynamic, mxs, networks, nss, ptrs, ranges,
-     soas, srvs, sshfps, sys, txts, misc) = (
+     soas, srvs, sshfps, sys, txts, wgs, misc) = (
          objs['A'],
          objs['CNAME'],
          objs['DOMAIN'],
@@ -54,6 +54,7 @@ def _search(request):
          objs['SSHFP'],
          objs['SYSTEM'],
          objs['TXT'],
+         objs['WORKGROUP'],
          [])
 
     meta = [
@@ -71,6 +72,7 @@ def _search(request):
         (srvs.count() if srvs else 0, 'srv', 'SRVs'),
         (sys.count() if srvs else 0, 'sys', 'Systems'),
         (txts.count() if txts else 0, 'txt', 'TXTs'),
+        (wgs.count() if wgs else 0, 'workgroup', 'Workgroups'),
     ]
 
     tables = [
@@ -88,6 +90,7 @@ def _search(request):
         (tablefy(srvs, request=request), 'srv', 'SRVs'),
         (tablefy(sys, request=request), 'sys', 'Systems'),
         (tablefy(txts, request=request), 'txt', 'TXTs'),
+        (tablefy(wgs, request=request), 'workgroup', 'Workgroups'),
     ]
 
     return (meta, tables)

@@ -15,6 +15,7 @@ from cyder.cydhcp.site.models import Site
 from cyder.cydhcp.utils import IPFilter
 from cyder.cydhcp.utils import start_end_filter
 from cyder.cydhcp.vlan.models import Vlan
+from cyder.cydhcp.workgroup.models import Workgroup
 from cyder.cydns.address_record.models import AddressRecord
 from cyder.cydns.cname.models import CNAME
 from cyder.cydns.domain.models import Domain
@@ -44,6 +45,7 @@ searchables = (
     ('SSHFP', SSHFP),
     ('SYSTEM', System),
     ('TXT', TXT),
+    ('WORKGROUP', Workgroup),
 )
 
 
