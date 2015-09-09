@@ -51,7 +51,7 @@ class Nameserver(CydnsRecord):
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {server:$rhs_just}.")
 
-    search_fields = ("server", "domain__name")
+    search_fields = ("server", "domain__name", "description")
 
     class Meta:
         app_label = 'cyder'

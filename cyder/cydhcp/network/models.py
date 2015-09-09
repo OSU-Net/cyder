@@ -84,7 +84,8 @@ class Network(BaseNetwork):
                   "*as is* in the dhcpd.conf file for this subnet.")
     network = None
 
-    search_fields = ('vlan__name', 'site__name', 'network_str')
+    search_fields = ('vlan__name', 'site__name', 'network_str',
+                     'dhcpd_raw_include')
     sort_fields = ('start_lower',)
 
     class Meta:

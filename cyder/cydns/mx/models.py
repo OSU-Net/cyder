@@ -25,7 +25,7 @@ class MX(LabelDomainMixin, CydnsRecord):
                  "{rdclass:$rdclass_just} "
                  "{rdtype:3} {priority:$prio_just}  "
                  "{server:$rhs_just}.")
-    search_fields = ('fqdn', 'server')
+    search_fields = ('fqdn', 'server', 'description')
 
     class Meta:
         app_label = 'cyder'

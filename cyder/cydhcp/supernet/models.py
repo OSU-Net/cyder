@@ -14,7 +14,7 @@ class Supernet(BaseNetwork):
 
     network = None
 
-    search_fields = ('',)
+    search_fields = ('network_str', 'name', 'description')
     sort_fields = ('',)
 
     class Meta:
