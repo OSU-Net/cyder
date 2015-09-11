@@ -57,7 +57,7 @@ class Tablefier:
         except AttributeError:
             try:
                 klass = self.first_obj.__class__
-            except IndexError:
+            except (IndexError, TypeError):
                 return None
         return klass
 
