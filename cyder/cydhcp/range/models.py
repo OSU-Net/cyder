@@ -97,7 +97,8 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
 
     range_usage = models.IntegerField(max_length=3, null=True, blank=True)
 
-    search_fields = ('start_str', 'end_str', 'name')
+    search_fields = ('start_str', 'end_str', 'name',
+                     'description', 'dhcpd_raw_include')
     sort_fields = ('start_lower', 'end_lower')
 
     class Meta:

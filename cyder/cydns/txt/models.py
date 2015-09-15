@@ -22,7 +22,7 @@ class TXT(LabelDomainMixin, CydnsRecord):
     ctnr = models.ForeignKey("cyder.Ctnr", null=False,
                              verbose_name="Container")
 
-    search_fields = ("fqdn", "txt_data")
+    search_fields = ("fqdn", "txt_data", "description")
 
     class Meta:
         app_label = 'cyder'

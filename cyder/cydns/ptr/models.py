@@ -162,7 +162,7 @@ class PTR(BaseModel, BasePTR, Ip, ViewMixin, DisplayMixin, ObjectUrlMixin):
     template = _("{reverse_domain:$lhs_just} {ttl:$ttl_just}  "
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {bind_name:1}")
-    search_fields = ('ip_str', 'fqdn')
+    search_fields = ('ip_str', 'fqdn', 'description')
 
     class Meta:
         app_label = 'cyder'

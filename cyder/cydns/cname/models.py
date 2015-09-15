@@ -35,7 +35,7 @@ class CNAME(LabelDomainMixin, CydnsRecord):
                  "{rdclass:$rdclass_just} "
                  "{rdtype:$rdtype_just} {target:$rhs_just}.")
 
-    search_fields = ('fqdn', 'target')
+    search_fields = ('fqdn', 'target', 'description')
     sort_fields = ('fqdn', 'target')
 
     class Meta:

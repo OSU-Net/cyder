@@ -71,7 +71,7 @@ class StaticInterface(BaseAddressRecord, BasePTR, ExpirableMixin):
 
     last_seen = models.DateTimeField(null=True, blank=True)
 
-    search_fields = ('mac', 'ip_str', 'fqdn')
+    search_fields = ('mac', 'ip_str', 'fqdn', 'description')
 
     class Meta:
         app_label = 'cyder'

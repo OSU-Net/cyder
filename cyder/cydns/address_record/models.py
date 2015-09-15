@@ -20,7 +20,7 @@ class BaseAddressRecord(Ip, LabelDomainMixin, CydnsRecord):
         ... ip_type=ip_type)
 
     """
-    search_fields = ('fqdn', 'ip_str')
+    search_fields = ('fqdn', 'ip_str', 'description')
     sort_fields = ('fqdn', 'ip_lower')
 
     class Meta:

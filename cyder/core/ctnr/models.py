@@ -32,7 +32,7 @@ class Ctnr(BaseModel, ObjectUrlMixin):
     description = models.CharField(max_length=200, blank=True)
     email_contact = models.CharField(max_length=75, blank=True)
 
-    search_fields = ('name', 'description')
+    search_fields = ('name', 'description', 'email_contact')
     sort_fields = ('name',)
 
     class Meta:

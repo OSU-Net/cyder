@@ -44,7 +44,7 @@ class SRV(CydnsRecord, LabelDomainUtilsMixin):
                  "{weight:$extra_just} {port:$extra_just} "
                  "{target:$extra_just}.")
 
-    search_fields = ("fqdn", "target")
+    search_fields = ("fqdn", "target", "description")
 
     def details(self):
         """For tables."""

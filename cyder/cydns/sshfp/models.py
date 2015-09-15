@@ -39,7 +39,7 @@ class SSHFP(LabelDomainMixin, CydnsRecord):
                  "{rdtype:$rdtype_just} {algorithm_number} {fingerprint_type} "
                  "{key:$rhs_just}")
 
-    search_fields = ("fqdn", "key")
+    search_fields = ("fqdn", "key", "description")
 
     class Meta:
         app_label = 'cyder'
