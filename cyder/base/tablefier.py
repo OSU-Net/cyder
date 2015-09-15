@@ -7,6 +7,11 @@ from cyder.base.helpers import cached_property
 import json
 
 
+def get_no_update():
+    from cyder.models import Ctnr
+    return [Ctnr]
+
+
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
                  users=False, custom=None, update=True, detail_view=False,
@@ -25,6 +30,9 @@ class Tablefier:
         else:
             self.extra_cols = extra_cols
             self.update = update
+
+        if self.klass in get_no_update():
+            self.update = False
 
         if detail_view and objects and hasattr(objects[0], 'ctnr'):
             self.show_ctnr = True
@@ -47,7 +55,10 @@ class Tablefier:
         try:
             klass = self.objects.object_list.model
         except AttributeError:
-            klass = self.first_obj.__class__
+            try:
+                klass = self.first_obj.__class__
+            except (IndexError, TypeError):
+                return None
         return klass
 
     @cached_property
