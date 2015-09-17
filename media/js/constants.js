@@ -15,7 +15,7 @@ Messages.CtnrDetail = {}
 Messages.CtnrDetail.Confirmation = [
     'Are you sure you want to remove this object?',
     'Are you sure you want to remove this object from {0}?',
-    'Are you sure you want to remove this {0} from {1}?',
+    'Are you sure you want to remove this {0} from this container?',
     'Are you sure you want to remove {0}, {1}, from {2}?'
 ];
 

@@ -10,7 +10,7 @@ import json
 class Tablefier:
     def __init__(self, objects, request=None, extra_cols=None,
                  users=False, custom=None, update=True, detail_view=False,
-                 excluded=[]):
+                 excluded=[], related_object=None):
         if users:
             objects = [u.profile for u in objects]
 
@@ -30,6 +30,19 @@ class Tablefier:
             self.show_ctnr = True
         else:
             self.show_ctnr = False
+
+        from cyder.models import Ctnr
+        if (objects and isinstance(objects[0], Ctnr)
+                and related_object is not None):
+            from cyder.core.ctnr.views import create_obj_extra_cols
+            remove_col = None
+            for obj in objects:
+                col = create_obj_extra_cols(obj, [related_object], None)[0][0]
+                if remove_col is None:
+                    remove_col = col
+                else:
+                    remove_col['data'].extend(col['data'])
+            self.extra_cols = [remove_col]
 
     @cached_property
     def profile(self):
