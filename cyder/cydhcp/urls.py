@@ -5,6 +5,8 @@ from cyder.cydhcp.views import (cydhcp_view, cydhcp_table_update,
                                 cydhcp_search_obj)
 from cyder.cydhcp.constants import DHCP_EAV_MODELS
 
+from activate import CYDER_REVISION
+
 
 def cydhcp_urls(object_type):
     """Url generator for DHCP views"""
@@ -20,7 +22,9 @@ def cydhcp_urls(object_type):
 
 urlpatterns = patterns(
     '',
-    url(r'^$', direct_to_template, {'template': 'cydhcp/cydhcp_index.html'},
+    url(r'^$', direct_to_template,
+        {'template': 'cydhcp/cydhcp_index.html',
+         'extra_context': {'cyder_revision': CYDER_REVISION}},
         name='cydhcp-index'),
     url(r'^record/search/', cydhcp_search_obj, name='cydhcp-search-record'),
     url(r'^build/', include('cyder.cydhcp.build.urls')),
