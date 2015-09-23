@@ -36,6 +36,10 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(NetworkForm, self).__init__(*args, **kwargs)
+        if kwargs.get('instance'):
+            for fieldname in ['routers', 'gateway', 'subnet_mask']:
+                field = self.fields[fieldname]
+                field.widget = field.hidden_widget()
         self.fields['dhcpd_raw_include'].label = "DHCP Config Extras"
         self.fields['dhcpd_raw_include'].widget.attrs.update(
             {'cols': '80',
