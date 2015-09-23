@@ -71,25 +71,22 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
             if cleaned_data["routers"]:
                 for key in ["gateway", "subnet_mask"]:
                     value = cleaned_data.get(key)
-                    if key == "subnet_mask" and "/" in value:
-                        if ip_type == IP_TYPE_4:
-                            size = 32
-                        else:
-                            size = 128
-                        _, mask = tuple(value.split("/"))
-                        mask = (1 << (size-int(mask))) - 1
-                        base = (1 << size) - 1
-                        value = long2ip(base ^ mask)
                     if value:
                         if ip_type == IP_TYPE_4:
                             value = ipaddr.IPv4Network(value)
+                            size = 32
                         elif ip_type == IP_TYPE_6:
                             value = ipaddr.IPv6Network(value)
+                            size = 128
                         if key == "gateway" and not network.overlaps(value):
                             raise ValidationError("Network does not contain "
                                                   "specified gateway.")
                         if key == "subnet_mask":
-                            prefixlen = bin(int(value.broadcast)).count('1')
+                            binstring = bin(int(value.broadcast))
+                            binstring = "".join(binstring[2:])
+                            if "01" in binstring or len(binstring) != size:
+                                raise ValidationError("Invalid subnet mask.")
+                            prefixlen = binstring.count('1')
                             if prefixlen > network.prefixlen:
                                 raise ValidationError(
                                     "Subnet mask is smaller than network.")
