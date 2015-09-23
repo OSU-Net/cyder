@@ -24,6 +24,7 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
     )
 
     routers = forms.BooleanField(label='Option "routers"', required=False,
+                                 initial=False,
                                  help_text='Auto-create DHCP "routers" option')
     gateway = forms.CharField(
         label='Alternate Gateway', required=False,
