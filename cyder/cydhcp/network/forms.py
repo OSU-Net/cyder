@@ -24,7 +24,7 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
     )
 
     routers = forms.BooleanField(label='Option "routers"', required=False,
-                                 initial=False,
+                                 initial=True,
                                  help_text='Auto-create DHCP "routers" option')
     gateway = forms.CharField(
         label='Alternate Gateway', required=False,
@@ -38,6 +38,7 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
     def __init__(self, *args, **kwargs):
         super(NetworkForm, self).__init__(*args, **kwargs)
         if kwargs.get('instance'):
+            self.fields['routers'].initial = False
             for fieldname in ['routers', 'gateway', 'subnet_mask']:
                 field = self.fields[fieldname]
                 field.widget = field.hidden_widget()
