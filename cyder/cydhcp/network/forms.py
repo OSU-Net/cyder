@@ -82,10 +82,18 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
                         value = long2ip(base ^ mask)
                     if value:
                         if ip_type == IP_TYPE_4:
-                            value = str(ipaddr.IPv4Network(value))
+                            value = ipaddr.IPv4Network(value)
                         elif ip_type == IP_TYPE_6:
-                            value = str(ipaddr.IPv6Network(value))
-                        value, _ = tuple(value.split("/"))
+                            value = ipaddr.IPv6Network(value)
+                        if key == "gateway" and not network.overlaps(value):
+                            raise ValidationError("Network does not contain "
+                                                  "specified gateway.")
+                        if key == "subnet_mask":
+                            prefixlen = bin(int(value.broadcast)).count('1')
+                            if prefixlen > network.prefixlen:
+                                raise ValidationError(
+                                    "Subnet mask is smaller than network.")
+                        value = str(value.broadcast)
                         cleaned_data[key] = value
 
         except ipaddr.AddressValueError, e:
