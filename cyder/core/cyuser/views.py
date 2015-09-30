@@ -125,7 +125,7 @@ def clone_perms(request, user_id):
             {'errors': {'__all__': 'You do not have permissions to perform '
                         + 'this action'}}))
 
-    user = UserProfile.objects.get(id=user_id)
+    profile = UserProfile.objects.get(user__id=user_id)
     perms_qs = CtnrUser.objects.filter(user__id=user_id)
     if not perms_qs.exists():
         perms_qs = []
@@ -259,8 +259,10 @@ def search(request):
     if not term:
         raise Http404
 
-    users = UserProfile.objects.filter(make_megafilter(UserProfile, term))[:15]
-    users = [{'label': str(user), 'pk': user.user.pk} for user in users]
+    profiles = UserProfile.objects.filter(
+        make_megafilter(UserProfile, term))[:15]
+    users = [{'label': str(profile), 'pk': profile.user.pk}
+             for profile in profiles]
     return HttpResponse(json.dumps(users))
 
 
@@ -316,7 +318,7 @@ def unbecome_user(request):
 def user_detail(request, pk):
     from cyder.base.views import cy_detail
 
-    user = UserProfile.objects.get(user__id=pk)
+    profile = UserProfile.objects.get(user__id=pk)
     email = User.objects.get(id=pk).email
     contacts = []
     form = UserPermForm()
@@ -325,16 +327,16 @@ def user_detail(request, pk):
     else:
         contacts = []
 
-    ctnrs = CtnrUser.objects.filter(user_id=user)
+    ctnrs = CtnrUser.objects.filter(user_id=profile.user)
 
     tables = {
         'Containers': ctnrs,
         'Contact For': contacts,
     }
 
-    if request.user.id == user.id or request.user.is_superuser:
-        tokens = Token.objects.filter(user=user)
+    if request.user.id == profile.user.id or request.user.is_superuser:
+        tokens = Token.objects.filter(user=profile.user)
         tables.update({'API Tokens': tokens})
 
     return cy_detail(request, UserProfile, 'cyuser/user_detail.html',
-                     tables, obj=user, user_perm_form=form)
+                     tables, obj=profile, user_perm_form=form)
