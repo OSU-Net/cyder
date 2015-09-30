@@ -125,7 +125,7 @@ def clone_perms(request, user_id):
             {'errors': {'__all__': 'You do not have permissions to perform '
                         + 'this action'}}))
 
-    user = UserProfile.objects.get(id=user_id)
+    user = UserProfile.objects.get(user__id=user_id)
     perms_qs = CtnrUser.objects.filter(user__id=user_id)
     if not perms_qs.exists():
         perms_qs = []
@@ -316,7 +316,7 @@ def unbecome_user(request):
 def user_detail(request, pk):
     from cyder.base.views import cy_detail
 
-    user = UserProfile.objects.get(id=pk)
+    user = UserProfile.objects.get(user__id=pk)
     email = User.objects.get(id=pk).email
     contacts = []
     form = UserPermForm()
