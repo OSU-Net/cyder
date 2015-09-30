@@ -301,9 +301,10 @@ def cy_detail(request, Klass, template, obj_sets, pk=None, obj=None, **kwargs):
         page_obj = make_paginator(
             request, obj_set, obj_type=name.lower().replace(' ', ''))
         if obj_type == 'user':
-            table = tablefy(page_obj, request=request, update=False)
+            table = tablefy(page_obj, request=request, update=False,
+                            related_object=obj)
         else:
-            table = tablefy(page_obj, request=request)
+            table = tablefy(page_obj, request=request, related_object=obj)
 
         tables.append({
             'name': name,

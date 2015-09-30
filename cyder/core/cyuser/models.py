@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.urlresolvers import NoReverseMatch, reverse
 from django.db import models
 from django.db.models import signals
 
@@ -62,6 +63,14 @@ class UserProfile(BaseModel, ObjectUrlMixin):
 
     def check_in_ctnr(self, ctnr):
         return ctnr.check_contains_obj(self.user)
+
+    def get_detail_url(self):
+        """Return the detail url of an object."""
+        try:
+            return reverse(self._meta.db_table + '-detail',
+                           args=[self.user.pk])
+        except NoReverseMatch:
+            return ''
 
 
 def create_user_profile(sender, **kwargs):

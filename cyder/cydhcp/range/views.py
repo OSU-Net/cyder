@@ -62,7 +62,8 @@ def range_detail(request, pk):
 
     range_table = tablefy((mrange,), request=request, detail_view=True)
 
-    ctnr_table = tablefy(mrange.ctnr_set.all(), request=request)
+    ctnr_table = tablefy(mrange.ctnr_set.all(), request=request,
+                         related_object=mrange)
 
     if ip_usage_percent:
         ip_usage_percent = "{0}%".format(ip_usage_percent)
