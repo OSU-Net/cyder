@@ -88,7 +88,7 @@ function addAttr(area, field, limit, aa) {
     var label1 = document.createElement('label');
     label1.innerHTML = "Attribute: ";
     label1.style.display = "inline";
-    label1.for = field + count;
+    label1['for'] = field + count;
     label1.innerHTML = "Attribute: ";
     label1.style.display = "inline";
     select.id = field + count;
@@ -102,7 +102,7 @@ function addAttr(area, field, limit, aa) {
     var label2 = document.createElement('label');
     label2.innerHTML = " Value: ";
     var input2 = document.createElement('input');
-    label2.for = field+count;
+    label2['for'] = field+count;
     label2.innerHTML = " Value: ";
     label2.style.display = "inline";
     input2.id = field+count+"_value";
@@ -149,7 +149,7 @@ function addField(area, field, limit, offset) {
 
     var label1 = document.createElement('label');
     var input1 = document.createElement('input');
-    label1.for = field+count;
+    label1['for'] = field+count;
     label1.innerHTML = "Attribute: ";
     label1.style.display = "inline";
     input1.id = field+count;
@@ -161,7 +161,7 @@ function addField(area, field, limit, offset) {
     var label2 = document.createElement('label');
     var input2 = document.createElement('input');
 
-    label2.for = field+count;
+    label2['for'] = field+count;
     label2.innerHTML = " Value: ";
     label2.style.display = "inline";
     input2.id = field+count+"_value";
