@@ -25,8 +25,8 @@ function insertTablefyRow( tablefy, tbody ) {
                                 newLink = $('<a>' + col.value[i] + '</a>');
                             } else {
                                 newLink = $('<a><img src=' + col.img[i] + '></a>');
-                                if ( col.class ) {
-                                    newLink.attr( 'class', col.class[i] );
+                                if ( col['class'] ) {
+                                    newLink.attr( 'class', col['class'][i] );
                                 }
                                 if ( col.data[i] ) {
                                     jQuery.each( col.data[i], function ( i, value ) {

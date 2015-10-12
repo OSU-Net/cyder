@@ -162,6 +162,7 @@ def _has_perm(user, ctnr, action, obj=None, obj_class=None):
         'Workgroup': has_workgroup_perm,
         'StaticInterface': has_static_registration_perm,
         'DynamicInterface': has_dynamic_registration_perm,
+        'Supernet': has_supernet_perm,
 
         'WorkgroupAV': has_workgroupav_perm,
 
@@ -423,6 +424,14 @@ def has_dynamic_registration_perm(user_level, obj, ctnr, action):
         'cyder_guest': action == ACTION_VIEW,
     }.get(user_level, False)
 
+def has_supernet_perm(user_level, obj, ctnr, action):
+    return {
+        'cyder_admin': True,
+        'ctnr_admin': action == ACTION_VIEW,
+        'ctnr_user': action == ACTION_VIEW,
+        'ctnr_guest': action == ACTION_VIEW,
+        'cyder_guest': action == ACTION_VIEW,
+    }.get(user_level, False)
 
 def has_token_perm(user, obj, ctnr, action):
     """
