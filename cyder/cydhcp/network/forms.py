@@ -2,7 +2,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 import ipaddr
-
+import socket
+import struct
 from cyder.base.constants import IP_TYPES, IP_TYPE_4, IP_TYPE_6
 from cyder.base.eav.forms import get_eav_form
 from cyder.base.eav.models import Attribute
@@ -106,6 +107,7 @@ class NetworkForm(forms.ModelForm, UsabilityFormMixin):
             attr_subnet_mask = Attribute.objects.get(name="subnet-mask")
             if not self.cleaned_data.get('gateway'):
                 gateway, _ = tuple(network.network_str.split("/"))
+                gateway = socket.inet_ntoa(struct.pack('!L',struct.unpack('!L',socket.inet_aton(gateway))[0]+1))
             else:
                 gateway = self.cleaned_data['gateway']
             if not self.cleaned_data.get('subnet_mask'):
