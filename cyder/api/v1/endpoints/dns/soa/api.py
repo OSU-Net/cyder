@@ -31,7 +31,7 @@ class SOANestedKeyValueSerializer(CommonAPINestedAVSerializer):
 
 class SOASerializer(serializers.HyperlinkedModelSerializer):
     soaav_set = SOANestedKeyValueSerializer(many=True)
-
+    root_domain = serializers.HyperlinkedRelatedField(many=False,read_only=True,view_name='api-dns-domain-detail')
     class Meta(api.CommonDNSMeta):
         model = SOA
 
