@@ -344,14 +344,14 @@ class Range(BaseModel, ViewMixin, ObjectUrlMixin):
             build_str += join_dhcp_args(range_options, depth=2)
         if self.dhcpd_raw_include:
             build_str += "\t\t# Raw pool includes\n"
-            build_str += "\t\t{0};".format(self.dhcp_raw_include)
+            build_str += "\t\t{0};".format(self.dhcpd_raw_include)
         build_str += "\t\t# Allow statements\n"
         build_str += join_dhcp_args(self.get_allow_deny_list(), depth=2)
         if self.ip_type == IP_TYPE_4:
             build_str += "\t\trange {0} {1};\n".format(self.start_str,
                                                        self.end_str)
         else:
-            build_str += "\t\trange6{0} {1};\n".format(self.start_str,
+            build_str += "\t\trange6 {0} {1};\n".format(self.start_str,
                                                        self.end_str)
         build_str += "\t}\n\n"
         return build_str

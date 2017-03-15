@@ -2,6 +2,7 @@ from itertools import chain
 
 from django.db import models
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 
 from cyder.base.eav.constants import ATTRIBUTE_OPTION, ATTRIBUTE_STATEMENT
 from cyder.base.eav.fields import EAVAttributeField
@@ -53,6 +54,12 @@ class Workgroup(BaseModel, ObjectUrlMixin):
         self.full_clean()
 
         super(Workgroup, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.staticinterface_set.exists() or self.dynamicinterface_set.exists():
+            raise ValidationError('Cannot delete this workgroup because '
+                                  'interfaces are using it.')
+        super(Workgroup, self).delete(*args, **kwargs)
 
     def build_workgroup(self, ip_type):
         from cyder.cydhcp.interface.static_intr.models import StaticInterface
