@@ -244,7 +244,8 @@ class Network(BaseNetwork):
             build_str += join_dhcp_args(options)
             if self.dhcpd_raw_include:
                 build_str += "\t# Raw network options\n"
-                build_str += join_dhcp_args(self.dhcpd_raw_include.split("\n"))
+                for raw_line in self.dhcpd_raw_include.split("\n"):
+                    build_str += "\t{0}\n".format(raw_line)
         for range_ in ranges:
             build_str += range_.build_range()
         build_str += "}\n"
