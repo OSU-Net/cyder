@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError, FieldError
 from django.db import models
 from django.db.models import Q
+from django.db.models.loading import get_model
 from django.db.models.signals import m2m_changed
 from django.forms import ModelForm
 
@@ -44,6 +45,15 @@ class Ctnr(BaseModel, ObjectUrlMixin):
         self.full_clean()
 
         super(Ctnr, self).save(*args, **kwargs)
+
+
+    @transaction_atomic
+    def delete(self, *args, **kwargs):
+        UserProfile = get_model('cyder','userprofile')
+        for user_profile in UserProfile.objects.filter(default_ctnr_id=self.id):
+            user_profile.default_ctnr_id = 1
+            user_profile.save()
+        super(Ctnr, self).delete(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
